@@ -6,38 +6,37 @@ import { AppContainerComponent } from "./app-container";
 
 import "./app.sass";
 
-interface Props {
-}
-
-interface InjectedProps {
+interface IInjectedProps {
   user: UserModelType;
   devMode: boolean;
 }
 
 // import this type into other components when using @inject
-export interface AllStores {
+export interface IAllStores {
   devMode: boolean;
   user: UserModelType;
   problem: ProblemModelType;
 }
 
-@inject((allStores: AllStores) => {
-  return {
-    user: allStores.user,
+@inject((allStores: IAllStores) => {
+  const injected: IInjectedProps = {
     devMode: allStores.devMode,
-  } as InjectedProps;
+    user: allStores.user,
+  };
+  return injected;
 })
 @observer
-export class AppComponent extends React.Component<Props, {}> {
+export class AppComponent extends React.Component<{}, {}> {
 
   get injected() {
-    return this.props as InjectedProps;
+    return this.props as IInjectedProps;
   }
 
   public componentWillMount() {
     if (!this.injected.user.authenticated) {
       // TODO: start user authentication here
-      // NOTE: authenticated will always be true in developer mode so you may want to check this.injected.devMode while developing this
+      // NOTE: authenticated will always be true in developer mode so you may want
+      // to check this.injected.devMode while developing this
     }
   }
 

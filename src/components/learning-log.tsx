@@ -3,11 +3,8 @@ import * as React from "react";
 
 import "./learning-log.sass";
 
-interface Props {
-}
-
 @observer
-export class LearningLogComponent extends React.Component<Props, {}> {
+export class LearningLogComponent extends React.Component<{}, {}> {
 
   public render() {
     return (

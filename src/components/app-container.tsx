@@ -8,11 +8,8 @@ import { WorkspaceComponent } from "./workspace";
 
 import "./app-container.sass";
 
-interface Props {
-}
-
 @observer
-export class AppContainerComponent extends React.Component<Props, {}> {
+export class AppContainerComponent extends React.Component<{}, {}> {
 
   public render() {
     return (

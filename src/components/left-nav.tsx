@@ -3,11 +3,8 @@ import * as React from "react";
 
 import "./left-nav.sass";
 
-interface Props {
-}
-
 @observer
-export class LeftNavComponent extends React.Component<Props, {}> {
+export class LeftNavComponent extends React.Component<{}, {}> {
 
   public render() {
     return (

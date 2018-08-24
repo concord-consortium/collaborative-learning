@@ -3,11 +3,8 @@ import * as React from "react";
 
 import "./my-work.sass";
 
-interface Props {
-}
-
 @observer
-export class MyWorkComponent extends React.Component<Props, {}> {
+export class MyWorkComponent extends React.Component<{}, {}> {
 
   public render() {
     return (
