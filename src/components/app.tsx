@@ -1,6 +1,7 @@
 import * as React from "react"
 import { observer, inject } from "mobx-react"
 import { UserType } from "../models/user"
+import { AppContainerComponent } from "./app-container"
 
 import "./app.sass"
 
@@ -9,16 +10,19 @@ interface Props {
 
 interface InjectedProps {
   user: UserType
+  devMode: boolean
 }
 
 // import this type into other components when using @inject
 export interface AllStores {
+  devMode: boolean
   user: UserType
 }
 
 @inject((allStores:AllStores) => {
   return {
-    user: allStores.user
+    user: allStores.user,
+    devMode: allStores.devMode
   } as InjectedProps
 })
 @observer
@@ -29,19 +33,27 @@ export class AppComponent extends React.Component<Props, {}> {
   }
 
   componentWillMount() {
-    if (!this.injected.user) {
-      // TODO: do user authentication checks here
+    if (!this.injected.user.authenticated) {
+      // TODO: start user authentication here
+      // NOTE: authenticated will always be true in developer mode so you may want to check this.injected.devMode while developing this
     }
   }
 
-  handleClick = (e:React.MouseEvent<HTMLDivElement>) => {
-    // testing user model updates
-    this.injected.user.setName(`Example User clicked at ${Date.now()}`)
-  }
-
   render() {
+    const {authenticated} = this.injected.user
+
+    if (!authenticated) {
+      return (
+        <div className="app">
+          <div className="progress">Authenticating</div>
+        </div>
+      )
+    }
+
     return (
-      <div className="app" onClick={this.handleClick}>Collaborative Learning Environment: {this.injected.user.name}</div>
+      <div className="app">
+        <AppContainerComponent />
+      </div>
     )
   }
 }
