@@ -1,19 +1,16 @@
-import * as React from "react"
-import { observer } from "mobx-react"
+import { observer } from "mobx-react";
+import * as React from "react";
 
-import "./left-nav.sass"
-
-interface Props {
-}
+import "./left-nav.sass";
 
 @observer
-export class LeftNavComponent extends React.Component<Props, {}> {
+export class LeftNavComponent extends React.Component<{}, {}> {
 
-  render() {
+  public render() {
     return (
       <div className="left-nav">
         Left Nav
       </div>
-    )
+    );
   }
 }

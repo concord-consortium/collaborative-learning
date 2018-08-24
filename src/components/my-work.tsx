@@ -1,19 +1,16 @@
-import * as React from "react"
-import { observer } from "mobx-react"
+import { observer } from "mobx-react";
+import * as React from "react";
 
-import "./my-work.sass"
-
-interface Props {
-}
+import "./my-work.sass";
 
 @observer
-export class MyWorkComponent extends React.Component<Props, {}> {
+export class MyWorkComponent extends React.Component<{}, {}> {
 
-  render() {
+  public render() {
     return (
       <div className="my-work">
         My Work
       </div>
-    )
+    );
   }
 }

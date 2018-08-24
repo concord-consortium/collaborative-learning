@@ -1,37 +1,35 @@
-import * as React from "react"
-import { observer, inject } from "mobx-react"
-import { UserModelType } from "../models/user"
-import { ProblemModelType } from "../models/problem"
-import { AllStores } from "./app"
+import { inject, observer } from "mobx-react";
+import * as React from "react";
+import { ProblemModelType } from "../models/problem";
+import { UserModelType } from "../models/user";
+import { IAllStores } from "./app";
 
-import "./header.sass"
+import "./header.sass";
 
-interface Props {
+interface IInjectedProps {
+  user: UserModelType;
+  problem: ProblemModelType;
 }
 
-interface InjectedProps {
-  user: UserModelType
-  problem: ProblemModelType
-}
-
-@inject((allStores:AllStores) => {
-  return {
+@inject((allStores: IAllStores) => {
+  const injected: IInjectedProps = {
+    problem: allStores.problem,
     user: allStores.user,
-    problem: allStores.problem
-  } as InjectedProps
+  };
+  return injected;
 })
 @observer
-export class HeaderComponent extends React.Component<Props, {}> {
+export class HeaderComponent extends React.Component<{}, {}> {
 
   get injected() {
-    return this.props as InjectedProps
+    return this.props as IInjectedProps;
   }
 
-  render() {
-    const {user, problem} = this.injected
+  public render() {
+    const {user, problem} = this.injected;
 
     return (
       <div className="header">Collaborative Learning Environment: {user.name} / {problem.name} </div>
-    )
+    );
   }
 }

@@ -1,19 +1,16 @@
-import * as React from "react"
-import { observer } from "mobx-react"
+import { observer } from "mobx-react";
+import * as React from "react";
 
-import "./learning-log.sass"
-
-interface Props {
-}
+import "./learning-log.sass";
 
 @observer
-export class LearningLogComponent extends React.Component<Props, {}> {
+export class LearningLogComponent extends React.Component<{}, {}> {
 
-  render() {
+  public render() {
     return (
       <div className="learning-log">
         Learning Log
       </div>
-    )
+    );
   }
 }
