@@ -1,6 +1,6 @@
 import * as React from "react"
 import { observer, inject } from "mobx-react"
-import { UserType } from "../models/user"
+import { UserModelType } from "../models/user"
 import { AppContainerComponent } from "./app-container"
 
 import "./app.sass"
@@ -9,14 +9,14 @@ interface Props {
 }
 
 interface InjectedProps {
-  user: UserType
+  user: UserModelType
   devMode: boolean
 }
 
 // import this type into other components when using @inject
 export interface AllStores {
   devMode: boolean
-  user: UserType
+  user: UserModelType
 }
 
 @inject((allStores:AllStores) => {

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { observer, inject } from "mobx-react"
-import { UserType } from "../models/user"
+import { UserModelType } from "../models/user"
 import { AllStores } from "./app"
 
 import "./header.sass"
@@ -9,7 +9,7 @@ interface Props {
 }
 
 interface InjectedProps {
-  user: UserType
+  user: UserModelType
 }
 
 @inject((allStores:AllStores) => {

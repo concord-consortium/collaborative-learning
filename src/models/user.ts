@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree"
 
-export const User = types
+export const UserModel = types
   .model("User", {
     authenticated: false,
     name: types.maybeNull(types.string)
@@ -11,4 +11,4 @@ export const User = types
     }
   }))
 
-export type UserType = typeof User.Type
+export type UserModelType = typeof UserModel.Type
