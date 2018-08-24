@@ -1,6 +1,7 @@
 import * as React from "react"
 import { observer, inject } from "mobx-react"
 import { UserModelType } from "../models/user"
+import { ProblemModelType } from "../models/problem"
 import { AppContainerComponent } from "./app-container"
 
 import "./app.sass"
@@ -17,6 +18,7 @@ interface InjectedProps {
 export interface AllStores {
   devMode: boolean
   user: UserModelType
+  problem: ProblemModelType
 }
 
 @inject((allStores:AllStores) => {
@@ -40,9 +42,7 @@ export class AppComponent extends React.Component<Props, {}> {
   }
 
   render() {
-    const {authenticated} = this.injected.user
-
-    if (!authenticated) {
+    if (!this.injected.user.authenticated) {
       return (
         <div className="app">
           <div className="progress">Authenticating</div>

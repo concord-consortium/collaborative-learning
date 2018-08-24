@@ -4,6 +4,7 @@ import { Provider } from "mobx-react"
 
 import { AppComponent } from "./components/app"
 import { UserModel } from "./models/user"
+import { ProblemModel } from "./models/problem"
 
 import "./index.sass"
 
@@ -15,8 +16,12 @@ const user = UserModel.create({
   name: devMode ? "Developer Mode" : null
 })
 
+const problem = ProblemModel.create({
+  name: "Sample Problem"
+})
+
 ReactDOM.render(
-  <Provider devMode={devMode} user={user}>
+  <Provider devMode={devMode} user={user} problem={problem}>
     <AppComponent />
   </Provider>,
   document.getElementById("app")
