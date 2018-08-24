@@ -24,19 +24,19 @@ export interface AllStores {
 @observer
 export class AppComponent extends React.Component<Props, {}> {
 
-  get injected():InjectedProps {
+  get injected() {
     return this.props as InjectedProps
   }
 
   componentWillMount() {
-    if (!this.injected.user.authenticated) {
+    if (!this.injected.user) {
       // TODO: do user authentication checks here
     }
   }
 
   handleClick = (e:React.MouseEvent<HTMLDivElement>) => {
     // testing user model updates
-    debugger;
+    this.injected.user.setName(`Example User clicked at ${Date.now()}`)
   }
 
   render() {
