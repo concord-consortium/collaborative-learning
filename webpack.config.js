@@ -30,6 +30,7 @@ module.exports = (env, argv) => {
                     use: [
                     devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
                     'css-loader',
+                    'postcss-loader',
                     'sass-loader'
                     ]
                 },
@@ -56,5 +57,5 @@ module.exports = (env, argv) => {
                 {from: 'src/public'}
             ])
         ]
-    }
+    };
 };
