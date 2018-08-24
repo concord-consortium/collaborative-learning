@@ -1,0 +1,40 @@
+{
+  "name": "collaborative-learning",
+  "version": "0.0.1",
+  "description": "Collaborative Learning environment",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --content-base dist/",
+    "build": "webpack --mode production --devtool false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concord-consortium/collaborative-learning.git"
+  },
+  "author": "Concord Consortium",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/concord-consortium/collaborative-learning/issues"
+  },
+  "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
+  "devDependencies": {
+    "@types/react": "^16.4.11",
+    "@types/react-dom": "^16.0.7",
+    "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^1.0.0",
+    "fork-ts-checker-webpack-plugin": "^0.4.9",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.2",
+    "node-sass": "^4.9.3",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "ts-loader": "^4.5.0",
+    "typescript": "^3.0.1",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  },
+  "dependencies": {}
+}
