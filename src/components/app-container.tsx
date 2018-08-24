@@ -1,12 +1,12 @@
-import * as React from "react"
-import { observer } from "mobx-react"
-import { HeaderComponent } from "./header"
-import { LeftNavComponent } from "./left-nav"
-import { WorkspaceComponent } from "./workspace"
-import { LearningLogComponent } from "./learning-log"
-import { MyWorkComponent } from "./my-work"
+import { observer } from "mobx-react";
+import * as React from "react";
+import { HeaderComponent } from "./header";
+import { LearningLogComponent } from "./learning-log";
+import { LeftNavComponent } from "./left-nav";
+import { MyWorkComponent } from "./my-work";
+import { WorkspaceComponent } from "./workspace";
 
-import "./app-container.sass"
+import "./app-container.sass";
 
 interface Props {
 }
@@ -14,7 +14,7 @@ interface Props {
 @observer
 export class AppContainerComponent extends React.Component<Props, {}> {
 
-  render() {
+  public render() {
     return (
       <div className="app-container">
         <HeaderComponent />
@@ -23,6 +23,6 @@ export class AppContainerComponent extends React.Component<Props, {}> {
         <LearningLogComponent />
         <MyWorkComponent />
       </div>
-    )
+    );
   }
 }

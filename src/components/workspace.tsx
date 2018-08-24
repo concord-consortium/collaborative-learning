@@ -1,7 +1,7 @@
-import * as React from "react"
-import { observer } from "mobx-react"
+import { observer } from "mobx-react";
+import * as React from "react";
 
-import "./workspace.sass"
+import "./workspace.sass";
 
 interface Props {
 }
@@ -9,11 +9,11 @@ interface Props {
 @observer
 export class WorkspaceComponent extends React.Component<Props, {}> {
 
-  render() {
+  public render() {
     return (
       <div className="workspace">
         Workspace
       </div>
-    )
+    );
   }
 }
