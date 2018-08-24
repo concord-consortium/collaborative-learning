@@ -20,6 +20,18 @@ module.exports = (env, argv) => {
             rules: [
                 {
                     test: /\.tsx?$/,
+                    enforce: 'pre',
+                    use: [
+                        {
+                            loader: 'tslint-loader',
+                            options: {
+
+                            }
+                        }
+                    ]
+                },
+                {
+                    test: /\.tsx?$/,
                     loader: 'ts-loader',
                     options: {
                         transpileOnly: true // IMPORTANT! use transpileOnly mode to speed-up compilation
@@ -28,10 +40,10 @@ module.exports = (env, argv) => {
                 {
                     test: /\.(sa|sc|c)ss$/i,
                     use: [
-                    devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    'postcss-loader',
-                    'sass-loader'
+                        devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'postcss-loader',
+                        'sass-loader'
                     ]
                 },
                 { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader' }
