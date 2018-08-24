@@ -4,7 +4,7 @@
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --content-base dist/",
+    "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "webpack --mode production --devtool false"
   },
   "repository": {
@@ -36,5 +36,9 @@
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
   },
-  "dependencies": {}
+  "dependencies": {
+    "mobx": "^5.0.4",
+    "mobx-react": "^5.2.5",
+    "mobx-state-tree": "^3.2.3"
+  }
 }
