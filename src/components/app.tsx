@@ -5,10 +5,10 @@ import { UserType } from "../models/user"
 import "./app.sass"
 
 interface Props {
-  user?: UserType // needs to be optional as it injected by the provider
 }
 
-interface State {
+interface InjectedProps {
+  user: UserType
 }
 
 // import this type into other components when using @inject
@@ -16,31 +16,32 @@ export interface AllStores {
   user: UserType
 }
 
+@inject((allStores:AllStores) => {
+  return {
+    user: allStores.user
+  } as InjectedProps
+})
 @observer
-@inject((allStores:AllStores) => ({
-  user: allStores.user
-}))
-export class AppComponent extends React.Component<Props, State> {
-  constructor (props:Props) {
-    super(props)
+export class AppComponent extends React.Component<Props, {}> {
 
-    this.state = {
-    }
-  }
-
-  get user():UserType {
-    return this.props.user! // need to append ! to signal the user prop is expected to exist
+  get injected():InjectedProps {
+    return this.props as InjectedProps
   }
 
   componentWillMount() {
-    if (!this.user.authenticated) {
+    if (!this.injected.user.authenticated) {
       // TODO: do user authentication checks here
     }
   }
 
+  handleClick = (e:React.MouseEvent<HTMLDivElement>) => {
+    // testing user model updates
+    debugger;
+  }
+
   render() {
     return (
-      <div className="app">Collaborative Learning Environment: {this.user.name}</div>
+      <div className="app" onClick={this.handleClick}>Collaborative Learning Environment: {this.injected.user.name}</div>
     )
   }
 }
