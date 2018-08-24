@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
-    "build": "webpack --mode production --devtool false"
+    "build": "webpack --mode production --devtool false",
+    "test": "mocha -r ts-node/register src/**/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -18,19 +19,24 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
+    "chai": "^4.1.2",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^1.0.0",
     "fork-ts-checker-webpack-plugin": "^0.4.9",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.4.2",
+    "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.22.1",
     "ts-loader": "^4.5.0",
+    "ts-node": "^7.0.1",
     "typescript": "^3.0.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0",

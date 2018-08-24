@@ -35,7 +35,7 @@ You can view the status of all the branch deploys [here](https://travis-ci.org/c
 
 ### Testing
 
-Currently there are no tests.  That will change RSN.
+Run `npm test` to run all tests.
 
 ## License
 
