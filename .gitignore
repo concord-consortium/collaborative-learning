@@ -4,5 +4,4 @@ yarn-error.log
 
 # There is no way to prevent Cypress from generating these folders because of a known issue
 # https://github.com/cypress-io/cypress/issues/1372
-cypress/plugins/
 cypress/support/
