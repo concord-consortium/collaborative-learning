@@ -10,7 +10,8 @@
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:fix": "tslint -c tslint.json --fix 'src/**/*.{ts,tsx}'",
-    "test": "mocha -r ts-node/register src/**/*.test.ts"
+    "test": "mocha -r ts-node/register src/**/*.test.ts",
+    "test:watch": "mocha --watch-extensions ts --watch -r ts-node/register src/**/*.test.ts"
   },
   "repository": {
     "type": "git",

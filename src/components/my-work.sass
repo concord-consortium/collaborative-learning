@@ -1,0 +1,33 @@
+@import vars
+
+.my-work
+  position: fixed
+  height: $my-work-contracted-height
+  left: 0
+  right: 0
+  bottom: 0
+  color: #000
+  transition: height $animation-speed
+
+  &.expanded
+    height: $my-work-expanded-height
+    transition: height $animation-speed
+
+  .tabs
+    display: flex
+    justify-content: center
+
+    .tab
+      border: 2px solid $tab-border-color
+      border-bottom: 2px solid $tab-background-color
+      border-top-left-radius: $tab-border-radius
+      border-top-right-radius: $tab-border-radius
+      padding: 3px 6px
+      background: $tab-background-color
+
+  .expanded-area
+    background: $tab-background-color
+    border-top: 2px solid $tab-border-color
+    height: $my-work-expanded-height - $my-work-contracted-height
+    margin-top: -1px
+

@@ -1,0 +1,37 @@
+@import vars
+
+.left-nav
+  position: fixed
+  top: $header-height
+  left: -($left-nav-expanded-width - $left-nav-contracted-width)
+  width: $left-nav-expanded-width
+  bottom: 0
+  color: #000
+  transition: left $animation-speed
+
+  &.expanded
+    left: 0
+    transition: left $animation-speed
+
+  .tabs
+    display: flex
+    flex-direction: column
+    width: $left-nav-contracted-width
+    position: absolute
+    right: 0
+
+    .tab
+      border: 2px solid $tab-border-color
+      border-left: 2px solid $tab-background-color
+      border-top-right-radius: $tab-border-radius
+      border-bottom-right-radius: $tab-border-radius
+      padding: 3px 6px
+      background: $tab-background-color
+      margin-top: 5px
+
+  .expanded-area
+    width: $left-nav-expanded-width - $left-nav-contracted-width
+    background: $tab-background-color
+    border-right: 2px solid $tab-border-color
+    margin-left: -1px
+    height: 100%

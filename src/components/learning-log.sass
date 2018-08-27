@@ -1,0 +1,37 @@
+@import vars
+
+.learning-log
+  position: fixed
+  top: $header-height
+  right: 0 //
+  width: $learning-log-contracted-width
+  bottom: 0
+  color: #000
+  transition: right $animation-speed
+
+  &.expanded
+    right: $learning-log-expanded-width - $learning-log-contracted-width
+    transition: right $animation-speed
+
+  .tabs
+    display: flex
+    flex-direction: column
+    width: $learning-log-contracted-width
+    position: absolute
+    right: 0
+
+    .tab
+      border: 2px solid $tab-border-color
+      border-right: 2px solid $tab-background-color
+      border-top-left-radius: $tab-border-radius
+      border-bottom-left-radius: $tab-border-radius
+      padding: 3px 6px
+      background: $tab-background-color
+      margin-top: 5px
+
+  .expanded-area
+    width: $learning-log-expanded-width - $learning-log-contracted-width
+    background: $tab-background-color
+    border-left: 2px solid $tab-border-color
+    margin-left: $learning-log-contracted-width
+    height: 100%
