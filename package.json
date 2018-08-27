@@ -11,7 +11,7 @@
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:fix": "tslint -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "test": "mocha -r ts-node/register src/**/*.test.ts",
-    "test:full": "npm run test && npm run cypress:test",
+    "test:full": "npm-run-all test cypress:test",
     "cypress:open": "cypress open",
     "cypress:test": "cypress run"
   },
