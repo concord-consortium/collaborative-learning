@@ -18,7 +18,9 @@ export interface IAllStores {
 }
 
 const host = window.location.host.split(":")[0];
-const devMode = (host === "localhost") || (host === "127.0.0.1");
+const devMode = (window.location.search.indexOf("devMode=true") !== -1) ||
+                (host === "localhost") ||
+                (host === "127.0.0.1");
 
 const user = UserModel.create({
   authenticated: devMode,
