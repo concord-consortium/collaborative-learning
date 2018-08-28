@@ -38,7 +38,7 @@ export class AppComponent extends React.Component<{}, {}> {
     if (!this.injected.user.authenticated) {
       return (
         <div className="app">
-          <div className="progress">Authenticating</div>
+          <div className="progress">Authenticating ...</div>
         </div>
       );
     }
