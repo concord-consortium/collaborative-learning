@@ -8,9 +8,7 @@ export class WorkspaceComponent extends React.Component<{}, {}> {
 
   public render() {
     return (
-      <div className="workspace">
-        Workspace
-      </div>
+      <div className="workspace" />
     );
   }
 }

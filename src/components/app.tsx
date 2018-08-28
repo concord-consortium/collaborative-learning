@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { IAllStores } from "../index";
 import { ProblemModelType } from "../models/problem";
 import { UserModelType } from "../models/user";
 import { AppContainerComponent } from "./app-container";
@@ -9,13 +10,6 @@ import "./app.sass";
 interface IInjectedProps {
   user: UserModelType;
   devMode: boolean;
-}
-
-// import this type into other components when using @inject
-export interface IAllStores {
-  devMode: boolean;
-  user: UserModelType;
-  problem: ProblemModelType;
 }
 
 @inject((allStores: IAllStores) => {

@@ -15,10 +15,10 @@ export class AppContainerComponent extends React.Component<{}, {}> {
     return (
       <div className="app-container">
         <HeaderComponent />
-        <LeftNavComponent />
         <WorkspaceComponent />
-        <LearningLogComponent />
+        <LeftNavComponent />
         <MyWorkComponent />
+        <LearningLogComponent />
       </div>
     );
   }
