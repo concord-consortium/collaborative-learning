@@ -26,10 +26,13 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "^2.0.1",
     "@types/chai": "^4.1.4",
     "@types/mocha": "^5.2.5",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
+    "@types/enzyme": "^3.1.13",
+    "@types/enzyme-adapter-react-16": "^1.0.3",
     "autoprefixer": "^9.1.3",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^1.0.0",
@@ -57,9 +60,6 @@
     "webpack-dev-server": "^3.1.5"
   },
   "dependencies": {
-    "@cypress/webpack-preprocessor": "^2.0.1",
-    "@types/enzyme": "^3.1.13",
-    "@types/enzyme-adapter-react-16": "^1.0.3",
     "chai": "^4.1.2",
     "mobx": "^5.0.4",
     "mobx-react": "^5.2.5",
