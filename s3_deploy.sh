@@ -27,10 +27,11 @@ fi
 # tagged builds deploy to /version/TAG_NAME
 if [ "$TRAVIS_BRANCH" = "$CURRENT_TAG" ]; then
   mkdir -p _site/version
-  DEPLOY_DIR="version/$TRAVIS_BRANCH"
-  DEPLOY_DEST= "_site/$DEPLOY_DIR"
+  S3_DEPLOY_DIR="version/$TRAVIS_BRANCH"
+  DEPLOY_DEST= "_site/$S3_DEPLOY_DIR"
   INVAL_PATH="/version/$TRAVIS_BRANCH/index.html"
-  export DEPLOY_DIR
+  # used by s3_website.yml
+  export S3_DEPLOY_DIR
 
 # production branch builds deploy to root of site
 elif [ "$TRAVIS_BRANCH" = "$PRODUCTION_BRANCH" ]; then
@@ -40,10 +41,11 @@ elif [ "$TRAVIS_BRANCH" = "$PRODUCTION_BRANCH" ]; then
 # branch builds deploy to /branch/BRANCH_NAME
 else
   mkdir -p _site/branch
-  DEPLOY_DIR="branch/$DEPLOY_DIR_NAME"
-  DEPLOY_DEST="_site/$DEPLOY_DIR"
+  S3_DEPLOY_DIR="branch/$DEPLOY_DIR_NAME"
+  DEPLOY_DEST="_site/$S3_DEPLOY_DIR"
   INVAL_PATH="/branch/$DEPLOY_DIR_NAME/index.html"
-  export DEPLOY_DIR
+  # used by s3_website.yml
+  export S3_DEPLOY_DIR
 fi
 
 # copy files to destination
