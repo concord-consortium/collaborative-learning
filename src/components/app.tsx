@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { hot } from "react-hot-loader";
 import { IAllStores } from "../index";
 import { ProblemModelType } from "../models/problem";
 import { UserModelType } from "../models/user";
@@ -50,3 +51,5 @@ export class AppComponent extends React.Component<{}, {}> {
     );
   }
 }
+
+export default hot(module)(AppComponent);
