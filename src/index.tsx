@@ -3,7 +3,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { AppComponent } from "./components/app";
-import { ProblemModel, ProblemModelType, ProblemSectionModel } from "./models/problem";
+import { ProblemModel, ProblemModelType } from "./models/problem";
+import { SectionType } from "./models/section";
 import { UIModel, UIModelType } from "./models/ui";
 import { UserModel, UserModelType } from "./models/user";
 
@@ -28,25 +29,14 @@ const user = UserModel.create({
 });
 
 const problem = ProblemModel.create({
-  name: "Sample Problem",
+  ordinal: 1,
+  title: "Sample Problem",
   sections: [
-    {
-      name: "Introduction",
-      shortName: "In",
-    },
-    {
-      name: "Initial Challenge",
-      shortName: "IC",
-    },
-    {
-      name: "What If...?",
-      shortName: "W?",
-    },
-    {
-      name: "Now What Do You Know?",
-      shortName: "N?",
-    },
-  ],
+    { type: SectionType.introduction },
+    { type: SectionType.initialChallenge },
+    { type: SectionType.whatIf },
+    { type: SectionType.nowWhatDoYouKnow }
+  ]
 });
 
 const ui = UIModel.create({
@@ -59,5 +49,5 @@ ReactDOM.render(
   <Provider devMode={devMode} user={user} problem={problem} ui={ui}>
     <AppComponent />
   </Provider>,
-  document.getElementById("app"),
+  document.getElementById("app")
 );
