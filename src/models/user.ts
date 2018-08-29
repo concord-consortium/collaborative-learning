@@ -9,6 +9,9 @@ export const UserModel = types
     setName(name: string) {
       self.name = name;
     },
+    setAuthentication(auth: boolean) {
+      self.authenticated = auth;
+    },
   }));
 
 export type UserModelType = typeof UserModel.Type;

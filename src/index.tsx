@@ -1,4 +1,5 @@
 import { Provider } from "mobx-react";
+import * as queryString from "query-string";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
@@ -21,15 +22,18 @@ export interface IAllStores {
 }
 
 const host = window.location.host.split(":")[0];
-const devMode = (urlParams.devMode === "true") ||
-                (urlParams.devMode === "1") ||
-                (host === "localhost") ||
-                (host === "127.0.0.1");
+const urlParams = queryString.parse(window.location.search);
+// An explicitly set devMode takes priority
+// Otherwise, assume that local users are devs, unless a token is specified,
+// in which authentication is likely being tested
+const devMode = urlParams.devMode !== undefined
+                  ? urlParams.devMode === "true"
+                  : queryString.parse(window.location.search).token === undefined && (
+                      (host === "localhost") ||
+                      (host === "127.0.0.1")
+                    );
 
-const user = UserModel.create({
-  authenticated: devMode,
-  name: devMode ? "Jane Q. Developer" : null,
-});
+const user = UserModel.create();
 
 const curriculumUnit = createFromJson(curriculumJson);
 const defaultProblemOrdinal = "2.1";
