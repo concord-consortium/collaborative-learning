@@ -3,7 +3,7 @@ import { types } from "mobx-state-tree";
 export const UserModel = types
   .model("User", {
     authenticated: false,
-    name: types.maybeNull(types.string),
+    name: types.optional(types.string, "Anonymous User"),
     className: types.maybeNull(types.string),
   })
   .actions((self) => ({

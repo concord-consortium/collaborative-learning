@@ -6,7 +6,7 @@ describe("user model", () => {
   it("sets default values", () => {
     const user = UserModel.create({});
     expect(user.authenticated).to.equal(false);
-    expect(user.name).to.equal(null);
+    expect(user.name).to.equal("Anonymous User");
   });
 
   it("uses override values", () => {

@@ -38,14 +38,6 @@ export class AppComponent extends React.Component<{}, {}> {
   }
 
   public render() {
-    if (!this.injected.user.authenticated) {
-      return (
-        <div className="app">
-          <div className="progress">Authenticating ...</div>
-        </div>
-      );
-    }
-
     return (
       <div className="app">
         <AppContainerComponent />
