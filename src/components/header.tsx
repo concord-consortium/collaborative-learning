@@ -27,12 +27,14 @@ export class HeaderComponent extends React.Component<{}, {}> {
 
   public render() {
     const {user, problem} = this.injected;
+    const subtitle = problem.subtitle ? `: ${problem.subtitle}` : "";
+    const problemTitle = `${problem.title}${subtitle}`;
 
     return (
       <div className="header">
         <div className="info">
           <div>
-            <div className="problem">{problem.title}</div>
+            <div className="problem">{problemTitle}</div>
             <div className="class">Class TBD</div>
           </div>
         </div>

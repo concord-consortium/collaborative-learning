@@ -10,6 +10,27 @@ export const CurriculumModel = types
     subtitle: types.optional(types.string, ""),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel)
+  })
+  .views(self => {
+    return {
+      getInvestigation(investigationOrdinal: number) {
+        return (investigationOrdinal > 0) && (investigationOrdinal <= self.investigations.length)
+                ? self.investigations[investigationOrdinal - 1]
+                : undefined;
+      }
+    };
+  })
+  .views(self => {
+    return {
+      // ordinalString: e.g. "2.1", "2.2", etc.
+      getProblem(ordinalString: string) {
+        const ordinals = ordinalString.split(".");
+        const investigationOrdinal = ordinals[0] ? +ordinals[0] : 1;
+        const problemOrdinal = ordinals[1] ? +ordinals[1] : 1;
+        const investigation = self.getInvestigation(investigationOrdinal);
+        return investigation && investigation.getProblem(problemOrdinal);
+      }
+    };
   });
 
 export type CurriculumModelType = typeof CurriculumModel.Type;
