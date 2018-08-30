@@ -22,7 +22,6 @@ export interface IAllStores {
 }
 
 const host = window.location.host.split(":")[0];
-const urlParams = queryString.parse(window.location.search);
 // An explicitly set devMode takes priority
 // Otherwise, assume that local users are devs, unless a token is specified,
 // in which authentication is likely being tested

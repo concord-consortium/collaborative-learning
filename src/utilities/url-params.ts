@@ -1,3 +1,8 @@
 import { parse } from "query-string";
 
-export const urlParams = parse(location.search);
+interface QueryParams {
+  devMode?: string;
+  problem?: string;
+}
+
+export const urlParams: QueryParams = parse(location.search);
