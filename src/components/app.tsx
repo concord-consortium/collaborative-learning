@@ -27,10 +27,11 @@ export class AppComponent extends React.Component<{}, {}> {
   }
 
   public componentWillMount() {
-    authenticate(this.injected.devMode).then((userName) => {
-      if (userName) {
+    authenticate(this.injected.devMode).then((authenticatedUser) => {
+      if (authenticatedUser) {
         const user = this.injected.user;
-        user.setName(userName);
+        user.setName(authenticatedUser.fullName);
+        user.setClassName(authenticatedUser.className);
         user.setAuthentication(true);
       }
     });

@@ -2,6 +2,47 @@ import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
 
+const DEV_USER: StudentUser = {
+  type: "student",
+  id: "123",
+  firstName: "Sofia",
+  lastName: "Q.",
+  fullName: "Sophia Q.",
+  className: "Mr. Singh's Class",
+};
+
+export interface RawUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface StudentUser {
+  type: "student";
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  className: string;
+}
+
+export interface RawClassInfo {
+  uri: string;
+  name: string;
+  state: string;
+  class_hash: string;
+  teachers: RawUser[];
+  students: RawUser[];
+}
+
+export interface ClassInfo {
+  uri: string;
+  name: string;
+  state: string;
+  classHash: string;
+  students: StudentUser[];
+}
+
 export interface AuthQueryParams {
   token?: string;
   domain?: string;
@@ -51,10 +92,48 @@ export const getPortalJWTWithBearerToken = (domain: string, type: string, token:
   });
 };
 
+export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
+  return new Promise<ClassInfo>((resolve, reject) => {
+    superagent
+    .get(classInfoUrl)
+    .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+    .end((err, res) => {
+      if (err) {
+        reject(getErrorMessage(err, res));
+      } else if (!res.body || !res.body.class_hash) {
+        reject("Invalid class info response");
+      } else {
+        const rawClassInfo: RawClassInfo = res.body;
+
+        const classInfo: ClassInfo = {
+          uri: rawClassInfo.uri,
+          name: rawClassInfo.name,
+          state: rawClassInfo.state,
+          classHash: rawClassInfo.class_hash,
+          students: rawClassInfo.students.map((rawStudent) => {
+            const fullName = `${rawStudent.first_name} ${rawStudent.last_name}`;
+            const student: StudentUser = {
+              type: "student",
+              id: rawStudent.id,
+              firstName: rawStudent.first_name,
+              lastName: rawStudent.last_name,
+              fullName,
+              className: rawClassInfo.name,
+            };
+            return student;
+          }),
+        };
+
+        resolve(classInfo);
+      }
+    });
+  });
+};
+
 export const authenticate = (devMode: boolean) => {
-  return new Promise<string | null>((resolve, reject) => {
+  return new Promise<StudentUser | null>((resolve, reject) => {
     if (devMode) {
-      resolve("Sofia Q.");
+      resolve(DEV_USER);
     }
 
     const queryParams: AuthQueryParams = queryString.parse(window.location.search);
@@ -70,7 +149,22 @@ export const authenticate = (devMode: boolean) => {
 
     return getPortalJWTWithBearerToken(domain, "Bearer", token)
       .then(([rawJWT, portalJWT]) => {
-        resolve(`User ${portalJWT.learner_id}`);
+        const classInfoUrl = portalJWT.class_info_url;
+
+        return getClassInfo(classInfoUrl, rawJWT)
+          .then((classInfo) => {
+            let user: StudentUser | null = null;
+            classInfo.students.forEach((student) => {
+              if (student.id === portalJWT.user_id) {
+                user = student;
+              }
+            });
+            if (!user) {
+              reject("Current user not found in class roster");
+            }
+
+            resolve(user);
+          });
       });
   });
 };

@@ -4,6 +4,7 @@ export const UserModel = types
   .model("User", {
     authenticated: false,
     name: types.maybeNull(types.string),
+    className: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setName(name: string) {
@@ -11,6 +12,9 @@ export const UserModel = types
     },
     setAuthentication(auth: boolean) {
       self.authenticated = auth;
+    },
+    setClassName(className: string) {
+      self.className = className;
     },
   }));
 
