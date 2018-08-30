@@ -10,7 +10,7 @@ export enum SectionType {
   didYouKnow = "didYouKnow"
 }
 
-const sectionInfo = {
+export const sectionInfo = {
   [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
   [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
   [SectionType.whatIf]: { title: "What if...?", abbrev: "W?" },
