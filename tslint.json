@@ -6,6 +6,7 @@
     "object-literal-sort-keys": false,
     "one-line": false,
     "ordered-imports": false,
-    "trailing-comma": false
+    "trailing-comma": false,
+    "interface-name" : [false]
   }
 }

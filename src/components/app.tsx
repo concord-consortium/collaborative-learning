@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { IAllStores } from "../index";
-import { ProblemModelType } from "../models/problem";
+import { authenticate } from "../lib/auth";
 import { UserModelType } from "../models/user";
 import { AppContainerComponent } from "./app-container";
 
@@ -27,22 +27,17 @@ export class AppComponent extends React.Component<{}, {}> {
   }
 
   public componentWillMount() {
-    if (!this.injected.user.authenticated) {
-      // TODO: start user authentication here
-      // NOTE: authenticated will always be true in developer mode so you may want
-      // to check this.injected.devMode while developing this
-    }
+    authenticate(this.injected.devMode).then((authenticatedUser) => {
+      if (authenticatedUser) {
+        const user = this.injected.user;
+        user.setName(authenticatedUser.fullName);
+        user.setClassName(authenticatedUser.className);
+        user.setAuthentication(true);
+      }
+    });
   }
 
   public render() {
-    if (!this.injected.user.authenticated) {
-      return (
-        <div className="app">
-          <div className="progress">Authenticating ...</div>
-        </div>
-      );
-    }
-
     return (
       <div className="app">
         <AppContainerComponent />
