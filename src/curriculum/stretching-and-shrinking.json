@@ -18,6 +18,7 @@
   },
   "investigations": [
     {
+      "description": "Investigation 1",
       "ordinal": 1,
       "title": "Enlarging and Reducing Shapes",
       "introduction": {
@@ -27,6 +28,7 @@
       },
       "problems": [
         {
+          "description": "Problem 1.1",
           "ordinal": 1,
           "title": "Solving a Mystery",
           "subtitle": "An Introduction to Similarity",
@@ -77,6 +79,7 @@
           ]
         },
         {
+          "description": "Problem 1.2",
           "ordinal": 2,
           "title": "Stretching a Figure",
           "subtitle": "Comparing Similar Figures",
@@ -128,6 +131,7 @@
           ]
         },
         {
+          "description": "Problem 1.3",
           "ordinal": 3,
           "title": "Scaling Up and Down",
           "subtitle": "Corresponding Sides and Angles",
@@ -144,9 +148,17 @@
             { "type": "nowWhatDoYouKnow" }
           ]
         }
-      ]
+      ],
+      "reflections": {
+        "content": [
+          "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures.",
+          "What do you know about similarity?",
+          "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+        ]
+      }
     },
     {
+      "description": "Investigation 2",
       "ordinal": 2,
       "title": "Similar Figures",
       "introduction": {
@@ -280,8 +292,81 @@
               ]
             }
           ]
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 2,
+          "title": "Mouthing Off and Nosing Around",
+          "subtitle": "Scale Factors",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "content": [
+                  "How did you decide which of the computer game characters were members of the Wump family? How did you decide which were impostors?",
+                  "How can you decide whether two shapes are similar?",
+                  "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures.",
+                  "- Corresponding angles are the same size",
+                  "- The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure.",
+                  "The scale factor is the number that the side lengths of one figure can be multiplied by to give the corresponding side lengths of a similar figure.",
+                  "The rectangles below are similar. The scale factor from the smaller rectangle to the larger rectangle is 3.",
+                  "What is the scale factor from the larger rectangle to the smaller rectangle?",
+                  "Explain how you found it."
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "content": [
+                  "The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from imposters.",
+                  "1. Identify pairs of rectangles that are similar. For those that are similar, what is the scale factor?",
+                  "2. Identify paris of triangles that are similar. For those that are similar, what is the scale factor?",
+                  "3. In what ways could the scale factor be useful?"
+                ]
+              },
+              "supports": [
+                "Have you considered the corresponding angles?",
+                "How might you compare corresponding side lengths?"
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "content": [
+                  "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says factor 1/2. Who is correct? Explain why.",
+                  "2. Marta claims that if she knows the perimeter of one shape, she can predict the perimiter of a similar shape. Do you agree? Explain why.",
+                  "3. Zack says that to determine if two rectangles are similar, you only need to show that the scale factor is the same for corresponding side lengths. Is this correct? Explain.",
+                  "4. Is Zack's claim true for triangles? Explain."
+                ]
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "content": [
+                  "How can you decide if two shapes are similar?",
+                  "How can you determine the scale factor between two similar shapes?"
+                ]
+              },
+              "supports": [
+                "How can you find the scale factor if you used rubber bands to make similar figures?",
+                "How can you find the scale factor if you used coordinate graphs to make similar figures?"
+              ]
+            }
+          ]
         }
-      ]
+      ],
+      "reflections": {
+        "content": [
+          "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures using coordinate rules and grid paper.",
+          "Now what do you know about similar figures?",
+          "Discuss your ideas with other students and your teachers. Then write a summary in your notebook.",
+          "Just-in-Time Supports",
+          "What measurements change from one similar figure to another?",
+          "How is the change related to the scale factor?"
+        ]
+      }
     },
     {
       "description": "Investigation 3",

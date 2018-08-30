@@ -3,10 +3,12 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { AppComponent } from "./components/app";
-import { ProblemModel, ProblemModelType } from "./models/problem";
-import { SectionType } from "./models/section";
+import { ProblemModelType } from "./models/problem";
 import { UIModel, UIModelType } from "./models/ui";
 import { UserModel, UserModelType } from "./models/user";
+import { createFromJson } from "./models/curriculum";
+import * as curriculumJson from "./curriculum/stretching-and-shrinking.json";
+import { urlParams } from "./utilities/url-params";
 
 import "./index.sass";
 
@@ -19,7 +21,8 @@ export interface IAllStores {
 }
 
 const host = window.location.host.split(":")[0];
-const devMode = (window.location.search.indexOf("devMode=true") !== -1) ||
+const devMode = (urlParams.devMode === "true") ||
+                (urlParams.devMode === "1") ||
                 (host === "localhost") ||
                 (host === "127.0.0.1");
 
@@ -28,16 +31,11 @@ const user = UserModel.create({
   name: devMode ? "Jane Q. Developer" : null,
 });
 
-const problem = ProblemModel.create({
-  ordinal: 1,
-  title: "Sample Problem",
-  sections: [
-    { type: SectionType.introduction },
-    { type: SectionType.initialChallenge },
-    { type: SectionType.whatIf },
-    { type: SectionType.nowWhatDoYouKnow }
-  ]
-});
+const curriculumUnit = createFromJson(curriculumJson);
+const defaultProblemOrdinal = "2.1";
+const problemOrdinal = urlParams.problem || defaultProblemOrdinal;
+const problem = curriculumUnit.getProblem(problemOrdinal) ||
+                curriculumUnit.getProblem(defaultProblemOrdinal);
 
 const ui = UIModel.create({
   learningLogExpanded: false,
