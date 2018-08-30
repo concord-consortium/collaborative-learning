@@ -1,15 +1,12 @@
 import { types } from "mobx-state-tree";
-
-export const ProblemSectionModel = types
-  .model("ProblemSection", {
-    name: types.string,
-    shortName: types.string,
-  });
+import { SectionModel } from "./section";
 
 export const ProblemModel = types
   .model("Problem", {
-    name: types.string,
-    sections: types.array(ProblemSectionModel),
+    ordinal: types.integer,
+    title: types.string,
+    subtitle: types.optional(types.string, ""),
+    sections: types.array(SectionModel)
   });
 
 export type ProblemModelType = typeof ProblemModel.Type;

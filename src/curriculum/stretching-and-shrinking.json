@@ -1,0 +1,299 @@
+{
+  "title": "Stretching and Shrinking",
+  "subtitle": "Understanding Similarity",
+  "lookingAhead": {
+    "content": [
+      "A map is a scale drawing of the place it represents. You can use a map to find actual distances to any place in the world. How can you estimate the distance from Cape Town, South Africa to Port Elizabeth, South Africa?",
+      "Suppose that you want to find the width of a river that is too wide to measure directly. How can you use similar triangles to find the distance across the river?",
+      "Here is a picture of Duke, a real dog. If you know the scale factor between Duke and the picture, how can you determine how long Duke is from his nose to the tip of his tail?",
+      "You probably use the word similar in everyday conversation. For example, you might say that one song sounds similar to another song. You may also say that your friend’s bike is similar to yours. In many cases, you might use the word similar to describe objects and images that are the same shape but not the same size.",
+      "A floor plan of a house has the same shape as the actual house, but it is much smaller. The images on a movie screen as the same shape as the real people and objects they depict, but they are much larger. You can order your school portrait in a variety of sizes, but your face will have the same shape in each photo. In the Shapes and Design units you studied a variety of shapes, including the properties that make some shapes important in science, engineering, construction, and art.",
+      "What features of shapes are important in determining the unique shape, like polygons?",
+      "When you encounter a new problem, it is a good idea to ask yourself questions. In this Unit, you might ask questions such as:",
+      "What determines whether two shapes are similar?",
+      "What is the same and what is different about two similar figures?",
+      "When figures are similar, how are the side lengths, areas, and scale factors related?",
+      "How can I use similar figures to find missing measurements?"
+    ]
+  },
+  "investigations": [
+    {
+      "ordinal": 1,
+      "title": "Enlarging and Reducing Shapes",
+      "introduction": {
+        "content": [
+          "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
+        ]
+      },
+      "problems": [
+        {
+          "ordinal": 1,
+          "title": "Solving a Mystery",
+          "subtitle": "An Introduction to Similarity",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "content": [
+                  "The Mystery Club at P.I. Middle School meets monthly. Members watch videos, discuss novels, play “whodunit” games, and talk about real-life mysteries. One day, a member announces that the school is having a contest. A teacher in disguise will appear for a few minutes at school each day for a week. Any student can pay $1 for a guess at the identity of the mystery teacher. The student with the first correct guess wins a prize.",
+                  "The Mystery Club decides to enter the contest together. Each member brings a camera to school in hopes of getting a picture of the mystery teacher.",
+                  "One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher."
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "content": [
+                  "Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                ]
+              }
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "content": [
+                  "1. Could you have found the height of the teacher if you did not know that the magazine was 10 inches tall? Explain.",
+                  "2. Can you think of some other times you could use a photo to estimate the size of something?"
+                ]
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "content": [
+                  "The Mystery Club Advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
+                ]
+              }
+            },
+            {
+              "type": "didYouKnow",
+              "content": {
+                "content": [
+                  "Measurement is often used in police work. For example, some stores with cameras place a spot on the wall 6 feet from the floor. When a person standing near the wall is filmed, this makes it easier to estimate the person's height. Investigators take measurements of tire marks at the scene of auto accidents to help them estimate the speed of the vehicles involved. Photographs and molds of footprints help the police determine the shoe size, type of shoe, and weight of the person who made the prints."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "ordinal": 2,
+          "title": "Stretching a Figure",
+          "subtitle": "Comparing Similar Figures",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "content": [
+                  "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members.",
+                  "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "content": [
+                  "Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure.",
+                  "How are the original figure and its image alike?"
+                ]
+              },
+              "supports": [
+                "How do the lengths of line segments compare between the two figures?",
+                "How do the areas of the two figures compare?",
+                "How do the angles of the two figures compare?"
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "content": [
+                  "1. What if you could change the position of the anchor point? How does this affect the image?",
+                  "2. What if you used three rubber bands? How does this affect the image?"
+                ]
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "content": [
+                  "The original figure and its image are similar figures.",
+                  "For two similar figures, what things are the same? What things are different? Explain how."
+                ]
+              },
+              "supports": [
+                "Have you considered how points, angles, side lengths, and area change?"
+              ]
+            }
+          ]
+        },
+        {
+          "ordinal": 3,
+          "title": "Scaling Up and Down",
+          "subtitle": "Corresponding Sides and Angles",
+          "sections": [
+            { "type": "introduction" },
+            {
+              "type": "initialChallenge",
+              "supports": [
+                "Would corresponding side lengths help to decide the percent?",
+                "What about corresponding angles?"
+              ]
+            },
+            { "type": "whatIf" },
+            { "type": "nowWhatDoYouKnow" }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 2,
+      "title": "Similar Figures",
+      "introduction": {
+        "content": [
+          "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle, Carlos, a programmer for a video game company, about computer animation.",
+          "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.",
+          "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points on the new figure, using key points from the original figure.",
+          "",
+          "Did You Know?",
+          "You can make figures and then rotate, slide, flip, stretch, and copy them using a computer graphics program. There are two basic kinds of graphics programs. Paint programs make images out of pixels. Draw programs make images out of lines that are drawn from mathematical equations.",
+          "The images you make in a graphics program are displayed on the computer screen. A beam of electrons activates a chemical in the screen, called phosphor, to make the images appear on your screen. If you have a laptop computer with a liquid crystal screen, an electric current makes the images appear on the screen."
+        ]
+      },
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "Drawing Wumps",
+          "subtitle": "Making Similar Figures",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "content": [
+                  "Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members.",
+                  "Zack and Marta experiment with enlarging and reducing figures on a coordinate grid. First, Zack draws Mug Wump on graph paper. Then, he labels the key points from A to X and lists the coordinates for each point. Marta writes the rules that will change Mug’s size. Marta tries several rules for transforming Mug into different sizes."
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "content": [
+                  "To draw Mug on a coordinate graph paper, refer to the columns for Zug, Lug, Bug and Glug in the table on the next page.",
+                  "- For Parts 1-3 of the figure, plot the points in order. Connect them as you go along.",
+                  "- For part 4, plot the two points, but do not connect them.",
+                  "To draw Zug, Lug, Bug, and Glug on coordinate graph paper use the columns for Zug, Lug, Bug, and Glug.",
+                  "- Use the given rule to find the coordinates of the points. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug's coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
+                  "- Plot and connect the points from A to X for each figure on separate axes.",
+                  "Use the coordinate rules to draw the Mug, Zug, Lug, Bug, and Glug on coordinate graph paper.",
+                  "Which characters are imposters? How do you know?"
+                ]
+              },
+              "supports": [
+                "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?",
+                "Describe the shape of Mug?",
+                "What measures help you identify the imposters?",
+                "What features are the same about Mug and the others? What features are different?"
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "content": [
+                  "1. What if the rule is (5x, 5y)? Marta says this will make a character that is similar to Mug. Is this true? Why?",
+                  "2. What if the rule is (5x, y)? Marta says this character is not similar to Mug. Is this true? Why?",
+                  "3. Jacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Mug. Is he correct? Explain why.",
+                  "4. Make a rule that would create a figure similar to Lug."
+                ]
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "content": [
+                  "1. How can you determine if an original and its image are similar by looking at the coordinate rule that produced the image?",
+                  "2. What features stay the same for Mug and similar figures? What features might change?"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "Hats Off to the Wumps",
+          "subtitle": "Changing a Figure's Size and Location",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "content": [
+                  "Zack experiments with multiplying Mug’s coordinates by different whole numbers to make other characters. Marta asks her uncle how multiplying the coordinates by a decimal or adding numbers to or subtracting numbers from each coordinate will affect Mug’s shape. He gives her a sketch for a new shape (a hat for Mug) and some rules to try."
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "content": [
+                  "Predict what will happen to the hat with each rule.",
+                  "Test each rule. How does your result compare with your prediction?"
+                ]
+              },
+              "supports": [
+                "What do you need to do to each x coordinate? y coordinate?",
+                "Does adding or subtracting a number to the x or y coordinate make a difference?"
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "content": [
+                  "1. What if you wanted a figure that is similar to Mug? What rule would you need if:",
+                  "- The side lengths are one third as long as Mug's.",
+                  "- The side lengths are 1.5 times as long as Mug's.",
+                  "- The hat is the same size as Mug's but has moved right 1 unit and up 5 units.",
+                  "- The image is in another quadrant.",
+                  "2. What if you multiply each coordinate by a negative number? What happens to the image?",
+                  "3. Isaiah challenges his group to write a rule that will put Mug's hat on Mug. Is this possible? Why?"
+                ]
+              },
+              "supports": [
+                "How did adding to the coordinates change the hat?",
+                "What made the hat get smaller?",
+                "What did subtracting do to the hat?"
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "content": [
+                  "If you know the coordinate rules to create an image,",
+                  "- How can you tell if the two figures are similar?",
+                  "- How can you predict the side lengths of the image?"
+                ]
+              },
+              "supports": [
+                "If figures are similar, what changes and what stays the same?",
+                "How can you use the rule to predict the length of a corresponding side of the image?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "Scaling Perimeter and Area",
+      "problems": []
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "Similarity and Ratios",
+      "problems": []
+    }
+  ]
+}

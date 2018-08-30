@@ -1,45 +1,54 @@
-import { assert, expect } from "chai";
+import { assert } from "chai";
 import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
+import { SectionType } from "./section";
+import { omitUndefined } from "../utilities/test-utils";
 
 describe("problem model", () => {
 
   it("has default values", () => {
     const problem = ProblemModel.create({
-      name: "test",
+      ordinal: 1,
+      title: "test"
     });
     assert.deepEqual(getSnapshot(problem), {
-      name: "test",
-      sections: [],
+      ordinal: 1,
+      title: "test",
+      subtitle: "",
+      sections: []
     });
   });
 
   it("uses override values", () => {
     const problem = ProblemModel.create({
-        name: "test",
-        sections: [
-          {
-            name: "first",
-            shortName: "1",
-          },
-          {
-            name: "second",
-            shortName: "2",
-          },
-        ],
-    });
-    assert.deepEqual(getSnapshot(problem), {
-      name: "test",
+      ordinal: 1,
+      title: "test",
+      subtitle: "sub",
       sections: [
         {
-          name: "first",
-          shortName: "1",
+          type: SectionType.introduction
         },
         {
-          name: "second",
-          shortName: "2",
+          type: SectionType.initialChallenge
+        }
+      ]
+    });
+    assert.deepEqual(
+      // omit undefined properties for comparison purposes
+      omitUndefined(getSnapshot(problem)), {
+      ordinal: 1,
+      title: "test",
+      subtitle: "sub",
+      sections: [
+        {
+          type: SectionType.introduction,
+          supports: []
         },
-      ],
+        {
+          type: SectionType.initialChallenge,
+          supports: []
+        }
+      ]
     });
   });
 

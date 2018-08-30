@@ -16,6 +16,7 @@ module.exports = (env, argv) => {
     output: {
       filename: 'assets/index.[hash].js'
     },
+    performance: { hints: false },
     module: {
       rules: [
         {

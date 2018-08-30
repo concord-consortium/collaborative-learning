@@ -32,7 +32,7 @@ export class HeaderComponent extends React.Component<{}, {}> {
       <div className="header">
         <div className="info">
           <div>
-            <div className="problem">{problem.name}</div>
+            <div className="problem">{problem.title}</div>
             <div className="class">Class TBD</div>
           </div>
         </div>

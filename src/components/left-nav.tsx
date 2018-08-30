@@ -35,8 +35,8 @@ export class LeftNavComponent extends React.Component<{}, {}> {
         <TabSetComponent>
           {sections.map((section) => {
             return (
-              <TabComponent key={section.shortName}>
-                <span title={section.name}>{section.shortName}</span>
+              <TabComponent key={section.abbrev}>
+                <span title={section.title}>{section.abbrev}</span>
               </TabComponent>
             );
           })}
