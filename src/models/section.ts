@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree";
 import { values } from "lodash";
-import { AuthoredContentModel } from "./authored-content";
+import { DocumentContentModel } from "./document-content";
 
 export enum SectionType {
   introduction = "introduction",
@@ -21,7 +21,7 @@ const sectionInfo = {
 export const SectionModel = types
   .model("Section", {
     type: types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[]),
-    content: types.maybe(AuthoredContentModel),
+    content: types.maybe(DocumentContentModel),
     supports: types.array(types.string)
   })
   .views(self => {

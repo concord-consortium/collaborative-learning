@@ -1,5 +1,5 @@
 import { SnapshotIn, types } from "mobx-state-tree";
-import { AuthoredContentModel } from "./authored-content";
+import { DocumentContentModel } from "./document-content";
 import { InvestigationModel } from "./investigation";
 import { SectionModelType, SectionType } from "./section";
 import { each, isObject } from "lodash";
@@ -8,7 +8,7 @@ export const CurriculumModel = types
   .model("Curriculum", {
     title: types.string,
     subtitle: types.optional(types.string, ""),
-    lookingAhead: types.maybe(AuthoredContentModel),
+    lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel)
   });
 
