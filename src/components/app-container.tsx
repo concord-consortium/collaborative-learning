@@ -1,25 +1,17 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IStores } from "../models/stores";
 import { HeaderComponent } from "./header";
 import { LearningLogComponent } from "./learning-log";
 import { LeftNavComponent } from "./left-nav";
 import { MyWorkComponent } from "./my-work";
 import { WorkspaceComponent } from "./workspace";
+import { BaseComponent } from "./base";
 
 import "./app-container.sass";
 
-interface IProps {
-  stores?: IStores;
-}
-
 @inject("stores")
 @observer
-export class AppContainerComponent extends React.Component<IProps, {}> {
-
-  get stores() {
-    return this.props.stores as IStores;
-  }
+export class AppContainerComponent extends BaseComponent<{}, {}> {
 
   public render() {
     return (

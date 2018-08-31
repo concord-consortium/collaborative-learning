@@ -1,22 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { IStores } from "../models/stores";
 import "./my-work.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
-
-interface IProps {
-  stores?: IStores;
-}
+import { BaseComponent } from "./base";
 
 @inject("stores")
 @observer
-export class MyWorkComponent extends React.Component<IProps, {}> {
-
-  get stores() {
-    return this.props.stores as IStores;
-  }
+export class MyWorkComponent extends BaseComponent<{}, {}> {
 
   public render() {
     const { myWorkExpanded } = this.stores.ui;

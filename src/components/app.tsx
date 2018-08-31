@@ -1,22 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IStores } from "../models/stores";
 import { authenticate } from "../lib/auth";
 import { AppContainerComponent } from "./app-container";
+import { BaseComponent } from "./base";
 
 import "./app.sass";
 
-interface IProps {
-  stores?: IStores;
-}
-
 @inject("stores")
 @observer
-export class AppComponent extends React.Component<IProps, {}> {
-
-  get stores() {
-    return this.props.stores as IStores;
-  }
+export class AppComponent extends BaseComponent<{}, {}> {
 
   public componentWillMount() {
     authenticate(this.stores.devMode).then((authenticatedUser) => {
