@@ -1,11 +1,11 @@
 import { assert } from "chai";
-import { getPortalJWTWithBearerToken, getClassInfo, authenticate, _private } from "./auth";
+import { authenticate, _private, PortalJWT, RawUser, RawClassInfo } from "./auth";
 import * as nock from "nock";
 
 // tslint:disable-next-line:max-line-length
-const RAW_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzNTY4NDEyNCwiZXhwIjoxNTM1Njg3NzI0LCJ1aWQiOjQ4MiwiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6ImxlYXJuZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzQ4MiIsImxlYXJuZXJfaWQiOjExNTgsImNsYXNzX2luZm9fdXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2FwaS92MS9jbGFzc2VzLzEyOCIsIm9mZmVyaW5nX2lkIjo5OTJ9.NTEtF2GR23SzdhE9CCoc_VMcWyb1orb11RhKjdq-st8";
+const RAW_PORTAL_JWT: string = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzNTY4NDEyNCwiZXhwIjoxNTM1Njg3NzI0LCJ1aWQiOjQ4MiwiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6ImxlYXJuZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzQ4MiIsImxlYXJuZXJfaWQiOjExNTgsImNsYXNzX2luZm9fdXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2FwaS92MS9jbGFzc2VzLzEyOCIsIm9mZmVyaW5nX2lkIjo5OTJ9.NTEtF2GR23SzdhE9CCoc_VMcWyb1orb11RhKjdq-st8";
 
-const PORTAL_JWT = {
+const PORTAL_JWT: PortalJWT = {
   alg: "HS256",
   iat: 1535684124,
   exp: 1535687724,
@@ -18,31 +18,32 @@ const PORTAL_JWT = {
   offering_id: 992
 };
 
-const GOOD_NONCE = "goodNonce";
-const BAD_NONCE = "badNonce";
+const GOOD_NONCE: string = "goodNonce";
+const BAD_NONCE: string = "badNonce";
 
-const PORTAL_DOMAIN = "http://portal/";
+const PORTAL_DOMAIN: string = "http://portal/";
 
-const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/128";
+const CLASS_INFO_URL: string = "https://learn.staging.concord.org/api/v1/classes/128";
 
-const RAW_CORRECT_STUDENT = {
+const RAW_CORRECT_STUDENT: RawUser = {
   id: PORTAL_JWT.user_id,
   first_name: "good first",
   last_name: "good last",
 };
 
-const RAW_INCORRECT_STUDENT = {
+const RAW_INCORRECT_STUDENT: RawUser = {
   id: "bad id",
   first_name: "bad first",
   last_name: "bad last",
 };
 
-const RAW_CLASS_INFO = {
+const RAW_CLASS_INFO: RawClassInfo = {
   uri: "https://foo.bar",
   name: "test name",
   state: "test state",
   class_hash: "test hash",
-  students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ]
+  students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
+  teachers: [],
 };
 
 describe("authentication", () => {
