@@ -1,31 +1,25 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { IAllStores } from "..";
-import { UIModelType } from "../models/ui";
+import { IStores } from "../models/stores";
 import "./learning-log.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 
-interface IInjectedProps {
-  ui: UIModelType;
+interface IProps {
+  stores?: IStores;
 }
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    ui: allStores.ui,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class LearningLogComponent extends React.Component<{}, {}> {
+export class LearningLogComponent extends React.Component<IProps, {}> {
 
-  get injected() {
-    return this.props as IInjectedProps;
+  get stores() {
+    return this.props.stores as IStores;
   }
 
   public render() {
-    const className = `learning-log${this.injected.ui.learningLogExpanded ? " expanded" : ""}`;
+    const className = `learning-log${this.stores.ui.learningLogExpanded ? " expanded" : ""}`;
     return (
       <div className={className} onClick={this.handleClick}>
         <TabSetComponent>
@@ -41,6 +35,6 @@ export class LearningLogComponent extends React.Component<{}, {}> {
   }
 
   private handleClick = () => {
-    this.injected.ui.toggleLearningLog();
+    this.stores.ui.toggleLearningLog();
   }
 }

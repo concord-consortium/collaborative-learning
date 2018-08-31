@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { IAllStores } from "../index";
+import { IStores } from "../models/stores";
 import { UIModelType } from "../models/ui";
 import { WorkspaceModel, WorkspaceTool } from "../models/workspace";
 import { CanvasComponent } from "./canvas";
@@ -16,21 +16,16 @@ const workspace = WorkspaceModel.create({
   tool: "select",
 });
 
-interface IInjectedProps {
-  ui: UIModelType;
+interface IProps {
+  stores?: IStores;
 }
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    ui: allStores.ui,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class WorkspaceComponent extends React.Component<{}, {}> {
+export class WorkspaceComponent extends React.Component<IProps, {}> {
 
-  get injected() {
-    return this.props as IInjectedProps;
+  get stores() {
+    return this.props.stores as IStores;
   }
 
   public render() {

@@ -1,32 +1,23 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IAllStores } from "../index";
-import { ProblemModelType } from "../models/problem";
-import { UserModelType } from "../models/user";
+import { IStores } from "../models/stores";
 
 import "./header.sass";
 
-interface IInjectedProps {
-  user: UserModelType;
-  problem: ProblemModelType;
+interface IProps {
+  stores?: IStores;
 }
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    problem: allStores.problem,
-    user: allStores.user,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class HeaderComponent extends React.Component<{}, {}> {
+export class HeaderComponent extends React.Component<IProps, {}> {
 
-  get injected() {
-    return this.props as IInjectedProps;
+  get stores() {
+    return this.props.stores as IStores;
   }
 
   public render() {
-    const {user, problem} = this.injected;
+    const {user, problem} = this.stores;
     const subtitle = problem.subtitle ? `: ${problem.subtitle}` : "";
     const problemTitle = `${problem.title}${subtitle}`;
 

@@ -1,35 +1,27 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IAllStores } from "../index";
+import { IStores } from "../models/stores";
 import { authenticate } from "../lib/auth";
-import { UserModelType } from "../models/user";
 import { AppContainerComponent } from "./app-container";
 
 import "./app.sass";
 
-interface IInjectedProps {
-  user: UserModelType;
-  devMode: boolean;
+interface IProps {
+  stores?: IStores;
 }
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    devMode: allStores.devMode,
-    user: allStores.user,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class AppComponent extends React.Component<{}, {}> {
+export class AppComponent extends React.Component<IProps, {}> {
 
-  get injected() {
-    return this.props as IInjectedProps;
+  get stores() {
+    return this.props.stores as IStores;
   }
 
   public componentWillMount() {
-    authenticate(this.injected.devMode).then((authenticatedUser) => {
+    authenticate(this.stores.devMode).then((authenticatedUser) => {
       if (authenticatedUser) {
-        const user = this.injected.user;
+        const user = this.stores.user;
         user.setName(authenticatedUser.fullName);
         user.setClassName(authenticatedUser.className);
         user.setAuthentication(true);
