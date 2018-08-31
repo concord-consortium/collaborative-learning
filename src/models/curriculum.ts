@@ -7,7 +7,7 @@ import { each, isObject } from "lodash";
 export const CurriculumModel = types
   .model("Curriculum", {
     title: types.string,
-    subtitle: types.optional(types.string, ""),
+    subtitle: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel)
   })

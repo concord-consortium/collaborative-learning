@@ -5,7 +5,7 @@ export const ProblemModel = types
   .model("Problem", {
     ordinal: types.integer,
     title: types.string,
-    subtitle: types.optional(types.string, ""),
+    subtitle: "",
     sections: types.array(SectionModel)
   });
 
