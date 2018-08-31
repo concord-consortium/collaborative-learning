@@ -64,6 +64,15 @@ export interface PortalJWT extends BasePortalJWT {
   offering_id: number;
 }
 
+// An explicitly set devMode takes priority
+// Otherwise, assume that local users are devs, unless a token is specified,
+// in which authentication is likely being tested
+export const getDevMode = (devModeParam?: string, token?: string, host?: string) => {
+  return devModeParam != null
+           ? devModeParam === "true" || devModeParam === "1"
+           : token == null && (host === "localhost" || host === "127.0.0.1");
+};
+
 export const getErrorMessage = (err: any, res: superagent.Response) => {
   return (res.body ? res.body.message : null) || err;
 };
