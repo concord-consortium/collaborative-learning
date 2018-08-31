@@ -7,6 +7,7 @@ export const UIModel = types
     learningLogExpanded: false,
     leftNavExpanded: false,
     myWorkExpanded: false,
+    error: types.maybeNull(types.string),
   })
   .views((self) => ({
     get allContracted() {
@@ -53,6 +54,9 @@ export const UIModel = types
       toggleMyWork(override?: boolean) {
         toggleWithOverride("myWorkExpanded", override);
       },
+      setError(error: string|null) {
+        self.error = error;
+      }
     };
   });
 

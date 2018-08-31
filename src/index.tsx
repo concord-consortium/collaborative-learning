@@ -8,12 +8,12 @@ import { UserModel } from "./models/user";
 import { createFromJson } from "./models/curriculum";
 import * as curriculumJson from "./curriculum/stretching-and-shrinking.json";
 import { urlParams } from "./utilities/url-params";
-import { getDevMode } from "./lib/auth";
+import { getAppMode } from "./lib/auth";
 
 import "./index.sass";
 
 const host = window.location.host.split(":")[0];
-const devMode = getDevMode(urlParams.devMode, urlParams.token, host);
+const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
 
 const user = UserModel.create();
 
@@ -23,7 +23,7 @@ const problemOrdinal = urlParams.problem || defaultProblemOrdinal;
 const problem = curriculumUnit.getProblem(problemOrdinal) ||
                 curriculumUnit.getProblem(defaultProblemOrdinal);
 
-const stores = createStores({ devMode, user, problem });
+const stores = createStores({ appMode, user, problem });
 
 ReactDOM.render(
   <Provider stores={stores}>

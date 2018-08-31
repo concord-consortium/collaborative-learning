@@ -1,14 +1,22 @@
 import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
+import { AppMode } from "../models/stores";
 
-const DEV_USER: StudentUser = {
+const initials = require("initials");
+
+const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
+const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
+const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
+
+export const DEV_USER: StudentUser = {
   type: "student",
   id: "123",
   firstName: "Sofia",
   lastName: "Q.",
   fullName: "Sofia Q.",
-  className: "Geometry (3rd)",
+  initials: "SQ",
+  className: "Geometry (3rd)"
 };
 
 export interface RawUser {
@@ -17,12 +25,22 @@ export interface RawUser {
   last_name: string;
 }
 
-export interface StudentUser {
-  type: "student";
+export type AuthenticatedUser = StudentUser;
+
+interface User {
   id: string;
   firstName: string;
   lastName: string;
   fullName: string;
+  initials: string;
+  portalJWT?: PortalJWT;
+  rawPortalJWT?: string;
+  firebaseJWT?: PortalFirebaseJWT;
+  rawFirebaseJWT?: string;
+}
+
+export interface StudentUser extends User {
+  type: "student";
   className: string;
 }
 
@@ -48,6 +66,8 @@ export interface AuthQueryParams {
   domain?: string;
 }
 
+export type PortalJWT = PortalStudentJWT | PortalTeacherJWT | PortalUserJWT;
+
 export interface BasePortalJWT {
   alg: string;
   iat: number;
@@ -55,7 +75,7 @@ export interface BasePortalJWT {
   uid: number;
 }
 
-export interface PortalJWT extends BasePortalJWT {
+export interface PortalStudentJWT extends BasePortalJWT {
   domain: string;
   user_type: "learner";
   user_id: string;
@@ -64,27 +84,82 @@ export interface PortalJWT extends BasePortalJWT {
   offering_id: number;
 }
 
-// An explicitly set devMode takes priority
+// An explicitly set appMode takes priority
 // Otherwise, assume that local users are devs, unless a token is specified,
 // in which authentication is likely being tested
-export const getDevMode = (devModeParam?: string, token?: string, host?: string) => {
-  return devModeParam != null
-           ? devModeParam === "true" || devModeParam === "1"
-           : token == null && (host === "localhost" || host === "127.0.0.1");
+export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string) => {
+  return appModeParam != null
+           ? appModeParam
+           : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
 };
+
+export interface PortalTeacherJWT extends BasePortalJWT {
+  domain: string;
+  user_type: "teacher";
+  user_id: string;
+  teacher_id: number;
+}
+
+export interface PortalUserJWT extends BasePortalJWT {
+  domain: string;
+  user_type: "user";
+  user_id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface PortalFirebaseJWTStudentClaims {
+  user_type: "learner";
+  user_id: string;
+  class_hash: string;
+  offering_id: number;
+}
+export interface PortalFirebaseJWTTeacherClaims {
+  user_type: "teacher";
+  user_id: string;
+  class_hash: string;
+}
+
+export type PortalFirebaseJWTClaims = PortalFirebaseJWTStudentClaims | PortalFirebaseJWTTeacherClaims;
+
+export interface BasePortalFirebaseJWT {
+  alg: string;
+  iss: string;
+  sub: string;
+  aud: string;
+  iat: number;
+  exp: number;
+  uid: number;
+}
+
+export interface PortalFirebaseStudentJWT extends BasePortalFirebaseJWT {
+  domain: string;
+  domain_uid: number;
+  externalId: number;
+  returnUrl: string;
+  logging: boolean;
+  class_info_url: string;
+  claims: PortalFirebaseJWTStudentClaims;
+}
+
+export interface PortalFirebaseTeacherJWT extends BasePortalFirebaseJWT {
+  domain: string;
+  domain_uid: number;
+  claims: PortalFirebaseJWTTeacherClaims;
+}
+
+export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacherJWT;
 
 export const getErrorMessage = (err: any, res: superagent.Response) => {
   return (res.body ? res.body.message : null) || err;
 };
 
-const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
-
-export const getPortalJWTWithBearerToken = (domain: string, type: string, token: string) => {
+export const getPortalJWTWithBearerToken = (domain: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
     const url = `${domain}${PORTAL_JWT_URL_SUFFIX}`;
     superagent
       .get(url)
-      .set("Authorization", `${type} ${token}`)
+      .set("Authorization", `${type} ${rawToken}`)
       .end((err, res) => {
         if (err) {
           reject(getErrorMessage(err, res));
@@ -97,6 +172,33 @@ export const getPortalJWTWithBearerToken = (domain: string, type: string, token:
             resolve([rawJWT, portalJWT as PortalJWT]);
           } else {
             reject("Invalid portal token");
+          }
+        }
+      });
+  });
+};
+
+export const getFirebaseJWTWithBearerToken = (domain: string, type: string, rawToken: string) => {
+  return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
+    const url = `${domain}${FIREBASE_JWT_URL_SUFFIX}${FIREBASE_JWT_QUERY}`;
+    superagent
+      .get(url)
+      .set("Authorization", `${type} ${rawToken}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        }
+        else if (!res.body || !res.body.token) {
+          reject("No Firebase token found in Firebase JWT request response");
+        }
+        else {
+          const {token} = res.body;
+          const firebaseJWT = jwt.decode(token);
+          if (firebaseJWT) {
+            resolve([token, firebaseJWT as PortalFirebaseJWT]);
+          }
+          else {
+            reject("Invalid Firebase token");
           }
         }
       });
@@ -130,6 +232,7 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
               lastName: rawStudent.last_name,
               fullName,
               className: rawClassInfo.name,
+              initials: initials(fullName)
             };
             return student;
           }),
@@ -141,9 +244,9 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
   });
 };
 
-export const authenticate = (devMode: boolean, token?: string, domain?: string) => {
-  return new Promise<StudentUser | null>((resolve, reject) => {
-    if (devMode) {
+export const authenticate = (appMode: AppMode, token?: string, domain?: string) => {
+  return new Promise<AuthenticatedUser>((resolve, reject) => {
+    if (appMode !== "authed") {
       resolve(DEV_USER);
     }
 
@@ -156,31 +259,42 @@ export const authenticate = (devMode: boolean, token?: string, domain?: string) 
     }
 
     return getPortalJWTWithBearerToken(domain, "Bearer", token)
-      .then(([rawJWT, portalJWT]) => {
-        const classInfoUrl = portalJWT.class_info_url;
+      .then(([rawJPortalWT, portalJWT]) => {
 
-        return getClassInfo(classInfoUrl, rawJWT)
-          .then((classInfo) => {
-            let user: StudentUser | null = null;
-            classInfo.students.forEach((student) => {
-              if (student.id === portalJWT.user_id) {
-                user = student;
-              }
-            });
-            if (!user) {
-              reject("Current user not found in class roster");
+        return getFirebaseJWTWithBearerToken(domain, "Bearer", token)
+          .then(([rawFirebaseJWT, firebaseJWT]) => {
+
+            if (portalJWT.user_type === "learner") {
+              const classInfoUrl = portalJWT.class_info_url;
+
+              return getClassInfo(classInfoUrl, rawJPortalWT)
+                .then((classInfo) => {
+                  const user = classInfo.students.find((student) => student.id === portalJWT.user_id);
+                  if (user) {
+                    user.portalJWT = portalJWT;
+                    user.rawPortalJWT = rawJPortalWT;
+                    user.firebaseJWT = firebaseJWT;
+                    user.rawFirebaseJWT = rawFirebaseJWT;
+                    resolve(user);
+                  }
+                  else {
+                    reject("Current user not found in class roster");
+                  }
+                });
             }
-
-            resolve(user);
-          });
+            else {
+              reject("Only student logins are currently supported!");
+            }
+          })
+          .catch(reject);
       })
-      .catch((e) => {
-        reject(e);
-      });
+      .catch(reject);
   });
 };
 
 export const _private = {
   DEV_USER,
-  PORTAL_JWT_URL_SUFFIX
+  PORTAL_JWT_URL_SUFFIX,
+  FIREBASE_JWT_URL_SUFFIX,
+  FIREBASE_JWT_QUERY,
 };

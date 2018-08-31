@@ -28,7 +28,7 @@ describe("user model", () => {
 
   it("can authenticate", () => {
     const user = UserModel.create();
-    user.setAuthentication(true);
+    user.setAuthenticated(true);
     expect(user.authenticated).toBe(true);
   });
 

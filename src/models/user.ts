@@ -10,7 +10,7 @@ export const UserModel = types
     setName(name: string) {
       self.name = name;
     },
-    setAuthentication(auth: boolean) {
+    setAuthenticated(auth: boolean) {
       self.authenticated = auth;
     },
     setClassName(className: string) {
