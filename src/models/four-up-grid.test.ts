@@ -1,52 +1,51 @@
-import { expect } from "chai";
 import { CellPositions, DEFAULT_SPLITTER_SIZE, FourUpGridModel } from "./four-up-grid";
 
 describe("four-up grid model", () => {
 
   it("sets default values", () => {
     const grid = FourUpGridModel.create({});
-    expect(grid.cells.length).to.equal(4);
-    expect(grid.hSplitter).to.equal(0);
-    expect(grid.height).to.equal(0);
-    expect(grid.splitterSize).to.equal(DEFAULT_SPLITTER_SIZE);
-    expect(grid.vSplitter).to.equal(0);
-    expect(grid.width).to.equal(0);
+    expect(grid.cells.length).toBe(4);
+    expect(grid.hSplitter).toBe(0);
+    expect(grid.height).toBe(0);
+    expect(grid.splitterSize).toBe(DEFAULT_SPLITTER_SIZE);
+    expect(grid.vSplitter).toBe(0);
+    expect(grid.width).toBe(0);
 
     const nwCell = grid.cells[CellPositions.NorthWest];
-    expect(nwCell.bottom).to.equal(0);
-    expect(nwCell.height).to.equal(0);
-    expect(nwCell.left).to.equal(0);
-    expect(nwCell.right).to.equal(0);
-    expect(nwCell.scale).to.equal(0);
-    expect(nwCell.top).to.equal(0);
-    expect(nwCell.width).to.equal(0);
+    expect(nwCell.bottom).toBe(0);
+    expect(nwCell.height).toBe(0);
+    expect(nwCell.left).toBe(0);
+    expect(nwCell.right).toBe(0);
+    expect(nwCell.scale).toBe(0);
+    expect(nwCell.top).toBe(0);
+    expect(nwCell.width).toBe(0);
 
     const neCell = grid.cells[CellPositions.NorthEast];
-    expect(neCell.bottom).to.equal(0);
-    expect(neCell.height).to.equal(0);
-    expect(neCell.left).to.equal(DEFAULT_SPLITTER_SIZE);
-    expect(neCell.right).to.equal(0);
-    expect(neCell.scale).to.equal(0);
-    expect(neCell.top).to.equal(0);
-    expect(neCell.width).to.equal(0);
+    expect(neCell.bottom).toBe(0);
+    expect(neCell.height).toBe(0);
+    expect(neCell.left).toBe(DEFAULT_SPLITTER_SIZE);
+    expect(neCell.right).toBe(0);
+    expect(neCell.scale).toBe(0);
+    expect(neCell.top).toBe(0);
+    expect(neCell.width).toBe(0);
 
     const seCell = grid.cells[CellPositions.SouthEast];
-    expect(seCell.bottom).to.equal(0);
-    expect(seCell.height).to.equal(0);
-    expect(seCell.left).to.equal(DEFAULT_SPLITTER_SIZE);
-    expect(seCell.right).to.equal(0);
-    expect(seCell.scale).to.equal(0);
-    expect(seCell.top).to.equal(DEFAULT_SPLITTER_SIZE);
-    expect(seCell.width).to.equal(0);
+    expect(seCell.bottom).toBe(0);
+    expect(seCell.height).toBe(0);
+    expect(seCell.left).toBe(DEFAULT_SPLITTER_SIZE);
+    expect(seCell.right).toBe(0);
+    expect(seCell.scale).toBe(0);
+    expect(seCell.top).toBe(DEFAULT_SPLITTER_SIZE);
+    expect(seCell.width).toBe(0);
 
     const swCell = grid.cells[CellPositions.SouthWest];
-    expect(swCell.bottom).to.equal(0);
-    expect(swCell.height).to.equal(0);
-    expect(swCell.left).to.equal(0);
-    expect(swCell.right).to.equal(0);
-    expect(swCell.scale).to.equal(0);
-    expect(swCell.top).to.equal(DEFAULT_SPLITTER_SIZE);
-    expect(swCell.width).to.equal(0);
+    expect(swCell.bottom).toBe(0);
+    expect(swCell.height).toBe(0);
+    expect(swCell.left).toBe(0);
+    expect(swCell.right).toBe(0);
+    expect(swCell.scale).toBe(0);
+    expect(swCell.top).toBe(DEFAULT_SPLITTER_SIZE);
+    expect(swCell.width).toBe(0);
   });
 
   it("uses override values", () => {
@@ -57,47 +56,47 @@ describe("four-up grid model", () => {
       vSplitter: 50,
       width: 200,
     });
-    expect(grid.hSplitter).to.equal(75);
-    expect(grid.height).to.equal(100);
-    expect(grid.splitterSize).to.equal(5);
-    expect(grid.vSplitter).to.equal(50);
-    expect(grid.width).to.equal(200);
+    expect(grid.hSplitter).toBe(75);
+    expect(grid.height).toBe(100);
+    expect(grid.splitterSize).toBe(5);
+    expect(grid.vSplitter).toBe(50);
+    expect(grid.width).toBe(200);
 
     const nwCell = grid.cells[CellPositions.NorthWest];
-    expect(nwCell.bottom).to.equal(0);
-    expect(nwCell.height).to.equal(75);
-    expect(nwCell.left).to.equal(0);
-    expect(nwCell.right).to.equal(0);
-    expect(nwCell.scale).to.equal(0.25);
-    expect(nwCell.top).to.equal(0);
-    expect(nwCell.width).to.equal(50);
+    expect(nwCell.bottom).toBe(0);
+    expect(nwCell.height).toBe(75);
+    expect(nwCell.left).toBe(0);
+    expect(nwCell.right).toBe(0);
+    expect(nwCell.scale).toBe(0.25);
+    expect(nwCell.top).toBe(0);
+    expect(nwCell.width).toBe(50);
 
     const neCell = grid.cells[CellPositions.NorthEast];
-    expect(neCell.bottom).to.equal(nwCell.bottom);
-    expect(neCell.height).to.equal(nwCell.height);
-    expect(neCell.left).to.equal(55);
-    expect(neCell.right).to.equal(0);
-    expect(neCell.scale).to.equal(0.725);
-    expect(neCell.top).to.equal(0);
-    expect(neCell.width).to.equal(145);
+    expect(neCell.bottom).toBe(nwCell.bottom);
+    expect(neCell.height).toBe(nwCell.height);
+    expect(neCell.left).toBe(55);
+    expect(neCell.right).toBe(0);
+    expect(neCell.scale).toBe(0.725);
+    expect(neCell.top).toBe(0);
+    expect(neCell.width).toBe(145);
 
     const seCell = grid.cells[CellPositions.SouthEast];
-    expect(seCell.bottom).to.equal(0);
-    expect(seCell.height).to.equal(20);
-    expect(seCell.left).to.equal(neCell.left);
-    expect(seCell.right).to.equal(neCell.right);
-    expect(seCell.scale).to.equal(0.2);
-    expect(seCell.top).to.equal(80);
-    expect(seCell.width).to.equal(145);
+    expect(seCell.bottom).toBe(0);
+    expect(seCell.height).toBe(20);
+    expect(seCell.left).toBe(neCell.left);
+    expect(seCell.right).toBe(neCell.right);
+    expect(seCell.scale).toBe(0.2);
+    expect(seCell.top).toBe(80);
+    expect(seCell.width).toBe(145);
 
     const swCell = grid.cells[CellPositions.SouthWest];
-    expect(swCell.bottom).to.equal(seCell.bottom);
-    expect(swCell.height).to.equal(seCell.height);
-    expect(swCell.left).to.equal(nwCell.left);
-    expect(swCell.right).to.equal(nwCell.right);
-    expect(swCell.scale).to.equal(seCell.scale);
-    expect(swCell.top).to.equal(seCell.top);
-    expect(swCell.width).to.equal(nwCell.width);
+    expect(swCell.bottom).toBe(seCell.bottom);
+    expect(swCell.height).toBe(seCell.height);
+    expect(swCell.left).toBe(nwCell.left);
+    expect(swCell.right).toBe(nwCell.right);
+    expect(swCell.scale).toBe(seCell.scale);
+    expect(swCell.top).toBe(seCell.top);
+    expect(swCell.width).toBe(nwCell.width);
   });
 
   it("can initialize the splitters", () => {
@@ -107,8 +106,8 @@ describe("four-up grid model", () => {
       width: 200,
     });
     grid.update({initSplitters: true});
-    expect(grid.hSplitter).to.equal(48.5);
-    expect(grid.vSplitter).to.equal(98.5);
+    expect(grid.hSplitter).toBe(48.5);
+    expect(grid.vSplitter).toBe(98.5);
   });
 
   it("can resize the splitters", () => {
@@ -123,8 +122,8 @@ describe("four-up grid model", () => {
       resizeSplitters: true,
       width: 300,
     });
-    expect(grid.hSplitter).to.equal(97);
-    expect(grid.vSplitter).to.equal(147.75);
+    expect(grid.hSplitter).toBe(97);
+    expect(grid.vSplitter).toBe(147.75);
   });
 
   it("can move the splitters", () => {
@@ -138,7 +137,7 @@ describe("four-up grid model", () => {
       hSplitter: 25,
       vSplitter: 75,
     });
-    expect(grid.hSplitter).to.equal(25);
-    expect(grid.vSplitter).to.equal(75);
+    expect(grid.hSplitter).toBe(25);
+    expect(grid.vSplitter).toBe(75);
   });
 });
