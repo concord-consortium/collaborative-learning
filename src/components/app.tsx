@@ -3,6 +3,7 @@ import * as React from "react";
 import { authenticate } from "../lib/auth";
 import { AppContainerComponent } from "./app-container";
 import { BaseComponent, IBaseProps } from "./base";
+import { urlParams } from "../utilities/url-params";
 
 import "./app.sass";
 
@@ -13,7 +14,7 @@ interface IProps extends IBaseProps {}
 export class AppComponent extends BaseComponent<IProps, {}> {
 
   public componentWillMount() {
-    authenticate(this.stores.devMode).then((authenticatedUser) => {
+    authenticate(this.stores.devMode, urlParams.token, urlParams.domain).then((authenticatedUser) => {
       if (authenticatedUser) {
         const user = this.stores.user;
         user.setName(authenticatedUser.fullName);

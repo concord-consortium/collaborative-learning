@@ -7,6 +7,8 @@ interface QueryParams {
   problem?: string;
   // nonce (short-lived token) from portal for authentication
   token?: string;
+  // The domain of the portal opening the app
+  domain?: string;
 }
 
 export const urlParams: QueryParams = parse(location.search);

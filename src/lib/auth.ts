@@ -64,13 +64,24 @@ export interface PortalJWT extends BasePortalJWT {
   offering_id: number;
 }
 
+// An explicitly set devMode takes priority
+// Otherwise, assume that local users are devs, unless a token is specified,
+// in which authentication is likely being tested
+export const getDevMode = (devModeParam?: string, token?: string, host?: string) => {
+  return devModeParam != null
+           ? devModeParam === "true" || devModeParam === "1"
+           : token == null && (host === "localhost" || host === "127.0.0.1");
+};
+
 export const getErrorMessage = (err: any, res: superagent.Response) => {
   return (res.body ? res.body.message : null) || err;
 };
 
+const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
+
 export const getPortalJWTWithBearerToken = (domain: string, type: string, token: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
-    const url = `${domain}api/v1/jwt/portal`;
+    const url = `${domain}${PORTAL_JWT_URL_SUFFIX}`;
     superagent
       .get(url)
       .set("Authorization", `${type} ${token}`)
@@ -130,14 +141,11 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
   });
 };
 
-export const authenticate = (devMode: boolean) => {
+export const authenticate = (devMode: boolean, token?: string, domain?: string) => {
   return new Promise<StudentUser | null>((resolve, reject) => {
     if (devMode) {
       resolve(DEV_USER);
     }
-
-    const queryParams: AuthQueryParams = queryString.parse(window.location.search);
-    const {token, domain} = queryParams;
 
     if (!token) {
       return reject("No token provided for authentication (must launch from Portal)");
@@ -165,6 +173,14 @@ export const authenticate = (devMode: boolean) => {
 
             resolve(user);
           });
+      })
+      .catch((e) => {
+        reject(e);
       });
   });
+};
+
+export const _private = {
+  DEV_USER,
+  PORTAL_JWT_URL_SUFFIX
 };
