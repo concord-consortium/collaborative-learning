@@ -1,35 +1,21 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { IAllStores } from "..";
-import { ProblemModelType } from "../models/problem";
-import { UIModelType } from "../models/ui";
 import "./left-nav.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
+import { BaseComponent, IBaseProps } from "./base";
 
-interface IInjectedProps {
-  ui: UIModelType;
-  problem: ProblemModelType;
-}
+interface IProps extends IBaseProps {}
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    problem: allStores.problem,
-    ui: allStores.ui,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class LeftNavComponent extends React.Component<{}, {}> {
-
-  get injected() {
-    return this.props as IInjectedProps;
-  }
+export class LeftNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const className = `left-nav${this.injected.ui.leftNavExpanded ? " expanded" : ""}`;
-    const { sections } = this.injected.problem;
+    const { problem, ui } = this.stores;
+    const className = `left-nav${ui.leftNavExpanded ? " expanded" : ""}`;
+    const { sections } = problem;
     return (
       <div className={className} onClick={this.handleClick}>
         <TabSetComponent>
@@ -49,6 +35,6 @@ export class LeftNavComponent extends React.Component<{}, {}> {
   }
 
   private handleClick = () => {
-    this.injected.ui.toggleLeftNav();
+    this.stores.ui.toggleLeftNav();
   }
 }

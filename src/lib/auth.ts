@@ -7,8 +7,8 @@ const DEV_USER: StudentUser = {
   id: "123",
   firstName: "Sofia",
   lastName: "Q.",
-  fullName: "Sophia Q.",
-  className: "Mr. Singh's Class",
+  fullName: "Sofia Q.",
+  className: "Geometry (3rd)",
 };
 
 export interface RawUser {

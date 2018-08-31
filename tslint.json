@@ -1,8 +1,9 @@
 {
-  "extends": ["tslint:recommended", "tslint-react"],
+  "extends": ["tslint:recommended", "tslint-react", "tslint-no-unused-expression-chai"],
   "rules": {
     "arrow-parens": false,
     "jsx-no-multiline-js": false,
+    "no-empty-interface": false,
     "object-literal-sort-keys": false,
     "one-line": false,
     "ordered-imports": false,

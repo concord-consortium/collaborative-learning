@@ -1,38 +1,26 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IAllStores } from "../index";
-import { UIModelType } from "../models/ui";
 import { HeaderComponent } from "./header";
 import { LearningLogComponent } from "./learning-log";
 import { LeftNavComponent } from "./left-nav";
 import { MyWorkComponent } from "./my-work";
 import { WorkspaceComponent } from "./workspace";
+import { BaseComponent, IBaseProps } from "./base";
 
 import "./app-container.sass";
 
-interface IInjectedProps {
-  ui: UIModelType;
-}
+interface IProps extends IBaseProps {}
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    ui: allStores.ui,
-  };
-  return injected;
-})
+@inject("stores")
 @observer
-export class AppContainerComponent extends React.Component<{}, {}> {
-
-  get injected() {
-    return this.props as IInjectedProps;
-  }
+export class AppContainerComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     return (
       <div className="app-container">
         <HeaderComponent />
         <WorkspaceComponent />
-        {this.injected.ui.allContracted ? null : this.renderBlocker()}
+        {this.stores.ui.allContracted ? null : this.renderBlocker()}
         <LeftNavComponent />
         <MyWorkComponent />
         <LearningLogComponent />
@@ -41,7 +29,7 @@ export class AppContainerComponent extends React.Component<{}, {}> {
   }
 
   private handleRemoveBlocker = () => {
-    this.injected.ui.contractAll();
+    this.stores.ui.contractAll();
   }
 
   private renderBlocker() {
