@@ -1,11 +1,10 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { UIModelType } from "../models/ui";
 import { WorkspaceModel, WorkspaceTool } from "../models/workspace";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
 
 import "./workspace.sass";
 
@@ -16,9 +15,11 @@ const workspace = WorkspaceModel.create({
   tool: "select",
 });
 
+interface IProps extends IBaseProps {}
+
 @inject("stores")
 @observer
-export class WorkspaceComponent extends BaseComponent<{}, {}> {
+export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     return (

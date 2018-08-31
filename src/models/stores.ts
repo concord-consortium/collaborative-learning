@@ -10,7 +10,7 @@ export interface IStores {
 }
 
 export interface ICreateStores {
-  devMode: boolean;
+  devMode?: boolean;
   problem?: ProblemModelType;
   user?: UserModelType;
   ui?: UIModelType;

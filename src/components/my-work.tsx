@@ -4,11 +4,13 @@ import * as React from "react";
 import "./my-work.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
+
+interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
-export class MyWorkComponent extends BaseComponent<{}, {}> {
+export class MyWorkComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { myWorkExpanded } = this.stores.ui;

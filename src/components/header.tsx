@@ -1,12 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
 
 import "./header.sass";
 
+interface IProps extends IBaseProps {}
+
 @inject("stores")
 @observer
-export class HeaderComponent extends BaseComponent<{}, {}> {
+export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {user, problem} = this.stores;

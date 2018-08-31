@@ -4,11 +4,13 @@ import * as React from "react";
 import "./learning-log.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
+
+interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
-export class LearningLogComponent extends BaseComponent<{}, {}> {
+export class LearningLogComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const className = `learning-log${this.stores.ui.learningLogExpanded ? " expanded" : ""}`;

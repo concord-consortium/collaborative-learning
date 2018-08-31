@@ -5,13 +5,15 @@ import { LearningLogComponent } from "./learning-log";
 import { LeftNavComponent } from "./left-nav";
 import { MyWorkComponent } from "./my-work";
 import { WorkspaceComponent } from "./workspace";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
 
 import "./app-container.sass";
 
+interface IProps extends IBaseProps {}
+
 @inject("stores")
 @observer
-export class AppContainerComponent extends BaseComponent<{}, {}> {
+export class AppContainerComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     return (

@@ -3,6 +3,7 @@
   "rules": {
     "arrow-parens": false,
     "jsx-no-multiline-js": false,
+    "no-empty-interface": false,
     "object-literal-sort-keys": false,
     "one-line": false,
     "ordered-imports": false,

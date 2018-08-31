@@ -4,11 +4,13 @@ import * as React from "react";
 import "./left-nav.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
-import { BaseComponent } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
+
+interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
-export class LeftNavComponent extends BaseComponent<{}, {}> {
+export class LeftNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { problem, ui } = this.stores;
