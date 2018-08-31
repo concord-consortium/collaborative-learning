@@ -26,4 +26,17 @@ describe("user model", () => {
     user.setName("Different User");
     expect(user.name).to.equal("Different User");
   });
+
+  it("can authenticate", () => {
+    const user = UserModel.create();
+    user.setAuthentication(true);
+    expect(user.authenticated).to.equal(true);
+  });
+
+  it("can set a class name", () => {
+    const user = UserModel.create();
+    const className = "test class";
+    user.setClassName(className);
+    expect(user.className).to.equal(className);
+  });
 });
