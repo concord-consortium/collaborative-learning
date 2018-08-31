@@ -7,10 +7,10 @@ describe("stores object", () => {
 
   it("supports creating dummy stores for testing", () => {
     const stores = createStores();
-    expect(stores).to.exist;          // tslint:disable-line
-    expect(stores.user).to.exist;     // tslint:disable-line
-    expect(stores.problem).to.exist;  // tslint:disable-line
-    expect(stores.ui).to.exist;       // tslint:disable-line
+    expect(stores).to.exist;
+    expect(stores.user).to.exist;
+    expect(stores.problem).to.exist;
+    expect(stores.ui).to.exist;
   });
 
   it("supports passing in stores for testing", () => {
