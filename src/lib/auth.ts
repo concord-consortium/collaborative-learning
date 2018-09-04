@@ -130,6 +130,7 @@ export interface BasePortalFirebaseJWT {
   iat: number;
   exp: number;
   uid: number;
+  user_id: string;
 }
 
 export interface PortalFirebaseStudentJWT extends BasePortalFirebaseJWT {
@@ -275,6 +276,7 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
                     user.rawPortalJWT = rawJPortalWT;
                     user.firebaseJWT = firebaseJWT;
                     user.rawFirebaseJWT = rawFirebaseJWT;
+                    user.id = firebaseJWT.user_id;
                     resolve(user);
                   }
                   else {

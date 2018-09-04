@@ -58,7 +58,7 @@ export const UIModel = types
         toggleWithOverride("myWorkExpanded", override);
       },
       setError(error: string|null) {
-        self.error = error;
+        self.error = error ? error.toString() : error;
       },
       setActiveSectionIndex(activeSectionIndex: number) {
         self.activeSectionIndex = activeSectionIndex;

@@ -1,5 +1,6 @@
 import * as firebase from "firebase";
 import { AppMode } from "../models/stores";
+import { UserModelType } from "../models/user";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -79,5 +80,9 @@ export class DB {
     const { appMode } = this;
     const userSubFolder = appMode === "authed" ? "" : `${this.firebaseUser ? this.firebaseUser.uid : "no-user-id"}/`;
     return `/${appMode}/${userSubFolder}`;
+  }
+
+  public getUserGroupRef(user: UserModelType): firebase.database.Reference {
+    return this.ref(`users/${user.id}/group`);
   }
 }

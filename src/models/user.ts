@@ -1,11 +1,13 @@
 import { types } from "mobx-state-tree";
+import { AuthenticatedUser } from "../lib/auth";
 
 export const UserModel = types
   .model("User", {
     authenticated: false,
     name: "Anonymous User",
     className: "",
-    group: types.maybe(types.string),
+    group: types.maybeNull(types.string),
+    id: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setName(name: string) {
@@ -17,9 +19,19 @@ export const UserModel = types
     setClassName(className: string) {
       self.className = className;
     },
-    setGroup(groupName: string) {
-      self.group = groupName;
-    }
+    setGroup(group: string | null) {
+      self.group = group;
+    },
+    setId(id: string | null) {
+      self.id = id;
+    },
+    setAuthenticatedUser(user: AuthenticatedUser) {
+      self.authenticated = true;
+      self.name = user.fullName;
+      self.className = user.className;
+      self.group = null;
+      self.id = user.id;
+    },
   }));
 
 export type UserModelType = typeof UserModel.Type;

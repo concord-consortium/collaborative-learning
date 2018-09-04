@@ -33,7 +33,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
     e.preventDefault();
     const select = e.currentTarget.querySelector("select");
     if (select) {
-      this.selectGroup(select.options[select.selectedIndex].text);
+      this.selectGroup(select.value);
     }
   }
 
