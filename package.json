@@ -80,6 +80,8 @@
     "webpack-dev-server": "^3.1.5"
   },
   "dependencies": {
+    "firebase": "4.12.1",
+    "initials": "^3.0.0",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
     "mobx": "^5.0.4",

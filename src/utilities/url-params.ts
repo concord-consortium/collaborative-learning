@@ -1,8 +1,9 @@
 import { parse } from "query-string";
+import { AppMode } from "../models/stores";
 
 interface QueryParams {
-  // devMode === "true" or "1" for auto-authentication as developer
-  devMode?: string;
+  // appMode is "authed", "test" or "dev" with the default of dev
+  appMode?: AppMode;
   // ordinal string, e.g. "2.1", "3.2", etc.
   problem?: string;
   // nonce (short-lived token) from portal for authentication

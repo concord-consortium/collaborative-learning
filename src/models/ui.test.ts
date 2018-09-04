@@ -12,6 +12,7 @@ describe("ui model", () => {
     expect(ui.learningLogExpanded).toBe(false);
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.error).toBe(null);
   });
 
   it("allows the left nav to be toggled", () => {
@@ -83,5 +84,13 @@ describe("ui model", () => {
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.learningLogExpanded).toBe(false);
     expect(ui.myWorkExpanded).toBe(true);
+  });
+
+  it("allows error to be set", () => {
+    const error = "the sky is falling!";
+    ui.setError(error);
+    expect(ui.error).toBe(error);
+    ui.setError(null);
+    expect(ui.error).toBe(null);
   });
 });
