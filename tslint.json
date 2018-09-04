@@ -1,5 +1,5 @@
 {
-  "extends": ["tslint:recommended", "tslint-react", "tslint-no-unused-expression-chai"],
+  "extends": ["tslint:recommended", "tslint-react"],
   "rules": {
     "arrow-parens": false,
     "jsx-no-multiline-js": false,

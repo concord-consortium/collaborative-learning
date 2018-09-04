@@ -1,4 +1,3 @@
-import { assert } from "chai";
 import { authenticate, _private, PortalJWT, RawUser, RawClassInfo, getDevMode } from "./auth";
 import * as nock from "nock";
 
@@ -49,25 +48,25 @@ const RAW_CLASS_INFO: RawClassInfo = {
 describe("dev mode", () => {
   it("should be in dev mode on a local machine", () => {
     const mode = getDevMode(undefined, undefined, "localhost");
-    assert.equal(mode, true);
+    expect(mode).toBe(true);
   });
 
   it("should not be in dev mode if authentication is being tested", () => {
     const mode = getDevMode(undefined, "testToken", "localhost");
-    assert.equal(mode, false);
+    expect(mode).toBe(false);
   });
 
   it("should not be in dev mode by default in production", () => {
     const mode = getDevMode(undefined, undefined, "learning.concord.org");
-    assert.equal(mode, false);
+    expect(mode).toBe(false);
   });
 
   it("should use the dev mode parameter if it's specified", () => {
     const trueMode = getDevMode("true", undefined, "learning.concord.org");
-    assert.equal(trueMode, true);
+    expect(trueMode).toBe(true);
 
     const falseMode = getDevMode("false", undefined, "localhost");
-    assert.equal(falseMode, false);
+    expect(falseMode).toBe(false);
   });
 });
 
@@ -103,14 +102,14 @@ describe("authentication", () => {
 
   it("Authenticates as a developer", (done) => {
     authenticate(true).then((authenticatedUser) => {
-      assert.deepEqual(authenticatedUser, _private.DEV_USER);
+      expect(authenticatedUser).toEqual(_private.DEV_USER);
       done();
     });
   });
 
   it("Authenticates externally", (done) => {
     authenticate(false, GOOD_NONCE, PORTAL_DOMAIN).then((authenticatedUser) => {
-      assert.deepEqual(authenticatedUser, {
+      expect(authenticatedUser).toEqual({
         type: "student",
         id: PORTAL_JWT.user_id,
         firstName: RAW_CORRECT_STUDENT.first_name,
@@ -125,7 +124,7 @@ describe("authentication", () => {
   it("Fails to authenticate with a bad nonce", (done) => {
     authenticate(false, BAD_NONCE, PORTAL_DOMAIN)
       .then(() => {
-        assert(false);
+        done.fail();
       })
       .catch(() => done());
   });
@@ -133,7 +132,7 @@ describe("authentication", () => {
   it("Fails to authenticate with no token", (done) => {
     authenticate(false, undefined, PORTAL_DOMAIN)
       .then(() => {
-        assert(false);
+        done.fail();
       })
       .catch(() => done());
   });
@@ -141,7 +140,7 @@ describe("authentication", () => {
   it("Fails to authenticate with no domain", (done) => {
     authenticate(false, BAD_NONCE, undefined)
       .then(() => {
-        assert(false);
+        done.fail();
       })
       .catch(() => done());
   });
