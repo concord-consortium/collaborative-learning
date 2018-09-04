@@ -23,7 +23,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="group">
           <div>
-            <div className="name">Group TBD</div>
+            <div className="name">{user.group}</div>
             <div className="members">Members TBD</div>
           </div>
         </div>

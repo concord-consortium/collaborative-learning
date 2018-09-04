@@ -6,6 +6,7 @@ import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 
 import "./app.sass";
+import { GroupChooserComponent } from "./group-chooser";
 
 interface IProps extends IBaseProps {}
 
@@ -51,6 +52,10 @@ export class AppComponent extends BaseComponent<IProps, {}> {
 
     if (!user.authenticated) {
       return this.renderApp(this.renderAuthenticating());
+    }
+
+    if (user.group === null) {
+      return this.renderApp(<GroupChooserComponent />);
     }
 
     return this.renderApp(<AppContainerComponent />);

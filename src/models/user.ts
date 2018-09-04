@@ -5,6 +5,7 @@ export const UserModel = types
     authenticated: false,
     name: "Anonymous User",
     className: "",
+    group: types.maybe(types.string),
   })
   .actions((self) => ({
     setName(name: string) {
@@ -16,6 +17,9 @@ export const UserModel = types
     setClassName(className: string) {
       self.className = className;
     },
+    setGroup(groupName: string) {
+      self.group = groupName;
+    }
   }));
 
 export type UserModelType = typeof UserModel.Type;
