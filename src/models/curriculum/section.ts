@@ -11,15 +11,16 @@ export enum SectionType {
 }
 
 export const sectionInfo = {
-  [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
-  [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
-  [SectionType.whatIf]: { title: "What if...?", abbrev: "W?" },
-  [SectionType.nowWhatDoYouKnow]: { title: "Now What Do You Know?", abbrev: "N?" },
-  [SectionType.didYouKnow]: { title: "Did You Know?", abbrev: "D?" }
+  [SectionType.introduction]: { id: SectionType.introduction, title: "Introduction", abbrev: "In" },
+  [SectionType.initialChallenge]: { id: SectionType.initialChallenge, title: "Initial Challenge", abbrev: "IC" },
+  [SectionType.whatIf]: { id: SectionType.whatIf, title: "What if...?", abbrev: "W?" },
+  [SectionType.nowWhatDoYouKnow]: { id: SectionType.nowWhatDoYouKnow, title: "Now What Do You Know?", abbrev: "N?" },
+  [SectionType.didYouKnow]: { id: SectionType.didYouKnow, title: "Did You Know?", abbrev: "D?" }
 };
 
 export const SectionModel = types
   .model("Section", {
+    id: types.identifier,
     type: types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[]),
     content: types.maybe(DocumentContentModel),
     supports: types.array(types.string)

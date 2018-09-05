@@ -26,9 +26,11 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
+          id: SectionType.introduction,
           type: SectionType.introduction
         },
         {
+          id: SectionType.initialChallenge,
           type: SectionType.initialChallenge
         }
       ]
@@ -40,10 +42,12 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
+          id: SectionType.introduction,
           type: SectionType.introduction,
           supports: []
         },
         {
+          id: SectionType.initialChallenge,
           type: SectionType.initialChallenge,
           supports: []
         }

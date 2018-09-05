@@ -35,9 +35,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTitleBar() {
+    const { activeSection } = this.stores.ui;
     return (
       <div className="titlebar">
-        <div className="title">TBD: Workspace Name</div>
+        <div className="title">{activeSection ? activeSection.title : ""}</div>
         <div className="actions">
           <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
         </div>

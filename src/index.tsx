@@ -27,6 +27,7 @@ const stores = createStores({ appMode, user, problem });
 
 if (problem) {
   document.title = `CLUE: ${problem.fullTitle}`;
+  stores.ui.setActiveSection(problem.sections[0]);
 }
 
 ReactDOM.render(

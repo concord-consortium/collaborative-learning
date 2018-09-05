@@ -1,4 +1,5 @@
 import { UIModel, UIModelType } from "./ui";
+import { SectionModel, SectionType } from "./section";
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -13,6 +14,8 @@ describe("ui model", () => {
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.myWorkExpanded).toBe(false);
     expect(ui.error).toBe(null);
+    expect(ui.activeSection).toBe(null);
+    expect(ui.activeLearningLogTab).toBe("LL");
   });
 
   it("allows the left nav to be toggled", () => {
@@ -93,4 +96,22 @@ describe("ui model", () => {
     ui.setError(null);
     expect(ui.error).toBe(null);
   });
+
+  it("allows activeSection to be set", () => {
+    const section = SectionModel.create({
+      id: SectionType.introduction,
+      type: SectionType.introduction
+    });
+    ui.setActiveSection(section);
+    expect(ui.activeSection).toBe(section);
+    ui.setActiveSection(null);
+    expect(ui.activeSection).toBe(null);
+  });
+
+  it("allows activeLearningLogTab to be set", () => {
+    const activeLearningLogTab = "M";
+    ui.setActiveLearningLogTab(activeLearningLogTab);
+    expect(ui.activeLearningLogTab).toBe(activeLearningLogTab);
+  });
+
 });
