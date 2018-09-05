@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import * as firebase from "firebase";
 import { authenticate } from "../lib/auth";
 import { AppContainerComponent } from "./app-container";
 import { BaseComponent, IBaseProps } from "./base";
@@ -9,6 +8,7 @@ import { urlParams } from "../utilities/url-params";
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
 import { ModelDBConnector } from "../lib/model-db-connector";
+import { observable } from "mobx";
 
 interface IProps extends IBaseProps {}
 
@@ -16,6 +16,7 @@ interface IProps extends IBaseProps {}
 @observer
 export class AppComponent extends BaseComponent<IProps, {}> {
   private modelDbConnector: ModelDBConnector | null;
+  @observable private synced = false;
 
   public componentWillMount() {
     const {appMode, user, db, ui} = this.stores;
@@ -63,11 +64,11 @@ export class AppComponent extends BaseComponent<IProps, {}> {
       return this.renderApp(this.renderError(ui.error));
     }
 
-    if (!user.authenticated || (user.group === null)) {
+    if (!user.authenticated || !this.synced) {
       return this.renderApp(this.renderAuthenticating());
     }
 
-    if (user.group.length === 0) {
+    if (!user.group) {
       return this.renderApp(<GroupChooserComponent />);
     }
 
@@ -85,7 +86,7 @@ export class AppComponent extends BaseComponent<IProps, {}> {
   private renderAuthenticating() {
     return (
       <div className="progress">
-        Authenticating ...
+        Loading CLUE ...
       </div>
     );
   }
@@ -98,8 +99,12 @@ export class AppComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private setSynced = () => {
+    this.synced = true;
+  }
+
   private handleStartModelListeners = () => {
-    this.modelDbConnector = new ModelDBConnector(this.stores);
+    this.modelDbConnector = new ModelDBConnector(this.stores, this.setSynced);
     this.modelDbConnector.startListeners();
   }
 }

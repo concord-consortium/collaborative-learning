@@ -130,7 +130,7 @@ describe("authentication", () => {
     authenticate("authed", GOOD_NONCE, PORTAL_DOMAIN).then((authenticatedUser) => {
       expect(authenticatedUser).toEqual({
         type: "student",
-        id: PORTAL_JWT.user_id,
+        id: PORTAL_JWT.uid,
         firstName: RAW_CORRECT_STUDENT.first_name,
         lastName: RAW_CORRECT_STUDENT.last_name,
         fullName: `${RAW_CORRECT_STUDENT.first_name} ${RAW_CORRECT_STUDENT.last_name}`,

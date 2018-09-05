@@ -129,7 +129,7 @@ export interface BasePortalFirebaseJWT {
   aud: string;
   iat: number;
   exp: number;
-  uid: number;
+  uid: string;
   user_id: string;
 }
 
@@ -276,7 +276,7 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
                     user.rawPortalJWT = rawJPortalWT;
                     user.firebaseJWT = firebaseJWT;
                     user.rawFirebaseJWT = rawFirebaseJWT;
-                    user.id = firebaseJWT.user_id;
+                    user.id = firebaseJWT.uid;
                     resolve(user);
                   }
                   else {

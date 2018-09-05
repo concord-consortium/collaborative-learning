@@ -7,9 +7,11 @@ export class ModelDBConnector {
   private stores: IStores;
   private groupRef: firebase.database.Reference | null = null;
   private groupSnapshotDisposer: IDisposer | null = null;
+  private onSynced: () => void;
 
-  constructor(stores: IStores) {
+  constructor(stores: IStores, onSynced: () => void) {
     this.stores = stores;
+    this.onSynced = onSynced;
   }
 
   public startListeners() {
@@ -44,6 +46,7 @@ export class ModelDBConnector {
   }
 
   private handleGroupRef = (snapshot: firebase.database.DataSnapshot) => {
-    this.stores.user.setGroup(snapshot.val() || "");
+    this.stores.user.setGroup(snapshot.val());
+    this.onSynced();
   }
 }
