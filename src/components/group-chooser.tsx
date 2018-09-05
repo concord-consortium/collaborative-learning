@@ -18,8 +18,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
         <div className="join-title">Join Group</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
-          {this.renderChooseNewGroup([])}
           {this.renderChooseExistingGroup()}
+          {this.renderChooseNewGroup([])}
         </div>
       </div>
     );
@@ -64,8 +64,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
 
   private renderChooseExistingGroup() {
     const groups: {[key: string]: string[]} = {
-      "Group 1": ["EK", "AB"],
-      "Group 2": ["CD"]
+      1: ["EK", "AB"],
+      2: ["CD"]
     };
     const groupElements: JSX.Element[] = [];
     Object.keys(groups).forEach((key) => {
