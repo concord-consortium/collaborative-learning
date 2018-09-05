@@ -7,65 +7,62 @@ import { urlParams } from "../utilities/url-params";
 
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
-import { ModelDBConnector } from "../lib/model-db-connector";
 import { observable } from "mobx";
+import { IStores } from "../models/stores";
 
 interface IProps extends IBaseProps {}
+
+export const authAndConnect = (stores: IStores) => {
+  const {appMode, user, db, ui} = stores;
+
+  authenticate(appMode, urlParams.token, urlParams.domain)
+    .then((authenticatedUser) => {
+      user.setAuthenticatedUser(authenticatedUser);
+
+      if (appMode === "authed")  {
+        const { rawFirebaseJWT } = authenticatedUser;
+        if (rawFirebaseJWT) {
+          db.connect({appMode, stores, rawFirebaseJWT}).catch(ui.setError);
+        }
+        else {
+          ui.setError("No firebase token available to connect to db!");
+        }
+      }
+      else {
+        db.connect({appMode, stores}).catch(ui.setError);
+      }
+    })
+    .catch((error) => {
+      let errorMessage = error.toString();
+      if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
+          (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
+        errorMessage = "Your authorization has expired.  Please close this window and re-run the activity.";
+      }
+      ui.setError(errorMessage);
+    });
+};
 
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps, {}> {
-  private modelDbConnector: ModelDBConnector | null;
-  @observable private synced = false;
 
   public componentWillMount() {
-    const {appMode, user, db, ui} = this.stores;
-
-    authenticate(appMode, urlParams.token, urlParams.domain)
-      .then((authenticatedUser) => {
-        user.setAuthenticatedUser(authenticatedUser);
-
-        if (appMode === "authed")  {
-          if (authenticatedUser.rawFirebaseJWT) {
-            db.connect({appMode, rawFirebaseToken: authenticatedUser.rawFirebaseJWT})
-              .then(this.handleStartModelListeners)
-              .catch(ui.setError);
-          }
-          else {
-            ui.setError("No firebase token available to connect to db!");
-          }
-        }
-        else {
-          db.connect({appMode})
-            .then(this.handleStartModelListeners)
-            .catch(ui.setError);
-        }
-      })
-      .catch((error) => {
-        let errorMessage = error.toString();
-        if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
-            (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-          errorMessage = "Your authorization has expired.  Please close this window and re-run the activity.";
-        }
-        ui.setError(errorMessage);
-      });
+    authAndConnect(this.stores);
   }
 
   public componentWillUnmount() {
-    if (this.modelDbConnector) {
-      this.modelDbConnector.stopListeners();
-    }
+    this.stores.db.disconnect();
   }
 
   public render() {
-    const {user, ui} = this.stores;
+    const {user, ui, db} = this.stores;
 
     if (ui.error) {
       return this.renderApp(this.renderError(ui.error));
     }
 
-    if (!user.authenticated || !this.synced) {
-      return this.renderApp(this.renderAuthenticating());
+    if (!user.authenticated || !db.isListening) {
+      return this.renderApp(this.renderLoading());
     }
 
     if (!user.group) {
@@ -83,7 +80,7 @@ export class AppComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private renderAuthenticating() {
+  private renderLoading() {
     return (
       <div className="progress">
         Loading CLUE ...
@@ -97,14 +94,5 @@ export class AppComponent extends BaseComponent<IProps, {}> {
         {error.toString()}
       </div>
     );
-  }
-
-  private setSynced = () => {
-    this.synced = true;
-  }
-
-  private handleStartModelListeners = () => {
-    this.modelDbConnector = new ModelDBConnector(this.stores, this.setSynced);
-    this.modelDbConnector.startListeners();
   }
 }

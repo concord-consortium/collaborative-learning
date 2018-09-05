@@ -1,19 +1,28 @@
 import * as firebase from "firebase";
-import { AppMode } from "../models/stores";
+import { AppMode, IStores } from "../models/stores";
 import { UserModelType } from "../models/user";
+import { onSnapshot } from "mobx-state-tree";
+import { IDisposer } from "mobx-state-tree/dist/utils";
+import { observable, action } from "mobx";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
   appMode: "authed";
-  rawFirebaseToken: string;
+  rawFirebaseJWT: string;
+  stores: IStores;
 }
 export interface IDBNonAuthConnectOptions {
   appMode: "dev" | "test";
+  stores: IStores;
 }
 
 export class DB {
+  @observable public isListening = false;
   private appMode: AppMode;
   private firebaseUser: firebase.User | null = null;
+  private stores: IStores;
+  private groupRef: firebase.database.Reference | null = null;
+  private groupSnapshotDisposer: IDisposer | null = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -37,9 +46,11 @@ export class DB {
         });
       }
 
+      this.stores = options.stores;
+
       if (options.appMode === "authed") {
         firebase.auth()
-          .signInWithCustomToken(options.rawFirebaseToken)
+          .signInWithCustomToken(options.rawFirebaseJWT)
           .catch(reject);
       }
       else {
@@ -52,13 +63,16 @@ export class DB {
         if (firebaseUser) {
           this.appMode = options.appMode;
           this.firebaseUser = firebaseUser;
-          resolve(true);
+          this.stopListeners();
+          this.startListeners().then(() => resolve(true)).catch(reject);
         }
       });
     });
   }
 
   public disconnect() {
+    this.stopListeners();
+
     if (this.appMode === "test") {
       // delete all test data (for this unique anonymous test user)
       return this.ref().set(null);
@@ -84,5 +98,61 @@ export class DB {
 
   public getUserGroupRef(user: UserModelType): firebase.database.Reference {
     return this.ref(`users/${user.id}/group`);
+  }
+
+  private startListeners() {
+    return new Promise<void>((resolve, reject) => {
+      this.startGroupListener()
+        .then(() => {
+          this.isListening = true;
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
+
+  private stopListeners() {
+    this.stopGroupListener();
+    this.isListening = false;
+  }
+
+  private startGroupListener() {
+    return new Promise<void>((resolve, reject) => {
+      const {user, ui} = this.stores;
+      const groupRef = this.groupRef = this.getUserGroupRef(user);
+
+      // use once() so we can get a promise
+      groupRef.once("value")
+        .then((snapshot) => {
+          this.handleGroupRef(snapshot);
+          groupRef.on("value", this.handleGroupRef);
+
+          this.groupSnapshotDisposer = onSnapshot(user, (newUser) => {
+            if (this.groupRef) {
+              this.groupRef.set(newUser.group).catch((error) => {
+                ui.setError(error);
+              });
+            }
+          });
+
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
+
+  private stopGroupListener() {
+    if (this.groupRef) {
+      this.groupRef.off("value", this.handleGroupRef);
+      this.groupRef = null;
+    }
+    if (this.groupSnapshotDisposer) {
+      this.groupSnapshotDisposer();
+      this.groupSnapshotDisposer = null;
+    }
+  }
+
+  private handleGroupRef = (snapshot: firebase.database.DataSnapshot) => {
+    this.stores.user.setGroup(snapshot.val());
   }
 }

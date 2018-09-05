@@ -23,7 +23,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="group">
           <div>
-            <div onClick={this.resetGroup} className="name">{`Group ${user.group}`}</div>
+            <div onClick={this.handleResetGroup} className="name">{`Group ${user.group}`}</div>
             <div className="members">Members TBD</div>
           </div>
         </div>
@@ -34,7 +34,9 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private resetGroup = () => {
-    this.stores.user.setGroup("");
+  private handleResetGroup = () => {
+    if (confirm("Do you want to change groups?")) {
+      this.stores.user.setGroup(null);
+    }
   }
 }
