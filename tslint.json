@@ -3,10 +3,14 @@
   "rules": {
     "arrow-parens": false,
     "jsx-no-multiline-js": false,
+    "no-empty-interface": false,
     "object-literal-sort-keys": false,
     "one-line": false,
     "ordered-imports": false,
     "trailing-comma": false,
-    "interface-name" : [false]
+    "interface-name" : [false],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"],
+    "no-debugger": false,
+    "no-var-requires": false
   }
 }

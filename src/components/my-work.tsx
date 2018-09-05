@@ -1,30 +1,19 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { IAllStores } from "..";
-import { UIModelType } from "../models/ui";
 import "./my-work.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
+import { BaseComponent, IBaseProps } from "./base";
 
-interface IInjectedProps {
-  ui: UIModelType;
-}
+interface IProps extends IBaseProps {}
 
-@inject((allStores: IAllStores) => {
-  const injected: IInjectedProps = {
-    ui: allStores.ui,
-  };
-  return injected;
-})@observer
-export class MyWorkComponent extends React.Component<{}, {}> {
-
-  get injected() {
-    return this.props as IInjectedProps;
-  }
+@inject("stores")
+@observer
+export class MyWorkComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { myWorkExpanded } = this.injected.ui;
+    const { myWorkExpanded } = this.stores.ui;
     const className = `my-work${myWorkExpanded ? " expanded" : ""}`;
     return (
       <div className={className}>
@@ -39,6 +28,6 @@ export class MyWorkComponent extends React.Component<{}, {}> {
   }
 
   private handleClick = () => {
-    this.injected.ui.toggleMyWork();
+    this.stores.ui.toggleMyWork();
   }
 }

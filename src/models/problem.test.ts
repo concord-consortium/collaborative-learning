@@ -1,4 +1,3 @@
-import { assert } from "chai";
 import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
 import { SectionType } from "./section";
@@ -11,12 +10,13 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test"
     });
-    assert.deepEqual(getSnapshot(problem), {
+    expect(getSnapshot(problem)).toEqual({
       ordinal: 1,
       title: "test",
       subtitle: "",
       sections: []
     });
+    expect(problem.fullTitle).toBe("test");
   });
 
   it("uses override values", () => {
@@ -33,9 +33,8 @@ describe("problem model", () => {
         }
       ]
     });
-    assert.deepEqual(
-      // omit undefined properties for comparison purposes
-      omitUndefined(getSnapshot(problem)), {
+    // omit undefined properties for comparison purposes
+    expect(omitUndefined(getSnapshot(problem))).toEqual({
       ordinal: 1,
       title: "test",
       subtitle: "sub",
@@ -50,6 +49,7 @@ describe("problem model", () => {
         }
       ]
     });
+    expect(problem.fullTitle).toBe("test: sub");
   });
 
 });
