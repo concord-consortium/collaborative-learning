@@ -8,9 +8,11 @@ export const ProblemModel = types
     subtitle: "",
     sections: types.array(SectionModel)
   })
-  .actions((self) => {
+  .views((self) => {
     return {
-      getFullTitle: () => `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`,
+      get fullTitle() {
+        return `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`;
+      },
     };
   });
 

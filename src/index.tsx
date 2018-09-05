@@ -26,7 +26,7 @@ const problem = curriculumUnit.getProblem(problemOrdinal) ||
 const stores = createStores({ appMode, user, problem });
 
 if (problem) {
-  document.title = `CLUE: ${problem.getFullTitle()}`;
+  document.title = `CLUE: ${problem.fullTitle}`;
 }
 
 ReactDOM.render(

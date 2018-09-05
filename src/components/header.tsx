@@ -17,7 +17,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
       <div className="header">
         <div className="info">
           <div>
-            <div className="problem">{problem.getFullTitle()}</div>
+            <div className="problem">{problem.fullTitle}</div>
             <div className="class">{user.className}</div>
           </div>
         </div>
