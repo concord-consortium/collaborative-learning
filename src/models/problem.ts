@@ -7,6 +7,11 @@ export const ProblemModel = types
     title: types.string,
     subtitle: "",
     sections: types.array(SectionModel)
+  })
+  .actions((self) => {
+    return {
+      getFullTitle: () => `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`,
+    };
   });
 
 export type ProblemModelType = typeof ProblemModel.Type;
