@@ -25,6 +25,10 @@ const problem = curriculumUnit.getProblem(problemOrdinal) ||
 
 const stores = createStores({ appMode, user, problem });
 
+if (problem) {
+  document.title = `CLUE: ${problem.fullTitle}`;
+}
+
 ReactDOM.render(
   <Provider stores={stores}>
     <AppComponent />

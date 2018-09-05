@@ -16,6 +16,7 @@ describe("problem model", () => {
       subtitle: "",
       sections: []
     });
+    expect(problem.fullTitle).toBe("test");
   });
 
   it("uses override values", () => {
@@ -48,6 +49,7 @@ describe("problem model", () => {
         }
       ]
     });
+    expect(problem.fullTitle).toBe("test: sub");
   });
 
 });
