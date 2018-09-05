@@ -86,7 +86,7 @@
     "lodash": "^4.17.10",
     "mobx": "^5.0.4",
     "mobx-react": "^5.2.5",
-    "mobx-state-tree": "^3.2.3",
+    "mobx-state-tree": "^3.2.4",
     "query-string": "^6.1.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
