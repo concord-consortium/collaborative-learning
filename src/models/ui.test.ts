@@ -16,6 +16,21 @@ describe("ui model", () => {
     expect(ui.error).toBe(null);
     expect(ui.activeSectionIndex).toBe(0);
     expect(ui.activeLearningLogTab).toBe("LL");
+    expect(ui.showDemoCreator).toBe(false);
+  });
+
+  it("uses overtide values", () => {
+    ui = UIModel.create({
+      learningLogExpanded: true,
+      showDemoCreator: true,
+      error: "test"
+    });
+    expect(ui.allContracted).toBe(false);
+    expect(ui.learningLogExpanded).toBe(true);
+    expect(ui.leftNavExpanded).toBe(false);
+    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.error).toBe("test");
+    expect(ui.showDemoCreator).toBe(true);
   });
 
   it("allows the left nav to be toggled", () => {

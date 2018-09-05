@@ -4,6 +4,7 @@ import { authenticate } from "../lib/auth";
 import { AppContainerComponent } from "./app-container";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
+import { DemoCreatorComponment } from "./demo-creator";
 
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
@@ -14,7 +15,7 @@ interface IProps extends IBaseProps {}
 export const authAndConnect = (stores: IStores) => {
   const {appMode, user, db, ui} = stores;
 
-  authenticate(appMode, urlParams.token, urlParams.domain)
+  authenticate(appMode, urlParams)
     .then(({authenticatedUser, classInfo}) => {
       user.setAuthenticatedUser(authenticatedUser);
       if (classInfo) {
@@ -58,6 +59,10 @@ export class AppComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {user, ui, db, groups} = this.stores;
+
+    if (ui.showDemoCreator) {
+      return this.renderApp(<DemoCreatorComponment />);
+    }
 
     if (ui.error) {
       return this.renderApp(this.renderError(ui.error));

@@ -2,6 +2,8 @@ import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores";
+import { QueryParams } from "../utilities/url-params";
+import {NUM_DEMO_STUDENTS} from "../components/demo-creator";
 
 const initials = require("initials");
 
@@ -34,7 +36,7 @@ export interface RawUser {
   last_name: string;
 }
 
-export type AuthenticatedUser = StudentUser;
+export type AuthenticatedUser = StudentUser | TeacherUser;
 
 interface User {
   id: string;
@@ -54,6 +56,10 @@ export interface StudentUser extends User {
   className: string;
   classHash: string;
   offeringId: string;
+}
+
+export interface TeacherUser extends User {
+  type: "teacher";
 }
 
 export interface RawClassInfo {
@@ -102,6 +108,8 @@ export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string
            ? appModeParam
            : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
 };
+
+export type UserType = "student" | "teacher";
 
 export interface PortalTeacherJWT extends BasePortalJWT {
   domain: string;
@@ -265,9 +273,24 @@ export const getClassInfo = (params: GetClassInfoParams) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, token?: string, domain?: string) => {
+export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
+    const {token, domain} = urlParams || {token: undefined, domain: undefined};
+
     if (appMode !== "authed") {
+      if (appMode === "demo") {
+        urlParams = urlParams || {demoClass: undefined, demoUser: undefined, demoOffering: undefined};
+        const {demoClass, demoUser, demoOffering} = urlParams;
+        if (!demoClass || !demoUser || !demoOffering) {
+          return reject("Missing demoClass or demoUser or demoOffering parameter for demo!");
+        }
+        const [userType, userId, ...rest] = demoUser.split(":");
+        if (((userType !== "student") && (userType !== "teacher")) || !userId) {
+          return reject("demoUser must be in the form of student:<id> or teacher:<id>");
+        }
+        resolve(createDemoInfo(demoClass, userType, userId, demoOffering));
+      }
+
       resolve({authenticatedUser: DEV_USER, classInfo: DEV_CLASS_INFO});
     }
 
@@ -318,6 +341,49 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
       })
       .catch(reject);
   });
+};
+
+export const createDemoUser = (classId: string, userType: UserType, userId: string, offeringId: string) => {
+  if (userType === "student") {
+    const student: StudentUser = {
+      type: "student",
+      id: userId,
+      portal: "demo",
+      firstName: "Student",
+      lastName: `${userId}`,
+      fullName: `Student ${userId}`,
+      initials: `S${userId}`,
+      className: `Demo Class ${classId}`,
+      classHash: `democlass${classId}`,
+      offeringId,
+    };
+    return student;
+  }
+  else {
+    const teacher: TeacherUser = {
+      type: "teacher",
+      id: userId,
+      portal: "demo",
+      firstName: "Student",
+      lastName: `${userId}`,
+      fullName: `Student ${userId}`,
+      initials: `S${userId}`
+    };
+    return teacher;
+  }
+};
+
+export const createDemoInfo = (classId: string, userType: UserType, userId: string, offeringId: string) => {
+  const authenticatedUser = createDemoUser(classId, userType, userId, offeringId);
+  const classInfo: ClassInfo = {
+    name: `Demo Class ${classId}`,
+    classHash: `democlass${classId}`,
+    students: []
+  };
+  for (let i = 1; i <= NUM_DEMO_STUDENTS; i++) {
+    classInfo.students.push(createDemoUser(classId, "student", `${i}`, offeringId) as StudentUser);
+  }
+  return {authenticatedUser, classInfo};
 };
 
 export const _private = {

@@ -13,6 +13,8 @@ export const UIModel = types
     activeSectionIndex: 0,
     activeLearningLogTab: "LL",
     activeWorkspaceSectionId: types.maybe(types.string),
+    showDemo: false,
+    showDemoCreator: false,
   })
   .views((self) => ({
     get allContracted() {
@@ -70,6 +72,9 @@ export const UIModel = types
       },
       setActiveWorkspaceSectionId(sectionId?: string) {
         self.activeWorkspaceSectionId = sectionId;
+      },
+      setShowDemo(showDemo: boolean) {
+        self.showDemoCreator = showDemo;
       }
     };
   });
