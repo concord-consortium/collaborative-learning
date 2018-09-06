@@ -1,4 +1,4 @@
-import { ProblemModel, ProblemModelType } from "./problem";
+import { ProblemModel, ProblemModelType } from "./curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { DB } from "../lib/db";

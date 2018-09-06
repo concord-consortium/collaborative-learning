@@ -30,6 +30,7 @@
     "lint:fix": "tslint -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "test": "jest",
     "test:all": "npm-run-all build test start",
+    "test:coverage": "jest --coverage",
     "test:debug": "node --nolazy --inspect-brk ./node_modules/.bin/jest --runInBand --no-cache",
     "test:watch": "jest --watchAll"
   },

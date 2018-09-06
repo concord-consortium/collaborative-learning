@@ -1,7 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
 import { SectionType } from "./section";
-import { omitUndefined } from "../utilities/test-utils";
+import { omitUndefined } from "../../utilities/test-utils";
 
 describe("problem model", () => {
 

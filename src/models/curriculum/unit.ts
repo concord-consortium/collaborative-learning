@@ -1,11 +1,11 @@
 import { SnapshotIn, types } from "mobx-state-tree";
-import { DocumentContentModel } from "./document-content";
+import { DocumentContentModel } from "../document-content";
 import { InvestigationModel } from "./investigation";
 import { SectionModelType, SectionType } from "./section";
 import { each, isObject } from "lodash";
 
-export const CurriculumModel = types
-  .model("Curriculum", {
+export const UnitModel = types
+  .model("Unit", {
     title: types.string,
     subtitle: "",
     lookingAhead: types.maybe(DocumentContentModel),
@@ -25,15 +25,18 @@ export const CurriculumModel = types
       // ordinalString: e.g. "2.1", "2.2", etc.
       getProblem(ordinalString: string) {
         const ordinals = ordinalString.split(".");
-        const investigationOrdinal = ordinals[0] ? +ordinals[0] : 1;
-        const problemOrdinal = ordinals[1] ? +ordinals[1] : 1;
+        // if only one exists, investigation defaults to 1
+        // if neither exists, investigation defaults to 0
+        const investigationOrdinal = ordinals[1] ? +ordinals[0] : (+ordinals[0] ? 1 : 0);
+        // if only one exists, it corresponds to problem
+        const problemOrdinal = ordinals[1] ? +ordinals[1] : +ordinals[0];
         const investigation = self.getInvestigation(investigationOrdinal);
         return investigation && investigation.getProblem(problemOrdinal);
       }
     };
   });
 
-export type CurriculumModelType = typeof CurriculumModel.Type;
+export type UnitModelType = typeof UnitModel.Type;
 
 /*
   createFromJson
@@ -45,7 +48,7 @@ export type CurriculumModelType = typeof CurriculumModel.Type;
  */
 export function createFromJson(json: any) {
   const snapshot = replaceSectionTypes(json);
-  return CurriculumModel.create(snapshot);
+  return UnitModel.create(snapshot);
 }
 
 /*
@@ -54,7 +57,7 @@ export function createFromJson(json: any) {
   Recursively replaces SectionType strings in 'type' fields with corresponding
   SectionType enumerated values.
  */
-function replaceSectionTypes(obj: {}): SnapshotIn<typeof CurriculumModel> {
+function replaceSectionTypes(obj: {}): SnapshotIn<typeof UnitModel> {
   each(obj, (v, k) => {
     if ((k === "type") && (SectionType[v] != null)) {
       (obj as SectionModelType).type = SectionType[v] as SectionType;
@@ -63,5 +66,5 @@ function replaceSectionTypes(obj: {}): SnapshotIn<typeof CurriculumModel> {
       replaceSectionTypes(v);
     }
   });
-  return obj as SnapshotIn<typeof CurriculumModel>;
+  return obj as SnapshotIn<typeof UnitModel>;
 }
