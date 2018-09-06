@@ -1,12 +1,12 @@
-# Firebase Schema
+# DB Schema
 
 The core design elements of the schema are:
 
-1. The top level keys are `test`, `dev`, `demo` and `authed` where `test` and `dev` use subkeys based on the user id to create unique environments per Firebase user.  Unit tests automatically delete any data added.
+1. The top level keys are `test`, `dev`, `demo` and `authed` where `test` and `dev` use subkeys based on the user id to create unique environments per DB user.  Unit tests automatically delete any data added.
 2. Under the top level keys is the `portals` key with sub-keys under `portals` for each portal domain found during authentication.  There will be a special `localhost` domain used for portals when in dev mode.  All data except for user data will live under a portal domain.
 4. All objects will have a version property.
 5. Any objects that can be loaded as a list should contain the minimum amount of metadata to display the information on the UI with id references to larger objects.
-6. All read-only write-once data (such as "publications") will be stored using Firebase storage.
+6. All read-only write-once data (such as "publications") will be stored using DB storage.
 
 ## Heirarchy
 
@@ -15,167 +15,74 @@ The core design elements of the schema are:
   [<firebaseUserId> if dev or test]
     /portals
       /<escapedPortalDomain>
-        /users {key: uid => FirebasePortalUser}
+        /users {key: uid => DBPortalUser}
           version: "1.0"
+          /self
+            uid: string
           latestGroupId: string
-          /documentMetadata {key: documentKey => FirebaseDocumentMetadata}
+          /documentMetadata {key: documentKey => DBDocumentMetadata}
             version: "1.0"
-            documentKey: string
-            creatorUID: string
+            /self
+              uid: string
+              documentKey: string
             createdAt: number|object
             // TDB: serialized document model metadata (back pointers too)
-          /documents: {key: documentKey => FirebaseDocument}
+          /documents: {key: documentKey => DBDocument}
             version: "1.0"
-            documentKey: string
-            creatorUID: string
-            // TDB: serialized document model contents
-        /classes {key: classHash => FirebaseClass}
+            /self
+              documentKey: string
+              uid: string
+            TDB: serialized document model contents
+        /classes {key: classHash => DBClass}
           version: "1.0"
-          classHash: string // allow self reference
-          /offerings: {key: offeringId => FirebaseOffering}
+          /self
+            classHash: string
+          /offerings: {key: offeringId => DBOffering}
             version: "1.0"
-            offeringId: string // allows self reference
-            classHash: string // allow self reference
-            /users {key: uid => FirebaseOfferingUser}
+            /self
+              classHash: string
+              offeringId: string
+            /users {key: uid => DBOfferingUser}
               version: "1.0"
-              offeringId: string // allows self reference
-              classHash: string // allow self reference
-              uid: string // allows self reference
-              // TDB: store ui information here?
-              /sectionDocuments {key: sectionId => FirebaseOfferingUserSectionDocument}
+              /self
+                classHash: string
+                offeringId: string
+                uid: string
+              TDB: store ui information here?
+              /sectionDocuments {key: sectionId => DBOfferingUserSectionDocument}
                 version: "1.0"
+                /self
+                  classHash: string
+                  offeringId: string
+                  uid: string
+                  sectionId: string
                 visibility: "public" | "private"
-                offeringId: string // allows self reference
-                classHash: string // allow self reference
-                uid: string // allows self reference
-                documentKey: string // firebase id of portal user document
-            /groups {key: groupId => FirebaseOfferingGroup}
+                documentKey: string
+            /groups {key: groupId => DBOfferingGroup}
               version: "1.0"
-              offeringId: string // allows self reference
-              classHash: string // allow self reference
-              groupId: string // allows self reference
-              /users {key: uid => FirebaseOfferingGroupUser}
+              /self
+                classHash: string
+                offeringId: string
+                groupId: string
+              /users {key: uid => DBOfferingGroupUser}
                 version: "1.0"
-                offeringId: string // allows self reference
-                classHash: string // allow self reference
-                groupId: string // allows self reference
-                uid: string // allows self reference
+                /self
+                  classHash: string
+                  offeringId: string
+                  groupId: string
+                  uid: string
                 connected: boolean // MAYBE
                 connectedTimestamp: number|object
                 disconnectedTimestamp: number|object
 
 NOTES:
 
-  1. escapedPortalDomain is the Firebase escaped hostname of the domain in the portal JWT. TODO: get escapedPortalDomain is Firebase JWT claims.
+  1. escapedPortalDomain is the DB escaped hostname of the domain in the portal JWT. TODO: get escapedPortalDomain is DB JWT claims.
   2. uid is a numeric user id from the portal JWT
   3. classHash is a string from the portal JWT
+  4. documentKey is generated by DB pushes to the documents reference
 ```
 
-## Interfaces and Types
+## Interfaces
 
-```
-interface FirebasePortalUser {
-  version: "1.0"
-  latestGroupId: string
-  documentMetadata: FirebaseDocumentMetadataMap
-  documents: FirebaseDocumentMap
-}
-
-interface FirebaseDocumentMetadataMap {
-  [key: string]: FirebaseDocumentMetadata // key is document id generated by push to FirebaseDocumentMap
-}
-
-interface FirebaseDocumentMap {
-  [key: string]: FirebaseDocument // key is generated by push
-}
-
-interface FirebaseDocumentMetadata {
-  version: "1.0"
-  documentKey: string
-  creatorUID: string
-  createdAt: number|object
-  // TDB: serialized document model metadata (back pointers too)
-}
-
-interface FirebaseDocument {
-  version: "1.0"
-  documentKey: string
-  // TDB: serialized document model contents
-}
-
-interface FirebaseClass {
-  version: "1.0"
-  classHash: string // allow self reference
-  offerings: FirebaseOfferingMap
-}
-
-interface FirebaseOfferingMap {
-  [key: string]: FirebaseOffering  // key is offeringId
-}
-
-interface FirebaseOffering {
-  version: "1.0"
-  offeringId: string // allows self reference
-  classHash: string // allow self reference
-  users: FirebaseOfferingUserMap
-  groups: FirebaseOfferingGroupMap
-}
-
-interface FirebaseOfferingUserMap {
-  [key: string]: FirebaseOfferingUser // key is uid
-}
-
-interface FirebaseOfferingGroupMap {
-  [key: string]: FirebaseOfferingGroup // key is groupId
-}
-
-interface FirebaseOfferingUser {
-  version: "1.0"
-  offeringId: string // allows self reference
-  classHash: string // allow self reference
-  uid: string // allows self reference
-  sectionDocuments: FirebaseOfferingUserSectionDocumentMap
-  // TDB: store ui information here?
-}
-
-interface FirebaseOfferingUserSectionDocumentMap {
-  [key: string]: FirebaseOfferingUserSectionDocument // key is sectionId
-}
-
-interface FirebaseOfferingUserSectionDocument {
-  version: "1.0"
-  visibility: "public" | "private"
-  offeringId: string // allows self reference
-  classHash: string // allow self reference
-  uid: string // allows self reference
-  documentKey: string // firebase id of portal user document
-}
-
-interface FirebaseOfferingGroup {
-  version: "1.0"
-  offeringId: string // allows self reference
-  classHash: string // allow self reference
-  groupId: string // allows self reference
-  users: FirebaseOfferingGroupUserMap
-}
-
-interface FirebaseOfferingGroupUserMap {
-  [key: string]: FirebaseOfferingGroupUser // key is uid
-}
-
-interface FirebaseOfferingGroupUser {
-  version: "1.0"
-  offeringId: string // allows self reference
-  classHash: string // allow self reference
-  groupId: string // allows self reference
-  uid: string // allows self reference
-  connected: boolean // MAYBE: check if timestamp is overwritten locally
-  connectedTimestamp: number|object
-  disconnectedTimestamp: number|object
-}
-
-```
-
-
-
-
+All interfaces can be found in `lib/db-types.ts`.
