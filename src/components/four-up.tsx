@@ -60,17 +60,17 @@ export class FourUpComponent extends React.Component<{}, {}> {
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div

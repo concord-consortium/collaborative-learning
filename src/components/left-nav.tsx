@@ -4,6 +4,7 @@ import * as React from "react";
 import "./left-nav.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
+import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "./base";
 import { SectionModelType } from "../models/curriculum/section";
 
@@ -35,7 +36,7 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
           })}
         </TabSetComponent>
         <div className="expanded-area">
-          <div className="tbd">{activeSection ? activeSection.title : ""}</div>
+          <LeftNavPanelComponent section={activeSection} />
         </div>
       </div>
     );
