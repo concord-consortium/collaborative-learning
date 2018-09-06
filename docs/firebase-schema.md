@@ -12,12 +12,57 @@ The core design elements of the schema are:
 
 ```
 /(dev|test|demo|authed)
-  /portals
-    /<escapedPortalDomain>
-      /users
-        {key: uid => FirebasePortalUser}
-      /classes
-        {key: classHash => FirebaseClass}
+  [<firebaseUserId> if dev or test]
+    /portals
+      /<escapedPortalDomain>
+        /users {key: uid => FirebasePortalUser}
+          version: "1.0"
+          latestGroupId: string
+          /documentMetadata {key: documentKey => FirebaseDocumentMetadata}
+            version: "1.0"
+            documentKey: string
+            creatorUID: string
+            createdAt: number|object
+            // TDB: serialized document model metadata (back pointers too)
+          /documents: {key: documentKey => FirebaseDocument}
+            version: "1.0"
+            documentKey: string
+            creatorUID: string
+            // TDB: serialized document model contents
+        /classes {key: classHash => FirebaseClass}
+          version: "1.0"
+          classHash: string // allow self reference
+          /offerings: {key: offeringId => FirebaseOffering}
+            version: "1.0"
+            offeringId: string // allows self reference
+            classHash: string // allow self reference
+            /users {key: uid => FirebaseOfferingUser}
+              version: "1.0"
+              offeringId: string // allows self reference
+              classHash: string // allow self reference
+              uid: string // allows self reference
+              // TDB: store ui information here?
+              /sectionDocuments {key: sectionId => FirebaseOfferingUserSectionDocument}
+                version: "1.0"
+                visibility: "public" | "private"
+                offeringId: string // allows self reference
+                classHash: string // allow self reference
+                uid: string // allows self reference
+                documentKey: string // firebase id of portal user document
+            /groups {key: groupId => FirebaseOfferingGroup}
+              version: "1.0"
+              offeringId: string // allows self reference
+              classHash: string // allow self reference
+              groupId: string // allows self reference
+              /users {key: uid => FirebaseOfferingGroupUser}
+                version: "1.0"
+                offeringId: string // allows self reference
+                classHash: string // allow self reference
+                groupId: string // allows self reference
+                uid: string // allows self reference
+                connected: boolean // MAYBE
+                connectedTimestamp: number|object
+                disconnectedTimestamp: number|object
 
 NOTES:
 
@@ -30,7 +75,8 @@ NOTES:
 
 ```
 interface FirebasePortalUser {
-  version: "1.0.0"
+  version: "1.0"
+  latestGroupId: string
   documentMetadata: FirebaseDocumentMetadataMap
   documents: FirebaseDocumentMap
 }
@@ -44,19 +90,21 @@ interface FirebaseDocumentMap {
 }
 
 interface FirebaseDocumentMetadata {
-  version: "1.0.0"
+  version: "1.0"
+  documentKey: string
   creatorUID: string
   createdAt: number|object
-  // TDB: serialized document model metadata
+  // TDB: serialized document model metadata (back pointers too)
 }
 
 interface FirebaseDocument {
-  version: "1.0.0"
+  version: "1.0"
+  documentKey: string
   // TDB: serialized document model contents
 }
 
 interface FirebaseClass {
-  version: "1.0.0"
+  version: "1.0"
   classHash: string // allow self reference
   offerings: FirebaseOfferingMap
 }
@@ -66,8 +114,9 @@ interface FirebaseOfferingMap {
 }
 
 interface FirebaseOffering {
-  version: "1.0.0"
+  version: "1.0"
   offeringId: string // allows self reference
+  classHash: string // allow self reference
   users: FirebaseOfferingUserMap
   groups: FirebaseOfferingGroupMap
 }
@@ -81,24 +130,31 @@ interface FirebaseOfferingGroupMap {
 }
 
 interface FirebaseOfferingUser {
-  version: "1.0.0"
+  version: "1.0"
+  offeringId: string // allows self reference
+  classHash: string // allow self reference
   uid: string // allows self reference
   sectionDocuments: FirebaseOfferingUserSectionDocumentMap
   // TDB: store ui information here?
 }
 
 interface FirebaseOfferingUserSectionDocumentMap {
-  [key: string]: FirebaseOfferingUserSectionDocument // key is section index???
+  [key: string]: FirebaseOfferingUserSectionDocument // key is sectionId
 }
 
 interface FirebaseOfferingUserSectionDocument {
-  version: "1.0.0"
-  status: "visible" | "private"
-  documentId: string // firebase id of portal user document
+  version: "1.0"
+  visibility: "public" | "private"
+  offeringId: string // allows self reference
+  classHash: string // allow self reference
+  uid: string // allows self reference
+  documentKey: string // firebase id of portal user document
 }
 
 interface FirebaseOfferingGroup {
-  version: "1.0.0"
+  version: "1.0"
+  offeringId: string // allows self reference
+  classHash: string // allow self reference
   groupId: string // allows self reference
   users: FirebaseOfferingGroupUserMap
 }
@@ -108,22 +164,14 @@ interface FirebaseOfferingGroupUserMap {
 }
 
 interface FirebaseOfferingGroupUser {
-  version: "1.0.0"
+  version: "1.0"
+  offeringId: string // allows self reference
+  classHash: string // allow self reference
+  groupId: string // allows self reference
   uid: string // allows self reference
-  status: FirebaseOfferingGroupUserStatus
-}
-
-type FirebaseOfferingGroupUserStatus = FirebaseOfferingGroupUserConnected | FirebaseOfferingGroupUserDisconnected
-
-export interface FirebaseOfferingGroupUserConnected {
-  version: "1.0.0"
-  connected: true
-  connectedAt: number|object
-}
-export interface FirebaseOfferingGroupUserDisconnected {
-  version: "1.0.0"
-  connected: false
-  disconnectedAt: number|object
+  connected: boolean // MAYBE: check if timestamp is overwritten locally
+  connectedTimestamp: number|object
+  disconnectedTimestamp: number|object
 }
 
 ```
