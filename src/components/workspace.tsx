@@ -35,7 +35,8 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTitleBar() {
-    const { activeSection } = this.stores.ui;
+    const { ui, problem } = this.stores;
+    const activeSection = problem.getSectionByIndex(ui.activeSectionIndex);
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? activeSection.title : ""}</div>

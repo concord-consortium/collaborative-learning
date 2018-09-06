@@ -34,7 +34,6 @@
           "subtitle": "An Introduction to Similarity",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction",
               "content": {
                 "content": [
@@ -45,7 +44,6 @@
               }
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "content": {
                 "content": [
@@ -54,7 +52,6 @@
               }
             },
             {
-              "id": "whatIf",
               "type": "whatIf",
               "content": {
                 "content": [
@@ -64,7 +61,6 @@
               }
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow",
               "content": {
                 "content": [
@@ -73,7 +69,6 @@
               }
             },
             {
-              "id": "didYouKnow",
               "type": "didYouKnow",
               "content": {
                 "content": [
@@ -90,7 +85,6 @@
           "subtitle": "Comparing Similar Figures",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction",
               "content": {
                 "content": [
@@ -100,7 +94,6 @@
               }
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "content": {
                 "content": [
@@ -115,7 +108,6 @@
               ]
             },
             {
-              "id": "whatIf",
               "type": "whatIf",
               "content": {
                 "content": [
@@ -125,7 +117,6 @@
               }
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow",
               "content": {
                 "content": [
@@ -146,11 +137,9 @@
           "subtitle": "Corresponding Sides and Angles",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction"
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "supports": [
                 "Would corresponding side lengths help to decide the percent?",
@@ -158,11 +147,9 @@
               ]
             },
             {
-              "id": "whatIf",
               "type": "whatIf"
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow"
             }
           ]
@@ -199,7 +186,6 @@
           "subtitle": "Making Similar Figures",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction",
               "content": {
                 "content": [
@@ -209,7 +195,6 @@
               }
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "content": {
                 "content": [
@@ -231,7 +216,6 @@
               ]
             },
             {
-              "id": "whatIf",
               "type": "whatIf",
               "content": {
                 "content": [
@@ -243,7 +227,6 @@
               }
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow",
               "content": {
                 "content": [
@@ -261,7 +244,6 @@
           "subtitle": "Changing a Figure's Size and Location",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction",
               "content": {
                 "content": [
@@ -270,7 +252,6 @@
               }
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "content": {
                 "content": [
@@ -284,7 +265,6 @@
               ]
             },
             {
-              "id": "whatIf",
               "type": "whatIf",
               "content": {
                 "content": [
@@ -304,7 +284,6 @@
               ]
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow",
               "content": {
                 "content": [
@@ -327,7 +306,6 @@
           "subtitle": "Scale Factors",
           "sections": [
             {
-              "id": "introduction",
               "type": "introduction",
               "content": {
                 "content": [
@@ -344,7 +322,6 @@
               }
             },
             {
-              "id": "initialChallenge",
               "type": "initialChallenge",
               "content": {
                 "content": [
@@ -360,7 +337,6 @@
               ]
             },
             {
-              "id": "whatIf",
               "type": "whatIf",
               "content": {
                 "content": [
@@ -372,7 +348,6 @@
               }
             },
             {
-              "id": "nowWhatDoYouKnow",
               "type": "nowWhatDoYouKnow",
               "content": {
                 "content": [

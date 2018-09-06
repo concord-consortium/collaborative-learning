@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { SectionModelType, SectionModel } from "./section";
+import { SectionModelType, SectionModel } from "./curriculum/section";
 
 type ToggleElement = "learningLogExpanded" | "leftNavExpanded" | "myWorkExpanded";
 
@@ -9,7 +9,7 @@ export const UIModel = types
     leftNavExpanded: false,
     myWorkExpanded: false,
     error: types.maybeNull(types.string),
-    activeSection: types.maybeNull(types.reference(SectionModel)),
+    activeSectionIndex: 0,
     activeLearningLogTab: "LL"
   })
   .views((self) => ({
@@ -60,8 +60,8 @@ export const UIModel = types
       setError(error: string|null) {
         self.error = error;
       },
-      setActiveSection(activeSection: SectionModelType|null) {
-        self.activeSection = activeSection;
+      setActiveSectionIndex(activeSectionIndex: number) {
+        self.activeSectionIndex = activeSectionIndex;
       },
       setActiveLearningLogTab(tab: string) {
         self.activeLearningLogTab = tab;

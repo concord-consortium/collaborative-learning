@@ -5,7 +5,7 @@ import "./left-nav.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
-import { SectionModelType } from "../models/section";
+import { SectionModelType } from "../models/curriculum/section";
 
 interface IProps extends IBaseProps {}
 
@@ -15,18 +15,19 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { problem, ui } = this.stores;
-    const { activeSection } = ui;
-    const className = `left-nav${ui.leftNavExpanded ? " expanded" : ""}`;
+    const { activeSectionIndex } = ui;
     const { sections } = problem;
+    const activeSection = problem.getSectionByIndex(activeSectionIndex);
+    const className = `left-nav${ui.leftNavExpanded ? " expanded" : ""}`;
     return (
       <div className={className}>
         <TabSetComponent>
-          {sections.map((section) => {
+          {sections.map((section, sectionIndex) => {
             return (
               <TabComponent
                 key={section.abbrev}
-                active={activeSection === section}
-                onClick={this.handleTabClick(section)}
+                active={activeSectionIndex === sectionIndex}
+                onClick={this.handleTabClick(sectionIndex)}
               >
                 <span title={section.title}>{section.abbrev}</span>
               </TabComponent>
@@ -40,11 +41,11 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleTabClick = (section: SectionModelType) => {
+  private handleTabClick = (sectionIndex: number) => {
     const { ui } = this.stores;
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      if (ui.activeSection !== section) {
-        ui.setActiveSection(section);
+      if (ui.activeSectionIndex !== sectionIndex) {
+        ui.setActiveSectionIndex(sectionIndex);
         this.stores.ui.toggleLeftNav(true);
       }
       else {
