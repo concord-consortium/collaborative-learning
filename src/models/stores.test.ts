@@ -1,5 +1,5 @@
 import { createStores, AppMode } from "./stores";
-import { ProblemModel } from "./problem";
+import { ProblemModel } from "./curriculum/problem";
 import { UserModel } from "./user";
 import { DB } from "../lib/db";
 
