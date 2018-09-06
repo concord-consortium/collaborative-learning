@@ -16,18 +16,19 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { problem, ui } = this.stores;
-    const { activeSectionIndex } = ui;
+    const { activeSectionIndex, leftNavExpanded } = ui;
     const { sections } = problem;
     const activeSection = problem.getSectionByIndex(activeSectionIndex);
-    const className = `left-nav${ui.leftNavExpanded ? " expanded" : ""}`;
+    const className = `left-nav${leftNavExpanded ? " expanded" : ""}`;
     return (
       <div className={className}>
         <TabSetComponent>
           {sections.map((section, sectionIndex) => {
             return (
               <TabComponent
+                id={this.getTabId(sectionIndex)}
                 key={section.abbrev}
-                active={activeSectionIndex === sectionIndex}
+                active={leftNavExpanded && (activeSectionIndex === sectionIndex)}
                 onClick={this.handleTabClick(sectionIndex)}
               >
                 <span title={section.title}>{section.abbrev}</span>
@@ -35,7 +36,11 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
             );
           })}
         </TabSetComponent>
-        <div className="expanded-area">
+        <div
+          className="expanded-area"
+          aria-labelledby={this.getTabId(activeSectionIndex)}
+          aria-hidden={ui.leftNavExpanded}
+        >
           <LeftNavPanelComponent section={activeSection} />
         </div>
       </div>
@@ -53,5 +58,9 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
         this.stores.ui.toggleLeftNav();
       }
     };
+  }
+
+  private getTabId(sectionIndex: number) {
+    return `leftNavTab${sectionIndex}`;
   }
 }

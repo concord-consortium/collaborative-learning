@@ -8,7 +8,7 @@ export class TabSetComponent extends React.Component<{}, {}> {
 
   public render() {
     return (
-      <div className="tabs">
+      <div className="tabs" role="tablist">
         {this.props.children}
       </div>
     );

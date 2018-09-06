@@ -4,6 +4,7 @@ import * as React from "react";
 import "./tab.sass";
 
 interface IProps {
+  id?: string;
   active?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -12,10 +13,10 @@ interface IProps {
 export class TabComponent extends React.Component<IProps, {}> {
 
   public render() {
-    const {active} = this.props;
+    const {id, active} = this.props;
     const className = `tab${active ? " active" : ""}`;
     return (
-      <div className={className} onClick={this.handleClick}>
+      <div id={id} className={className} onClick={this.handleClick} role="tab" aria-selected={active}>
         {this.props.children}
       </div>
     );

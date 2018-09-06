@@ -23,6 +23,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {tabs.map((tab) => {
             return (
               <TabComponent
+                id={this.getTabId(tab)}
                 key={tab}
                 active={learningLogExpanded && (activeLearningLogTab === tab)}
                 onClick={this.handleTabClick(tab)}
@@ -32,7 +33,11 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
             );
           })}
         </TabSetComponent>
-        <div className="expanded-area">
+        <div
+          className="expanded-area"
+          aria-labelledby={this.getTabId(activeLearningLogTab)}
+          aria-hidden={!learningLogExpanded}
+        >
           <div className="tbd">{activeLearningLogTab}</div>
         </div>
       </div>
@@ -50,5 +55,9 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
         this.stores.ui.toggleLearningLog();
       }
     };
+  }
+
+  private getTabId(tab: string) {
+    return `learningLogTab${tab}`;
   }
 }
