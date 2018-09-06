@@ -1,6 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
-import { SectionType } from "./section";
+import { SectionType, SectionModelType } from "./section";
 import { omitUndefined } from "../../utilities/test-utils";
 
 describe("problem model", () => {
@@ -52,4 +52,30 @@ describe("problem model", () => {
     expect(problem.fullTitle).toBe("test: sub");
   });
 
+  it("can get sections by index", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "test",
+      subtitle: "sub",
+      sections: [
+        {
+          type: SectionType.introduction
+        },
+        {
+          type: SectionType.initialChallenge
+        }
+      ]
+    });
+    const firstSection = problem.getSectionByIndex(0) as SectionModelType;
+    expect(firstSection.type).toBe(SectionType.introduction);
+    const lastSection = problem.getSectionByIndex(1) as SectionModelType;
+    expect(lastSection.type).toBe(SectionType.initialChallenge);
+
+    // < 0 returns first section
+    const underflowSection = problem.getSectionByIndex(-1) as SectionModelType;
+    expect(underflowSection.type).toBe(SectionType.introduction);
+    // > length return last section
+    const overflowSection = problem.getSectionByIndex(10) as SectionModelType;
+    expect(overflowSection.type).toBe(SectionType.initialChallenge);
+  });
 });

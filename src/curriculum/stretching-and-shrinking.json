@@ -136,7 +136,9 @@
           "title": "Scaling Up and Down",
           "subtitle": "Corresponding Sides and Angles",
           "sections": [
-            { "type": "introduction" },
+            {
+              "type": "introduction"
+            },
             {
               "type": "initialChallenge",
               "supports": [
@@ -144,8 +146,12 @@
                 "What about corresponding angles?"
               ]
             },
-            { "type": "whatIf" },
-            { "type": "nowWhatDoYouKnow" }
+            {
+              "type": "whatIf"
+            },
+            {
+              "type": "nowWhatDoYouKnow"
+            }
           ]
         }
       ],

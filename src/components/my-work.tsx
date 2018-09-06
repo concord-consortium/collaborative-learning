@@ -18,10 +18,20 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
     return (
       <div className={className}>
         <TabSetComponent>
-          <TabComponent onClick={this.handleClick}>My Work</TabComponent>
+          <TabComponent
+            id="myWorkTab"
+            active={myWorkExpanded}
+            onClick={this.handleClick}
+          >
+            My Work
+          </TabComponent>
         </TabSetComponent>
-        <div className="expanded-area">
-        <div className="tbd">TBD</div>
+        <div
+          className="expanded-area"
+          aria-labelledby="myWorkTab"
+          aria-hidden={!myWorkExpanded}
+        >
+          <div className="tbd">TBD</div>
         </div>
       </div>
     );

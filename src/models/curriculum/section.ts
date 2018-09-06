@@ -10,6 +10,7 @@ export enum SectionType {
   didYouKnow = "didYouKnow"
 }
 
+// TODO: figure out way to add SectionType as the index type to this const
 export const sectionInfo = {
   [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
   [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },

@@ -14,21 +14,50 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const className = `learning-log${this.stores.ui.learningLogExpanded ? " expanded" : ""}`;
+    const tabs = ["LL", "M", "C"];
+    const {activeLearningLogTab, learningLogExpanded} = this.stores.ui;
+
     return (
-      <div className={className} onClick={this.handleClick}>
+      <div className={className}>
         <TabSetComponent>
-          <TabComponent>LL</TabComponent>
-          <TabComponent>M</TabComponent>
-          <TabComponent>C</TabComponent>
+          {tabs.map((tab) => {
+            return (
+              <TabComponent
+                id={this.getTabId(tab)}
+                key={tab}
+                active={learningLogExpanded && (activeLearningLogTab === tab)}
+                onClick={this.handleTabClick(tab)}
+              >
+                {tab}
+              </TabComponent>
+            );
+          })}
         </TabSetComponent>
-        <div className="expanded-area">
-          <div className="tbd">TBD</div>
+        <div
+          className="expanded-area"
+          aria-labelledby={this.getTabId(activeLearningLogTab)}
+          aria-hidden={!learningLogExpanded}
+        >
+          <div className="tbd">{activeLearningLogTab}</div>
         </div>
       </div>
     );
   }
 
-  private handleClick = () => {
-    this.stores.ui.toggleLearningLog();
+  private handleTabClick = (tab: string) => {
+    const { ui } = this.stores;
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+      if (ui.activeLearningLogTab !== tab) {
+        ui.setActiveLearningLogTab(tab);
+        this.stores.ui.toggleLearningLog(true);
+      }
+      else {
+        this.stores.ui.toggleLearningLog();
+      }
+    };
+  }
+
+  private getTabId(tab: string) {
+    return `learningLogTab${tab}`;
   }
 }
