@@ -118,7 +118,6 @@ export interface DBOfferingGroupUser {
     groupId: string;
     uid: string;
   };
-  connected: boolean; // MAYBE: check if timestamp is overwritten locally
   connectedTimestamp: number;
   disconnectedTimestamp?: number;
 }

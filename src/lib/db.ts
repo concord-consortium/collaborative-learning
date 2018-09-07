@@ -34,8 +34,8 @@ export class DB {
   private stores: IStores;
   private latestGroupIdRef: firebase.database.Reference | null = null;
   private groupsRef: firebase.database.Reference | null = null;
-  private groupDisconnectRef: firebase.database.Reference | null = null;
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
+  private connectedRef: firebase.database.Reference | null = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -124,22 +124,15 @@ export class DB {
               groupId,
               uid: user.id
             },
-            connected: true,
             connectedTimestamp: firebase.database.ServerValue.TIMESTAMP
           } as DBOfferingGroupUser);
         })
         .then(() => {
-          // add disconnect handler
-          this.groupDisconnectRef = userRef.child("disconnectedTimestamp");
-          if (this.groupOnDisconnect) {
-            this.groupOnDisconnect.cancel();
-          }
-          this.groupOnDisconnect = this.groupDisconnectRef.onDisconnect();
-          this.groupOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+          this.setConnectionHandlers(userRef);
         })
         .then(() => {
           // remember the last group joined
-          this.getLatestGroupIdRef().set(groupId);
+          return this.getLatestGroupIdRef().set(groupId);
         })
         .then(resolve)
         .catch(reject);
@@ -258,7 +251,7 @@ export class DB {
       const latestGroupIdRef = this.latestGroupIdRef = this.getLatestGroupIdRef();
       // use once() so we are ensured that latestGroupId is set before we resolve
       latestGroupIdRef.once("value", (snapshot) => {
-        this.stores.user.setLatestGroupId(snapshot.val() || undefined);
+        this.handleLatestGroupIdRef(snapshot);
         latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
       })
       .then(resolve)
@@ -291,8 +284,14 @@ export class DB {
         .then((snapshot) => {
           this.handleGroupsRef(snapshot);
 
-          // if we are not currently in a group try to join the latest group
-          if (!groups.groupForUser(user.id) && user.latestGroupId) {
+          const group = groups.groupForUser(user.id);
+          if (group) {
+            // update our connection time so we report as connected/disconnected
+            const userRef = this.ref(this.getGroupUserPath(user, group.id));
+            this.setConnectionHandlers(userRef);
+          }
+          else if (user.latestGroupId) {
+            // if we are not currently in a group try to join the latest group
             return this.joinGroup(user.latestGroupId);
           }
         })
@@ -326,7 +325,7 @@ export class DB {
       if (userKeys.length > 4) {
         // sort the users by connected timestamp and find the newest users to kick out
         const users = userKeys.map((uid) => groups[groupId].users[uid]);
-        users.sort((a, b) => a.connectedTimestamp - a.connectedTimestamp);
+        users.sort((a, b) => a.connectedTimestamp - b.connectedTimestamp);
         users.splice(0, 4);
         users.forEach((userToRemove) => {
           const userPath = this.getFullPath(this.getGroupUserPath(user, groupId, userToRemove.self.uid));
@@ -335,12 +334,11 @@ export class DB {
       }
     });
 
-    const numUpdates = Object.keys(overSubsribedUserUpdates).length;
-
     // if there is a problem with the groups fix the problem in the next timeslice
+    const numUpdates = Object.keys(overSubsribedUserUpdates).length;
     if ((numUpdates > 0) || (myGroupIds.length > 1)) {
       setTimeout(() => {
-        if ( numUpdates > 0) {
+        if (numUpdates > 0) {
           firebase.database().ref().update(overSubsribedUserUpdates);
         }
         if (myGroupIds.length > 1) {
@@ -352,5 +350,26 @@ export class DB {
       // otherwise set the groups
       this.stores.groups.updateFromDB(user.id, groups);
     }
+  }
+
+  private setConnectionHandlers(userRef: firebase.database.Reference) {
+    if (this.connectedRef) {
+      this.connectedRef.off("value");
+    }
+    else if (!this.connectedRef) {
+      this.connectedRef = firebase.database().ref(".info/connected");
+    }
+    this.connectedRef.on("value", (snapshot) => {
+      if (snapshot && snapshot.val()) {
+        userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+      }
+    });
+
+    if (this.groupOnDisconnect) {
+      this.groupOnDisconnect.cancel();
+    }
+    const groupDisconnectedRef = userRef.child("disconnectedTimestamp");
+    this.groupOnDisconnect = groupDisconnectedRef.onDisconnect();
+    this.groupOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
   }
 }

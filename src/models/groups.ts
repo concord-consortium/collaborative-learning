@@ -5,9 +5,16 @@ export const GroupUserModel = types
   .model("GroupUser", {
     id: types.string,
     initials: types.string,
-    connected: false,
-    connectedTimestamp: types.maybe(types.number),
+    connectedTimestamp: types.number,
     disconnectedTimestamp: types.maybe(types.number),
+  })
+  .views((self) => {
+    return {
+      get connected() {
+        const {connectedTimestamp, disconnectedTimestamp} = self;
+        return !disconnectedTimestamp || (connectedTimestamp > disconnectedTimestamp);
+      }
+    };
   });
 
 export const GroupModel = types
@@ -26,11 +33,10 @@ export const GroupsModel = types
         const allGroups = Object.keys(groups).map((groupId) => {
           const group = groups[groupId];
           const users = Object.keys(group.users || {}).map((groupUserId) => {
-            const {connected, connectedTimestamp, disconnectedTimestamp} = group.users[groupUserId];
+            const {connectedTimestamp, disconnectedTimestamp} = group.users[groupUserId];
             return GroupUserModel.create({
               id: groupUserId,
               initials: "??",  // TODO: pass in class info so initials can be generated
-              connected,
               connectedTimestamp,
               disconnectedTimestamp
             });

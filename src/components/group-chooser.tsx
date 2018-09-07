@@ -73,7 +73,6 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
 
   private selectGroup = (groupId: string) => {
     this.stores.db.joinGroup(groupId);
-    // this.stores.user.setGroup(groupId);
   }
 
   private handleChooseExistingGroup = (groupId: string) => {

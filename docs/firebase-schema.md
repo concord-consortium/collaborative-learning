@@ -71,9 +71,8 @@ The core design elements of the schema are:
                   offeringId: string
                   groupId: string
                   uid: string
-                connected: boolean // MAYBE
-                connectedTimestamp: number|object
-                disconnectedTimestamp: number|object
+                connectedTimestamp: number
+                disconnectedTimestamp: number
 
 NOTES:
 
