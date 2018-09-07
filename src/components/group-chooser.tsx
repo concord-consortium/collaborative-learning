@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
+import { GroupUsersMap } from "../lib/db";
 
 import "./group-chooser.sass";
 
@@ -12,14 +13,15 @@ interface IProps extends IBaseProps {}
 @observer
 export class GroupChooserComponent extends BaseComponent<IProps, {}> {
   public render() {
-    const user = this.stores.user;
+    const {db, user} = this.stores;
+    const {groups} = db;
     return (
       <div className="join">
         <div className="join-title">Join Group</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
-          {this.renderChooseExistingGroup()}
-          {this.renderChooseNewGroup([])}
+          {Object.keys(groups).length > 0 && this.renderChooseExistingGroup(groups)}
+          {this.renderChooseNewGroup(groups)}
         </div>
       </div>
     );
@@ -37,7 +39,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
     }
   }
 
-  private renderChooseNewGroup(groupKeys: string[]) {
+  private renderChooseNewGroup(groups: GroupUsersMap) {
+    const groupKeys = Object.keys(groups);
     const items: JSX.Element[] = [];
     const haveExistingGroups = groupKeys.length > 0;
     for (let i = 1; i <= MAX_GROUPS; i++) {
@@ -58,21 +61,18 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
 
   private chooseExistingGroup = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    const title = (e.target as HTMLElement).firstChild;
-    this.selectGroup(title && title.textContent ? title.textContent : "");
+    const title = (e.currentTarget as HTMLElement).firstChild;
+    // Only store the group number, rather than the group name
+    this.selectGroup(title && title.textContent ? title.textContent.split(" ")[1] : "");
   }
 
-  private renderChooseExistingGroup() {
-    const groups: {[key: string]: string[]} = {
-      1: ["EK", "AB"],
-      2: ["CD"]
-    };
+  private renderChooseExistingGroup(groups: GroupUsersMap) {
     const groupElements: JSX.Element[] = [];
     Object.keys(groups).forEach((key) => {
       const users = groups[key];
       groupElements.push(
         <div className="group" key={key} onClick={this.chooseExistingGroup}>
-          <div className="group-title">{key}</div>
+          <div className="group-title">{`Group ${key}`}</div>
           {
             users.map((initials, i) => (
               <span key={i} className="user">

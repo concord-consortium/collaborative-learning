@@ -32,6 +32,12 @@ export const UserModel = types
       self.group = null;
       self.id = user.id;
     },
+  }))
+  .views((self) => ({
+    get initials() {
+      const name = self.name.split(" ");
+      return (name[0][0] + name[name.length - 1][0]).toUpperCase();
+    }
   }));
 
 export type UserModelType = typeof UserModel.Type;

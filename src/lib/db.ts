@@ -15,13 +15,24 @@ export interface IDBNonAuthConnectOptions {
   appMode: "dev" | "test";
   stores: IStores;
 }
+export interface UserGroupMap {
+  [key: string]: {
+    group: number,
+    initials: string
+  };
+}
+export interface GroupUsersMap {
+  [key: string]: string[];
+}
 
 export class DB {
   @observable public isListening = false;
+  @observable public groups: GroupUsersMap = {};
   private appMode: AppMode;
   private firebaseUser: firebase.User | null = null;
   private stores: IStores;
   private groupRef: firebase.database.Reference | null = null;
+  private usersRef: firebase.database.Reference | null = null;
   private groupSnapshotDisposer: IDisposer | null = null;
 
   public get isConnected() {
@@ -96,13 +107,21 @@ export class DB {
     return `/${appMode}/${userSubFolder}`;
   }
 
+  public getUsersRef(): firebase.database.Reference {
+    return this.ref("users");
+  }
+
+  public getUserRef(user: UserModelType): firebase.database.Reference {
+    return this.ref(`users/${user.id}`);
+  }
+
   public getUserGroupRef(user: UserModelType): firebase.database.Reference {
     return this.ref(`users/${user.id}/group`);
   }
 
   private startListeners() {
     return new Promise<void>((resolve, reject) => {
-      this.startGroupListener()
+      this.startGroupListeners()
         .then(() => {
           this.isListening = true;
           resolve();
@@ -112,11 +131,21 @@ export class DB {
   }
 
   private stopListeners() {
-    this.stopGroupListener();
+    this.stopGroupListeners();
     this.isListening = false;
   }
 
-  private startGroupListener() {
+  private startGroupListeners() {
+    return this.startMyGroupListener()
+      .then(this.startGroupsListener);
+  }
+
+  private startGroupsListener = () => {
+    const usersRef = this.usersRef = this.getUsersRef();
+    usersRef.on("value", this.handleUsersRef);
+  }
+
+  private startMyGroupListener() {
     return new Promise<void>((resolve, reject) => {
       const {user, ui} = this.stores;
       const groupRef = this.groupRef = this.getUserGroupRef(user);
@@ -128,11 +157,12 @@ export class DB {
           groupRef.on("value", this.handleGroupRef);
 
           this.groupSnapshotDisposer = onSnapshot(user, (newUser) => {
-            if (this.groupRef) {
-              this.groupRef.set(newUser.group).catch((error) => {
-                ui.setError(error);
-              });
-            }
+            this.getUserRef(user).set({
+              group: newUser.group,
+              initials: user.initials
+            }).catch((error) => {
+              ui.setError(error);
+            });
           });
 
           resolve();
@@ -141,7 +171,11 @@ export class DB {
     });
   }
 
-  private stopGroupListener() {
+  private stopGroupListeners() {
+    if (this.usersRef) {
+      this.usersRef.off("value", this.handleUsersRef);
+      this.usersRef = null;
+    }
     if (this.groupRef) {
       this.groupRef.off("value", this.handleGroupRef);
       this.groupRef = null;
@@ -154,5 +188,22 @@ export class DB {
 
   private handleGroupRef = (snapshot: firebase.database.DataSnapshot) => {
     this.stores.user.setGroup(snapshot.val());
+  }
+
+  private handleUsersRef = (snapshot: firebase.database.DataSnapshot) => {
+    const users = snapshot.val() as UserGroupMap;
+    const groups: GroupUsersMap = {};
+    if (users) {
+      Object.keys(users).forEach((userId) => {
+        const group = users[userId].group;
+        if (group) {
+          if (groups[group] == null) {
+            groups[group] = [];
+          }
+          groups[group].push(users[userId].initials);
+        }
+      });
+    }
+    this.groups = groups;
   }
 }
