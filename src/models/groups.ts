@@ -29,7 +29,7 @@ export const GroupsModel = types
             const {connected, connectedTimestamp, disconnectedTimestamp} = group.users[groupUserId];
             return GroupUserModel.create({
               id: groupUserId,
-              initials: "TD",
+              initials: "??",  // TODO: pass in class info so initials can be generated
               connected,
               connectedTimestamp,
               disconnectedTimestamp

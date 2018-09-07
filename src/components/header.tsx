@@ -3,6 +3,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./header.sass";
+import { GroupModelType, GroupUserModelType } from "../models/groups";
 
 interface IProps extends IBaseProps {}
 
@@ -23,14 +24,37 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
           </div>
         </div>
         <div className="group">
-          <div>
-            <div onClick={this.handleResetGroup} className="name">{`Group ${myGroup ? myGroup.id : "n/a"}`}</div>
-            <div className="members">Members TBD</div>
-          </div>
+          {myGroup ? this.renderGroup(myGroup) : null}
         </div>
         <div className="user">
           <div className="name">{user.name}</div>
         </div>
+      </div>
+    );
+  }
+
+  private renderGroup(group: GroupModelType) {
+    return (
+      <div>
+        <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
+        <div className="members">
+          {group.users.map((user) => this.renderGroupUser(user))}
+        </div>
+      </div>
+    );
+  }
+
+  private renderGroupUser(user: GroupUserModelType) {
+    const {connected} = user;
+    const className = `member ${user.connected ? "connected" : "disconnected"}`;
+    const title = user.connected ? `connected` : `disconnected`;
+    return (
+      <div
+        key={user.id}
+        className={className}
+        title={title}
+      >
+        {user.initials}
       </div>
     );
   }
