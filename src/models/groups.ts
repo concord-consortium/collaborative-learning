@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DBOfferingGroup, DBOfferingGroupMap } from "../lib/db-types";
+import { ClassModelType } from "./class";
 
 export const GroupUserModel = types
   .model("GroupUser", {
@@ -29,14 +30,15 @@ export const GroupsModel = types
   })
   .actions((self) => {
     return {
-      updateFromDB(uid: string, groups: DBOfferingGroupMap) {
+      updateFromDB(uid: string, groups: DBOfferingGroupMap, clazz: ClassModelType) {
         const allGroups = Object.keys(groups).map((groupId) => {
           const group = groups[groupId];
           const users = Object.keys(group.users || {}).map((groupUserId) => {
             const {connectedTimestamp, disconnectedTimestamp} = group.users[groupUserId];
+            const student = clazz.getStudentById(groupUserId);
             return GroupUserModel.create({
               id: groupUserId,
-              initials: "??",  // TODO: pass in class info so initials can be generated
+              initials: student ? student.initials : "??",
               connectedTimestamp,
               disconnectedTimestamp
             });

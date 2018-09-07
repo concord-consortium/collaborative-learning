@@ -348,7 +348,7 @@ export class DB {
     }
     else {
       // otherwise set the groups
-      this.stores.groups.updateFromDB(user.id, groups);
+      this.stores.groups.updateFromDB(user.id, groups, this.stores.class);
     }
   }
 

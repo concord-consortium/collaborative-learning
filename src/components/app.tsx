@@ -16,8 +16,11 @@ export const authAndConnect = (stores: IStores) => {
   const {appMode, user, db, ui} = stores;
 
   authenticate(appMode, urlParams.token, urlParams.domain)
-    .then((authenticatedUser) => {
+    .then(({authenticatedUser, classInfo}) => {
       user.setAuthenticatedUser(authenticatedUser);
+      if (classInfo) {
+        stores.class.updateFromPortal(classInfo);
+      }
 
       if (appMode === "authed")  {
         const { rawFirebaseJWT } = authenticatedUser;

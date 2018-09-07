@@ -21,6 +21,12 @@ export const DEV_USER: StudentUser = {
   offeringId: "1",
 };
 
+export const DEV_CLASS_INFO: ClassInfo = {
+  name: DEV_USER.className,
+  classHash: DEV_USER.classHash,
+  students: [DEV_USER]
+};
+
 export interface RawUser {
   id: string;
   first_name: string;
@@ -58,9 +64,7 @@ export interface RawClassInfo {
 }
 
 export interface ClassInfo {
-  uri: string;
   name: string;
-  state: string;
   classHash: string;
   students: StudentUser[];
 }
@@ -224,9 +228,7 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string, offerin
         const rawClassInfo: RawClassInfo = res.body;
 
         const classInfo: ClassInfo = {
-          uri: rawClassInfo.uri,
           name: rawClassInfo.name,
-          state: rawClassInfo.state,
           classHash: rawClassInfo.class_hash,
           students: rawClassInfo.students.map((rawStudent) => {
             const fullName = `${rawStudent.first_name} ${rawStudent.last_name}`;
@@ -252,9 +254,9 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string, offerin
 };
 
 export const authenticate = (appMode: AppMode, token?: string, domain?: string) => {
-  return new Promise<AuthenticatedUser>((resolve, reject) => {
+  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
     if (appMode !== "authed") {
-      resolve(DEV_USER);
+      resolve({authenticatedUser: DEV_USER, classInfo: DEV_CLASS_INFO});
     }
 
     if (!token) {
@@ -276,14 +278,14 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
 
               return getClassInfo(classInfoUrl, rawJPortalWT, portalJWT.offering_id)
                 .then((classInfo) => {
-                  const user = classInfo.students.find((student) => student.id === portalJWT.user_id);
-                  if (user) {
-                    user.portalJWT = portalJWT;
-                    user.rawPortalJWT = rawJPortalWT;
-                    user.firebaseJWT = firebaseJWT;
-                    user.rawFirebaseJWT = rawFirebaseJWT;
-                    user.id = firebaseJWT.uid;
-                    resolve(user);
+                  const authenticatedUser = classInfo.students.find((student) => student.id === portalJWT.user_id);
+                  if (authenticatedUser) {
+                    authenticatedUser.portalJWT = portalJWT;
+                    authenticatedUser.rawPortalJWT = rawJPortalWT;
+                    authenticatedUser.firebaseJWT = firebaseJWT;
+                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                    authenticatedUser.id = firebaseJWT.uid;
+                    resolve({authenticatedUser, classInfo});
                   }
                   else {
                     reject("Current user not found in class roster");

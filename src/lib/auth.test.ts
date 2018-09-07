@@ -1,4 +1,4 @@
-import { authenticate, _private, PortalJWT, RawUser, RawClassInfo, getAppMode } from "./auth";
+import { authenticate, _private, PortalJWT, RawUser, RawClassInfo, getAppMode, DEV_CLASS_INFO } from "./auth";
 import * as nock from "nock";
 
 const { FIREBASE_JWT_QUERY, FIREBASE_JWT_URL_SUFFIX, PORTAL_JWT_URL_SUFFIX } = _private;
@@ -120,14 +120,14 @@ describe("authentication", () => {
   });
 
   it("Authenticates as a developer", (done) => {
-    authenticate("dev").then((authenticatedUser) => {
+    authenticate("dev").then(({authenticatedUser}) => {
       expect(authenticatedUser).toEqual(_private.DEV_USER);
       done();
     });
   });
 
   it("Authenticates externally", (done) => {
-    authenticate("authed", GOOD_NONCE, PORTAL_DOMAIN).then((authenticatedUser) => {
+    authenticate("authed", GOOD_NONCE, PORTAL_DOMAIN).then(({authenticatedUser, classInfo}) => {
       expect(authenticatedUser).toEqual({
         type: "student",
         id: PORTAL_JWT.uid,
