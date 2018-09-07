@@ -4,10 +4,12 @@ import { AuthenticatedUser } from "../lib/auth";
 export const UserModel = types
   .model("User", {
     authenticated: false,
+    id: "0",
     name: "Anonymous User",
     className: "",
-    group: types.maybeNull(types.string),
-    id: types.maybeNull(types.string),
+    classHash: "",
+    offeringId: "",
+    latestGroupId: types.maybe(types.string),
   })
   .actions((self) => ({
     setName(name: string) {
@@ -19,18 +21,20 @@ export const UserModel = types
     setClassName(className: string) {
       self.className = className;
     },
-    setGroup(group: string | null) {
-      self.group = group;
+    setLatestGroupId(latestGroupId?: string) {
+      self.latestGroupId = latestGroupId;
     },
-    setId(id: string | null) {
+    setId(id: string) {
       self.id = id;
     },
     setAuthenticatedUser(user: AuthenticatedUser) {
       self.authenticated = true;
       self.name = user.fullName;
       self.className = user.className;
-      self.group = null;
+      self.latestGroupId = undefined;
       self.id = user.id;
+      self.classHash = user.classHash;
+      self.offeringId = user.offeringId;
     },
   }))
   .views((self) => ({

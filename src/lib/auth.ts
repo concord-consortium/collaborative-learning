@@ -16,7 +16,9 @@ export const DEV_USER: StudentUser = {
   lastName: "Q.",
   fullName: "Sofia Q.",
   initials: "SQ",
-  className: "Geometry (3rd)"
+  className: "Geometry (3rd)",
+  classHash: "devclass",
+  offeringId: "1",
 };
 
 export interface RawUser {
@@ -42,6 +44,8 @@ interface User {
 export interface StudentUser extends User {
   type: "student";
   className: string;
+  classHash: string;
+  offeringId: string;
 }
 
 export interface RawClassInfo {
@@ -206,7 +210,7 @@ export const getFirebaseJWTWithBearerToken = (domain: string, type: string, rawT
   });
 };
 
-export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
+export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string, offeringId: number) => {
   return new Promise<ClassInfo>((resolve, reject) => {
     superagent
     .get(classInfoUrl)
@@ -233,7 +237,9 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
               lastName: rawStudent.last_name,
               fullName,
               className: rawClassInfo.name,
-              initials: initials(fullName)
+              initials: initials(fullName),
+              classHash: rawClassInfo.class_hash,
+              offeringId: `${offeringId}`,
             };
             return student;
           }),
@@ -268,7 +274,7 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
             if (portalJWT.user_type === "learner") {
               const classInfoUrl = portalJWT.class_info_url;
 
-              return getClassInfo(classInfoUrl, rawJPortalWT)
+              return getClassInfo(classInfoUrl, rawJPortalWT, portalJWT.offering_id)
                 .then((classInfo) => {
                   const user = classInfo.students.find((student) => student.id === portalJWT.user_id);
                   if (user) {

@@ -136,6 +136,8 @@ describe("authentication", () => {
         fullName: `${RAW_CORRECT_STUDENT.first_name} ${RAW_CORRECT_STUDENT.last_name}`,
         initials: "GG",
         className: RAW_CLASS_INFO.name,
+        classHash: "test hash",
+        offeringId: "992",
         portalJWT: {
           alg: "HS256",
           class_info_url: "https://learn.staging.concord.org/api/v1/classes/128",

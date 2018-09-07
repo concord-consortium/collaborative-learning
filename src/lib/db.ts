@@ -4,6 +4,7 @@ import { UserModelType } from "../models/user";
 import { onSnapshot } from "mobx-state-tree";
 import { IDisposer } from "mobx-state-tree/dist/utils";
 import { observable, action } from "mobx";
+import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap } from "./db-types";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -31,16 +32,17 @@ export class DB {
   private appMode: AppMode;
   private firebaseUser: firebase.User | null = null;
   private stores: IStores;
-  private groupRef: firebase.database.Reference | null = null;
-  private usersRef: firebase.database.Reference | null = null;
-  private groupSnapshotDisposer: IDisposer | null = null;
+  private latestGroupIdRef: firebase.database.Reference | null = null;
+  private groupsRef: firebase.database.Reference | null = null;
+  private groupDisconnectRef: firebase.database.Reference | null = null;
+  private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
   }
 
   public connect(options: IDBConnectOptions) {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (this.isConnected) {
         reject("Already connected to database!");
       }
@@ -75,7 +77,7 @@ export class DB {
           this.appMode = options.appMode;
           this.firebaseUser = firebaseUser;
           this.stopListeners();
-          this.startListeners().then(() => resolve(true)).catch(reject);
+          this.startListeners().then(resolve).catch(reject);
         }
       });
     });
@@ -90,7 +92,97 @@ export class DB {
     }
   }
 
-  public ref(path: string = ""): firebase.database.Reference {
+  public joinGroup(groupId: string) {
+    const {user} = this.stores;
+    const groupRef = this.ref(this.getGroupPath(user, groupId));
+    let userRef: firebase.database.Reference;
+
+    return new Promise<void>((resolve, reject) => {
+      groupRef.once("value")
+        .then((snapshot) => {
+          // if the group doesn't exist create it
+          if (!snapshot.val()) {
+            return groupRef.set({
+              version: "1.0",
+              self: {
+                classHash: user.classHash,
+                offeringId: user.offeringId,
+                groupId,
+              },
+              users: {},
+            } as DBOfferingGroup);
+          }
+        })
+        .then(() => {
+          // always add the user to the group, the listeners will sort out if the group is oversubscribed
+          userRef = groupRef.child("users").child(user.id);
+          return userRef.set({
+            version: "1.0",
+            self: {
+              classHash: user.classHash,
+              offeringId: user.offeringId,
+              groupId,
+              uid: user.id
+            },
+            connected: true,
+            connectedTimestamp: firebase.database.ServerValue.TIMESTAMP
+          } as DBOfferingGroupUser);
+        })
+        .then(() => {
+          // add disconnect handler
+          this.groupDisconnectRef = userRef.child("disconnectedTimestamp");
+          if (this.groupOnDisconnect) {
+            this.groupOnDisconnect.cancel();
+          }
+          this.groupOnDisconnect = this.groupDisconnectRef.onDisconnect();
+          this.groupOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+        })
+        .then(() => {
+          // remember the last group joined
+          this.getLatestGroupIdRef().set(groupId);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
+  public leaveGroup() {
+    const {user} = this.stores;
+    const groupsRef = this.ref(this.getGroupsPath(user));
+
+    if (this.groupOnDisconnect) {
+      this.groupOnDisconnect.cancel();
+    }
+    this.groupOnDisconnect = null;
+
+    return new Promise<void>((resolve, reject) => {
+      groupsRef.once("value")
+        .then((snapshot) => {
+          // find all groups where the user is a member, this should be only 0 or 1 but just in case...
+          const groups: DBOfferingGroupMap = snapshot.val() || {};
+          const myGroupIds = Object.keys(groups).filter((groupId) => {
+            const users = groups[groupId].users || {};
+            return Object.keys(users).indexOf(user.id) !== -1;
+          });
+
+          // set out user in each group to null
+          if (myGroupIds.length > 0) {
+            const updates: any = {};
+            myGroupIds.forEach((groupId) => {
+              updates[this.getFullPath(this.getGroupUserPath(user, groupId))] = null;
+            });
+            return firebase.database().ref().update(updates);
+          }
+        })
+        .then(() => {
+          this.getLatestGroupIdRef().set(null);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
+  public ref(path: string = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
     }
@@ -107,103 +199,158 @@ export class DB {
     return `/${appMode}/${userSubFolder}`;
   }
 
-  public getUsersRef(): firebase.database.Reference {
-    return this.ref("users");
+  //
+  // Paths
+  //
+
+  public getUserPath(user: UserModelType) {
+    return `users/${user.id}`;
   }
 
-  public getUserRef(user: UserModelType): firebase.database.Reference {
-    return this.ref(`users/${user.id}`);
+  public getClassPath(user: UserModelType) {
+    return `classes/${user.classHash}`;
   }
 
-  public getUserGroupRef(user: UserModelType): firebase.database.Reference {
-    return this.ref(`users/${user.id}/group`);
+  public getOfferingPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
   }
+
+  public getGroupsPath(user: UserModelType) {
+    return `${this.getOfferingPath(user)}/groups`;
+  }
+
+  public getGroupPath(user: UserModelType, groupId: string) {
+    return `${this.getGroupsPath(user)}/${groupId}`;
+  }
+
+  public getGroupUserPath(user: UserModelType, groupId: string, userId?: string) {
+    return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
+  }
+
+  //
+  // Listeners
+  //
 
   private startListeners() {
     return new Promise<void>((resolve, reject) => {
-      this.startGroupListeners()
+      // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
+      this.startLatestGroupIdListener()
+        .then(() => {
+          return this.startGroupsListener();
+        })
         .then(() => {
           this.isListening = true;
-          resolve();
         })
+        .then(resolve)
         .catch(reject);
     });
   }
 
   private stopListeners() {
+    this.stopLatestGroupIdListener();
     this.stopGroupListeners();
     this.isListening = false;
   }
 
-  private startGroupListeners() {
-    return this.startMyGroupListener()
-      .then(this.startGroupsListener);
-  }
-
-  private startGroupsListener = () => {
-    const usersRef = this.usersRef = this.getUsersRef();
-    usersRef.on("value", this.handleUsersRef);
-  }
-
-  private startMyGroupListener() {
+  private startLatestGroupIdListener() {
     return new Promise<void>((resolve, reject) => {
-      const {user, ui} = this.stores;
-      const groupRef = this.groupRef = this.getUserGroupRef(user);
+      const {user} = this.stores;
+      const latestGroupIdRef = this.latestGroupIdRef = this.getLatestGroupIdRef();
+      // use once() so we are ensured that latestGroupId is set before we resolve
+      latestGroupIdRef.once("value", (snapshot) => {
+        this.stores.user.setLatestGroupId(snapshot.val() || undefined);
+        latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
+      })
+      .then(resolve)
+      .catch(reject);
+    });
+  }
 
-      // use once() so we can get a promise
-      groupRef.once("value")
+  private getLatestGroupIdRef() {
+    return this.ref(this.getUserPath(this.stores.user)).child("latestGroupId");
+  }
+
+  private stopLatestGroupIdListener() {
+    if (this.latestGroupIdRef) {
+      this.latestGroupIdRef.off("value");
+      this.latestGroupIdRef = null;
+    }
+  }
+
+  private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
+    this.stores.user.setLatestGroupId(snapshot.val() || undefined);
+  }
+
+  private startGroupsListener() {
+    return new Promise<void>((resolve, reject) => {
+      const {user, groups} = this.stores;
+      const groupsRef = this.groupsRef = this.ref(this.getGroupsPath(user));
+
+      // use once() so we are ensured that groups are set before we resolve
+      groupsRef.once("value")
         .then((snapshot) => {
-          this.handleGroupRef(snapshot);
-          groupRef.on("value", this.handleGroupRef);
+          this.handleGroupsRef(snapshot);
 
-          this.groupSnapshotDisposer = onSnapshot(user, (newUser) => {
-            this.getUserRef(user).set({
-              group: newUser.group,
-              initials: user.initials
-            }).catch((error) => {
-              ui.setError(error);
-            });
-          });
-
-          resolve();
+          // if we are not currently in a group try to join the latest group
+          if (!groups.groupForUser(user.id) && user.latestGroupId) {
+            return this.joinGroup(user.latestGroupId);
+          }
         })
+        .then(() => {
+          groupsRef.on("value", this.handleGroupsRef);
+        })
+        .then(resolve)
         .catch(reject);
     });
   }
 
   private stopGroupListeners() {
-    if (this.usersRef) {
-      this.usersRef.off("value", this.handleUsersRef);
-      this.usersRef = null;
-    }
-    if (this.groupRef) {
-      this.groupRef.off("value", this.handleGroupRef);
-      this.groupRef = null;
-    }
-    if (this.groupSnapshotDisposer) {
-      this.groupSnapshotDisposer();
-      this.groupSnapshotDisposer = null;
+    if (this.groupsRef) {
+      this.groupsRef.off("value", this.handleGroupsRef);
+      this.groupsRef = null;
     }
   }
 
-  private handleGroupRef = (snapshot: firebase.database.DataSnapshot) => {
-    this.stores.user.setGroup(snapshot.val());
-  }
+  private handleGroupsRef = (snapshot: firebase.database.DataSnapshot) => {
+    const {user} = this.stores;
+    const groups: DBOfferingGroupMap = snapshot.val() || {};
+    const myGroupIds: string[] = [];
+    const overSubsribedUserUpdates: any = {};
 
-  private handleUsersRef = (snapshot: firebase.database.DataSnapshot) => {
-    const users = snapshot.val() as UserGroupMap;
-    const groups: GroupUsersMap = {};
-    if (users) {
-      Object.keys(users).forEach((userId) => {
-        const group = users[userId].group;
-        if (group) {
-          if (groups[group] == null) {
-            groups[group] = [];
-          }
-          groups[group].push(users[userId].initials);
+    // ensure that the current user is not in more than 1 group and groups are not oversubscribed
+    Object.keys(groups).forEach((groupId) => {
+      const userKeys = Object.keys(groups[groupId].users || {});
+      if (userKeys.indexOf(user.id) !== -1) {
+        myGroupIds.push(groupId);
+      }
+      if (userKeys.length > 4) {
+        // sort the users by connected timestamp and find the newest users to kick out
+        const users = userKeys.map((uid) => groups[groupId].users[uid]);
+        users.sort((a, b) => a.connectedTimestamp - a.connectedTimestamp);
+        users.splice(0, 4);
+        users.forEach((userToRemove) => {
+          const userPath = this.getFullPath(this.getGroupUserPath(user, groupId, userToRemove.self.uid));
+          overSubsribedUserUpdates[userPath] = null;
+        });
+      }
+    });
+
+    const numUpdates = Object.keys(overSubsribedUserUpdates).length;
+
+    // if there is a problem with the groups fix the problem in the next timeslice
+    if ((numUpdates > 0) || (myGroupIds.length > 1)) {
+      setTimeout(() => {
+        if ( numUpdates > 0) {
+          firebase.database().ref().update(overSubsribedUserUpdates);
         }
-      });
+        if (myGroupIds.length > 1) {
+          this.leaveGroup();
+        }
+      }, 1);
     }
-    this.groups = groups;
+    else {
+      // otherwise set the groups
+      this.stores.groups.updateFromDB(user.id, groups);
+    }
   }
 }

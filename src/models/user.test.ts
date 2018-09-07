@@ -4,12 +4,12 @@ import { AuthenticatedUser } from "../lib/auth";
 describe("user model", () => {
 
   it("sets default values", () => {
-    const user = UserModel.create({});
+    const user = UserModel.create();
     expect(user.authenticated).toBe(false);
     expect(user.name).toBe("Anonymous User");
     expect(user.className).toBe("");
-    expect(user.group).toBe(null);
-    expect(user.id).toBe(null);
+    expect(user.latestGroupId).toBe(undefined);
+    expect(user.id).toBe("0");
   });
 
   it("uses override values", () => {
@@ -17,19 +17,20 @@ describe("user model", () => {
         authenticated: true,
         name: "Test User",
         className: "Test Class",
-        group: "1",
+        latestGroupId: "1",
         id: "2",
     });
     expect(user.authenticated).toBe(true);
     expect(user.name).toBe("Test User");
     expect(user.className).toBe("Test Class");
-    expect(user.group).toBe("1");
+    expect(user.latestGroupId).toBe("1");
     expect(user.id).toBe("2");
   });
 
   it("can change its name", () => {
     const user = UserModel.create({
-        name: "Test User",
+      name: "Test User",
+      id: "2",
     });
     expect(user.name).toBe("Test User");
     user.setName("Different User");
@@ -52,8 +53,8 @@ describe("user model", () => {
   it("can set a group", () => {
     const user = UserModel.create();
     const group = "1";
-    user.setGroup(group);
-    expect(user.group).toBe(group);
+    user.setLatestGroupId(group);
+    expect(user.latestGroupId).toBe(group);
   });
 
   it("can set an id", () => {
@@ -73,12 +74,14 @@ describe("user model", () => {
       fullName: "Fred Flintstone",
       initials: "FF",
       className: "Bedrock",
+      classHash: "test",
+      offeringId: "1",
     };
     user.setAuthenticatedUser(authenticatedUser);
     expect(user.authenticated).toBe(true);
     expect(user.id).toBe(authenticatedUser.id);
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
-    expect(user.group).toBe(null);
+    expect(user.latestGroupId).toBe(undefined);
   });
 });

@@ -55,7 +55,7 @@ export class AppComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const {user, ui, db} = this.stores;
+    const {user, ui, db, groups} = this.stores;
 
     if (ui.error) {
       return this.renderApp(this.renderError(ui.error));
@@ -65,7 +65,7 @@ export class AppComponent extends BaseComponent<IProps, {}> {
       return this.renderApp(this.renderLoading());
     }
 
-    if (!user.group) {
+    if (!groups.groupForUser(user.id)) {
       return this.renderApp(<GroupChooserComponent />);
     }
 

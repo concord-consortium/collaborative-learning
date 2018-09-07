@@ -12,39 +12,29 @@ interface IProps extends IBaseProps {}
 @inject("stores")
 @observer
 export class GroupChooserComponent extends BaseComponent<IProps, {}> {
+  private groupSelect: HTMLSelectElement|null;
+
   public render() {
-    const {db, user} = this.stores;
-    const {groups} = db;
+    const {db, user, groups} = this.stores;
     return (
       <div className="join">
         <div className="join-title">Join Group</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
-          {Object.keys(groups).length > 0 && this.renderChooseExistingGroup(groups)}
-          {this.renderChooseNewGroup(groups)}
+          {groups.allGroups.length > 0 && this.renderChooseExistingGroup()}
+          {this.renderChooseNewGroup()}
         </div>
       </div>
     );
   }
 
-  private selectGroup = (key: string) => {
-    this.stores.user.setGroup(key);
-  }
-
-  private handleChooseGroup = (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const select = e.currentTarget.querySelector("select");
-    if (select) {
-      this.selectGroup(select.value);
-    }
-  }
-
-  private renderChooseNewGroup(groups: GroupUsersMap) {
-    const groupKeys = Object.keys(groups);
+  private renderChooseNewGroup() {
+    const {allGroups} = this.stores.groups;
+    const groupIds = allGroups.map((group) => group.id);
     const items: JSX.Element[] = [];
-    const haveExistingGroups = groupKeys.length > 0;
+    const haveExistingGroups = groupIds.length > 0;
     for (let i = 1; i <= MAX_GROUPS; i++) {
-      if (groupKeys.indexOf(`${i}`) === -1) {
+      if (groupIds.indexOf(`${i}`) === -1) {
         items.push(<option value={i} key={i}>Group {i}</option>);
       }
     }
@@ -52,34 +42,21 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
       <form className="create-group" onSubmit={this.handleChooseGroup}>
         <div>{haveExistingGroups ? "Or create a new group" : "Please create your group"}</div>
         <div>
-          <select>{items}</select>
+          <select ref={(el) => this.groupSelect = el}>{items}</select>
           <input type="submit" className="button" value="Create Group" />
         </div>
       </form>
     );
   }
 
-  private chooseExistingGroup = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    const title = (e.currentTarget as HTMLElement).firstChild;
-    // Only store the group number, rather than the group name
-    this.selectGroup(title && title.textContent ? title.textContent.split(" ")[1] : "");
-  }
-
-  private renderChooseExistingGroup(groups: GroupUsersMap) {
-    const groupElements: JSX.Element[] = [];
-    Object.keys(groups).forEach((key) => {
-      const users = groups[key];
-      groupElements.push(
-        <div className="group" key={key} onClick={this.chooseExistingGroup}>
-          <div className="group-title">{`Group ${key}`}</div>
-          {
-            users.map((initials, i) => (
-              <span key={i} className="user">
-                {initials}
-              </span>
-            ))
-          }
+  private renderChooseExistingGroup() {
+    const {groups} = this.stores;
+    const groupElements = groups.allGroups.map((group) => {
+      const users = group.users.map((user) => <span key={user.id} className="user">{user.initials}</span>);
+      return (
+        <div className="group" key={group.id} onClick={this.handleChooseExistingGroup(group.id)}>
+          <div className="group-title">{`Group ${group.id}`}</div>
+          {users}
         </div>
       );
     });
@@ -92,5 +69,24 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
+  }
+
+  private selectGroup = (groupId: string) => {
+    this.stores.db.joinGroup(groupId);
+    // this.stores.user.setGroup(groupId);
+  }
+
+  private handleChooseExistingGroup = (groupId: string) => {
+    return (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      this.selectGroup(groupId);
+    };
+  }
+
+  private handleChooseGroup = (e: React.ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (this.groupSelect) {
+      this.selectGroup(this.groupSelect.value);
+    }
   }
 }

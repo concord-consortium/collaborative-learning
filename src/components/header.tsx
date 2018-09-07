@@ -11,7 +11,8 @@ interface IProps extends IBaseProps {}
 export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const {user, problem} = this.stores;
+    const {user, problem, groups} = this.stores;
+    const myGroup = groups.groupForUser(user.id);
 
     return (
       <div className="header">
@@ -23,7 +24,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="group">
           <div>
-            <div onClick={this.handleResetGroup} className="name">{`Group ${user.group}`}</div>
+            <div onClick={this.handleResetGroup} className="name">{`Group ${myGroup ? myGroup.id : "n/a"}`}</div>
             <div className="members">Members TBD</div>
           </div>
         </div>
@@ -36,7 +37,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   private handleResetGroup = () => {
     if (confirm("Do you want to change groups?")) {
-      this.stores.user.setGroup(null);
+      this.stores.db.leaveGroup();
     }
   }
 }
