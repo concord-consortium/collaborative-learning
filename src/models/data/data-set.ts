@@ -54,10 +54,11 @@ interface IEnvContext {
 export const DataSet = types.model("DataSet", {
   id: types.identifier,
   sourceID: types.maybe(types.string),
-  name: types.string,
+  name: types.maybe(types.string),
   attributes: types.array(Attribute),
   cases: types.array(CaseID),
 }).preProcessSnapshot((snapshot) => {
+  if (!snapshot) { return snapshot; }
   const { id, ...others } = snapshot;
   return { id: id || localId(), ...others };
 }).volatile(self => ({
