@@ -1,12 +1,12 @@
-import { types } from "mobx-state-tree";
-import { DocumentRowModel } from "./document-row";
+import { types, Instance } from "mobx-state-tree";
+import { DataSet } from "./data/data-set";
+import { ToolTileModel } from "./tools/tool-tile";
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
-    // rows contain ToolTiles
-    rows: types.array(DocumentRowModel)
+    tiles: types.array(ToolTileModel),
     // data shared between tools
-    // shared: DataManager [TBD]
+    shared: types.maybe(DataSet)
   });
 
-export type DocumentContentModelType = typeof DocumentContentModel.Type;
+export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
