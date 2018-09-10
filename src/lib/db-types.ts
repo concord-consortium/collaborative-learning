@@ -103,7 +103,7 @@ export interface DBOfferingGroup {
     offeringId: string;
     groupId: string;
   };
-  users: DBOfferingGroupUserMap;
+  users?: DBOfferingGroupUserMap;
 }
 
 export interface DBOfferingGroupUserMap {

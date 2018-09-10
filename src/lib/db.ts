@@ -318,13 +318,14 @@ export class DB {
 
     // ensure that the current user is not in more than 1 group and groups are not oversubscribed
     Object.keys(groups).forEach((groupId) => {
-      const userKeys = Object.keys(groups[groupId].users || {});
+      const groupUsers = groups[groupId].users || {};
+      const userKeys = Object.keys(groupUsers);
       if (userKeys.indexOf(user.id) !== -1) {
         myGroupIds.push(groupId);
       }
       if (userKeys.length > 4) {
         // sort the users by connected timestamp and find the newest users to kick out
-        const users = userKeys.map((uid) => groups[groupId].users[uid]);
+        const users = userKeys.map((uid) => groupUsers[uid]);
         users.sort((a, b) => a.connectedTimestamp - b.connectedTimestamp);
         users.splice(0, 4);
         users.forEach((userToRemove) => {

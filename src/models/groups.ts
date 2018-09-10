@@ -33,8 +33,9 @@ export const GroupsModel = types
       updateFromDB(uid: string, groups: DBOfferingGroupMap, clazz: ClassModelType) {
         const allGroups = Object.keys(groups).map((groupId) => {
           const group = groups[groupId];
-          const users = Object.keys(group.users || {}).map((groupUserId) => {
-            const {connectedTimestamp, disconnectedTimestamp} = group.users[groupUserId];
+          const groupUsers = group.users || {};
+          const users = Object.keys(groupUsers).map((groupUserId) => {
+            const {connectedTimestamp, disconnectedTimestamp} = groupUsers[groupUserId];
             const student = clazz.getStudentById(groupUserId);
             return GroupUserModel.create({
               id: groupUserId,

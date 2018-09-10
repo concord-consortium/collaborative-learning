@@ -25,6 +25,7 @@ describe("user model", () => {
     expect(user.className).toBe("Test Class");
     expect(user.latestGroupId).toBe("1");
     expect(user.id).toBe("2");
+    expect(user.initials).toBe("TU");
   });
 
   it("can change its name", () => {
