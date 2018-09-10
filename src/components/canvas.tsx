@@ -6,6 +6,8 @@ import { DocumentModelType } from "../models/document";
 
 import "./canvas.sass";
 
+import TextTool from "./canvas-tools/text-tool"
+
 interface IProps extends IBaseProps {
   readOnly?: boolean;
   document?: DocumentModelType;

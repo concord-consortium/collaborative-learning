@@ -54,6 +54,8 @@
     "@types/query-string": "^6.1.0",
     "@types/react": "^16.4.13",
     "@types/react-dom": "^16.0.7",
+    "@types/slate": "^0.40.0",
+    "@types/slate-react": "^0.18.0",
     "@types/superagent": "^3.8.4",
     "@types/uuid": "^3.4.4",
     "autoprefixer": "^9.1.5",
@@ -85,6 +87,7 @@
   },
   "dependencies": {
     "firebase": "5.4.2",
+    "immutable": "^3.8.2",
     "initials": "^3.0.0",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
@@ -94,6 +97,8 @@
     "query-string": "^6.1.0",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
+    "slate": "^0.40.2",
+    "slate-react": "^0.18.5",
     "superagent": "^3.8.3",
     "uuid": "^3.3.2"
   }
