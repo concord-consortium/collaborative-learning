@@ -1,11 +1,14 @@
 import { DB } from "./db";
 import { IStores, createStores } from "../models/stores";
+import { UserModel } from "../models/user";
 
 describe("db", () => {
   let stores: IStores;
 
   beforeEach(() => {
-    stores = createStores();
+    stores = createStores({
+      user: UserModel.create({id: "1", portal: "example.com"}),
+    });
   });
 
   it("connects", () => {
@@ -21,8 +24,8 @@ describe("db", () => {
     const db = new DB();
     return db.connect({appMode: "test", stores})
       .then(() => {
-        expect(db.getRootFolder()).toMatch(/^\/test\/([^/])+\/$/);
-        expect(db.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/foo$/);
+        expect(db.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
+        expect(db.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
       })
       .then(() => db.disconnect());
   });
@@ -31,8 +34,8 @@ describe("db", () => {
     const db = new DB();
     return db.connect({appMode: "dev", stores})
       .then(() => {
-        expect(db.getRootFolder()).toMatch(/^\/dev\/([^/])+\/$/);
-        expect(db.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/foo$/);
+        expect(db.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
+        expect(db.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
       })
       .then(() => db.disconnect());
   });

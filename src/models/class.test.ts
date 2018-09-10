@@ -46,6 +46,7 @@ describe("Class model", () => {
           classHash: "test",
           offeringId: "1",
           id: "1",
+          portal: "test",
           firstName: "First",
           lastName: "Student",
           fullName: "First Student",

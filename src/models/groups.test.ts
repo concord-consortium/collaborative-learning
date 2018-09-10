@@ -16,17 +16,20 @@ describe("Groups model", () => {
       users: [
         GroupUserModel.create({
           id: "1",
+          name: "User 1",
           initials: "U1",
           connectedTimestamp: 1,
         }),
         GroupUserModel.create({
           id: "2",
+          name: "User 2",
           initials: "U2",
           connectedTimestamp: 1,
           disconnectedTimestamp: 2,
         }),
         GroupUserModel.create({
           id: "3",
+          name: "User 3",
           initials: "U3",
           connectedTimestamp: 3,
           disconnectedTimestamp: 2,

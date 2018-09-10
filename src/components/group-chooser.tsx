@@ -52,7 +52,11 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
   private renderChooseExistingGroup() {
     const {groups} = this.stores;
     const groupElements = groups.allGroups.map((group) => {
-      const users = group.users.map((user) => <span key={user.id} className="user">{user.initials}</span>);
+      const users = group.users.map((user) => {
+        const className = `user ${user.connected ? "connected" : "disconnected"}`;
+        const title = `${user.name}: ${user.connected ? "connected" : "disconnected"}`;
+        return <span key={user.id} className={className} title={title}>{user.initials}</span>;
+      });
       return (
         <div className="group" key={group.id} onClick={this.handleChooseExistingGroup(group.id)}>
           <div className="group-title">{`Group ${group.id}`}</div>
