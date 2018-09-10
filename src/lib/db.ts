@@ -247,14 +247,15 @@ export class DB {
 
   private startLatestGroupIdListener() {
     return new Promise<void>((resolve, reject) => {
-      const {user} = this.stores;
       const latestGroupIdRef = this.latestGroupIdRef = this.getLatestGroupIdRef();
       // use once() so we are ensured that latestGroupId is set before we resolve
       latestGroupIdRef.once("value", (snapshot) => {
         this.handleLatestGroupIdRef(snapshot);
         latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
       })
-      .then(resolve)
+      .then(snapshot => {
+        resolve();
+      })
       .catch(reject);
     });
   }

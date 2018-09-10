@@ -8,7 +8,7 @@ The core design elements of the schema are:
 5. Any objects that can be loaded as a list should contain the minimum amount of metadata to display the information on the UI with id references to larger objects.
 6. All read-only write-once data (such as "publications") will be stored using DB storage.
 
-## Heirarchy
+## Hierarchy
 
 ```
 /(dev|test|demo|authed)

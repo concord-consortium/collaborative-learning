@@ -1,4 +1,4 @@
-// NOTE: see docs/firebase-schema.md to see a visual heirarchy of these interfaces
+// NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
 
 export interface DBPortalUser {
   version: "1.0";

@@ -7,7 +7,6 @@ import { urlParams } from "../utilities/url-params";
 
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
-import { observable } from "mobx";
 import { IStores } from "../models/stores";
 
 interface IProps extends IBaseProps {}
