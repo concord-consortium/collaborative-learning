@@ -16,7 +16,15 @@ export const DEV_USER: StudentUser = {
   lastName: "Q.",
   fullName: "Sofia Q.",
   initials: "SQ",
-  className: "Geometry (3rd)"
+  className: "Geometry (3rd)",
+  classHash: "devclass",
+  offeringId: "1",
+};
+
+export const DEV_CLASS_INFO: ClassInfo = {
+  name: DEV_USER.className,
+  classHash: DEV_USER.classHash,
+  students: [DEV_USER]
 };
 
 export interface RawUser {
@@ -42,6 +50,8 @@ interface User {
 export interface StudentUser extends User {
   type: "student";
   className: string;
+  classHash: string;
+  offeringId: string;
 }
 
 export interface RawClassInfo {
@@ -54,9 +64,7 @@ export interface RawClassInfo {
 }
 
 export interface ClassInfo {
-  uri: string;
   name: string;
-  state: string;
   classHash: string;
   students: StudentUser[];
 }
@@ -129,7 +137,8 @@ export interface BasePortalFirebaseJWT {
   aud: string;
   iat: number;
   exp: number;
-  uid: number;
+  uid: string;
+  user_id: string;
 }
 
 export interface PortalFirebaseStudentJWT extends BasePortalFirebaseJWT {
@@ -205,7 +214,7 @@ export const getFirebaseJWTWithBearerToken = (domain: string, type: string, rawT
   });
 };
 
-export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
+export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string, offeringId: number) => {
   return new Promise<ClassInfo>((resolve, reject) => {
     superagent
     .get(classInfoUrl)
@@ -219,9 +228,7 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
         const rawClassInfo: RawClassInfo = res.body;
 
         const classInfo: ClassInfo = {
-          uri: rawClassInfo.uri,
           name: rawClassInfo.name,
-          state: rawClassInfo.state,
           classHash: rawClassInfo.class_hash,
           students: rawClassInfo.students.map((rawStudent) => {
             const fullName = `${rawStudent.first_name} ${rawStudent.last_name}`;
@@ -232,7 +239,9 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
               lastName: rawStudent.last_name,
               fullName,
               className: rawClassInfo.name,
-              initials: initials(fullName)
+              initials: initials(fullName),
+              classHash: rawClassInfo.class_hash,
+              offeringId: `${offeringId}`,
             };
             return student;
           }),
@@ -245,9 +254,9 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
 };
 
 export const authenticate = (appMode: AppMode, token?: string, domain?: string) => {
-  return new Promise<AuthenticatedUser>((resolve, reject) => {
+  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
     if (appMode !== "authed") {
-      resolve(DEV_USER);
+      resolve({authenticatedUser: DEV_USER, classInfo: DEV_CLASS_INFO});
     }
 
     if (!token) {
@@ -267,15 +276,16 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
             if (portalJWT.user_type === "learner") {
               const classInfoUrl = portalJWT.class_info_url;
 
-              return getClassInfo(classInfoUrl, rawJPortalWT)
+              return getClassInfo(classInfoUrl, rawJPortalWT, portalJWT.offering_id)
                 .then((classInfo) => {
-                  const user = classInfo.students.find((student) => student.id === portalJWT.user_id);
-                  if (user) {
-                    user.portalJWT = portalJWT;
-                    user.rawPortalJWT = rawJPortalWT;
-                    user.firebaseJWT = firebaseJWT;
-                    user.rawFirebaseJWT = rawFirebaseJWT;
-                    resolve(user);
+                  const authenticatedUser = classInfo.students.find((student) => student.id === portalJWT.user_id);
+                  if (authenticatedUser) {
+                    authenticatedUser.portalJWT = portalJWT;
+                    authenticatedUser.rawPortalJWT = rawJPortalWT;
+                    authenticatedUser.firebaseJWT = firebaseJWT;
+                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                    authenticatedUser.id = firebaseJWT.uid;
+                    resolve({authenticatedUser, classInfo});
                   }
                   else {
                     reject("Current user not found in class roster");

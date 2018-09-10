@@ -35,7 +35,21 @@
     border-bottom: 2px solid #fff
 
     .name
+      text-decoration: underline
+      font-weight: bold
+      cursor: pointer
     .members
+      margin-top: 3px
+      .member
+        display: inline
+        font-size: 10px
+        margin: 0 5px
+        padding: 3px
+        background-color: #2da343
+        &.disconnected
+          background-color: #777
+        &.teacher
+          background-color: #EA6D2F !important
 
   .user
     flex-grow: 0

@@ -16,13 +16,15 @@ describe("stores object", () => {
 
   it("supports passing in stores for testing", () => {
     const appMode: AppMode = "dev";
+    const id = "1";
     const name = "Colonel Mustard";
-    const user = UserModel.create({ name });
+    const user = UserModel.create({ id, name });
     const title = "Test Problem";
     const problem = ProblemModel.create({ ordinal: 1, title });
     const db = new DB();
     const stores = createStores({ appMode, user, problem, db });
     expect(stores.appMode).toBe("dev");
+    expect(stores.user.id).toBe(id);
     expect(stores.user.name).toBe(name);
     expect(stores.problem.title).toBe(title);
     expect(stores.db).toBe(db);
