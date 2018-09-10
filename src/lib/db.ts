@@ -187,9 +187,21 @@ export class DB {
   }
 
   public getRootFolder() {
+    // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode } = this;
-    const userSubFolder = appMode === "authed" ? "" : `${this.firebaseUser ? this.firebaseUser.uid : "no-user-id"}/`;
-    return `/${appMode}/${userSubFolder}`;
+    const parts = [`${appMode}`];
+
+    if (appMode !== "authed") {
+      parts.push(this.firebaseUser ? `${this.firebaseUser.uid}` : "no-user-id");
+    }
+    parts.push("portals");
+    parts.push(this.escapeKey(this.stores.user.portal));
+
+    return `/${parts.join("/")}/`;
+  }
+
+  public escapeKey(s: string): string {
+    return s.replace(/[.$[\]#\/]/g, "_");
   }
 
   //

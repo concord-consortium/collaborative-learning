@@ -70,6 +70,7 @@ describe("user model", () => {
     const authenticatedUser: AuthenticatedUser = {
       type: "student",
       id: "1",
+      portal: "test",
       firstName: "Fred",
       lastName: "Flintstone",
       fullName: "Fred Flintstone",

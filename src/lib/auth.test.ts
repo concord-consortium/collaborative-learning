@@ -130,7 +130,8 @@ describe("authentication", () => {
     authenticate("authed", GOOD_NONCE, PORTAL_DOMAIN).then(({authenticatedUser, classInfo}) => {
       expect(authenticatedUser).toEqual({
         type: "student",
-        id: PORTAL_JWT.uid,
+        id: `${PORTAL_JWT.uid}`,
+        portal: "learn.staging.concord.org",
         firstName: RAW_CORRECT_STUDENT.first_name,
         lastName: RAW_CORRECT_STUDENT.last_name,
         fullName: `${RAW_CORRECT_STUDENT.first_name} ${RAW_CORRECT_STUDENT.last_name}`,

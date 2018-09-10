@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser } from "../lib/auth";
+const initials = require("initials");
 
 export const UserModel = types
   .model("User", {
@@ -10,6 +11,7 @@ export const UserModel = types
     classHash: "",
     offeringId: "",
     latestGroupId: types.maybe(types.string),
+    portal: "",
   })
   .actions((self) => ({
     setName(name: string) {
@@ -35,12 +37,12 @@ export const UserModel = types
       self.id = user.id;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
+      self.portal = user.portal;
     },
   }))
   .views((self) => ({
     get initials() {
-      const name = self.name.split(" ");
-      return (name[0][0] + name[name.length - 1][0]).toUpperCase();
+      return initials(self.name);
     }
   }));
 

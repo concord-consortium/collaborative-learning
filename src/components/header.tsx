@@ -47,7 +47,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   private renderGroupUser(user: GroupUserModelType) {
     const {connected} = user;
     const className = `member ${user.connected ? "connected" : "disconnected"}`;
-    const title = user.connected ? `connected` : `disconnected`;
+    const title = `${user.name}: ${user.connected ? "connected" : "disconnected"}`;
     return (
       <div
         key={user.id}

@@ -22,15 +22,16 @@ export const ClassModel = types
         self.name = classInfo.name;
         self.classHash = classInfo.classHash;
         self.students.replace(
-        classInfo.students.map((student) => {
-          return ClassStudentModel.create({
-            id: student.id,
-            firstName: student.firstName,
-            lastName: student.lastName,
-            fullName: student.fullName,
-            initials: student.initials,
-          });
-        }));
+          classInfo.students.map((student) => {
+            return ClassStudentModel.create({
+              id: student.id,
+              firstName: student.firstName,
+              lastName: student.lastName,
+              fullName: student.fullName,
+              initials: student.initials,
+            });
+          })
+        );
       }
     };
   })
