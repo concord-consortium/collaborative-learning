@@ -78,4 +78,25 @@ describe("problem model", () => {
     const overflowSection = problem.getSectionByIndex(10) as SectionModelType;
     expect(overflowSection.type).toBe(SectionType.initialChallenge);
   });
+
+  it("can get sections by id", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "test",
+      subtitle: "sub",
+      sections: [
+        {
+          type: SectionType.introduction
+        },
+        {
+          type: SectionType.initialChallenge
+        }
+      ]
+    });
+    const firstSection = problem.getSectionById(SectionType.introduction) as SectionModelType;
+    expect(firstSection.type).toBe(SectionType.introduction);
+    const lastSection = problem.getSectionById(SectionType.initialChallenge) as SectionModelType;
+    expect(lastSection.type).toBe(SectionType.initialChallenge);
+
+  });
 });

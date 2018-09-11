@@ -4,7 +4,16 @@ import { UserModelType } from "../models/user";
 import { onSnapshot } from "mobx-state-tree";
 import { IDisposer } from "mobx-state-tree/dist/utils";
 import { observable, action } from "mobx";
-import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap } from "./db-types";
+import { DBOfferingGroup,
+         DBOfferingGroupUser,
+         DBOfferingGroupMap,
+         DBOfferingUser,
+         DBOfferingUserSectionDocumentMap,
+         DBDocumentMetadata,
+         DBDocument,
+         DBOfferingUserSectionDocument} from "./db-types";
+import { WorkspaceModelType, WorkspaceModel } from "../models/workspaces";
+import { DocumentModelType, DocumentModel } from "../models/document";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -175,6 +184,162 @@ export class DB {
     });
   }
 
+  public createWorkspace(sectionId: string) {
+    return new Promise<WorkspaceModelType>((resolve, reject) => {
+
+      const {user, workspaces, ui} = this.stores;
+      const offeringUserRef = this.ref(this.getOfferingUserPath(user));
+      const sectionDocumentRef = this.ref(this.getSectionDocumentPath(user, sectionId));
+
+      return offeringUserRef.once("value")
+        .then((snapshot) => {
+          // ensure the offering user exists
+          if (!snapshot.val()) {
+            const offeringUser: DBOfferingUser = {
+              version: "1.0",
+              self: {
+                classHash: user.classHash,
+                offeringId: user.offeringId,
+                uid: user.id,
+              }
+            };
+            return offeringUserRef.set(offeringUser);
+          }
+         })
+        .then(() => {
+          // check if the section document exists
+          return sectionDocumentRef.once("value")
+            .then((snapshot) => {
+              return snapshot.val() as DBOfferingUserSectionDocument|null;
+            });
+        })
+        .then((sectionDocument) => {
+          if (sectionDocument) {
+            return sectionDocument;
+          }
+          else {
+            // create the document and section document
+            return this.createDocument()
+              .then((document) => {
+                  sectionDocument = {
+                    version: "1.0",
+                    self: {
+                      classHash: user.classHash,
+                      offeringId: user.offeringId,
+                      uid: user.id,
+                      sectionId
+                    },
+                    visibility: "public",
+                    documentKey: document.self.documentKey,
+                  };
+                  return sectionDocumentRef.set(sectionDocument).then(() => sectionDocument!);
+              });
+          }
+        })
+        .then((sectionDocument) => {
+          return this.openWorkspace(sectionDocument.self.sectionId);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
+  public openWorkspace(sectionId: string) {
+    const { user } = this.stores;
+
+    return new Promise<WorkspaceModelType>((resolve, reject) => {
+      const sectionDocumentRef = this.ref(this.getSectionDocumentPath(user, sectionId));
+      return sectionDocumentRef.once("value")
+        .then((snapshot) => {
+          const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
+          if (!sectionDocument) {
+            throw new Error("Unable to find workspace document in db!");
+          }
+          return sectionDocument;
+        })
+        .then((sectionDocument) => {
+          // open the user's document
+          return this.openDocument(user.id, sectionDocument.documentKey)
+            .then((userDocument) => {
+              const workspace = WorkspaceModel.create({
+                mode: "1-up",
+                tool: "select",
+                sectionId,
+                userDocument,
+                visibility: sectionDocument.visibility,
+              });
+              return workspace;
+            });
+        })
+        .then((workspace) => {
+          // TODO: PT #159980227: open group documents and listen for group changes
+          resolve(workspace);
+        })
+        .catch(reject);
+    });
+  }
+
+  public createDocument() {
+    const {user} = this.stores;
+    return new Promise<DBDocument>((resolve, reject) => {
+      const documentRef = this.ref(this.getUserDocumentPath(user)).push();
+      const documentKey = documentRef.key!;
+      const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey));
+      const document: DBDocument = {
+        version: "1.0",
+        self: {
+          uid: user.id,
+          documentKey,
+        }
+      };
+      const metadata: DBDocumentMetadata = {
+        version: "1.0",
+        self: {
+          uid: user.id,
+          documentKey,
+        },
+        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
+        classHash: user.classHash,
+        offeringId: user.offeringId
+      };
+
+      return documentRef.set(document)
+        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          resolve(document);
+        })
+        .catch(reject);
+    });
+  }
+
+  public openDocument(userId: string, documentKey: string) {
+    const {user} = this.stores;
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
+      const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey, userId));
+
+      Promise.all([documentRef.once("value"), metadataRef.once("value")])
+        .then(([documentSnapshot, metadataSnapshot]) => {
+          const document: DBDocument|null = documentSnapshot.val();
+          const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
+          if (!document || !metadata) {
+            throw new Error(`Unable to open document ${documentKey}`);
+          }
+          return DocumentModel.create({
+            uid: document.self.uid,
+            key: document.self.documentKey,
+            createdAt: metadata.createdAt,
+            content: {}, // TODO: PT #159979453: load content
+          });
+        })
+        .then((document) => {
+          // TODO: PT #159979453: listen for content changes and update model and save in firebase
+          resolve(document);
+        })
+        .catch(reject);
+    });
+  }
+
   public ref(path: string = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
@@ -208,8 +373,18 @@ export class DB {
   // Paths
   //
 
-  public getUserPath(user: UserModelType) {
-    return `users/${user.id}`;
+  public getUserPath(user: UserModelType, userId?: string) {
+    return `users/${userId || user.id}`;
+  }
+
+  public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user, userId)}/documents${suffix}`;
+  }
+
+  public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user)}/documentMetadata${suffix}`;
   }
 
   public getClassPath(user: UserModelType) {
@@ -218,6 +393,19 @@ export class DB {
 
   public getOfferingPath(user: UserModelType) {
     return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
+  }
+
+  public getOfferingUsersPath(user: UserModelType) {
+    return `${this.getOfferingPath(user)}/users`;
+  }
+
+  public getOfferingUserPath(user: UserModelType, userId?: string) {
+    return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
+  }
+
+  public getSectionDocumentPath(user: UserModelType, sectionId?: string) {
+    const suffix = sectionId ? `/${sectionId}` : "";
+    return `${this.getOfferingUserPath(user)}/sectionDocuments${suffix}`;
   }
 
   public getGroupsPath(user: UserModelType) {

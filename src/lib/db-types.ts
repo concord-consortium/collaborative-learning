@@ -27,6 +27,8 @@ export interface DBDocumentMetadata {
     documentKey: string;
   };
   createdAt: number;
+  classHash: string;
+  offeringId: string;
   // TDB: serialized document model metadata (back pointers too)
 }
 
@@ -76,7 +78,7 @@ export interface DBOfferingUser {
     offeringId: string;
     uid: string;
   };
-  sectionDocuments: DBOfferingUserSectionDocumentMap;
+  sectionDocuments?: DBOfferingUserSectionDocumentMap;
   // TDB: store ui information here?
 }
 

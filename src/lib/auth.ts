@@ -11,7 +11,7 @@ const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
 
 export const DEV_USER: StudentUser = {
   type: "student",
-  id: "123",
+  id: "1",
   portal: "localhost",
   firstName: "Sofia",
   lastName: "Q.",

@@ -3,6 +3,7 @@ import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
+import { WorkspacesModel, WorkspacesModelType } from "./workspaces";
 import { DB } from "../lib/db";
 
 export type AppMode = "authed" | "dev" | "test";
@@ -14,6 +15,7 @@ export interface IStores {
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
+  workspaces: WorkspacesModelType;
   db: DB;
 }
 
@@ -24,6 +26,7 @@ export interface ICreateStores {
   ui?: UIModelType;
   groups?: GroupsModelType;
   class?: ClassModelType;
+  workspaces?: WorkspacesModelType;
   db?: DB;
 }
 
@@ -37,5 +40,6 @@ export function createStores(params?: ICreateStores): IStores {
     groups: params && params.groups || GroupsModel.create({}),
     class: params && params.class || ClassModel.create({name: "Null Class", classHash: ""}),
     db: params && params.db || new DB(),
+    workspaces: params && params.workspaces || WorkspacesModel.create({}),
   };
 }

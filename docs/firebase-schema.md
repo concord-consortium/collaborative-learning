@@ -25,8 +25,10 @@ The core design elements of the schema are:
             /self
               uid: string
               documentKey: string
-            createdAt: number|object
-            // TDB: serialized document model metadata (back pointers too)
+            createdAt: number
+            classHash: string
+            offeringId: string
+            // TDB: serialized document model metadata
           /documents: {key: documentKey => DBDocument}
             version: "1.0"
             /self
