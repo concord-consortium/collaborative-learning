@@ -41,7 +41,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
 
   private renderContent(content: DocumentContentModelType) {
     return (
-      <CanvasComponent readOnly={true} />
+      <CanvasComponent readOnly={true} content={content}/>
     );
   }
 

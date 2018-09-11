@@ -6,7 +6,6 @@ import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "./base";
-import { SectionModelType } from "../models/curriculum/section";
 
 interface IProps extends IBaseProps {}
 

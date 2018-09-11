@@ -7,6 +7,13 @@ export const DocumentContentModel = types
     tiles: types.array(ToolTileModel),
     // data shared between tools
     shared: types.maybe(DataSet)
+  })
+  .views(self => {
+    return {
+      get isEmpty() {
+        return self.tiles.length === 0;
+      }
+    };
   });
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
