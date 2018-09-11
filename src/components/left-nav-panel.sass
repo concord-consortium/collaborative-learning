@@ -6,9 +6,19 @@
   left: 0
 
   .section
-    h1
-      font-size: 18px
-      margin: 5px 0 0 10px
+    .section-header
+      display: flex
+      flex-direction: row
+      flex-wrap: nowrap
+      justify-content: flex-start
+
+      h1
+        flex-grow: 1
+        font-size: 18px
+        margin: 5px 0 0 10px
+      .buttons
+        flex-grow: 0
+        margin: 5px 10px
 
     .canvas
       position: absolute
@@ -18,4 +28,3 @@
       left: 10px
       width: initial
       height: initial
-

@@ -14,6 +14,7 @@ interface IProps extends IBaseProps {
 @inject("stores")
 @observer
 export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
+  private openWorkspaceButton: HTMLButtonElement | null;
 
   public render() {
     const { section } = this.props;
@@ -29,7 +30,10 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     const {content} = section;
     return (
       <div className="section">
-        <h1>{section.title}</h1>
+        <div className="section-header">
+          <h1>{section.title}</h1>
+          {this.renderButtons()}
+        </div>
         {content ? this.renderContent(content) : null}
       </div>
     );
@@ -39,5 +43,39 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     return (
       <CanvasComponent readOnly={true} />
     );
+  }
+
+  private renderButtons() {
+    return (
+      <div className="buttons">
+        <button ref={(el) => this.openWorkspaceButton = el} onClick={this.handleOpenWorkspace}>Open Workspace</button>
+      </div>
+    );
+  }
+
+  private handleOpenWorkspace = () => {
+    const { db, ui, workspaces } = this.stores;
+    const { section } = this.props;
+    if (section) {
+      // TODO: create section id instead of using type
+      const sectionId = section.type;
+      const workspace = workspaces.getWorkspaceBySectionId(sectionId);
+      const done = () => {
+        ui.setActiveWorkspaceSectionId(sectionId);
+        ui.contractAll();
+        this.openWorkspaceButton!.disabled = false;
+      };
+
+      this.openWorkspaceButton!.disabled = true;
+      if (workspace) {
+        done();
+      }
+      else {
+        db.createWorkspace(sectionId)
+          .then(workspaces.addWorkspace)
+          .then(done)
+          .catch(ui.setError);
+      }
+    }
   }
 }

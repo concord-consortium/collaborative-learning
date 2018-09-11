@@ -113,4 +113,12 @@ describe("ui model", () => {
     expect(ui.activeLearningLogTab).toBe(activeLearningLogTab);
   });
 
+  it("allows activeWorkspaceSectionId to be set", () => {
+    const activeWorkspaceSectionId = "1";
+    ui.setActiveWorkspaceSectionId(activeWorkspaceSectionId);
+    expect(ui.activeWorkspaceSectionId).toBe(activeWorkspaceSectionId);
+    ui.setActiveWorkspaceSectionId(undefined);
+    expect(ui.activeWorkspaceSectionId).toBe(undefined);
+  });
+
 });
