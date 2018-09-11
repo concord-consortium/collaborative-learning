@@ -128,7 +128,7 @@ export class DB {
           } as DBOfferingGroupUser);
         })
         .then(() => {
-          this.setConnectionHandlers(userRef);
+          return this.setConnectionHandlers(userRef);
         })
         .then(() => {
           // remember the last group joined
@@ -295,13 +295,15 @@ export class DB {
       // use once() so we are ensured that groups are set before we resolve
       groupsRef.once("value")
         .then((snapshot) => {
-          this.handleGroupsRef(snapshot);
+          const dbGroups: DBOfferingGroupMap = snapshot.val() || {};
+          // Groups may be invalid at this point, but the listener will resolve it once connection times are set
+          groups.updateFromDB(user.id, dbGroups, this.stores.class);
 
           const group = groups.groupForUser(user.id);
           if (group) {
             // update our connection time so we report as connected/disconnected
             const userRef = this.ref(this.getGroupUserPath(user, group.id));
-            this.setConnectionHandlers(userRef);
+            return this.setConnectionHandlers(userRef);
           }
           else if (user.latestGroupId) {
             // if we are not currently in a group try to join the latest group
@@ -327,7 +329,7 @@ export class DB {
     const {user} = this.stores;
     const groups: DBOfferingGroupMap = snapshot.val() || {};
     const myGroupIds: string[] = [];
-    const overSubsribedUserUpdates: any = {};
+    const overSubscribedUserUpdates: any = {};
 
     // ensure that the current user is not in more than 1 group and groups are not oversubscribed
     Object.keys(groups).forEach((groupId) => {
@@ -343,17 +345,17 @@ export class DB {
         users.splice(0, 4);
         users.forEach((userToRemove) => {
           const userPath = this.getFullPath(this.getGroupUserPath(user, groupId, userToRemove.self.uid));
-          overSubsribedUserUpdates[userPath] = null;
+          overSubscribedUserUpdates[userPath] = null;
         });
       }
     });
 
     // if there is a problem with the groups fix the problem in the next timeslice
-    const numUpdates = Object.keys(overSubsribedUserUpdates).length;
+    const numUpdates = Object.keys(overSubscribedUserUpdates).length;
     if ((numUpdates > 0) || (myGroupIds.length > 1)) {
       setTimeout(() => {
         if (numUpdates > 0) {
-          firebase.database().ref().update(overSubsribedUserUpdates);
+          firebase.database().ref().update(overSubscribedUserUpdates);
         }
         if (myGroupIds.length > 1) {
           this.leaveGroup();
@@ -367,23 +369,36 @@ export class DB {
   }
 
   private setConnectionHandlers(userRef: firebase.database.Reference) {
-    if (this.connectedRef) {
-      this.connectedRef.off("value");
-    }
-    else if (!this.connectedRef) {
-      this.connectedRef = firebase.database().ref(".info/connected");
-    }
-    this.connectedRef.on("value", (snapshot) => {
-      if (snapshot && snapshot.val()) {
-        userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
-      }
-    });
-
     if (this.groupOnDisconnect) {
       this.groupOnDisconnect.cancel();
     }
     const groupDisconnectedRef = userRef.child("disconnectedTimestamp");
     this.groupOnDisconnect = groupDisconnectedRef.onDisconnect();
     this.groupOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+
+    if (this.connectedRef) {
+      this.connectedRef.off("value");
+    }
+    else if (!this.connectedRef) {
+      this.connectedRef = firebase.database().ref(".info/connected");
+    }
+    // once() ensures that the connected timestamp is set before resolving
+    return this.connectedRef.once("value", (snapshot) => {
+        return this.handleConnectedRef(userRef, snapshot);
+      })
+      .then(() => {
+        if (this.connectedRef) {
+          this.connectedRef.on("value", (snapshot) => {
+            this.handleConnectedRef(userRef, snapshot || undefined);
+          });
+        }
+      });
   }
+
+  private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
+    if (snapshot && snapshot.val()) {
+      return userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+    }
+  }
+
 }
