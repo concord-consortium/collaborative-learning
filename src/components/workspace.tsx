@@ -1,21 +1,16 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { WorkspaceModel, WorkspaceTool } from "../models/workspace";
+import { WorkspaceModel, WorkspaceTool, WorkspaceModelType } from "../models/workspaces";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./workspace.sass";
 
-// TODO: integrate the workspace model into a larger document store
-//       for now just have a singleton
-const workspace = WorkspaceModel.create({
-  mode: "1-up",
-  tool: "select",
-});
-
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  workspace: WorkspaceModelType;
+}
 
 @inject("stores")
 @observer
@@ -27,7 +22,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
         {this.renderTitleBar()}
         {this.renderToolbar()}
         <div className="canvas-area">
-          {workspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
+          {this.props.workspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
         </div>
         {this.renderSupports()}
       </div>
@@ -35,9 +30,11 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTitleBar() {
+    const { workspace } = this.props;
+    const activeSection = this.stores.problem.getSectionById(workspace.sectionId);
     return (
       <div className="titlebar">
-        <div className="title">TBD: Workspace Name</div>
+        <div className="title">{activeSection ? activeSection.title : ""}</div>
         <div className="actions">
           <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
         </div>
@@ -46,6 +43,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
+    const { workspace } = this.props;
     const className = (tool: WorkspaceTool) => {
       return `tool${tool === workspace.tool ? " active" : ""}`;
     };
@@ -64,13 +62,13 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private render1UpCanvas() {
     return (
-      <CanvasComponent />
+      <CanvasComponent document={this.props.workspace.userDocument} />
     );
   }
 
   private render4UpCanvas() {
     return (
-      <FourUpComponent />
+      <FourUpComponent workspace={this.props.workspace} />
     );
   }
 
@@ -83,7 +81,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToggleWorkspaceMode = () => {
-    workspace.toggleMode();
+    this.props.workspace.toggleMode();
   }
 
 }

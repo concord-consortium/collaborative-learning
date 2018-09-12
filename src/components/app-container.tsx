@@ -6,6 +6,7 @@ import { LeftNavComponent } from "./left-nav";
 import { MyWorkComponent } from "./my-work";
 import { WorkspaceComponent } from "./workspace";
 import { BaseComponent, IBaseProps } from "./base";
+import { DemoCreatorComponment } from "./demo-creator";
 
 import "./app-container.sass";
 
@@ -19,7 +20,7 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="app-container">
         <HeaderComponent />
-        <WorkspaceComponent />
+        {this.renderWorkspace()}
         {this.stores.ui.allContracted ? null : this.renderBlocker()}
         <LeftNavComponent />
         <MyWorkComponent />
@@ -30,6 +31,14 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
 
   private handleRemoveBlocker = () => {
     this.stores.ui.contractAll();
+  }
+
+  private renderWorkspace() {
+    const {ui, workspaces} = this.stores;
+    const workspace = ui.activeWorkspaceSectionId
+                        ? workspaces.getWorkspaceBySectionId(ui.activeWorkspaceSectionId)
+                        : null;
+    return workspace ? <WorkspaceComponent workspace={workspace} /> : null;
   }
 
   private renderBlocker() {

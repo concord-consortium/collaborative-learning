@@ -2,15 +2,19 @@
   "extends": ["tslint:recommended", "tslint-react"],
   "rules": {
     "arrow-parens": false,
+    "interface-name" : false,
+    "jsx-alignment": false,
+    "jsx-curly-spacing": false,
     "jsx-no-multiline-js": false,
+    "jsx-wrap-multiline": false,
+    "no-console": false,
+    "no-debugger": false,
     "no-empty-interface": false,
+    "no-var-requires": false,
     "object-literal-sort-keys": false,
     "one-line": false,
     "ordered-imports": false,
     "trailing-comma": false,
-    "interface-name" : [false],
-    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"],
-    "no-debugger": false,
-    "no-var-requires": false
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
   }
 }

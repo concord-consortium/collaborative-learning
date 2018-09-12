@@ -3,16 +3,22 @@ import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
          FourUpGridModelType, IGridUpdate } from "../models/four-up-grid";
+import { WorkspaceModelType } from "../models/workspaces";
 import { CanvasComponent } from "./canvas";
+import { BaseComponent, IBaseProps } from "./base";
 
 import "./four-up.sass";
 
+interface IProps extends IBaseProps {
+  workspace: WorkspaceModelType;
+}
+
 @observer
-export class FourUpComponent extends React.Component<{}, {}> {
+export class FourUpComponent extends BaseComponent<IProps, {}> {
   private grid: FourUpGridModelType;
   private container: HTMLDivElement | null;
 
-  constructor(props: {}) {
+  constructor(props: IProps) {
     super(props);
 
     // use local grid model
@@ -55,22 +61,22 @@ export class FourUpComponent extends React.Component<{}, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent />
+            <CanvasComponent document={this.props.workspace.userDocument} />
           </div>
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent />
+            <CanvasComponent readOnly={true} />
           </div>
         </div>
         <div

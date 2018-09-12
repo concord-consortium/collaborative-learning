@@ -5,7 +5,7 @@ import * as ReactDOM from "react-dom";
 import { AppComponent } from "./components/app";
 import { createStores } from "./models/stores";
 import { UserModel } from "./models/user";
-import { createFromJson } from "./models/curriculum";
+import { createFromJson } from "./models/curriculum/unit";
 import * as curriculumJson from "./curriculum/stretching-and-shrinking.json";
 import { urlParams } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
@@ -17,17 +17,16 @@ const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
 
 const user = UserModel.create();
 
-const curriculumUnit = createFromJson(curriculumJson);
+const unit = createFromJson(curriculumJson);
 const defaultProblemOrdinal = "2.1";
 const problemOrdinal = urlParams.problem || defaultProblemOrdinal;
-const problem = curriculumUnit.getProblem(problemOrdinal) ||
-                curriculumUnit.getProblem(defaultProblemOrdinal);
+const problem = unit.getProblem(problemOrdinal) ||
+                unit.getProblem(defaultProblemOrdinal);
+const showDemoCreator = urlParams.demo;
+const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
 
-const stores = createStores({ appMode, user, problem });
-
-if (problem) {
-  document.title = `CLUE: ${problem.fullTitle}`;
-}
+document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
+stores.ui.setShowDemo(!!showDemoCreator);
 
 ReactDOM.render(
   <Provider stores={stores}>

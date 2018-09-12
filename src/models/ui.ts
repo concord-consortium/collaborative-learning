@@ -1,4 +1,6 @@
 import { types } from "mobx-state-tree";
+import { SectionModelType, SectionModel } from "./curriculum/section";
+import { WorkspaceModel, WorkspaceModelType } from "./workspaces";
 
 type ToggleElement = "learningLogExpanded" | "leftNavExpanded" | "myWorkExpanded";
 
@@ -8,6 +10,11 @@ export const UIModel = types
     leftNavExpanded: false,
     myWorkExpanded: false,
     error: types.maybeNull(types.string),
+    activeSectionIndex: 0,
+    activeLearningLogTab: "LL",
+    activeWorkspaceSectionId: types.maybe(types.string),
+    showDemo: false,
+    showDemoCreator: false,
   })
   .views((self) => ({
     get allContracted() {
@@ -55,7 +62,19 @@ export const UIModel = types
         toggleWithOverride("myWorkExpanded", override);
       },
       setError(error: string|null) {
-        self.error = error;
+        self.error = error ? error.toString() : error;
+      },
+      setActiveSectionIndex(activeSectionIndex: number) {
+        self.activeSectionIndex = activeSectionIndex;
+      },
+      setActiveLearningLogTab(tab: string) {
+        self.activeLearningLogTab = tab;
+      },
+      setActiveWorkspaceSectionId(sectionId?: string) {
+        self.activeWorkspaceSectionId = sectionId;
+      },
+      setShowDemo(showDemo: boolean) {
+        self.showDemoCreator = showDemo;
       }
     };
   });

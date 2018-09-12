@@ -1,6 +1,17 @@
-import { CellPositions, DEFAULT_SPLITTER_SIZE, FourUpGridModel } from "./four-up-grid";
+import { CellPositions, DEFAULT_SPLITTER_SIZE, FourUpGridModel, FourUpGridCellModel } from "./four-up-grid";
 
 describe("four-up grid model", () => {
+
+  it("throws an exception is the cells aren't empty", () => {
+    const invalidCells = () => {
+      const grid = FourUpGridModel.create({
+        cells: [
+          FourUpGridCellModel.create({})
+        ]
+      });
+    };
+    expect(invalidCells).toThrowError(Error);
+  });
 
   it("sets default values", () => {
     const grid = FourUpGridModel.create({});
@@ -139,5 +150,17 @@ describe("four-up grid model", () => {
     });
     expect(grid.hSplitter).toBe(25);
     expect(grid.vSplitter).toBe(75);
+  });
+
+  it("can do partial updates of the cells", () => {
+    const grid = FourUpGridModel.create({
+      height: 100,
+      splitterSize: 3,
+      width: 200,
+    });
+    grid.cells[CellPositions.NorthWest].update({});
+    grid.cells[CellPositions.NorthEast].update({});
+    grid.cells[CellPositions.SouthEast].update({});
+    grid.cells[CellPositions.SouthWest].update({});
   });
 });

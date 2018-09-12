@@ -4,24 +4,27 @@ import * as React from "react";
 import "./tab.sass";
 
 interface IProps {
-  onClick?(e?: React.MouseEvent<HTMLDivElement>): void;
+  id?: string;
+  active?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 @observer
 export class TabComponent extends React.Component<IProps, {}> {
 
   public render() {
+    const {id, active} = this.props;
+    const className = `tab${active ? " active" : ""}`;
     return (
-      <div className="tab" onClick={this.handleClick}>
+      <div id={id} className={className} onClick={this.handleClick} role="tab" aria-selected={active}>
         {this.props.children}
       </div>
     );
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { onClick } = this.props;
-    if (onClick) {
-      onClick(e);
+    if (this.props.onClick) {
+      this.props.onClick(e);
     }
   }
 }

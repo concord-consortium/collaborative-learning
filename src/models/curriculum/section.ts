@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree";
 import { values } from "lodash";
-import { DocumentContentModel } from "./document-content";
+import { DocumentContentModel } from "../document-content";
 
 export enum SectionType {
   introduction = "introduction",
@@ -10,6 +10,7 @@ export enum SectionType {
   didYouKnow = "didYouKnow"
 }
 
+// TODO: figure out way to add SectionType as the index type to this const
 export const sectionInfo = {
   [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
   [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
@@ -26,11 +27,15 @@ export const SectionModel = types
   })
   .views(self => {
     return {
+      get id() {
+        // until we come up with a more permanent ID
+        return self.type;
+      },
       get title() {
-        return self.type ? sectionInfo[self.type].title : "";
+        return sectionInfo[self.type].title;
       },
       get abbrev() {
-        return self.type ? sectionInfo[self.type].abbrev : "";
+        return sectionInfo[self.type].abbrev;
       }
     };
   });

@@ -1,4 +1,5 @@
 import { UIModel, UIModelType } from "./ui";
+import { SectionModel, SectionType } from "./curriculum/section";
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -13,6 +14,23 @@ describe("ui model", () => {
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.myWorkExpanded).toBe(false);
     expect(ui.error).toBe(null);
+    expect(ui.activeSectionIndex).toBe(0);
+    expect(ui.activeLearningLogTab).toBe("LL");
+    expect(ui.showDemoCreator).toBe(false);
+  });
+
+  it("uses overtide values", () => {
+    ui = UIModel.create({
+      learningLogExpanded: true,
+      showDemoCreator: true,
+      error: "test"
+    });
+    expect(ui.allContracted).toBe(false);
+    expect(ui.learningLogExpanded).toBe(true);
+    expect(ui.leftNavExpanded).toBe(false);
+    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.error).toBe("test");
+    expect(ui.showDemoCreator).toBe(true);
   });
 
   it("allows the left nav to be toggled", () => {
@@ -93,4 +111,29 @@ describe("ui model", () => {
     ui.setError(null);
     expect(ui.error).toBe(null);
   });
+
+  it("allows activeSection to be set", () => {
+    const section = SectionModel.create({
+      type: SectionType.introduction
+    });
+    ui.setActiveSectionIndex(1);
+    expect(ui.activeSectionIndex).toBe(1);
+    ui.setActiveSectionIndex(0);
+    expect(ui.activeSectionIndex).toBe(0);
+  });
+
+  it("allows activeLearningLogTab to be set", () => {
+    const activeLearningLogTab = "M";
+    ui.setActiveLearningLogTab(activeLearningLogTab);
+    expect(ui.activeLearningLogTab).toBe(activeLearningLogTab);
+  });
+
+  it("allows activeWorkspaceSectionId to be set", () => {
+    const activeWorkspaceSectionId = "1";
+    ui.setActiveWorkspaceSectionId(activeWorkspaceSectionId);
+    expect(ui.activeWorkspaceSectionId).toBe(activeWorkspaceSectionId);
+    ui.setActiveWorkspaceSectionId(undefined);
+    expect(ui.activeWorkspaceSectionId).toBe(undefined);
+  });
+
 });

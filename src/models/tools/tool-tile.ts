@@ -1,17 +1,19 @@
-import { types } from "mobx-state-tree";
-import { ToolTypeUnion } from "./tool-types";
+import { types, Instance } from "mobx-state-tree";
+import { TileLayoutModel } from "./tile-layout";
+import { ToolContentUnion } from "./tool-types";
+import * as uuid from "uuid/v4";
 
-// first tile 100%, second tile 50%, etc.
-const kDefaultTileWidthPct = 100;
 // generally negotiated with app, e.g. single column width for table
-const kDefaultMinWidth = 60;
+export const kDefaultMinWidth = 60;
 
 export const ToolTileModel = types
   .model("ToolTile", {
-    // first tile 100%, second tile 50%, etc.
-    widthPct: kDefaultTileWidthPct,
-    // e.g. "GeometryToolModel", "TableToolModel", "TextToolModel"
-    toolContent: ToolTypeUnion
+    // if not provided, will be generated
+    id: types.optional(types.string, () => uuid()),
+    // optional information about placement of tile
+    layout: types.maybe(TileLayoutModel),
+    // e.g. "GeometryContentModel", "RichTextContentModel", "TableContentModel", "TextContentModel"
+    content: ToolContentUnion
   })
   .views(self => ({
     // generally negotiated with app, e.g. single column width for table
@@ -25,4 +27,4 @@ export const ToolTileModel = types
     }
   }));
 
-export type ToolTileModelType = typeof ToolTileModel.Type;
+export type ToolTileModelType = Instance<typeof ToolTileModel>;

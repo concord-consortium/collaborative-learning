@@ -1,4 +1,11 @@
-import { authenticate, _private, PortalJWT, RawUser, RawClassInfo, getAppMode } from "./auth";
+import { authenticate,
+        createDemoInfo,
+        _private,
+        PortalJWT,
+        RawUser,
+        RawClassInfo,
+        getAppMode,
+        DEV_CLASS_INFO } from "./auth";
 import * as nock from "nock";
 
 const { FIREBASE_JWT_QUERY, FIREBASE_JWT_URL_SUFFIX, PORTAL_JWT_URL_SUFFIX } = _private;
@@ -21,8 +28,8 @@ const PORTAL_JWT: PortalJWT = {
   offering_id: 992
 };
 
-const GOOD_NONCE = "goodNonce";
-const BAD_NONCE = "badNonce";
+const GOOD_TOKEN = "goodToken";
+const BAD_TOKEN = "badToken";
 
 const PORTAL_DOMAIN = "http://portal/";
 
@@ -76,7 +83,7 @@ describe("authentication", () => {
   beforeEach(() => {
     nock((PORTAL_DOMAIN + PORTAL_JWT_URL_SUFFIX), {
       reqheaders: {
-        Authorization: `Bearer ${GOOD_NONCE}`
+        Authorization: `Bearer ${GOOD_TOKEN}`
       }
     })
     .get("")
@@ -86,7 +93,7 @@ describe("authentication", () => {
 
     nock((PORTAL_DOMAIN + PORTAL_JWT_URL_SUFFIX), {
       reqheaders: {
-        Authorization: `Bearer ${BAD_NONCE}`
+        Authorization: `Bearer ${BAD_TOKEN}`
       }
     })
     .get("")
@@ -94,7 +101,7 @@ describe("authentication", () => {
 
     nock((PORTAL_DOMAIN + FIREBASE_JWT_URL_SUFFIX), {
       reqheaders: {
-        Authorization: `Bearer ${GOOD_NONCE}`
+        Authorization: `Bearer ${GOOD_TOKEN}`
       }
     })
     .get(FIREBASE_JWT_QUERY)
@@ -104,7 +111,7 @@ describe("authentication", () => {
 
     nock((PORTAL_DOMAIN + FIREBASE_JWT_URL_SUFFIX), {
       reqheaders: {
-        Authorization: `Bearer ${BAD_NONCE}`
+        Authorization: `Bearer ${BAD_TOKEN}`
       }
     })
     .get(FIREBASE_JWT_QUERY)
@@ -120,22 +127,25 @@ describe("authentication", () => {
   });
 
   it("Authenticates as a developer", (done) => {
-    authenticate("dev").then((authenticatedUser) => {
+    authenticate("dev").then(({authenticatedUser}) => {
       expect(authenticatedUser).toEqual(_private.DEV_USER);
       done();
     });
   });
 
   it("Authenticates externally", (done) => {
-    authenticate("authed", GOOD_NONCE, PORTAL_DOMAIN).then((authenticatedUser) => {
+    authenticate("authed", {token: GOOD_TOKEN, domain: PORTAL_DOMAIN}).then(({authenticatedUser, classInfo}) => {
       expect(authenticatedUser).toEqual({
         type: "student",
-        id: PORTAL_JWT.user_id,
+        id: `${PORTAL_JWT.uid}`,
+        portal: "learn.staging.concord.org",
         firstName: RAW_CORRECT_STUDENT.first_name,
         lastName: RAW_CORRECT_STUDENT.last_name,
         fullName: `${RAW_CORRECT_STUDENT.first_name} ${RAW_CORRECT_STUDENT.last_name}`,
         initials: "GG",
         className: RAW_CLASS_INFO.name,
+        classHash: "test hash",
+        offeringId: "992",
         portalJWT: {
           alg: "HS256",
           class_info_url: "https://learn.staging.concord.org/api/v1/classes/128",
@@ -168,8 +178,8 @@ describe("authentication", () => {
     .catch(done);
   });
 
-  it("Fails to authenticate with a bad nonce", (done) => {
-    authenticate("authed", BAD_NONCE, PORTAL_DOMAIN)
+  it("Fails to authenticate with a bad token", (done) => {
+    authenticate("authed", {token: BAD_TOKEN, domain: PORTAL_DOMAIN})
       .then(() => {
         done.fail();
       })
@@ -177,7 +187,7 @@ describe("authentication", () => {
   });
 
   it("Fails to authenticate with no token", (done) => {
-    authenticate("authed", undefined, PORTAL_DOMAIN)
+    authenticate("authed", {token: undefined, domain: PORTAL_DOMAIN})
       .then(() => {
         done.fail();
       })
@@ -185,10 +195,142 @@ describe("authentication", () => {
   });
 
   it("Fails to authenticate with no domain", (done) => {
-    authenticate("authed", BAD_NONCE, undefined)
+    authenticate("authed", {token: BAD_TOKEN, domain: undefined})
       .then(() => {
         done.fail();
       })
       .catch(() => done());
+  });
+
+  it("creates demo info", () => {
+    const demoInfo = createDemoInfo("1", "student", "1", "1");
+    expect(demoInfo).toEqual({
+      authenticatedUser: {
+        type: "student",
+        id: "1",
+        portal: "demo",
+        firstName: "Student",
+        lastName: "1",
+        fullName: "Student 1",
+        initials: "S1",
+        className: "Demo Class 1",
+        classHash: "democlass1",
+        offeringId: "1"
+      },
+      classInfo: {
+        name: "Demo Class 1",
+        classHash: "democlass1",
+        students: [
+          {
+            type: "student",
+            id: "1",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "1",
+            fullName: "Student 1",
+            initials: "S1",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "2",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "2",
+            fullName: "Student 2",
+            initials: "S2",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "3",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "3",
+            fullName: "Student 3",
+            initials: "S3",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "4",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "4",
+            fullName: "Student 4",
+            initials: "S4",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "5",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "5",
+            fullName: "Student 5",
+            initials: "S5",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "6",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "6",
+            fullName: "Student 6",
+            initials: "S6",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "7",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "7",
+            fullName: "Student 7",
+            initials: "S7",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "8",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "8",
+            fullName: "Student 8",
+            initials: "S8",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          },
+          {
+            type: "student",
+            id: "9",
+            portal: "demo",
+            firstName: "Student",
+            lastName: "9",
+            fullName: "Student 9",
+            initials: "S9",
+            className: "Demo Class 1",
+            classHash: "democlass1",
+            offeringId: "1"
+          }
+        ]
+      }
+    });
   });
 });

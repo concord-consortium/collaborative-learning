@@ -2,6 +2,8 @@ import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores";
+import { QueryParams } from "../utilities/url-params";
+import {NUM_DEMO_STUDENTS} from "../components/demo-creator";
 
 const initials = require("initials");
 
@@ -11,12 +13,21 @@ const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
 
 export const DEV_USER: StudentUser = {
   type: "student",
-  id: "123",
+  id: "1",
+  portal: "localhost",
   firstName: "Sofia",
   lastName: "Q.",
   fullName: "Sofia Q.",
   initials: "SQ",
-  className: "Geometry (3rd)"
+  className: "Geometry (3rd)",
+  classHash: "devclass",
+  offeringId: "1",
+};
+
+export const DEV_CLASS_INFO: ClassInfo = {
+  name: DEV_USER.className,
+  classHash: DEV_USER.classHash,
+  students: [DEV_USER]
 };
 
 export interface RawUser {
@@ -25,10 +36,11 @@ export interface RawUser {
   last_name: string;
 }
 
-export type AuthenticatedUser = StudentUser;
+export type AuthenticatedUser = StudentUser | TeacherUser;
 
 interface User {
   id: string;
+  portal: string;
   firstName: string;
   lastName: string;
   fullName: string;
@@ -42,6 +54,12 @@ interface User {
 export interface StudentUser extends User {
   type: "student";
   className: string;
+  classHash: string;
+  offeringId: string;
+}
+
+export interface TeacherUser extends User {
+  type: "teacher";
 }
 
 export interface RawClassInfo {
@@ -54,9 +72,7 @@ export interface RawClassInfo {
 }
 
 export interface ClassInfo {
-  uri: string;
   name: string;
-  state: string;
   classHash: string;
   students: StudentUser[];
 }
@@ -92,6 +108,8 @@ export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string
            ? appModeParam
            : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
 };
+
+export type UserType = "student" | "teacher";
 
 export interface PortalTeacherJWT extends BasePortalJWT {
   domain: string;
@@ -129,7 +147,8 @@ export interface BasePortalFirebaseJWT {
   aud: string;
   iat: number;
   exp: number;
-  uid: number;
+  uid: string;
+  user_id: string;
 }
 
 export interface PortalFirebaseStudentJWT extends BasePortalFirebaseJWT {
@@ -205,7 +224,15 @@ export const getFirebaseJWTWithBearerToken = (domain: string, type: string, rawT
   });
 };
 
-export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
+export interface GetClassInfoParams {
+  classInfoUrl: string;
+  rawPortalJWT: string;
+  portal: string;
+  offeringId: number;
+}
+
+export const getClassInfo = (params: GetClassInfoParams) => {
+  const {classInfoUrl, rawPortalJWT, portal, offeringId} = params;
   return new Promise<ClassInfo>((resolve, reject) => {
     superagent
     .get(classInfoUrl)
@@ -219,20 +246,22 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
         const rawClassInfo: RawClassInfo = res.body;
 
         const classInfo: ClassInfo = {
-          uri: rawClassInfo.uri,
           name: rawClassInfo.name,
-          state: rawClassInfo.state,
           classHash: rawClassInfo.class_hash,
           students: rawClassInfo.students.map((rawStudent) => {
             const fullName = `${rawStudent.first_name} ${rawStudent.last_name}`;
+            const id = rawStudent.id.split("/").pop() || "0";
             const student: StudentUser = {
               type: "student",
-              id: rawStudent.id,
+              id,
+              portal,
               firstName: rawStudent.first_name,
               lastName: rawStudent.last_name,
               fullName,
               className: rawClassInfo.name,
-              initials: initials(fullName)
+              initials: initials(fullName),
+              classHash: rawClassInfo.class_hash,
+              offeringId: `${offeringId}`,
             };
             return student;
           }),
@@ -244,10 +273,25 @@ export const getClassInfo = (classInfoUrl: string, rawPortalJWT: string) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, token?: string, domain?: string) => {
-  return new Promise<AuthenticatedUser>((resolve, reject) => {
+export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
+  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
+    const {token, domain} = urlParams || {token: undefined, domain: undefined};
+
     if (appMode !== "authed") {
-      resolve(DEV_USER);
+      if (appMode === "demo") {
+        urlParams = urlParams || {demoClass: undefined, demoUser: undefined, demoOffering: undefined};
+        const {demoClass, demoUser, demoOffering} = urlParams;
+        if (!demoClass || !demoUser || !demoOffering) {
+          return reject("Missing demoClass or demoUser or demoOffering parameter for demo!");
+        }
+        const [userType, userId, ...rest] = demoUser.split(":");
+        if (((userType !== "student") && (userType !== "teacher")) || !userId) {
+          return reject("demoUser must be in the form of student:<id> or teacher:<id>");
+        }
+        resolve(createDemoInfo(demoClass, userType, userId, demoOffering));
+      }
+
+      resolve({authenticatedUser: DEV_USER, classInfo: DEV_CLASS_INFO});
     }
 
     if (!token) {
@@ -259,7 +303,7 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
     }
 
     return getPortalJWTWithBearerToken(domain, "Bearer", token)
-      .then(([rawJPortalWT, portalJWT]) => {
+      .then(([rawPortalJWT, portalJWT]) => {
 
         return getFirebaseJWTWithBearerToken(domain, "Bearer", token)
           .then(([rawFirebaseJWT, firebaseJWT]) => {
@@ -267,15 +311,22 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
             if (portalJWT.user_type === "learner") {
               const classInfoUrl = portalJWT.class_info_url;
 
-              return getClassInfo(classInfoUrl, rawJPortalWT)
+              const domainParser = document.createElement("a");
+              domainParser.href = portalJWT.domain;
+              const portal = domainParser.hostname;
+
+              return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId: portalJWT.offering_id})
                 .then((classInfo) => {
-                  const user = classInfo.students.find((student) => student.id === portalJWT.user_id);
-                  if (user) {
-                    user.portalJWT = portalJWT;
-                    user.rawPortalJWT = rawJPortalWT;
-                    user.firebaseJWT = firebaseJWT;
-                    user.rawFirebaseJWT = rawFirebaseJWT;
-                    resolve(user);
+                  const uidAsString = `${portalJWT.uid}`;
+                  const authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                  if (authenticatedUser) {
+                    authenticatedUser.portalJWT = portalJWT;
+                    authenticatedUser.rawPortalJWT = rawPortalJWT;
+                    authenticatedUser.firebaseJWT = firebaseJWT;
+                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                    authenticatedUser.id = `${portalJWT.uid}`;
+                    authenticatedUser.portal = portal;
+                    resolve({authenticatedUser, classInfo});
                   }
                   else {
                     reject("Current user not found in class roster");
@@ -290,6 +341,49 @@ export const authenticate = (appMode: AppMode, token?: string, domain?: string) 
       })
       .catch(reject);
   });
+};
+
+export const createDemoUser = (classId: string, userType: UserType, userId: string, offeringId: string) => {
+  if (userType === "student") {
+    const student: StudentUser = {
+      type: "student",
+      id: userId,
+      portal: "demo",
+      firstName: "Student",
+      lastName: `${userId}`,
+      fullName: `Student ${userId}`,
+      initials: `S${userId}`,
+      className: `Demo Class ${classId}`,
+      classHash: `democlass${classId}`,
+      offeringId,
+    };
+    return student;
+  }
+  else {
+    const teacher: TeacherUser = {
+      type: "teacher",
+      id: userId,
+      portal: "demo",
+      firstName: "Student",
+      lastName: `${userId}`,
+      fullName: `Student ${userId}`,
+      initials: `S${userId}`
+    };
+    return teacher;
+  }
+};
+
+export const createDemoInfo = (classId: string, userType: UserType, userId: string, offeringId: string) => {
+  const authenticatedUser = createDemoUser(classId, userType, userId, offeringId);
+  const classInfo: ClassInfo = {
+    name: `Demo Class ${classId}`,
+    classHash: `democlass${classId}`,
+    students: []
+  };
+  for (let i = 1; i <= NUM_DEMO_STUDENTS; i++) {
+    classInfo.students.push(createDemoUser(classId, "student", `${i}`, offeringId) as StudentUser);
+  }
+  return {authenticatedUser, classInfo};
 };
 
 export const _private = {
