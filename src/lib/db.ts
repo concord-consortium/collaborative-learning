@@ -45,6 +45,7 @@ export class DB {
   private groupsRef: firebase.database.Reference | null = null;
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
+  private workspaceRef: firebase.database.Reference | null  = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -258,18 +259,7 @@ export class DB {
           return sectionDocument;
         })
         .then((sectionDocument) => {
-          // open the user's document
-          return this.openDocument(user.id, sectionDocument.documentKey)
-            .then((userDocument) => {
-              const workspace = WorkspaceModel.create({
-                mode: "1-up",
-                tool: "select",
-                sectionId,
-                userDocument,
-                visibility: sectionDocument.visibility,
-              });
-              return workspace;
-            });
+          return this.createWorkspaceFromSectionDocument(user.id, sectionDocument);
         })
         .then((workspace) => {
           // TODO: PT #159980227: open group documents and listen for group changes
@@ -432,6 +422,9 @@ export class DB {
           return this.startGroupsListener();
         })
         .then(() => {
+          return this.startWorkspaceListener();
+        })
+        .then(() => {
           this.isListening = true;
         })
         .then(resolve)
@@ -442,6 +435,7 @@ export class DB {
   private stopListeners() {
     this.stopLatestGroupIdListener();
     this.stopGroupListeners();
+    this.stopWorkspaceListener();
     this.isListening = false;
   }
 
@@ -510,6 +504,26 @@ export class DB {
     if (this.groupsRef) {
       this.groupsRef.off("value", this.handleGroupsRef);
       this.groupsRef = null;
+    }
+  }
+
+  private startWorkspaceListener() {
+    this.workspaceRef = this.ref(this.getSectionDocumentPath(this.stores.user));
+    this.workspaceRef.on("child_added", this.handleWorkspaceChildAdded);
+  }
+
+  private stopWorkspaceListener() {
+    if (this.workspaceRef) {
+      this.workspaceRef.off("child_added", this.handleWorkspaceChildAdded);
+    }
+  }
+
+  private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
+    const {user, workspaces, ui} = this.stores;
+    const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
+    if (sectionDocument && !workspaces.getWorkspaceBySectionId(sectionDocument.self.sectionId)) {
+      this.createWorkspaceFromSectionDocument(user.id, sectionDocument)
+        .then(workspaces.addWorkspace);
     }
   }
 
@@ -589,4 +603,17 @@ export class DB {
     }
   }
 
+  private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
+    return this.openDocument(userId, sectionDocument.documentKey)
+      .then((userDocument) => {
+        const workspace = WorkspaceModel.create({
+          mode: "1-up",
+          tool: "select",
+          sectionId: sectionDocument.self.sectionId,
+          userDocument,
+          visibility: sectionDocument.visibility,
+        });
+        return workspace;
+      });
+  }
 }
