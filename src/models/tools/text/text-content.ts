@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
+import Plain from "slate-plain-serializer";
 
 export const kTextToolID = "Text";
 
@@ -62,6 +63,18 @@ export const TextContentModel = types
         }
       }
       return Value.fromJSON(parsed);
+    }
+  }))
+  .views(self => ({
+    convertSlate() {
+      switch (self.format) {
+        case "slate":
+          return self.getSlate();
+        case "markdown":
+          // handle markdown import here; for now we treat as text
+        default:
+          return Plain.deserialize(self.joinText);
+      }
     }
   }))
   .actions(self => ({
