@@ -9,7 +9,7 @@ export const UnknownContentModel = types
     originalContent: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    const { type, ...others }: { type: string } = snapshot || {};
+    const { type, ...others }: { type: string } = snapshot;
     return type && (type !== kUnknownToolID)
             ? {
               type: kUnknownToolID,

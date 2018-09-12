@@ -5,20 +5,20 @@ export const kTextToolID = "Text";
 
 export const StringOrArray = types.union(types.string, types.array(types.string));
 
-const emptyJson: ValueJSON = {
-        document: {
-          nodes: [{
-            object: "block",
-            type: "paragraph",
-            nodes: [{
-              object: "text",
-              leaves: [{
-                text: ""
-              }]
-            }]
-          }]
-        }
-      };
+export const emptyJson: ValueJSON = {
+              document: {
+                nodes: [{
+                  object: "block",
+                  type: "paragraph",
+                  nodes: [{
+                    object: "text",
+                    leaves: [{
+                      text: ""
+                    }]
+                  }]
+                }]
+              }
+            };
 
 const errorJson: ValueJSON = {
         document: {
@@ -37,7 +37,7 @@ const errorJson: ValueJSON = {
 
 export const TextContentModel = types
   .model("TextTool", {
-    type: types.literal(kTextToolID),
+    type: types.optional(types.literal(kTextToolID), kTextToolID),
     text: types.optional(StringOrArray, ""),
     // e.g. "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string)
