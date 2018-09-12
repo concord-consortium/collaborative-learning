@@ -41,7 +41,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
 
   private renderContent(content: DocumentContentModelType) {
     return (
-      <CanvasComponent readOnly={true} />
+      <CanvasComponent readOnly={true} content={content}/>
     );
   }
 
@@ -58,10 +58,9 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     const { section } = this.props;
     if (section) {
       // TODO: create section id instead of using type
-      const sectionId = section.type;
-      const workspace = workspaces.getWorkspaceBySectionId(sectionId);
+      const workspace = workspaces.getWorkspaceBySectionId(section.id);
       const done = () => {
-        ui.setActiveWorkspaceSectionId(sectionId);
+        ui.setActiveWorkspaceSectionId(section.id);
         ui.contractAll();
         this.openWorkspaceButton!.disabled = false;
       };
@@ -71,7 +70,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
         done();
       }
       else {
-        db.createWorkspace(sectionId)
+        db.createWorkspace(section.id)
           .then(workspaces.addWorkspace)
           .then(done)
           .catch(ui.setError);
