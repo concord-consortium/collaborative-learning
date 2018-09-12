@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 0.0.3 - released September 12, 2018
+
+- Added active section and active LL tab [#160284706]
+- Genericize document model [#160175815] - add layout object to tiles to support arbitrary layout paradigms - update curriculum to match document model
+- Added open workspace button [#160358488]
+- Added demo mode [#160288085]
+- Enable basic creation/editing of text tool objects in user documents [#159979476]
+- Added content for "My Work" tab [#160359729]
+
+### Asset Sizes
+
+| File | Size | % Increase from Previous Release |
+|---|---|---|
+| index.css | 11,863 bytes | 67.8% |
+| index.js | 1,495,031 bytes | 30.1% |
+
 ## Version 0.0.2 - released September 5, 2018
 
 - Refactor stores [#160188594] - moves `stores` into separate module - @inject stores into all components that need them
