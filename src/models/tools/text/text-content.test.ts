@@ -1,5 +1,6 @@
 import { TextContentModel, kTextToolID, emptyJson } from "./text-content";
-import { Value } from "slate";
+import { Value, ValueJSON } from "slate";
+import Plain from "slate-plain-serializer";
 
 describe("TextContentModel", () => {
 
@@ -37,8 +38,8 @@ describe("TextContentModel", () => {
   it("handles slate format strings", () => {
     const model = TextContentModel.create();
     model.setSlate(Value.fromJSON(emptyJson));
-    const outJson = model.getSlate();
-    expect(outJson).toBeDefined();
+    const slate = model.getSlate();
+    expect(Plain.serialize(slate)).toBe("");
 
     // handles errors gracefully
     const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
@@ -47,4 +48,32 @@ describe("TextContentModel", () => {
     expect(bogus2.getSlate()).toBeDefined();
   });
 
+  const fooJson: ValueJSON = {
+                document: {
+                  nodes: [{
+                    object: "block",
+                    type: "paragraph",
+                    nodes: [{
+                      object: "text",
+                      leaves: [{
+                        text: "foo"
+                      }]
+                    }]
+                  }]
+                }
+              };
+
+  it("converts to slate correctly", () => {
+    const foo = "foo";
+    const model = TextContentModel.create({ text: foo });
+    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+
+    model.setMarkdown("foo");
+    expect(model.format).toBe("markdown");
+    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+
+    model.setSlate(fooJson);
+    expect(model.format).toBe("slate");
+    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+  });
 });

@@ -82,6 +82,10 @@ export const TextContentModel = types
       self.format = undefined;
       self.text = text;
     },
+    setMarkdown(text: string) {
+      self.format = "markdown";
+      self.text = text;
+    },
     setSlate(value: any) {
       self.format = "slate";
       self.text = JSON.stringify(value);
