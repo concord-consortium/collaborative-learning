@@ -27,6 +27,10 @@ export const SectionModel = types
   })
   .views(self => {
     return {
+      get id() {
+        // until we come up with a more permanent ID
+        return self.type;
+      },
       get title() {
         return sectionInfo[self.type].title;
       },

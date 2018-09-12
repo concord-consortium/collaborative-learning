@@ -26,6 +26,9 @@ export const WorkspaceModel = types
 
       toggleTool(tool: WorkspaceTool) {
         self.tool = tool === self.tool ? "select" : tool;
+        if (tool === "text") {
+          self.userDocument.content.addTextTile();
+        }
       },
 
       toggleVisibility(overide?: "public" | "private") {

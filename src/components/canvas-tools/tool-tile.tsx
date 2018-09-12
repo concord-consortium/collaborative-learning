@@ -36,7 +36,7 @@ export class ToolTileComponent extends React.Component<IProps, {}> {
 
   private renderTextTile() {
     return (
-      <TextToolComponent {...this.props} />
+      <TextToolComponent key={this.props.model.id} {...this.props} />
     );
   }
 

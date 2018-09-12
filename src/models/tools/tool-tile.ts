@@ -1,12 +1,15 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileLayoutModel } from "./tile-layout";
 import { ToolContentUnion } from "./tool-types";
+import * as uuid from "uuid/v4";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
 
 export const ToolTileModel = types
   .model("ToolTile", {
+    // if not provided, will be generated
+    id: types.optional(types.string, () => uuid()),
     // optional information about placement of tile
     layout: types.maybe(TileLayoutModel),
     // e.g. "GeometryContentModel", "RichTextContentModel", "TableContentModel", "TextContentModel"

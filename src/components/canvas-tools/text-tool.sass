@@ -2,9 +2,13 @@
 
 .text-tool
   width: 100%
+  min-height: 18px
   text-align: left
-  padding: 5px
+  padding: 3px 0
+  margin: 3px 0
 
-  .read-only
+  &.editable
+    border: 1px solid #cccccc
+
+  &.read-only
     user-modify: read-only
-
