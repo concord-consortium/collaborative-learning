@@ -32,12 +32,15 @@ export const UserModel = types
     setAuthenticatedUser(user: AuthenticatedUser) {
       self.authenticated = true;
       self.name = user.fullName;
-      self.className = user.className;
       self.latestGroupId = undefined;
       self.id = user.id;
-      self.classHash = user.classHash;
-      self.offeringId = user.offeringId;
       self.portal = user.portal;
+
+      if (user.type === "student") {
+        self.className = user.className;
+        self.classHash = user.classHash;
+        self.offeringId = user.offeringId;
+      }
     },
   }))
   .views((self) => ({

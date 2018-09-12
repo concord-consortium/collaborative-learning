@@ -22,7 +22,7 @@ export interface IDBAuthConnectOptions {
   stores: IStores;
 }
 export interface IDBNonAuthConnectOptions {
-  appMode: "dev" | "test";
+  appMode: "dev" | "test" | "demo";
   stores: IStores;
 }
 export interface UserGroupMap {
@@ -356,7 +356,7 @@ export class DB {
     const { appMode } = this;
     const parts = [`${appMode}`];
 
-    if (appMode !== "authed") {
+    if ((appMode === "dev") || (appMode === "test")) {
       parts.push(this.firebaseUser ? `${this.firebaseUser.uid}` : "no-user-id");
     }
     parts.push("portals");

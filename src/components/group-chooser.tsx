@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "./base";
 import { GroupUsersMap } from "../lib/db";
 
 import "./group-chooser.sass";
+import { GroupModelType } from "../models/groups";
 
 const MAX_GROUPS = 99;
 
@@ -58,9 +59,15 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
         return <span key={user.id} className={className} title={title}>{user.initials}</span>;
       });
       return (
-        <div className="group" key={group.id} onClick={this.handleChooseExistingGroup(group.id)}>
+        <div
+          className="group"
+          key={group.id}
+          onClick={this.handleChooseExistingGroup(group)}
+        >
           <div className="group-title">{`Group ${group.id}`}</div>
-          {users}
+          <div className="group-users">
+            {users}
+          </div>
         </div>
       );
     });
@@ -79,10 +86,15 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
     this.stores.db.joinGroup(groupId);
   }
 
-  private handleChooseExistingGroup = (groupId: string) => {
+  private handleChooseExistingGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
-      this.selectGroup(groupId);
+      if (group.users.length >= 4) {
+        alert("Sorry, that group is full with four students.");
+      }
+      else {
+        this.selectGroup(group.id);
+      }
     };
   }
 

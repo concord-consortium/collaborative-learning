@@ -6,6 +6,7 @@ import { LeftNavComponent } from "./left-nav";
 import { MyWorkComponent } from "./my-work";
 import { WorkspaceComponent } from "./workspace";
 import { BaseComponent, IBaseProps } from "./base";
+import { DemoCreatorComponment } from "./demo-creator";
 
 import "./app-container.sass";
 

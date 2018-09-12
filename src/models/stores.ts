@@ -5,8 +5,10 @@ import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { WorkspacesModel, WorkspacesModelType } from "./workspaces";
 import { DB } from "../lib/db";
+import { UnitModelType, UnitModel } from "./curriculum/unit";
+import { DemoModelType, DemoModel } from "./demo";
 
-export type AppMode = "authed" | "dev" | "test";
+export type AppMode = "authed" | "dev" | "test" | "demo";
 
 export interface IStores {
   appMode: AppMode;
@@ -17,6 +19,9 @@ export interface IStores {
   class: ClassModelType;
   workspaces: WorkspacesModelType;
   db: DB;
+  unit: UnitModelType;
+  demo: DemoModelType;
+  showDemoCreator: boolean;
 }
 
 export interface ICreateStores {
@@ -28,6 +33,9 @@ export interface ICreateStores {
   class?: ClassModelType;
   workspaces?: WorkspacesModelType;
   db?: DB;
+  showDemoCreator?: boolean;
+  unit?: UnitModelType;
+  demo?: DemoModelType;
 }
 
 export function createStores(params?: ICreateStores): IStores {
@@ -41,5 +49,8 @@ export function createStores(params?: ICreateStores): IStores {
     class: params && params.class || ClassModel.create({name: "Null Class", classHash: ""}),
     db: params && params.db || new DB(),
     workspaces: params && params.workspaces || WorkspacesModel.create({}),
+    unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
+    demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
+    showDemoCreator: params && params.showDemoCreator || false
   };
 }
