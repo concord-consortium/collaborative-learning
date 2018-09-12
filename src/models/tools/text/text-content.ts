@@ -41,7 +41,8 @@ export const TextContentModel = types
     type: types.optional(types.literal(kTextToolID), kTextToolID),
     text: types.optional(StringOrArray, ""),
     // e.g. "markdown", "slate", "quill", empty => plain text
-    format: types.maybe(types.string)
+    format: types.maybe(types.string),
+    changes: 0
   })
   .views(self => ({
     get joinText() {
@@ -49,8 +50,16 @@ export const TextContentModel = types
               ? self.text.join("\n")
               : self.text;
 
-    },
-    getSlate() {
+    }
+  }))
+  .extend(self => {
+    // local cache of Slate's immutable.js object
+    let slateValue: Value | undefined;
+
+    // views
+    function getSlate() {
+      if (slateValue) { return slateValue; }
+
       const text = Array.isArray(self.text) ? "" : self.text;
       let parsed = emptyJson;
       if (text) {
@@ -62,34 +71,58 @@ export const TextContentModel = types
           parsed = errorJson;
         }
       }
-      return Value.fromJSON(parsed);
+      return slateValue = Value.fromJSON(parsed);
     }
-  }))
-  .views(self => ({
-    convertSlate() {
+
+    function convertSlate() {
+      if (slateValue) { return slateValue; }
+
       switch (self.format) {
         case "slate":
-          return self.getSlate();
+          return getSlate();
         case "markdown":
           // handle markdown import here; for now we treat as text
         default:
-          return Plain.deserialize(self.joinText);
+          return slateValue = Plain.deserialize(self.joinText);
       }
     }
-  }))
-  .actions(self => ({
-    setText(text: string) {
+
+    // actions
+    function setText(text: string) {
       self.format = undefined;
       self.text = text;
-    },
-    setMarkdown(text: string) {
+      slateValue = undefined;
+    }
+
+    function setMarkdown(text: string) {
       self.format = "markdown";
       self.text = text;
-    },
-    setSlate(value: any) {
-      self.format = "slate";
-      self.text = JSON.stringify(value);
+      slateValue = undefined;
     }
-  }));
+
+    function setSlate(value: Value) {
+      self.format = "slate";
+      self.text = JSON.stringify(value.toJSON());
+      ++self.changes;
+      slateValue = value;
+    }
+
+    function setSlateReadOnly(value: Value) {
+      slateValue = value;
+    }
+
+    return {
+      views: {
+        getSlate,
+        convertSlate
+      },
+      actions: {
+        setText,
+        setMarkdown,
+        setSlate,
+        setSlateReadOnly
+      }
+    };
+  });
 
 export type TextContentModelType = Instance<typeof TextContentModel>;

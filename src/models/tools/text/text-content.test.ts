@@ -45,7 +45,7 @@ describe("TextContentModel", () => {
     const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
     expect(bogus1.getSlate()).toBeDefined();
     const bogus2 = TextContentModel.create({ format: "slate", text: ["foo", "bar"] });
-    expect(bogus2.getSlate()).toBeDefined();
+    expect(bogus2.convertSlate()).toBeDefined();
   });
 
   const fooJson: ValueJSON = {
@@ -72,7 +72,14 @@ describe("TextContentModel", () => {
     expect(model.format).toBe("markdown");
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
 
-    model.setSlate(fooJson);
+    const fooValue = Value.fromJSON(fooJson);
+    const preChanges = model.changes;
+    model.setSlate(fooValue);
+    expect(model.changes).toBe(preChanges + 1);
+    expect(model.format).toBe("slate");
+    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+    model.setSlateReadOnly(fooValue);
+    expect(model.changes).toBe(preChanges + 1);
     expect(model.format).toBe("slate");
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
   });
