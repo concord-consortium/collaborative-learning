@@ -316,10 +316,8 @@ export class DB {
     });
   }
 
-  public openDocument(userId: string, offeringDoc: DBOfferingUserSectionDocument) {
-    const {user, workspaces} = this.stores;
-    const {documentKey} = offeringDoc;
-    const sectionId = offeringDoc.self.sectionId;
+  public openDocument(userId: string, documentKey: string) {
+    const { user } = this.stores;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
       const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey, userId));
@@ -332,23 +330,6 @@ export class DB {
             throw new Error(`Unable to open document ${documentKey}`);
           }
 
-          // TODO: When the 4-up code is merged, we need a flag to disable this monitoring when we're
-          // just opening group mates' models
-          this.userDocumentRefs[documentKey] = documentRef;
-          documentRef.on("value", (snapshot) => {
-            if (snapshot && snapshot.val()) {
-              const updatedDoc: DBDocument = snapshot.val();
-              const updatedContent = this.parseDocumentContent(updatedDoc);
-              if (updatedContent) {
-                const workspace = workspaces.getWorkspaceBySectionId(sectionId);
-                if (workspace) {
-                  workspace.userDocument.setContent(updatedContent);
-                  this.monitorContentModel(updatedContent, documentRef, documentKey);
-                }
-              }
-            }
-          });
-
           const content = this.parseDocumentContent(document);
           return DocumentModel.create({
             uid: document.self.uid,
@@ -358,7 +339,6 @@ export class DB {
           });
         })
         .then((document) => {
-          this.monitorContentModel(document.content, documentRef, documentKey);
           resolve(document);
         })
         .catch(reject);
@@ -659,16 +639,19 @@ export class DB {
   }
 
   private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    return this.openDocument(userId, sectionDocument)
+    return this.openDocument(userId, sectionDocument.documentKey)
       .then((userDocument) => {
-        const workspace = WorkspaceModel.create({
-          mode: "1-up",
-          tool: "select",
-          sectionId: sectionDocument.self.sectionId,
-          userDocument,
-          visibility: sectionDocument.visibility,
-        });
-        return workspace;
+          this.monitorDocumentModel(userDocument);
+          this.monitorSectionDocumentRef(sectionDocument.self.sectionId, userDocument);
+
+          const newWorkspace = WorkspaceModel.create({
+            mode: "1-up",
+            tool: "select",
+            sectionId: sectionDocument.self.sectionId,
+            userDocument,
+            visibility: sectionDocument.visibility,
+          });
+          return newWorkspace;
       });
   }
 
@@ -691,13 +674,40 @@ export class DB {
     });
   }
 
-  private monitorContentModel = (content: DocumentContentModelType,
-                                 updateRef: firebase.database.Reference,
-                                 documentKey: string) => {
-    if (this.userDocumentDisposers[documentKey]) {
-      this.userDocumentDisposers[documentKey]();
+  private monitorSectionDocumentRef = (sectionId: string, document: DocumentModelType) => {
+    const { user, workspaces } = this.stores;
+    const documentKey = document.key;
+    const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
+
+    if (this.userDocumentRefs[documentKey]) {
+      this.userDocumentRefs[documentKey].off("value");
     }
-    this.userDocumentDisposers[documentKey] = (onSnapshot(content, (newContent) => {
+    this.userDocumentRefs[documentKey] = documentRef;
+
+    documentRef.on("value", (snapshot) => {
+      if (snapshot && snapshot.val()) {
+        const updatedDoc: DBDocument = snapshot.val();
+        const updatedContent = this.parseDocumentContent(updatedDoc);
+        if (updatedContent) {
+          const workspace = workspaces.getWorkspaceBySectionId(sectionId);
+          if (workspace) {
+            const workspaceDoc = workspace.userDocument;
+            workspaceDoc.setContent(updatedContent);
+            this.monitorDocumentModel(workspaceDoc);
+          }
+        }
+      }
+    });
+  }
+
+  private monitorDocumentModel = (document: DocumentModelType) => {
+    const { user } = this.stores;
+    const { key, content } = document;
+    if (this.userDocumentDisposers[key]) {
+      this.userDocumentDisposers[key]();
+    }
+    const updateRef = this.ref(this.getUserDocumentPath(user, key));
+    this.userDocumentDisposers[key] = (onSnapshot(content, (newContent) => {
       updateRef.update({
         content: JSON.stringify(newContent)
       });
