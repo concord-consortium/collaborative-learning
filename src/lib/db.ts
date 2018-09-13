@@ -47,6 +47,9 @@ export interface DisposerMap {
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
+  public _private = {
+    parseDocumentContent: this.parseDocumentContent
+  };
   private appMode: AppMode;
   private firebaseUser: firebase.User | null = null;
   private stores: IStores;
@@ -668,7 +671,8 @@ export class DB {
         return workspace;
       });
   }
-  private parseDocumentContent = (document: DBDocument): DocumentContentModelType|null => {
+
+  private parseDocumentContent(document: DBDocument): DocumentContentModelType|null {
     if (!document.content) {
       return null;
     }
