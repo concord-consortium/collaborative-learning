@@ -2,6 +2,7 @@ import { SnapshotIn, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document-content";
 import { InvestigationModel } from "./investigation";
 import { SectionModelType, SectionType } from "./section";
+import { SupportModel } from "./support";
 import { each, isObject } from "lodash";
 
 export const UnitModel = types
@@ -9,7 +10,8 @@ export const UnitModel = types
     title: types.string,
     subtitle: "",
     lookingAhead: types.maybe(DocumentContentModel),
-    investigations: types.array(InvestigationModel)
+    investigations: types.array(InvestigationModel),
+    supports: types.array(SupportModel),
   })
   .views(self => {
     return {
@@ -31,7 +33,10 @@ export const UnitModel = types
         // if only one exists, it corresponds to problem
         const problemOrdinal = ordinals[1] ? +ordinals[1] : +ordinals[0];
         const investigation = self.getInvestigation(investigationOrdinal);
-        return investigation && investigation.getProblem(problemOrdinal);
+        return {
+          investigation,
+          problem:  investigation && investigation.getProblem(problemOrdinal)
+        };
       }
     };
   });

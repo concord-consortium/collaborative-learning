@@ -7,6 +7,7 @@ import { WorkspacesModel, WorkspacesModelType } from "./workspaces";
 import { DB } from "../lib/db";
 import { UnitModelType, UnitModel } from "./curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
+import { SupportsModel, SupportsModelType } from "./supports";
 
 export type AppMode = "authed" | "dev" | "test" | "demo";
 
@@ -22,6 +23,7 @@ export interface IStores {
   unit: UnitModelType;
   demo: DemoModelType;
   showDemoCreator: boolean;
+  supports: SupportsModelType;
 }
 
 export interface ICreateStores {
@@ -36,6 +38,7 @@ export interface ICreateStores {
   showDemoCreator?: boolean;
   unit?: UnitModelType;
   demo?: DemoModelType;
+  supports?: SupportsModelType;
 }
 
 export function createStores(params?: ICreateStores): IStores {
@@ -51,6 +54,7 @@ export function createStores(params?: ICreateStores): IStores {
     workspaces: params && params.workspaces || WorkspacesModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
     demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
-    showDemoCreator: params && params.showDemoCreator || false
+    showDemoCreator: params && params.showDemoCreator || false,
+    supports: params && params.supports || SupportsModel.create({}),
   };
 }
