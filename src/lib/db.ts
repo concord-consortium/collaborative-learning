@@ -3,17 +3,19 @@ import { AppMode, IStores } from "../models/stores";
 import { UserModelType } from "../models/user";
 import { onSnapshot } from "mobx-state-tree";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { observable, action } from "mobx";
+import { observable } from "mobx";
 import { DBOfferingGroup,
          DBOfferingGroupUser,
          DBOfferingGroupMap,
          DBOfferingUser,
-         DBOfferingUserSectionDocumentMap,
          DBDocumentMetadata,
          DBDocument,
          DBOfferingUserSectionDocument} from "./db-types";
 import { WorkspaceModelType, WorkspaceModel } from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
+import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
+import { ToolTileModel } from "../models/tools/tool-tile";
+import { toolFactory } from "../models/tools/tool-types";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -35,6 +37,13 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
+export interface ReferenceMap {
+  [key: string]: firebase.database.Reference;
+}
+export interface DisposerMap {
+  [key: string]: IDisposer;
+}
+
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
@@ -46,6 +55,8 @@ export class DB {
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
   private workspaceRef: firebase.database.Reference | null  = null;
+  private userDocumentRefs: ReferenceMap = {};
+  private userDocumentDisposers: DisposerMap = {};
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -302,8 +313,10 @@ export class DB {
     });
   }
 
-  public openDocument(userId: string, documentKey: string) {
-    const {user} = this.stores;
+  public openDocument(userId: string, offeringDoc: DBOfferingUserSectionDocument) {
+    const {user, workspaces} = this.stores;
+    const {documentKey} = offeringDoc;
+    const sectionId = offeringDoc.self.sectionId;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
       const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey, userId));
@@ -315,15 +328,34 @@ export class DB {
           if (!document || !metadata) {
             throw new Error(`Unable to open document ${documentKey}`);
           }
+
+          // TODO: When the 4-up code is merged, we need a flag to disable this monitoring when we're
+          // just opening group mates' models
+          this.userDocumentRefs[documentKey] = documentRef;
+          documentRef.on("value", (snapshot) => {
+            if (snapshot && snapshot.val()) {
+              const updatedDoc: DBDocument = snapshot.val();
+              const updatedContent = this.parseDocumentContent(updatedDoc);
+              if (updatedContent) {
+                const workspace = workspaces.getWorkspaceBySectionId(sectionId);
+                if (workspace) {
+                  workspace.userDocument.setContent(updatedContent);
+                  this.monitorContentModel(updatedContent, documentRef, documentKey);
+                }
+              }
+            }
+          });
+
+          const content = this.parseDocumentContent(document);
           return DocumentModel.create({
             uid: document.self.uid,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
-            content: {}, // TODO: PT #159979453: load content
+            content: content ? content : {}
           });
         })
         .then((document) => {
-          // TODO: PT #159979453: listen for content changes and update model and save in firebase
+          this.monitorContentModel(document.content, documentRef, documentKey);
           resolve(document);
         })
         .catch(reject);
@@ -436,6 +468,7 @@ export class DB {
     this.stopLatestGroupIdListener();
     this.stopGroupListeners();
     this.stopWorkspaceListener();
+    this.stopUserDocListeners();
     this.isListening = false;
   }
 
@@ -463,6 +496,25 @@ export class DB {
       this.latestGroupIdRef.off("value");
       this.latestGroupIdRef = null;
     }
+  }
+
+  private stopUserDocListeners() {
+    this.stopUserDocModelListeners();
+    this.stopUserDocRefListeners();
+  }
+
+  private stopUserDocModelListeners() {
+    Object.keys(this.userDocumentDisposers).forEach((docId) => {
+      this.userDocumentDisposers[docId]();
+    });
+    this.userDocumentDisposers = {};
+  }
+
+  private stopUserDocRefListeners() {
+    Object.keys(this.userDocumentRefs).forEach((docId) => {
+      this.userDocumentRefs[docId].off("value");
+    });
+    this.userDocumentRefs = {};
   }
 
   private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
@@ -604,7 +656,7 @@ export class DB {
   }
 
   private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    return this.openDocument(userId, sectionDocument.documentKey)
+    return this.openDocument(userId, sectionDocument)
       .then((userDocument) => {
         const workspace = WorkspaceModel.create({
           mode: "1-up",
@@ -616,4 +668,36 @@ export class DB {
         return workspace;
       });
   }
+  private parseDocumentContent = (document: DBDocument): DocumentContentModelType|null => {
+    if (!document.content) {
+      return null;
+    }
+
+    const storedContent: DocumentContentModelType = JSON.parse(document.content);
+    return DocumentContentModel.create({
+      shared: storedContent.shared,
+      tiles: storedContent.tiles.map((tile) => {
+        const tileTool = toolFactory(tile.content);
+        return ToolTileModel.create({
+          id: tile.id,
+          layout: tile.layout,
+          content: tileTool.create(tile.content)
+        });
+      })
+    });
+  }
+
+  private monitorContentModel = (content: DocumentContentModelType,
+                                 updateRef: firebase.database.Reference,
+                                 documentKey: string) => {
+    if (this.userDocumentDisposers[documentKey]) {
+      this.userDocumentDisposers[documentKey]();
+    }
+    this.userDocumentDisposers[documentKey] = (onSnapshot(content, (newContent) => {
+      updateRef.update({
+        content: JSON.stringify(newContent)
+      });
+    }));
+  }
+
 }
