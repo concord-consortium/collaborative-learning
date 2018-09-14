@@ -23,9 +23,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
             <div className="class">{user.className}</div>
           </div>
         </div>
-        <div className="group">
-          {myGroup ? this.renderGroup(myGroup) : null}
-        </div>
+        {myGroup ? this.renderGroup(myGroup) : null}
         <div className="user">
           <div className="name">{user.name}</div>
         </div>
@@ -35,7 +33,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   private renderGroup(group: GroupModelType) {
     return (
-      <div>
+      <div className="group">
         <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
         <div className="members">
           {group.users.map((user) => this.renderGroupUser(user))}

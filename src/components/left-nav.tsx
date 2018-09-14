@@ -30,7 +30,7 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
                 active={leftNavExpanded && (activeSectionIndex === sectionIndex)}
                 onClick={this.handleTabClick(sectionIndex)}
               >
-                <span title={section.title}>{section.abbrev}</span>
+                <span title={section.title}>{section.title}</span>
               </TabComponent>
             );
           })}

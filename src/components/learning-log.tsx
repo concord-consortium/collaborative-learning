@@ -5,6 +5,9 @@ import "./learning-log.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
+import { CanvasComponent } from "./canvas";
+import { LearningLogWorkspaceModelType } from "../models/workspaces";
+import { timeAgo, niceDateTime } from "../utilities/time";
 
 interface IProps extends IBaseProps {}
 
@@ -13,51 +16,88 @@ interface IProps extends IBaseProps {}
 export class LearningLogComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const className = `learning-log${this.stores.ui.learningLogExpanded ? " expanded" : ""}`;
-    const tabs = ["LL", "M", "C"];
-    const {activeLearningLogTab, learningLogExpanded} = this.stores.ui;
-
     return (
-      <div className={className}>
-        <TabSetComponent>
-          {tabs.map((tab) => {
-            return (
-              <TabComponent
-                id={this.getTabId(tab)}
-                key={tab}
-                active={learningLogExpanded && (activeLearningLogTab === tab)}
-                onClick={this.handleTabClick(tab)}
-              >
-                {tab}
-              </TabComponent>
-            );
-          })}
-        </TabSetComponent>
-        <div
-          className="expanded-area"
-          aria-labelledby={this.getTabId(activeLearningLogTab)}
-          aria-hidden={!learningLogExpanded}
-        >
-          <div className="tbd">{activeLearningLogTab}</div>
-        </div>
+      <div className="learning-log">
+        <button onClick={this.handleCreateLearningLog}>Create</button>
+        {this.renderLearningLogs()}
       </div>
     );
   }
 
-  private handleTabClick = (tab: string) => {
-    const { ui } = this.stores;
+  private renderLearningLogs() {
+    const learningLogs = this.getSortedLearningLogs();
+    if (learningLogs.length === 0) {
+      return null;
+    }
+    return (
+      <div className="list">
+        {learningLogs.map((learningLog) => {
+          return (
+            <div
+              className="list-item"
+              key={learningLog.document.key}
+            >
+              <div
+                className="scaled-list-item-container"
+                onClick={this.handleLearningLogClicked(learningLog)}
+                onDragStart={this.handleLearningLogDragStart(learningLog)}
+                draggable={true}
+              >
+                <div className="scaled-list-item">
+                  <CanvasComponent document={learningLog.document} readOnly={true} />
+                </div>
+              </div>
+              <div className="info">
+                <span onClick={this.handleRenameLearningLog(learningLog)}>{learningLog.title}</span>
+                <div className="created" title={niceDateTime(learningLog.createdAt)}>
+                  {timeAgo(learningLog.createdAt)}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  private handleCreateLearningLog = () => {
+    const title = (prompt("Enter name of learning log") || "").trim();
+    if (title.length > 0) {
+      this.stores.db.createLearningLogWorkspace(title)
+        .then(this.handleSelectLearningLog)
+        .catch(this.stores.ui.setError);
+    }
+  }
+
+  private handleLearningLogClicked = (learningLog: LearningLogWorkspaceModelType) => {
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      if (ui.activeLearningLogTab !== tab) {
-        ui.setActiveLearningLogTab(tab);
-        this.stores.ui.toggleLearningLog(true);
-      }
-      else {
-        this.stores.ui.toggleLearningLog();
+      this.handleSelectLearningLog(learningLog);
+    };
+  }
+
+  private handleSelectLearningLog = (learningLog: LearningLogWorkspaceModelType) => {
+    const {ui} = this.stores;
+    ui.setAvailableWorkspace(learningLog);
+    ui.contractAll();
+  }
+
+  private handleLearningLogDragStart = (workspace: LearningLogWorkspaceModelType) => {
+    return (e: React.DragEvent<HTMLDivElement>) => {
+      e.dataTransfer.setData("workspace.document.key", workspace.document.key);
+    };
+  }
+
+  private handleRenameLearningLog = (learningLog: LearningLogWorkspaceModelType) => {
+    const {ui} = this.stores;
+    return (e: React.MouseEvent<HTMLSpanElement>) => {
+      const title = (prompt("Enter new name of learning log", learningLog.title) || "").trim();
+      if ((title.length > 0) && (title !== learningLog.title)) {
+        learningLog.setTitle(title);
       }
     };
   }
 
-  private getTabId(tab: string) {
-    return `learningLogTab${tab}`;
+  private getSortedLearningLogs() {
+    return this.stores.workspaces.learningLogs.slice().sort((a, b) => b.createdAt - a.createdAt);
   }
 }

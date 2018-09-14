@@ -1,23 +1,59 @@
 $animation-speed: 500ms
 
-$header-height: 50px
+$header-height: 55px
+$header-background: #C9DAB7
+$header-highlight: #D7E3C9
 
-$my-work-contracted-height: 25px
-$my-work-expanded-height: 100px
+$workspace-titlebar-background: #C9DAB7
+$workspace-statusbar-background: #D7E3C9
 
-$left-nav-contracted-width: 40px
+$workspace-border-color: #FBF8E5
+$workspace-titlebar-height: 40px
+$workspace-statusbar-height: 40px
+$workspace-toolbar-width: 40px
+
+$nav-expanded-peek: 15px;
+
+$bottom-nav-contracted-height: 32px
+$bottom-nav-expanded-height: 130px
+
+$left-nav-contracted-width: 94px
 $left-nav-expanded-width: 700px
 
-$learning-log-contracted-width: 40px
-$learning-log-expanded-width: 160px
+$right-nav-contracted-width: 94px
+$right-nav-expanded-width: 214px
 
-$tab-background-color: #f2f2f2
-$tab-border-color: #797979
+$left-nav-tab-background-color: #EBE7C0
+$left-nav-tab-active-background-color: #D1CC7E
+$left-nav-tab-hover-background-color: #D2CDA0
+
+$right-nav-tab-background-color: #ECD8A5
+$right-nav-tab-active-background-color: #dab76b
+$right-nav-tab-hover-background-color: #e3c788
+
+$bottom-nav-tab-background-color: #A4CDE9
+$bottom-nav-tab-active-background-color: #69a5d5
+$bottom-nav-tab-hover-background-color: #86b9df
+
+$tab-border-color: #FBF8E5
 $tab-border-radius: 10px
+$tab-min-height: 50px
+$tab-color: #474748
+$tab-font-size: 12px
+$tab-font-weight: 700
+$tab-letter-spacing: 0
 
 $active-tab-color: #fff
 $active-tab-background-color: #aaa
 
-$workspace-titlebar-height: 25px
-$workspace-supports-height: 40px
-$workspace-toolbar-width: 40px
+=tab($direction)
+  display: flex
+  justify-content: $direction
+  align-items: center
+  text-align: $direction
+  color: $tab-color
+  font-size: $tab-font-size
+  font-weight: $tab-font-weight
+  letter-spacing: $tab-letter-spacing
+  padding: 0 5px
+

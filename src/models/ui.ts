@@ -1,65 +1,73 @@
 import { types } from "mobx-state-tree";
-import { SectionModelType, SectionModel } from "./curriculum/section";
-import { WorkspaceModel, WorkspaceModelType } from "./workspaces";
+import { SectionWorkspaceModelType, LearningLogWorkspaceModelType } from "./workspaces";
 
-type ToggleElement = "learningLogExpanded" | "leftNavExpanded" | "myWorkExpanded";
+export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
 export const UIModel = types
   .model("UI", {
-    learningLogExpanded: false,
+    rightNavExpanded: false,
     leftNavExpanded: false,
-    myWorkExpanded: false,
+    bottomNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
-    activeLearningLogTab: "LL",
-    activeWorkspaceSectionId: types.maybe(types.string),
+    activeRightNavTab: "My Work",
+    primaryWorkspaceDocumentKey: types.maybe(types.string),
+    comparisonWorkspaceDocumentKey: types.maybe(types.string),
+    comparisonWorkspaceVisible: false,
     showDemo: false,
     showDemoCreator: false,
   })
   .views((self) => ({
     get allContracted() {
-      return !self.learningLogExpanded && !self.leftNavExpanded && !self.myWorkExpanded;
+      return !self.rightNavExpanded && !self.leftNavExpanded && !self.bottomNavExpanded;
     },
   }))
   .actions((self) => {
     const contractAll = () => {
-      self.learningLogExpanded = false;
+      self.rightNavExpanded = false;
       self.leftNavExpanded = false;
-      self.myWorkExpanded = false;
+      self.bottomNavExpanded = false;
     };
 
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
       const expanded = typeof override !== "undefined" ? override : !self[toggle];
 
-      // for mobx we can't set self[toggle] as it doesn't trigger the update
-      // so we set everything to false and then only expand a single toggle if needed
       contractAll();
 
-      if (expanded) {
-        switch (toggle) {
-          case "learningLogExpanded":
-            self.learningLogExpanded = true;
-            break;
-          case "leftNavExpanded":
-            self.leftNavExpanded = true;
-            break;
-          case "myWorkExpanded":
-            self.myWorkExpanded = true;
-            break;
-        }
+      switch (toggle) {
+        case "rightNavExpanded":
+          self.rightNavExpanded = expanded;
+          break;
+        case "leftNavExpanded":
+          self.leftNavExpanded = expanded;
+          break;
+        case "bottomNavExpanded":
+          self.bottomNavExpanded = expanded;
+          break;
       }
+    };
+
+    const setPrimaryWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+      self.primaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    };
+
+    const setComparisonWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+      self.comparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
     return {
       contractAll,
+      setPrimaryWorkspace,
+      setComparisonWorkspace,
+
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },
-      toggleLearningLog(override?: boolean) {
-        toggleWithOverride("learningLogExpanded", override);
+      toggleRightNav(override?: boolean) {
+        toggleWithOverride("rightNavExpanded", override);
       },
-      toggleMyWork(override?: boolean) {
-        toggleWithOverride("myWorkExpanded", override);
+      toggleBottomNav(override?: boolean) {
+        toggleWithOverride("bottomNavExpanded", override);
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
@@ -67,14 +75,37 @@ export const UIModel = types
       setActiveSectionIndex(activeSectionIndex: number) {
         self.activeSectionIndex = activeSectionIndex;
       },
-      setActiveLearningLogTab(tab: string) {
-        self.activeLearningLogTab = tab;
+      setActiveRightNavTab(tab: string) {
+        self.activeRightNavTab = tab;
       },
-      setActiveWorkspaceSectionId(sectionId?: string) {
-        self.activeWorkspaceSectionId = sectionId;
+      setAvailableWorkspace(workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
+        if (self.comparisonWorkspaceVisible) {
+          setComparisonWorkspace(workspace);
+        }
+        else {
+          setPrimaryWorkspace(workspace);
+        }
+      },
+      closeWorkspace(workspace: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
+        const {key} = workspace.document;
+        if (key === self.primaryWorkspaceDocumentKey) {
+          self.primaryWorkspaceDocumentKey = undefined;
+          self.comparisonWorkspaceDocumentKey = undefined;
+          self.comparisonWorkspaceVisible = false;
+        }
+        else if (key === self.comparisonWorkspaceDocumentKey) {
+          self.comparisonWorkspaceDocumentKey = undefined;
+        }
       },
       setShowDemo(showDemo: boolean) {
         self.showDemoCreator = showDemo;
+      },
+      toggleComparisonWorkspaceVisible(override?: boolean) {
+        const visible = typeof override !== "undefined" ? override : !self.comparisonWorkspaceVisible;
+        self.comparisonWorkspaceVisible = visible;
+        if (!visible) {
+          self.comparisonWorkspaceDocumentKey = undefined;
+        }
       }
     };
   });

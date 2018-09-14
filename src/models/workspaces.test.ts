@@ -1,26 +1,26 @@
-import { WorkspaceModel, WorkspaceModelType, WorkspacesModel, WorkspacesModelType } from "./workspaces";
+import { SectionWorkspaceModel, SectionWorkspaceModelType, WorkspacesModel, WorkspacesModelType } from "./workspaces";
 import { DocumentModel } from "./document";
 
 describe("workspaces model", () => {
   let workspaces: WorkspacesModelType;
-  let workspace: WorkspaceModelType;
+  let workspace: SectionWorkspaceModelType;
 
   beforeEach(() => {
-    workspace = WorkspaceModel.create({
+    workspace = SectionWorkspaceModel.create({
       mode: "1-up",
       tool: "select",
       sectionId: "1",
       visibility: "public",
-      userDocument: DocumentModel.create({
+      document: DocumentModel.create({
         uid: "1",
         key: "test",
         createdAt: 1,
         content: {}
       }),
-      groupDocuments: {}
+      groupDocuments: {},
     });
     workspaces = WorkspacesModel.create({});
-    workspaces.addWorkspace(workspace);
+    workspaces.addSectionWorkspace(workspace);
   });
 
   it("has default values", () => {
@@ -43,17 +43,17 @@ describe("workspaces model", () => {
   });
 
   it("allows the select tool to be toggled", () => {
-    workspace.toggleTool("select");
+    workspace.selectTool("select");
     expect(workspace.tool).toBe("select");
-    workspace.toggleTool("select");
+    workspace.selectTool("select");
     expect(workspace.tool).toBe("select");
   });
 
   it("allows the text tool to be toggled", () => {
-    workspace.toggleTool("text");
+    workspace.selectTool("text");
     expect(workspace.tool).toBe("text");
-    workspace.toggleTool("text");
-    expect(workspace.tool).toBe("select");
+    workspace.selectTool("text");
+    expect(workspace.tool).toBe("text");
   });
 
   it("allows the visibility to be toggled", () => {
@@ -71,16 +71,16 @@ describe("workspaces model", () => {
   });
 
   it("allows workspaces to be found by section id", () => {
-    expect(workspaces.getWorkspaceBySectionId("1")).toBe(workspace);
+    expect(workspaces.getSectionWorkspace("1")).toBe(workspace);
   });
 
   it("allows workspaces with new section ids to be added", () => {
-    const newWorkspace = WorkspaceModel.create({
+    const newWorkspace = SectionWorkspaceModel.create({
       mode: "1-up",
       tool: "select",
       sectionId: "2",
       visibility: "private",
-      userDocument: DocumentModel.create({
+      document: DocumentModel.create({
         uid: "1",
         key: "test",
         createdAt: 1,
@@ -88,17 +88,17 @@ describe("workspaces model", () => {
       }),
       groupDocuments: {},
     });
-    workspaces.addWorkspace(newWorkspace);
-    expect(workspaces.getWorkspaceBySectionId("2")).toBe(newWorkspace);
+    workspaces.addSectionWorkspace(newWorkspace);
+    expect(workspaces.getSectionWorkspace("2")).toBe(newWorkspace);
   });
 
   it("allows ignores adding workspaces with existing section ids", () => {
-    const newWorkspace = WorkspaceModel.create({
+    const newWorkspace = SectionWorkspaceModel.create({
       mode: "1-up",
       tool: "select",
       sectionId: "1",
       visibility: "private",
-      userDocument: DocumentModel.create({
+      document: DocumentModel.create({
         uid: "1",
         key: "test",
         createdAt: 1,
@@ -106,8 +106,8 @@ describe("workspaces model", () => {
       }),
       groupDocuments: {},
     });
-    workspaces.addWorkspace(newWorkspace);
-    expect(workspaces.getWorkspaceBySectionId("1")).toBe(workspace);
+    workspaces.addSectionWorkspace(newWorkspace);
+    expect(workspaces.getSectionWorkspace("1")).toBe(workspace);
   });
 
 });

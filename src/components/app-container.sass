@@ -1,6 +1,7 @@
 @import vars
 
 .app-container
+
   .blocker
     position: absolute
     top: $header-height
@@ -9,3 +10,45 @@
     bottom: 0
     opacity: 0
 
+  .single-workspace
+    position: fixed
+    top: $header-height
+    left: $left-nav-contracted-width + $nav-expanded-peek
+    right: $right-nav-contracted-width + $nav-expanded-peek
+    bottom: $bottom-nav-contracted-height + $nav-expanded-peek
+
+  .left-workspace
+    position: fixed
+    top: $header-height
+    left: $left-nav-contracted-width + $nav-expanded-peek
+    right: 50%
+    bottom: $bottom-nav-contracted-height + $nav-expanded-peek
+
+    .workspace
+      margin-right: 5px
+
+  .right-workspace
+    position: fixed
+    top: $header-height
+    left: 50%
+    right: $right-nav-contracted-width + $nav-expanded-peek
+    bottom: $bottom-nav-contracted-height + $nav-expanded-peek
+
+    .workspace
+      margin-left: 5px
+
+    .comparison-placeholder
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      color: #000
+      background-color: #F8FCFE
+      margin: 10px
+      border: 2px solid #797979
+      border-radius: 10px
+      display: flex
+      justify-content: center
+      align-items: center
+      text-align: center

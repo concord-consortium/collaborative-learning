@@ -20,16 +20,33 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export interface DBDocumentMetadata {
+export type DBDocumentType = "section" | "learningLog";
+
+export type DBDocumentMetadata = DBSectionDocumentMetadata | DBLearningLogDocumentMetadata;
+export interface DBDocumentMetadataBase {
   version: "1.0";
   self: {
     uid: string;
     documentKey: string;
   };
   createdAt: number;
+}
+export interface DBSectionDocumentMetadata extends DBDocumentMetadataBase {
+  type: "section";
   classHash: string;
   offeringId: string;
-  // TDB: serialized document model metadata (back pointers too)
+}
+export interface DBLearningLogDocumentMetadata extends DBDocumentMetadataBase {
+  type: "learningLog";
+}
+
+export interface DBLearningLog {
+  version: "1.0";
+  self: {
+    uid: string;
+    documentKey: string;
+  };
+  title: string;
 }
 
 export interface DBDocument {

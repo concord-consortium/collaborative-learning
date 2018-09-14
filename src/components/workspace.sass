@@ -1,15 +1,15 @@
 @import vars
 
 .workspace
-  position: fixed
-  top: $header-height
-  left: $left-nav-contracted-width
-  right: $learning-log-contracted-width
-  bottom: $my-work-contracted-height
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
   color: #000
   background-color: #F8FCFE
   margin: 10px
-  border: 2px solid #797979
+  border: 4px solid $workspace-border-color
   border-radius: 10px
 
   .titlebar
@@ -18,7 +18,7 @@
     left: 0
     right: 0
     height: $workspace-titlebar-height
-    background-color: #e4e4e4
+    background-color: $workspace-titlebar-background
     display: flex
     flex-direction: row
     flex-wrap: nowrap
@@ -29,17 +29,19 @@
     .title
       flex-grow: 1
       text-align: center
-      padding: 3px 0
+      margin: 10px 0
+      font-weight: bold
 
     .actions
       flex-grow: 0
-      padding: 3px 5px 0 0
+      padding: 10px 5px 0 0
 
       span
         background-color: #777
         font-size: 12px
         padding: 3px
         color: #fff
+        margin-left: 5px
 
       .share-button
         margin-right: 5px
@@ -50,7 +52,7 @@
   .toolbar
     position: absolute
     top: $workspace-titlebar-height
-    bottom: $workspace-supports-height
+    bottom: $workspace-statusbar-height
     width: $workspace-toolbar-width
     border-right: 2px solid #eee
 
@@ -81,55 +83,82 @@
   .canvas-area
     position: absolute
     top: $workspace-titlebar-height
-    bottom: $workspace-supports-height
+    bottom: $workspace-statusbar-height
     left: $workspace-toolbar-width
     right: 0
+    border-top: 4px solid $workspace-border-color
 
-  .supports
+  .learning-log-canvas-area
+    .canvas
+      border-bottom-right-radius: 10px
+
+  .statusbar
     position: absolute
-    background-color: #c2c2c2
+    background: $workspace-statusbar-background
     bottom: 0
     left: 0
     right: 0
-    height: $workspace-supports-height
+    height: $workspace-statusbar-height
     border-bottom-left-radius: 10px
     border-bottom-right-radius: 10px
+    border-top: 4px solid $workspace-border-color
+    display: flex
+    flex-direction: row
+    flex-wrap: nowrap
+    justify-content: flex-start
 
-    .supports-list
-      margin: 5px 10px
+    .supports
+      flex-grow: 1
 
-      span
-        display: inline-block
-        padding: 5px
-        margin-right: 5px
-        color: #fff
-        background: #aaa
-        border-radius: 15px
-        width: 18px
-        text-align: center
-
-        &.active
-          background-color: #00f
-
-  .visible-supports
-    position: absolute
-    bottom: $workspace-supports-height
-    left: 0
-    right: 0
-
-    .supports-list
-      div
-        background-color: #e2e2e2
-        padding: 5px 10px
+      .supports-list
+        display: inline
+        margin: 0 10px
 
         span
           display: inline-block
           padding: 5px
-          margin-right: 2px
+          margin: 5px 5px 0 0
           color: #fff
           background: #aaa
           border-radius: 15px
           width: 18px
           text-align: center
-          background-color: #00f
+
+          &.active
+            background-color: #00f
+
+      .visible-supports
+        position: absolute
+        bottom: $workspace-statusbar-height + 4
+        left: 0
+        right: 0
+
+        .supports-list
+          margin: 0
+
+          div
+            background-color: $workspace-statusbar-background
+            padding: 5px 10px
+
+            span
+              display: inline-block
+              padding: 5px
+              margin-right: 2px
+              color: #fff
+              background: #aaa
+              border-radius: 15px
+              width: 18px
+              text-align: center
+              background-color: #00f
+
+    .actions
+      flex-grow: 0
+      padding: 10px 5px
+
+      span
+        background-color: #777
+        font-size: 12px
+        padding: 3px
+        color: #fff
+
 

@@ -58,9 +58,9 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     const { section } = this.props;
     if (section) {
       // TODO: create section id instead of using type
-      const workspace = workspaces.getWorkspaceBySectionId(section.id);
+      const workspace = workspaces.getSectionWorkspace(section.id);
       const done = () => {
-        ui.setActiveWorkspaceSectionId(section.id);
+        ui.setPrimaryWorkspace(workspace);
         ui.contractAll();
         this.openWorkspaceButton!.disabled = false;
       };
@@ -70,8 +70,8 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
         done();
       }
       else {
-        db.createWorkspace(section.id)
-          .then(workspaces.addWorkspace)
+        db.createSectionWorkspace(section.id)
+          .then(workspaces.addSectionWorkspace)
           .then(done)
           .catch(ui.setError);
       }
