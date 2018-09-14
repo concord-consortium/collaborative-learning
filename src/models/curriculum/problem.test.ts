@@ -14,7 +14,8 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      sections: []
+      sections: [],
+      supports: []
     });
     expect(problem.fullTitle).toBe("test");
   });
@@ -47,7 +48,8 @@ describe("problem model", () => {
           type: SectionType.initialChallenge,
           supports: []
         }
-      ]
+      ],
+      supports: []
     });
     expect(problem.fullTitle).toBe("test: sub");
   });

@@ -20,13 +20,15 @@ const user = UserModel.create();
 const unit = createFromJson(curriculumJson);
 const defaultProblemOrdinal = "2.1";
 const problemOrdinal = urlParams.problem || defaultProblemOrdinal;
-const problem = unit.getProblem(problemOrdinal) ||
-                unit.getProblem(defaultProblemOrdinal);
+const {investigation, problem} = unit.getProblem(problemOrdinal) ||
+                                 unit.getProblem(defaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
 
 document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
 stores.ui.setShowDemo(!!showDemoCreator);
+
+stores.supports.createFromUnit(unit, investigation, problem);
 
 ReactDOM.render(
   <Provider stores={stores}>

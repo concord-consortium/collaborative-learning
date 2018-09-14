@@ -7,6 +7,7 @@ import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./workspace.sass";
+import { SupportItemModelType } from "../models/supports";
 
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
@@ -24,7 +25,8 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
         <div className="canvas-area">
           {this.props.workspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
         </div>
-        {this.renderSupports()}
+        {this.renderSupportIcons()}
+        {this.renderVisibleSupports()}
       </div>
     );
   }
@@ -72,16 +74,59 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private renderSupports() {
+  private renderSupportIcons() {
+    const supports = this.getSupportsWithIndices();
     return (
       <div className="supports">
-        <span>TBD: Just In Time Supports</span>
+        <div className="supports-list">
+          {supports.map((support) => {
+            return (
+              <span
+                key={support.index}
+                onClick={this.handleToggleSupport(support.item)}
+                className={support.item.visible ? "active" : undefined}
+              >
+                {support.index}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  private renderVisibleSupports() {
+    const supports = this.getSupportsWithIndices().filter((supportWithIndex) => supportWithIndex.item.visible);
+    if (supports.length === 0) {
+      return null;
+    }
+    return (
+      <div className="visible-supports">
+        <div className="supports-list">
+          {supports.map((support) => {
+            return (
+              <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
+                <span>{support.index}</span> {support.item.text}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
 
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
+  }
+
+  private handleToggleSupport = (support: SupportItemModelType) => {
+    return () => this.stores.supports.toggleSupport(support);
+  }
+
+  private getSupportsWithIndices() {
+    return this.stores.supports.getAllForSection(this.props.workspace.sectionId).map((support, index) => {
+      return {index: index + 1, item: support};
+    });
   }
 
 }

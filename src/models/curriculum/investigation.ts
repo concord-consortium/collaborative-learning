@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document-content";
 import { ProblemModel } from "./problem";
+import { SupportModel } from "./support";
 
 export const InvestigationModel = types
   .model("Investigation", {
@@ -8,7 +9,8 @@ export const InvestigationModel = types
     title: types.string,
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
-    reflections: types.maybe(DocumentContentModel)
+    reflections: types.maybe(DocumentContentModel),
+    supports: types.array(SupportModel),
   })
   .views(self => {
     return {
