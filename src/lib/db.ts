@@ -37,11 +37,11 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
-export interface ReferenceMap {
-  [key: string]: firebase.database.Reference;
-}
-export interface DisposerMap {
-  [key: string]: IDisposer;
+export interface DocumentListeners {
+  [key /* documentKey */: string]: {
+    ref?: firebase.database.Reference;
+    modelDisposer?: IDisposer;
+  };
 }
 
 export class DB {
@@ -58,8 +58,7 @@ export class DB {
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
   private workspaceRef: firebase.database.Reference | null  = null;
-  private userDocumentRefs: ReferenceMap = {};
-  private userDocumentDisposers: DisposerMap = {};
+  private documentListeners: DocumentListeners = {};
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -451,7 +450,7 @@ export class DB {
     this.stopLatestGroupIdListener();
     this.stopGroupListeners();
     this.stopWorkspaceListener();
-    this.stopUserDocListeners();
+    this.stopDocumentListeners();
     this.isListening = false;
   }
 
@@ -481,23 +480,19 @@ export class DB {
     }
   }
 
-  private stopUserDocListeners() {
-    this.stopUserDocModelListeners();
-    this.stopUserDocRefListeners();
-  }
+  private stopDocumentListeners() {
+    Object.keys(this.documentListeners).forEach((docKey) => {
+      const listeners = this.documentListeners[docKey];
+      if (listeners) {
+        if (listeners.modelDisposer) {
+          listeners.modelDisposer();
+        }
 
-  private stopUserDocModelListeners() {
-    Object.keys(this.userDocumentDisposers).forEach((docId) => {
-      this.userDocumentDisposers[docId]();
+        if (listeners.ref) {
+          listeners.ref.off();
+        }
+      }
     });
-    this.userDocumentDisposers = {};
-  }
-
-  private stopUserDocRefListeners() {
-    Object.keys(this.userDocumentRefs).forEach((docId) => {
-      this.userDocumentRefs[docId].off("value");
-    });
-    this.userDocumentRefs = {};
   }
 
   private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
@@ -664,10 +659,14 @@ export class DB {
     const documentKey = document.key;
     const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
 
-    if (this.userDocumentRefs[documentKey]) {
-      this.userDocumentRefs[documentKey].off("value");
+    if (this.documentListeners[documentKey] == null) {
+      this.documentListeners[documentKey] = {};
     }
-    this.userDocumentRefs[documentKey] = documentRef;
+    const docListeners = this.documentListeners[documentKey];
+    if (docListeners.ref) {
+      docListeners.ref.off("value");
+    }
+    docListeners.ref = documentRef;
 
     documentRef.on("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
@@ -688,11 +687,17 @@ export class DB {
   private monitorDocumentModel = (document: DocumentModelType) => {
     const { user } = this.stores;
     const { key, content } = document;
-    if (this.userDocumentDisposers[key]) {
-      this.userDocumentDisposers[key]();
+
+    if (this.documentListeners[key] == null) {
+      this.documentListeners[key] = {};
     }
+    const docListeners = this.documentListeners[key];
+    if (docListeners.modelDisposer) {
+      docListeners.modelDisposer();
+    }
+
     const updateRef = this.ref(this.getUserDocumentPath(user, key));
-    this.userDocumentDisposers[key] = (onSnapshot(content, (newContent) => {
+    this.documentListeners[key].modelDisposer = (onSnapshot(content, (newContent) => {
       updateRef.update({
         content: JSON.stringify(newContent)
       });
