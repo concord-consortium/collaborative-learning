@@ -659,14 +659,11 @@ export class DB {
     const documentKey = document.key;
     const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
 
-    if (this.documentListeners[documentKey] == null) {
-      this.documentListeners[documentKey] = {};
+    const docListener = this.getOrCreateDocumentListener(documentKey);
+    if (docListener.ref) {
+      docListener.ref.off("value");
     }
-    const docListeners = this.documentListeners[documentKey];
-    if (docListeners.ref) {
-      docListeners.ref.off("value");
-    }
-    docListeners.ref = documentRef;
+    docListener.ref = documentRef;
 
     documentRef.on("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
@@ -688,20 +685,23 @@ export class DB {
     const { user } = this.stores;
     const { key, content } = document;
 
-    if (this.documentListeners[key] == null) {
-      this.documentListeners[key] = {};
-    }
-    const docListeners = this.documentListeners[key];
-    if (docListeners.modelDisposer) {
-      docListeners.modelDisposer();
+    const docListener = this.getOrCreateDocumentListener(key);
+    if (docListener.modelDisposer) {
+      docListener.modelDisposer();
     }
 
     const updateRef = this.ref(this.getUserDocumentPath(user, key));
-    this.documentListeners[key].modelDisposer = (onSnapshot(content, (newContent) => {
+    docListener.modelDisposer = (onSnapshot(content, (newContent) => {
       updateRef.update({
         content: JSON.stringify(newContent)
       });
     }));
   }
 
+  private getOrCreateDocumentListener(documentKey: string) {
+    if (!this.documentListeners[documentKey]) {
+      this.documentListeners[documentKey] = {};
+    }
+    return this.documentListeners[documentKey];
+  }
 }
