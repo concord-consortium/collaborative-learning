@@ -104,7 +104,11 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": [
+                {"text": "TEST: problem 1.1 level support #1"},
+                {"text": "TEST: problem 1.1 level support #2"}
+              ]
             },
             {
               "type": "initialChallenge",
@@ -117,7 +121,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "whatIf",
@@ -134,7 +139,8 @@
                       "text": "2. Can you think of some other times you could use a photo to estimate the size of something?"
                     }
                   }
-                ]
+                ],
+                "supports": []
               }
             },
             {
@@ -147,7 +153,8 @@
                       "text": "The Mystery Club Advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
                     }
                   }
-                ]
+                ],
+                "supports": []
               }
             },
             {
@@ -160,10 +167,12 @@
                       "text": "Measurement is often used in police work. For example, some stores with cameras place a spot on the wall 6 feet from the floor. When a person standing near the wall is filmed, this makes it easier to estimate the person's height. Investigators take measurements of tire marks at the scene of auto accidents to help them estimate the speed of the vehicles involved. Photographs and molds of footprints help the police determine the shoe size, type of shoe, and weight of the person who made the prints."
                     }
                   }
-                ]
+                ],
+                "supports": []
               }
             }
-          ]
+          ],
+          "supports": []
         },
         {
           "description": "Problem 1.2",
@@ -186,7 +195,8 @@
                       "text": "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
                     }
                   }
-                ]
+                ],
+                "supports": []
               }
             },
             {
@@ -207,9 +217,9 @@
                 ]
               },
               "supports": [
-                "How do the lengths of line segments compare between the two figures?",
-                "How do the areas of the two figures compare?",
-                "How do the angles of the two figures compare?"
+                {"text": "How do the lengths of line segments compare between the two figures?"},
+                {"text": "How do the areas of the two figures compare?"},
+                {"text": "How do the angles of the two figures compare?"}
               ]
             },
             {
@@ -228,7 +238,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -248,10 +259,11 @@
                 ]
               },
               "supports": [
-                "Have you considered how points, angles, side lengths, and area change?"
+                {"text": "Have you considered how points, angles, side lengths, and area change?"}
               ]
             }
-          ]
+          ],
+          "supports": []
         },
         {
           "description": "Problem 1.3",
@@ -270,7 +282,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "initialChallenge",
@@ -285,8 +298,8 @@
                 ]
               },
               "supports": [
-                "Would corresponding side lengths help to decide the percent?",
-                "What about corresponding angles?"
+                {"text": "Would corresponding side lengths help to decide the percent?"},
+                {"text": "What about corresponding angles?"}
               ]
             },
             {
@@ -330,7 +343,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -343,7 +357,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             }
           ]
         }
@@ -367,7 +382,11 @@
             }
           }
         ]
-      }
+      },
+      "supports": [
+        {"text": "TEST: investigation #1 level support #1"},
+        {"text": "TEST: investigation #1 level support #2"}
+      ]
     },
     {
       "description": "Investigation 2",
@@ -437,7 +456,11 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": [
+                {"text": "TEST: problem #2.1 introduction level support #1"},
+                {"text": "TEST: problem #2.1 introduction level support #2"}
+              ]
             },
             {
               "type": "initialChallenge",
@@ -487,10 +510,10 @@
                 ]
               },
               "supports": [
-                "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?",
-                "Describe the shape of Mug?",
-                "What measures help you identify the imposters?",
-                "What features are the same about Mug and the others? What features are different?"
+                {"text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"},
+                {"text": "Describe the shape of Mug?"},
+                {"text": "What measures help you identify the imposters?"},
+                {"text": "What features are the same about Mug and the others? What features are different?"}
               ]
             },
             {
@@ -519,7 +542,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -537,8 +561,13 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             }
+          ],
+          "supports": [
+            {"text": "TEST: problem #2.1 level support #1"},
+            {"text": "TEST: problem #2.1 level support #2"}
           ]
         },
         {
@@ -558,7 +587,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "initialChallenge",
@@ -578,8 +608,8 @@
                 ]
               },
               "supports": [
-                "What do you need to do to each x coordinate? y coordinate?",
-                "Does adding or subtracting a number to the x or y coordinate make a difference?"
+                {"text": "What do you need to do to each x coordinate? y coordinate?"},
+                {"text": "Does adding or subtracting a number to the x or y coordinate make a difference?"}
               ]
             },
             {
@@ -625,9 +655,9 @@
                 ]
               },
               "supports": [
-                "How did adding to the coordinates change the hat?",
-                "What made the hat get smaller?",
-                "What did subtracting do to the hat?"
+                {"text": "How did adding to the coordinates change the hat?"},
+                {"text": "What made the hat get smaller?"},
+                {"text": "What did subtracting do to the hat?"}
               ]
             },
             {
@@ -653,11 +683,12 @@
                 ]
               },
               "supports": [
-                "If figures are similar, what changes and what stays the same?",
-                "How can you use the rule to predict the length of a corresponding side of the image?"
+                {"text": "If figures are similar, what changes and what stays the same?"},
+                {"text": "How can you use the rule to predict the length of a corresponding side of the image?"}
               ]
             }
-          ]
+          ],
+          "supports": []
         },
         {
           "description": "Problem 2.3",
@@ -716,7 +747,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "initialChallenge",
@@ -746,8 +778,8 @@
                 ]
               },
               "supports": [
-                "Have you considered the corresponding angles?",
-                "How might you compare corresponding side lengths?"
+                {"text": "Have you considered the corresponding angles?"},
+                {"text": "How might you compare corresponding side lengths?"}
               ]
             },
             {
@@ -776,7 +808,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -796,11 +829,12 @@
                 ]
               },
               "supports": [
-                "How can you find the scale factor if you used rubber bands to make similar figures?",
-                "How can you find the scale factor if you used coordinate graphs to make similar figures?"
+                {"text": "How can you find the scale factor if you used rubber bands to make similar figures?"},
+                {"text": "How can you find the scale factor if you used coordinate graphs to make similar figures?"}
               ]
             }
-          ]
+          ],
+          "supports": []
         }
       ],
       "reflections": {
@@ -837,19 +871,29 @@
             }
           }
         ]
-      }
+      },
+      "supports": [
+        {"text": "TEST: investigation #2 level support #1"},
+        {"text": "TEST: investigation #2 level support #2"}
+      ]
     },
     {
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "Scaling Perimeter and Area",
-      "problems": []
+      "problems": [],
+      "supports": []
     },
     {
       "description": "Investigation 4",
       "ordinal": 4,
       "title": "Similarity and Ratios",
-      "problems": []
+      "problems": [],
+      "supports": []
     }
+  ],
+  "supports": [
+    {"text": "TEST: unit level support #1"},
+    {"text": "TEST: unit level support #2"}
   ]
 }
