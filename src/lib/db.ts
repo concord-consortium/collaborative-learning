@@ -656,22 +656,7 @@ export class DB {
   }
 
   private parseDocumentContent(document: DBDocument): DocumentContentModelType|null {
-    if (!document.content) {
-      return null;
-    }
-
-    const storedContent: DocumentContentModelType = JSON.parse(document.content);
-    return DocumentContentModel.create({
-      shared: storedContent.shared,
-      tiles: storedContent.tiles.map((tile) => {
-        const tileTool = toolFactory(tile.content);
-        return ToolTileModel.create({
-          id: tile.id,
-          layout: tile.layout,
-          content: tileTool.create(tile.content)
-        });
-      })
-    });
+    return document.content ? DocumentContentModel.create(JSON.parse(document.content)) : null;
   }
 
   private monitorSectionDocumentRef = (sectionId: string, document: DocumentModelType) => {
