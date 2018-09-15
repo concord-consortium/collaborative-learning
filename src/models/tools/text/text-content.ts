@@ -41,8 +41,7 @@ export const TextContentModel = types
     type: types.optional(types.literal(kTextToolID), kTextToolID),
     text: types.optional(StringOrArray, ""),
     // e.g. "markdown", "slate", "quill", empty => plain text
-    format: types.maybe(types.string),
-    changes: 0
+    format: types.maybe(types.string)
   })
   .views(self => ({
     get joinText() {
@@ -102,8 +101,9 @@ export const TextContentModel = types
 
     function setSlate(value: Value) {
       self.format = "slate";
-      self.text = JSON.stringify(value.toJSON());
-      ++self.changes;
+      // Workaround for missing argument in Slate types
+      const myToJSON = value.toJSON as any;
+      self.text = JSON.stringify(myToJSON.call(value, {preserveSelection: true}));
       slateValue = value;
     }
 

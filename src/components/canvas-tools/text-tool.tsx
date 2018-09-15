@@ -37,8 +37,6 @@ export default class TextToolComponent extends React.Component<IProps, {}> {
     // Unfortunately, copy from readOnly doesn't work for unknown reasons.
     const readOnly = false;
     const value = (content as TextContentModelType).convertSlate();
-    // triggers re-render on changes, even if resulting stringified JSON is the same
-    const changes = content.type === "Text" ? content.changes : 0;
     return (
       <Editor
         key={model.id}
@@ -46,7 +44,6 @@ export default class TextToolComponent extends React.Component<IProps, {}> {
         readOnly={readOnly}
         value={value}
         onChange={this.onChange}
-        data-changes={changes}
       />
     );
   }
