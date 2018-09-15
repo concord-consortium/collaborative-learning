@@ -14,8 +14,8 @@ import { DBOfferingGroup,
 import { WorkspaceModelType, WorkspaceModel } from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
-import { ToolTileModel } from "../models/tools/tool-tile";
-import { toolFactory } from "../models/tools/tool-types";
+import { ToolTileModelType } from "../models/tools/tool-tile";
+import { TextContentModelType } from "../models/tools/text/text-content";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -329,7 +329,7 @@ export class DB {
             throw new Error(`Unable to open document ${documentKey}`);
           }
 
-          const content = this.parseDocumentContent(document);
+          const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
             uid: document.self.uid,
             key: document.self.documentKey,
@@ -650,8 +650,26 @@ export class DB {
       });
   }
 
-  private parseDocumentContent(document: DBDocument): DocumentContentModelType|null {
-    return document.content ? DocumentContentModel.create(JSON.parse(document.content)) : null;
+  private parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentModelType|null {
+    if (document.content == null) {
+      return null;
+    }
+
+    const content = JSON.parse(document.content);
+    // XXX: When Slate text loads with an active selection, it breaks.
+    // When we load text from the DB, we actively deselect it to prevent this.
+    // This is a hack until a better method for synchronizing state across MST, React, FB and Slate is developed
+    if (deselect) {
+      content.tiles.forEach((tile: ToolTileModelType) => {
+        if (tile.content.type === "Text") {
+          const tileContent = tile.content as TextContentModelType;
+          if (typeof tileContent.text === "string") {
+            tileContent.text = tileContent.text.replace('"isFocused":true', '"isFocused":false');
+          }
+        }
+      });
+    }
+    return DocumentContentModel.create(content);
   }
 
   private monitorSectionDocumentRef = (sectionId: string, document: DocumentModelType) => {
@@ -665,10 +683,12 @@ export class DB {
     }
     docListener.ref = documentRef;
 
+    let initialLoad = true;
     documentRef.on("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.parseDocumentContent(updatedDoc);
+        const updatedContent = this.parseDocumentContent(updatedDoc, initialLoad);
+        initialLoad = false;
         if (updatedContent) {
           const workspace = workspaces.getWorkspaceBySectionId(sectionId);
           if (workspace) {
