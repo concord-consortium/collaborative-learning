@@ -3,17 +3,19 @@ import { AppMode, IStores } from "../models/stores";
 import { UserModelType } from "../models/user";
 import { onSnapshot } from "mobx-state-tree";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { observable, action } from "mobx";
+import { observable } from "mobx";
 import { DBOfferingGroup,
          DBOfferingGroupUser,
          DBOfferingGroupMap,
          DBOfferingUser,
-         DBOfferingUserSectionDocumentMap,
          DBDocumentMetadata,
          DBDocument,
          DBOfferingUserSectionDocument} from "./db-types";
 import { WorkspaceModelType, WorkspaceModel } from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
+import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
+import { ToolTileModelType } from "../models/tools/tool-tile";
+import { TextContentModelType } from "../models/tools/text/text-content";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -35,9 +37,19 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
+export interface DocumentListeners {
+  [key /* documentKey */: string]: {
+    ref?: firebase.database.Reference;
+    modelDisposer?: IDisposer;
+  };
+}
+
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
+  public _private = {
+    parseDocumentContent: this.parseDocumentContent
+  };
   private appMode: AppMode;
   private firebaseUser: firebase.User | null = null;
   private stores: IStores;
@@ -46,6 +58,7 @@ export class DB {
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
   private workspaceRef: firebase.database.Reference | null  = null;
+  private documentListeners: DocumentListeners = {};
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -303,7 +316,7 @@ export class DB {
   }
 
   public openDocument(userId: string, documentKey: string) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
       const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey, userId));
@@ -315,15 +328,16 @@ export class DB {
           if (!document || !metadata) {
             throw new Error(`Unable to open document ${documentKey}`);
           }
+
+          const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
             uid: document.self.uid,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
-            content: {}, // TODO: PT #159979453: load content
+            content: content ? content : {}
           });
         })
         .then((document) => {
-          // TODO: PT #159979453: listen for content changes and update model and save in firebase
           resolve(document);
         })
         .catch(reject);
@@ -436,6 +450,7 @@ export class DB {
     this.stopLatestGroupIdListener();
     this.stopGroupListeners();
     this.stopWorkspaceListener();
+    this.stopDocumentListeners();
     this.isListening = false;
   }
 
@@ -463,6 +478,21 @@ export class DB {
       this.latestGroupIdRef.off("value");
       this.latestGroupIdRef = null;
     }
+  }
+
+  private stopDocumentListeners() {
+    Object.keys(this.documentListeners).forEach((docKey) => {
+      const listeners = this.documentListeners[docKey];
+      if (listeners) {
+        if (listeners.modelDisposer) {
+          listeners.modelDisposer();
+        }
+
+        if (listeners.ref) {
+          listeners.ref.off();
+        }
+      }
+    });
   }
 
   private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
@@ -606,14 +636,92 @@ export class DB {
   private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
     return this.openDocument(userId, sectionDocument.documentKey)
       .then((userDocument) => {
-        const workspace = WorkspaceModel.create({
-          mode: "1-up",
-          tool: "select",
-          sectionId: sectionDocument.self.sectionId,
-          userDocument,
-          visibility: sectionDocument.visibility,
-        });
-        return workspace;
+          this.monitorDocumentModel(userDocument);
+          this.monitorSectionDocumentRef(sectionDocument.self.sectionId, userDocument);
+
+          const newWorkspace = WorkspaceModel.create({
+            mode: "1-up",
+            tool: "select",
+            sectionId: sectionDocument.self.sectionId,
+            userDocument,
+            visibility: sectionDocument.visibility,
+          });
+          return newWorkspace;
       });
+  }
+
+  private parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentModelType|null {
+    if (document.content == null) {
+      return null;
+    }
+
+    const content = JSON.parse(document.content);
+    // XXX: When Slate text loads with an active selection, it breaks.
+    // When we load text from the DB, we actively deselect it to prevent this.
+    // This is a hack until a better method for synchronizing state across MST, React, FB and Slate is developed
+    if (deselect) {
+      content.tiles.forEach((tile: ToolTileModelType) => {
+        if (tile.content.type === "Text") {
+          const tileContent = tile.content as TextContentModelType;
+          if (typeof tileContent.text === "string") {
+            tileContent.text = tileContent.text.replace('"isFocused":true', '"isFocused":false');
+          }
+        }
+      });
+    }
+    return DocumentContentModel.create(content);
+  }
+
+  private monitorSectionDocumentRef = (sectionId: string, document: DocumentModelType) => {
+    const { user, workspaces } = this.stores;
+    const documentKey = document.key;
+    const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
+
+    const docListener = this.getOrCreateDocumentListener(documentKey);
+    if (docListener.ref) {
+      docListener.ref.off("value");
+    }
+    docListener.ref = documentRef;
+
+    let initialLoad = true;
+    documentRef.on("value", (snapshot) => {
+      if (snapshot && snapshot.val()) {
+        const updatedDoc: DBDocument = snapshot.val();
+        const updatedContent = this.parseDocumentContent(updatedDoc, initialLoad);
+        initialLoad = false;
+        if (updatedContent) {
+          const workspace = workspaces.getWorkspaceBySectionId(sectionId);
+          if (workspace) {
+            const workspaceDoc = workspace.userDocument;
+            workspaceDoc.setContent(updatedContent);
+            this.monitorDocumentModel(workspaceDoc);
+          }
+        }
+      }
+    });
+  }
+
+  private monitorDocumentModel = (document: DocumentModelType) => {
+    const { user } = this.stores;
+    const { key, content } = document;
+
+    const docListener = this.getOrCreateDocumentListener(key);
+    if (docListener.modelDisposer) {
+      docListener.modelDisposer();
+    }
+
+    const updateRef = this.ref(this.getUserDocumentPath(user, key));
+    docListener.modelDisposer = (onSnapshot(content, (newContent) => {
+      updateRef.update({
+        content: JSON.stringify(newContent)
+      });
+    }));
+  }
+
+  private getOrCreateDocumentListener(documentKey: string) {
+    if (!this.documentListeners[documentKey]) {
+      this.documentListeners[documentKey] = {};
+    }
+    return this.documentListeners[documentKey];
   }
 }

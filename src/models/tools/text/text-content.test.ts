@@ -73,13 +73,10 @@ describe("TextContentModel", () => {
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
 
     const fooValue = Value.fromJSON(fooJson);
-    const preChanges = model.changes;
     model.setSlate(fooValue);
-    expect(model.changes).toBe(preChanges + 1);
     expect(model.format).toBe("slate");
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
     model.setSlateReadOnly(fooValue);
-    expect(model.changes).toBe(preChanges + 1);
     expect(model.format).toBe("slate");
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
   });

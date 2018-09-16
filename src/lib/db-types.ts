@@ -38,7 +38,7 @@ export interface DBDocument {
     uid: string;
     documentKey: string;
   };
-  // TDB: serialized document model contents
+  content?: string;
 }
 
 export interface DBClass {
