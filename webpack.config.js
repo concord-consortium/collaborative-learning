@@ -20,6 +20,10 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
+          test: /jsxgraphcore\.js$/,
+          use: [ 'script-loader' ]
+        },
+        {
           test: /\.tsx?$/,
           enforce: 'pre',
           use: [
@@ -45,7 +49,14 @@ module.exports = (env, argv) => {
             'sass-loader'
           ]
         },
-        { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader' }
+        {
+          test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+          loader: 'url-loader',
+          options: {
+            limit: 8192,
+            name: 'assets/[name].[ext]'
+          }
+        }
       ]
     },
     resolve: {
