@@ -25,6 +25,7 @@ export class DocumentContentComponent extends React.Component<IProps, {}> {
     return (
       <div className="document-content">
         {tiles}
+        {this.props.children}
       </div>
     );
   }

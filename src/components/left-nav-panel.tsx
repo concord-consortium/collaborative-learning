@@ -32,24 +32,24 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
       <div className="section">
         <div className="section-header">
           <h1>{section.title}</h1>
-          {this.renderButtons()}
         </div>
-        {content ? this.renderContent(content) : null}
+        {content ? this.renderContent(section, content) : null}
       </div>
     );
   }
 
-  private renderContent(content: DocumentContentModelType) {
+  private renderContent(section: SectionModelType, content: DocumentContentModelType) {
     return (
-      <CanvasComponent readOnly={true} content={content}/>
-    );
-  }
-
-  private renderButtons() {
-    return (
-      <div className="buttons">
-        <button ref={(el) => this.openWorkspaceButton = el} onClick={this.handleOpenWorkspace}>Open Workspace</button>
-      </div>
+      <CanvasComponent readOnly={true} content={content}>
+        <div className="buttons">
+          <button
+            ref={(el) => this.openWorkspaceButton = el}
+            onClick={this.handleOpenWorkspace}
+          >
+            Open {section.title} Section
+          </button>
+        </div>
+      </CanvasComponent>
     );
   }
 
