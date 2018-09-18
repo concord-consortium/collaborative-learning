@@ -47,7 +47,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   private renderToolbar() {
     const { workspace } = this.props;
     const className = (tool: WorkspaceTool) => {
-      return `tool${tool === workspace.tool ? " active" : ""}`;
+      return `tool ${tool}${tool === workspace.tool ? " active" : ""}`;
     };
     const handleSelectTool = (tool: WorkspaceTool) => {
       return (e: React.MouseEvent<HTMLDivElement>) => {
@@ -58,6 +58,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
       <div className="toolbar">
         <div className={className("select")} title="Select" onClick={handleSelectTool("select")}>↖</div>
         <div className={className("text")} title="Text" onClick={handleSelectTool("text")}>T</div>
+        <div className={className("geometry")} title="Geometry" onClick={handleSelectTool("geometry")}/>
       </div>
     );
   }
