@@ -4,6 +4,7 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
+import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
 
 interface IProps {
@@ -25,8 +26,9 @@ export class ToolTileComponent extends React.Component<IProps, {}> {
   }
 
   private renderGeometryTile() {
-    // return <GeometryTile />
-    return null;
+    return (
+      <GeometryToolComponent key={this.props.model.id} {...this.props} />
+    );
   }
 
   private renderTableTile() {

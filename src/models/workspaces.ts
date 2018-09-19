@@ -4,7 +4,7 @@ import { DocumentModel } from "./document";
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 
-export const WorkspaceToolEnum = types.enumeration("tool", ["select", "text"]);
+export const WorkspaceToolEnum = types.enumeration("tool", ["geometry", "select", "text"]);
 export type WorkspaceTool = typeof WorkspaceToolEnum.Type;
 
 export const WorkspaceModel = types
@@ -26,8 +26,13 @@ export const WorkspaceModel = types
 
       toggleTool(tool: WorkspaceTool) {
         self.tool = tool === self.tool ? "select" : tool;
-        if (tool === "text") {
-          self.userDocument.content.addTextTile();
+        switch (tool) {
+          case "geometry":
+            self.userDocument.content.addGeometryTile();
+            break;
+          case "text":
+            self.userDocument.content.addTextTile();
+            break;
         }
       },
 

@@ -16,7 +16,7 @@ export const ToolTileModel = types
     content: ToolContentUnion
   })
   .views(self => ({
-    // generally negotiated with app, e.g. single column width for table
+    // generally negotiated with tool, e.g. single column width for table
     get minWidth() {
       return kDefaultMinWidth;
     },
