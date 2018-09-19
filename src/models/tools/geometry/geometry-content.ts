@@ -25,6 +25,16 @@ export const GeometryContentModel = types
       JXG.JSXGraph.freeBoard(board);
     }
 
+    function addPoint(board: JXG.Board, parents: any, properties?: any) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "point",
+        parents,
+        properties
+      };
+      _applyChange(board, change);
+    }
+
     function _applyChange(board: JXG.Board, change: JXGChange) {
       if (board) {
         applyChange(board, change);
@@ -38,6 +48,7 @@ export const GeometryContentModel = types
       actions: {
         initialize,
         destroy,
+        addPoint,
         applyChange: _applyChange
       }
     };
