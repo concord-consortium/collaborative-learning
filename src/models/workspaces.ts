@@ -48,6 +48,10 @@ export const WorkspaceModel = types
       setGroupDocument(uid: string, document: DocumentModelType) {
         self.groupDocuments.set(uid, document);
       },
+
+      clearGroupDocument(uid: string) {
+        self.groupDocuments.delete(uid);
+      }
     };
   });
 

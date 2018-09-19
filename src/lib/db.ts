@@ -54,6 +54,10 @@ export interface UserSectionDocumentListeners {
   };
 }
 
+export interface WorkspaceModelDisposers {
+  [key /* sectionId */: string]: IDisposer;
+}
+
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
@@ -70,6 +74,7 @@ export class DB {
   private workspaceRef: firebase.database.Reference | null  = null;
   private documentListeners: DocumentListeners = {};
   private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
+  private workspaceModelDisposers: WorkspaceModelDisposers = {};
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -287,6 +292,7 @@ export class DB {
         })
         .then((workspace) => {
           this.updateGroupUserSectionDocumentListeners(sectionId);
+          this.monitorWorkspaceVisibility(workspace);
           resolve(workspace);
         })
         .catch(reject);
@@ -557,6 +563,10 @@ export class DB {
     if (this.workspaceRef) {
       this.workspaceRef.off("child_added", this.handleWorkspaceChildAdded);
     }
+
+    Object.keys(this.workspaceModelDisposers).forEach((sectionId) => {
+      this.workspaceModelDisposers[sectionId]();
+    });
   }
 
   private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
@@ -566,6 +576,7 @@ export class DB {
       this.createWorkspaceFromSectionDocument(user.id, sectionDocument)
         .then((workspace) => {
           this.updateGroupUserSectionDocumentListeners(sectionDocument.self.sectionId);
+          this.monitorWorkspaceVisibility(workspace);
           return workspace;
         })
         .then(workspaces.addWorkspace);
@@ -744,6 +755,20 @@ export class DB {
     return this.documentListeners[documentKey];
   }
 
+  private monitorWorkspaceVisibility = (workspace: WorkspaceModelType) => {
+    if (this.workspaceModelDisposers[workspace.sectionId]) {
+      this.workspaceModelDisposers[workspace.sectionId]();
+    }
+    const { user } = this.stores;
+    const updateRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId));
+    const disposer = (onSnapshot(workspace, (newWorkspace) => {
+      updateRef.update({
+        visibility: newWorkspace.visibility
+      });
+    }));
+    this.workspaceModelDisposers[workspace.sectionId] = disposer;
+  }
+
   private updateGroupUserSectionDocumentListeners(sectionId: string) {
     const { user, groups } = this.stores;
     const userGroup = groups.groupForUser(user.id);
@@ -771,21 +796,28 @@ export class DB {
   private handleGroupUserSectionDocRef(snapshot: firebase.database.DataSnapshot|null) {
     const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
     if (sectionDocument) {
-      const docKey = sectionDocument.documentKey;
       const groupUserId = sectionDocument.self.uid;
       const sectionId = sectionDocument.self.sectionId;
-      const mainUser = this.stores.user;
-      const currentDocContentListener = this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
-          .docContentRef;
-      if (currentDocContentListener) {
-        currentDocContentListener.off();
+      if (sectionDocument.visibility === "public") {
+        const docKey = sectionDocument.documentKey;
+        const mainUser = this.stores.user;
+        const currentDocContentListener = this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
+            .docContentRef;
+        if (currentDocContentListener) {
+          currentDocContentListener.off();
+        }
+        const groupUserDocRef = this.ref(this.getUserDocumentPath(mainUser, docKey, groupUserId));
+        this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
+          .docContentRef = groupUserDocRef;
+        groupUserDocRef.on("value", (docContentSnapshot) => {
+          this.handleGroupUserDocRef(docContentSnapshot, sectionId);
+        });
+      } else {
+        const workspace = this.stores.workspaces.getWorkspaceBySectionId(sectionId);
+        if (workspace) {
+          workspace.clearGroupDocument(groupUserId);
+        }
       }
-      const groupUserDocRef = this.ref(this.getUserDocumentPath(mainUser, docKey, groupUserId));
-      this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
-        .docContentRef = groupUserDocRef;
-      groupUserDocRef.on("value", (docContentSnapshot) => {
-        this.handleGroupUserDocRef(docContentSnapshot, sectionId);
-      });
     }
   }
 

@@ -38,6 +38,9 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
       <div className="titlebar">
         <div className="title">{activeSection ? activeSection.title : ""}</div>
         <div className="actions">
+          <span className="share-button" onClick={this.handleToggleVisibility}>
+            {workspace.visibility === "private" ? "Share" : "Unshare"}
+          </span>
           <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
         </div>
       </div>
@@ -118,6 +121,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
+  }
+
+  private handleToggleVisibility = () => {
+    this.props.workspace.toggleVisibility();
   }
 
   private handleToggleSupport = (support: SupportItemModelType) => {
