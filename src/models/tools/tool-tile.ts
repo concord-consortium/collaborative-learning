@@ -9,7 +9,7 @@ export const kDefaultMinWidth = 60;
 export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
-    id: types.optional(types.string, () => uuid()),
+    id: types.optional(types.identifier, () => uuid()),
     // optional information about placement of tile
     layout: types.maybe(TileLayoutModel),
     // e.g. "GeometryContentModel", "RichTextContentModel", "TableContentModel", "TextContentModel"

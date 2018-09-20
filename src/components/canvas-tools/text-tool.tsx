@@ -1,7 +1,8 @@
 import * as React from "react";
-import { observer } from "mobx-react";
+import { observer, inject } from "mobx-react";
 import { Change, Value } from "slate";
 import { Editor } from "slate-react";
+import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 
@@ -17,8 +18,9 @@ interface IState {
   value?: Value;
 }
 ​
+@inject("stores")
 @observer
-export default class TextToolComponent extends React.Component<IProps, IState> {
+export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   public static getDerivedStateFromProps = (props: IProps, state: IState) => {
     const { model: { content } } = props;
@@ -35,7 +37,13 @@ export default class TextToolComponent extends React.Component<IProps, IState> {
   public state: IState = {};
 
   public onChange = (change: Change) => {
-    const { readOnly, model: { content } } = this.props;
+    const { readOnly, model } = this.props;
+    const { content } = model;
+    const { ui } = this.stores;
+    const op = change.operations.get(0);
+    if (op.type === "set_selection") {
+      ui.setSelectedTile(model);
+    }
     if (content.type === "Text") {
       if (!readOnly) {
         content.setSlate(change.value);
