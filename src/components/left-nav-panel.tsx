@@ -40,7 +40,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
 
   private renderContent(section: SectionModelType, content: DocumentContentModelType) {
     return (
-      <CanvasComponent readOnly={true} content={content}>
+      <CanvasComponent context="left-nav" readOnly={true} content={content}>
         <div className="buttons">
           <button
             ref={(el) => this.openWorkspaceButton = el}

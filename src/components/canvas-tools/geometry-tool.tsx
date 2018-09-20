@@ -5,6 +5,7 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import "./text-tool.sass";
 
 interface IProps {
+  context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -26,11 +27,18 @@ function getEventCoords(board: JXG.Board, evt: any, index?: number) {
 @observer
 export default class GeometryToolComponent extends React.Component<IProps, IState> {
 
+  private elementId: string;
+
+  public componentWillMount() {
+    const { context, model: { id } } = this.props;
+    this.elementId = `${context}-${id}`;
+  }
+
   public componentDidMount() {
-    const { model } = this.props;
-    const { id, content } = model;
+    const { model: { content } } = this.props;
+    const elt = document.getElementById(this.elementId);
     if (content.type === "Geometry") {
-      const board = content.initialize(id);
+      const board = content.initialize(this.elementId);
       this.setState({ board });
 
       if (board) {
@@ -48,14 +56,14 @@ export default class GeometryToolComponent extends React.Component<IProps, IStat
 
   public render() {
     const { model, readOnly } = this.props;
-    const { id, layout } = model;
+    const { layout } = model;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     const style = layout && layout.height
                     ? { height: layout.height }
                     : {};
     return (
-      <div id={id} className={classes} style={style} />
+      <div id={this.elementId} className={classes} style={style} />
     );
   }
 

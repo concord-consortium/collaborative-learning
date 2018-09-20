@@ -8,6 +8,7 @@ import { DocumentContentModelType } from "../models/document-content";
 import "./canvas.sass";
 
 interface IProps extends IBaseProps {
+  context: string;
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
@@ -25,14 +26,14 @@ export class CanvasComponent extends React.Component<IProps, {}> {
   }
 
   private renderContent() {
-    const {readOnly, content, document, ...others} = this.props;
+    const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
     const hasContent =  documentContent && !documentContent.isEmpty;
     const defaultContent = `${this.props.readOnly ? "NON " : ""}Editable Canvas`;
 
     if (hasContent) {
       return (
-        <DocumentContentComponent readOnly={readOnly} content={documentContent} {...others}>
+        <DocumentContentComponent content={documentContent} {...others}>
           {this.props.children}
         </DocumentContentComponent>
       );

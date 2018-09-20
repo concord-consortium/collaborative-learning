@@ -49,7 +49,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
               title={title}
             >
               <div className="scaled-list-item">
-                <CanvasComponent document={workspace.userDocument} readOnly={true} />
+                <CanvasComponent context="my-work" document={workspace.userDocument} readOnly={true} />
               </div>
             </div>
           );

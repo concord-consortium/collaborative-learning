@@ -7,6 +7,7 @@ import { ToolTileComponent } from "./canvas-tools/tool-tile";
 import "./document-content.sass";
 
 interface IProps extends IBaseProps {
+  context: string;
   content?: DocumentContentModelType;
   readOnly?: boolean;
 }
@@ -15,11 +16,11 @@ interface IProps extends IBaseProps {
 export class DocumentContentComponent extends React.Component<IProps, {}> {
 
   public render() {
-    const { content } = this.props;
+    const { content, ...others } = this.props;
     const tileModels = content && content.tiles;
     const tiles = tileModels
-                    ? tileModels.map((tile, index) => {
-                        return <ToolTileComponent key={index} readOnly={this.props.readOnly} model={tile} />;
+                    ? tileModels.map((tile) => {
+                        return <ToolTileComponent key={tile.id} model={tile} {...others} />;
                       })
                     : null;
     return (

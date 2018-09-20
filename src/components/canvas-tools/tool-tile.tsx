@@ -10,6 +10,7 @@ import TextToolComponent from "./text-tool";
 import { cloneDeep } from "lodash";
 
 interface IProps {
+  context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
