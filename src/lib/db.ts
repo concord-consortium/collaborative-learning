@@ -259,7 +259,7 @@ export class DB {
                       uid: user.id,
                       sectionId
                     },
-                    visibility: "public",
+                    visibility: "private",
                     documentKey: document.self.documentKey,
                   };
                   return sectionDocumentRef.set(sectionDocument).then(() => sectionDocument!);
