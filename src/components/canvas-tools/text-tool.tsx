@@ -7,24 +7,32 @@ import { TextContentModelType } from "../../models/tools/text/text-content";
 
 import "./text-tool.sass";
 
-interface IState {
-  value: Value;
-}
-​
 interface IProps {
   model: ToolTileModelType;
   readOnly?: boolean;
 }
 
+interface IState {
+  prevContent?: TextContentModelType;
+  value?: Value;
+}
+​
 @observer
 export default class TextToolComponent extends React.Component<IProps, IState> {
 
-  public componentWillMount() {
-    const { model: { content } } = this.props;
-    if (content.type === "Text") {
-      this.setState({ value: content.convertSlate() });
+  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
+    const { model: { content } } = props;
+    if (content === state.prevContent) { return null; }
+    const textContent = content as TextContentModelType;
+    const newState: IState = { prevContent: textContent };
+    const value = textContent.convertSlate(state.value);
+    if (value !== state.value) {
+      newState.value = value;
     }
+    return newState;
   }
+
+  public state: IState = {};
 
   public onChange = (change: Change) => {
     const { readOnly, model: { content } } = this.props;
@@ -40,6 +48,7 @@ export default class TextToolComponent extends React.Component<IProps, IState> {
     const { model, readOnly } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `text-tool ${editableClass}`;
+    if (!this.state.value) { return null; }
     return (
       <Editor
         key={model.id}
