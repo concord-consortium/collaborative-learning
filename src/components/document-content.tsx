@@ -35,8 +35,10 @@ export class DocumentContentComponent extends React.Component<IProps, {}> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    // indicate we'll accept the drop
-    e.preventDefault();
+    if (!this.props.readOnly) {
+      // indicate we'll accept the drop
+      e.preventDefault();
+    }
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {

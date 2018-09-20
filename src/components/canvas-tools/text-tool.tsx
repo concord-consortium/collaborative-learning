@@ -19,34 +19,33 @@ interface IProps {
 @observer
 export default class TextToolComponent extends React.Component<IProps, IState> {
 
+  public componentWillMount() {
+    const { model: { content } } = this.props;
+    if (content.type === "Text") {
+      this.setState({ value: content.convertSlate() });
+    }
+  }
+
   public onChange = (change: Change) => {
     const { readOnly, model: { content } } = this.props;
     if (content.type === "Text") {
-      if (readOnly) {
-        this.setState({
-          value: change.value
-        });
-      }
-      else {
+      if (!readOnly) {
         content.setSlate(change.value);
       }
+      this.setState({ value: change.value });
     }
   }
 
   public render() {
     const { model, readOnly } = this.props;
-    const { content } = model;
-    const editableClass = this.props.readOnly ? "read-only" : "editable";
+    const editableClass = readOnly ? "read-only" : "editable";
     const classes = `text-tool ${editableClass}`;
-    const value = (readOnly && this.state)
-      ? this.state.value
-      : (content as TextContentModelType).convertSlate();
     return (
       <Editor
         key={model.id}
         className={classes}
         readOnly={readOnly}
-        value={value}
+        value={this.state.value}
         onChange={this.onChange}
       />
     );
