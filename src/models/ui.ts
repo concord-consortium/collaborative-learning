@@ -14,6 +14,9 @@ export const UIModel = types
     primaryWorkspaceDocumentKey: types.maybe(types.string),
     comparisonWorkspaceDocumentKey: types.maybe(types.string),
     comparisonWorkspaceVisible: false,
+    llPrimaryWorkspaceDocumentKey: types.maybe(types.string),
+    llComparisonWorkspaceDocumentKey: types.maybe(types.string),
+    llComparisonWorkspaceVisible: false,
     showDemo: false,
     showDemoCreator: false,
   })
@@ -32,17 +35,19 @@ export const UIModel = types
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
       const expanded = typeof override !== "undefined" ? override : !self[toggle];
 
-      contractAll();
-
       switch (toggle) {
-        case "rightNavExpanded":
-          self.rightNavExpanded = expanded;
-          break;
         case "leftNavExpanded":
           self.leftNavExpanded = expanded;
+          self.rightNavExpanded = false;
+          self.bottomNavExpanded = false;
+          break;
+        case "rightNavExpanded":
+          self.rightNavExpanded = expanded;
+          self.leftNavExpanded = false;
           break;
         case "bottomNavExpanded":
           self.bottomNavExpanded = expanded;
+          self.leftNavExpanded = false;
           break;
       }
     };
@@ -55,10 +60,20 @@ export const UIModel = types
       self.comparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
+    const setLLPrimaryWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+      self.llPrimaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    };
+
+    const setLLComparisonWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+      self.llComparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    };
+
     return {
       contractAll,
       setPrimaryWorkspace,
       setComparisonWorkspace,
+      setLLPrimaryWorkspace,
+      setLLComparisonWorkspace,
 
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
@@ -86,17 +101,6 @@ export const UIModel = types
           setPrimaryWorkspace(workspace);
         }
       },
-      closeWorkspace(workspace: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
-        const {key} = workspace.document;
-        if (key === self.primaryWorkspaceDocumentKey) {
-          self.primaryWorkspaceDocumentKey = undefined;
-          self.comparisonWorkspaceDocumentKey = undefined;
-          self.comparisonWorkspaceVisible = false;
-        }
-        else if (key === self.comparisonWorkspaceDocumentKey) {
-          self.comparisonWorkspaceDocumentKey = undefined;
-        }
-      },
       setShowDemo(showDemo: boolean) {
         self.showDemoCreator = showDemo;
       },
@@ -105,6 +109,21 @@ export const UIModel = types
         self.comparisonWorkspaceVisible = visible;
         if (!visible) {
           self.comparisonWorkspaceDocumentKey = undefined;
+        }
+      },
+      setAvailableLLWorkspace(workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
+        if (self.llComparisonWorkspaceVisible) {
+          setLLComparisonWorkspace(workspace);
+        }
+        else {
+          setLLPrimaryWorkspace(workspace);
+        }
+      },
+      toggleLLComparisonWorkspaceVisible(override?: boolean) {
+        const visible = typeof override !== "undefined" ? override : !self.llComparisonWorkspaceVisible;
+        self.llComparisonWorkspaceVisible = visible;
+        if (!visible) {
+          self.llComparisonWorkspaceDocumentKey = undefined;
         }
       }
     };

@@ -6,6 +6,7 @@ import { DocumentContentModelType } from "../models/document-content";
 
 import "./left-nav-panel.sass";
 import { CanvasComponent } from "./canvas";
+import { WorkspaceModelType } from "../models/workspaces";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
@@ -59,15 +60,15 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     if (section) {
       // TODO: create section id instead of using type
       const workspace = workspaces.getSectionWorkspace(section.id);
-      const done = () => {
-        ui.setPrimaryWorkspace(workspace);
+      const done = (finalWorkspace: WorkspaceModelType) => {
+        ui.setPrimaryWorkspace(finalWorkspace);
         ui.contractAll();
         this.openWorkspaceButton!.disabled = false;
       };
 
       this.openWorkspaceButton!.disabled = true;
       if (workspace) {
-        done();
+        done(workspace);
       }
       else {
         db.createSectionWorkspace(section.id)

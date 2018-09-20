@@ -13,8 +13,12 @@ import { BaseComponent, IBaseProps } from "./base";
 import "./workspace.sass";
 import { SupportItemModelType } from "../models/supports";
 
+export type WorkspaceSide = "primary" | "comparison";
+
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
+  side: WorkspaceSide;
+  readOnly?: boolean;
 }
 
 @inject("stores")
@@ -25,7 +29,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="workspace">
         {this.renderTitleBar()}
-        {this.renderToolbar()}
+        {this.isPrimary() ? this.renderToolbar() : null}
         {this.renderCanvas()}
         {this.renderStatusBar()}
       </div>
@@ -43,8 +47,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderSectionTitleBar() {
+    const {ui, problem} = this.stores;
     const workspace = this.sectionWorkspace;
-    const activeSection = this.stores.problem.getSectionById(workspace.sectionId);
+    const activeSection = problem.getSectionById(workspace.sectionId);
+    const show4up = !ui.comparisonWorkspaceVisible && !ui.bottomNavExpanded;
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
@@ -52,8 +58,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
           <span className="share-button" onClick={this.handleToggleVisibility}>
             {workspace.visibility === "private" ? "Share" : "Unshare"}
           </span>
-          <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
-          <span onClick={this.handleCloseWorkspace}>Close</span>
+          {show4up
+              ? <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
+              : null
+          }
         </div>
       </div>
     );
@@ -64,9 +72,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="titlebar">
         <div className="title">Learning Log: {workspace.title}</div>
-        <div className="actions">
-          <span onClick={this.handleCloseWorkspace}>Close</span>
-        </div>
+        <div className="actions" />
       </div>
     );
   }
@@ -110,7 +116,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private render1UpCanvas(roundBottomRight: boolean) {
     return (
-      <CanvasComponent context="workspace" document={this.props.workspace.document} />
+      <CanvasComponent document={this.props.workspace.document} readOnly={this.props.readOnly} />
     );
   }
 
@@ -121,20 +127,30 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderStatusBar() {
-    const {ui} = this.stores;
     const {workspace} = this.props;
-    const isSection = workspace.type === "section";
+    const isPrimary = this.isPrimary();
+    const showContents = isPrimary && (workspace.type === "section");
     return (
       <div className="statusbar">
         <div className="supports">
-          {isSection ? this.renderSupportIcons() : null}
-          {isSection ? this.renderVisibleSupports() : null}
+          {showContents ? this.renderSupportIcons() : null}
+          {showContents ? this.renderVisibleSupports() : null}
         </div>
         <div className="actions">
-          {this.isPrimary() ? <span onClick={this.handleToggleTwoUp}>2-up</span> : null}
+          {isPrimary ? this.renderTwoUpButton() : null}
         </div>
       </div>
     );
+  }
+
+  private renderTwoUpButton() {
+    const {ui} = this.stores;
+    if (this.props.workspace.type === "learningLog") {
+      return <span onClick={this.handleToggleLLTwoUp}>{ui.llComparisonWorkspaceVisible ? "1-up" : "2-up"}</span>;
+    }
+    else if (this.sectionWorkspace.mode === "1-up") {
+      return <span onClick={this.handleToggleTwoUp}>{ui.comparisonWorkspaceVisible ? "1-up" : "2-up"}</span>;
+    }
   }
 
   private renderSupportIcons() {
@@ -188,12 +204,12 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     return () => this.stores.supports.toggleSupport(support);
   }
 
-  private handleCloseWorkspace = () => {
-    this.stores.ui.closeWorkspace(this.props.workspace);
-  }
-
   private handleToggleTwoUp = () => {
     this.stores.ui.toggleComparisonWorkspaceVisible();
+  }
+
+  private handleToggleLLTwoUp = () => {
+    this.stores.ui.toggleLLComparisonWorkspaceVisible();
   }
 
   private getSupportsWithIndices() {
@@ -211,7 +227,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private isPrimary() {
-    return this.stores.ui.primaryWorkspaceDocumentKey === this.props.workspace.document.key;
+    return this.props.side === "primary";
   }
 
 }

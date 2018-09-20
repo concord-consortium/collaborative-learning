@@ -55,8 +55,14 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
   private handleWorkspaceClicked = (workspace: SectionWorkspaceModelType) => {
     const {ui} = this.stores;
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      ui.setAvailableWorkspace(workspace);
-      ui.contractAll();
+      if (ui.bottomNavExpanded) {
+        ui.setLLComparisonWorkspace(workspace);
+        ui.toggleLLComparisonWorkspaceVisible(true);
+      }
+      else {
+        ui.setAvailableWorkspace(workspace);
+        ui.contractAll();
+      }
     };
   }
 

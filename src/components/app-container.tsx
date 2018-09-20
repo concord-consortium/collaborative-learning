@@ -50,15 +50,23 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
     if (ui.comparisonWorkspaceVisible) {
       return (
         <div onMouseOver={this.handleMouseOver}>
-          {this.renderWorkspace("left-workspace", "primary", <WorkspaceComponent workspace={primaryWorkspace} />)}
+          {this.renderWorkspace(
+            "left-workspace",
+            "primary",
+            <WorkspaceComponent workspace={primaryWorkspace} side="primary" />
+          )}
           {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
-              ? <WorkspaceComponent workspace={comparisonWorkspace} />
+              ? <WorkspaceComponent workspace={comparisonWorkspace} readOnly={true} side="comparison" />
               : this.renderComparisonPlaceholder())}
         </div>
       );
     }
     else {
-      return this.renderWorkspace("single-workspace", "primary", <WorkspaceComponent workspace={primaryWorkspace} />);
+      return this.renderWorkspace(
+               "single-workspace",
+               "primary",
+               <WorkspaceComponent workspace={primaryWorkspace} side="primary" />
+             );
     }
   }
 
@@ -78,7 +86,7 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
   private renderComparisonPlaceholder() {
     return (
       <div className="comparison-placeholder">
-        Click an item in the right or bottom tabs to show it here
+        Click or drag an item in the right tabs to show it here
       </div>
     );
   }

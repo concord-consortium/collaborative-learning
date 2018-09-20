@@ -1,53 +1,113 @@
+@import vars
+
 $list-item-height: 600px
 $list-item-width: 800px
 $list-item-scale: 0.08
 
+$log-list-height: 100px;
+
 $button-width: 60px;
 
 .learning-log
-
-  button
-    padding: 5px
-    margin: 10px
-    width: $button-width
-
-  .list
+  .workspaces
     position: absolute
-    top: 10px
-    right: 0
-    left: $button-width + 20px
-    bottom: 10px
-    overflow: auto
-    overflow-y: hidden
+    top: 0
+    left: 0
+    right: $right-nav-contracted-width - 20
+    bottom: $log-list-height
 
-    .list-item
-      position: relative
-      float: left
-      margin: 0 5px
-      overflow: hidden
+    .single-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
 
-      .scaled-list-item-container
-        position: relative
-        border: 1px solid #aaa
-        width: $list-item-width * $list-item-scale
-        height: $list-item-height * $list-item-scale
+    .left-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 50%
+      bottom: 0
 
-        .scaled-list-item
-          position: absolute
-          top: 0
-          left: 0
-          transform: scale($list-item-scale)
-          transform-origin: 0 0
-          height: $list-item-height
-          width: $list-item-width
+      .workspace
+        margin-right: 5px
 
-        .canvas
+    .right-workspace
+      position: absolute
+      top: 0
+      left: 50%
+      right: 0
+      bottom: 0
 
-      .info
-        margin-top: 5px
+      .workspace
+        margin-left: 5px
+
+      .comparison-placeholder
+        position: absolute
+        top: 0
+        left: 0
+        right: 0
+        bottom: 0
+        color: #000
+        background-color: #F8FCFE
+        margin: 10px
+        border: 2px solid #797979
+        border-radius: 10px
+        display: flex
+        justify-content: center
+        align-items: center
         text-align: center
-        font-size: 0.8em
 
-        .created
-          font-style: italic
+  .logs
+    position: absolute
+    right: 0
+    left: 0
+    height: $log-list-height
+    bottom: 0
+
+    button
+      padding: 5px
+      margin: 10px
+      width: $button-width
+
+    .list
+      position: absolute
+      top: 0
+      right: 0
+      left: $button-width + 20px
+      bottom: 0
+      overflow: auto
+      overflow-y: hidden
+
+      .list-item
+        position: relative
+        float: left
+        margin: 0 5px
+        overflow: hidden
+
+        .scaled-list-item-container
+          position: relative
+          border: 1px solid #aaa
+          width: $list-item-width * $list-item-scale
+          height: $list-item-height * $list-item-scale
+
+          .scaled-list-item
+            position: absolute
+            top: 0
+            left: 0
+            transform: scale($list-item-scale)
+            transform-origin: 0 0
+            height: $list-item-height
+            width: $list-item-width
+
+          .canvas
+
+        .info
+          margin-top: 5px
+          text-align: center
           font-size: 0.8em
+
+          .created
+            font-style: italic
+            font-size: 0.8em

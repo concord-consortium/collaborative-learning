@@ -89,7 +89,7 @@ describe("ui model", () => {
     expect(ui.bottomNavExpanded).toBe(true);
   });
 
-  it("only allows one component to be expanded at a time", () => {
+  it("only allows some components to be expanded at a time", () => {
     ui.toggleLeftNav();
     expect(ui.leftNavExpanded).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
@@ -102,7 +102,7 @@ describe("ui model", () => {
 
     ui.toggleBottomNav();
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.rightNavExpanded).toBe(false);
+    expect(ui.rightNavExpanded).toBe(true);
     expect(ui.bottomNavExpanded).toBe(true);
   });
 
