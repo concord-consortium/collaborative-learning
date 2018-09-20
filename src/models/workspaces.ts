@@ -1,8 +1,5 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
-import { set } from "mobx";
-import { TextContentModelType } from "./tools/text/text-content";
-import { DocumentContentModelType } from "./document-content";
 
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
@@ -10,12 +7,25 @@ export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 export const WorkspaceToolEnum = types.enumeration("tool", ["geometry", "select", "text"]);
 export type WorkspaceTool = typeof WorkspaceToolEnum.Type;
 
-export const WorkspaceModel = types
-  .model("Workspace", {
+const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
+  switch (tool) {
+    case "geometry":
+      document.content.addGeometryTile();
+      break;
+    case "text":
+      document.content.addTextTile();
+      break;
+  }
+  return tool;
+};
+
+export const SectionWorkspaceModel = types
+  .model("SectionWorkspace", {
+    type: "section",
     mode: WorkspaceModeEnum,
     tool: WorkspaceToolEnum,
     sectionId: types.string,
-    userDocument: DocumentModel,
+    document: DocumentModel,
     groupDocuments: types.map(DocumentModel),
     visibility: types.enumeration("VisibilityType", ["public", "private"]),
   })
@@ -27,16 +37,8 @@ export const WorkspaceModel = types
           : override;
       },
 
-      toggleTool(tool: WorkspaceTool) {
-        self.tool = tool === self.tool ? "select" : tool;
-        switch (tool) {
-          case "geometry":
-            self.userDocument.content.addGeometryTile();
-            break;
-          case "text":
-            self.userDocument.content.addTextTile();
-            break;
-        }
+      selectTool(tool: WorkspaceTool) {
+        self.tool = selectTool(tool, self.document);
       },
 
       toggleVisibility(overide?: "public" | "private") {
@@ -55,26 +57,67 @@ export const WorkspaceModel = types
     };
   });
 
-export const WorkspacesModel = types
-  .model("Workspaces", {
-    workspaces: types.array(WorkspaceModel)
+export const LearningLogWorkspaceModel = types
+  .model("LearningLogWorkspace", {
+    type: "learningLog",
+    tool: WorkspaceToolEnum,
+    document: DocumentModel,
+    title: types.string,
+    createdAt: types.number,
   })
   .actions((self) => {
-    const getWorkspaceBySectionId = (sectionId: string) => {
-      return self.workspaces.find((workspace) => workspace.sectionId === sectionId);
+    return {
+      selectTool(tool: WorkspaceTool) {
+        self.tool = selectTool(tool, self.document);
+      },
+
+      setTitle(title: string) {
+        self.title = title;
+      }
+    };
+  });
+
+export const WorkspacesModel = types
+  .model("Workspaces", {
+    sections: types.array(SectionWorkspaceModel),
+    learningLogs: types.array(LearningLogWorkspaceModel)
+  })
+  .actions((self) => {
+    const findByDocumentId = (documentKey: string) => {
+      return (workspace: WorkspaceModelType) => workspace.document.key === documentKey;
+    };
+    const getSectionWorkspace = (sectionId: string) => {
+      return self.sections.find((workspace) => workspace.sectionId === sectionId);
+    };
+    const getLearningLogWorkspace = (documentKey: string) => {
+      return self.learningLogs.find(findByDocumentId(documentKey));
+    };
+    const getWorkspace = (documentKey: string) => {
+      return self.sections.find(findByDocumentId(documentKey)) || self.learningLogs.find(findByDocumentId(documentKey));
     };
 
     return {
-      getWorkspaceBySectionId,
+      getSectionWorkspace,
+      getLearningLogWorkspace,
+      getWorkspace,
 
-      addWorkspace(workspace: WorkspaceModelType) {
-        if (!getWorkspaceBySectionId(workspace.sectionId)) {
-          self.workspaces.push(workspace);
+      addSectionWorkspace(workspace: SectionWorkspaceModelType) {
+        if (!getSectionWorkspace(workspace.sectionId)) {
+          self.sections.push(workspace);
         }
         return workspace;
+      },
+
+      addLearningLogWorkspace(learningLog: LearningLogWorkspaceModelType) {
+        if (!getLearningLogWorkspace(learningLog.document.key)) {
+          self.learningLogs.push(learningLog);
+        }
+        return learningLog;
       }
     };
   });
 
 export type WorkspacesModelType = typeof WorkspacesModel.Type;
-export type WorkspaceModelType = typeof WorkspaceModel.Type;
+export type SectionWorkspaceModelType = typeof SectionWorkspaceModel.Type;
+export type LearningLogWorkspaceModelType = typeof LearningLogWorkspaceModel.Type;
+export type WorkspaceModelType = SectionWorkspaceModelType | LearningLogWorkspaceModelType;

@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
          FourUpGridModelType, IGridUpdate } from "../models/four-up-grid";
-import { WorkspaceModelType } from "../models/workspaces";
+import { SectionWorkspaceModelType } from "../models/workspaces";
 import { CanvasComponent } from "./canvas";
 import { BaseComponent, IBaseProps } from "./base";
 
@@ -12,7 +12,7 @@ import { values } from "mobx";
 import { DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {
-  workspace: WorkspaceModelType;
+  workspace: SectionWorkspaceModelType;
 }
 
 interface FourUpUser {
@@ -85,7 +85,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" document={workspace.userDocument} />
+            <CanvasComponent context="four-up-nw" document={workspace.document} />
           </div>
           <div className="member">{user.initials}</div>
         </div>

@@ -1,42 +1,113 @@
 @import vars
 
+$list-item-height: 600px
+$list-item-width: 800px
+$list-item-scale: 0.08
+
+$log-list-height: 100px;
+
+$button-width: 60px;
+
 .learning-log
-  position: fixed
-  top: $header-height
-  right: 0 //
-  width: $learning-log-contracted-width
-  bottom: 0
-  color: #000
-  transition: right $animation-speed
+  .workspaces
+    position: absolute
+    top: 0
+    left: 0
+    right: $right-nav-contracted-width - 20
+    bottom: $log-list-height
 
-  &.expanded
-    right: $learning-log-expanded-width - $learning-log-contracted-width
-    transition: right $animation-speed
+    .single-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
 
-  .tabs
-    display: flex
-    flex-direction: column
-    width: $learning-log-contracted-width
+    .left-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 50%
+      bottom: 0
+
+      .workspace
+        margin-right: 5px
+
+    .right-workspace
+      position: absolute
+      top: 0
+      left: 50%
+      right: 0
+      bottom: 0
+
+      .workspace
+        margin-left: 5px
+
+      .comparison-placeholder
+        position: absolute
+        top: 0
+        left: 0
+        right: 0
+        bottom: 0
+        color: #000
+        background-color: #F8FCFE
+        margin: 10px
+        border: 2px solid #797979
+        border-radius: 10px
+        display: flex
+        justify-content: center
+        align-items: center
+        text-align: center
+
+  .logs
     position: absolute
     right: 0
+    left: 0
+    height: $log-list-height
+    bottom: 0
 
-    .tab
-      border: 2px solid $tab-border-color
-      border-right: 2px solid $tab-background-color
-      border-top-left-radius: $tab-border-radius
-      border-bottom-left-radius: $tab-border-radius
-      padding: 3px 6px
-      background: $tab-background-color
-      margin-top: 5px
+    button
+      padding: 5px
+      margin: 10px
+      width: $button-width
 
-      &.active
-        background: $active-tab-background-color
-        color: $active-tab-color
-        border-right: 2px solid $active-tab-background-color
+    .list
+      position: absolute
+      top: 0
+      right: 0
+      left: $button-width + 20px
+      bottom: 0
+      overflow: auto
+      overflow-y: hidden
 
-  .expanded-area
-    width: $learning-log-expanded-width - $learning-log-contracted-width
-    background: $tab-background-color
-    border-left: 2px solid $tab-border-color
-    margin-left: $learning-log-contracted-width
-    height: 100%
+      .list-item
+        position: relative
+        float: left
+        margin: 0 5px
+        overflow: hidden
+
+        .scaled-list-item-container
+          position: relative
+          border: 1px solid #aaa
+          width: $list-item-width * $list-item-scale
+          height: $list-item-height * $list-item-scale
+
+          .scaled-list-item
+            position: absolute
+            top: 0
+            left: 0
+            transform: scale($list-item-scale)
+            transform-origin: 0 0
+            height: $list-item-height
+            width: $list-item-width
+
+          .canvas
+
+        .info
+          margin-top: 5px
+          text-align: center
+          font-size: 0.8em
+
+          .created
+            font-style: italic
+            font-size: 0.8em

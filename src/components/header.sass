@@ -6,20 +6,18 @@
   left: 0
   right: 0
   height: $header-height
-  color: #fff
-  background-color: #bcbcbc
+  background-color: $header-background
   display: flex
   flex-direction: row
   flex-wrap: nowrap
   justify-content: flex-start
-  font-size: 12px
+  font-size: 14px
 
   .info
     flex-grow: 1
     padding: 0 10px
     display: flex
     align-items: center
-    border-bottom: 2px solid #fff
 
     .problem
       font-weight: bold
@@ -29,17 +27,17 @@
     flex-grow: 0
     padding: 0 10px
     text-align: center
-    border-left: 2px solid #fff
     display: flex
+    flex-direction: row
     align-items: center
-    border-bottom: 2px solid #fff
 
     .name
-      text-decoration: underline
       font-weight: bold
       cursor: pointer
+      background-color: $header-highlight
+      padding: 5px 10px
+
     .members
-      margin-top: 3px
       .member
         display: inline
         font-size: 10px
@@ -53,8 +51,11 @@
 
   .user
     flex-grow: 0
-    padding: 0 10px
-    border-left: 2px solid #fff
     display: flex
     align-items: center
-    border-bottom: 2px solid #fff
+    margin-right: 20px
+
+    .name
+      padding: 5px 10px
+      background-color: $header-highlight
+      font-weight: bold

@@ -26,8 +26,9 @@ The core design elements of the schema are:
               uid: string
               documentKey: string
             createdAt: number
-            classHash: string
-            offeringId: string
+            type: "section" | "learningLog"
+            classHash?: string
+            offeringId?: string
             // TDB: serialized document model metadata
           /documents: {key: documentKey => DBDocument}
             version: "1.0"
@@ -35,6 +36,12 @@ The core design elements of the schema are:
               documentKey: string
               uid: string
             TDB: serialized document model contents
+          /learningLogs {key: documentKey => DBLearningLog}
+            version: "1.0"
+            /self
+              documentKey: string
+              uid: string
+            title: string
         /classes {key: classHash => DBClass}
           version: "1.0"
           /self
