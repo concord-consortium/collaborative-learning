@@ -29,7 +29,6 @@ export class CanvasComponent extends React.Component<IProps, {}> {
     const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
     const hasContent =  documentContent && !documentContent.isEmpty;
-    const defaultContent = `${this.props.readOnly ? "NON " : ""}Editable Canvas`;
 
     if (hasContent) {
       return (
@@ -39,7 +38,7 @@ export class CanvasComponent extends React.Component<IProps, {}> {
       );
     }
     else {
-      return defaultContent;
+      return null;
     }
   }
 }

@@ -1,6 +1,6 @@
 import * as firebase from "firebase";
 import { AppMode, IStores } from "../models/stores";
-import { UserModelType } from "../models/user";
+import { UserModelType, UserModel } from "../models/user";
 import { onSnapshot } from "mobx-state-tree";
 import { IDisposer } from "mobx-state-tree/dist/utils";
 import { observable } from "mobx";
@@ -10,7 +10,8 @@ import { DBOfferingGroup,
          DBOfferingUser,
          DBDocumentMetadata,
          DBDocument,
-         DBOfferingUserSectionDocument} from "./db-types";
+         DBOfferingUserSectionDocument,
+         DBOfferingUserSectionDocumentMap} from "./db-types";
 import { WorkspaceModelType, WorkspaceModel } from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
@@ -44,6 +45,19 @@ export interface DocumentListeners {
   };
 }
 
+export interface UserSectionDocumentListeners {
+  [key /* sectionId */: string]: {
+    [key /* userId */: string]: {
+      sectionDocsRef?: firebase.database.Reference;
+      docContentRef?: firebase.database.Reference;
+    };
+  };
+}
+
+export interface WorkspaceModelDisposers {
+  [key /* sectionId */: string]: IDisposer;
+}
+
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
@@ -59,6 +73,8 @@ export class DB {
   private connectedRef: firebase.database.Reference | null = null;
   private workspaceRef: firebase.database.Reference | null  = null;
   private documentListeners: DocumentListeners = {};
+  private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
+  private workspaceModelDisposers: WorkspaceModelDisposers = {};
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -243,7 +259,7 @@ export class DB {
                       uid: user.id,
                       sectionId
                     },
-                    visibility: "public",
+                    visibility: "private",
                     documentKey: document.self.documentKey,
                   };
                   return sectionDocumentRef.set(sectionDocument).then(() => sectionDocument!);
@@ -275,7 +291,8 @@ export class DB {
           return this.createWorkspaceFromSectionDocument(user.id, sectionDocument);
         })
         .then((workspace) => {
-          // TODO: PT #159980227: open group documents and listen for group changes
+          this.updateGroupUserSectionDocumentListeners(sectionId);
+          this.monitorWorkspaceVisibility(workspace);
           resolve(workspace);
         })
         .catch(reject);
@@ -388,7 +405,7 @@ export class DB {
 
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getUserPath(user)}/documentMetadata${suffix}`;
+    return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
   public getClassPath(user: UserModelType) {
@@ -407,9 +424,9 @@ export class DB {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
-  public getSectionDocumentPath(user: UserModelType, sectionId?: string) {
+  public getSectionDocumentPath(user: UserModelType, sectionId?: string, userId?: string) {
     const suffix = sectionId ? `/${sectionId}` : "";
-    return `${this.getOfferingUserPath(user)}/sectionDocuments${suffix}`;
+    return `${this.getOfferingUserPath(user, userId)}/sectionDocuments${suffix}`;
   }
 
   public getGroupsPath(user: UserModelType) {
@@ -546,6 +563,10 @@ export class DB {
     if (this.workspaceRef) {
       this.workspaceRef.off("child_added", this.handleWorkspaceChildAdded);
     }
+
+    Object.keys(this.workspaceModelDisposers).forEach((sectionId) => {
+      this.workspaceModelDisposers[sectionId]();
+    });
   }
 
   private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
@@ -553,6 +574,11 @@ export class DB {
     const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
     if (sectionDocument && !workspaces.getWorkspaceBySectionId(sectionDocument.self.sectionId)) {
       this.createWorkspaceFromSectionDocument(user.id, sectionDocument)
+        .then((workspace) => {
+          this.updateGroupUserSectionDocumentListeners(sectionDocument.self.sectionId);
+          this.monitorWorkspaceVisibility(workspace);
+          return workspace;
+        })
         .then(workspaces.addWorkspace);
     }
   }
@@ -597,6 +623,10 @@ export class DB {
     else {
       // otherwise set the groups
       this.stores.groups.updateFromDB(user.id, groups, this.stores.class);
+
+      Object.keys(this.groupUserSectionDocumentsListeners).forEach((sectionId) => {
+        this.updateGroupUserSectionDocumentListeners(sectionId);
+      });
     }
   }
 
@@ -723,5 +753,99 @@ export class DB {
       this.documentListeners[documentKey] = {};
     }
     return this.documentListeners[documentKey];
+  }
+
+  private monitorWorkspaceVisibility = (workspace: WorkspaceModelType) => {
+    if (this.workspaceModelDisposers[workspace.sectionId]) {
+      // Workspaces ignores any duplicate workspaces created for a sectionId, so don't listen to them
+      return;
+    }
+    const { user } = this.stores;
+    const updateRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId));
+    const disposer = (onSnapshot(workspace, (newWorkspace) => {
+      updateRef.update({
+        visibility: newWorkspace.visibility
+      });
+    }));
+    this.workspaceModelDisposers[workspace.sectionId] = disposer;
+  }
+
+  private updateGroupUserSectionDocumentListeners(sectionId: string) {
+    const { user, groups } = this.stores;
+    const userGroup = groups.groupForUser(user.id);
+    const groupUsers = userGroup && userGroup.users;
+    if (groupUsers) {
+      groupUsers.forEach((groupUser) => {
+        if (groupUser.id === user.id) {
+          return;
+        }
+        const currentSectionDocsListener = this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUser.id)
+          .sectionDocsRef;
+        if (currentSectionDocsListener) {
+          currentSectionDocsListener.off();
+        }
+        const groupUserSectionDocsRef = this.ref(this.getSectionDocumentPath(user, sectionId, groupUser.id));
+        this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUser.id)
+          .sectionDocsRef = groupUserSectionDocsRef;
+        groupUserSectionDocsRef.on("value", (snapshot) => {
+          this.handleGroupUserSectionDocRef(snapshot);
+        });
+      });
+    }
+  }
+
+  private handleGroupUserSectionDocRef(snapshot: firebase.database.DataSnapshot|null) {
+    const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
+    if (sectionDocument) {
+      const groupUserId = sectionDocument.self.uid;
+      const sectionId = sectionDocument.self.sectionId;
+      if (sectionDocument.visibility === "public") {
+        const docKey = sectionDocument.documentKey;
+        const mainUser = this.stores.user;
+        const currentDocContentListener = this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
+            .docContentRef;
+        if (currentDocContentListener) {
+          currentDocContentListener.off();
+        }
+        const groupUserDocRef = this.ref(this.getUserDocumentPath(mainUser, docKey, groupUserId));
+        this.getOrCreateGroupUserSectionDocumentListeners(sectionId, groupUserId)
+          .docContentRef = groupUserDocRef;
+        groupUserDocRef.on("value", (docContentSnapshot) => {
+          this.handleGroupUserDocRef(docContentSnapshot, sectionId);
+        });
+      } else {
+        const workspace = this.stores.workspaces.getWorkspaceBySectionId(sectionId);
+        if (workspace) {
+          workspace.clearGroupDocument(groupUserId);
+        }
+      }
+    }
+  }
+
+  private handleGroupUserDocRef(snapshot: firebase.database.DataSnapshot|null, sectionId: string) {
+    if (snapshot) {
+      const rawGroupDoc: DBDocument = snapshot.val();
+      if (rawGroupDoc) {
+        const groupUserId = rawGroupDoc.self.uid;
+        this.openDocument(groupUserId, rawGroupDoc.self.documentKey).then((groupUserDoc) => {
+          const workspace = this.stores.workspaces.getWorkspaceBySectionId(sectionId);
+          if (workspace) {
+            workspace.setGroupDocument(groupUserId, groupUserDoc);
+          }
+        });
+      }
+    }
+  }
+
+  private getOrCreateGroupUserSectionDocumentListeners(sectionId: string, userId: string) {
+    if (!this.groupUserSectionDocumentsListeners[sectionId]) {
+      this.groupUserSectionDocumentsListeners[sectionId] = {};
+    }
+
+    if (!this.groupUserSectionDocumentsListeners[sectionId][userId]) {
+      this.groupUserSectionDocumentsListeners[sectionId][userId] = {};
+    }
+
+    return this.groupUserSectionDocumentsListeners[sectionId][userId];
   }
 }

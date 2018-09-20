@@ -17,11 +17,10 @@ describe("workspaces model", () => {
         createdAt: 1,
         content: {}
       }),
-      groupDocuments: [],
+      groupDocuments: {}
     });
-    workspaces = WorkspacesModel.create({
-      workspaces: [workspace]
-    });
+    workspaces = WorkspacesModel.create({});
+    workspaces.addWorkspace(workspace);
   });
 
   it("has default values", () => {
@@ -87,7 +86,7 @@ describe("workspaces model", () => {
         createdAt: 1,
         content: {}
       }),
-      groupDocuments: [],
+      groupDocuments: {},
     });
     workspaces.addWorkspace(newWorkspace);
     expect(workspaces.getWorkspaceBySectionId("2")).toBe(newWorkspace);
@@ -105,7 +104,7 @@ describe("workspaces model", () => {
         createdAt: 1,
         content: {}
       }),
-      groupDocuments: [],
+      groupDocuments: {},
     });
     workspaces.addWorkspace(newWorkspace);
     expect(workspaces.getWorkspaceBySectionId("1")).toBe(workspace);
