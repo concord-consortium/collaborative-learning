@@ -116,7 +116,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private render1UpCanvas(roundBottomRight: boolean) {
     return (
-      <CanvasComponent document={this.props.workspace.document} readOnly={this.props.readOnly} />
+      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={this.props.readOnly} />
     );
   }
 
