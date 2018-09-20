@@ -28,6 +28,8 @@ function getEventCoords(board: JXG.Board, evt: any, index?: number) {
 export default class GeometryToolComponent extends React.Component<IProps, IState> {
 
   private elementId: string;
+  private lastPtrDownEvent: any;
+  private lastPtrDownCoords: JXG.Coords | undefined;
 
   public componentWillMount() {
     const { context, model: { id } } = this.props;
@@ -42,7 +44,8 @@ export default class GeometryToolComponent extends React.Component<IProps, IStat
       this.setState({ board });
 
       if (board) {
-        board.on("down", this.downHandler);
+        board.on("down", this.pointerDownHandler);
+        board.on("up", this.pointerUpHandler);
       }
     }
   }
@@ -67,14 +70,54 @@ export default class GeometryToolComponent extends React.Component<IProps, IStat
     );
   }
 
-  // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-  private downHandler = (evt: any) => {
+  private isSqrDistanceWithinThreshold(threshold: number, c1?: JXG.Coords, c2?: JXG.Coords) {
+    if ((c1 == null) || (c2 == null)) { return false; }
+    const [ , c1x, c1y] = c1.scrCoords;
+    const [ , c2x, c2y] = c2.scrCoords;
+    if ((c1x == null) || !isFinite(c1x) || (c1y == null) || !isFinite(c1y)) { return false; }
+    if ((c2x == null) || !isFinite(c2x) || (c2y == null) || !isFinite(c2y)) { return false; }
+    const dx = c2x - c1x;
+    const dy = c2y - c1y;
+    return dx * dx + dy * dy < threshold;
+  }
+
+  private pointerDownHandler = (evt: any) => {
     const { board } = this.state;
     if (!board) { return; }
+
     const index = evt[JXG.touchProperty] ? 0 : undefined;
     const coords = getEventCoords(board, evt, index);
-    let el;
+    const x = coords.usrCoords[1];
+    const y = coords.usrCoords[2];
+    if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
+      this.lastPtrDownEvent = evt;
+      this.lastPtrDownCoords = coords;
+    }
+  }
 
+  // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
+  private pointerUpHandler = (evt: any) => {
+    const { board } = this.state;
+    if (!board || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
+
+    const index = evt[JXG.touchProperty] ? 0 : undefined;
+    const coords = getEventCoords(board, evt, index);
+    let [ , x, y] = this.lastPtrDownCoords.usrCoords;
+    if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
+      return;
+    }
+
+    const clickTimeThreshold = 500;
+    if (evt.timeStamp - this.lastPtrDownEvent.timeStamp > clickTimeThreshold) {
+      return;
+    }
+
+    const clickSqrDistanceThreshold = 9;
+    if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastPtrDownCoords, coords)) {
+      return;
+    }
+
+    let el;
     for (el in board.objects) {
       if (JXG.isPoint(board.objects[el]) &&
           board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
@@ -84,8 +127,8 @@ export default class GeometryToolComponent extends React.Component<IProps, IStat
 
     const { model: { content } } = this.props;
     if (content.type === "Geometry") {
-      const x = JXG._round10(coords.usrCoords[1], -1);
-      const y = JXG._round10(coords.usrCoords[2], -1);
+      x = JXG._round10(x, -1);
+      y = JXG._round10(y, -1);
       content.addPoint(board, [x, y]);
     }
   }
