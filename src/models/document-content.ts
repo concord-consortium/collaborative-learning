@@ -25,7 +25,8 @@ export const DocumentContentModel = types
         target: "board",
         properties: {
           axis: true,
-          boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin]
+          boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
+          minimizeReflow: "none"
         }
       };
       const changeJson = JSON.stringify(createBoardChange);

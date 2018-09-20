@@ -61,22 +61,22 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent document={this.props.workspace.userDocument} />
+            <CanvasComponent context="four-up-nw" document={this.props.workspace.userDocument} />
           </div>
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-ne" readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-se" readOnly={true} />
           </div>
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-sw" readOnly={true} />
           </div>
         </div>
         <div

@@ -65,7 +65,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private render1UpCanvas() {
     return (
-      <CanvasComponent document={this.props.workspace.userDocument} />
+      <CanvasComponent context="workspace" document={this.props.workspace.userDocument} />
     );
   }
 
