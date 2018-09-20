@@ -757,7 +757,8 @@ export class DB {
 
   private monitorWorkspaceVisibility = (workspace: WorkspaceModelType) => {
     if (this.workspaceModelDisposers[workspace.sectionId]) {
-      this.workspaceModelDisposers[workspace.sectionId]();
+      // Workspaces ignores any duplicate workspaces created for a sectionId, so don't listen to them
+      return;
     }
     const { user } = this.stores;
     const updateRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId));
