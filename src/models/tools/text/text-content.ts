@@ -52,13 +52,9 @@ export const TextContentModel = types
     }
   }))
   .extend(self => {
-    // local cache of Slate's immutable.js object
-    let slateValue: Value | undefined;
 
     // views
     function getSlate() {
-      if (slateValue) { return slateValue; }
-
       const text = Array.isArray(self.text) ? "" : self.text;
       let parsed = emptyJson;
       if (text) {
@@ -70,19 +66,17 @@ export const TextContentModel = types
           parsed = errorJson;
         }
       }
-      return slateValue = Value.fromJSON(parsed);
+      return Value.fromJSON(parsed);
     }
 
     function convertSlate() {
-      if (slateValue) { return slateValue; }
-
       switch (self.format) {
         case "slate":
           return getSlate();
         case "markdown":
           // handle markdown import here; for now we treat as text
         default:
-          return slateValue = Plain.deserialize(self.joinText);
+          return Plain.deserialize(self.joinText);
       }
     }
 
@@ -90,25 +84,16 @@ export const TextContentModel = types
     function setText(text: string) {
       self.format = undefined;
       self.text = text;
-      slateValue = undefined;
     }
 
     function setMarkdown(text: string) {
       self.format = "markdown";
       self.text = text;
-      slateValue = undefined;
     }
 
     function setSlate(value: Value) {
       self.format = "slate";
-      // Workaround for missing argument in Slate types
-      const myToJSON = value.toJSON as any;
-      self.text = JSON.stringify(myToJSON.call(value, {preserveSelection: true}));
-      slateValue = value;
-    }
-
-    function setSlateReadOnly(value: Value) {
-      slateValue = value;
+      self.text = JSON.stringify(value.toJSON());
     }
 
     return {
@@ -119,8 +104,7 @@ export const TextContentModel = types
       actions: {
         setText,
         setMarkdown,
-        setSlate,
-        setSlateReadOnly
+        setSlate
       }
     };
   });

@@ -76,8 +76,5 @@ describe("TextContentModel", () => {
     model.setSlate(fooValue);
     expect(model.format).toBe("slate");
     expect(Plain.serialize(model.convertSlate())).toBe(foo);
-    model.setSlateReadOnly(fooValue);
-    expect(model.format).toBe("slate");
-    expect(Plain.serialize(model.convertSlate())).toBe(foo);
   });
 });
