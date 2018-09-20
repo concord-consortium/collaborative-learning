@@ -69,10 +69,11 @@ export const TextContentModel = types
       return Value.fromJSON(parsed);
     }
 
-    function convertSlate() {
+    function convertSlate(value?: Value): Value {
       switch (self.format) {
         case "slate":
-          return getSlate();
+          const json = value && JSON.stringify(value.toJSON());
+          return value && (json === self.text) ? value : getSlate();
         case "markdown":
           // handle markdown import here; for now we treat as text
         default:
