@@ -23,10 +23,36 @@ export class DocumentContentComponent extends React.Component<IProps, {}> {
                       })
                     : null;
     return (
-      <div className="document-content">
+      <div className="document-content"
+        onDragOver={this.handleDragOver}
+        onDrop={this.handleDrop}
+      >
         {tiles}
         {this.props.children}
       </div>
     );
   }
+
+  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    // indicate we'll accept the drop
+    e.preventDefault();
+  }
+
+  private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    const dragData = e.dataTransfer.getData("org.concord.clue.tile");
+    let snapshot;
+    if (content && dragData) {
+      try {
+        snapshot = JSON.parse(dragData);
+      }
+      catch (e) {
+        snapshot = null;
+      }
+      if (snapshot) {
+        content.addTileSnapshot(snapshot);
+      }
+    }
+  }
+
 }
