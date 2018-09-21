@@ -40,10 +40,20 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const { readOnly, model } = this.props;
     const { content } = model;
     const { ui } = this.stores;
-    const op = change.operations.get(0);
-    if (op.type === "set_selection") {
-      ui.setSelectedTile(model);
+
+    // determine last focus state from list of operations
+    let isFocused: boolean | undefined;
+    change.operations.forEach(op => {
+      if (op && op.type === "set_selection") {
+        isFocused = op.selection.get("isFocused");
+      }
+    });
+
+    if (isFocused != null) {
+      // polarity is reversed from what one might expect
+      ui.setSelectedTile(isFocused ? undefined : model);
     }
+
     if (content.type === "Text") {
       if (!readOnly) {
         content.setSlate(change.value);
