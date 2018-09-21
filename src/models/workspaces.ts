@@ -121,7 +121,12 @@ export const WorkspacesModel = types
           self.learningLogs.push(learningLog);
         }
         return learningLog;
-      }
+      },
+
+      deleteLearningLogWorkspace(learningLog: LearningLogWorkspaceModelType) {
+        self.learningLogs.remove(learningLog);
+        return learningLog;
+      },
     };
   });
 

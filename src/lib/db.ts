@@ -46,8 +46,8 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
-export interface DocumentListeners {
-  [key /* documentKey */: string]: {
+export interface ModelListeners {
+  [key /* unique Key */: string]: {
     ref?: firebase.database.Reference;
     modelDisposer?: IDisposer;
   };
@@ -80,7 +80,7 @@ export class DB {
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
   private workspaceRef: firebase.database.Reference | null  = null;
-  private documentListeners: DocumentListeners = {};
+  private modelListeners: ModelListeners = {};
   private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
   private workspaceModelDisposers: WorkspaceModelDisposers = {};
   private learningLogsRef: firebase.database.Reference | null  = null;
@@ -392,15 +392,16 @@ export class DB {
     return new Promise<LearningLogWorkspaceModelType>((resolve, reject) => {
       return this.createDocument("learningLog")
         .then(({document, metadata}) => {
+          const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
             version: "1.0",
             self: {
-              documentKey: document.self.documentKey,
+              documentKey,
               uid: user.id,
             },
             title
           };
-          return this.ref(this.getLearningLogPath(user)).push(learningLog).then(() => learningLog);
+          return this.ref(this.getLearningLogPath(user, documentKey)).set(learningLog).then(() => learningLog);
         })
         .then((learningLog) => {
           return this.createWorkspaceFromLearningLog(learningLog);
@@ -545,7 +546,7 @@ export class DB {
     this.stopLatestGroupIdListener();
     this.stopGroupListeners();
     this.stopWorkspaceListener();
-    this.stopDocumentListeners();
+    this.stopModelListeners();
     this.stopLearningLogsListener();
     this.isListening = false;
   }
@@ -576,9 +577,9 @@ export class DB {
     }
   }
 
-  private stopDocumentListeners() {
-    Object.keys(this.documentListeners).forEach((docKey) => {
-      const listeners = this.documentListeners[docKey];
+  private stopModelListeners() {
+    Object.keys(this.modelListeners).forEach((docKey) => {
+      const listeners = this.modelListeners[docKey];
       if (listeners) {
         if (listeners.modelDisposer) {
           listeners.modelDisposer();
@@ -651,12 +652,15 @@ export class DB {
   private startLearningLogsListener() {
     this.learningLogsRef = this.ref(this.getLearningLogPath(this.stores.user));
     this.learningLogsRef.on("child_added", this.handleLearningLogChildAdded);
+    this.learningLogsRef.on("child_changed", this.handleLearningLogChildChanged);
+    this.learningLogsRef.on("child_removed", this.handleLearningLogChildRemoved);
   }
 
   private stopLearningLogsListener() {
     if (this.learningLogsRef) {
       this.learningLogsRef.off("child_added", this.handleLearningLogChildAdded);
-      // TODO: add listener for child_changed and child_removed
+      this.learningLogsRef.off("child_changed", this.handleLearningLogChildChanged);
+      this.learningLogsRef.off("child_removed", this.handleLearningLogChildRemoved);
     }
   }
 
@@ -664,7 +668,33 @@ export class DB {
     const {workspaces} = this.stores;
     const learningLog: DBLearningLog|null = snapshot.val();
     if (learningLog) {
-      this.createWorkspaceFromLearningLog(learningLog).then(workspaces.addLearningLogWorkspace);
+      this.createWorkspaceFromLearningLog(learningLog)
+        .then(this.monitorLearningLogWorkspace)
+        .then(workspaces.addLearningLogWorkspace);
+    }
+  }
+
+  private handleLearningLogChildChanged = (snapshot: firebase.database.DataSnapshot) => {
+    const {workspaces} = this.stores;
+    const learningLog: DBLearningLog|null = snapshot.val();
+    if (learningLog) {
+      const learningLogWorkspace = workspaces.getLearningLogWorkspace(learningLog.self.documentKey);
+      if (learningLogWorkspace) {
+        learningLogWorkspace.setTitle(learningLog.title);
+        // TODO: for future drag to order story add ordinal to learning log and update here
+      }
+    }
+  }
+
+  private handleLearningLogChildRemoved = (snapshot: firebase.database.DataSnapshot) => {
+    const {workspaces} = this.stores;
+    const learningLog: DBLearningLog|null = snapshot.val();
+    if (learningLog) {
+      const learningLogWorkspace = workspaces.getLearningLogWorkspace(learningLog.self.documentKey);
+      if (learningLogWorkspace) {
+        workspaces.deleteLearningLogWorkspace(learningLogWorkspace);
+        // TODO: still need UI for delete
+      }
     }
   }
 
@@ -809,7 +839,7 @@ export class DB {
     const documentKey = document.key;
     const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
 
-    const docListener = this.getOrCreateDocumentListener(documentKey);
+    const docListener = this.getOrCreateModelListener(`document:${documentKey}`);
     if (docListener.ref) {
       docListener.ref.off("value");
     }
@@ -837,7 +867,7 @@ export class DB {
     const { user } = this.stores;
     const { key, content } = document;
 
-    const docListener = this.getOrCreateDocumentListener(key);
+    const docListener = this.getOrCreateModelListener(`document:${key}`);
     if (docListener.modelDisposer) {
       docListener.modelDisposer();
     }
@@ -850,11 +880,11 @@ export class DB {
     }));
   }
 
-  private getOrCreateDocumentListener(documentKey: string) {
-    if (!this.documentListeners[documentKey]) {
-      this.documentListeners[documentKey] = {};
+  private getOrCreateModelListener(uniqueKeyForModel: string) {
+    if (!this.modelListeners[uniqueKeyForModel]) {
+      this.modelListeners[uniqueKeyForModel] = {};
     }
-    return this.documentListeners[documentKey];
+    return this.modelListeners[uniqueKeyForModel];
   }
 
   private monitorSectionWorkspaceVisibility = (workspace: SectionWorkspaceModelType) => {
@@ -965,5 +995,25 @@ export class DB {
         // TODO: add model listener for renames
         return learningLogModel;
       });
+  }
+
+  private monitorLearningLogWorkspace = (learningLog: LearningLogWorkspaceModelType) => {
+    const { user } = this.stores;
+    const { key } = learningLog.document;
+
+    const listener = this.getOrCreateModelListener(`learningLogWorkspace:${key}`);
+    if (listener.modelDisposer) {
+      listener.modelDisposer();
+    }
+
+    const updateRef = this.ref(this.getLearningLogPath(user, key));
+    listener.modelDisposer = (onSnapshot(learningLog, (newLearningLog) => {
+      updateRef.update({
+        title: newLearningLog.title,
+        // TODO: for future ordering story add original to model and update here
+      });
+    }));
+
+    return learningLog;
   }
 }
