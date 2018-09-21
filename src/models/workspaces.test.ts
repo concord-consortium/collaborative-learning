@@ -1,9 +1,11 @@
 import { SectionWorkspaceModel, SectionWorkspaceModelType, WorkspacesModel, WorkspacesModelType } from "./workspaces";
-import { DocumentModel } from "./document";
+import { DocumentModel, DocumentModelType } from "./document";
 
 describe("workspaces model", () => {
   let workspaces: WorkspacesModelType;
   let workspace: SectionWorkspaceModelType;
+  let goodDoc: DocumentModelType;
+  let badDoc: DocumentModelType;
 
   beforeEach(() => {
     workspace = SectionWorkspaceModel.create({
@@ -21,6 +23,20 @@ describe("workspaces model", () => {
     });
     workspaces = WorkspacesModel.create({});
     workspaces.addSectionWorkspace(workspace);
+
+    goodDoc = DocumentModel.create({
+      uid: "2",
+      key: "test2",
+      createdAt: 1,
+      content: {}
+    });
+
+    badDoc = DocumentModel.create({
+      uid: "3",
+      key: "test3",
+      createdAt: 1,
+      content: {}
+    });
   });
 
   it("has default values", () => {
@@ -108,6 +124,23 @@ describe("workspaces model", () => {
     });
     workspaces.addSectionWorkspace(newWorkspace);
     expect(workspaces.getSectionWorkspace("1")).toBe(workspace);
+  });
+
+  it("adds new group documents", () => {
+    workspace.setGroupDocument("1", goodDoc);
+    expect(workspace.groupDocuments.get("1")).toBe(goodDoc);
+  });
+
+  it("updates existing group documents", () => {
+    workspace.setGroupDocument("2", badDoc);
+    workspace.setGroupDocument("2", goodDoc);
+    expect(workspace.groupDocuments.get("2")).toBe(goodDoc);
+  });
+
+  it("clears group documents", () => {
+    workspace.setGroupDocument("1", badDoc);
+    workspace.clearGroupDocument("1");
+    expect(workspace.groupDocuments.get("1")).toBeUndefined();
   });
 
 });
