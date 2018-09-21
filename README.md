@@ -8,7 +8,7 @@ MSU Inscriptions project.
 ### Initial steps
 
 1. Clone this repo and `cd` into it
-2. Run `yarn` to pull dependencies
+2. Run `npm install` to pull dependencies
 3. Run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
 
 ### Building
