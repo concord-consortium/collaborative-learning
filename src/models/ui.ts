@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { SectionWorkspaceModelType, LearningLogWorkspaceModelType } from "./workspaces";
+import { ToolTileModelType } from "./tools/tool-tile";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
@@ -11,6 +12,7 @@ export const UIModel = types
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: "My Work",
+    selectedTileId: types.maybe(types.string),
     primaryWorkspaceDocumentKey: types.maybe(types.string),
     comparisonWorkspaceDocumentKey: types.maybe(types.string),
     comparisonWorkspaceVisible: false,
@@ -24,6 +26,9 @@ export const UIModel = types
     get allContracted() {
       return !self.rightNavExpanded && !self.leftNavExpanded && !self.bottomNavExpanded;
     },
+    isSelectedTile(tile: ToolTileModelType) {
+      return (tile.id === self.selectedTileId);
+    }
   }))
   .actions((self) => {
     const contractAll = () => {
@@ -92,6 +97,9 @@ export const UIModel = types
       },
       setActiveRightNavTab(tab: string) {
         self.activeRightNavTab = tab;
+      },
+      setSelectedTile(tile?: ToolTileModelType) {
+        self.selectedTileId = tile ? tile.id : undefined;
       },
       setAvailableWorkspace(workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
         if (self.comparisonWorkspaceVisible) {

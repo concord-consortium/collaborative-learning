@@ -6,12 +6,12 @@ import { WorkspaceTool,
          SectionWorkspaceModelType,
          LearningLogWorkspaceModelType
        } from "../models/workspaces";
+import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./workspace.sass";
-import { SupportItemModelType } from "../models/supports";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -83,8 +83,17 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
       return `tool ${tool}${tool === workspace.tool ? " active" : ""}`;
     };
     const handleSelectTool = (tool: WorkspaceTool) => {
+      const { ui } = this.stores;
       return (e: React.MouseEvent<HTMLDivElement>) => {
-        workspace.selectTool(tool);
+        switch (tool) {
+          case "delete":
+            if (ui.selectedTileId) {
+              workspace.deleteTile(ui.selectedTileId);
+            }
+            break;
+          default:
+            workspace.selectTool(tool);
+        }
       };
     };
     return (
@@ -92,6 +101,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
         <div className={className("select")} title="Select" onClick={handleSelectTool("select")}>↖</div>
         <div className={className("text")} title="Text" onClick={handleSelectTool("text")}>T</div>
         <div className={className("geometry")} title="Geometry" onClick={handleSelectTool("geometry")}/>
+        <div className={className("delete")} title="Delete" onClick={handleSelectTool("delete")}>{"\u274c"}</div>
       </div>
     );
   }
