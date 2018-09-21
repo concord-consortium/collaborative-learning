@@ -4,7 +4,7 @@ import { DocumentModel, DocumentModelType } from "./document";
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 
-export const WorkspaceToolEnum = types.enumeration("tool", ["geometry", "select", "text"]);
+export const WorkspaceToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text"]);
 export type WorkspaceTool = typeof WorkspaceToolEnum.Type;
 
 const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
@@ -41,6 +41,10 @@ export const SectionWorkspaceModel = types
         self.tool = selectTool(tool, self.document);
       },
 
+      deleteTile(tileId: string) {
+        self.document.content.deleteTile(tileId);
+      },
+
       toggleVisibility(overide?: "public" | "private") {
         self.visibility = typeof overide === "undefined"
           ? (self.visibility === "public" ? "private" : "public")
@@ -69,6 +73,10 @@ export const LearningLogWorkspaceModel = types
     return {
       selectTool(tool: WorkspaceTool) {
         self.tool = selectTool(tool, self.document);
+      },
+
+      deleteTile(tileId: string) {
+        self.document.content.deleteTile(tileId);
       },
 
       setTitle(title: string) {

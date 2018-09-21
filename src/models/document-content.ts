@@ -40,13 +40,19 @@ export const DocumentContentModel = types
         }
       }));
     },
-    addTextTile() {
+    addTextTile(initialText?: string) {
       self.tiles.push(ToolTileModel.create({
         content: {
           type: "Text",
-          text: ""
+          text: initialText
         }
       }));
+    },
+    deleteTile(tileId: string) {
+      const index = self.tiles.findIndex(tile => tile.id === tileId);
+      if (index >= 0) {
+        self.tiles.splice(index, 1);
+      }
     },
     addTileSnapshot(snapshot: ToolTileModelType) {
       self.tiles.push(ToolTileModel.create(snapshot));
