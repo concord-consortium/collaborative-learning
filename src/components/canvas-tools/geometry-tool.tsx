@@ -89,7 +89,11 @@ export default class GeometryToolComponent extends BaseComponent<IProps, IState>
     const { ui } = this.stores;
     if (!board) { return; }
 
-    ui.setSelectedTile(model);
+    // first click selects the tile; subsequent clicks create points
+    if (!ui.isSelectedTile(model)) {
+      ui.setSelectedTile(model);
+      return;
+    }
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
     const coords = getEventCoords(board, evt, index);

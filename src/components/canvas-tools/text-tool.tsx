@@ -51,7 +51,13 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
     if (isFocused != null) {
       // polarity is reversed from what one might expect
-      ui.setSelectedTile(isFocused ? undefined : model);
+      if (!isFocused) {
+        // only select - if we deselect, it breaks delete because Slate
+        // somehow detects the selection change before the click on the
+        // delete button is processed by the workspace. For now, we just
+        // disable focus change on deselection.
+        ui.setSelectedTile(model);
+      }
     }
 
     if (content.type === "Text") {
