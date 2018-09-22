@@ -1,6 +1,6 @@
-import { observer } from "mobx-react";
+import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { IBaseProps } from "./base";
+import { BaseComponent, IBaseProps } from "./base";
 import { DocumentContentModelType } from "../models/document-content";
 import { ToolTileComponent } from "./canvas-tools/tool-tile";
 
@@ -12,8 +12,9 @@ interface IProps extends IBaseProps {
   readOnly?: boolean;
 }
 
+@inject("stores")
 @observer
-export class DocumentContentComponent extends React.Component<IProps, {}> {
+export class DocumentContentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { content, ...others } = this.props;
@@ -25,6 +26,7 @@ export class DocumentContentComponent extends React.Component<IProps, {}> {
                     : null;
     return (
       <div className="document-content"
+        onClick={this.handleClick}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop}
       >
@@ -32,6 +34,15 @@ export class DocumentContentComponent extends React.Component<IProps, {}> {
         {this.props.children}
       </div>
     );
+  }
+
+  private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = this.stores;
+    // deselect tiles on click on document background
+    // click must be on DocumentContent itself, not bubble up from child
+    if (e.target === e.currentTarget) {
+      ui.setSelectedTile();
+    }
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
