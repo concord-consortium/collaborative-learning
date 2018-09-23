@@ -881,6 +881,31 @@
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "Scaling Perimeter and Area",
+      "introduction": {
+        "tiles": [
+          {
+            "content": {
+              "type": "Text",
+              "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations. [image: SS_3_1_In_20_rep_tiles]"
+            }
+          }, {
+            "content": {
+            "type": "Text",
+            "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+            }
+          }, {
+            "content": {
+            "type": "Text",
+            "text": "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+            }
+          }, {
+            "content": {
+            "type": "Text",
+            "text": "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
+            }
+          }
+        ]
+      },
       "problems": [
         {
           "description": "Problem 3.1",
