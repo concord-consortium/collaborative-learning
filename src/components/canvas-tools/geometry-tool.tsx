@@ -2,6 +2,7 @@ import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
 
 import "./text-tool.sass";
 
@@ -34,13 +35,15 @@ export default class GeometryToolComponent extends BaseComponent<IProps, IState>
   private lastPtrDownCoords: JXG.Coords | undefined;
 
   public componentWillMount() {
-    const { context, model: { id } } = this.props;
-    this.elementId = `${context}-${id}`;
+    const { context, model: { id, content } } = this.props;
+    // elide uuid for readability/debugging
+    const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
+    const viewId = (content as GeometryContentModelType).nextViewId;
+    this.elementId = `${context}-${debugId}-${viewId}`;
   }
 
   public componentDidMount() {
     const { model: { content } } = this.props;
-    const elt = document.getElementById(this.elementId);
     if (content.type === "Geometry") {
       const board = content.initialize(this.elementId);
       this.setState({ board });

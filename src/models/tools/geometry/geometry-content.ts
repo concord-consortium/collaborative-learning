@@ -11,6 +11,8 @@ export const GeometryContentModel = types
   })
   .extend(self => {
 
+    let viewCount = 0;
+
     // views
 
     // actions
@@ -44,6 +46,9 @@ export const GeometryContentModel = types
 
     return {
       views: {
+        get nextViewId() {
+          return ++viewCount;
+        }
       },
       actions: {
         initialize,
