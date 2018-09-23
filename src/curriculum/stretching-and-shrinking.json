@@ -873,15 +873,353 @@
         ]
       },
       "supports": [
-        {"text": "TEST: investigation #2 level support #1"},
-        {"text": "TEST: investigation #2 level support #2"}
+        {"text": "What measurements change from one similar figure to another?"},
+        {"text": "How is the change related to the scale factor?"}
       ]
     },
     {
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "Scaling Perimeter and Area",
-      "problems": [],
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "Rep-Tile Quadrilaterals",
+          "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
+          "sections": [
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Sketch or use your Shape Set to make several copies of these shapes: ",
+                    }
+                  }, {
+                    "content": {
+                    "type": "Text",
+                    "text": "Quadrilaterals: a non-square rectangle, a non-rectangular parallelogram, and a trapezoid",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "Triangles: a right triangle, an isosceles triangle, and a scalene triangle",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "1. Which of these quadrilaterals is a rep-tile? Make a sketch to show how the copies fit together.",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "2. Which of these triangles make a rep-tile? Make a sketch to show how the copies fit together.",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "For the shapes that rep-tile,",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "3. What is the scale factor from the original figure to the image? Explain your reasoning.",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "4. How does the perimeter of the larger figure relate to the perimeter of the original figure?",
+                    }
+                  }, {
+                  "content": {
+                  "type": "Text",
+                  "text": "5. How does the area of the larger figure relate to the area of the original figure?",
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What if you extend one of the rep-tile patterns you drew in the Initial Challenge. You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. Show how the copies fit together."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2.Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and the image?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "4. Tomoko claims that all triangles are rep-tiles. Is this true? Explain."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "5. Make a sketch of a quadrilateral. Divide the quadrilateral into four congruent smaller quadrilaterals. Explain why the smaller quadrilaterals are similar to the original."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "6. Make a sketch of a triangle. Divide the triangle."
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "How do rep-tiles show the relationship between the scale factor and the area of similar shape?"
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "Designing Under Constraints",
+          "subtitle": "Scale Factors and Similar Shapes",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "The scale factor from one figure to a similar figure gives you information about how the side lengths, perimeters, and areas of the figures are related. In Problem 3.2, you will use what you learned to draw scale drawings."
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Constraints for A: For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. The scale factor from Rectangle A to the new rectangle J is 2.5."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. The area of the new rectangle K is 1/4 the area of Rectangle A."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. The perimeter of the new rectangle L is three times the perimeter of Rectangle A."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Constraints for B: For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. The area of the new triangle W is 16 times the area of Triangle B."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. The scale factor from Triangle B to the new triangle X is 1/2."
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {"text": "Can using corresponding sides help?"},
+                {"text": "Can using corresponding angles help?"},
+                {"text": "What is the scale factor from one shape to the other?"}
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What if you are given the following designs for similar figures."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. Is it possible to find the length of side AD? Explain. [image: SS_3_2_WI_24_Q1]"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. Find all the missing side lengths and angles. Explain your reasoning. [image: SS_3_2_WI_25_Q2]"
+                    }
+                  }
+                ]
+              },
+              "supports": [ 
+                 {"text": "Can using corresponding sides help?"},
+                 {"text": "Can using corresponding angles help?"},
+                 {"text": "What is the scale factor from one shape to the other?"}
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "How can you use scale factors"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "to draw similar figures? to find missing information about angle measures? Areas? Perimeters?"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "Out of Reach",
+          "subtitle": "Finding Lengths with Similar Triangles",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Durell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle. [image: SS_3_3_In_26_river_triangle]"
+                    }, 
+                    "content": {
+                      "type": "Text",
+                      "text": "The angles that look like right angles are right angles."
+                    }, 
+                    "content": {
+                      "type": "Text",
+                      "text": "The triangles in the diagram are similar."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {"text": "What shapes do you see in the diagram?"},
+                {"text": "What measurements do we know?"}
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. Durrell claims that he can use rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2.Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain.[image: SS_3_3_WI_27_river_triangle2]"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "How can you use similar triangles to find a distance that is difficult to measure directly?"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "reflections": {
+        "tiles": [
+          {
+            "content": {
+              "type": "Text",
+              "text": "In this Investigation, we explored similar polygons, scale factors and measures related to similar figures."
+            }
+          }, {
+            "content": {
+              "type": "Text",
+              "text": "Now what do you know about similarity?"
+            }
+          }, {
+            "content": {
+              "type": "Text",
+              "text": "Discuss your ideas with other students and your teacher. Then write a summary of your findings."
+            }
+          }
+        ]
+      },
       "supports": []
     },
     {
