@@ -5,25 +5,20 @@ $list-item-width: 800px
 $list-item-scale: 0.1
 
 .right-nav
-  position: fixed
-  top: $header-height + $nav-expanded-peek
-  right: $nav-expanded-peek
-  width: $right-nav-contracted-width
-  bottom: $nav-expanded-peek * 2
   color: #000
-  transition: right $animation-speed
-
-  &.expanded
-    right: $right-nav-expanded-width - $right-nav-contracted-width
-    transition: right $animation-speed
 
   .tabs
     display: flex
     flex-direction: column
     width: $right-nav-contracted-width
     position: absolute
-    top: 15px
-    right: 0
+    top: $header-height + $nav-expanded-peek + 15px
+    right: $nav-expanded-peek
+    transition: right $animation-speed
+
+    &.expanded
+      right: $right-nav-expanded-width - $right-nav-contracted-width
+      transition: right $animation-speed
 
     .tab
       +tab(right)
@@ -44,7 +39,9 @@ $list-item-scale: 0.1
         z-index: 2
 
   .expanded-area
-    position: relative
+    position: absolute
+    top: $header-height + $nav-expanded-peek
+    right: $nav-expanded-peek - ($right-nav-expanded-width - $right-nav-contracted-width)
     width: $right-nav-expanded-width - $right-nav-contracted-width
     background: $right-nav-tab-background-color
     border-top: 4px solid $tab-border-color
@@ -54,6 +51,11 @@ $list-item-scale: 0.1
     margin-left: $right-nav-contracted-width
     height: 100%
     box-shadow: -2px 2px 0 0 rgba(0,0,0,0.20)
+    transition: right $animation-speed
+
+    &.expanded
+      right: 0
+      transition: right $animation-speed
 
     .contents
       position: relative
