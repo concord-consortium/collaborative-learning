@@ -7,7 +7,8 @@ import { ProblemModelType } from "../models/curriculum/problem";
 import "./demo-creator.sass";
 
 export const NUM_DEMO_CLASSES = 9;
-export const NUM_DEMO_STUDENTS = 9;
+export const NUM_DEMO_STUDENTS = 99;
+export const NUM_DEMO_STUDENTS_VISIBLE = 9;
 export const NUM_DEMO_TEACHERS = 3;
 
 interface IProps extends IBaseProps {}
@@ -56,7 +57,7 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
       classes.push(<option key={classIndex}>Class {classIndex}</option>);
     }
 
-    for (let studentIndex = 1; studentIndex <= NUM_DEMO_STUDENTS; studentIndex++) {
+    for (let studentIndex = 1; studentIndex <= NUM_DEMO_STUDENTS_VISIBLE; studentIndex++) {
       studentLinks.push(this.createLink("student", studentIndex));
     }
 

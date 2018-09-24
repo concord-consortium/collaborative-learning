@@ -7,6 +7,7 @@ import { authenticate,
         getAppMode,
         DEV_CLASS_INFO } from "./auth";
 import * as nock from "nock";
+import { NUM_DEMO_STUDENTS } from "../components/demo-creator";
 
 const { FIREBASE_JWT_QUERY, FIREBASE_JWT_URL_SUFFIX, PORTAL_JWT_URL_SUFFIX } = _private;
 
@@ -204,133 +205,20 @@ describe("authentication", () => {
 
   it("creates demo info", () => {
     const demoInfo = createDemoInfo("1", "student", "1", "1");
-    expect(demoInfo).toEqual({
-      authenticatedUser: {
-        type: "student",
-        id: "1",
-        portal: "demo",
-        firstName: "Student",
-        lastName: "1",
-        fullName: "Student 1",
-        initials: "S1",
-        className: "Demo Class 1",
-        classHash: "democlass1",
-        offeringId: "1"
-      },
-      classInfo: {
-        name: "Demo Class 1",
-        classHash: "democlass1",
-        students: [
-          {
-            type: "student",
-            id: "1",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "1",
-            fullName: "Student 1",
-            initials: "S1",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "2",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "2",
-            fullName: "Student 2",
-            initials: "S2",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "3",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "3",
-            fullName: "Student 3",
-            initials: "S3",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "4",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "4",
-            fullName: "Student 4",
-            initials: "S4",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "5",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "5",
-            fullName: "Student 5",
-            initials: "S5",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "6",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "6",
-            fullName: "Student 6",
-            initials: "S6",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "7",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "7",
-            fullName: "Student 7",
-            initials: "S7",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "8",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "8",
-            fullName: "Student 8",
-            initials: "S8",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          },
-          {
-            type: "student",
-            id: "9",
-            portal: "demo",
-            firstName: "Student",
-            lastName: "9",
-            fullName: "Student 9",
-            initials: "S9",
-            className: "Demo Class 1",
-            classHash: "democlass1",
-            offeringId: "1"
-          }
-        ]
-      }
+    expect(demoInfo.authenticatedUser).toEqual({
+      type: "student",
+      id: "1",
+      portal: "demo",
+      firstName: "Student",
+      lastName: "1",
+      fullName: "Student 1",
+      initials: "S1",
+      className: "Demo Class 1",
+      classHash: "democlass1",
+      offeringId: "1"
     });
+    expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
+    expect(demoInfo.classInfo.classHash).toEqual("democlass1");
+    expect(demoInfo.classInfo.students.length).toEqual(NUM_DEMO_STUDENTS);
   });
 });
