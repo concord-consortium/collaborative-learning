@@ -33,7 +33,8 @@
     "test:all": "npm-run-all build test start",
     "test:coverage": "jest --coverage",
     "test:debug": "node --nolazy --inspect-brk ./node_modules/.bin/jest --runInBand --no-cache",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "test:coverage:watch": "jest --coverage --watchAll"
   },
   "repository": {
     "type": "git",

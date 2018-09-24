@@ -1,4 +1,8 @@
-import { SectionWorkspaceModel, SectionWorkspaceModelType, WorkspacesModel, WorkspacesModelType } from "./workspaces";
+import { SectionWorkspaceModel,
+         SectionWorkspaceModelType,
+         WorkspacesModel,
+         WorkspacesModelType,
+         LearningLogWorkspaceModel } from "./workspaces";
 import { DocumentModel, DocumentModelType } from "./document";
 
 describe("workspaces model", () => {
@@ -17,7 +21,15 @@ describe("workspaces model", () => {
         uid: "1",
         key: "test",
         createdAt: 1,
-        content: {}
+        content: {
+          tiles: [{
+            id: "1",
+            content: {
+              type: "Text",
+              text: "test"
+            }
+          }]
+        }
       }),
       groupDocuments: {},
     });
@@ -58,18 +70,19 @@ describe("workspaces model", () => {
     expect(workspace.mode).toBe("4-up");
   });
 
-  it("allows the select tool to be toggled", () => {
+  it("allows the tools to be selected", () => {
     workspace.selectTool("select");
     expect(workspace.tool).toBe("select");
-    workspace.selectTool("select");
-    expect(workspace.tool).toBe("select");
+    workspace.selectTool("text");
+    expect(workspace.tool).toBe("text");
+    workspace.selectTool("geometry");
+    expect(workspace.tool).toBe("geometry");
   });
 
-  it("allows the text tool to be toggled", () => {
-    workspace.selectTool("text");
-    expect(workspace.tool).toBe("text");
-    workspace.selectTool("text");
-    expect(workspace.tool).toBe("text");
+  it("allows tiles to be deleted", () => {
+    expect(workspace.document.content.tiles.length).toBe(1);
+    workspace.deleteTile("1");
+    expect(workspace.document.content.tiles.length).toBe(0);
   });
 
   it("allows the visibility to be toggled", () => {
@@ -141,6 +154,74 @@ describe("workspaces model", () => {
     workspace.setGroupDocument("1", badDoc);
     workspace.clearGroupDocument("1");
     expect(workspace.groupDocuments.get("1")).toBeUndefined();
+  });
+
+  it("allows learning log workspaces to be added and deleted", () => {
+    const newWorkspace = LearningLogWorkspaceModel.create({
+      tool: "select",
+      document: DocumentModel.create({
+        uid: "1",
+        key: "ll-test",
+        createdAt: 1,
+        content: {
+          tiles: [{
+            id: "1",
+            content: {
+              type: "Text",
+              text: "test"
+            }
+          }]
+        }
+      }),
+      title: "Test Log",
+      createdAt: 1,
+    });
+    workspaces.addLearningLogWorkspace(newWorkspace);
+    expect(workspaces.getWorkspace("ll-test")).toBe(newWorkspace);
+    expect(workspaces.getLearningLogWorkspace("ll-test")).toBe(newWorkspace);
+
+    newWorkspace.setTitle("New Log");
+    expect(newWorkspace.title).toBe("New Log");
+
+    newWorkspace.selectTool("text");
+    expect(newWorkspace.tool).toBe("text");
+
+    expect(newWorkspace.document.content.tiles.length).toBe(2);
+    newWorkspace.deleteTile("1");
+    expect(newWorkspace.document.content.tiles.length).toBe(1);
+
+    workspaces.deleteLearningLogWorkspace(newWorkspace);
+    expect(workspaces.getLearningLogWorkspace("ll-test")).toBe(undefined);
+  });
+
+  it("does not allow learning log workspaces with duplicate keys to be added", () => {
+    const learningLog1 = LearningLogWorkspaceModel.create({
+      tool: "select",
+      document: DocumentModel.create({
+        uid: "1",
+        key: "ll-test",
+        createdAt: 1,
+        content: {}
+      }),
+      title: "Test Log #1",
+      createdAt: 1,
+    });
+    const learningLog2 = LearningLogWorkspaceModel.create({
+      tool: "select",
+      document: DocumentModel.create({
+        uid: "1",
+        key: "ll-test",
+        createdAt: 1,
+        content: {}
+      }),
+      title: "Test Log #2",
+      createdAt: 1,
+    });
+    expect(workspaces.learningLogs.length).toBe(0);
+    workspaces.addLearningLogWorkspace(learningLog1);
+    expect(workspaces.learningLogs.length).toBe(1);
+    workspaces.addLearningLogWorkspace(learningLog2);
+    expect(workspaces.learningLogs.length).toBe(1);
   });
 
 });

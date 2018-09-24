@@ -65,7 +65,7 @@ describe("user model", () => {
     expect(user.id).toBe(id);
   });
 
-  it("can set an authenticated user", () => {
+  it("can set an authenticated student user", () => {
     const user = UserModel.create();
     const authenticatedUser: AuthenticatedUser = {
       type: "student",
@@ -84,6 +84,24 @@ describe("user model", () => {
     expect(user.id).toBe(authenticatedUser.id);
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
+    expect(user.latestGroupId).toBe(undefined);
+  });
+
+  it("can set an authenticated teacher user", () => {
+    const user = UserModel.create();
+    const authenticatedUser: AuthenticatedUser = {
+      type: "teacher",
+      id: "1",
+      portal: "test",
+      firstName: "Fred",
+      lastName: "Flintstone",
+      fullName: "Fred Flintstone",
+      initials: "FF",
+    };
+    user.setAuthenticatedUser(authenticatedUser);
+    expect(user.authenticated).toBe(true);
+    expect(user.id).toBe(authenticatedUser.id);
+    expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.latestGroupId).toBe(undefined);
   });
 });

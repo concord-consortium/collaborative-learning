@@ -11,6 +11,7 @@ import { DocumentModel } from "../models/document";
 import { createStores } from "../models/stores";
 import { CanvasComponent } from "./canvas";
 import { UserModel } from "../models/user";
+import { componentByNodeRegistery } from "mobx-react";
 
 configure({ adapter: new Adapter() });
 
@@ -91,5 +92,15 @@ describe("Four Up Component", () => {
     expect(comp.find(".member").at(0).text()).toBe("U3");
     expect(comp.find(".member").at(1).text()).toBe("U1");
     expect(comp.find(".member").at(2).text()).toBe("U2");
+
+    // TODO: figure out how to add coverage for window mouse events setup by the spliiter handlers
+    comp.find(".horizontal").simulate("mouseDown");
+    comp.find(".horizontal").simulate("mouseUp");
+
+    comp.find(".vertical").simulate("mouseDown");
+    comp.find(".vertical").simulate("mouseUp");
+
+    comp.find(".center").simulate("mouseDown");
+    comp.find(".center").simulate("mouseUp");
   });
 });
