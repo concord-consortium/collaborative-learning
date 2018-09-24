@@ -14,13 +14,12 @@ interface IProps extends IBaseProps {}
 export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const className = `right-nav${this.stores.ui.rightNavExpanded ? " expanded" : ""}`;
-    const tabs = ["My Work"];
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
+    const tabs = ["My Work"];
 
     return (
-      <div className={className}>
-        <TabSetComponent>
+      <div className="right-nav">
+        <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
           {tabs.map((tab) => {
             return (
               <TabComponent
@@ -35,7 +34,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
           })}
         </TabSetComponent>
         <div
-          className="expanded-area"
+          className={`expanded-area${rightNavExpanded ? " expanded" : ""}`}
           aria-labelledby={this.getTabId(activeRightNavTab)}
           aria-hidden={!rightNavExpanded}
         >
