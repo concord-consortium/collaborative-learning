@@ -35,17 +35,22 @@ export const GroupsModel = types
         const allGroups = Object.keys(groups).map((groupId) => {
           const group = groups[groupId];
           const groupUsers = group.users || {};
-          const users = Object.keys(groupUsers).map((groupUserId) => {
+          const users: GroupUserModelType[] = [];
+          Object.keys(groupUsers).forEach((groupUserId) => {
             const groupUser = groupUsers[groupUserId];
             const {connectedTimestamp, disconnectedTimestamp} = groupUser;
-            const student = clazz.getStudentById(groupUser.self.uid);
-            return GroupUserModel.create({
-              id: groupUserId,
-              name: student ? student.fullName : "Unknown",
-              initials: student ? student.initials : "??",
-              connectedTimestamp,
-              disconnectedTimestamp
-            });
+            // self may be undefined if the database was deleted while a tab remains open
+            // causing the disconnectedAt timestamp to be set at the groupUser level
+            if (groupUser.self) {
+              const student = clazz.getStudentById(groupUser.self.uid);
+              users.push(GroupUserModel.create({
+                id: groupUserId,
+                name: student ? student.fullName : "Unknown",
+                initials: student ? student.initials : "??",
+                connectedTimestamp,
+                disconnectedTimestamp
+              }));
+            }
           });
           return GroupModel.create({id: groupId, users});
         });
