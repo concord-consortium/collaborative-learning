@@ -3,7 +3,6 @@ import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
-import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { BaseComponent } from "../base";
@@ -15,6 +14,7 @@ import "./tool-tile.sass";
 
 interface IProps {
   context: string;
+  scale?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -51,10 +51,24 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // set the drag data
     const snapshot = cloneDeep(getSnapshot(this.props.model));
     delete snapshot.id;
     const dragData = JSON.stringify(snapshot);
     e.dataTransfer.setData("org.concord.clue.tile", dragData);
+
+    // set the drag image
+    const { model, scale } = this.props;
+    const ToolComponent = kToolComponentMap[model.content.type];
+    const dragElt = e.target as HTMLElement;
+    // tool components can provide alternate dom node for drag image
+    const dragImage = ToolComponent && ToolComponent.getDragImageNode
+                        ? ToolComponent.getDragImageNode(dragElt)
+                        : dragElt;
+    const clientRect = dragElt.getBoundingClientRect();
+    const offsetX = (e.clientX - clientRect.left) / (scale || 1);
+    const offsetY = (e.clientY - clientRect.top) / (scale || 1);
+    e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
 }
