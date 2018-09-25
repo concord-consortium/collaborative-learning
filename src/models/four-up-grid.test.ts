@@ -158,9 +158,9 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.cells[CellPositions.NorthWest].update({});
+    grid.cells[CellPositions.NorthWest].update({right: 10});
     grid.cells[CellPositions.NorthEast].update({});
-    grid.cells[CellPositions.SouthEast].update({});
-    grid.cells[CellPositions.SouthWest].update({});
+    grid.cells[CellPositions.SouthEast].update({bottom: 0});
+    grid.cells[CellPositions.SouthWest].update({right: 10, bottom: 0});
   });
 });

@@ -26,7 +26,7 @@ const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
 
 document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
-stores.ui.setShowDemo(!!showDemoCreator);
+stores.ui.setShowDemoCreator(!!showDemoCreator);
 
 stores.supports.createFromUnit(unit, investigation, problem);
 

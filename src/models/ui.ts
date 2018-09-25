@@ -109,8 +109,8 @@ export const UIModel = types
           setPrimaryWorkspace(workspace);
         }
       },
-      setShowDemo(showDemo: boolean) {
-        self.showDemoCreator = showDemo;
+      setShowDemoCreator(showDemoCreator: boolean) {
+        self.showDemoCreator = showDemoCreator;
       },
       toggleComparisonWorkspaceVisible(override?: boolean) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonWorkspaceVisible;
