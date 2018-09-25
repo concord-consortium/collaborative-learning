@@ -72,7 +72,6 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
       }
       else {
         db.createSectionWorkspace(section.id)
-          .then(workspaces.addSectionWorkspace)
           .then(done)
           .catch(ui.setError);
       }
