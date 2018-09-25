@@ -25,7 +25,7 @@ interface IState extends SizeMeProps {
   elementId?: string;
   board?: JXG.Board;
   content?: GeometryContentModelType;
-  syncChanges?: number;
+  syncedChanges?: number;
 }
 
 // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
@@ -64,8 +64,8 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
     if (content !== prevState.content) {
       const geometryContent = content as GeometryContentModelType;
-      if (geometryContent.changes.length !== prevState.syncChanges) {
-        for (let i = prevState.syncChanges || 0; i < geometryContent.changes.length; ++i) {
+      if (geometryContent.changes.length !== prevState.syncedChanges) {
+        for (let i = prevState.syncedChanges || 0; i < geometryContent.changes.length; ++i) {
           try {
             const change = JSON.parse(geometryContent.changes[i]);
             geometryContent.syncChange(prevState.board, change);
@@ -74,6 +74,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
             // ignore exceptions
           }
         }
+        nextState.syncedChanges = geometryContent.changes.length;
       }
       nextState.content = geometryContent;
     }
@@ -89,8 +90,8 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
     const { model: { content }, size } = this.props;
     if ((content.type === "Geometry") && this.state.elementId) {
       const board = content.initializeBoard(this.state.elementId);
-      const syncChanges = content.changes.length;
-      this.setState({ board, size, syncChanges });
+      const syncedChanges = content.changes.length;
+      this.setState({ board, size, syncedChanges });
 
       if (board) {
         board.on("down", this.pointerDownHandler);
@@ -120,7 +121,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private applyChange(change: () => void) {
-    this.setState({ syncChanges: (this.state.syncChanges || 0) + 1 }, change);
+    this.setState({ syncedChanges: (this.state.syncedChanges || 0) + 1 }, change);
   }
 
   private isSqrDistanceWithinThreshold(threshold: number, c1?: JXG.Coords, c2?: JXG.Coords) {
