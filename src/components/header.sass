@@ -6,7 +6,7 @@
   left: 0
   right: 0
   height: $header-height
-  background-color: $header-background
+  background-color: $color1
   display: flex
   flex-direction: row
   flex-wrap: nowrap
@@ -15,7 +15,7 @@
 
   .info
     flex-grow: 1
-    padding: 0 10px
+    padding: 0 $padding
     display: flex
     align-items: center
 
@@ -25,7 +25,7 @@
 
   .group
     flex-grow: 0
-    padding: 0 10px
+    padding: 0 $padding
     text-align: center
     display: flex
     flex-direction: row
@@ -34,8 +34,8 @@
     .name
       font-weight: bold
       cursor: pointer
-      background-color: $header-highlight
-      padding: 5px 10px
+      background-color: $color1-3
+      padding: $half-padding $padding
 
     .members
       .member
@@ -53,9 +53,9 @@
     flex-grow: 0
     display: flex
     align-items: center
-    margin-right: 20px
+    margin-right: $double-margin
 
     .name
-      padding: 5px 10px
-      background-color: $header-highlight
+      padding: $half-padding $padding
+      background-color: $color1-3
       font-weight: bold

@@ -15,7 +15,7 @@ interface IState {
 }
 
 const HEADER_HEIGHT = 55;
-const TAB_HEIGHT = 32;
+const TAB_HEIGHT = 35;
 
 @inject("stores")
 @observer
@@ -74,8 +74,8 @@ export class BottomNavComponent extends BaseComponent<IProps, IState> {
     if (app) {
       const appHeight = app.getBoundingClientRect().height;
       this.setState({
-        componentHeight: appHeight - HEADER_HEIGHT + TAB_HEIGHT,
-        expandedHeight: appHeight - HEADER_HEIGHT
+        componentHeight: appHeight - HEADER_HEIGHT,
+        expandedHeight: appHeight - HEADER_HEIGHT - (TAB_HEIGHT / 2)
       });
     }
   }

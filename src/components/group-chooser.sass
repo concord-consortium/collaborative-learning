@@ -1,3 +1,5 @@
+@import vars
+
 .join
   width: 380px
   border: 1px solid #333
@@ -10,19 +12,18 @@
     background-color: #3E90AC
     color: #fff
     font-size: 13px
-    padding: 2px 5px
+    padding: $half-padding
 
   .join-content
-    padding: 20px
+    padding: $double-padding
 
     .welcome
       font-weight: bold
-      margin-bottom: 10px
-
+      margin-bottom: $margin
 
     .groups
       .group-list
-        margin: 0 0 20px 0
+        margin: 0 0 $double-margin 0
         float: left
 
         .group
@@ -30,7 +31,7 @@
           min-height: 76px
           background-color: #ccc
           float: left
-          margin: 10px 10px 0 0
+          margin: $margin $margin 0 0
           cursor: pointer
           font-size: 10px
 
@@ -38,33 +39,39 @@
             background-color: #3E90AC
             color: #fff
             text-align: center
-            padding: 3px
+            padding: $half-padding
 
           .group-users
-            padding: 5px
+            padding: $half-padding
 
             .user
               background-color: #2da343
-              padding: 3px
+              padding: $half-padding
               float: left
-              margin: 4px
+              margin: $quarter-margin
 
               &.disconnected
                 background-color: #777
+
+            &::after
+              content: ''
+              display: block
+              clear: both
+              margin-top: $half-margin
 
     .create-group
       clear: both
 
       div
-        margin: 10px 0
+        margin: $half-margin 0
 
       select
-        margin-right: 10px
-        padding: 3px 5px
+        margin-right: $margin
+        padding: $half-padding
 
       .button
         border: 1px solid #313131
-        padding: 3px 8px
-        margin-top: 2px
+        padding: $half-padding $padding
+        margin-top: $half-margin
         font-size: 14px
         background-color: #dddddd
