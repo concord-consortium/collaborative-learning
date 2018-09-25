@@ -9,6 +9,7 @@ import "./canvas.sass";
 
 interface IProps extends IBaseProps {
   context: string;
+  scale?: number;
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
