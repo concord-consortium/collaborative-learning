@@ -107,6 +107,7 @@
     "query-string": "^6.1.0",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
+    "react-sizeme": "^2.5.2",
     "slate": "^0.40.2",
     "slate-plain-serializer": "^0.6.2",
     "slate-react": "^0.18.5",

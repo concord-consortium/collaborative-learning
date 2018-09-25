@@ -11,18 +11,25 @@ export const GeometryContentModel = types
   })
   .extend(self => {
 
+    let viewCount = 0;
+
     // views
 
     // actions
-    function initialize(domElementID: string): JXG.Board | undefined {
+    function initializeBoard(domElementID: string): JXG.Board | undefined {
       if (self.changes.length) {
         const changes = self.changes.map(change => JSON.parse(change));
         return applyChanges(domElementID, changes);
       }
     }
 
-    function destroy(board: JXG.Board) {
+    function destroyBoard(board: JXG.Board) {
       JXG.JSXGraph.freeBoard(board);
+    }
+
+    function resizeBoard(board: JXG.Board, width: number, height: number) {
+      board.resizeContainer(width, height);
+      board.update();
     }
 
     function addPoint(board: JXG.Board, parents: any, properties?: any) {
@@ -36,20 +43,29 @@ export const GeometryContentModel = types
     }
 
     function _applyChange(board: JXG.Board, change: JXGChange) {
+      syncChange(board, change);
+      self.changes.push(JSON.stringify(change));
+    }
+
+    function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
         applyChange(board, change);
       }
-      self.changes.push(JSON.stringify(change));
     }
 
     return {
       views: {
+        get nextViewId() {
+          return ++viewCount;
+        }
       },
       actions: {
-        initialize,
-        destroy,
+        initializeBoard,
+        destroyBoard,
+        resizeBoard,
         addPoint,
-        applyChange: _applyChange
+        applyChange: _applyChange,
+        syncChange
       }
     };
   });

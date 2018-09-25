@@ -27,6 +27,9 @@ declare namespace JXG {
     create: (elementType: string, parents?: any, attributes?: any) => any;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
+    resizeContainer: (canvasWidth: number, canvasHeight: number,
+                      dontSet?: boolean, dontSetBoundingBox?: boolean) => void;
+    update: (drag?: JXG.GeometryElement) => void;
   }
 
   class Coords {
