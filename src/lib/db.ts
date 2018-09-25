@@ -763,7 +763,7 @@ export class DB {
       // otherwise set the groups
       this.stores.groups.updateFromDB(user.id, groups, this.stores.class);
 
-      Object.keys(this.groupUserSectionDocumentsListeners).forEach((sectionId) => {
+      workspaces.sections.map(workspace => workspace.sectionId).forEach((sectionId) => {
         const workspace = workspaces.getSectionWorkspace(sectionId);
         if (workspace) {
           this.updateGroupUserSectionDocumentListeners(workspace);
