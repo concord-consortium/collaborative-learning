@@ -84,6 +84,7 @@ export class DB {
   private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
   private workspaceModelDisposers: WorkspaceModelDisposers = {};
   private learningLogsRef: firebase.database.Reference | null  = null;
+  private creatingWorkspaces: string[] = [];
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -225,6 +226,7 @@ export class DB {
 
   public createSectionWorkspace(sectionId: string) {
     return new Promise<SectionWorkspaceModelType>((resolve, reject) => {
+      this.creatingWorkspaces.push(sectionId);
 
       const {user, workspaces, ui} = this.stores;
       const offeringUserRef = this.ref(this.getOfferingUserPath(user));
@@ -277,6 +279,11 @@ export class DB {
         })
         .then((sectionDocument) => {
           return this.openSectionWorkspace(sectionDocument.self.sectionId);
+        })
+        .then((sectionWorkspace) => {
+          workspaces.addSectionWorkspace(sectionWorkspace);
+          this.creatingWorkspaces.splice(this.creatingWorkspaces.indexOf(sectionId), 1);
+          return sectionWorkspace;
         })
         .then(resolve)
         .catch(reject);
@@ -701,7 +708,10 @@ export class DB {
   private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {user, workspaces, ui} = this.stores;
     const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
-    if (sectionDocument && !workspaces.getSectionWorkspace(sectionDocument.self.sectionId)) {
+    // If a workspace has already been created, or is currently been created, then its listeners are already set
+    if (sectionDocument
+          && !workspaces.getSectionWorkspace(sectionDocument.self.sectionId)
+          && this.creatingWorkspaces.indexOf(sectionDocument.self.sectionId) === -1) {
       this.createWorkspaceFromSectionDocument(user.id, sectionDocument)
         .then((workspace) => {
           this.updateGroupUserSectionDocumentListeners(workspace);
@@ -888,10 +898,6 @@ export class DB {
   }
 
   private monitorSectionWorkspaceVisibility = (workspace: SectionWorkspaceModelType) => {
-    if (this.workspaceModelDisposers[workspace.sectionId]) {
-      // Workspaces ignores any duplicate workspaces created for a sectionId, so don't listen to them
-      return;
-    }
     const { user } = this.stores;
     const updateRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId));
     const disposer = (onSnapshot(workspace, (newWorkspace) => {
