@@ -51,6 +51,7 @@ declare namespace JXG {
   class GeometryElement {
     type: number;
     visProp: { [prop: string]: any };
+    fixed: boolean;
   }
 
   const JSXGraph: {

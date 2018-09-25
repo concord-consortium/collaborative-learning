@@ -55,7 +55,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
     const nextState: IState = {};
 
-    const { size } = nextProps;
+    const { readOnly, size } = nextProps;
     if (size && (size.width != null) && (size.height != null) && prevState.size &&
         ((size.width !== prevState.size.width) || (size.height !== prevState.size.height))) {
       (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height);
@@ -68,7 +68,11 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
         for (let i = prevState.syncedChanges || 0; i < geometryContent.changes.length; ++i) {
           try {
             const change = JSON.parse(geometryContent.changes[i]);
-            geometryContent.syncChange(prevState.board, change);
+            const result = geometryContent.syncChange(prevState.board, change);
+            if (readOnly && (result instanceof JXG.GeometryElement)) {
+              const obj = result as JXG.GeometryElement;
+              obj.fixed = true;
+            }
           }
           catch (e) {
             // ignore exceptions
@@ -87,9 +91,9 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
   private lastPtrDownCoords: JXG.Coords | undefined;
 
   public componentDidMount() {
-    const { model: { content }, size } = this.props;
+    const { model: { content }, readOnly, size } = this.props;
     if ((content.type === "Geometry") && this.state.elementId) {
-      const board = content.initializeBoard(this.state.elementId);
+      const board = content.initializeBoard(this.state.elementId, readOnly);
       const syncedChanges = content.changes.length;
       this.setState({ board, size, syncedChanges });
 
@@ -137,7 +141,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
   private pointerDownHandler = (evt: any) => {
     const { board } = this.state;
-    const { model, scale } = this.props;
+    const { model, readOnly, scale } = this.props;
     const { ui } = this.stores;
     if (!board) { return; }
 
@@ -146,6 +150,8 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
       ui.setSelectedTile(model);
       return;
     }
+
+    if (readOnly) { return; }
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
     const coords = getEventCoords(board, evt, scale, index);
@@ -160,8 +166,8 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
   // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
   private pointerUpHandler = (evt: any) => {
     const { board } = this.state;
-    const { scale } = this.props;
-    if (!board || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
+    const { readOnly, scale } = this.props;
+    if (!board || readOnly || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
     const coords = getEventCoords(board, evt, scale, index);

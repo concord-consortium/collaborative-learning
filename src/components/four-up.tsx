@@ -95,19 +95,19 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent context="four-up-ne" scale={neCell.scale} document={groupDoc(0)} />
+            <CanvasComponent context="four-up-ne" scale={neCell.scale} readOnly={true} document={groupDoc(0)} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent context="four-up-se" scale={seCell.scale} document={groupDoc(1)} />
+            <CanvasComponent context="four-up-se" scale={seCell.scale} readOnly={true} document={groupDoc(1)} />
           </div>
           {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent context="four-up-sw" scale={swCell.scale} document={groupDoc(2)} />
+            <CanvasComponent context="four-up-sw" scale={swCell.scale} readOnly={true} document={groupDoc(2)} />
           </div>
           {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>

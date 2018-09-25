@@ -1,6 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange } from "./jxg-changes";
+import { each } from "lodash";
 
 export const kGeometryToolID = "Geometry";
 
@@ -16,10 +17,19 @@ export const GeometryContentModel = types
     // views
 
     // actions
-    function initializeBoard(domElementID: string): JXG.Board | undefined {
+    function initializeBoard(domElementID: string, readOnly?: boolean): JXG.Board | undefined {
       if (self.changes.length) {
         const changes = self.changes.map(change => JSON.parse(change));
-        return applyChanges(domElementID, changes);
+        const board = applyChanges(domElementID, changes);
+        if (readOnly) {
+          each(board && board.objects || {}, obj => {
+            if (obj instanceof JXG.GeometryElement) {
+              // disable dragging, etc.
+              obj.fixed = true;
+            }
+          });
+        }
+        return board;
       }
     }
 
@@ -39,17 +49,18 @@ export const GeometryContentModel = types
         parents,
         properties
       };
-      _applyChange(board, change);
+      return _applyChange(board, change);
     }
 
     function _applyChange(board: JXG.Board, change: JXGChange) {
-      syncChange(board, change);
+      const result = syncChange(board, change);
       self.changes.push(JSON.stringify(change));
+      return result;
     }
 
     function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
-        applyChange(board, change);
+        return applyChange(board, change);
       }
     }
 
