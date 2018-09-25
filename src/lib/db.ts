@@ -442,6 +442,22 @@ export class DB {
     });
   }
 
+  public publishDocument(document: DocumentModelType) {
+    const { user } = this.stores;
+    const content = JSON.stringify(document.content);
+    const publicationsRef = this.ref(this.getPublicationsPath(user)).push();
+    const publicationKey = publicationsRef.key!;
+    const storedDoc: DBDocument = {
+      content,
+      version: "1.0",
+      self: {
+        uid: document.uid,
+        documentKey: publicationKey
+      }
+    };
+    return publicationsRef.set(storedDoc);
+  }
+
   public ref(path: string = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
@@ -553,6 +569,10 @@ export class DB {
 
   public getGroupUserPath(user: UserModelType, groupId: string, userId?: string) {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
+  }
+
+  public getPublicationsPath(user: UserModelType) {
+    return `${this.getOfferingPath(user)}/publications/`;
   }
 
   //

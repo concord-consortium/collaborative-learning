@@ -56,6 +56,9 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         <div className="actions">
+          <svg className={`icon icon-publish`} onClick={this.handlePublishCanvas}>
+            <use xlinkHref={`#icon-publish`} />
+          </svg>
           <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
             <use xlinkHref={`#icon-${share}`} />
           </svg>
@@ -239,6 +242,13 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleToggleLLTwoUp = () => {
     this.stores.ui.toggleLLComparisonWorkspaceVisible();
+  }
+
+  private handlePublishCanvas = () => {
+    const { db } = this.stores;
+    // TODO: Disable publish button while publishing
+    db.publishDocument(this.sectionWorkspace.document)
+      .then(() => alert("Published"));
   }
 
   private getSupportsWithIndices() {
