@@ -16,6 +16,7 @@ interface SizeMeProps {
 
 interface IProps extends SizeMeProps {
   context: string;
+  scale?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -28,11 +29,11 @@ interface IState extends SizeMeProps {
 }
 
 // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-function getEventCoords(board: JXG.Board, evt: any, index?: number) {
+function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: number) {
   const cPos = board.getCoordsTopLeftCorner();
   const absPos = JXG.getPosition(evt, index);
-  const dx = absPos[0] - cPos[0];
-  const dy = absPos[1] - cPos[1];
+  const dx = (absPos[0] - cPos[0]) / (scale || 1);
+  const dy = (absPos[1] - cPos[1]) / (scale || 1);
 
   return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
 }
@@ -135,7 +136,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
   private pointerDownHandler = (evt: any) => {
     const { board } = this.state;
-    const { model } = this.props;
+    const { model, scale } = this.props;
     const { ui } = this.stores;
     if (!board) { return; }
 
@@ -146,7 +147,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
     }
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
-    const coords = getEventCoords(board, evt, index);
+    const coords = getEventCoords(board, evt, scale, index);
     const x = coords.usrCoords[1];
     const y = coords.usrCoords[2];
     if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
@@ -158,10 +159,11 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
   // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
   private pointerUpHandler = (evt: any) => {
     const { board } = this.state;
+    const { scale } = this.props;
     if (!board || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
-    const coords = getEventCoords(board, evt, index);
+    const coords = getEventCoords(board, evt, scale, index);
     let [ , x, y] = this.lastPtrDownCoords.usrCoords;
     if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
       return;
