@@ -43,10 +43,14 @@ export const GeometryContentModel = types
     }
 
     function _applyChange(board: JXG.Board, change: JXGChange) {
+      syncChange(board, change);
+      self.changes.push(JSON.stringify(change));
+    }
+
+    function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
         applyChange(board, change);
       }
-      self.changes.push(JSON.stringify(change));
     }
 
     return {
@@ -60,7 +64,8 @@ export const GeometryContentModel = types
         destroyBoard,
         resizeBoard,
         addPoint,
-        applyChange: _applyChange
+        applyChange: _applyChange,
+        syncChange
       }
     };
   });
