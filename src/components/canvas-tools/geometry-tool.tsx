@@ -3,16 +3,25 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
+import * as sizeMe from "react-sizeme";
 
-import "./text-tool.sass";
+import "./geometry-tool.sass";
 
-interface IProps {
+interface SizeMeProps {
+  size?: {
+    width: number | null;
+    height: number | null;
+  };
+}
+
+interface IProps extends SizeMeProps {
   context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
 
-interface IState {
+interface IState extends SizeMeProps {
+  elementId?: string;
   board?: JXG.Board;
 }
 
@@ -28,25 +37,36 @@ function getEventCoords(board: JXG.Board, evt: any, index?: number) {
 ​
 @inject("stores")
 @observer
-export default class GeometryToolComponent extends BaseComponent<IProps, IState> {
+class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
-  private elementId: string;
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    const { context, model: { id, content } } = nextProps;
+    if (!prevState.elementId) {
+      // elide uuid for readability/debugging
+      const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
+      const viewId = (content as GeometryContentModelType).nextViewId;
+      return { elementId: `${context}-${debugId}-${viewId}` };
+    }
+    else if (prevState.board) {
+      const { size } = nextProps;
+      if (size && (size.width != null) && (size.height != null) && prevState.size &&
+          ((size.width !== prevState.size.width) ||
+          (size.height !== prevState.size.height))) {
+        (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height);
+      }
+    }
+  }
+
+  public state: IState = {};
+
   private lastPtrDownEvent: any;
   private lastPtrDownCoords: JXG.Coords | undefined;
 
-  public componentWillMount() {
-    const { context, model: { id, content } } = this.props;
-    // elide uuid for readability/debugging
-    const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
-    const viewId = (content as GeometryContentModelType).nextViewId;
-    this.elementId = `${context}-${debugId}-${viewId}`;
-  }
-
   public componentDidMount() {
-    const { model: { content } } = this.props;
-    if (content.type === "Geometry") {
-      const board = content.initialize(this.elementId);
-      this.setState({ board });
+    const { model: { content }, size } = this.props;
+    if ((content.type === "Geometry") && this.state.elementId) {
+      const board = content.initializeBoard(this.state.elementId);
+      this.setState({ board, size });
 
       if (board) {
         board.on("down", this.pointerDownHandler);
@@ -58,7 +78,7 @@ export default class GeometryToolComponent extends BaseComponent<IProps, IState>
   public componentWillUnmount() {
     const { model: { content } } = this.props;
     if ((content.type === "Geometry") && this.state.board) {
-      content.destroy(this.state.board);
+      content.destroyBoard(this.state.board);
     }
   }
 
@@ -71,7 +91,7 @@ export default class GeometryToolComponent extends BaseComponent<IProps, IState>
                     ? { height: layout.height }
                     : {};
     return (
-      <div id={this.elementId} className={classes} style={style} />
+      <div id={this.state.elementId} className={classes} style={style} />
     );
   }
 
@@ -146,3 +166,5 @@ export default class GeometryToolComponent extends BaseComponent<IProps, IState>
     }
   }
 }
+
+export default sizeMe()(GeometryToolComponent);
