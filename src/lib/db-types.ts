@@ -60,6 +60,7 @@ export interface DBOfferingDocumentMetadata extends DBDocumentMetadata {
 export interface DBPublishedDocumentMetadata extends DBOfferingDocumentMetadata {
   type: "published";
   groupId: string;
+  userId: string;
   onlineUserIds: string[];
   offlineUserIds: string[];
 }

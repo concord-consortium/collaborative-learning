@@ -19,11 +19,13 @@ import { DBOfferingGroup,
          DBPublishedDocumentMetadata,
          DBUserDocumentMetadata,
          DBOfferingDocumentMetadata,
+         DBPublishedDocument,
         } from "./db-types";
 import { SectionWorkspaceModelType,
          SectionWorkspaceModel,
          LearningLogWorkspaceModelType,
-         LearningLogWorkspaceModel } from "../models/workspaces";
+         LearningLogWorkspaceModel,
+         PublishedWorkspaceModel} from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
@@ -91,6 +93,7 @@ export class DB {
   private workspaceModelDisposers: WorkspaceModelDisposers = {};
   private learningLogsRef: firebase.database.Reference | null  = null;
   private creatingWorkspaces: string[] = [];
+  private publicationsRef: firebase.database.Reference | null = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -392,6 +395,7 @@ export class DB {
         },
         createdAt: firebase.database.ServerValue.TIMESTAMP as number,
         groupId: userGroup.id,
+        userId: user.id,
         // Get actual group mate IDs in later commit
         onlineUserIds: ["2"],
         offlineUserIds: ["3"]
@@ -406,7 +410,7 @@ export class DB {
     });
   }
 
-  public openDocument(userId: string, documentKey: string) {
+  public openUserDocument(userId: string, documentKey: string) {
     const { user } = this.stores;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
@@ -423,6 +427,35 @@ export class DB {
           const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
             uid: userId,
+            key: document.self.documentKey,
+            createdAt: metadata.createdAt,
+            content: content ? content : {}
+          });
+        })
+        .then((document) => {
+          resolve(document);
+        })
+        .catch(reject);
+    });
+  }
+
+  public openOfferingDocument(documentKey: string) {
+    const { user } = this.stores;
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const documentRef = this.ref(this.getOfferingDocumentsPath(user, documentKey));
+      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
+
+      return Promise.all([documentRef.once("value"), metadataRef.once("value")])
+        .then(([documentSnapshot, metadataSnapshot]) => {
+          const document: DBDocument|null = documentSnapshot.val();
+          const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
+          if (!document || !metadata) {
+            throw new Error(`Unable to open document ${documentKey}`);
+          }
+
+          const content = this.parseDocumentContent(document, true);
+          return DocumentModel.create({
+            uid: user.id,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
             content: content ? content : {}
@@ -599,8 +632,9 @@ export class DB {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
-  public getOfferingDocumentsPath(user: UserModelType) {
-    return `${this.getOfferingPath(user)}/documents`;
+  public getOfferingDocumentsPath(user: UserModelType, documentKey?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getOfferingPath(user)}/documents${suffix}`;
   }
 
   public getOfferingDocumentMetadataPath(user: UserModelType, documentKey?: string) {
@@ -624,6 +658,9 @@ export class DB {
         })
         .then(() => {
           return this.startLearningLogsListener();
+        })
+        .then(() => {
+          return this.startPublicationsListener();
         })
         .then(() => {
           this.isListening = true;
@@ -789,6 +826,22 @@ export class DB {
     }
   }
 
+  private startPublicationsListener() {
+    this.publicationsRef = this.ref(this.getOfferingDocumentMetadataPath(this.stores.user));
+    this.publicationsRef.on("child_added", this.handlePublicationAdded);
+  }
+
+  private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
+    const {workspaces} = this.stores;
+    const metadata: DBPublishedDocumentMetadata|null = snapshot.val();
+    if (metadata) {
+      this.createWorkspaceFromPublication(metadata)
+        .then((workspace) => {
+          workspaces.addPublishedWorkspace(workspace);
+        });
+    }
+  }
+
   private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {user, workspaces, ui} = this.stores;
     const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
@@ -890,7 +943,7 @@ export class DB {
   }
 
   private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    return this.openDocument(userId, sectionDocument.documentKey)
+    return this.openUserDocument(userId, sectionDocument.documentKey)
       .then((document) => {
         this.monitorDocumentModel(document);
         this.monitorDocumentRef(document);
@@ -1047,7 +1100,7 @@ export class DB {
       if (rawGroupDoc) {
         const groupUserId = rawGroupDoc.self.uid;
         const {documentKey} = rawGroupDoc.self;
-        this.openDocument(groupUserId, documentKey).then((groupUserDoc) => {
+        this.openUserDocument(groupUserId, documentKey).then((groupUserDoc) => {
           workspace.setGroupDocument(groupUserId, groupUserDoc);
         });
       }
@@ -1067,9 +1120,21 @@ export class DB {
     return this.groupUserSectionDocumentsListeners[sectionId][userId];
   }
 
+  private createWorkspaceFromPublication(publication: DBPublishedDocumentMetadata) {
+    const {groupId, self: {documentKey}} = publication;
+    return this.openOfferingDocument(documentKey)
+      .then((document) => {
+        return PublishedWorkspaceModel.create({
+          document,
+          createdAt: document.createdAt,
+          groupId
+        });
+      });
+  }
+
   private createWorkspaceFromLearningLog(learningLog: DBLearningLog) {
     const {title, self: {uid, documentKey}} = learningLog;
-    return this.openDocument(uid, documentKey)
+    return this.openUserDocument(uid, documentKey)
       .then((document) => {
         this.monitorDocumentModel(document);
         this.monitorDocumentRef(document);

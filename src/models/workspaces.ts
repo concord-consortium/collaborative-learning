@@ -85,10 +85,19 @@ export const LearningLogWorkspaceModel = types
     };
   });
 
+export const PublishedWorkspaceModel = types
+  .model("PublishedWorkspace", {
+    type: "published",
+    document: DocumentModel,
+    createdAt: types.number,
+    groupId: types.string
+  });
+
 export const WorkspacesModel = types
   .model("Workspaces", {
     sections: types.array(SectionWorkspaceModel),
-    learningLogs: types.array(LearningLogWorkspaceModel)
+    learningLogs: types.array(LearningLogWorkspaceModel),
+    publications: types.array(PublishedWorkspaceModel)
   })
   .actions((self) => {
     const findByDocumentId = (documentKey: string) => {
@@ -127,6 +136,10 @@ export const WorkspacesModel = types
         self.learningLogs.remove(learningLog);
         return learningLog;
       },
+
+      addPublishedWorkspace(publication: PublishedWorkspaceModelType) {
+        self.publications.push(publication);
+      }
     };
   });
 
@@ -134,3 +147,4 @@ export type WorkspacesModelType = typeof WorkspacesModel.Type;
 export type SectionWorkspaceModelType = typeof SectionWorkspaceModel.Type;
 export type LearningLogWorkspaceModelType = typeof LearningLogWorkspaceModel.Type;
 export type WorkspaceModelType = SectionWorkspaceModelType | LearningLogWorkspaceModelType;
+export type PublishedWorkspaceModelType = typeof PublishedWorkspaceModel.Type;
