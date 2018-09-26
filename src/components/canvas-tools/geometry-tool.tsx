@@ -28,6 +28,9 @@ interface IState extends SizeMeProps {
   syncedChanges?: number;
 }
 
+// For snap to grid
+const kSnapUnit = 0.2;
+
 // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
 function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: number) {
   const cPos = board.getCoordsTopLeftCorner();
@@ -171,7 +174,7 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
     const index = evt[JXG.touchProperty] ? 0 : undefined;
     const coords = getEventCoords(board, evt, scale, index);
-    let [ , x, y] = this.lastPtrDownCoords.usrCoords;
+    const [ , x, y] = this.lastPtrDownCoords.usrCoords;
     if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
       return;
     }
@@ -196,9 +199,8 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
 
     const { model: { content } } = this.props;
     if (content.type === "Geometry") {
-      x = JXG._round10(x, -1);
-      y = JXG._round10(y, -1);
-      this.applyChange(() => content.addPoint(board, [x, y]));
+      const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
+      this.applyChange(() => content.addPoint(board, [x, y], props));
     }
   }
 }
