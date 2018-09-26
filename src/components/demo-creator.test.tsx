@@ -7,7 +7,7 @@ import { createStores, IStores } from "../models/stores";
 import { logComponent } from "../utilities/test-utils";
 import { DemoModel } from "../models/demo";
 
-import * as curriculumJson from "../curriculum/stretching-and-shrinking.json";
+import * as curriculumJson from "../curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { createFromJson } from "../models/curriculum/unit";
 
 configure({ adapter: new Adapter() });

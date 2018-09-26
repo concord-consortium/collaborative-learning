@@ -81,7 +81,12 @@ module.exports = (env, argv) => {
       }),
       new CopyWebpackPlugin([
         {from: 'src/public'}
-      ])
+      ]),
+      new CopyWebpackPlugin([{
+        from: 'src/curriculum',
+        ignore: ['**/*.json', '**/*.{ts,tsx}'],
+        to: 'assets/curriculum'
+      }])
     ]
   };
 };
