@@ -5,9 +5,11 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
+import { kImageToolID } from "../../models/tools/image/image-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
+import ImageToolComponent from "./image-tool";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
@@ -41,6 +43,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       case kGeometryToolID: return this.renderGeometryTile();
       case kTableToolID: return this.renderTableTile();
       case kTextToolID: return this.renderTextTile();
+      case kImageToolID: return this.renderImageTile();
     }
     return this.renderUnknownTile();
   }
@@ -66,6 +69,12 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   private renderTextTile() {
     return (
       <TextToolComponent key={this.props.model.id} {...this.props} />
+    );
+  }
+
+  private renderImageTile() {
+    return (
+      <ImageToolComponent key={this.props.model.id} {...this.props} />
     );
   }
 

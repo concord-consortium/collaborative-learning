@@ -1019,7 +1019,13 @@
           {
             "content": {
               "type": "Text",
-              "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations. [image: SS_3_1_In_20_rep_tiles]"
+              "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
+            }
+          },
+          {
+            "content": {
+              "type": "Image",
+              "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_500w.png"
             }
           },
           {
@@ -1271,13 +1277,25 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Is it possible to find the length of side AD? Explain. [image: SS_3_2_WI_24_Q1]"
+                      "text": "1. Is it possible to find the length of side AD? Explain."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Find all the missing side lengths and angles. Explain your reasoning. [image: SS_3_2_WI_25_Q2]"
+                      "text": "2. Find all the missing side lengths and angles. Explain your reasoning."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
                     }
                   }
                 ]
@@ -1330,7 +1348,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Durell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle. [image: SS_3_3_In_26_river_triangle]"
+                      "text": "Durell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
                     }
                   },
                   {
@@ -1383,7 +1407,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2.Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain.[image: SS_3_3_WI_27_river_triangle2]"
+                      "text": "2.Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
                     }
                   }
                 ]

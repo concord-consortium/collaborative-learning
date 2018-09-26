@@ -6,7 +6,7 @@ import { AppComponent } from "./components/app";
 import { createStores } from "./models/stores";
 import { UserModel } from "./models/user";
 import { createFromJson } from "./models/curriculum/unit";
-import * as curriculumJson from "./curriculum/stretching-and-shrinking.json";
+import * as curriculumJson from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { urlParams } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 
