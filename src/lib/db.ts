@@ -11,16 +11,19 @@ import { DBOfferingGroup,
          DBDocumentMetadata,
          DBDocument,
          DBOfferingUserSectionDocument,
-         DBOfferingUserSectionDocumentMap,
-         DBDocumentType,
-         DBLearningLog
+         DBLearningLog,
+         DBUserDocument,
+         DBUserDocumentType,
+         DBOfferingDocumentType,
+         DBOfferingDocument,
+         DBPublishedDocumentMetadata,
+         DBUserDocumentMetadata,
+         DBOfferingDocumentMetadata,
         } from "./db-types";
-import { WorkspaceModelType,
-         SectionWorkspaceModelType,
+import { SectionWorkspaceModelType,
          SectionWorkspaceModel,
          LearningLogWorkspaceModelType,
-         LearningLogWorkspaceModel,
-         WorkspacesModel } from "../models/workspaces";
+         LearningLogWorkspaceModel } from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
@@ -263,7 +266,7 @@ export class DB {
           }
           else {
             // create the document and section document
-            return this.createDocument("section")
+            return this.createUserDocument("section")
               .then(({document, metadata}) => {
                   sectionDocument = {
                     version: "1.0",
@@ -318,45 +321,81 @@ export class DB {
     });
   }
 
-  public createDocument(type: DBDocumentType) {
+  public createUserDocument(type: DBUserDocumentType) {
     const {user} = this.stores;
-    return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
+    return new Promise<{document: DBUserDocument, metadata: DBUserDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
       const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey));
-      const document: DBDocument = {
+      const document: DBUserDocument = {
         version: "1.0",
         self: {
           uid: user.id,
           documentKey,
-        }
+        },
+        type
       };
-      let metadata: DBDocumentMetadata;
+      let metadata: DBUserDocumentMetadata;
 
+      const metadataBase: DBUserDocumentMetadata = {
+        version: "1.0",
+        self: {
+          uid: user.id,
+          documentKey,
+        },
+        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
+        type
+      };
       if (type === "section") {
-        metadata = {
-          version: "1.0",
-          self: {
-            uid: user.id,
-            documentKey,
-          },
-          createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-          type: "section",
+        metadata = Object.assign({
           classHash: user.classHash,
           offeringId: user.offeringId
-        };
+        }, metadataBase);
+      } else {
+        metadata = metadataBase;
       }
-      else {
-        metadata = {
-          version: "1.0",
-          self: {
-            uid: user.id,
-            documentKey,
-          },
-          createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-          type: "learningLog"
-        };
-      }
+
+      return documentRef.set(document)
+        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          resolve({document, metadata});
+        })
+        .catch(reject);
+    });
+  }
+
+  public createOfferingDocument(type: DBOfferingDocumentType, content?: string) {
+    const {user, groups} = this.stores;
+    return new Promise<{document: DBOfferingDocument, metadata: DBOfferingDocumentMetadata}>((resolve, reject) => {
+      const documentRef = this.ref(this.getOfferingDocumentsPath(user)).push();
+      const documentKey = documentRef.key!;
+      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
+      const document: DBOfferingDocument = {
+        version: "1.0",
+        self: {
+          classHash: user.classHash,
+          offeringId: user.offeringId,
+          documentKey,
+        },
+        type,
+        content
+      };
+
+      const userGroup = groups.groupForUser(user.id)!;
+      const metadata: DBPublishedDocumentMetadata = {
+        version: "1.0",
+        type,
+        self: {
+          classHash: user.classHash,
+          offeringId: user.offeringId,
+          documentKey,
+        },
+        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
+        groupId: userGroup.id,
+        // Get actual group mate IDs in later commit
+        onlineUserIds: ["2"],
+        offlineUserIds: ["3"]
+      };
 
       return documentRef.set(document)
         .then(() => metadataRef.set(metadata))
@@ -383,7 +422,7 @@ export class DB {
 
           const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
-            uid: document.self.uid,
+            uid: userId,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
             content: content ? content : {}
@@ -400,7 +439,7 @@ export class DB {
     const {user} = this.stores;
 
     return new Promise<LearningLogWorkspaceModelType>((resolve, reject) => {
-      return this.createDocument("learningLog")
+      return this.createUserDocument("learningLog")
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
@@ -442,20 +481,9 @@ export class DB {
     });
   }
 
-  public publishDocument(document: DocumentModelType) {
-    const { user } = this.stores;
-    const content = JSON.stringify(document.content);
-    const publicationsRef = this.ref(this.getPublicationsPath(user)).push();
-    const publicationKey = publicationsRef.key!;
-    const storedDoc: DBDocument = {
-      content,
-      version: "1.0",
-      self: {
-        uid: document.uid,
-        documentKey: publicationKey
-      }
-    };
-    return publicationsRef.set(storedDoc);
+  public publishDocument(documentModel: DocumentModelType) {
+    const content = JSON.stringify(documentModel.content);
+    return this.createOfferingDocument("published", content);
   }
 
   public ref(path: string = "") {
@@ -571,8 +599,13 @@ export class DB {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
-  public getPublicationsPath(user: UserModelType) {
-    return `${this.getOfferingPath(user)}/publications/`;
+  public getOfferingDocumentsPath(user: UserModelType) {
+    return `${this.getOfferingPath(user)}/documents`;
+  }
+
+  public getOfferingDocumentMetadataPath(user: UserModelType, documentKey?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getOfferingPath(user)}/documentMetadata${suffix}`;
   }
 
   //
@@ -1010,7 +1043,7 @@ export class DB {
 
   private handleGroupUserDocRef(snapshot: firebase.database.DataSnapshot|null, workspace: SectionWorkspaceModelType) {
     if (snapshot) {
-      const rawGroupDoc: DBDocument = snapshot.val();
+      const rawGroupDoc: DBUserDocument = snapshot.val();
       if (rawGroupDoc) {
         const groupUserId = rawGroupDoc.self.uid;
         const {documentKey} = rawGroupDoc.self;
