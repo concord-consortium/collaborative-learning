@@ -26,6 +26,7 @@ export const DocumentContentModel = types
         properties: {
           axis: true,
           boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
+          grid: {}, // defaults to 1-unit gridlines
           minimizeReflow: "none"
         }
       };
