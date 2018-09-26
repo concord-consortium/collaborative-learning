@@ -8,9 +8,9 @@
   bottom: 0
   color: #000
   background-color: #F8FCFE
-  margin: 10px
-  border: 4px solid $workspace-border-color
-  border-radius: 10px
+  margin: $margin
+  border: $border-width solid $border-color
+  border-radius: $border-radius
 
   .titlebar
     position: absolute
@@ -18,43 +18,41 @@
     left: 0
     right: 0
     height: $workspace-titlebar-height
-    background-color: $workspace-titlebar-background
+    background-color: $color1-3
     display: flex
     flex-direction: row
     flex-wrap: nowrap
     justify-content: flex-start
-    border-top-left-radius: 10px
-    border-top-right-radius: 10px
+    border-top-left-radius: $border-radius
+    border-top-right-radius: $border-radius
 
     .title
       flex-grow: 1
       text-align: center
-      margin: 10px 0
+      margin: $margin 0
       font-weight: bold
 
     .actions
       flex-grow: 0
-      padding: 10px 5px 0 0
+      padding: 1px 0
 
-      span
-        background-color: #777
-        font-size: 12px
-        padding: 3px
-        color: #fff
-        margin-left: 5px
+      .icon
+        background-color: #b3ca9d
+        color: #9EBA83
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
 
-      .share-button
-        margin-right: 5px
-        width: 52px
-        display: inline-block
-        text-align: center
+        &:last-child
+          border-top-right-radius: $border-radius
 
   .toolbar
     position: absolute
     top: $workspace-titlebar-height
     bottom: $workspace-statusbar-height
     width: $workspace-toolbar-width
-    border-right: 2px solid #eee
+    border-right: $border-width solid $border-color
 
     display: flex
     flex-direction: column
@@ -69,7 +67,7 @@
       text-align: center
       font-size: 20px
       font-weight: bold
-      margin-bottom: 2px
+      margin-bottom: $quarter-margin
 
       &.geometry
         background-image: url("../assets/logo_tw.png")
@@ -86,22 +84,22 @@
     bottom: $workspace-statusbar-height
     left: $workspace-toolbar-width
     right: 0
-    border-top: 4px solid $workspace-border-color
+    border-top: $border-width solid $border-color
 
   .learning-log-canvas-area
     .canvas
-      border-bottom-right-radius: 10px
+      border-bottom-right-radius: $border-radius
 
   .statusbar
     position: absolute
-    background: $workspace-statusbar-background
+    background: $color1-3
     bottom: 0
     left: 0
     right: 0
     height: $workspace-statusbar-height
-    border-bottom-left-radius: 10px
-    border-bottom-right-radius: 10px
-    border-top: 4px solid $workspace-border-color
+    border-bottom-left-radius: $border-radius
+    border-bottom-right-radius: $border-radius
+    border-top: $border-width solid $border-color
     display: flex
     flex-direction: row
     flex-wrap: nowrap
@@ -112,12 +110,12 @@
 
       .supports-list
         display: inline
-        margin: 0 10px
+        margin: 0 $margin
 
         span
           display: inline-block
-          padding: 5px
-          margin: 5px 5px 0 0
+          padding: $half-padding
+          margin: $half-margin $half-margin 0 0
           color: #fff
           background: #aaa
           border-radius: 15px
@@ -129,7 +127,7 @@
 
       .visible-supports
         position: absolute
-        bottom: $workspace-statusbar-height + 4
+        bottom: $workspace-statusbar-height + $border-width
         left: 0
         right: 0
 
@@ -137,13 +135,13 @@
           margin: 0
 
           div
-            background-color: $workspace-statusbar-background
-            padding: 5px 10px
+            background-color: $color1-3
+            padding: $half-padding $padding
 
             span
               display: inline-block
-              padding: 5px
-              margin-right: 2px
+              padding: $half-padding
+              margin-right: $quarter-margin
               color: #fff
               background: #aaa
               border-radius: 15px
@@ -153,12 +151,18 @@
 
     .actions
       flex-grow: 0
-      padding: 10px 5px
+      padding: 1px 0
 
-      span
-        background-color: #777
-        font-size: 12px
-        padding: 3px
-        color: #fff
+      .icon
+        background-color: #b3ca9d
+        color: #9EBA83
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
+
+        &:last-child
+          border-bottom-right-radius: $border-radius
+
 
 

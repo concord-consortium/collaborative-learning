@@ -2,7 +2,7 @@
 
 $list-item-height: 600px
 $list-item-width: 800px
-$list-item-scale: 0.1
+$list-item-scale: 0.11
 
 .right-nav
   color: #000
@@ -23,19 +23,21 @@ $list-item-scale: 0.1
     .tab
       +tab(right)
       min-height: $tab-min-height
-      background: $right-nav-tab-background-color
-      border: 4px solid $tab-border-color
-      border-radius: $tab-border-radius 0 0 $tab-border-radius
-      box-shadow: -2px 2px 0 0 rgba(0,0,0,0.20)
-      margin-top: 5px
-      padding: 0 10px
+      background: $color5
+      border: $border-width solid $border-color
+      border-radius: $border-radius 0 0 $border-radius
+      box-shadow: -$half-border-width $half-border-width 0 0 rgba(0,0,0,0.20)
+      margin-top: $half-margin
+      padding: 0 $padding
 
       &.active
-        background: $right-nav-tab-active-background-color
+        background: $color5-selected
+        border-right: $border-width solid $color5
         z-index: 1
 
       &:hover
-        background: $right-nav-tab-hover-background-color
+        background: $color5-hover
+        border-right: $border-width solid $color5
         z-index: 2
 
   .expanded-area
@@ -43,14 +45,14 @@ $list-item-scale: 0.1
     top: $header-height + $nav-expanded-peek
     right: $nav-expanded-peek - ($right-nav-expanded-width - $right-nav-contracted-width)
     width: $right-nav-expanded-width - $right-nav-contracted-width
-    background: $right-nav-tab-background-color
-    border-top: 4px solid $tab-border-color
-    border-left: 4px solid $tab-border-color
-    border-bottom: 4px solid $tab-border-color
-    border-radius: $tab-border-radius 0 0 $tab-border-radius
+    background: $color5
+    border-top: $border-width solid $border-color
+    border-left: $border-width solid $border-color
+    border-bottom: $border-width solid $border-color
+    border-radius: $border-radius 0 0 $border-radius
     margin-left: $right-nav-contracted-width
     height: 100%
-    box-shadow: -2px 2px 0 0 rgba(0,0,0,0.20)
+    box-shadow: -$half-border-width $half-border-width 0 0 rgba(0,0,0,0.20)
     transition: right $animation-speed
 
     &.expanded
@@ -63,23 +65,23 @@ $list-item-scale: 0.1
       height: 100%
 
       button
-        padding: 5px
-        margin: 10px
+        padding: $half-padding
+        margin: $margin
         width: ($right-nav-expanded-width - $right-nav-contracted-width) - 20px
 
       .list
         position: absolute
-        top: 10px
+        top: $margin
         right: 0
-        left: 12px
-        bottom: 10px
+        left: 15px
+        bottom: $margin
         overflow: auto
         overflow-x: hidden
 
         .list-item
           position: relative
           float: left
-          margin: 5px 0 10px 0
+          margin: $half-margin 0 $margin 0
           overflow: hidden
 
           .scaled-list-item-container
@@ -100,7 +102,7 @@ $list-item-scale: 0.1
             .canvas
 
           .info
-            margin-top: 5px
+            margin-top: $half-margin
             text-align: center
             font-size: 0.6em
 

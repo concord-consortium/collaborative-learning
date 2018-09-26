@@ -56,8 +56,13 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
     const {ui} = this.stores;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (ui.bottomNavExpanded) {
-        ui.setLLComparisonWorkspace(workspace);
-        ui.toggleLLComparisonWorkspaceVisible(true);
+        if (ui.llPrimaryWorkspaceDocumentKey) {
+          ui.setLLComparisonWorkspace(workspace);
+          ui.toggleLLComparisonWorkspaceVisible(true);
+        }
+        else {
+          alert("Sorry, you must first select a learning log.");
+        }
       }
       else {
         ui.setAvailableWorkspace(workspace);

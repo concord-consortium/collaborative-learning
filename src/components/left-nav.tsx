@@ -18,9 +18,10 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
     const { activeSectionIndex, leftNavExpanded } = ui;
     const { sections } = problem;
     const activeSection = problem.getSectionByIndex(activeSectionIndex);
-    const className = `left-nav${leftNavExpanded ? " expanded" : ""}`;
+    const outerClassName = `left-nav${leftNavExpanded ? " expanded" : ""}`;
+    const expandedAreaClassName = `expanded-area${leftNavExpanded ? " expanded" : ""}`;
     return (
-      <div className={className}>
+      <div className={outerClassName}>
         <TabSetComponent>
           {sections.map((section, sectionIndex) => {
             return (
@@ -36,7 +37,7 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
           })}
         </TabSetComponent>
         <div
-          className="expanded-area"
+          className={expandedAreaClassName}
           aria-labelledby={this.getTabId(activeSectionIndex)}
           aria-hidden={ui.leftNavExpanded}
         >

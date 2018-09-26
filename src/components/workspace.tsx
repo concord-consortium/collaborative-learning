@@ -51,19 +51,27 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     const workspace = this.sectionWorkspace;
     const activeSection = problem.getSectionById(workspace.sectionId);
     const show4up = !ui.comparisonWorkspaceVisible && !ui.bottomNavExpanded;
+    const share = workspace.visibility === "private" ? "share" : "unshare";
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         <div className="actions">
-          <span className="share-button" onClick={this.handleToggleVisibility}>
-            {workspace.visibility === "private" ? "Share" : "Unshare"}
-          </span>
-          {show4up
-              ? <span onClick={this.handleToggleWorkspaceMode}>{workspace.mode === "1-up" ? "4-up" : "1-up"}</span>
-              : null
-          }
+          <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
+            <use xlinkHref={`#icon-${share}`} />
+          </svg>
+          {show4up ? this.renderMode() : null}
         </div>
       </div>
+    );
+  }
+
+  private renderMode() {
+    const workspace = this.sectionWorkspace;
+    const mode = workspace.mode === "1-up" ? "up1" : "up";
+    return (
+      <svg className={`icon icon-${mode}`} onClick={this.handleToggleWorkspaceMode}>
+        <use xlinkHref={`#icon-${mode}`} />
+      </svg>
     );
   }
 
@@ -155,11 +163,22 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderTwoUpButton() {
     const {ui} = this.stores;
+    const mode = ui.comparisonWorkspaceVisible ? "up" : "up2";
+    const llMode = ui.llComparisonWorkspaceVisible ? "up" : "up2";
+
     if (this.props.workspace.type === "learningLog") {
-      return <span onClick={this.handleToggleLLTwoUp}>{ui.llComparisonWorkspaceVisible ? "1-up" : "2-up"}</span>;
+      return (
+        <svg className={`icon icon-${llMode}`} onClick={this.handleToggleLLTwoUp}>
+          <use xlinkHref={`#icon-${llMode}`} />
+        </svg>
+      );
     }
     else if (this.sectionWorkspace.mode === "1-up") {
-      return <span onClick={this.handleToggleTwoUp}>{ui.comparisonWorkspaceVisible ? "1-up" : "2-up"}</span>;
+      return (
+        <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
+          <use xlinkHref={`#icon-${mode}`} />
+        </svg>
+      );
     }
   }
 
