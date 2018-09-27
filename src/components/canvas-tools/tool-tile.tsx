@@ -19,6 +19,12 @@ interface IProps {
   readOnly?: boolean;
 }
 
+const kToolComponentMap: any = {
+        [kGeometryToolID]: GeometryToolComponent,
+        [kImageToolID]: ImageToolComponent,
+        [kTextToolID]: TextToolComponent
+      };
+
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
@@ -27,25 +33,21 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const { model } = this.props;
     const { ui } = this.stores;
     const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
+    const ToolComponent = kToolComponentMap[model.content.type];
     return (
       <div className={`tool-tile${selectedClass}`}
         onDragStart={this.handleToolDragStart}
         draggable={true}
       >
-        {this.renderTile()}
+        {this.renderTile(ToolComponent)}
       </div>
     );
   }
 
-  private renderTile() {
-    const { model } = this.props;
-    switch (model.content.type) {
-      case kGeometryToolID: return this.renderGeometryTile();
-      case kTableToolID: return this.renderTableTile();
-      case kTextToolID: return this.renderTextTile();
-      case kImageToolID: return this.renderImageTile();
-    }
-    return this.renderUnknownTile();
+  private renderTile(ToolComponent: any) {
+    return ToolComponent != null
+            ? <ToolComponent key={this.props.model.id} {...this.props} />
+            : null;
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -55,31 +57,4 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData("org.concord.clue.tile", dragData);
   }
 
-  private renderGeometryTile() {
-    return (
-      <GeometryToolComponent key={this.props.model.id} {...this.props} />
-    );
-  }
-
-  private renderTableTile() {
-    // return <TableTile />
-    return null;
-  }
-
-  private renderTextTile() {
-    return (
-      <TextToolComponent key={this.props.model.id} {...this.props} />
-    );
-  }
-
-  private renderImageTile() {
-    return (
-      <ImageToolComponent key={this.props.model.id} {...this.props} />
-    );
-  }
-
-  private renderUnknownTile() {
-    // return <UnknownTile />
-    return null;
-  }
 }
