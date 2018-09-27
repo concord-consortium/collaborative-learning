@@ -242,7 +242,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     const handlePointerUp = (evt: any) => {
       const id = point.id;
-      const _uuid_ = (point as any)._uuid_;
       const dragEntry = this.dragPts[id];
       if (!dragEntry) { return; }
 
@@ -254,7 +253,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if ((content.type === "Geometry") && board) {
           const coords = dragEntry.final.usrCoords.slice(1);
           const props = { position: coords };
-          this.applyChange(() => content.updatePoints(board, _uuid_, props));
+          this.applyChange(() => content.updatePoints(board, id, props));
         }
       }
     };

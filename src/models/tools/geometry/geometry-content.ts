@@ -48,7 +48,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "point",
         parents,
-        properties: assign({ _uuid_: uuid() }, properties)
+        properties: assign({ id: uuid() }, properties)
       };
       return _applyChange(board, change);
     }
