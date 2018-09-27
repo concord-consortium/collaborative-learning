@@ -1,6 +1,7 @@
 import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler } from "./jxg-changes";
 import { boardChangeAgent, isBoard } from "./jxg-board";
 import { pointChangeAgent } from "./jxg-point";
+import { polygonChangeAgent } from "./jxg-polygon";
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -8,7 +9,8 @@ interface JXGChangeAgents {
 
 const agents: JXGChangeAgents = {
   board: boardChangeAgent,
-  point: pointChangeAgent
+  point: pointChangeAgent,
+  polygon: polygonChangeAgent
 };
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {

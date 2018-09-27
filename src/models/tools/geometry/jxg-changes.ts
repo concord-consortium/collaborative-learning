@@ -1,13 +1,8 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "point";
+export type JXGObjectType = "board" | "point" | "polygon";
 
-export interface JXGObjectRef {
-  type: JXGObjectType;
-  id: string;
-}
-
-export type JXGParentType = JXGObjectRef | number;
+export type JXGParentType = string | number;
 
 export interface JXGProperties {
   [key: string]: any;

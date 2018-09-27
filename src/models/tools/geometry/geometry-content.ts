@@ -1,6 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGElement, JXGProperties } from "./jxg-changes";
+import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
 
@@ -63,6 +64,20 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
+    function connectFreePoints(board: JXG.Board) {
+      const freePtIds = board.objectsList
+                          .filter(elt => isFreePoint(elt))
+                          .map(pt => pt.id);
+      if (freePtIds && freePtIds.length > 1) {
+        const change: JXGChange = {
+                operation: "create",
+                target: "polygon",
+                parents: freePtIds
+              };
+        return _applyChange(board, change);
+      }
+    }
+
     function _applyChange(board: JXG.Board, change: JXGChange) {
       const result = syncChange(board, change);
       self.changes.push(JSON.stringify(change));
@@ -88,6 +103,7 @@ export const GeometryContentModel = types
         addChange,
         addPoint,
         updatePoints,
+        connectFreePoints,
         applyChange: _applyChange,
         syncChange
       }

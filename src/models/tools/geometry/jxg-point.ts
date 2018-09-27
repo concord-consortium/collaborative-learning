@@ -1,8 +1,11 @@
 import { JXGChangeAgent } from "./jxg-changes";
-import { assign } from "lodash";
+import { assign, size } from "lodash";
 import * as uuid from "uuid/v4";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
+
+export const isFreePoint = (v: any) => isPoint(v) && v.hasLabel &&
+                                        (size(v.childElements) <= 1) && (size(v.descendants) <= 1);
 
 export const pointChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
