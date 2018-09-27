@@ -7,6 +7,7 @@
     "jsx-curly-spacing": false,
     "jsx-no-multiline-js": false,
     "jsx-wrap-multiline": false,
+    "max-classes-per-file": false,
     "no-console": false,
     "no-debugger": false,
     "no-empty-interface": false,

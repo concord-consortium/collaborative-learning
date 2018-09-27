@@ -3,7 +3,7 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
-import * as sizeMe from "react-sizeme";
+import { SizeMe } from "react-sizeme";
 
 import "./geometry-tool.sass";
 
@@ -43,7 +43,7 @@ function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: numb
 ​
 @inject("stores")
 @observer
-class GeometryToolComponent extends BaseComponent<IProps, IState> {
+class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
     const { context, model: { id, content } } = nextProps;
@@ -205,4 +205,21 @@ class GeometryToolComponent extends BaseComponent<IProps, IState> {
   }
 }
 
-export default sizeMe()(GeometryToolComponent);
+export default class GeometryToolComponent extends React.Component<IProps, {}> {
+
+  public static getDragImageNode(dragTargetNode: HTMLElement) {
+    // dragTargetNode is the tool-tile div
+    // firstChild is SizeMe div
+    const child = dragTargetNode.firstChild;
+    // firstChild's firstChild is the actual SVG, which works as a drag image
+    return child && child.firstChild;
+  }
+
+  public render() {
+    return (
+      <SizeMe>
+        {() => <GeometryToolComponentImpl {...this.props} />}
+      </SizeMe>
+    );
+  }
+}
