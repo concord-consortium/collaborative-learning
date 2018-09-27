@@ -5,6 +5,7 @@ import { AppContainerComponent } from "./app-container";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo-creator";
+import { TeacherDashboardComponent } from "./teacher-dashboard";
 
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
@@ -73,7 +74,12 @@ export class AppComponent extends BaseComponent<IProps, {}> {
     }
 
     if (!groups.groupForUser(user.id)) {
-      return this.renderApp(<GroupChooserComponent />);
+      if (user.type === "teacher") {
+        return this.renderApp(<TeacherDashboardComponent />);
+      }
+      else {
+        return this.renderApp(<GroupChooserComponent />);
+      }
     }
 
     return this.renderApp(<AppContainerComponent />);
