@@ -29,9 +29,8 @@ export class CanvasComponent extends React.Component<IProps, {}> {
   private renderContent() {
     const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
-    const hasContent =  documentContent && !documentContent.isEmpty;
 
-    if (hasContent) {
+    if (documentContent) {
       return (
         <DocumentContentComponent content={documentContent} {...others}>
           {this.props.children}
