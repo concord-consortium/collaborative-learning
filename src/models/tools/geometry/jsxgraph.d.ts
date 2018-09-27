@@ -24,6 +24,8 @@ declare namespace JXG {
 
     objects: { [id: string]: any };
 
+    objectsList: any[];
+
     create: (elementType: string, parents?: any, attributes?: any) => any;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
@@ -45,13 +47,16 @@ declare namespace JXG {
   }
 
   class CoordsElement extends GeometryElement {
-
+    coords: JXG.Coords;
   }
 
   class GeometryElement {
+    id: string;
     type: number;
     visProp: { [prop: string]: any };
     fixed: boolean;
+
+    setAttribute: (attrs: any) => void;
   }
 
   const JSXGraph: {
@@ -59,8 +64,9 @@ declare namespace JXG {
     freeBoard: (board: JXG.Board | string) => void;
   };
 
-  class Point extends GeometryElement {
-
+  class Point extends CoordsElement {
+    on: (event: string, handler: (evt: any) => void) => void;
+    setPosition: (method: number, coords: number[]) => JXG.Point;
   }
 
   const _ceil10: (value: number, exp: number) => number;

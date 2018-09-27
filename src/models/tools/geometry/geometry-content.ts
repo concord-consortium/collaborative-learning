@@ -1,7 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange } from "./jxg-changes";
-import { each } from "lodash";
+import { JXGChange, JXGElement, JXGProperties } from "./jxg-changes";
+import { assign } from "lodash";
+import * as uuid from "uuid/v4";
 
 export const kGeometryToolID = "Geometry";
 
@@ -17,20 +18,16 @@ export const GeometryContentModel = types
     // views
 
     // actions
-    function initializeBoard(domElementID: string, readOnly?: boolean): JXG.Board | undefined {
-      if (self.changes.length) {
-        const changes = self.changes.map(change => JSON.parse(change));
-        const board = applyChanges(domElementID, changes);
-        if (readOnly) {
-          each(board && board.objects || {}, obj => {
-            if (obj instanceof JXG.GeometryElement) {
-              // disable dragging, etc.
-              obj.fixed = true;
-            }
-          });
-        }
-        return board;
-      }
+    function initializeBoard(domElementID: string, readOnly?: boolean): JXGElement[] {
+      const changes = self.changes.map(change => JSON.parse(change));
+      return applyChanges(domElementID, changes)
+              .filter(result => result != null)
+              .map(elt => {
+                if (readOnly && (elt instanceof JXG.GeometryElement)) {
+                  elt.setAttribute({ fixed: true });
+                }
+                return elt;
+              }) as JXGElement[];
     }
 
     function destroyBoard(board: JXG.Board) {
@@ -42,13 +39,27 @@ export const GeometryContentModel = types
       board.update();
     }
 
-    function addPoint(board: JXG.Board, parents: any, properties?: any) {
+    function addChange(change: JXGChange) {
+      self.changes.push(JSON.stringify(change));
+    }
+
+    function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties) {
       const change: JXGChange = {
         operation: "create",
         target: "point",
         parents,
-        properties
+        properties: assign({ _uuid_: uuid() }, properties)
       };
+      return _applyChange(board, change);
+    }
+
+    function updatePoints(board: JXG.Board, ids: string | string[], properties: JXGProperties | JXGProperties[]) {
+      const change: JXGChange = {
+              operation: "update",
+              target: "point",
+              targetID: ids,
+              properties
+            };
       return _applyChange(board, change);
     }
 
@@ -74,7 +85,9 @@ export const GeometryContentModel = types
         initializeBoard,
         destroyBoard,
         resizeBoard,
+        addChange,
         addPoint,
+        updatePoints,
         applyChange: _applyChange,
         syncChange
       }

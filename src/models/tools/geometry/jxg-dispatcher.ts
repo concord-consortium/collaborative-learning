@@ -1,4 +1,4 @@
-import { JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler } from "./jxg-changes";
 import { boardChangeAgent, isBoard } from "./jxg-board";
 import { pointChangeAgent } from "./jxg-point";
 
@@ -11,22 +11,22 @@ const agents: JXGChangeAgents = {
   point: pointChangeAgent
 };
 
-export function applyChanges(board: JXG.Board|string, changes: JXGChange[]) {
+export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {
   let _board: JXG.Board | undefined;
-  changes.forEach(change => {
-    const result = applyChange(_board || board, change);
-    if ((typeof board === "string") && isBoard(result)) {
-      _board = result as JXG.Board;
-    }
-  });
-  return _board;
+  return changes.map(change => {
+          const result = applyChange(_board || board, change);
+          if ((typeof board === "string") && isBoard(result)) {
+            _board = result as JXG.Board;
+          }
+          return result;
+        });
 }
 
-export function applyChange(board: JXG.Board|string, change: JXGChange): JXG.Board | undefined {
+export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
   const target = change.target.toLowerCase();
   const agent = agents[target];
   const handler = agent && agent[change.operation];
   return handler
-          ? handler(board, change)
-          : (isBoard(board) ? board : undefined);
+          ? (handler as JXGCreateHandler)(board, change)
+          : undefined;
 }
