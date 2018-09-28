@@ -24,40 +24,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `image-tool ${editableClass}`;
     return (
-      <div className={classes} style={this.containerStyle}>
+      <div className={classes}>
         <img
           src={imageContent.url}
-          style={this.imageStyle}
-          onMouseDown={() => { this.onMouseDown(model, ui ); }}
+          onMouseDown={this.handleMouseDown}
         />
       </div>
     );
   }
 
-  private get containerStyle() {
-    const content = this.props.model.content as ImageContentModelType;
-    const result: any = {};
-    if (typeof content.align !== "undefined") {
-      result.textAlign = content.align;
-    }
-    return result;
-  }
-
-  private get imageStyle() {
-    const content = this.props.model.content as ImageContentModelType;
-    const result: any = {};
-    if (typeof content.width !== "undefined") {
-      result.width = content.width;
-    }
-    if (typeof content.height !== "undefined") {
-      result.height = content.height;
-    }
-    return result;
-  }
-
-  // TODO: Not sure how to type these parameters in a call-back. Prolly a
-  // better way to do this, from the get-go.
-  private onMouseDown(model: any, ui: any) {
-    ui.setSelectedTile(model);
+  private handleMouseDown = (e: React.MouseEvent<HTMLImageElement>) => {
+    this.stores.ui.setSelectedTile(this.props.model);
   }
 }
