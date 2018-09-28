@@ -17,13 +17,19 @@ interface IProps {
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { readOnly, model: { id, content } } = this.props;
+    const { readOnly, model } = this.props;
+    const { content } = model;
+    const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `image-tool ${editableClass}`;
     return (
       <div className={classes} style={this.containerStyle}>
-        <img src={imageContent.url} style={this.imageStyle} />
+        <img
+          src={imageContent.url}
+          style={this.imageStyle}
+          onMouseDown={() => { this.onMouseDown(model, ui ) }}
+        />
       </div>
     );
   }
@@ -47,5 +53,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       result.height = content.height;
     }
     return result;
+  }
+
+  // TODO: Not sure how to type these parameters in a call-back. Prolly a
+  // better way to do this, from the get-go.
+  private onMouseDown(model: any, ui: any) {
+    ui.setSelectedTile(model);
   }
 }
