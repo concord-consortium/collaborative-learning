@@ -11,7 +11,6 @@ import { DocumentModel } from "../models/document";
 import { createStores } from "../models/stores";
 import { CanvasComponent } from "./canvas";
 import { UserModel } from "../models/user";
-import { componentByNodeRegistery } from "mobx-react";
 
 configure({ adapter: new Adapter() });
 

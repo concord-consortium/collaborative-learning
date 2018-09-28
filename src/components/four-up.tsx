@@ -2,13 +2,12 @@ import { observer, inject } from "mobx-react";
 import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
-         FourUpGridModelType, IGridUpdate } from "../models/four-up-grid";
+         FourUpGridModelType } from "../models/four-up-grid";
 import { SectionWorkspaceModelType } from "../models/workspaces";
 import { CanvasComponent } from "./canvas";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./four-up.sass";
-import { values } from "mobx";
 import { DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {
@@ -66,7 +65,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     };
 
     const { groups, user } = this.stores;
-    const { workspace } = this.props;
+    const { workspace, ...others } = this.props;
 
     const group = groups.groupForUser(user.id);
     const groupUsers: FourUpUser[] = group
@@ -89,25 +88,29 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale} document={workspace.document} />
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+                            document={workspace.document} {...others} />
           </div>
           <div className="member">{user.initials}</div>
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent context="four-up-ne" scale={neCell.scale} readOnly={true} document={groupDoc(0)} />
+            <CanvasComponent context="four-up-ne" scale={neCell.scale}
+                            readOnly={true} document={groupDoc(0)} {...others} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent context="four-up-se" scale={seCell.scale} readOnly={true} document={groupDoc(1)} />
+            <CanvasComponent context="four-up-se" scale={seCell.scale}
+                            readOnly={true} document={groupDoc(1)} {...others}/>
           </div>
           {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent context="four-up-sw" scale={swCell.scale} readOnly={true} document={groupDoc(2)} />
+            <CanvasComponent context="four-up-sw" scale={swCell.scale}
+                            readOnly={true} document={groupDoc(2)} {...others}/>
           </div>
           {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>
