@@ -2,10 +2,14 @@ import { types } from "mobx-state-tree";
 import { AuthenticatedUser } from "../lib/auth";
 const initials = require("initials");
 
+export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
+export type UserType = typeof UserTypeEnum.Type;
+
 export const UserModel = types
   .model("User", {
     authenticated: false,
     id: "0",
+    type: types.maybe(UserTypeEnum),
     name: "Anonymous User",
     className: "",
     classHash: "",
@@ -35,12 +39,10 @@ export const UserModel = types
       self.latestGroupId = undefined;
       self.id = user.id;
       self.portal = user.portal;
-
-      if (user.type === "student") {
-        self.className = user.className;
-        self.classHash = user.classHash;
-        self.offeringId = user.offeringId;
-      }
+      self.type = user.type;
+      self.className = user.className;
+      self.classHash = user.classHash;
+      self.offeringId = user.offeringId;
     },
   }))
   .views((self) => ({

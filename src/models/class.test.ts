@@ -52,7 +52,8 @@ describe("Class model", () => {
           fullName: "First Student",
           initials: "FS",
         }
-      ]
+      ],
+      teachers: []
     };
     clazz.updateFromPortal(classInfo);
     expect(clazz.students.length).toEqual(1);

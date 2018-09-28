@@ -1,43 +1,66 @@
 import { authenticate,
         createDemoInfo,
-        _private,
-        PortalJWT,
+        DEV_STUDENT,
+        PORTAL_JWT_URL_SUFFIX,
+        FIREBASE_JWT_URL_SUFFIX,
+        FIREBASE_JWT_QUERY,
+        PortalStudentJWT,
         RawUser,
         RawClassInfo,
         getAppMode,
-        DEV_CLASS_INFO } from "./auth";
+        PortalTeacherJWT,
+        createDemoUser} from "./auth";
 import * as nock from "nock";
 import { NUM_DEMO_STUDENTS } from "../components/demo-creator";
-
-const { FIREBASE_JWT_QUERY, FIREBASE_JWT_URL_SUFFIX, PORTAL_JWT_URL_SUFFIX } = _private;
+import { QueryParams } from "../utilities/url-params";
 
 // tslint:disable-next-line:max-line-length
-const RAW_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzNTY4NDEyNCwiZXhwIjoxNTM1Njg3NzI0LCJ1aWQiOjQ4MiwiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6ImxlYXJuZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzQ4MiIsImxlYXJuZXJfaWQiOjExNTgsImNsYXNzX2luZm9fdXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2FwaS92MS9jbGFzc2VzLzEyOCIsIm9mZmVyaW5nX2lkIjo5OTJ9.NTEtF2GR23SzdhE9CCoc_VMcWyb1orb11RhKjdq-st8";
+const RAW_STUDENT_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTg5MCwiZXhwIjoxNTM4MDU5NDkwLCJ1aWQiOjQ1NDMsImRvbWFpbiI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy8iLCJ1c2VyX3R5cGUiOiJsZWFybmVyIiwidXNlcl9pZCI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy91c2Vycy80NTQzIiwibGVhcm5lcl9pZCI6MTIzMiwiY2xhc3NfaW5mb191cmwiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvYXBpL3YxL2NsYXNzZXMvNjYiLCJvZmZlcmluZ19pZCI6MTAzM30.WxfzUkv7mWBv3fN_I3eYKp7VxBNADLLhIurxXjewoK4";
 // tslint:disable-next-line:max-line-length
-const RAW_FIREBASE_JWT = RAW_PORTAL_JWT;
+const RAW_STUDENT_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWF4a2JsQGNvbGxhYm9yYXRpdmUtbGVhcm5pbmctZWMyMTUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1heGtibEBjb2xsYWJvcmF0aXZlLWxlYXJuaW5nLWVjMjE1LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE1MzgwNTU4OTAsImV4cCI6MTUzODA1OTQ5MCwidWlkIjoiYTU2ZjBlMmUxNzZhYTQ4ZWFhMzRmMTllMDkyMmViZTgiLCJkb21haW4iOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvIiwiZXh0ZXJuYWxJZCI6MTIzMiwicmV0dXJuVXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2RhdGFzZXJ2aWNlL2V4dGVybmFsX2FjdGl2aXR5X2RhdGEvYTNmN2Y4ZDQtMjY4ZS00ODQzLThmMzEtZmM0YWRlN2Q3ODAxIiwibG9nZ2luZyI6ZmFsc2UsImRvbWFpbl91aWQiOjQ1NDMsImNsYXNzX2luZm9fdXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2FwaS92MS9jbGFzc2VzLzY2IiwiY2xhaW1zIjp7InVzZXJfdHlwZSI6ImxlYXJuZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzQ1NDMiLCJjbGFzc19oYXNoIjoiODRkZGIxOTcxZTE2Yjc1NmQ1ZmRlOTdhNzk3OTU4Y2FlYWU4ZjcxMzM4ZDMyZmRjIiwib2ZmZXJpbmdfaWQiOjEwMzN9fQ.lvjuLdrAfbQizwilvv9zCi4cwAmmcrLfKZcnX5-R3O6n_-hSfuAVZ_ScK_95mkFkZdx9Mdpx1j4bDAYEc9gpwP7mIjFqlDJFuwG6m1gicj-D-DrIvecf5nJhCVJgzcEYyuCwLdDhk8iPEFeaJZRqaCg7m8l2B6qWO2nWWFdUTYCyWcmab-VF8z-A43fD76PBNeOdiz90iNBLK_VIMoRNWsk1BVRW4IPUJYsTh1SDWpUP2ocFzuk7x59XiQszlA1CII4pl5O_thtyK79Spt10MbhGbXFZWa1j60TYH3Pi-mXF-JDjD8UUVKUR24PAr8CMCuFstgdnMwphhiGALRtI2g";
 
-const PORTAL_JWT: PortalJWT = {
+// tslint:disable-next-line:max-line-length
+const RAW_TEACHER_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTY2OSwiZXhwIjoxNTM4MDU5MjY5LCJ1aWQiOjIxNywiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6InRlYWNoZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzIxNyIsInRlYWNoZXJfaWQiOjg4fQ.lwFtD-UUXQOcOono0Q9fjBQFbOdP14rhZbJw9PN51vk";
+// tslint:disable-next-line:max-line-length
+const RAW_TEACHER_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWF4a2JsQGNvbGxhYm9yYXRpdmUtbGVhcm5pbmctZWMyMTUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1heGtibEBjb2xsYWJvcmF0aXZlLWxlYXJuaW5nLWVjMjE1LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE1MzgwNTU2NzAsImV4cCI6MTUzODA1OTI3MCwidWlkIjoiMzU4MTYwYzk3M2Y0MmE0MzYxZjA5YzdlMjA2YjVmNGQiLCJkb21haW4iOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvIiwiZG9tYWluX3VpZCI6MjE3LCJjbGFpbXMiOnsidXNlcl90eXBlIjoidGVhY2hlciIsInVzZXJfaWQiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvdXNlcnMvMjE3IiwiY2xhc3NfaGFzaCI6bnVsbH19.XQ_-MmbZUegnod789tKZgWt4r3QpecEoSASb572jDfQGEKupiWGcXn2MGeESuRsOFwD3eWbiQoC6B7F8cy6h0EiaXhIVFR_xrviqoXgayQsDQalrCVGjllLGak4vY7p-ZnLvSie6F9-KubPIfsF_0NdRSDTFOHbN3LGhpxGUYxc4GKandDgGTJwy5rgXLebU7ezzKyzE2YAYEGuVPge5Yf9PgXI__OsbiUD4tOK2dxSTytcL30maeYQ4x0CBWY96w8oOlusOHIsf96OkqKe272SXz2BgkhF6e1IHby_CIhl51FFxAqKr6P1sPlt8WnVpK7qwTDY8VSNCYNxNQMiaXw";
+
+const STUDENT_PORTAL_JWT: PortalStudentJWT = {
   alg: "HS256",
-  iat: 1535684124,
-  exp: 1535687724,
-  uid: 482,
+  iat: 1538055890,
+  exp: 1538059490,
+  uid: 4543,
   domain: "https://learn.staging.concord.org/",
   user_type: "learner",
-  user_id: "https://learn.staging.concord.org/users/482",
-  learner_id: 1158,
-  class_info_url: "https://learn.staging.concord.org/api/v1/classes/128",
-  offering_id: 992
+  user_id: "https://learn.staging.concord.org/users/4543",
+  learner_id: 1232,
+  class_info_url: "https://learn.staging.concord.org/api/v1/classes/66",
+  offering_id: 1033,
 };
 
-const GOOD_TOKEN = "goodToken";
-const BAD_TOKEN = "badToken";
+const TEACHER_PORTAL_JWT: PortalTeacherJWT = {
+  alg: "HS256",
+  iat: 1538055669,
+  exp: 1538059269,
+  uid: 217,
+  domain: "https://learn.staging.concord.org/",
+  user_type: "teacher",
+  user_id: "https://learn.staging.concord.org/users/217",
+  teacher_id: 88,
+};
 
-const PORTAL_DOMAIN = "http://portal/";
+const GOOD_STUDENT_TOKEN = "goodStudentToken";
+const BAD_STUDENT_TOKEN = "badStudentToken";
 
-const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/128";
+const GOOD_TEACHER_TOKEN = "goodTeacherToken";
+const BAD_TEACHER_TOKEN = "badTeacherToken";
+
+const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
+
+const OFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
+const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/66";
 
 const RAW_CORRECT_STUDENT: RawUser = {
-  id: PORTAL_JWT.user_id,
+  id: STUDENT_PORTAL_JWT.user_id,
   first_name: "GoodFirst",
   last_name: "GoodLast",
 };
@@ -48,13 +71,19 @@ const RAW_INCORRECT_STUDENT: RawUser = {
   last_name: "BadLast",
 };
 
+const RAW_CORRECT_TEACHER: RawUser = {
+  id: TEACHER_PORTAL_JWT.user_id,
+  first_name: "GoodFirst",
+  last_name: "GoodLast",
+};
+
 const RAW_CLASS_INFO: RawClassInfo = {
   uri: "https://foo.bar",
   name: "test name",
   state: "test state",
   class_hash: "test hash",
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
-  teachers: [],
+  teachers: [RAW_CORRECT_TEACHER],
 };
 
 describe("dev mode", () => {
@@ -79,66 +108,119 @@ describe("dev mode", () => {
   });
 });
 
-describe("authentication", () => {
+describe("demo mode", () => {
+  let urlParams: QueryParams = {
+    demoClass: "1",
+    demoUser: "student:2",
+    demoOffering: "3",
+  };
 
   beforeEach(() => {
-    nock((PORTAL_DOMAIN + PORTAL_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${GOOD_TOKEN}`
-      }
-    })
-    .get("")
-    .reply(200, {
-      token: RAW_PORTAL_JWT,
+    urlParams = {
+      demoClass: "1",
+      demoUser: "student:2",
+      demoOffering: "3",
+    };
+  });
+
+  it("should be valid", () => {
+    const mode = getAppMode("demo");
+    expect(mode).toBe("demo");
+  });
+
+  it("should authenticate", (done) => {
+    authenticate("demo", urlParams).then(({authenticatedUser}) => {
+      expect(authenticatedUser).toEqual(createDemoUser("1", "student", "2", "3"));
+      done();
     });
+  });
 
-    nock((PORTAL_DOMAIN + PORTAL_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${BAD_TOKEN}`
-      }
-    })
-    .get("")
-    .reply(400);
+  it("should fail without a demo class", (done) => {
+    urlParams.demoClass = undefined;
+    authenticate("demo", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
 
-    nock((PORTAL_DOMAIN + FIREBASE_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${GOOD_TOKEN}`
-      }
-    })
-    .get(FIREBASE_JWT_QUERY)
-    .reply(200, {
-      token: RAW_FIREBASE_JWT,
-    });
+  it("should fail without a demo user", (done) => {
+    urlParams.demoUser = undefined;
+    authenticate("demo", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
 
-    nock((PORTAL_DOMAIN + FIREBASE_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${BAD_TOKEN}`
-      }
-    })
-    .get(FIREBASE_JWT_QUERY)
-    .reply(400);
+  it("should fail without a demo offering", (done) => {
+    urlParams.demoOffering = undefined;
+    authenticate("demo", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
 
+  it("should fail with an invalid demo user", (done) => {
+    urlParams.demoUser = "invalid";
+    authenticate("demo", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+});
+
+describe("student authentication", () => {
+
+  beforeEach(() => {
     nock(CLASS_INFO_URL, {
       reqheaders: {
-        Authorization: `Bearer/JWT ${RAW_PORTAL_JWT}`
+        authorization: `Bearer/JWT ${RAW_STUDENT_PORTAL_JWT}`
       }
     })
     .get("")
     .reply(200, RAW_CLASS_INFO);
   });
 
-  it("Authenticates as a developer", (done) => {
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
+  it("works in dev mode", (done) => {
     authenticate("dev").then(({authenticatedUser}) => {
-      expect(authenticatedUser).toEqual(_private.DEV_USER);
+      expect(authenticatedUser).toEqual(DEV_STUDENT);
       done();
     });
   });
 
-  it("Authenticates externally", (done) => {
-    authenticate("authed", {token: GOOD_TOKEN, domain: PORTAL_DOMAIN}).then(({authenticatedUser, classInfo}) => {
+  it("works in authed mode", (done) => {
+    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+      reqheaders: {
+        authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
+      }
+    })
+    .get("")
+    .reply(200, {
+      token: RAW_STUDENT_PORTAL_JWT,
+    });
+
+    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+      reqheaders: {
+        authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_QUERY)
+    .reply(200, {
+      token: RAW_STUDENT_FIREBASE_JWT,
+    });
+
+    authenticate("authed", {token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL}).then(({authenticatedUser}) => {
       expect(authenticatedUser).toEqual({
         type: "student",
-        id: `${PORTAL_JWT.uid}`,
+        id: `${STUDENT_PORTAL_JWT.uid}`,
         portal: "learn.staging.concord.org",
         firstName: RAW_CORRECT_STUDENT.first_name,
         lastName: RAW_CORRECT_STUDENT.last_name,
@@ -146,64 +228,90 @@ describe("authentication", () => {
         initials: "GG",
         className: RAW_CLASS_INFO.name,
         classHash: "test hash",
-        offeringId: "992",
+        offeringId: "1033",
         portalJWT: {
           alg: "HS256",
-          class_info_url: "https://learn.staging.concord.org/api/v1/classes/128",
+          iat: 1538055890,
+          exp: 1538059490,
+          uid: 4543,
           domain: "https://learn.staging.concord.org/",
-          exp: 1535687724,
-          iat: 1535684124,
-          learner_id: 1158,
-          offering_id: 992,
-          uid: 482,
-          user_id: "https://learn.staging.concord.org/users/482",
           user_type: "learner",
+          user_id: "https://learn.staging.concord.org/users/4543",
+          learner_id: 1232,
+          class_info_url: "https://learn.staging.concord.org/api/v1/classes/66",
+          offering_id: 1033,
         },
         firebaseJWT: {
-          alg: "HS256",
-          class_info_url: "https://learn.staging.concord.org/api/v1/classes/128",
+          alg: "RS256",
+          iss: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+          sub: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+          aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+          iat: 1538055890,
+          exp: 1538059490,
+          uid: "a56f0e2e176aa48eaa34f19e0922ebe8",
           domain: "https://learn.staging.concord.org/",
-          exp: 1535687724,
-          iat: 1535684124,
-          learner_id: 1158,
-          offering_id: 992,
-          uid: 482,
-          user_id: "https://learn.staging.concord.org/users/482",
-          user_type: "learner",
+          externalId: 1232,
+          // tslint:disable-next-line:max-line-length
+          returnUrl: "https://learn.staging.concord.org/dataservice/external_activity_data/a3f7f8d4-268e-4843-8f31-fc4ade7d7801",
+          logging: false,
+          domain_uid: 4543,
+          class_info_url: "https://learn.staging.concord.org/api/v1/classes/66",
+          claims: {
+            user_type: "learner",
+            user_id: "https://learn.staging.concord.org/users/4543",
+            class_hash: "84ddb1971e16b756d5fde97a797958caeae8f71338d32fdc",
+            offering_id: 1033
+          }
         },
-        rawPortalJWT: RAW_PORTAL_JWT,
-        rawFirebaseJWT: RAW_FIREBASE_JWT,
+        rawPortalJWT: RAW_STUDENT_PORTAL_JWT,
+        rawFirebaseJWT: RAW_STUDENT_FIREBASE_JWT,
       });
       done();
     })
     .catch(done);
   });
 
-  it("Fails to authenticate with a bad token", (done) => {
-    authenticate("authed", {token: BAD_TOKEN, domain: PORTAL_DOMAIN})
+  it("fails with a bad token", (done) => {
+    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+      reqheaders: {
+        authorization: `Bearer ${BAD_STUDENT_TOKEN}`
+      }
+    })
+    .get("")
+    .reply(400);
+
+    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+      reqheaders: {
+        authorization: `Bearer ${BAD_STUDENT_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_QUERY)
+    .reply(400);
+
+    authenticate("authed", {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
       .then(() => {
         done.fail();
       })
       .catch(() => done());
   });
 
-  it("Fails to authenticate with no token", (done) => {
-    authenticate("authed", {token: undefined, domain: PORTAL_DOMAIN})
+  it("fails with no token", (done) => {
+    authenticate("authed", {token: undefined, domain: BASE_PORTAL_URL})
       .then(() => {
         done.fail();
       })
       .catch(() => done());
   });
 
-  it("Fails to authenticate with no domain", (done) => {
-    authenticate("authed", {token: BAD_TOKEN, domain: undefined})
+  it("fails with no domain", (done) => {
+    authenticate("authed", {token: BAD_STUDENT_TOKEN, domain: undefined})
       .then(() => {
         done.fail();
       })
       .catch(() => done());
   });
 
-  it("creates demo info", () => {
+  it("can create demo info", () => {
     const demoInfo = createDemoInfo("1", "student", "1", "1");
     expect(demoInfo.authenticatedUser).toEqual({
       type: "student",
@@ -220,5 +328,158 @@ describe("authentication", () => {
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
     expect(demoInfo.classInfo.students.length).toEqual(NUM_DEMO_STUDENTS);
+  });
+});
+
+describe("teacher authentication", () => {
+  let urlParams: QueryParams = {
+    token: GOOD_TEACHER_TOKEN,
+    reportType: "offering",
+    class: CLASS_INFO_URL,
+    offering: OFERING_INFO_URL
+  };
+
+  beforeEach(() => {
+    urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFERING_INFO_URL};
+
+    nock(CLASS_INFO_URL, {
+      reqheaders: {
+        Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
+      }
+    })
+    .get("")
+    .reply(200, RAW_CLASS_INFO);
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
+  it("works in authed mode", (done) => {
+    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+      }
+    })
+    .get("")
+    .reply(200, {
+      token: RAW_TEACHER_PORTAL_JWT,
+    });
+
+    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_QUERY)
+    .reply(200, {
+      token: RAW_TEACHER_FIREBASE_JWT,
+    });
+
+    authenticate("authed", urlParams).then(({authenticatedUser}) => {
+      expect(authenticatedUser).toEqual({
+        type: "teacher",
+        id: `${TEACHER_PORTAL_JWT.uid}`,
+        portal: "learn.staging.concord.org",
+        firstName: RAW_CORRECT_TEACHER.first_name,
+        lastName: RAW_CORRECT_TEACHER.last_name,
+        fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
+        initials: "GG",
+        className: RAW_CLASS_INFO.name,
+        classHash: "test hash",
+        offeringId: "1033",
+        portalJWT: {
+          alg: "HS256",
+          iat: 1538055669,
+          exp: 1538059269,
+          uid: 217,
+          domain: "https://learn.staging.concord.org/",
+          user_type: "teacher",
+          user_id: "https://learn.staging.concord.org/users/217",
+          teacher_id: 88,
+        },
+        firebaseJWT: {
+          alg: "RS256",
+          iss: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+          sub: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+          aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+          iat: 1538055670,
+          exp: 1538059270,
+          uid: "358160c973f42a4361f09c7e206b5f4d",
+          domain: "https://learn.staging.concord.org/",
+          domain_uid: 217,
+          claims: {
+            user_type: "teacher",
+            user_id: "https://learn.staging.concord.org/users/217",
+            class_hash: null
+          }
+        },
+        rawPortalJWT: RAW_TEACHER_PORTAL_JWT,
+        rawFirebaseJWT: RAW_TEACHER_FIREBASE_JWT,
+      });
+      done();
+    })
+    .catch(done);
+  });
+
+  it("fails with a bad token", (done) => {
+    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+      reqheaders: {
+        Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
+      }
+    })
+    .get("")
+    .reply(400);
+
+    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+      reqheaders: {
+        Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_QUERY)
+    .reply(400);
+
+    urlParams.token = BAD_TEACHER_TOKEN;
+    authenticate("authed", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no token", (done) => {
+    urlParams.token = undefined;
+    authenticate("authed", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with a bad report type", (done) => {
+    urlParams.reportType = "unknown";
+    authenticate("authed", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no class", (done) => {
+    urlParams.class = undefined;
+    authenticate("authed", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no offering", (done) => {
+    urlParams.offering = undefined;
+    authenticate("authed", urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
   });
 });
