@@ -28,7 +28,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         <img
           src={imageContent.url}
           style={this.imageStyle}
-          onMouseDown={() => { this.onMouseDown(model, ui ) }}
+          onMouseDown={() => { this.onMouseDown(model, ui ); }}
         />
       </div>
     );
