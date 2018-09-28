@@ -1,5 +1,5 @@
 import { authenticate,
-        createDemoInfo,
+        createFakeAuthentication,
         DEV_STUDENT,
         PORTAL_JWT_URL_SUFFIX,
         FIREBASE_JWT_URL_SUFFIX,
@@ -9,9 +9,9 @@ import { authenticate,
         RawClassInfo,
         getAppMode,
         PortalTeacherJWT,
-        createDemoUser} from "./auth";
+        createFakeUser} from "./auth";
 import * as nock from "nock";
-import { NUM_DEMO_STUDENTS } from "../components/demo-creator";
+import { NUM_FAKE_STUDENTS } from "../components/demo-creator";
 import { QueryParams } from "../utilities/url-params";
 
 // tslint:disable-next-line:max-line-length
@@ -110,16 +110,16 @@ describe("dev mode", () => {
 
 describe("demo mode", () => {
   let urlParams: QueryParams = {
-    demoClass: "1",
-    demoUser: "student:2",
-    demoOffering: "3",
+    fakeClass: "1",
+    fakeUser: "student:2",
+    fakeOffering: "3",
   };
 
   beforeEach(() => {
     urlParams = {
-      demoClass: "1",
-      demoUser: "student:2",
-      demoOffering: "3",
+      fakeClass: "1",
+      fakeUser: "student:2",
+      fakeOffering: "3",
     };
   });
 
@@ -130,13 +130,20 @@ describe("demo mode", () => {
 
   it("should authenticate", (done) => {
     authenticate("demo", urlParams).then(({authenticatedUser}) => {
-      expect(authenticatedUser).toEqual(createDemoUser("1", "student", "2", "3"));
+      const demoUser = createFakeUser({
+        appMode: "demo",
+        classId: "1",
+        userType: "student",
+        userId: "2",
+        offeringId: "3"
+      });
+      expect(authenticatedUser).toEqual(demoUser);
       done();
     });
   });
 
   it("should fail without a demo class", (done) => {
-    urlParams.demoClass = undefined;
+    urlParams.fakeClass = undefined;
     authenticate("demo", urlParams)
       .then(() => {
         done.fail();
@@ -145,7 +152,7 @@ describe("demo mode", () => {
   });
 
   it("should fail without a demo user", (done) => {
-    urlParams.demoUser = undefined;
+    urlParams.fakeUser = undefined;
     authenticate("demo", urlParams)
       .then(() => {
         done.fail();
@@ -154,7 +161,7 @@ describe("demo mode", () => {
   });
 
   it("should fail without a demo offering", (done) => {
-    urlParams.demoOffering = undefined;
+    urlParams.fakeOffering = undefined;
     authenticate("demo", urlParams)
       .then(() => {
         done.fail();
@@ -163,7 +170,7 @@ describe("demo mode", () => {
   });
 
   it("should fail with an invalid demo user", (done) => {
-    urlParams.demoUser = "invalid";
+    urlParams.fakeUser = "invalid";
     authenticate("demo", urlParams)
       .then(() => {
         done.fail();
@@ -312,22 +319,28 @@ describe("student authentication", () => {
   });
 
   it("can create demo info", () => {
-    const demoInfo = createDemoInfo("1", "student", "1", "1");
+    const demoInfo = createFakeAuthentication({
+      appMode: "demo",
+      classId: "1",
+      userType: "student",
+      userId: "2",
+      offeringId: "3"
+    });
     expect(demoInfo.authenticatedUser).toEqual({
       type: "student",
-      id: "1",
+      id: "2",
       portal: "demo",
       firstName: "Student",
-      lastName: "1",
-      fullName: "Student 1",
-      initials: "S1",
+      lastName: "2",
+      fullName: "Student 2",
+      initials: "S2",
       className: "Demo Class 1",
       classHash: "democlass1",
-      offeringId: "1"
+      offeringId: "3"
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
-    expect(demoInfo.classInfo.students.length).toEqual(NUM_DEMO_STUDENTS);
+    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
   });
 });
 

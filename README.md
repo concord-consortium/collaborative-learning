@@ -51,8 +51,16 @@ To deploy a production release:
 
 Run `npm test` to run all tests.
 
+### QA
+
+Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA mode uses the same parameters as demo mode with two additional parameters:
+
+1. qaGroup - the group to automatically assign the fake user to after connecting to the database.
+2. qaClear - either "all", "class" or "offering".  When this parameter is present the QA database is cleared at the level requested based on the user parameters.
+   This is useful to clear data between automated QA runs.  When complete the app will display `<span className="qa-clear">QA Cleared: OK</span>`.
+
 ## License
 
-Teaching Teamwork is Copyright 2018 (c) by the Concord Consortium and is distributed under the [MIT license](http://www.opensource.org/licenses/MIT).
+Collaborative Learning is Copyright 2018 (c) by the Concord Consortium and is distributed under the [MIT license](http://www.opensource.org/licenses/MIT).
 
 See license.md for the complete license text.
