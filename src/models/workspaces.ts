@@ -4,7 +4,8 @@ import { DocumentModel, DocumentModelType } from "./document";
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 
-export const WorkspaceToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text"]);
+export const WorkspaceToolEnum = types.enumeration("tool",
+  ["delete", "geometry", "select", "text", "image"]);
 export type WorkspaceTool = typeof WorkspaceToolEnum.Type;
 
 const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
@@ -15,6 +16,8 @@ const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
     case "text":
       document.content.addTextTile();
       break;
+    case "image":
+      document.content.addImageTile();
   }
   return tool;
 };

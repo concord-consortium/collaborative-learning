@@ -49,6 +49,15 @@ export const DocumentContentModel = types
         }
       }));
     },
+    addImageTile() {
+      self.tiles.push(ToolTileModel.create({
+        content: {
+          type: "Image",
+          // TODO: Make this settable from the UI or, pick a more reasonable default.
+          url: "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
+        }
+      }));
+    },
     deleteTile(tileId: string) {
       const index = self.tiles.findIndex(tile => tile.id === tileId);
       if (index >= 0) {
