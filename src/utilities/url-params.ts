@@ -1,5 +1,6 @@
 import { parse } from "query-string";
 import { AppMode } from "../models/stores";
+import { DBClearLevel } from "../lib/db";
 
 export interface QueryParams {
   // appMode is "authed", "test" or "dev" with the default of dev
@@ -30,15 +31,24 @@ export interface QueryParams {
   reportType?: string;
 
   //
-  // Demo Creator generated parameters
+  // demo or qa mode parameters
   //
 
-  // class id for demo
-  demoClass?: string;
-  // user id from demo in form (student|teacher):<id>
-  demoUser?: string;
-  // demo offering id
-  demoOffering?: string;
+  // class id for demo or qa
+  fakeClass?: string;
+  // user id  in form (student|teacher):<id>
+  fakeUser?: string;
+  // offering id for demo or qa
+  fakeOffering?: string;
+
+  //
+  // QA options
+  //
+
+  // group id for qa
+  qaGroup?: string;
+  // db level to clear for qa
+  qaClear?: DBClearLevel;
 }
 
 const params = parse(location.search);
@@ -54,9 +64,11 @@ export const defaultUrlParams: QueryParams = {
   class: undefined,
   offering: undefined,
   reportType: undefined,
-  demoClass: undefined,
-  demoUser: undefined,
-  demoOffering: undefined,
+  fakeClass: undefined,
+  fakeUser: undefined,
+  fakeOffering: undefined,
+  qaGroup: undefined,
+  qaClear: undefined,
 };
 
 export const urlParams: QueryParams = params;

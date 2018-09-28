@@ -3,7 +3,7 @@ import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores";
 import { QueryParams, defaultUrlParams } from "../utilities/url-params";
-import {NUM_DEMO_STUDENTS, NUM_DEMO_TEACHERS} from "../components/demo-creator";
+import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo-creator";
 
 const initials = require("initials");
 
@@ -311,16 +311,21 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
-    if (appMode === "demo") {
-      const {demoClass, demoUser, demoOffering} = urlParams;
-      if (!demoClass || !demoUser || !demoOffering) {
-        return reject("Missing demoClass or demoUser or demoOffering parameter for demo!");
+    if ((appMode === "demo") || (appMode === "qa")) {
+      const {fakeClass, fakeUser, fakeOffering} = urlParams;
+      if (!fakeClass || !fakeUser || !fakeOffering) {
+        return reject("Missing fakeClass or fakeUser or fakeOffering parameter for demo!");
       }
-      const [userType, userId, ...rest] = demoUser.split(":");
+      const [userType, userId, ...rest] = fakeUser.split(":");
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
-        return reject("demoUser must be in the form of student:<id> or teacher:<id>");
+        return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
-      resolve(createDemoInfo(demoClass, userType, userId, demoOffering));
+      resolve(createFakeAuthentication({
+        appMode,
+        classId: fakeClass,
+        userType, userId,
+        offeringId: fakeOffering
+      }));
     }
 
     if (appMode !== "authed") {
@@ -417,53 +422,85 @@ export const parseUrl = (url: string) => {
   return parser;
 };
 
-export const createDemoUser = (classId: string, userType: UserType, userId: string, offeringId: string) => {
+export interface CreateFakeUserOptions {
+  appMode: AppMode;
+  classId: string;
+  userType: UserType;
+  userId: string;
+  offeringId: string;
+}
+
+export const createFakeUser = (options: CreateFakeUserOptions) => {
+  const {appMode, classId, userType, userId, offeringId} = options;
+  const className = `${appMode === "demo" ? "Demo" : "QA"} Class ${classId}`;
   if (userType === "student") {
     const student: StudentUser = {
       type: "student",
       id: userId,
-      portal: "demo",
+      portal: appMode,
       firstName: "Student",
       lastName: `${userId}`,
       fullName: `Student ${userId}`,
       initials: `S${userId}`,
-      className: `Demo Class ${classId}`,
-      classHash: `democlass${classId}`,
+      className,
+      classHash: `${appMode}class${classId}`,
       offeringId,
     };
     return student;
   }
   else {
-    userId = `${parseInt(userId, 10) + 1000}`;
     const teacher: TeacherUser = {
       type: "teacher",
-      id: userId,
-      portal: "demo",
+      id: `${parseInt(userId, 10) + 1000}`,
+      portal: appMode,
       firstName: "Teacher",
       lastName: `${userId}`,
       fullName: `Teacher ${userId}`,
-      initials: `S${userId}`,
-      className: `Demo Class ${classId}`,
-      classHash: `democlass${classId}`,
+      initials: `T${userId}`,
+      className,
+      classHash: `${appMode}class${classId}`,
       offeringId,
     };
     return teacher;
   }
 };
 
-export const createDemoInfo = (classId: string, userType: UserType, userId: string, offeringId: string) => {
-  const authenticatedUser = createDemoUser(classId, userType, userId, offeringId);
+export interface CreateFakeAuthenticationOptions {
+  appMode: AppMode;
+  classId: string;
+  userType: UserType;
+  userId: string;
+  offeringId: string;
+}
+
+export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
+  const {appMode, classId, userType, userId, offeringId} = options;
+  const authenticatedUser = createFakeUser({appMode, classId, userType, userId, offeringId});
   const classInfo: ClassInfo = {
-    name: `Demo Class ${classId}`,
-    classHash: `democlass${classId}`,
+    name: authenticatedUser.className,
+    classHash: authenticatedUser.classHash,
     students: [],
     teachers: [],
   };
-  for (let i = 1; i <= NUM_DEMO_STUDENTS; i++) {
-    classInfo.students.push(createDemoUser(classId, "student", `${i}`, offeringId) as StudentUser);
+  for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
+    classInfo.students.push(
+      createFakeUser({
+        appMode,
+        classId,
+        userType: "student",
+        userId: `${i}`, offeringId
+      }) as StudentUser
+    );
   }
-  for (let i = 1; i <= NUM_DEMO_TEACHERS; i++) {
-    classInfo.teachers.push(createDemoUser(classId, "teacher", `${i}`, offeringId) as TeacherUser);
+  for (let i = 1; i <= NUM_FAKE_TEACHERS; i++) {
+    classInfo.teachers.push(
+      createFakeUser({
+        appMode,
+        classId,
+        userType: "teacher",
+        userId: `${i}`, offeringId
+      }) as TeacherUser
+    );
   }
   return {authenticatedUser, classInfo};
 };

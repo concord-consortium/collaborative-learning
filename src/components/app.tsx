@@ -12,8 +12,12 @@ import { GroupChooserComponent } from "./group-chooser";
 import { IStores } from "../models/stores";
 
 interface IProps extends IBaseProps {}
+interface IState {
+  qaCleared: boolean;
+  qaClearError?: string;
+}
 
-export const authAndConnect = (stores: IStores) => {
+export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
   const {appMode, user, db, ui} = stores;
 
   authenticate(appMode, urlParams)
@@ -33,7 +37,26 @@ export const authAndConnect = (stores: IStores) => {
         }
       }
       else {
-        db.connect({appMode, stores}).catch(ui.setError);
+        db.connect({appMode, stores})
+          .then(() => {
+            if (appMode === "qa") {
+              const {qaClear, qaGroup} = urlParams;
+              if (qaClear) {
+                const cleared = (err?: string) => {
+                  if (onQAClear) {
+                    onQAClear(!err, err);
+                  }
+                };
+                db.clear(qaClear)
+                  .then(() => cleared())
+                  .catch(cleared);
+              }
+              else if (qaGroup) {
+                db.leaveGroup().then(() => db.joinGroup(qaGroup));
+              }
+            }
+          })
+          .catch(ui.setError);
       }
     })
     .catch((error) => {
@@ -48,10 +71,17 @@ export const authAndConnect = (stores: IStores) => {
 
 @inject("stores")
 @observer
-export class AppComponent extends BaseComponent<IProps, {}> {
+export class AppComponent extends BaseComponent<IProps, IState> {
+
+  public state: IState = {
+    qaCleared: false,
+    qaClearError: undefined
+  };
 
   public componentWillMount() {
-    authAndConnect(this.stores);
+    authAndConnect(this.stores, (qaCleared, qaClearError) => {
+      this.setState({qaCleared, qaClearError});
+    });
   }
 
   public componentWillUnmount() {
@@ -71,6 +101,15 @@ export class AppComponent extends BaseComponent<IProps, {}> {
 
     if (!user.authenticated || !db.isListening) {
       return this.renderApp(this.renderLoading());
+    }
+
+    if (urlParams.qaClear) {
+      const {qaCleared, qaClearError} = this.state;
+      return this.renderApp(
+        <span className="qa-clear">
+          {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}
+        </span>
+      );
     }
 
     if (!groups.groupForUser(user.id)) {
