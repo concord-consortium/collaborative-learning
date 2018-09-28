@@ -69,6 +69,9 @@ declare namespace JXG {
     setPosition: (method: number, coords: number[]) => JXG.Point;
   }
 
+  class Polygon extends GeometryElement {
+  }
+
   const _ceil10: (value: number, exp: number) => number;
   const _floor10: (value: number, exp: number) => number;
   const _round10: (value: number, exp: number) => number;

@@ -4,7 +4,7 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
 import { isBoard } from "../../models/tools/geometry/jxg-board";
-import { isPoint } from "../../models/tools/geometry/jxg-point";
+import { isPoint, isFreePoint } from "../../models/tools/geometry/jxg-point";
 import { assign, cloneDeep, isEqual } from "lodash";
 import { SizeMe } from "react-sizeme";
 
@@ -29,6 +29,11 @@ interface IState extends SizeMeProps {
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges?: number;
+}
+
+interface JXGPtrEvent {
+  evt: any;
+  coords: JXG.Coords;
 }
 
 // For snap to grid
@@ -93,8 +98,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
-  private lastPtrDownEvent: any;
-  private lastPtrDownCoords: JXG.Coords | undefined;
+  private lastBoardDown: JXGPtrEvent;
+  private lastPointDown?: JXGPtrEvent;
   private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
 
   public componentDidMount() {
@@ -156,6 +161,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return dx * dx + dy * dy < threshold;
   }
 
+  private isDoubleClick(c1?: JXGPtrEvent, c2?: JXGPtrEvent) {
+    return (c1 && c2 && (c2.evt.timeStamp - c1.evt.timeStamp < 300) &&
+            this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
+  }
+
   private installBoardEventHandlers(board: JXG.Board) {
 
     const handlePointerDown = (evt: any) => {
@@ -175,30 +185,29 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const x = coords.usrCoords[1];
       const y = coords.usrCoords[2];
       if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
-        this.lastPtrDownEvent = evt;
-        this.lastPtrDownCoords = coords;
+        this.lastBoardDown = { evt, coords };
       }
     };
 
     const handlePointerUp = (evt: any) => {
       const { readOnly, scale } = this.props;
-      if (readOnly || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
+      if (readOnly || !this.lastBoardDown) { return; }
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
       const index = evt[JXG.touchProperty] ? 0 : undefined;
       const coords = getEventCoords(board, evt, scale, index);
-      const [ , x, y] = this.lastPtrDownCoords.usrCoords;
+      const [ , x, y] = this.lastBoardDown.coords.usrCoords;
       if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
         return;
       }
 
       const clickTimeThreshold = 500;
-      if (evt.timeStamp - this.lastPtrDownEvent.timeStamp > clickTimeThreshold) {
+      if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
         return;
       }
 
       const clickSqrDistanceThreshold = 9;
-      if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastPtrDownCoords, coords)) {
+      if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastBoardDown.coords, coords)) {
         return;
       }
 
@@ -228,7 +237,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     const handlePointerDown = (evt: any) => {
       const id = point.id;
-      this.dragPts[id] = { initial: cloneDeep(point.coords) };
+      const coords = cloneDeep(point.coords);
+      if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+        const { model: { content } } = this.props;
+        const { board } = this.state;
+        if (board && (content.type === "Geometry")) {
+          this.applyChange(() => content.connectFreePoints(board));
+          this.lastPointDown = undefined;
+        }
+      }
+      else {
+        this.dragPts[id] = { initial: coords };
+        this.lastPointDown = { evt, coords };
+      }
     };
 
     const handleDrag = (evt: any) => {
@@ -247,7 +268,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       dragEntry.final = cloneDeep(point.coords);
 
-      if (!isEqual(dragEntry.initial, dragEntry.final)) {
+      if (!isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)) {
         const { content } = this.props.model;
         const { board } = this.state;
         if ((content.type === "Geometry") && board) {
