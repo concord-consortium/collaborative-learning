@@ -5,6 +5,7 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
 import { isBoard } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint } from "../../models/tools/geometry/jxg-point";
+import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
 import { assign, cloneDeep, isEqual } from "lodash";
 import { SizeMe } from "react-sizeme";
 
@@ -272,9 +273,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const { content } = this.props.model;
         const { board } = this.state;
         if ((content.type === "Geometry") && board) {
-          const coords = dragEntry.final.usrCoords.slice(1);
+          const coords = dragEntry.final.usrCoords.slice(1) as JXGCoordPair;
           const props = { position: coords };
-          this.applyChange(() => content.updatePoints(board, id, props));
+          this.applyChange(() => content.updateObjects(board, id, props));
         }
       }
     };
