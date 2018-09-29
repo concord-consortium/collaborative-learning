@@ -57,12 +57,15 @@ export interface DBOfferingDocumentMetadata extends DBDocumentMetadata {
   };
   type: DBOfferingDocumentType;
 }
+export interface DBGroupUserConnections {
+  [key /*userId*/: string]: boolean;
+}
 export interface DBPublishedDocumentMetadata extends DBOfferingDocumentMetadata {
   type: "published";
   groupId: string;
   userId: string;
-  onlineUserIds: string[];
-  offlineUserIds: string[];
+  sectionId: string;
+  groupUserConnections: DBGroupUserConnections;
 }
 
 export interface DBLearningLog {

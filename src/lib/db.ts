@@ -20,12 +20,14 @@ import { DBOfferingGroup,
          DBUserDocumentMetadata,
          DBOfferingDocumentMetadata,
          DBPublishedDocument,
+         DBGroupUserConnections,
         } from "./db-types";
 import { SectionWorkspaceModelType,
          SectionWorkspaceModel,
          LearningLogWorkspaceModelType,
          LearningLogWorkspaceModel,
-         PublishedWorkspaceModel} from "../models/workspaces";
+         PublishedWorkspaceModel,
+         WorkspaceModelType} from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
@@ -367,8 +369,10 @@ export class DB {
     });
   }
 
-  public createOfferingDocument(type: DBOfferingDocumentType, content?: string) {
+  public createOfferingDocument(type: DBOfferingDocumentType, workspace: SectionWorkspaceModelType) {
     const {user, groups} = this.stores;
+    const documentModel = workspace.document;
+    const content = JSON.stringify(documentModel.content);
     return new Promise<{document: DBOfferingDocument, metadata: DBOfferingDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.ref(this.getOfferingDocumentsPath(user)).push();
       const documentKey = documentRef.key!;
@@ -385,6 +389,12 @@ export class DB {
       };
 
       const userGroup = groups.groupForUser(user.id)!;
+      const groupUserConnections: DBGroupUserConnections = userGroup.users
+        .filter(groupUser => groupUser.id !== user.id)
+        .reduce((allUsers: DBGroupUserConnections, groupUser) => {
+          allUsers[groupUser.id] = groupUser.connected;
+          return allUsers;
+        }, {});
       const metadata: DBPublishedDocumentMetadata = {
         version: "1.0",
         type,
@@ -396,9 +406,8 @@ export class DB {
         createdAt: firebase.database.ServerValue.TIMESTAMP as number,
         groupId: userGroup.id,
         userId: user.id,
-        // Get actual group mate IDs in later commit
-        onlineUserIds: ["2"],
-        offlineUserIds: ["3"]
+        sectionId: workspace.sectionId,
+        groupUserConnections
       };
 
       return documentRef.set(document)
@@ -514,9 +523,8 @@ export class DB {
     });
   }
 
-  public publishDocument(documentModel: DocumentModelType) {
-    const content = JSON.stringify(documentModel.content);
-    return this.createOfferingDocument("published", content);
+  public publishWorkspace(workspace: SectionWorkspaceModelType) {
+    return this.createOfferingDocument("published", workspace);
   }
 
   public ref(path: string = "") {
@@ -1121,13 +1129,22 @@ export class DB {
   }
 
   private createWorkspaceFromPublication(publication: DBPublishedDocumentMetadata) {
-    const {groupId, self: {documentKey}} = publication;
+    const {groupId, sectionId, groupUserConnections, userId, self: {documentKey}} = publication;
+    // groupUserConnections returns as an array and must be converted back to a map
+    const groupUserConnectionsMap = Object.keys(groupUserConnections)
+      .reduce((allUsers, groupUserId) => {
+        allUsers[groupUserId] = groupUserConnections[groupUserId];
+        return allUsers;
+      }, {} as DBGroupUserConnections);
     return this.openOfferingDocument(documentKey)
       .then((document) => {
         return PublishedWorkspaceModel.create({
           document,
           createdAt: document.createdAt,
-          groupId
+          sectionId,
+          groupId,
+          userId,
+          groupUserConnections: groupUserConnectionsMap
         });
       });
   }

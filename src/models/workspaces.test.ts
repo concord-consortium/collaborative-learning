@@ -2,7 +2,8 @@ import { SectionWorkspaceModel,
          SectionWorkspaceModelType,
          WorkspacesModel,
          WorkspacesModelType,
-         LearningLogWorkspaceModel } from "./workspaces";
+         LearningLogWorkspaceModel,
+         PublishedWorkspaceModel} from "./workspaces";
 import { DocumentModel, DocumentModelType } from "./document";
 
 describe("workspaces model", () => {
@@ -224,4 +225,36 @@ describe("workspaces model", () => {
     expect(workspaces.learningLogs.length).toBe(1);
   });
 
+  const getPublishedWorkspace = (createdAt: number, sectionId: string, groupId: string) => {
+    return PublishedWorkspaceModel.create({
+      document: DocumentModel.create({
+        uid: "1",
+        key: "ll-test",
+        createdAt,
+        content: {}
+      }),
+      createdAt,
+      userId: "uid",
+      groupId,
+      sectionId,
+    });
+  };
+
+  it("gets a correctly sorted list of publications for a given section", () => {
+    const pub1 = getPublishedWorkspace(0, "introduction", "1");
+    const newerPub1 = getPublishedWorkspace(10, "introduction", "1");
+    const badPub1 = getPublishedWorkspace(5, "initialChallenge", "1");
+    const pub2 = getPublishedWorkspace(7, "introduction", "2");
+
+    workspaces.addPublishedWorkspace(pub2);
+    workspaces.addPublishedWorkspace(pub1);
+    workspaces.addPublishedWorkspace(newerPub1);
+    workspaces.addPublishedWorkspace(badPub1);
+    expect(workspaces.publications.length).toBe(4);
+
+    const latestPubs = workspaces.getLatestPublicationsForSection("introduction");
+    expect(latestPubs.length).toBe(2);
+    expect(latestPubs[0]).toBe(newerPub1);
+    expect(latestPubs[1]).toBe(pub2);
+  });
 });

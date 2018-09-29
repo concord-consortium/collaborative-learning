@@ -3,8 +3,8 @@ import * as React from "react";
 
 import { WorkspaceTool,
          WorkspaceModelType,
-         SectionWorkspaceModelType,
-         LearningLogWorkspaceModelType
+         LearningLogWorkspaceModelType,
+         SectionWorkspaceModelType
        } from "../models/workspaces";
 import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
@@ -44,9 +44,12 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     if (workspace.type === "learningLog") {
       return this.renderLearningLogTitleBar();
     }
+    if (workspace.type === "published") {
+      return this.renderSectionTitleBar(true);
+    }
   }
 
-  private renderSectionTitleBar() {
+  private renderSectionTitleBar(hideButtons?: boolean) {
     const {ui, problem} = this.stores;
     const workspace = this.sectionWorkspace;
     const activeSection = problem.getSectionById(workspace.sectionId);
@@ -55,15 +58,17 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
-        <div className="actions">
-          <svg className={`icon icon-publish`} onClick={this.handlePublishCanvas}>
-            <use xlinkHref={`#icon-publish`} />
-          </svg>
-          <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
-            <use xlinkHref={`#icon-${share}`} />
-          </svg>
-          {show4up ? this.renderMode() : null}
-        </div>
+        {!hideButtons &&
+          <div className="actions">
+            <svg className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
+              <use xlinkHref={`#icon-publish`} />
+            </svg>
+            <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
+              <use xlinkHref={`#icon-${share}`} />
+            </svg>
+            {show4up ? this.renderMode() : null}
+          </div>
+        }
       </div>
     );
   }
@@ -89,7 +94,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
-    const { workspace } = this.props;
+    const workspace = this.props.workspace;
+    if (!workspace.tool) {
+      return;
+    }
     const className = (tool: WorkspaceTool) => {
       return `tool ${tool}${tool === workspace.tool ? " active" : ""}`;
     };
@@ -122,11 +130,18 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     if (workspace.type === "section") {
       return (
         <div className="canvas-area">
-          {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas(false) : this.render4UpCanvas()}
+          {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
         </div>
       );
     }
     if (workspace.type === "learningLog") {
+      return (
+        <div className="canvas-area learning-log-canvas-area">
+          {this.render1UpCanvas()}
+        </div>
+      );
+    }
+    if (workspace.type === "published") {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas(true)}
@@ -135,9 +150,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     }
   }
 
-  private render1UpCanvas(roundBottomRight: boolean) {
+  private render1UpCanvas(forceReadOnly?: boolean) {
+    const readOnly = forceReadOnly ? true : this.props.readOnly;
     return (
-      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={this.props.readOnly} />
+      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={readOnly} />
     );
   }
 
@@ -176,7 +192,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
         </svg>
       );
     }
-    else if (this.sectionWorkspace.mode === "1-up") {
+    else if (this.props.workspace.mode === "1-up") {
       return (
         <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
           <use xlinkHref={`#icon-${mode}`} />
@@ -244,10 +260,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     this.stores.ui.toggleLLComparisonWorkspaceVisible();
   }
 
-  private handlePublishCanvas = () => {
+  private handlePublishWorkspace = () => {
     const { db } = this.stores;
     // TODO: Disable publish button while publishing
-    db.publishDocument(this.sectionWorkspace.document)
+    db.publishWorkspace(this.sectionWorkspace)
       .then(() => alert("Published"));
   }
 

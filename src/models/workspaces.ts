@@ -68,6 +68,7 @@ export const LearningLogWorkspaceModel = types
     document: DocumentModel,
     title: types.string,
     createdAt: types.number,
+    mode: types.maybe(types.undefined)
   })
   .actions((self) => {
     return {
@@ -90,7 +91,12 @@ export const PublishedWorkspaceModel = types
     type: "published",
     document: DocumentModel,
     createdAt: types.number,
-    groupId: types.string
+    userId: types.string,
+    groupId: types.string,
+    tool: types.maybe(types.undefined),
+    sectionId: types.string,
+    groupUserConnections: types.map(types.boolean),
+    mode: "1-up"
   });
 
 export const WorkspacesModel = types
@@ -110,7 +116,9 @@ export const WorkspacesModel = types
       return self.learningLogs.find(findByDocumentId(documentKey));
     };
     const getWorkspace = (documentKey: string) => {
-      return self.sections.find(findByDocumentId(documentKey)) || self.learningLogs.find(findByDocumentId(documentKey));
+      return self.sections.find(findByDocumentId(documentKey))
+             || self.learningLogs.find(findByDocumentId(documentKey))
+             || self.publications.find(findByDocumentId(documentKey));
     };
 
     return {
@@ -139,6 +147,28 @@ export const WorkspacesModel = types
 
       addPublishedWorkspace(publication: PublishedWorkspaceModelType) {
         self.publications.push(publication);
+      },
+    };
+  })
+  .views((self) => {
+    return {
+      // Returns the most recently published docs for the given section, sorted by group ID number
+      getLatestPublicationsForSection(sectionId: string) {
+        const latestPublications: PublishedWorkspaceModelType[] = [];
+        self.publications
+          .filter((publication) => publication.sectionId === sectionId)
+          .forEach((publication) => {
+            const groupId = publication.groupId;
+            const latestIndex = latestPublications.findIndex((pub) => pub.groupId === groupId);
+            if (latestIndex === -1) {
+              latestPublications.push(publication);
+            } else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+              latestPublications[latestIndex] = publication;
+            }
+          });
+
+        return latestPublications
+          .sort((pub1, pub2) => parseInt(pub1.groupId, 10) - parseInt(pub2.groupId, 10));
       }
     };
   });
@@ -146,5 +176,7 @@ export const WorkspacesModel = types
 export type WorkspacesModelType = typeof WorkspacesModel.Type;
 export type SectionWorkspaceModelType = typeof SectionWorkspaceModel.Type;
 export type LearningLogWorkspaceModelType = typeof LearningLogWorkspaceModel.Type;
-export type WorkspaceModelType = SectionWorkspaceModelType | LearningLogWorkspaceModelType;
 export type PublishedWorkspaceModelType = typeof PublishedWorkspaceModel.Type;
+export type WorkspaceModelType = SectionWorkspaceModelType
+                                  | LearningLogWorkspaceModelType
+                                  | PublishedWorkspaceModelType;

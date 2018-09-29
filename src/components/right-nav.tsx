@@ -6,6 +6,7 @@ import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
 import { MyWorkComponent } from "./my-work";
+import { ClassWorkComponent } from "./class-work";
 
 interface IProps extends IBaseProps {}
 
@@ -15,7 +16,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const tabs = ["My Work"];
+    const tabs = ["My Work", "Class Work"];
 
     return (
       <div className="right-nav">
@@ -51,6 +52,12 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
         return (
           <div className="contents">
             <MyWorkComponent />
+          </div>
+        );
+      case "Class Work":
+        return (
+          <div className="contents">
+            <ClassWorkComponent />
           </div>
         );
     }
