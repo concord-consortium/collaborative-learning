@@ -116,7 +116,12 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
                 </div>
               </div>
               <div className="info">
-                <span onClick={this.handleRenameLearningLog(learningLog)}>{learningLog.title}</span>
+                <div
+                  className="title"
+                  title={learningLog.title}
+                  onClick={this.handleRenameLearningLog(learningLog)}>
+                    {learningLog.title}
+                </div>
                 <div className="created" title={niceDateTime(learningLog.createdAt)}>
                   {timeAgo(learningLog.createdAt)}
                 </div>
