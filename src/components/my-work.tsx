@@ -61,7 +61,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
           ui.toggleLLComparisonWorkspaceVisible(true);
         }
         else {
-          alert("Sorry, you must first select a learning log.");
+          ui.alert("Please select a Learning Log first.", "Select for Learning Log");
         }
       }
       else {

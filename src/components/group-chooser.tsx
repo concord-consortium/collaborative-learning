@@ -10,9 +10,14 @@ const MAX_GROUPS = 99;
 
 interface IProps extends IBaseProps {}
 
+interface IState {
+  error?: string;
+}
+
 @inject("stores")
 @observer
-export class GroupChooserComponent extends BaseComponent<IProps, {}> {
+export class GroupChooserComponent extends BaseComponent<IProps, IState> {
+  public state: IState = {};
   private groupSelect: HTMLSelectElement|null;
 
   public render() {
@@ -24,6 +29,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
           {groups.allGroups.length > 0 && this.renderChooseExistingGroup()}
           {this.renderChooseNewGroup()}
+          {this.renderError()}
         </div>
       </div>
     );
@@ -82,15 +88,26 @@ export class GroupChooserComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private renderError() {
+    const {error} = this.state;
+    if (error) {
+      return (
+        <div className="error">{error}</div>
+      );
+    }
+  }
+
   private selectGroup = (groupId: string) => {
-    this.stores.db.joinGroup(groupId);
+    this.stores.db.joinGroup(groupId)
+      .then(() => this.setState({error: undefined}))
+      .catch((err) => this.setState({error: err.toString()}));
   }
 
   private handleChooseExistingGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       if (group.users.length >= 4) {
-        alert("Sorry, that group is full with four students.");
+        this.setState({error: "Sorry, that group is full with four students"});
       }
       else {
         this.selectGroup(group.id);

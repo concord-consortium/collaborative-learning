@@ -1,4 +1,4 @@
-import { UIModel, UIModelType } from "./ui";
+import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "./curriculum/section";
 import { SectionWorkspaceModel } from "./workspaces";
 import { DocumentModel } from "./document";
@@ -20,6 +20,7 @@ describe("ui model", () => {
     expect(ui.activeSectionIndex).toBe(0);
     expect(ui.activeRightNavTab).toBe("My Work");
     expect(ui.showDemoCreator).toBe(false);
+    expect(ui.dialog).toBe(undefined);
   });
 
   it("uses overtide values", () => {
@@ -304,5 +305,53 @@ describe("ui model", () => {
     expect(ui.selectedTileId).toBe("1");
     ui.setSelectedTile();
     expect(ui.selectedTileId).toBe(undefined);
+  });
+
+  it("allows alert dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.alert("alert test");
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(ui.dialog).not.toBe(undefined);
+    expect(dialog.type).toBe("alert");
+    expect(dialog.text).toBe("alert test");
+    expect(dialog.title).toBe(undefined);
+
+    ui.alert("alert test", "Test Alert Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Alert Title");
+  });
+
+  it("allows comfirm dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.confirm("confirm test");
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(ui.dialog).not.toBe(undefined);
+    expect(dialog.type).toBe("confirm");
+    expect(dialog.text).toBe("confirm test");
+    expect(dialog.title).toBe(undefined);
+
+    ui.confirm("confirm test", "Test Confirm Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Confirm Title");
+  });
+
+  it("allows prompt dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.prompt("prompt test");
+    expect(ui.dialog).not.toBe(undefined);
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.type).toBe("prompt");
+    expect(dialog.text).toBe("prompt test");
+    expect(dialog.defaultValue).toBe("");
+    expect(dialog.title).toBe(undefined);
+
+    ui.prompt("prompt test", "default value");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.defaultValue).toBe("default value");
+    expect(dialog.title).toBe(undefined);
+
+    ui.prompt("prompt test", undefined, "Test Prompt Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Prompt Title");
   });
 });

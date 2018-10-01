@@ -150,7 +150,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
             ui.setLLPrimaryWorkspace(workspace);
           }
           else {
-            alert("Sorry, you can't drop that type of document here.");
+            ui.alert("Please select a Learning Log first.", "Drop into Learning Log");
           }
         }
         else {
@@ -161,12 +161,12 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleCreateLearningLog = () => {
-    const title = (prompt("Enter name of learning log") || "").trim();
-    if (title.length > 0) {
-      this.stores.db.createLearningLogWorkspace(title)
-        .then(this.handleSelectLearningLog)
-        .catch(this.stores.ui.setError);
-    }
+    this.stores.ui.prompt("Enter name of learning log", "", "Create Learning Log")
+      .then((title: string) => {
+        this.stores.db.createLearningLogWorkspace(title)
+          .then(this.handleSelectLearningLog)
+          .catch(this.stores.ui.setError);
+      });
   }
 
   private handleLearningLogClicked = (learningLog: LearningLogWorkspaceModelType) => {
@@ -189,10 +189,12 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   private handleRenameLearningLog = (learningLog: LearningLogWorkspaceModelType) => {
     const {ui} = this.stores;
     return (e: React.MouseEvent<HTMLSpanElement>) => {
-      const title = (prompt("Enter new name of learning log", learningLog.title) || "").trim();
-      if ((title.length > 0) && (title !== learningLog.title)) {
-        learningLog.setTitle(title);
-      }
+      this.stores.ui.prompt("Enter new name of learning log", learningLog.title, "Renaming Learning Log")
+        .then((title: string) => {
+          if (title !== learningLog.title) {
+            learningLog.setTitle(title);
+          }
+        });
     };
   }
 
