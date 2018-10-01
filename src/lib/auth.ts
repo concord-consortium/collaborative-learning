@@ -2,7 +2,7 @@ import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores";
-import { QueryParams, defaultUrlParams } from "../utilities/url-params";
+import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo-creator";
 
 const initials = require("initials");
@@ -307,7 +307,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
 
 export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
-    urlParams = urlParams || defaultUrlParams;
+    urlParams = urlParams || DefaultUrlParams;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
@@ -320,7 +320,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
-      resolve(createFakeAuthentication({
+      return resolve(createFakeAuthentication({
         appMode,
         classId: fakeClass,
         userType, userId,
@@ -329,7 +329,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     }
 
     if (appMode !== "authed") {
-      resolve({authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO});
+      return resolve(this.generateDevAuthentication(urlParams.problem || DefaultProblemOrdinal));
     }
 
     if (!bearerToken) {
@@ -414,6 +414,18 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
       })
       .catch(reject);
   });
+};
+
+export const generateDevAuthentication = (problemOrdinal: string) => {
+  // create fake offeringIds per problem so we keep section documents separate
+  const [major, minor, ...rest] = problemOrdinal.split(".");
+  const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
+  const offeringId = `${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
+  DEV_STUDENT.offeringId = offeringId;
+  DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
+  DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
+
+  return {authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO};
 };
 
 export const parseUrl = (url: string) => {

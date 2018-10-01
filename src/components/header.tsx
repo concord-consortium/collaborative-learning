@@ -12,8 +12,9 @@ interface IProps extends IBaseProps {}
 export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const {user, problem, groups} = this.stores;
+    const {appMode, db, user, problem, groups} = this.stores;
     const myGroup = groups.groupForUser(user.id);
+    const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebaseUserId}` : undefined;
 
     return (
       <div className="header">
@@ -25,7 +26,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         {myGroup ? this.renderGroup(myGroup) : null}
         <div className="user">
-          <div className="name">{user.name}</div>
+          <div className="name" title={userTitle}>{user.name}</div>
         </div>
       </div>
     );
