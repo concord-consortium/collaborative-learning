@@ -54,7 +54,8 @@ export const DocumentContentModel = types
         content: {
           type: "Image",
           // TODO: Make this settable from the UI or, pick a more reasonable default.
-          url: "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
+          // url: "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
+          url: "../assets/image-placeholder.png"
         }
       }));
     },
