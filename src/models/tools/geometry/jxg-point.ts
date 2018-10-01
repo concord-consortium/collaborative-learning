@@ -1,4 +1,5 @@
 import { JXGChangeAgent } from "./jxg-changes";
+import { objectChangeAgent } from "./jxg-object";
 import { assign, size } from "lodash";
 import * as uuid from "uuid/v4";
 
@@ -19,23 +20,9 @@ export const pointChangeAgent: JXGChangeAgent = {
     return (board as JXG.Board).create("point", change.parents, props);
   },
 
-  update: (board, change) => {
-    if (!change.targetID || !change.properties) { return; }
-    const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
-    const props = Array.isArray(change.properties) ? change.properties : [change.properties];
-    ids.forEach((id, index) => {
-      const pt = board.objects[id] as JXG.Point;
-      if (pt) {
-        const p = props[index];
-        if (p.position != null) {
-          pt.setPosition(JXG.COORDS_BY_USER, p.position);
-        }
-      }
-    });
-    board.update();
-  },
+  // update can be handled generically
+  update: objectChangeAgent.update,
 
-  delete: (board, change) => {
-    // delete stuff
-  }
+  // delete can be handled generically
+  delete: objectChangeAgent.delete
 };

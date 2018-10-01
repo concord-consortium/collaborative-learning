@@ -7,9 +7,29 @@ import * as uuid from "uuid/v4";
 
 export const kGeometryToolID = "Geometry";
 
+export const kGeometryDefaultHeight = 200;
+
+export function defaultGeometryContent(overrides?: JXGProperties) {
+  const axisMin = -0.5;
+  const xAxisMax = 20;
+  const yAxisMax = 5;
+  const change: JXGChange = {
+    operation: "create",
+    target: "board",
+    properties: assign({
+                  id: uuid(),
+                  axis: true,
+                  boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
+                  grid: {}  // defaults to 1-unit gridlines
+                }, overrides)
+  };
+  const changeJson = JSON.stringify(change);
+  return GeometryContentModel.create({ changes: [changeJson] });
+}
+
 export const GeometryContentModel = types
   .model("GeometryContent", {
-    type: types.literal(kGeometryToolID),
+    type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     changes: types.array(types.string)
   })
   .extend(self => {
@@ -54,10 +74,19 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function updatePoints(board: JXG.Board, ids: string | string[], properties: JXGProperties | JXGProperties[]) {
+    function removeObjects(board: JXG.Board, id: string | string[]) {
+      const change: JXGChange = {
+        operation: "delete",
+        target: "object",
+        targetID: id
+      };
+      return _applyChange(board, change);
+    }
+
+    function updateObjects(board: JXG.Board, ids: string | string[], properties: JXGProperties | JXGProperties[]) {
       const change: JXGChange = {
               operation: "update",
-              target: "point",
+              target: "object",
               targetID: ids,
               properties
             };
@@ -72,7 +101,8 @@ export const GeometryContentModel = types
         const change: JXGChange = {
                 operation: "create",
                 target: "polygon",
-                parents: freePtIds
+                parents: freePtIds,
+                properties: { id: uuid() }
               };
         return _applyChange(board, change);
       }
@@ -102,7 +132,8 @@ export const GeometryContentModel = types
         resizeBoard,
         addChange,
         addPoint,
-        updatePoints,
+        removeObjects,
+        updateObjects,
         connectFreePoints,
         applyChange: _applyChange,
         syncChange
