@@ -58,9 +58,10 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     const { db, ui, workspaces } = this.stores;
     const { section } = this.props;
     if (section) {
-      // TODO: create section id instead of using type
       const workspace = workspaces.getSectionWorkspace(section.id);
       const done = (finalWorkspace: WorkspaceModelType) => {
+        ui.toggleComparisonWorkspaceVisible(false);
+        ui.setComparisonWorkspace();
         ui.setPrimaryWorkspace(finalWorkspace);
         ui.contractAll();
         this.openWorkspaceButton!.disabled = false;
