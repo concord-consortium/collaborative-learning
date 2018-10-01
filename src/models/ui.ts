@@ -4,6 +4,20 @@ import { ToolTileModelType } from "./tools/tool-tile";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
+export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
+export type UIDialogType = typeof UIDialogTypeEnum.Type;
+
+let dialogResolver: ((value?: string | PromiseLike<string> | boolean | PromiseLike<boolean> | undefined) => void) |
+                    undefined;
+
+export const UIDialogModel = types
+  .model("UIDialog", {
+    type: UIDialogTypeEnum,
+    text: types.string,
+    title: types.maybe(types.string),
+    defaultValue: types.maybe(types.string),
+  });
+
 export const UIModel = types
   .model("UI", {
     rightNavExpanded: false,
@@ -21,6 +35,7 @@ export const UIModel = types
     llComparisonWorkspaceVisible: false,
     showDemo: false,
     showDemoCreator: false,
+    dialog: types.maybe(UIDialogModel),
   })
   .views((self) => ({
     get allContracted() {
@@ -71,6 +86,11 @@ export const UIModel = types
 
     const setLLComparisonWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
       self.llComparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    };
+
+    const closeDialog = () => {
+      self.dialog = undefined;
+      dialogResolver = undefined;
     };
 
     return {
@@ -133,8 +153,32 @@ export const UIModel = types
         if (!visible) {
           self.llComparisonWorkspaceDocumentKey = undefined;
         }
-      }
+      },
+      alert(text: string, title?: string) {
+        self.dialog = UIDialogModel.create({type: "alert", text, title});
+        dialogResolver = undefined;
+      },
+      confirm(text: string, title?: string) {
+        self.dialog = UIDialogModel.create({type: "confirm", text, title});
+        return new Promise<boolean>((resolve, reject) => {
+          dialogResolver = resolve;
+        });
+      },
+      prompt(text: string, defaultValue: string = "", title?: string) {
+        self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title});
+        return new Promise<string>((resolve, reject) => {
+          dialogResolver = resolve;
+        });
+      },
+      resolveDialog(value: string | boolean) {
+        if (dialogResolver) {
+          dialogResolver(value);
+        }
+        closeDialog();
+      },
+      closeDialog
     };
   });
 
 export type UIModelType = typeof UIModel.Type;
+export type UIDialogModelType = typeof UIDialogModel.Type;

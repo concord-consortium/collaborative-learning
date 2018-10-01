@@ -58,8 +58,11 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    if (confirm("Do you want to change groups?")) {
-      this.stores.db.leaveGroup();
-    }
+    this.stores.ui.confirm("Do you want to change groups?", "Change Groups")
+      .then((ok) => {
+        if (ok) {
+          this.stores.db.leaveGroup();
+        }
+      });
   }
 }

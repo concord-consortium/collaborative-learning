@@ -6,7 +6,7 @@ import { RightNavComponent } from "./right-nav";
 import { BottomNavComponent } from "./bottom-nav";
 import { WorkspaceComponent } from "./workspace";
 import { BaseComponent, IBaseProps } from "./base";
-import { DemoCreatorComponment } from "./demo-creator";
+import { DialogComponent } from "./dialog";
 
 import "./app-container.sass";
 
@@ -26,6 +26,7 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
         <LeftNavComponent />
         <BottomNavComponent />
         <RightNavComponent />
+        <DialogComponent dialog={this.stores.ui.dialog} />
       </div>
     );
   }
