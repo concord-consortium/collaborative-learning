@@ -25,6 +25,7 @@ import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { TextContentModelType } from "../models/tools/text/text-content";
+import { urlParams } from "../utilities/url-params";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -33,7 +34,7 @@ export interface IDBAuthConnectOptions {
   stores: IStores;
 }
 export interface IDBNonAuthConnectOptions {
-  appMode: "dev" | "test" | "demo";
+  appMode: "dev" | "test" | "demo" | "qa";
   stores: IStores;
 }
 export interface UserGroupMap {
@@ -66,6 +67,8 @@ export interface WorkspaceModelDisposers {
   [key /* sectionId */: string]: IDisposer;
 }
 
+export type DBClearLevel = "all" | "class" | "offering";
+
 export class DB {
   @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
@@ -88,6 +91,10 @@ export class DB {
 
   public get isConnected() {
     return this.firebaseUser !== null;
+  }
+
+  public get firebaseUserId() {
+    return this.firebaseUser ? this.firebaseUser.uid : "no-user-id";
   }
 
   public connect(options: IDBConnectOptions) {
@@ -456,7 +463,7 @@ export class DB {
     const parts = [`${appMode}`];
 
     if ((appMode === "dev") || (appMode === "test")) {
-      parts.push(this.firebaseUser ? `${this.firebaseUser.uid}` : "no-user-id");
+      parts.push(this.firebaseUserId);
     }
     parts.push("portals");
     parts.push(this.escapeKey(this.stores.user.portal));
@@ -466,6 +473,34 @@ export class DB {
 
   public escapeKey(s: string): string {
     return s.replace(/[.$[\]#\/]/g, "_");
+  }
+
+  public clear(level: DBClearLevel) {
+    return new Promise<void>((resolve, reject) => {
+      const {user} = this.stores;
+      const clearPath = (path?: string) => {
+        this.ref(path).set(null).then(resolve).catch(reject);
+      };
+
+      if (this.stores.appMode !== "qa") {
+        return reject("db#clear is only available in qa mode");
+      }
+
+      switch (level) {
+        case "all":
+          clearPath();
+          break;
+        case "class":
+          clearPath(this.getClassPath(user));
+          break;
+        case "offering":
+          clearPath(this.getOfferingPath(user));
+          break;
+        default:
+          reject(`Invalid clear level: ${level}`);
+          break;
+      }
+    });
   }
 
   //

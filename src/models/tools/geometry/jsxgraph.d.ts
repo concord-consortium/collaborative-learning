@@ -9,7 +9,10 @@ declare namespace JXG {
 
   const touchProperty: string;
 
+  const boards: { [id: string]: Board };
+
   class Board {
+    id: string;
     axis: boolean;
     boundingBox: number[];
     canvasWidth: number;
@@ -24,11 +27,15 @@ declare namespace JXG {
 
     objects: { [id: string]: any };
 
+    objectsList: any[];
+
     create: (elementType: string, parents?: any, attributes?: any) => any;
+    removeObject: (object: GeometryElement) => void;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => void;
+    setBoundingBox: (boundingBox: number[]) => void;
     update: (drag?: JXG.GeometryElement) => void;
   }
 
@@ -45,13 +52,18 @@ declare namespace JXG {
   }
 
   class CoordsElement extends GeometryElement {
-
+    coords: JXG.Coords;
   }
 
   class GeometryElement {
+    id: string;
     type: number;
     visProp: { [prop: string]: any };
     fixed: boolean;
+
+    getAttribute: (key: string) => any;
+    setAttribute: (attrs: any) => void;
+    setPosition: (method: number, coords: number[]) => JXG.Point;
   }
 
   const JSXGraph: {
@@ -59,8 +71,11 @@ declare namespace JXG {
     freeBoard: (board: JXG.Board | string) => void;
   };
 
-  class Point extends GeometryElement {
+  class Point extends CoordsElement {
+    on: (event: string, handler: (evt: any) => void) => void;
+  }
 
+  class Polygon extends GeometryElement {
   }
 
   const _ceil10: (value: number, exp: number) => number;

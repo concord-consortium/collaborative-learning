@@ -6,10 +6,10 @@ import { ProblemModelType } from "../models/curriculum/problem";
 
 import "./demo-creator.sass";
 
-export const NUM_DEMO_CLASSES = 9;
-export const NUM_DEMO_STUDENTS = 99;
-export const NUM_DEMO_STUDENTS_VISIBLE = 9;
-export const NUM_DEMO_TEACHERS = 3;
+export const NUM_FAKE_CLASSES = 9;
+export const NUM_FAKE_STUDENTS = 99;
+export const NUM_FAKE_STUDENTS_VISIBLE = 9;
+export const NUM_FAKE_TEACHERS = 3;
 
 interface IProps extends IBaseProps {}
 
@@ -54,15 +54,15 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
       return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
 
-    for (let classIndex = 1; classIndex <= NUM_DEMO_CLASSES; classIndex++) {
+    for (let classIndex = 1; classIndex <= NUM_FAKE_CLASSES; classIndex++) {
       classes.push(<option key={classIndex} value={classIndex}>Class {classIndex}</option>);
     }
 
-    for (let studentIndex = 1; studentIndex <= NUM_DEMO_STUDENTS_VISIBLE; studentIndex++) {
+    for (let studentIndex = 1; studentIndex <= NUM_FAKE_STUDENTS_VISIBLE; studentIndex++) {
       studentLinks.push(this.createLink("student", studentIndex));
     }
 
-    for (let teacherIndex = 1; teacherIndex <= NUM_DEMO_TEACHERS; teacherIndex++) {
+    for (let teacherIndex = 1; teacherIndex <= NUM_FAKE_TEACHERS; teacherIndex++) {
       teacherLinks.push(this.createLink("teacher", teacherIndex));
     }
 
@@ -88,10 +88,10 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
 
   private createLink(userType: string, userIndex: number) {
     const { demo } = this.stores;
-    const demoUser = `${userType}:${userIndex}`;
-    const demoOffering = demo.problemIndex + 1;
+    const fakeUser = `${userType}:${userIndex}`;
+    const fakeOffering = demo.problemIndex + 1;
     // tslint:disable-next-line:max-line-length
-    const href = `?appMode=demo&demoClass=${demo.class.id}&demoUser=${demoUser}&demoOffering=${demoOffering}&problem=${demo.problemOrdinal}`;
+    const href = `?appMode=demo&fakeClass=${demo.class.id}&fakeUser=${fakeUser}&fakeOffering=${fakeOffering}&problem=${demo.problemOrdinal}`;
     return (
       <li key={userIndex}>
         <a href={href} target="_blank">{userType} {userIndex}</a>

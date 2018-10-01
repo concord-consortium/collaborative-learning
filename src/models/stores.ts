@@ -9,7 +9,7 @@ import { UnitModelType, UnitModel } from "./curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 
-export type AppMode = "authed" | "dev" | "test" | "demo";
+export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
 export interface IStores {
   appMode: AppMode;

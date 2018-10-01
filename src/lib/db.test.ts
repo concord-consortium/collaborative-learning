@@ -20,7 +20,7 @@ describe("db", () => {
         expect(db.isConnected).toBe(true);
       })
       .then(() => db.disconnect());
-  });
+  }, 10000);
 
   it("resolves paths in test mode", () => {
     const db = new DB();

@@ -1,15 +1,13 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "point";
+export type JXGObjectType = "board" | "object" | "point" | "polygon";
 
-export interface JXGObjectRef {
-  type: JXGObjectType;
-  id: string;
-}
+export type JXGParentType = string | number;
 
-export type JXGParentType = JXGObjectRef | number;
+export type JXGCoordPair = [number, number];
 
 export interface JXGProperties {
+  position?: JXGCoordPair;
   [key: string]: any;
 }
 
@@ -18,14 +16,17 @@ export interface JXGChange {
   target: JXGObjectType;
   targetID?: string | string[];
   parents?: JXGParentType[];
-  properties?: JXGProperties;
+  properties?: JXGProperties | JXGProperties[];
 }
+
+export type JXGElement = JXG.Board | JXG.Point;
+export type JXGChangeResult = JXGElement | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
 // for all other changes it should be the board
-export type JXGCreateHandler = (board: JXG.Board|string, change: JXGChange) => any;
-export type JXGUpdateHandler = (board: JXG.Board|string, change: JXGChange) => any;
-export type JXGDeleteHandler = (board: JXG.Board|string, change: JXGChange) => any;
+export type JXGCreateHandler = (board: JXG.Board|string, change: JXGChange) => JXGChangeResult;
+export type JXGUpdateHandler = (board: JXG.Board, change: JXGChange) => void;
+export type JXGDeleteHandler = (board: JXG.Board, change: JXGChange) => void;
 
 export interface JXGChangeAgent {
   create: JXGCreateHandler;

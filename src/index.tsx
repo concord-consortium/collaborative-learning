@@ -7,7 +7,7 @@ import { createStores } from "./models/stores";
 import { UserModel } from "./models/user";
 import { createFromJson } from "./models/curriculum/unit";
 import * as curriculumJson from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
-import { urlParams } from "./utilities/url-params";
+import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 
 import "./index.sass";
@@ -18,10 +18,9 @@ const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
 const user = UserModel.create();
 
 const unit = createFromJson(curriculumJson);
-const defaultProblemOrdinal = "2.1";
-const problemOrdinal = urlParams.problem || defaultProblemOrdinal;
+const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
 const {investigation, problem} = unit.getProblem(problemOrdinal) ||
-                                 unit.getProblem(defaultProblemOrdinal);
+                                 unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
 

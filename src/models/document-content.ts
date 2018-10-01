@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { DataSet } from "./data/data-set";
+import { defaultGeometryContent, kGeometryDefaultHeight } from "./tools/geometry/geometry-content";
 import { ToolTileModel, ToolTileModelType } from "./tools/tool-tile";
 
 export const DocumentContentModel = types
@@ -17,28 +18,11 @@ export const DocumentContentModel = types
   })
   .actions((self) => ({
     addGeometryTile() {
-      const axisMin = -0.5;
-      const xAxisMax = 20;
-      const yAxisMax = 5;
-      const createBoardChange = {
-        operation: "create",
-        target: "board",
-        properties: {
-          axis: true,
-          boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
-          grid: {}, // defaults to 1-unit gridlines
-          minimizeReflow: "none"
-        }
-      };
-      const changeJson = JSON.stringify(createBoardChange);
       self.tiles.push(ToolTileModel.create({
         layout: {
-          height: 200
+          height: kGeometryDefaultHeight
         },
-        content: {
-          type: "Geometry",
-          changes: [changeJson]
-        }
+        content: defaultGeometryContent()
       }));
     },
     addTextTile(initialText?: string) {

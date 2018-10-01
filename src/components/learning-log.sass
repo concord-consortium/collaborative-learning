@@ -85,12 +85,14 @@ $button-width: 60px;
         float: left
         margin: 0 $half-margin
         overflow: hidden
+        width: ($list-item-width * $list-item-scale) + $double-margin
 
         .scaled-list-item-container
           position: relative
           border: 1px solid #aaa
           width: $list-item-width * $list-item-scale
           height: $list-item-height * $list-item-scale
+          margin: 0 $margin
 
           .scaled-list-item
             position: absolute
@@ -107,6 +109,11 @@ $button-width: 60px;
           margin-top: $half-margin
           text-align: center
           font-size: 0.8em
+
+          .title
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
 
           .created
             font-style: italic

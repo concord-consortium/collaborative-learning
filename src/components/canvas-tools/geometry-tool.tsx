@@ -3,6 +3,10 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
+import { isBoard } from "../../models/tools/geometry/jxg-board";
+import { isPoint, isFreePoint } from "../../models/tools/geometry/jxg-point";
+import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
+import { assign, cloneDeep, isEqual } from "lodash";
 import { SizeMe } from "react-sizeme";
 
 import "./geometry-tool.sass";
@@ -26,6 +30,11 @@ interface IState extends SizeMeProps {
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges?: number;
+}
+
+interface JXGPtrEvent {
+  evt: any;
+  coords: JXG.Coords;
 }
 
 // For snap to grid
@@ -74,7 +83,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             const result = geometryContent.syncChange(prevState.board, change);
             if (readOnly && (result instanceof JXG.GeometryElement)) {
               const obj = result as JXG.GeometryElement;
-              obj.fixed = true;
+              obj.setAttribute({ fixed: true });
             }
           }
           catch (e) {
@@ -90,21 +99,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
-  private lastPtrDownEvent: any;
-  private lastPtrDownCoords: JXG.Coords | undefined;
+  private lastBoardDown: JXGPtrEvent;
+  private lastPointDown?: JXGPtrEvent;
+  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
 
   public componentDidMount() {
-    const { model: { content }, readOnly, size } = this.props;
-    if ((content.type === "Geometry") && this.state.elementId) {
-      const board = content.initializeBoard(this.state.elementId, readOnly);
-      const syncedChanges = content.changes.length;
-      this.setState({ board, size, syncedChanges });
-
-      if (board) {
-        board.on("down", this.pointerDownHandler);
-        board.on("up", this.pointerUpHandler);
-      }
-    }
+    this.initializeContent();
   }
 
   public componentWillUnmount() {
@@ -127,6 +127,26 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     );
   }
 
+  private initializeContent() {
+    const { model: { content }, readOnly } = this.props;
+    if ((content.type !== "Geometry") || !this.state.elementId) { return; }
+
+    let board: JXG.Board | undefined;
+    const elements = content.initializeBoard(this.state.elementId, readOnly);
+    elements.forEach(elt => {
+      if (isBoard(elt)) {
+        board = elt as JXG.Board;
+        this.installBoardEventHandlers(board);
+      }
+      else if (isPoint(elt)) {
+        this.installPointEventHandlers(elt as JXG.Point);
+      }
+    });
+    const newState = assign({ syncedChanges: content.changes.length },
+                            board ? { board } : null);
+    this.setState(newState);
+  }
+
   private applyChange(change: () => void) {
     this.setState({ syncedChanges: (this.state.syncedChanges || 0) + 1 }, change);
   }
@@ -142,66 +162,127 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return dx * dx + dy * dy < threshold;
   }
 
-  private pointerDownHandler = (evt: any) => {
-    const { board } = this.state;
-    const { model, readOnly, scale } = this.props;
-    const { ui } = this.stores;
-    if (!board) { return; }
-
-    // first click selects the tile; subsequent clicks create points
-    if (!ui.isSelectedTile(model)) {
-      ui.setSelectedTile(model);
-      return;
-    }
-
-    if (readOnly) { return; }
-
-    const index = evt[JXG.touchProperty] ? 0 : undefined;
-    const coords = getEventCoords(board, evt, scale, index);
-    const x = coords.usrCoords[1];
-    const y = coords.usrCoords[2];
-    if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
-      this.lastPtrDownEvent = evt;
-      this.lastPtrDownCoords = coords;
-    }
+  private isDoubleClick(c1?: JXGPtrEvent, c2?: JXGPtrEvent) {
+    return (c1 && c2 && (c2.evt.timeStamp - c1.evt.timeStamp < 300) &&
+            this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
-  // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-  private pointerUpHandler = (evt: any) => {
-    const { board } = this.state;
-    const { readOnly, scale } = this.props;
-    if (!board || readOnly || !this.lastPtrDownEvent || !this.lastPtrDownCoords) { return; }
+  private installBoardEventHandlers(board: JXG.Board) {
 
-    const index = evt[JXG.touchProperty] ? 0 : undefined;
-    const coords = getEventCoords(board, evt, scale, index);
-    const [ , x, y] = this.lastPtrDownCoords.usrCoords;
-    if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
-      return;
-    }
+    const handlePointerDown = (evt: any) => {
+      const { model, readOnly, scale } = this.props;
+      const { ui } = this.stores;
 
-    const clickTimeThreshold = 500;
-    if (evt.timeStamp - this.lastPtrDownEvent.timeStamp > clickTimeThreshold) {
-      return;
-    }
-
-    const clickSqrDistanceThreshold = 9;
-    if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastPtrDownCoords, coords)) {
-      return;
-    }
-
-    let el;
-    for (el in board.objects) {
-      if (JXG.isPoint(board.objects[el]) &&
-          board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+      // first click selects the tile; subsequent clicks create points
+      if (!ui.isSelectedTile(model)) {
+        ui.setSelectedTile(model);
         return;
       }
-    }
 
-    const { model: { content } } = this.props;
-    if (content.type === "Geometry") {
-      const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
-      this.applyChange(() => content.addPoint(board, [x, y], props));
-    }
+      if (readOnly) { return; }
+
+      const index = evt[JXG.touchProperty] ? 0 : undefined;
+      const coords = getEventCoords(board, evt, scale, index);
+      const x = coords.usrCoords[1];
+      const y = coords.usrCoords[2];
+      if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
+        this.lastBoardDown = { evt, coords };
+      }
+    };
+
+    const handlePointerUp = (evt: any) => {
+      const { readOnly, scale } = this.props;
+      if (readOnly || !this.lastBoardDown) { return; }
+
+      // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
+      const index = evt[JXG.touchProperty] ? 0 : undefined;
+      const coords = getEventCoords(board, evt, scale, index);
+      const [ , x, y] = this.lastBoardDown.coords.usrCoords;
+      if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
+        return;
+      }
+
+      const clickTimeThreshold = 500;
+      if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
+        return;
+      }
+
+      const clickSqrDistanceThreshold = 9;
+      if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastBoardDown.coords, coords)) {
+        return;
+      }
+
+      let el;
+      for (el in board.objects) {
+        if (JXG.isPoint(board.objects[el]) &&
+            board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          return;
+        }
+      }
+
+      const { model: { content } } = this.props;
+      if (content.type === "Geometry") {
+        const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
+        this.applyChange(() => {
+          const pt = content.addPoint(board, [x, y], props) as JXG.Point;
+          this.installPointEventHandlers(pt);
+        });
+      }
+    };
+
+    board.on("down", handlePointerDown);
+    board.on("up", handlePointerUp);
+  }
+
+  private installPointEventHandlers(point: JXG.Point) {
+
+    const handlePointerDown = (evt: any) => {
+      const id = point.id;
+      const coords = cloneDeep(point.coords);
+      if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+        const { model: { content } } = this.props;
+        const { board } = this.state;
+        if (board && (content.type === "Geometry")) {
+          this.applyChange(() => content.connectFreePoints(board));
+          this.lastPointDown = undefined;
+        }
+      }
+      else {
+        this.dragPts[id] = { initial: coords };
+        this.lastPointDown = { evt, coords };
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      const id = point.id;
+      let dragEntry = this.dragPts[id];
+      if (!dragEntry) {
+        dragEntry = this.dragPts[id] = { initial: cloneDeep(point.coords) };
+      }
+      dragEntry.final = cloneDeep(point.coords);
+    };
+
+    const handlePointerUp = (evt: any) => {
+      const id = point.id;
+      const dragEntry = this.dragPts[id];
+      if (!dragEntry) { return; }
+
+      dragEntry.final = cloneDeep(point.coords);
+
+      if (!isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)) {
+        const { content } = this.props.model;
+        const { board } = this.state;
+        if ((content.type === "Geometry") && board) {
+          const coords = dragEntry.final.usrCoords.slice(1) as JXGCoordPair;
+          const props = { position: coords };
+          this.applyChange(() => content.updateObjects(board, id, props));
+        }
+      }
+    };
+
+    point.on("down", handlePointerDown);
+    point.on("drag", handleDrag);
+    point.on("up", handlePointerUp);
   }
 }
 
