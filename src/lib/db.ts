@@ -93,6 +93,10 @@ export class DB {
     return this.firebaseUser !== null;
   }
 
+  public get firebaseUserId() {
+    return this.firebaseUser ? this.firebaseUser.uid : "no-user-id";
+  }
+
   public connect(options: IDBConnectOptions) {
     return new Promise<void>((resolve, reject) => {
       if (this.isConnected) {
@@ -459,7 +463,7 @@ export class DB {
     const parts = [`${appMode}`];
 
     if ((appMode === "dev") || (appMode === "test")) {
-      parts.push(this.firebaseUser ? `${this.firebaseUser.uid}` : "no-user-id");
+      parts.push(this.firebaseUserId);
     }
     parts.push("portals");
     parts.push(this.escapeKey(this.stores.user.portal));
