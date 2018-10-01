@@ -7,9 +7,11 @@ export const isPolygon = (v: any) => v instanceof JXG.Polygon;
 
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
-    const parents = (change.parents || []).map(id => board.objects[id]);
+    const parents = (change.parents || [])
+                      .map(id => board.objects[id])
+                      .filter(pt => pt != null);
     const props = assign({ id: uuid() }, change.properties);
-    return parents.length ? board.create("polygon", parents) : undefined;
+    return parents.length ? board.create("polygon", parents, props) : undefined;
   },
 
   // update can be handled generically
