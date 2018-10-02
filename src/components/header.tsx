@@ -59,10 +59,16 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    this.stores.ui.confirm("Do you want to change groups?", "Change Groups")
+    const {ui, db, user, groups} = this.stores;
+    ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
-          this.stores.db.leaveGroup();
+          if (user.id === groups.ghostUserId) {
+            groups.ghostGroup();
+          }
+          else {
+            db.leaveGroup();
+          }
         }
       });
   }

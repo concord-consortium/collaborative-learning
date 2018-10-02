@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
+import { SectionModelType } from "./curriculum/section";
 
 export const SectionWorkspace = "section";
 export const LearningLogWorkspace = "learningLog";
@@ -9,6 +10,13 @@ export type WorkspaceType = typeof WorkspaceTypeEnum.Type;
 
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
+
+const GhostSectionPrefix = "ghostSection";
+export const createGhostSectionDocumentKey = (sectionId: string) => `${GhostSectionPrefix}:${sectionId}`;
+export const parseGhostSectionDocumentKey = (documentKey: string) => {
+  const [prefix, sectionId, ...rest] = documentKey.split(":");
+  return sectionId;
+};
 
 export const WorkspaceModel = types
   .model("Workspace", {
@@ -60,6 +68,10 @@ export const WorkspaceModel = types
         if (!visible) {
           self.comparisonDocumentKey = undefined;
         }
+      },
+
+      setPrimaryGhostSection(section: SectionModelType) {
+        self.primaryDocumentKey = createGhostSectionDocumentKey(section.id);
       },
     };
   });

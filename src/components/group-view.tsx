@@ -7,36 +7,43 @@ import { BottomNavComponent } from "./bottom-nav";
 import { DocumentComponent } from "./document";
 import { BaseComponent, IBaseProps } from "./base";
 import { DialogComponent } from "./dialog";
+import { DocumentDragKey, DocumentModelType, DocumentModel, SectionDocument } from "../models/document";
+import { parseGhostSectionDocumentKey } from "../models/workspace";
 
-import "./app-container.sass";
-import { DocumentDragKey } from "../models/document";
+import "./group-view.sass";
 
 type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {}
 
+// keep ghost documents out of MST
+interface GhostDocumentMap {
+  [key: string]: DocumentModelType;
+}
+const ghostSectionDocuments: GhostDocumentMap = {};
+
 @inject("stores")
 @observer
-export class AppContainerComponent extends BaseComponent<IProps, {}> {
+export class GroupViewComponent extends BaseComponent<IProps, {}> {
 
   public render() {
+    const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     return (
-      <div className="app-container">
+      <div className="group-view">
         <HeaderComponent />
-        {this.renderDocuments()}
-        <LeftNavComponent />
-        <BottomNavComponent />
-        <RightNavComponent />
+        {this.renderDocuments(isGhostUser)}
+        <LeftNavComponent isGhostUser={isGhostUser} />
+        {isGhostUser ? null : <BottomNavComponent />}
+        <RightNavComponent isGhostUser={isGhostUser} />
         <DialogComponent dialog={this.stores.ui.dialog} />
       </div>
     );
   }
 
-  private renderDocuments() {
+  private renderDocuments(isGhostUser: boolean) {
     const {ui, documents} = this.stores;
     const {sectionWorkspace} = ui;
-    const primaryDocument = sectionWorkspace.primaryDocumentKey
-                            && documents.getDocument(sectionWorkspace.primaryDocumentKey);
+    const primaryDocument = this.getPrimaryDocument(sectionWorkspace.primaryDocumentKey);
     const comparisonDocument = sectionWorkspace.comparisonDocumentKey
                                && documents.getDocument(sectionWorkspace.comparisonDocumentKey);
 
@@ -50,7 +57,12 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
           {this.renderDocument(
             "left-workspace",
             "primary",
-            <DocumentComponent document={primaryDocument} workspace={sectionWorkspace} side="primary" />
+            <DocumentComponent
+              document={primaryDocument}
+              workspace={sectionWorkspace}
+              side="primary"
+              isGhostUser={isGhostUser}
+            />
           )}
           {this.renderDocument("right-workspace", "comparison", comparisonDocument
               ? <DocumentComponent
@@ -58,6 +70,7 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
                   workspace={sectionWorkspace}
                   readOnly={true}
                   side="comparison"
+                  isGhostUser={isGhostUser}
                 />
               : this.renderComparisonPlaceholder())}
         </div>
@@ -67,7 +80,12 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
       return this.renderDocument(
                "single-workspace",
                "primary",
-               <DocumentComponent document={primaryDocument} workspace={sectionWorkspace} side="primary" />
+               <DocumentComponent
+                 document={primaryDocument}
+                 workspace={sectionWorkspace}
+                 side="primary"
+                 isGhostUser={isGhostUser}
+               />
              );
     }
   }
@@ -123,5 +141,25 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
 
   private handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.contractAll();
+  }
+
+  private getPrimaryDocument(documentKey?: string) {
+    if (documentKey) {
+      const sectionId = parseGhostSectionDocumentKey(documentKey);
+      if (sectionId) {
+        if (!ghostSectionDocuments[sectionId]) {
+          ghostSectionDocuments[sectionId] = DocumentModel.create({
+            uid: "ghost",
+            type: SectionDocument,
+            key: sectionId,
+            sectionId,
+            createdAt: 1,
+            content: {},
+          });
+        }
+        return ghostSectionDocuments[sectionId];
+      }
+      return this.stores.documents.getDocument(documentKey);
+    }
   }
 }

@@ -22,6 +22,7 @@ interface IProps extends IBaseProps {
   document: DocumentModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
+  isGhostUser: boolean;
 }
 
 @inject("stores")
@@ -29,10 +30,11 @@ interface IProps extends IBaseProps {
 export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
+    const {isGhostUser} = this.props;
     return (
       <div className="document">
         {this.renderTitleBar()}
-        {this.isPrimary() ? this.renderToolbar() : null}
+        {this.isPrimary() && !isGhostUser ? this.renderToolbar() : null}
         {this.renderCanvas()}
         {this.renderStatusBar()}
       </div>
@@ -40,9 +42,9 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTitleBar() {
-    const { document, side } = this.props;
+    const { document, side, isGhostUser } = this.props;
     if (document.type === SectionDocument) {
-      return this.renderSectionTitleBar(side === "comparison");
+      return this.renderSectionTitleBar(isGhostUser || (side === "comparison"));
     }
     if (document.type === LearningLogDocument) {
       return this.renderLearningLogTitleBar();
@@ -124,8 +126,11 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderCanvas() {
-    const { document, workspace, side } = this.props;
+    const { document, workspace, side, isGhostUser } = this.props;
     if (document.type === SectionDocument) {
+      if (isGhostUser) {
+        return <div className="canvas-area">{this.render4UpCanvas()}</div>;
+      }
       return (
         <div className="canvas-area">
           {side === "primary"
@@ -159,9 +164,11 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private render4UpCanvas() {
+    const {isGhostUser} = this.props;
     const {sectionWorkspace} = this.stores.ui;
+    const document = isGhostUser ? undefined : this.props.document;
     return (
-      <FourUpComponent document={this.props.document} workspace={sectionWorkspace} />
+      <FourUpComponent document={document} workspace={sectionWorkspace} />
     );
   }
 
