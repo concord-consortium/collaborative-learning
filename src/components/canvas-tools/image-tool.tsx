@@ -3,7 +3,6 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-// import { UIModelType } from "../../models/ui";
 
 import "./image-tool.sass";
 
