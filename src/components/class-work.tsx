@@ -1,13 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import "./my-work.sass";
 import { TabComponent } from "./tab";
 import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
 import { SectionWorkspaceModelType, PublishedWorkspaceModelType } from "../models/workspaces";
 import { sectionInfo } from "../models/curriculum/section";
+
+import "./my-work.sass";
 
 interface IProps extends IBaseProps {}
 
@@ -20,9 +21,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
     const sections = problem.sections;
     const publications: PublishedWorkspaceModelType[] = [];
     sections.forEach((section) => {
-      workspaces.getLatestPublicationsForSection(section.id).forEach((publication) => {
-        publications.push(publication);
-      });
+      publications.push(...workspaces.getLatestPublicationsForSection(section.id));
     });
 
     return (

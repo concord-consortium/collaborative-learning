@@ -10,6 +10,7 @@ import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
+import { kSectionID, kLearningLogID, kPublicationID } from "../models/workspaces";
 
 import "./workspace.sass";
 
@@ -38,13 +39,13 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderTitleBar() {
     const { workspace } = this.props;
-    if (workspace.type === "section") {
+    if (workspace.type === kSectionID) {
       return this.renderSectionTitleBar();
     }
-    if (workspace.type === "learningLog") {
+    if (workspace.type === kLearningLogID) {
       return this.renderLearningLogTitleBar();
     }
-    if (workspace.type === "published") {
+    if (workspace.type === kPublicationID) {
       return this.renderSectionTitleBar(true);
     }
   }
@@ -127,21 +128,21 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderCanvas() {
     const { workspace } = this.props;
-    if (workspace.type === "section") {
+    if (workspace.type === kSectionID) {
       return (
         <div className="canvas-area">
           {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
         </div>
       );
     }
-    if (workspace.type === "learningLog") {
+    if (workspace.type === kLearningLogID) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas()}
         </div>
       );
     }
-    if (workspace.type === "published") {
+    if (workspace.type === kPublicationID) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas(true)}
@@ -166,7 +167,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   private renderStatusBar() {
     const {workspace} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (workspace.type === "section");
+    const showContents = isPrimary && (workspace.type === kSectionID);
     return (
       <div className="statusbar">
         <div className="supports">
@@ -185,7 +186,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     const mode = ui.comparisonWorkspaceVisible ? "up" : "up2";
     const llMode = ui.llComparisonWorkspaceVisible ? "up" : "up2";
 
-    if (this.props.workspace.type === "learningLog") {
+    if (this.props.workspace.type === kLearningLogID) {
       return (
         <svg className={`icon icon-${llMode}`} onClick={this.handleToggleLLTwoUp}>
           <use xlinkHref={`#icon-${llMode}`} />

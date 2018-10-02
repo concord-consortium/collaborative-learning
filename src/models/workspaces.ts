@@ -7,6 +7,10 @@ export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 export const WorkspaceToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text"]);
 export type WorkspaceTool = typeof WorkspaceToolEnum.Type;
 
+export const kSectionID = "section";
+export const kLearningLogID = "learningLog";
+export const kPublicationID = "publication";
+
 const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
   switch (tool) {
     case "geometry":
@@ -21,7 +25,7 @@ const selectTool = (tool: WorkspaceTool, document: DocumentModelType) => {
 
 export const SectionWorkspaceModel = types
   .model("SectionWorkspace", {
-    type: "section",
+    type: types.optional(types.literal(kSectionID), kSectionID),
     mode: WorkspaceModeEnum,
     tool: WorkspaceToolEnum,
     sectionId: types.string,
@@ -63,12 +67,12 @@ export const SectionWorkspaceModel = types
 
 export const LearningLogWorkspaceModel = types
   .model("LearningLogWorkspace", {
-    type: "learningLog",
+    type: types.optional(types.literal(kLearningLogID), kLearningLogID),
     tool: WorkspaceToolEnum,
     document: DocumentModel,
     title: types.string,
     createdAt: types.number,
-    mode: types.maybe(types.undefined)
+    mode: types.optional(types.literal("1-up"), "1-up")
   })
   .actions((self) => {
     return {
@@ -88,15 +92,15 @@ export const LearningLogWorkspaceModel = types
 
 export const PublishedWorkspaceModel = types
   .model("PublishedWorkspace", {
-    type: "published",
+    type: types.optional(types.literal(kPublicationID), kPublicationID),
     document: DocumentModel,
     createdAt: types.number,
     userId: types.string,
     groupId: types.string,
-    tool: types.maybe(types.undefined),
+    tool: types.optional(types.undefined, undefined),
     sectionId: types.string,
     groupUserConnections: types.map(types.boolean),
-    mode: "1-up"
+    mode: types.optional(types.literal("1-up"), "1-up")
   });
 
 export const WorkspacesModel = types

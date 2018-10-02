@@ -1131,7 +1131,7 @@ export class DB {
   private createWorkspaceFromPublication(publication: DBPublishedDocumentMetadata) {
     const {groupId, sectionId, groupUserConnections, userId, self: {documentKey}} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
-    const groupUserConnectionsMap = Object.keys(groupUserConnections)
+    const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
         allUsers[groupUserId] = groupUserConnections[groupUserId];
         return allUsers;
