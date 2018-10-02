@@ -37,7 +37,7 @@ export const DocumentContentModel = types
       self.tiles.push(ToolTileModel.create({
         content: {
           type: "Image",
-          url: "../assets/image-placeholder.png"
+          url: "assets/image-placeholder.png"
         }
       }));
     },
