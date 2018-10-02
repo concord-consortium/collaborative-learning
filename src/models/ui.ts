@@ -1,5 +1,8 @@
 import { types } from "mobx-state-tree";
-import { SectionWorkspaceModelType, LearningLogWorkspaceModelType } from "./workspaces";
+import { SectionWorkspaceModelType,
+        LearningLogWorkspaceModelType,
+        PublishedWorkspaceModelType,
+        WorkspaceModelType } from "./workspaces";
 import { ToolTileModelType } from "./tools/tool-tile";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
@@ -72,19 +75,19 @@ export const UIModel = types
       }
     };
 
-    const setPrimaryWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+    const setPrimaryWorkspace = (workspace?: WorkspaceModelType) => {
       self.primaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
-    const setComparisonWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+    const setComparisonWorkspace = (workspace?: WorkspaceModelType) => {
       self.comparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
-    const setLLPrimaryWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+    const setLLPrimaryWorkspace = (workspace?: WorkspaceModelType) => {
       self.llPrimaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
-    const setLLComparisonWorkspace = (workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) => {
+    const setLLComparisonWorkspace = (workspace?: WorkspaceModelType) => {
       self.llComparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
     };
 
@@ -121,7 +124,7 @@ export const UIModel = types
       setSelectedTile(tile?: ToolTileModelType) {
         self.selectedTileId = tile ? tile.id : undefined;
       },
-      setAvailableWorkspace(workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
+      setAvailableWorkspace(workspace?: WorkspaceModelType) {
         if (self.comparisonWorkspaceVisible) {
           setComparisonWorkspace(workspace);
         }

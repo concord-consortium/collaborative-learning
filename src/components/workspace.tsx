@@ -3,13 +3,14 @@ import * as React from "react";
 
 import { WorkspaceTool,
          WorkspaceModelType,
-         SectionWorkspaceModelType,
-         LearningLogWorkspaceModelType
+         LearningLogWorkspaceModelType,
+         SectionWorkspaceModelType
        } from "../models/workspaces";
 import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
+import { kSectionID, kLearningLogID, kPublicationID } from "../models/workspaces";
 
 import "./workspace.sass";
 
@@ -38,15 +39,18 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderTitleBar() {
     const { workspace } = this.props;
-    if (workspace.type === "section") {
+    if (workspace.type === kSectionID) {
       return this.renderSectionTitleBar();
     }
-    if (workspace.type === "learningLog") {
+    if (workspace.type === kLearningLogID) {
       return this.renderLearningLogTitleBar();
+    }
+    if (workspace.type === kPublicationID) {
+      return this.renderSectionTitleBar(true);
     }
   }
 
-  private renderSectionTitleBar() {
+  private renderSectionTitleBar(hideButtons?: boolean) {
     const {ui, problem} = this.stores;
     const workspace = this.sectionWorkspace;
     const activeSection = problem.getSectionById(workspace.sectionId);
@@ -55,12 +59,17 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
-        <div className="actions">
-          <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
-            <use xlinkHref={`#icon-${share}`} />
-          </svg>
-          {show4up ? this.renderMode() : null}
-        </div>
+        {!hideButtons &&
+          <div className="actions">
+            <svg className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
+              <use xlinkHref={`#icon-publish`} />
+            </svg>
+            <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
+              <use xlinkHref={`#icon-${share}`} />
+            </svg>
+            {show4up ? this.renderMode() : null}
+          </div>
+        }
       </div>
     );
   }
@@ -86,7 +95,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
-    const { workspace } = this.props;
+    const workspace = this.props.workspace;
+    if (!workspace.tool) {
+      return;
+    }
     const className = (tool: WorkspaceTool) => {
       return `tool ${tool}${tool === workspace.tool ? " active" : ""}`;
     };
@@ -116,14 +128,21 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderCanvas() {
     const { workspace } = this.props;
-    if (workspace.type === "section") {
+    if (workspace.type === kSectionID) {
       return (
         <div className="canvas-area">
-          {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas(false) : this.render4UpCanvas()}
+          {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
         </div>
       );
     }
-    if (workspace.type === "learningLog") {
+    if (workspace.type === kLearningLogID) {
+      return (
+        <div className="canvas-area learning-log-canvas-area">
+          {this.render1UpCanvas()}
+        </div>
+      );
+    }
+    if (workspace.type === kPublicationID) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas(true)}
@@ -132,9 +151,10 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     }
   }
 
-  private render1UpCanvas(roundBottomRight: boolean) {
+  private render1UpCanvas(forceReadOnly?: boolean) {
+    const readOnly = forceReadOnly ? true : this.props.readOnly;
     return (
-      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={this.props.readOnly} />
+      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={readOnly} />
     );
   }
 
@@ -147,7 +167,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   private renderStatusBar() {
     const {workspace} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (workspace.type === "section");
+    const showContents = isPrimary && (workspace.type === kSectionID);
     return (
       <div className="statusbar">
         <div className="supports">
@@ -166,14 +186,14 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
     const mode = ui.comparisonWorkspaceVisible ? "up" : "up2";
     const llMode = ui.llComparisonWorkspaceVisible ? "up" : "up2";
 
-    if (this.props.workspace.type === "learningLog") {
+    if (this.props.workspace.type === kLearningLogID) {
       return (
         <svg className={`icon icon-${llMode}`} onClick={this.handleToggleLLTwoUp}>
           <use xlinkHref={`#icon-${llMode}`} />
         </svg>
       );
     }
-    else if (this.sectionWorkspace.mode === "1-up") {
+    else if (this.props.workspace.mode === "1-up") {
       return (
         <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
           <use xlinkHref={`#icon-${mode}`} />
@@ -239,6 +259,13 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleToggleLLTwoUp = () => {
     this.stores.ui.toggleLLComparisonWorkspaceVisible();
+  }
+
+  private handlePublishWorkspace = () => {
+    const { db } = this.stores;
+    // TODO: Disable publish button while publishing
+    db.publishWorkspace(this.sectionWorkspace)
+      .then(() => alert("Published"));
   }
 
   private getSupportsWithIndices() {

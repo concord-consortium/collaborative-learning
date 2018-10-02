@@ -11,16 +11,23 @@ import { DBOfferingGroup,
          DBDocumentMetadata,
          DBDocument,
          DBOfferingUserSectionDocument,
-         DBOfferingUserSectionDocumentMap,
-         DBDocumentType,
-         DBLearningLog
+         DBLearningLog,
+         DBUserDocument,
+         DBUserDocumentType,
+         DBOfferingDocumentType,
+         DBOfferingDocument,
+         DBPublishedDocumentMetadata,
+         DBUserDocumentMetadata,
+         DBOfferingDocumentMetadata,
+         DBPublishedDocument,
+         DBGroupUserConnections,
         } from "./db-types";
-import { WorkspaceModelType,
-         SectionWorkspaceModelType,
+import { SectionWorkspaceModelType,
          SectionWorkspaceModel,
          LearningLogWorkspaceModelType,
          LearningLogWorkspaceModel,
-         WorkspacesModel } from "../models/workspaces";
+         PublishedWorkspaceModel,
+         WorkspaceModelType} from "../models/workspaces";
 import { DocumentModelType, DocumentModel } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
@@ -88,6 +95,7 @@ export class DB {
   private workspaceModelDisposers: WorkspaceModelDisposers = {};
   private learningLogsRef: firebase.database.Reference | null  = null;
   private creatingWorkspaces: string[] = [];
+  private publicationsRef: firebase.database.Reference | null = null;
 
   public get isConnected() {
     return this.firebaseUser !== null;
@@ -267,7 +275,7 @@ export class DB {
           }
           else {
             // create the document and section document
-            return this.createDocument("section")
+            return this.createUserDocument("section")
               .then(({document, metadata}) => {
                   sectionDocument = {
                     version: "1.0",
@@ -322,44 +330,38 @@ export class DB {
     });
   }
 
-  public createDocument(type: DBDocumentType) {
+  public createUserDocument(type: DBUserDocumentType) {
     const {user} = this.stores;
-    return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
+    return new Promise<{document: DBUserDocument, metadata: DBUserDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
       const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey));
-      const document: DBDocument = {
+      const document: DBUserDocument = {
         version: "1.0",
         self: {
           uid: user.id,
           documentKey,
-        }
+        },
+        type
       };
-      let metadata: DBDocumentMetadata;
+      let metadata: DBUserDocumentMetadata;
 
+      const metadataBase: DBUserDocumentMetadata = {
+        version: "1.0",
+        self: {
+          uid: user.id,
+          documentKey,
+        },
+        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
+        type
+      };
       if (type === "section") {
-        metadata = {
-          version: "1.0",
-          self: {
-            uid: user.id,
-            documentKey,
-          },
-          createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-          type: "section",
+        metadata = Object.assign({
           classHash: user.classHash,
           offeringId: user.offeringId
-        };
-      }
-      else {
-        metadata = {
-          version: "1.0",
-          self: {
-            uid: user.id,
-            documentKey,
-          },
-          createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-          type: "learningLog"
-        };
+        }, metadataBase);
+      } else {
+        metadata = metadataBase;
       }
 
       return documentRef.set(document)
@@ -371,7 +373,57 @@ export class DB {
     });
   }
 
-  public openDocument(userId: string, documentKey: string) {
+  public createOfferingDocument(type: DBOfferingDocumentType, workspace: SectionWorkspaceModelType) {
+    const {user, groups} = this.stores;
+    const documentModel = workspace.document;
+    const content = JSON.stringify(documentModel.content);
+    return new Promise<{document: DBOfferingDocument, metadata: DBOfferingDocumentMetadata}>((resolve, reject) => {
+      const documentRef = this.ref(this.getOfferingDocumentsPath(user)).push();
+      const documentKey = documentRef.key!;
+      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
+      const document: DBOfferingDocument = {
+        version: "1.0",
+        self: {
+          classHash: user.classHash,
+          offeringId: user.offeringId,
+          documentKey,
+        },
+        type,
+        content
+      };
+
+      const userGroup = groups.groupForUser(user.id)!;
+      const groupUserConnections: DBGroupUserConnections = userGroup.users
+        .filter(groupUser => groupUser.id !== user.id)
+        .reduce((allUsers: DBGroupUserConnections, groupUser) => {
+          allUsers[groupUser.id] = groupUser.connected;
+          return allUsers;
+        }, {});
+      const metadata: DBPublishedDocumentMetadata = {
+        version: "1.0",
+        type,
+        self: {
+          classHash: user.classHash,
+          offeringId: user.offeringId,
+          documentKey,
+        },
+        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
+        groupId: userGroup.id,
+        userId: user.id,
+        sectionId: workspace.sectionId,
+        groupUserConnections
+      };
+
+      return documentRef.set(document)
+        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          resolve({document, metadata});
+        })
+        .catch(reject);
+    });
+  }
+
+  public openUserDocument(userId: string, documentKey: string) {
     const { user } = this.stores;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
@@ -387,7 +439,36 @@ export class DB {
 
           const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
-            uid: document.self.uid,
+            uid: userId,
+            key: document.self.documentKey,
+            createdAt: metadata.createdAt,
+            content: content ? content : {}
+          });
+        })
+        .then((document) => {
+          resolve(document);
+        })
+        .catch(reject);
+    });
+  }
+
+  public openOfferingDocument(documentKey: string) {
+    const { user } = this.stores;
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const documentRef = this.ref(this.getOfferingDocumentsPath(user, documentKey));
+      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
+
+      return Promise.all([documentRef.once("value"), metadataRef.once("value")])
+        .then(([documentSnapshot, metadataSnapshot]) => {
+          const document: DBDocument|null = documentSnapshot.val();
+          const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
+          if (!document || !metadata) {
+            throw new Error(`Unable to open document ${documentKey}`);
+          }
+
+          const content = this.parseDocumentContent(document, true);
+          return DocumentModel.create({
+            uid: user.id,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
             content: content ? content : {}
@@ -404,7 +485,7 @@ export class DB {
     const {user} = this.stores;
 
     return new Promise<LearningLogWorkspaceModelType>((resolve, reject) => {
-      return this.createDocument("learningLog")
+      return this.createUserDocument("learningLog")
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
@@ -444,6 +525,10 @@ export class DB {
         .then(resolve)
         .catch(reject);
     });
+  }
+
+  public publishWorkspace(workspace: SectionWorkspaceModelType) {
+    return this.createOfferingDocument("published", workspace);
   }
 
   public ref(path: string = "") {
@@ -559,6 +644,16 @@ export class DB {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
+  public getOfferingDocumentsPath(user: UserModelType, documentKey?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getOfferingPath(user)}/documents${suffix}`;
+  }
+
+  public getOfferingDocumentMetadataPath(user: UserModelType, documentKey?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getOfferingPath(user)}/documentMetadata${suffix}`;
+  }
+
   //
   // Listeners
   //
@@ -575,6 +670,9 @@ export class DB {
         })
         .then(() => {
           return this.startLearningLogsListener();
+        })
+        .then(() => {
+          return this.startPublicationsListener();
         })
         .then(() => {
           this.isListening = true;
@@ -740,6 +838,22 @@ export class DB {
     }
   }
 
+  private startPublicationsListener() {
+    this.publicationsRef = this.ref(this.getOfferingDocumentMetadataPath(this.stores.user));
+    this.publicationsRef.on("child_added", this.handlePublicationAdded);
+  }
+
+  private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
+    const {workspaces} = this.stores;
+    const metadata: DBPublishedDocumentMetadata|null = snapshot.val();
+    if (metadata) {
+      this.createWorkspaceFromPublication(metadata)
+        .then((workspace) => {
+          workspaces.addPublishedWorkspace(workspace);
+        });
+    }
+  }
+
   private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {user, workspaces, ui} = this.stores;
     const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
@@ -841,7 +955,7 @@ export class DB {
   }
 
   private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    return this.openDocument(userId, sectionDocument.documentKey)
+    return this.openUserDocument(userId, sectionDocument.documentKey)
       .then((document) => {
         this.monitorDocumentModel(document);
         this.monitorDocumentRef(document);
@@ -994,11 +1108,11 @@ export class DB {
 
   private handleGroupUserDocRef(snapshot: firebase.database.DataSnapshot|null, workspace: SectionWorkspaceModelType) {
     if (snapshot) {
-      const rawGroupDoc: DBDocument = snapshot.val();
+      const rawGroupDoc: DBUserDocument = snapshot.val();
       if (rawGroupDoc) {
         const groupUserId = rawGroupDoc.self.uid;
         const {documentKey} = rawGroupDoc.self;
-        this.openDocument(groupUserId, documentKey).then((groupUserDoc) => {
+        this.openUserDocument(groupUserId, documentKey).then((groupUserDoc) => {
           workspace.setGroupDocument(groupUserId, groupUserDoc);
         });
       }
@@ -1018,9 +1132,30 @@ export class DB {
     return this.groupUserSectionDocumentsListeners[sectionId][userId];
   }
 
+  private createWorkspaceFromPublication(publication: DBPublishedDocumentMetadata) {
+    const {groupId, sectionId, groupUserConnections, userId, self: {documentKey}} = publication;
+    // groupUserConnections returns as an array and must be converted back to a map
+    const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
+      .reduce((allUsers, groupUserId) => {
+        allUsers[groupUserId] = groupUserConnections[groupUserId];
+        return allUsers;
+      }, {} as DBGroupUserConnections);
+    return this.openOfferingDocument(documentKey)
+      .then((document) => {
+        return PublishedWorkspaceModel.create({
+          document,
+          createdAt: document.createdAt,
+          sectionId,
+          groupId,
+          userId,
+          groupUserConnections: groupUserConnectionsMap
+        });
+      });
+  }
+
   private createWorkspaceFromLearningLog(learningLog: DBLearningLog) {
     const {title, self: {uid, documentKey}} = learningLog;
-    return this.openDocument(uid, documentKey)
+    return this.openUserDocument(uid, documentKey)
       .then((document) => {
         this.monitorDocumentModel(document);
         this.monitorDocumentRef(document);

@@ -86,14 +86,19 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
 
   private renderComparisonPlaceholder() {
     return (
-      <div className="comparison-placeholder">
+      <div
+        className="comparison-placeholder"
+        onDragOver={(this.handleDragOver)}
+        onDrop={this.handleDrop("comparison")}
+        onMouseOver={this.handleMouseOver}
+      >
         Click or drag an item in the right tabs to show it here
       </div>
     );
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (e.dataTransfer.getData("workspace.document.key")) {
+    if (e.dataTransfer.types.find((type) => type === "workspace.document.key")) {
       e.preventDefault();
     }
   }
