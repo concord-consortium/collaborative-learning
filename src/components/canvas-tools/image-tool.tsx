@@ -18,24 +18,21 @@ interface IProps {
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { readOnly, model: { content } } = this.props;
+    const { readOnly, model } = this.props;
+    const { content } = model;
+    const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `image-tool ${editableClass}`;
-    // const ui = this.stores;
-    const style_image = { position: 'relative'};
-    const style_url = { position: 'absolute', top: 10, left: 10 } ;
-    // const selected = ui.isSelectedTile(this.props.model);
-    // console.log("selected?" + selected);
+    const selectedClass = ui.isSelectedTile(model) ? "selected" : "";
+    const divClasses = `image-tool ${editableClass}`;
+    const inputClasses = `image-url ${selectedClass}`;
     return (
-      <div className={classes} onMouseDown={this.handleMouseDown} >
-        <img src={imageContent.url}
-                  style={style_image}
-                  />
-        <input
-          style={style_url}
+      <div className={divClasses} onMouseDown={this.handleMouseDown} >
+        <img src={imageContent.url} />
+        <input className={inputClasses}
           defaultValue={imageContent.url}
           onBlur={this.handleBlur}
+          onKeyUp={this.handleKeyUp}
         />
       </div>
     );
@@ -45,9 +42,20 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     this.stores.ui.setSelectedTile(this.props.model);
   }
 
-  private handleBlur = (e: React.MouseEvent<HTMLInputElement>) => {
-    // console.log("on blur");
+  private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // If we detect an enter key, treat the same way we handle losing focus,
+    // i.e., attempt to change the URL for the image.
+    if (e.keyCode === 13) {
+      this.updateURL(e.currentTarget.value);
+    }
+  }
+
+  private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    this.updateURL(e.currentTarget.value);
+  }
+
+  private updateURL = (newUrl: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
-    imageContent.setUrl(e.currentTarget.value);
+    imageContent.setUrl(newUrl);
   }
 }
