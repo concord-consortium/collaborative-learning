@@ -1,7 +1,7 @@
 // import { applyAction, clone, destroy, getEnv, getSnapshot, onAction } from 'mobx-state-tree';
 import { applyAction, clone, destroy, getSnapshot, onAction } from "mobx-state-tree";
 import { addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet,
-          CaseID, ICaseID, ICase, ICaseCreation, DataSet, IDataSet } from "./data-set";
+          CaseID, ICaseID, ICase, DataSet, IDataSet } from "./data-set";
 import * as uuid from "uuid/v4";
 
 // tslint:disable:one-variable-per-declaration
@@ -168,8 +168,8 @@ test("DataSet basic functionality", () => {
   expect(cases[0]).toEqual({ __id__: caseB2ID, str: "B", num: 20 });
   expect(cases[1]).toEqual({ __id__: caseC3ID, str: "C", num: 30 });
 
-  const bIndex = dataset.caseIndexFromID(caseB2ID);
-  const cases2 = dataset.getCasesAtIndices(bIndex, 2);
+  // const bIndex = dataset.caseIndexFromID(caseB2ID);
+  // const cases2 = dataset.getCasesAtIndices(bIndex, 2);
   expect(cases.length).toBe(2);
   expect(cases[0]).toEqual({ __id__: caseB2ID, str: "B", num: 20 });
   expect(cases[1]).toEqual({ __id__: caseC3ID, str: "C", num: 30 });

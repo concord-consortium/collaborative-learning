@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel, SupportsModelType, SupportItemType } from "./supports";
+import { SupportsModel, SupportItemType } from "./supports";
 import { UnitModel } from "./curriculum/unit";
 import { SupportModel } from "./curriculum/support";
 import { InvestigationModel } from "./curriculum/investigation";

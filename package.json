@@ -33,6 +33,7 @@
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:build": "tslint -c tslint-build.json 'src/**/*.{ts,tsx}'",
     "lint:fix": "tslint -c tslint-build.json --fix 'src/**/*.{ts,tsx}'",
+    "lint:unused": "tsc --noUnusedLocals --project .",
     "test": "jest",
     "test:all": "npm-run-all build test start",
     "test:coverage": "jest --coverage",

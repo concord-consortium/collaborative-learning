@@ -124,7 +124,7 @@ describe("ui model", () => {
   });
 
   it("allows activeSection to be set", () => {
-    const section = SectionModel.create({
+    SectionModel.create({
       type: SectionType.introduction
     });
     ui.setActiveSectionIndex(1);
