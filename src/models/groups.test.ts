@@ -1,4 +1,4 @@
-import { GroupsModel, GroupsModelType, GroupModel, GroupUserModel } from "./groups";
+import { GroupsModel, GroupModel, GroupUserModel } from "./groups";
 import { ClassModel, ClassStudentModel } from "./class";
 import { DBOfferingGroupMap } from "../lib/db-types";
 

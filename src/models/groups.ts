@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { DBOfferingGroup, DBOfferingGroupMap } from "../lib/db-types";
+import { DBOfferingGroupMap } from "../lib/db-types";
 import { ClassModelType } from "./class";
 
 export const GroupUserModel = types

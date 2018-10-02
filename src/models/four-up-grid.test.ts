@@ -2,9 +2,9 @@ import { CellPositions, DEFAULT_SPLITTER_SIZE, FourUpGridModel, FourUpGridCellMo
 
 describe("four-up grid model", () => {
 
-  it("throws an exception is the cells aren't empty", () => {
+  it("throws an exception if the cells aren't empty", () => {
     const invalidCells = () => {
-      const grid = FourUpGridModel.create({
+      FourUpGridModel.create({
         cells: [
           FourUpGridCellModel.create({})
         ]
