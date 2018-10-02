@@ -97,11 +97,17 @@ export const PublishedWorkspaceModel = types
     createdAt: types.number,
     userId: types.string,
     groupId: types.string,
-    tool: types.optional(types.undefined, undefined),
     sectionId: types.string,
-    groupUserConnections: types.map(types.boolean),
-    mode: types.optional(types.literal("1-up"), "1-up")
-  });
+    groupUserConnections: types.map(types.boolean)
+  })
+  .views(self => ({
+    get mode() {
+      return "1-up";
+    },
+    get tool() {
+      return undefined;
+    }
+  }));
 
 export const WorkspacesModel = types
   .model("Workspaces", {
