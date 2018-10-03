@@ -6,6 +6,7 @@ cache:
   pip: true
   directories:
     - "$HOME/.npm"
+    - "$HOME/.cache"
 # cf. https://stackoverflow.com/a/52387639
 install:
 - travis_retry gem install s3_website -v 3.4.0
@@ -14,5 +15,9 @@ install:
 script:
 - npm run build
 - npm run test:coverage -- --runInBand
+- npm run start &
+- cypress install
+- wait-on http://localhost:8080
+- $(npm bin)/cypress run --config video=false
 after_script:
 - ./s3_deploy.sh
