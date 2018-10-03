@@ -28,7 +28,9 @@ describe("Four Up Component", () => {
       type: SectionDocument,
       title: "test",
       uid: "1",
+      groupId: "1",
       key: "test",
+      sectionId: "introduction",
       createdAt: 1,
       content: {}
     }),
@@ -38,9 +40,9 @@ describe("Four Up Component", () => {
 
   it("can render", () => {
     const stores = createStores();
-    const comp = mount(<FourUpComponent workspace={workspace} stores={stores}/>);
+    const comp = mount(<FourUpComponent document={document} workspace={workspace} stores={stores}/>);
     expect(comp.find(CanvasComponent)).toHaveLength(4);
-    // FIXME: expect(comp.find(".member")).toHaveLength(1);
+    expect(comp.find(".member")).toHaveLength(1);
   });
 
   it("renders group members", () => {
@@ -84,13 +86,13 @@ describe("Four Up Component", () => {
       documents
     });
 
-    const comp = mount(<FourUpComponent workspace={workspace} stores={stores}/>);
+    const comp = mount(<FourUpComponent document={document} workspace={workspace} stores={stores}/>);
     expect(comp.find(CanvasComponent)).toHaveLength(4);
-    // FIXME: expect(comp.find(".member")).toHaveLength(3);
+    expect(comp.find(".member")).toHaveLength(3);
     // First member is the current user, followed by group members
-    // FIXME: expect(comp.find(".member").at(0).text()).toBe("U3");
-    // FIXME: expect(comp.find(".member").at(1).text()).toBe("U1");
-    // FIXME: expect(comp.find(".member").at(2).text()).toBe("U2");
+    expect(comp.find(".member").at(0).text()).toBe("U3");
+    expect(comp.find(".member").at(1).text()).toBe("U1");
+    expect(comp.find(".member").at(2).text()).toBe("U2");
 
     // TODO: figure out how to add coverage for window mouse events setup by the spliiter handlers
     comp.find(".horizontal").simulate("mouseDown");
