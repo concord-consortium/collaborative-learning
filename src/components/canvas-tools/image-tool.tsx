@@ -17,35 +17,44 @@ interface IProps {
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { readOnly, model: { id, content } } = this.props;
+    const { readOnly, model } = this.props;
+    const { content } = model;
+    const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `image-tool ${editableClass}`;
+    const selectedClass = ui.isSelectedTile(model) ? "selected" : "";
+    const divClasses = `image-tool ${editableClass}`;
+    const inputClasses = `image-url ${selectedClass}`;
     return (
-      <div className={classes} style={this.containerStyle}>
-        <img src={imageContent.url} style={this.imageStyle} />
+      <div className={divClasses} onMouseDown={this.handleMouseDown} >
+        <img src={imageContent.url} />
+        <input className={inputClasses}
+          defaultValue={imageContent.url}
+          onBlur={this.handleBlur}
+          onKeyUp={this.handleKeyUp}
+        />
       </div>
     );
   }
 
-  private get containerStyle() {
-    const content = this.props.model.content as ImageContentModelType;
-    const result: any = {};
-    if (typeof content.align !== "undefined") {
-      result.textAlign = content.align;
-    }
-    return result;
+  private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    this.stores.ui.setSelectedTile(this.props.model);
   }
 
-  private get imageStyle() {
-    const content = this.props.model.content as ImageContentModelType;
-    const result: any = {};
-    if (typeof content.width !== "undefined") {
-      result.width = content.width;
+  private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // If we detect an enter key, treat the same way we handle losing focus,
+    // i.e., attempt to change the URL for the image.
+    if (e.keyCode === 13) {
+      this.updateURL(e.currentTarget.value);
     }
-    if (typeof content.height !== "undefined") {
-      result.height = content.height;
-    }
-    return result;
+  }
+
+  private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    this.updateURL(e.currentTarget.value);
+  }
+
+  private updateURL = (newUrl: string) => {
+    const imageContent = this.props.model.content as ImageContentModelType;
+    imageContent.setUrl(newUrl);
   }
 }

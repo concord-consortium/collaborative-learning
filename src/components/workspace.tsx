@@ -121,6 +121,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
         <div className={className("select")} title="Select" onClick={handleSelectTool("select")}>↖</div>
         <div className={className("text")} title="Text" onClick={handleSelectTool("text")}>T</div>
         <div className={className("geometry")} title="Geometry" onClick={handleSelectTool("geometry")}/>
+        <div className={className("image")} title="Image" onClick={handleSelectTool("image")}/>
         <div className={className("delete")} title="Delete" onClick={handleSelectTool("delete")}>{"\u274c"}</div>
       </div>
     );

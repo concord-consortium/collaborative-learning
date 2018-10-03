@@ -33,6 +33,14 @@ export const DocumentContentModel = types
         }
       }));
     },
+    addImageTile() {
+      self.tiles.push(ToolTileModel.create({
+        content: {
+          type: "Image",
+          url: "assets/image_placeholder.png"
+        }
+      }));
+    },
     deleteTile(tileId: string) {
       const index = self.tiles.findIndex(tile => tile.id === tileId);
       if (index >= 0) {
