@@ -25,16 +25,42 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const selectedClass = ui.isSelectedTile(model) ? "selected" : "";
     const divClasses = `image-tool ${editableClass}`;
     const inputClasses = `image-url ${selectedClass}`;
+    const fileInputClasses = `image-file ${selectedClass}`;
+    const fileUploadClasses = `image-file-upload ${selectedClass}`;
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} >
         <img src={imageContent.url} />
-        <input className={inputClasses}
+        <input
+          className={inputClasses}
           defaultValue={imageContent.url}
           onBlur={this.handleBlur}
           onKeyUp={this.handleKeyUp}
         />
+        <input
+          className={fileInputClasses}
+          type="file"
+          accept="image/png, image/jpeg"
+          onChange={this.handleOnChange}
+        />
+        <button
+          className={fileUploadClasses}
+          onClick={this.handleUploadButton}>Upload</button>
       </div>
     );
+  }
+
+  private handleUploadButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log('Ready to upload to the database.');
+  }
+
+  private handleOnChange = (e: React.MouseEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files as FileList;
+    var fileReader = new FileReader();
+    fileReader.onloadend = () => {
+      const fileContent = fileReader.result;
+      console.log(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
+    };
+    fileReader.readAsBinaryString(files[0]);
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
