@@ -1,6 +1,8 @@
 import { getSnapshot } from "mobx-state-tree";
 import { DocumentModel, SectionDocument, DocumentModelType } from "./document";
 import { DocumentContentModel } from "./document-content";
+import { createSingleTileContent } from "../utilities/test-utils";
+import { TextContentModelType } from "./tools/text/text-content";
 
 describe("document model", () => {
   let document: DocumentModelType;
@@ -28,41 +30,37 @@ describe("document model", () => {
       visibility: "public",
       groupUserConnections: {},
       content: {
-        shared: undefined,
-        tiles: []
+        rowMap: {},
+        rowOrder: [],
+        tileMap: {}
       },
     });
   });
 
   it("can set content", () => {
-    document.setContent(DocumentContentModel.create({
-      tiles: [{
-        content: {
-          type: "Text",
-          text: "test"
-        }
-      }]
-    }));
-    expect(getSnapshot(document.content).tiles[0].content).toEqual({
-      format: undefined,
-      text: "test",
-      type: "Text"
+    const content = createSingleTileContent({ type: "Text", text: "test" });
+    document.setContent(DocumentContentModel.create(content));
+    expect(document.content.tileMap.size).toBe(1);
+    document.content.tileMap.forEach(tile => {
+      const textContent = tile.content as TextContentModelType;
+      expect(textContent.type).toBe("Text");
+      expect(textContent.text).toBe("test");
     });
   });
 
   it("allows the tools to be added", () => {
-    expect(document.content.tiles.length).toBe(0);
+    expect(document.content.tileMap.size).toBe(0);
     document.addTile("text");
-    expect(document.content.tiles.length).toBe(1);
+    expect(document.content.tileMap.size).toBe(1);
     document.addTile("geometry");
-    expect(document.content.tiles.length).toBe(2);
+    expect(document.content.tileMap.size).toBe(2);
   });
 
   it("allows tiles to be deleted", () => {
-    document.addTile("text");
-    expect(document.content.tiles.length).toBe(1);
-    document.deleteTile(document.content.tiles[0].id);
-    expect(document.content.tiles.length).toBe(0);
+    const textId = document.addTile("text");
+    expect(document.content.tileMap.size).toBe(1);
+    document.deleteTile(textId!);
+    expect(document.content.tileMap.size).toBe(0);
   });
 
   it("allows the visibility to be toggled", () => {

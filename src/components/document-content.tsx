@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentContentModelType } from "../models/document-content";
-import { ToolTileComponent } from "./canvas-tools/tool-tile";
+import { TileRowComponent } from "./document/tile-row";
 
 import "./document-content.sass";
 
@@ -17,23 +17,28 @@ interface IProps extends IBaseProps {
 export class DocumentContentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { content, ...others } = this.props;
-    const tileModels = content && content.tiles;
-    const tiles = tileModels
-                    ? tileModels.map((tile) => {
-                        return <ToolTileComponent key={tile.id} model={tile} {...others} />;
-                      })
-                    : null;
     return (
       <div className="document-content"
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop}
       >
-        {tiles}
+        {this.renderRows()}
         {this.props.children}
       </div>
     );
+  }
+
+  private renderRows() {
+    const { content, ...others } = this.props;
+    if (!content) { return null; }
+    const { rowMap, rowOrder, tileMap } = content;
+    return rowOrder.map(rowId => {
+      const row = rowMap.get(rowId);
+      return row
+              ? <TileRowComponent key={row.id} model={row} tileMap={tileMap} {...others} />
+              : null;
+    });
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -64,7 +69,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, {}> {
         snapshot = null;
       }
       if (snapshot) {
-        content.addTileSnapshot(snapshot);
+        content.addTileInNewRow(snapshot);
       }
     }
   }

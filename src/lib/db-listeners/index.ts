@@ -9,6 +9,7 @@ import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
 import { DocumentModelType, SectionDocument } from "../../models/document";
+import { DocumentContentModel } from "../../models/document-content";
 import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
 
 export interface ModelListeners {
@@ -186,7 +187,7 @@ export class DBListeners {
         if (updatedContent) {
           const documentModel = documents.getDocument(documentKey);
           if (documentModel) {
-            documentModel.setContent(updatedContent);
+            documentModel.setContent(DocumentContentModel.create(updatedContent));
             this.monitorDocumentModel(documentModel);
           }
         }

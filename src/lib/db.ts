@@ -13,7 +13,6 @@ import { DBOfferingGroup,
          DBGroupUserConnections,
          DBPublication,
          DBDocumentType,
-         DBBaseDocumentMetadata,
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
@@ -22,9 +21,7 @@ import { DocumentModelType,
          LearningLogDocument,
          PublicationDocument
         } from "../models/document";
-import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
-import { ToolTileModelType } from "../models/tools/tool-tile";
-import { TextContentModelType } from "../models/tools/text/text-content";
+import { DocumentContentSnapshotType } from "../models/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 
@@ -536,25 +533,11 @@ export class DB {
     });
   }
 
-  public parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentModelType|null {
+  public parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentSnapshotType|undefined {
     if (document.content == null) {
-      return null;
+      return undefined;
     }
 
-    const content = JSON.parse(document.content);
-    // XXX: When Slate text loads with an active selection, it breaks.
-    // When we load text from the DB, we actively deselect it to prevent this.
-    // This is a hack until a better method for synchronizing state across MST, React, FB and Slate is developed
-    if (deselect) {
-      content.tiles.forEach((tile: ToolTileModelType) => {
-        if (tile.content.type === "Text") {
-          const tileContent = tile.content as TextContentModelType;
-          if (typeof tileContent.text === "string") {
-            tileContent.text = tileContent.text.replace('"isFocused":true', '"isFocused":false');
-          }
-        }
-      });
-    }
-    return DocumentContentModel.create(content);
+    return JSON.parse(document.content);
   }
 }

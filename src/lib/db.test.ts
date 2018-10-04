@@ -2,7 +2,10 @@ import { DB } from "./db";
 import { IStores, createStores } from "../models/stores";
 import { UserModel } from "../models/user";
 import { DBDocument } from "./db-types";
+import { DocumentContentModel } from "../models/document-content";
 import { TextContentModelType } from "../models/tools/text/text-content";
+import { createSingleTileContent } from "../utilities/test-utils";
+import { ToolTileModelType } from "../models/tools/tool-tile";
 
 describe("db", () => {
   let stores: IStores;
@@ -63,19 +66,22 @@ describe("db", () => {
   it("can parse document text content", () => {
     const db = new DB();
     // tslint:disable-next-line:max-line-length
-    const storedJsonString = "{\"tiles\":[{\"id\":\"9d1cfc99-121a-4817-bc08-2144d00ba6d0\",\"content\":{\"type\":\"Text\",\"text\":\"{\\\"object\\\":\\\"value\\\",\\\"document\\\":{\\\"object\\\":\\\"document\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"block\\\",\\\"type\\\":\\\"line\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"text\\\",\\\"leaves\\\":[{\\\"object\\\":\\\"leaf\\\",\\\"text\\\":\\\"laaa\\\",\\\"marks\\\":[]}]}]}]}}\"}},{\"id\":\"72c8d88f-edea-4ac4-a7e7-0d70ecf960c0\",\"content\":{\"type\":\"Text\",\"text\":\"{\\\"object\\\":\\\"value\\\",\\\"document\\\":{\\\"object\\\":\\\"document\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"block\\\",\\\"type\\\":\\\"line\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"text\\\",\\\"leaves\\\":[{\\\"object\\\":\\\"leaf\\\",\\\"text\\\":\\\"Testing\\\",\\\"marks\\\":[]}]}]}]}}\",\"format\":\"slate\"}}]}";
-    const docContent = db.parseDocumentContent({content: storedJsonString} as DBDocument);
+    const storedJsonString = JSON.stringify(createSingleTileContent({ type: "Text", text: "Testing" }));
+    const docContentSnapshot = db.parseDocumentContent({content: storedJsonString} as DBDocument);
+    const docContent = DocumentContentModel.create(docContentSnapshot);
 
     if (docContent == null) {
       fail();
       return;
     }
 
-    expect(docContent.tiles.length).toBe(2);
-    const tileContent = docContent.tiles[1].content as TextContentModelType;
-    expect(tileContent.type).toBe("Text");
-    expect(tileContent.format).toBe("slate");
-    expect(tileContent.getSlate().texts.get(0).getText()).toBe("Testing");
+    expect(docContent.tileMap!.size).toBe(1);
+    docContent.tileMap!.forEach((tile: ToolTileModelType) => {
+      const tileContent = tile.content as TextContentModelType;
+      expect(tileContent.type).toBe("Text");
+      expect(tileContent.format).toBeUndefined();
+      expect(tileContent.text).toBe("Testing");
+    });
   });
 
 });
