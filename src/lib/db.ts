@@ -486,10 +486,11 @@ export class DB {
   public createDocumentFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
     const {documentKey} = sectionDocument;
     const {sectionId} = sectionDocument.self;
+    const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
         type: SectionDocument,
         userId,
-        groupId: this.stores.groups.groupForUser(userId)!.id,
+        groupId: group && group.id,
         documentKey,
         sectionId,
         visibility: sectionDocument.visibility
@@ -503,7 +504,8 @@ export class DB {
 
   public createDocumentFromLearningLog(learningLog: DBLearningLog) {
     const {title, self: {uid, documentKey}} = learningLog;
-    const groupId = this.stores.groups.groupForUser(uid)!.id;
+    const group = this.stores.groups.groupForUser(uid);
+    const groupId = group && group.id;
     return this.openDocument({type: LearningLogDocument, userId: uid, documentKey, groupId, title})
       .then((document) => {
         this.listeners.monitorDocumentModel(document);
