@@ -20,48 +20,46 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBUserDocumentType = "section" | "learningLog";
-export type DBOfferingDocumentType = "published";
-export type DBDocumentType = DBUserDocumentType | DBOfferingDocumentType;
+export type DBDocumentType = "section" | "learningLog" | "publication";
+export type DBDocumentMetadata = DBSectionDocumentMetadata |
+                                 DBLearningLogDocumentMetadata |
+                                 DBPublicationDocumentMetadata;
 
-export interface DBDocumentMetadata {
+export interface DBBaseDocumentMetadata {
   version: "1.0";
   self: {
+    uid: string;
     documentKey: string;
   };
   createdAt: number;
   type: DBDocumentType;
 }
 
-export interface DBUserDocumentMetadata extends DBDocumentMetadata {
-  self: {
-    uid: string;
-    documentKey: string;
-  };
-  type: DBUserDocumentType;
-}
-export interface DBSectionDocumentMetadata extends DBUserDocumentMetadata {
+export interface DBSectionDocumentMetadata extends DBBaseDocumentMetadata {
   type: "section";
   classHash: string;
   offeringId: string;
 }
-export interface DBLearningLogDocumentMetadata extends DBUserDocumentMetadata {
+export interface DBLearningLogDocumentMetadata extends DBBaseDocumentMetadata {
   type: "learningLog";
 }
-
-export interface DBOfferingDocumentMetadata extends DBDocumentMetadata {
-  self: {
-    documentKey: string;
-    classHash: string;
-    offeringId: string;
-  };
-  type: DBOfferingDocumentType;
+export interface DBPublicationDocumentMetadata extends DBBaseDocumentMetadata {
+  type: "publication";
+  classHash: string;
+  offeringId: string;
 }
+
 export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
-export interface DBPublishedDocumentMetadata extends DBOfferingDocumentMetadata {
-  type: "published";
+
+export interface DBPublication {
+  version: "1.0";
+  self: {
+    classHash: string;
+    offeringId: string;
+  };
+  documentKey: string;
   groupId: string;
   userId: string;
   sectionId: string;
@@ -80,39 +78,11 @@ export interface DBLearningLog {
 export interface DBDocument {
   version: "1.0";
   self: {
+    uid: string;
     documentKey: string;
   };
   content?: string;
   type: DBDocumentType;
-}
-
-export interface DBUserDocument extends DBDocument {
-  self: {
-    uid: string;
-    documentKey: string;
-  };
-  type: DBUserDocumentType;
-}
-
-export interface DBSectionDocument extends DBUserDocument {
-  type: "section";
-}
-
-export interface DBLearningLogDocument extends DBUserDocument {
-  type: "learningLog";
-}
-
-export interface DBOfferingDocument extends DBDocument {
-  self: {
-    classHash: string;
-    offeringId: string;
-    documentKey: string;
-  };
-  type: DBOfferingDocumentType;
-}
-
-export interface DBPublishedDocument extends DBOfferingDocument {
-  type: "published";
 }
 
 export interface DBClass {

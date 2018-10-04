@@ -3,11 +3,12 @@ import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
-import { WorkspacesModel, WorkspacesModelType } from "./workspaces";
 import { DB } from "../lib/db";
 import { UnitModelType, UnitModel } from "./curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
+import { DocumentsModelType, DocumentsModel } from "./documents";
+import { WorkspaceModel, WorkspaceType, LearningLogWorkspace, SectionWorkspace } from "./workspace";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -18,7 +19,7 @@ export interface IStores {
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
-  workspaces: WorkspacesModelType;
+  documents: DocumentsModelType;
   db: DB;
   unit: UnitModelType;
   demo: DemoModelType;
@@ -33,7 +34,7 @@ export interface ICreateStores {
   ui?: UIModelType;
   groups?: GroupsModelType;
   class?: ClassModelType;
-  workspaces?: WorkspacesModelType;
+  documents?: DocumentsModelType;
   db?: DB;
   showDemoCreator?: boolean;
   unit?: UnitModelType;
@@ -47,11 +48,24 @@ export function createStores(params?: ICreateStores): IStores {
     // for ease of testing, we create a null problem if none is provided
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user: params && params.user || UserModel.create({id: "0"}),
-    ui: params && params.ui || UIModel.create({}),
+    ui: params && params.ui || UIModel.create({
+      sectionWorkspace: {
+        type: SectionWorkspace,
+        mode: "1-up",
+        visibility: "private",
+        groupDocumentKeys: {}
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up",
+        visibility: "private",
+        groupDocumentKeys: {}
+      },
+    }),
     groups: params && params.groups || GroupsModel.create({}),
     class: params && params.class || ClassModel.create({name: "Null Class", classHash: ""}),
     db: params && params.db || new DB(),
-    workspaces: params && params.workspaces || WorkspacesModel.create({}),
+    documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
     demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,

@@ -99,7 +99,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(this.renderError(ui.error));
     }
 
-    if (!user.authenticated || !db.isListening) {
+    if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
     }
 

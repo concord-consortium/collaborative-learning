@@ -6,7 +6,7 @@ import { configure, mount, shallow } from "enzyme";
 import { CanvasComponent } from "./canvas";
 import { DocumentContentModel } from "../models/document-content";
 import { DocumentContentComponent } from "./document-content";
-import { DocumentModel } from "../models/document";
+import { DocumentModel, SectionDocument } from "../models/document";
 import { createStores } from "../models/stores";
 
 import { logComponent } from "../utilities/test-utils";
@@ -30,6 +30,8 @@ describe("Canvas Component", () => {
 
   it("can render with a document", () => {
     const document = DocumentModel.create({
+      type: SectionDocument,
+      title: "test",
       uid: "1",
       key: "test",
       createdAt: 1,

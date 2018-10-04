@@ -3,15 +3,16 @@ import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
          FourUpGridModelType } from "../models/four-up-grid";
-import { SectionWorkspaceModelType } from "../models/workspaces";
 import { CanvasComponent } from "./canvas";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./four-up.sass";
 import { DocumentModelType } from "../models/document";
+import { WorkspaceModelType } from "../models/workspace";
 
 interface IProps extends IBaseProps {
-  workspace: SectionWorkspaceModelType;
+  document?: DocumentModelType;
+  workspace: WorkspaceModelType;
 }
 
 interface FourUpUser {
@@ -64,15 +65,20 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
-    const { groups, user } = this.stores;
-    const { workspace, ...others } = this.props;
+    const { groups, user, documents } = this.stores;
+    const { workspace, document, ...others } = this.props;
 
     const group = groups.groupForUser(user.id);
+    const groupDocuments = group &&
+                           document &&
+                           documents.getSectionDocumentsForGroup(document.sectionId!, document.groupId!);
     const groupUsers: FourUpUser[] = group
       ? group.users
           .filter((groupUser) => groupUser.id !== user.id)
           .map((groupUser) => {
-            const groupUserDoc = workspace.groupDocuments.get(groupUser.id);
+            const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
+              return groupDocument.uid === groupUser.id;
+            });
             return {
               doc: groupUserDoc,
               initials: groupUser.initials
@@ -84,35 +90,43 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       return groupUsers[index] && groupUsers[index].doc;
     };
 
+    // if we have a document then make it the first of the group
+    if (document) {
+      groupUsers.unshift({
+        doc: document,
+        initials: user.initials
+      });
+    }
+
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
             <CanvasComponent context="four-up-nw" scale={nwCell.scale}
-                            document={workspace.document} {...others} />
+                            document={groupDoc(0)} {...others} />
           </div>
-          <div className="member">{user.initials}</div>
+          {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
             <CanvasComponent context="four-up-ne" scale={neCell.scale}
-                            readOnly={true} document={groupDoc(0)} {...others} />
+                            readOnly={true} document={groupDoc(1)} {...others} />
           </div>
-          {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
+          {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
             <CanvasComponent context="four-up-se" scale={seCell.scale}
-                            readOnly={true} document={groupDoc(1)} {...others}/>
+                            readOnly={true} document={groupDoc(2)} {...others}/>
           </div>
-          {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
+          {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
             <CanvasComponent context="four-up-sw" scale={swCell.scale}
-                            readOnly={true} document={groupDoc(2)} {...others}/>
+                            readOnly={true} document={groupDoc(3)} {...others}/>
           </div>
-          {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
+          {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
         </div>
         <div
           className="horizontal splitter"

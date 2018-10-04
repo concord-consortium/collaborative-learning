@@ -2,11 +2,9 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 
 import "./my-work.sass";
-import { TabComponent } from "./tab";
-import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
-import { SectionWorkspaceModelType } from "../models/workspaces";
+import { DocumentDragKey, SectionDocument, DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {}
 
@@ -15,30 +13,31 @@ interface IProps extends IBaseProps {}
 export class MyWorkComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const {sections} = this.stores.workspaces;
+    const {documents, user} = this.stores;
+    const sections = documents.byTypeForUser(SectionDocument, user.id);
     if (sections.length === 0) {
       return null;
     }
     return (
       <div className="my-work">
         <div className="list">
-          {sections.map((workspace) => {
-            const section = this.stores.problem.getSectionById(workspace.sectionId);
+          {sections.map((document) => {
+            const section = this.stores.problem.getSectionById(document.sectionId!);
             const title = section ? section.title : undefined;
             return (
               <div
                 className="list-item"
-                key={workspace.sectionId}
+                key={document.sectionId}
                 title={title}
               >
                 <div
                   className="scaled-list-item-container"
-                  onClick={this.handleWorkspaceClicked(workspace)}
-                  onDragStart={this.handleWorkspaceDragStart(workspace)}
+                  onClick={this.handleDocumentClicked(document)}
+                  onDragStart={this.handleDocumentDragStart(document)}
                   draggable={true}
                 >
                   <div className="scaled-list-item">
-                    <CanvasComponent context="my-work" document={workspace.document} readOnly={true} />
+                    <CanvasComponent context="my-work" document={document} readOnly={true} />
                   </div>
                 </div>
                 <div className="info">
@@ -52,28 +51,29 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleWorkspaceClicked = (workspace: SectionWorkspaceModelType) => {
+  private handleDocumentClicked = (document: DocumentModelType) => {
     const {ui} = this.stores;
+    const {sectionWorkspace, learningLogWorkspace} = ui;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (ui.bottomNavExpanded) {
-        if (ui.llPrimaryWorkspaceDocumentKey) {
-          ui.setLLComparisonWorkspace(workspace);
-          ui.toggleLLComparisonWorkspaceVisible(true);
+        if (learningLogWorkspace.primaryDocumentKey) {
+          learningLogWorkspace.setComparisonDocument(document);
+          learningLogWorkspace.toggleComparisonVisible(true);
         }
         else {
           ui.alert("Please select a Learning Log first.", "Select for Learning Log");
         }
       }
       else {
-        ui.setAvailableWorkspace(workspace);
+        sectionWorkspace.setAvailableDocument(document);
         ui.contractAll();
       }
     };
   }
 
-  private handleWorkspaceDragStart = (workspace: SectionWorkspaceModelType) => {
+  private handleDocumentDragStart = (document: DocumentModelType) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      e.dataTransfer.setData("workspace.document.key", workspace.document.key);
+      e.dataTransfer.setData(DocumentDragKey, document.key);
     };
   }
 }
