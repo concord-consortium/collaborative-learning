@@ -60,7 +60,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         <button
           className={fileUploadClasses}
           onClick={this.handleUploadButton}>Upload</button>
-        <div className="tempLogMessages">{this.state.logOutput}</div>
       </div>
     );
   }
@@ -68,7 +67,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   private getUrlFromStore(storePath: string) {
     const { db } = this.stores;
     const storage = db.firebase.firestore();
-    const ref = storage.refFromURL(storePath);
+    const ref = storage.ref(storePath);
     this.getUrlFromFirestore(ref);
   }
 
@@ -116,6 +115,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       }
     });
   }
+  // TODO: This will not exist once this branch work has been completed - leaving in for now for WIP development
   private showMessage(message: string, append: boolean = false) {
     const { logOutput } = this.state;
     // TODO: Figure out user-friendly way to show information
@@ -156,10 +156,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   private updateURL = (newUrl: string, storePath?: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
-    imageContent.setUrl(newUrl);
-    if (storePath) {
-      imageContent.setStorePath(storePath);
-      this.showMessage("---path set!--- " + storePath, true);
-    }
+    imageContent.setUrl(newUrl, storePath);
+    this.showMessage("---path set!--- " + storePath, true);
+
   }
 }

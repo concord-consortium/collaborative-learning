@@ -11,17 +11,14 @@ export const ImageContentModel = types
   .extend(self => {
 
     // actions
-    function setUrl(url?: string) {
+    function setUrl(url?: string, storePath?: string) {
       self.url = url;
-    }
-    function setStorePath(storePath?: string) {
       self.storePath = storePath;
     }
 
     return {
       actions: {
-        setUrl,
-        setStorePath
+        setUrl
       }
     };
   });
