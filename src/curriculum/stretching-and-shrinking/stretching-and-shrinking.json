@@ -11,14 +11,38 @@
       },
       {
         "content": {
+          "type": "Image",
+          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_01_map_500w.png"
+        }
+      },
+      {
+        "content": {
           "type": "Text",
           "text": "Suppose that you want to find the width of a river that is too wide to measure directly. How can you use similar triangles to find the distance across the river?"
         }
       },
       {
         "content": {
+          "type": "Image",
+          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_02_river_500w.png"
+        }
+      },
+      {
+        "content": {
           "type": "Text",
           "text": "Here is a picture of Duke, a real dog. If you know the scale factor between Duke and the picture, how can you determine how long Duke is from his nose to the tip of his tail?"
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_03_dog_500w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_500w.png"
         }
       },
       {
@@ -83,6 +107,12 @@
               "type": "Text",
               "text": "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
             }
+          },
+          {
+            "content": {
+              "type": "Image",
+              "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
+            }
           }
         ]
       },
@@ -114,6 +144,12 @@
                       "type": "Text",
                       "text": "One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher."
                     }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
+                    }   
                   }
                 ]
               },
@@ -169,6 +205,12 @@
                       "type": "Text",
                       "text": "The Mystery Club Advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
                     }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_500w.png"
+                    }   
                   }
                 ],
                 "supports": []
@@ -203,6 +245,12 @@
                 "tiles": [
                   {
                     "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_500w.png"
+                    }   
+                  },
+                  {
+                    "content": {
                       "type": "Text",
                       "text": "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members."
                     }
@@ -212,6 +260,12 @@
                       "type": "Text",
                       "text": "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
                     }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
+                    }   
                   }
                 ],
                 "supports": []
@@ -307,8 +361,92 @@
                   {
                     "content": {
                       "type": "Text",
+                      "text": "In the last Problem, you worked with images, or scale drawings, that were similar to the original. Those scale drawings were larger than the original figure. In this Problem, you will work with scale drawings that are smaller than the original. You will also learn more about what it means for figures to be similar."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "When you study similar figures, you often compare their sides and angles. To compare the parts correctly, mathematicians use the terms corresponding sides and corresponding angles. In every pair of similar figures, each side of one figure has a corresponding side in the other figure. Also, each angle has a corresponding angle. Recall that there are two ways to identify angles."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_500w.png"
+                    }   
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can identify an angle with three letters. The angles in the small triangle have the following names:"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "U+2220BAC or BAC"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "U+2220BCA or BCA"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "U+2220ABC or ABC"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of BAC."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can also name an angle by its vertex. It is important to use this method only when it is clear which angle you are referring to."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "BAC can also be called A"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "BCA can also be called C"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "ABC can also be called B"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What names would you give the angles of the large triangle?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
                       "text": "Daphne thinks the rubber-band method is clever, but she believes the school copier can make more accurate copies in a greater variety of sizes. She makes a copy of “Super Sleuth” with two different percent size factors. The results are shown below."
                     }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
+                    }   
                   }
                 ]
               },
@@ -424,14 +562,7 @@
           }
         ]
       },
-      "supports": [
-        {
-          "text": "TEST: investigation #1 level support #1"
-        },
-        {
-          "text": "TEST: investigation #1 level support #2"
-        }
-      ]
+      "supports": []
     },
     {
       "description": "Investigation 2",
@@ -453,8 +584,20 @@
           },
           {
             "content": {
+              "type": "Image",
+              "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_12_play_500w.png"
+            }
+          },
+          {
+            "content": {
               "type": "Text",
               "text": "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points on the new figure, using key points from the original figure."
+            }
+          },
+          {
+            "content": {
+              "type": "Image",
+              "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_500w.png"
             }
           },
           {
@@ -508,14 +651,7 @@
                   }
                 ]
               },
-              "supports": [
-                {
-                  "text": "TEST: problem #2.1 introduction level support #1"
-                },
-                {
-                  "text": "TEST: problem #2.1 introduction level support #2"
-                }
-              ]
+              "supports": [ ]
             },
             {
               "type": "initialChallenge",
@@ -1469,12 +1605,5 @@
       "supports": []
     }
   ],
-  "supports": [
-    {
-      "text": "TEST: unit level support #1"
-    },
-    {
-      "text": "TEST: unit level support #2"
-    }
-  ]
+  "supports": []
 }
