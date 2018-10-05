@@ -112,14 +112,14 @@ describe("demo mode", () => {
   let urlParams: QueryParams = {
     fakeClass: "1",
     fakeUser: "student:2",
-    fakeOffering: "3",
+    problem: "3.1",
   };
 
   beforeEach(() => {
     urlParams = {
       fakeClass: "1",
       fakeUser: "student:2",
-      fakeOffering: "3",
+      problem: "3.1",
     };
   });
 
@@ -135,7 +135,7 @@ describe("demo mode", () => {
         classId: "1",
         userType: "student",
         userId: "2",
-        offeringId: "3"
+        offeringId: "301"
       });
       expect(authenticatedUser).toEqual(demoUser);
       done();
@@ -153,15 +153,6 @@ describe("demo mode", () => {
 
   it("should fail without a demo user", (done) => {
     urlParams.fakeUser = undefined;
-    authenticate("demo", urlParams)
-      .then(() => {
-        done.fail();
-      })
-      .catch(() => done());
-  });
-
-  it("should fail without a demo offering", (done) => {
-    urlParams.fakeOffering = undefined;
     authenticate("demo", urlParams)
       .then(() => {
         done.fail();
@@ -324,7 +315,7 @@ describe("student authentication", () => {
       classId: "1",
       userType: "student",
       userId: "2",
-      offeringId: "3"
+      problemOrdinal: "3.1"
     });
     expect(demoInfo.authenticatedUser).toEqual({
       type: "student",
@@ -336,7 +327,7 @@ describe("student authentication", () => {
       initials: "S2",
       className: "Demo Class 1",
       classHash: "democlass1",
-      offeringId: "3"
+      offeringId: "301"
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
