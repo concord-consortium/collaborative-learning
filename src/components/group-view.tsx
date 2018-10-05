@@ -33,7 +33,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
         <HeaderComponent />
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />
-        {isGhostUser ? null : <BottomNavComponent />}
+        <BottomNavComponent />
         <RightNavComponent isGhostUser={isGhostUser} />
         <DialogComponent dialog={this.stores.ui.dialog} />
       </div>

@@ -15,7 +15,7 @@ const GhostSectionPrefix = "ghostSection";
 export const createGhostSectionDocumentKey = (sectionId: string) => `${GhostSectionPrefix}:${sectionId}`;
 export const parseGhostSectionDocumentKey = (documentKey: string) => {
   const [prefix, sectionId, ...rest] = documentKey.split(":");
-  return sectionId;
+  return prefix === GhostSectionPrefix ? sectionId : null;
 };
 
 export const WorkspaceModel = types

@@ -8,6 +8,8 @@ import { TeacherGroupTabComponent } from "./teacher-group-tab";
 import { TeacherStudentTabComponent } from "./teacher-student-tab";
 
 import "./teacher-dashboard.sass";
+import { BottomNavComponent } from "./bottom-nav";
+import { RightNavComponent } from "./right-nav";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -60,6 +62,8 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
             {this.renderTabContents()}
           </div>
         </div>
+        <BottomNavComponent />
+        <RightNavComponent isGhostUser={true} />
       </div>
     );
   }
