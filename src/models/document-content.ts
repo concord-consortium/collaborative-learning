@@ -7,6 +7,12 @@ import { ToolContentUnionType } from "./tools/tool-types";
 import { ToolTileModel } from "./tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
 import { cloneDeep } from "lodash";
+import * as uuid from "uuid/v4";
+
+export interface NewRowOptions {
+  rowHeight?: number;
+  rowIndex?: number;
+}
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -22,29 +28,57 @@ export const DocumentContentModel = types
             : snapshot;
   })
   .views(self => {
+    // used for drag/drop self-drop detection, for instance
+    const contentId = uuid();
+
+    function rowContainsTile(rowId: string, tileId: string) {
+      const row = self.rowMap.get(rowId);
+      return row
+              ? row.tiles.findIndex(tile => tile.tileId === tileId) >= 0
+              : false;
+    }
+
     return {
       get isEmpty() {
         return self.tileMap.size === 0;
+      },
+      get contentId() {
+        return contentId;
+      },
+      findRowContainingTile(tileId: string) {
+        return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
       }
     };
   })
   .actions(self => ({
-    addTileInNewRow(content: ToolContentUnionType, rowHeight?: number) {
+    addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions) {
       const tile = ToolTileModel.create({ content });
+      const o = options || {};
       const rowSpec: TileRowSnapshotType = { tiles: [{ tileId: tile.id }] };
-      if (rowHeight) {
-        rowSpec.height = rowHeight;
+      if (o.rowHeight) {
+        rowSpec.height = o.rowHeight;
       }
       const row = TileRowModel.create(rowSpec);
       self.tileMap.put(tile);
       self.rowMap.put(row);
-      self.rowOrder.push(row.id);
+      if ((o.rowIndex != null) && (o.rowIndex < self.rowOrder.length)) {
+        self.rowOrder.splice(o.rowIndex, 0, row.id);
+      }
+      else {
+        self.rowOrder.push(row.id);
+      }
       return tile.id;
+    },
+    moveRowToIndex(rowIndex: number, newRowIndex: number) {
+      const rowId = self.rowOrder[rowIndex];
+      self.rowOrder.splice(rowIndex, 1);
+      self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
     }
   }))
   .actions((self) => ({
     addGeometryTile() {
-      return self.addTileInNewRow(defaultGeometryContent(), kGeometryDefaultHeight);
+      return self.addTileInNewRow(defaultGeometryContent(),
+                                  { rowHeight: kGeometryDefaultHeight });
     },
     addTextTile(initialText?: string) {
       return self.addTileInNewRow(defaultTextContent(initialText));
@@ -90,7 +124,7 @@ function migrateSnapshot(snapshot: any): any {
   tiles.forEach(tile => {
     const newTile = cloneDeep(tile);
     const tileHeight = newTile.layout && newTile.layout.height;
-    docContent.addTileInNewRow(newTile.content, tileHeight);
+    docContent.addTileInNewRow(newTile.content, { rowHeight: tileHeight });
   });
   return getSnapshot(docContent);
 }

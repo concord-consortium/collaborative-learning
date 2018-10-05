@@ -8,6 +8,7 @@ import "./tile-row.sass";
 
 interface IProps {
   context: string;
+  docId: string;
   scale?: number;
   model: TileRowModelType;
   tileMap: any;
@@ -23,12 +24,12 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     const style = height ? { height } : undefined;
     return (
       <div className={`tile-row`} style={style}>
-        {this.renderTiles()}
+        {this.renderTiles(height)}
       </div>
     );
   }
 
-  private renderTiles() {
+  private renderTiles(rowHeight?: number) {
     const { model, tileMap, ...others } = this.props;
     const { tiles } = model;
     if (!tiles) { return null; }
@@ -36,7 +37,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     return tiles.map(tileRef => {
       const tileModel: ToolTileModelType = tileMap.get(tileRef.tileId);
       return tileModel
-              ? <ToolTileComponent key={tileModel.id} model={tileModel} {...others} />
+              ? <ToolTileComponent key={tileModel.id} model={tileModel} rowHeight={rowHeight} {...others} />
               : null;
     });
   }
