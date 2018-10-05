@@ -5,8 +5,11 @@ import * as uuid from "uuid/v4";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 
-export const isFreePoint = (v: any) => isPoint(v) && v.hasLabel &&
-                                        (size(v.childElements) <= 1) && (size(v.descendants) <= 1);
+export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
+
+export const isFreePoint = (v: any) => isVisiblePoint(v) &&
+                                        (size(v.childElements) <= 1) &&
+                                        (size(v.descendants) <= 1);
 
 export const pointChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
