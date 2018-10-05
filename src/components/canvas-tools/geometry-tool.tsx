@@ -4,7 +4,7 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
 import { isBoard } from "../../models/tools/geometry/jxg-board";
-import { isPoint, isFreePoint } from "../../models/tools/geometry/jxg-point";
+import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
 import { assign, cloneDeep, isEqual } from "lodash";
 import { SizeMe } from "react-sizeme";
@@ -214,7 +214,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       let el;
       for (el in board.objects) {
-        if (JXG.isPoint(board.objects[el]) &&
+        if (isVisiblePoint(board.objects[el]) &&
             board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
