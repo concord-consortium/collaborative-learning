@@ -6,6 +6,7 @@ export const ImageContentModel = types
   .model("ImageTool", {
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.maybe(types.string),
+    storePath: types.maybe(types.string)
   })
   .extend(self => {
 
@@ -13,10 +14,14 @@ export const ImageContentModel = types
     function setUrl(url?: string) {
       self.url = url;
     }
+    function setStorePath(storePath?: string) {
+      self.storePath = storePath;
+    }
 
     return {
       actions: {
         setUrl,
+        setStorePath
       }
     };
   });

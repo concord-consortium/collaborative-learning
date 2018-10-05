@@ -27,6 +27,10 @@ export class Firebase {
     return firebase.database().ref(this.getFullPath(path));
   }
 
+  public firestore() {
+    return firebase.storage();
+  }
+
   public storeRef(path: string = "") {
     if (!this.isConnected) {
       throw new Error("storeRef() requested before firestore connected!");
