@@ -164,11 +164,10 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private render4UpCanvas() {
-    const {isGhostUser} = this.props;
+    const {isGhostUser, document} = this.props;
     const {sectionWorkspace} = this.stores.ui;
-    const document = isGhostUser ? undefined : this.props.document;
     return (
-      <FourUpComponent document={document} workspace={sectionWorkspace} />
+      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser} />
     );
   }
 

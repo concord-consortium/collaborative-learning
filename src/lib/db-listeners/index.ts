@@ -267,14 +267,15 @@ export class DBListeners {
       if (rawGroupDoc) {
         const groupUserId = rawGroupDoc.self.uid;
         const {documentKey} = rawGroupDoc.self;
-        const { user } = this.db.stores;
+        const { groups } = this.db.stores;
+        const group = groups.groupForUser(groupUserId);
 
         this.db.openDocument({
           documentKey,
           type: SectionDocument,
           sectionId: document.sectionId,
           userId: groupUserId,
-          groupId: document.groupId!,
+          groupId: group && group.id,
           visibility: "public",
         }).then((groupUserDoc) => {
           this.db.stores.ui.sectionWorkspace.setGroupDocument(groupUserId, groupUserDoc);

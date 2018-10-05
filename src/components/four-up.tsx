@@ -13,6 +13,7 @@ import { WorkspaceModelType } from "../models/workspace";
 interface IProps extends IBaseProps {
   document?: DocumentModelType;
   workspace: WorkspaceModelType;
+  isGhostUser: boolean;
 }
 
 interface FourUpUser {
@@ -71,7 +72,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     const group = groups.groupForUser(user.id);
     const groupDocuments = group &&
                            document &&
-                           documents.getSectionDocumentsForGroup(document.sectionId!, document.groupId!);
+                           documents.getSectionDocumentsForGroup(document.sectionId!, group.id);
     const groupUsers: FourUpUser[] = group
       ? group.users
           .filter((groupUser) => groupUser.id !== user.id)
@@ -91,7 +92,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     };
 
     // if we have a document then make it the first of the group
-    if (document) {
+    if (!this.props.isGhostUser) {
       groupUsers.unshift({
         doc: document,
         initials: user.initials
@@ -102,7 +103,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale} readOnly={!this.props.isGhostUser}
                             document={groupDoc(0)} {...others} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}

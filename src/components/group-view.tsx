@@ -156,6 +156,8 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
             createdAt: 1,
             content: {},
           });
+
+          this.stores.db.listeners.updateGroupUserSectionDocumentListeners(ghostSectionDocuments[sectionId]);
         }
         return ghostSectionDocuments[sectionId];
       }
