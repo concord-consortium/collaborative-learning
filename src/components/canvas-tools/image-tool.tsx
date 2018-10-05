@@ -104,11 +104,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const files = e.currentTarget.files as FileList;
     const fileReader = new FileReader();
     fileReader.onloadend = () => {
-      const fileContent = fileReader.result;
-      console.log(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
+      this.setState({ currentFile: files[0] });
+      // const fileContent = fileReader.result;
+      // console.log(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
     };
-    this.setState({ currentFile: files[0] });
-
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
