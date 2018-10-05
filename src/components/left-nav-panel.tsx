@@ -6,7 +6,8 @@ import { DocumentContentModelType } from "../models/document-content";
 
 import "./left-nav-panel.sass";
 import { CanvasComponent } from "./canvas";
-import { WorkspaceModelType } from "../models/workspaces";
+import { WorkspaceModelType } from "../models/workspace";
+import { DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
@@ -15,7 +16,7 @@ interface IProps extends IBaseProps {
 @inject("stores")
 @observer
 export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
-  private openWorkspaceButton: HTMLButtonElement | null;
+  private openDocumentButton: HTMLButtonElement | null;
 
   public render() {
     const { section } = this.props;
@@ -44,8 +45,8 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
       <CanvasComponent context="left-nav" readOnly={true} content={content}>
         <div className="buttons">
           <button
-            ref={(el) => this.openWorkspaceButton = el}
-            onClick={this.handleOpenWorkspace}
+            ref={(el) => this.openDocumentButton = el}
+            onClick={this.handleOpenDocument}
           >
             Open {section.title} Section
           </button>
@@ -54,25 +55,26 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleOpenWorkspace = () => {
-    const { db, ui, workspaces } = this.stores;
+  private handleOpenDocument = () => {
+    const { db, ui, documents, user } = this.stores;
     const { section } = this.props;
+    const { sectionWorkspace } = ui;
     if (section) {
-      const workspace = workspaces.getSectionWorkspace(section.id);
-      const done = (finalWorkspace: WorkspaceModelType) => {
-        ui.toggleComparisonWorkspaceVisible(false);
-        ui.setComparisonWorkspace();
-        ui.setPrimaryWorkspace(finalWorkspace);
+      const document = documents.getSectionDocument(user.id, section.id);
+      const done = (finalDocument: DocumentModelType) => {
+        sectionWorkspace.toggleComparisonVisible(false);
+        sectionWorkspace.setComparisonDocument();
+        sectionWorkspace.setPrimaryDocument(finalDocument);
         ui.contractAll();
-        this.openWorkspaceButton!.disabled = false;
+        this.openDocumentButton!.disabled = false;
       };
 
-      this.openWorkspaceButton!.disabled = true;
-      if (workspace) {
-        done(workspace);
+      this.openDocumentButton!.disabled = true;
+      if (document) {
+        done(document);
       }
       else {
-        db.createSectionWorkspace(section.id)
+        db.createSectionDocument(section.id)
           .then(done)
           .catch(ui.setError);
       }

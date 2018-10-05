@@ -1,8 +1,5 @@
 import * as firebase from "firebase";
 import { AppMode, IStores } from "../models/stores";
-import { UserModelType, UserModel } from "../models/user";
-import { onSnapshot } from "mobx-state-tree";
-import { IDisposer } from "mobx-state-tree/dist/utils";
 import { observable } from "mobx";
 import { DBOfferingGroup,
          DBOfferingGroupUser,
@@ -12,27 +9,24 @@ import { DBOfferingGroup,
          DBDocument,
          DBOfferingUserSectionDocument,
          DBLearningLog,
-         DBUserDocument,
-         DBUserDocumentType,
-         DBOfferingDocumentType,
-         DBOfferingDocument,
-         DBPublishedDocumentMetadata,
-         DBUserDocumentMetadata,
-         DBOfferingDocumentMetadata,
-         DBPublishedDocument,
+         DBPublicationDocumentMetadata,
          DBGroupUserConnections,
+         DBPublication,
+         DBDocumentType,
+         DBBaseDocumentMetadata,
         } from "./db-types";
-import { SectionWorkspaceModelType,
-         SectionWorkspaceModel,
-         LearningLogWorkspaceModelType,
-         LearningLogWorkspaceModel,
-         PublishedWorkspaceModel,
-         WorkspaceModelType} from "../models/workspaces";
-import { DocumentModelType, DocumentModel } from "../models/document";
+import { DocumentModelType,
+         DocumentModel,
+         DocumentType,
+         SectionDocument,
+         LearningLogDocument,
+         PublicationDocument
+        } from "../models/document";
 import { DocumentContentModel, DocumentContentModelType } from "../models/document-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { TextContentModelType } from "../models/tools/text/text-content";
-import { urlParams } from "../utilities/url-params";
+import { Firebase } from "./firebase";
+import { DBListeners } from "./db-listeners";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -54,60 +48,37 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
-export interface ModelListeners {
-  [key /* unique Key */: string]: {
-    ref?: firebase.database.Reference;
-    modelDisposer?: IDisposer;
-  };
-}
-
-export interface UserSectionDocumentListeners {
-  [key /* sectionId */: string]: {
-    [key /* userId */: string]: {
-      sectionDocsRef?: firebase.database.Reference;
-      docContentRef?: firebase.database.Reference;
-    };
-  };
-}
-
-export interface WorkspaceModelDisposers {
-  [key /* sectionId */: string]: IDisposer;
-}
-
 export type DBClearLevel = "all" | "class" | "offering";
 
+export interface OpenDocumentOptions {
+  documentKey: string;
+  type: DocumentType;
+  userId: string;
+  groupId?: string;
+  sectionId?: string;
+  visibility?: "public" | "private";
+  title?: string;
+  groupUserConnections?: {};
+}
+
 export class DB {
-  @observable public isListening = false;
   @observable public groups: GroupUsersMap = {};
-  public _private = {
-    parseDocumentContent: this.parseDocumentContent
-  };
+  public firebase: Firebase;
+  public listeners: DBListeners;
+  public stores: IStores;
+
+  public creatingDocuments: string[] = [];
+
   private appMode: AppMode;
-  private firebaseUser: firebase.User | null = null;
-  private stores: IStores;
-  private latestGroupIdRef: firebase.database.Reference | null = null;
-  private groupsRef: firebase.database.Reference | null = null;
-  private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
-  private connectedRef: firebase.database.Reference | null = null;
-  private workspaceRef: firebase.database.Reference | null  = null;
-  private modelListeners: ModelListeners = {};
-  private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
-  private workspaceModelDisposers: WorkspaceModelDisposers = {};
-  private learningLogsRef: firebase.database.Reference | null  = null;
-  private creatingWorkspaces: string[] = [];
-  private publicationsRef: firebase.database.Reference | null = null;
 
-  public get isConnected() {
-    return this.firebaseUser !== null;
-  }
-
-  public get firebaseUserId() {
-    return this.firebaseUser ? this.firebaseUser.uid : "no-user-id";
+  constructor() {
+    this.firebase = new Firebase(this);
+    this.listeners = new DBListeners(this);
   }
 
   public connect(options: IDBConnectOptions) {
     return new Promise<void>((resolve, reject) => {
-      if (this.isConnected) {
+      if (this.firebase.isConnected) {
         reject("Already connected to database!");
       }
 
@@ -139,26 +110,26 @@ export class DB {
       firebase.auth().onAuthStateChanged((firebaseUser) => {
         if (firebaseUser) {
           this.appMode = options.appMode;
-          this.firebaseUser = firebaseUser;
-          this.stopListeners();
-          this.startListeners().then(resolve).catch(reject);
+          this.firebase.user = firebaseUser;
+          this.listeners.stop();
+          this.listeners.start().then(resolve).catch(reject);
         }
       });
     });
   }
 
   public disconnect() {
-    this.stopListeners();
+    this.listeners.stop();
 
     if (this.appMode === "test") {
       // delete all test data (for this unique anonymous test user)
-      return this.ref().set(null);
+      return this.firebase.ref().set(null);
     }
   }
 
   public joinGroup(groupId: string) {
     const {user} = this.stores;
-    const groupRef = this.ref(this.getGroupPath(user, groupId));
+    const groupRef = this.firebase.ref(this.firebase.getGroupPath(user, groupId));
     let userRef: firebase.database.Reference;
 
     return new Promise<void>((resolve, reject) => {
@@ -192,11 +163,11 @@ export class DB {
           } as DBOfferingGroupUser);
         })
         .then(() => {
-          return this.setConnectionHandlers(userRef);
+          return this.firebase.setConnectionHandlers(userRef);
         })
         .then(() => {
           // remember the last group joined
-          return this.getLatestGroupIdRef().set(groupId);
+          return this.firebase.getLatestGroupIdRef().set(groupId);
         })
         .then(resolve)
         .catch(reject);
@@ -205,12 +176,9 @@ export class DB {
 
   public leaveGroup() {
     const {user} = this.stores;
-    const groupsRef = this.ref(this.getGroupsPath(user));
+    const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
 
-    if (this.groupOnDisconnect) {
-      this.groupOnDisconnect.cancel();
-    }
-    this.groupOnDisconnect = null;
+    this.firebase.cancelGroupDisconnect();
 
     return new Promise<void>((resolve, reject) => {
       groupsRef.once("value")
@@ -226,26 +194,26 @@ export class DB {
           if (myGroupIds.length > 0) {
             const updates: any = {};
             myGroupIds.forEach((groupId) => {
-              updates[this.getFullPath(this.getGroupUserPath(user, groupId))] = null;
+              updates[this.firebase.getFullPath(this.firebase.getGroupUserPath(user, groupId))] = null;
             });
             return firebase.database().ref().update(updates);
           }
         })
         .then(() => {
-          this.getLatestGroupIdRef().set(null);
+          this.firebase.getLatestGroupIdRef().set(null);
         })
         .then(resolve)
         .catch(reject);
     });
   }
 
-  public createSectionWorkspace(sectionId: string) {
-    return new Promise<SectionWorkspaceModelType>((resolve, reject) => {
-      this.creatingWorkspaces.push(sectionId);
+  public createSectionDocument(sectionId: string) {
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      this.creatingDocuments.push(sectionId);
 
-      const {user, workspaces, ui} = this.stores;
-      const offeringUserRef = this.ref(this.getOfferingUserPath(user));
-      const sectionDocumentRef = this.ref(this.getSectionDocumentPath(user, sectionId));
+      const {user, documents, ui} = this.stores;
+      const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
+      const sectionDocumentRef = this.firebase.ref(this.firebase.getSectionDocumentPath(user, sectionId));
 
       return offeringUserRef.once("value")
         .then((snapshot) => {
@@ -275,7 +243,7 @@ export class DB {
           }
           else {
             // create the document and section document
-            return this.createUserDocument("section")
+            return this.createDocument(SectionDocument)
               .then(({document, metadata}) => {
                   sectionDocument = {
                     version: "1.0",
@@ -293,75 +261,70 @@ export class DB {
           }
         })
         .then((sectionDocument) => {
-          return this.openSectionWorkspace(sectionDocument.self.sectionId);
+          return this.openSectionDocument(sectionDocument.self.sectionId);
         })
-        .then((sectionWorkspace) => {
-          workspaces.addSectionWorkspace(sectionWorkspace);
-          this.creatingWorkspaces.splice(this.creatingWorkspaces.indexOf(sectionId), 1);
-          return sectionWorkspace;
+        .then((sectionDocument) => {
+          documents.add(sectionDocument);
+          this.creatingDocuments.splice(this.creatingDocuments.indexOf(sectionId), 1);
+          return sectionDocument;
         })
         .then(resolve)
         .catch(reject);
     });
   }
 
-  public openSectionWorkspace(sectionId: string) {
+  public openSectionDocument(sectionId: string) {
     const { user } = this.stores;
 
-    return new Promise<SectionWorkspaceModelType>((resolve, reject) => {
-      const sectionDocumentRef = this.ref(this.getSectionDocumentPath(user, sectionId));
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const sectionDocumentRef = this.firebase.ref(this.firebase.getSectionDocumentPath(user, sectionId));
       return sectionDocumentRef.once("value")
         .then((snapshot) => {
           const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
           if (!sectionDocument) {
-            throw new Error("Unable to find workspace document in db!");
+            throw new Error("Unable to find document in db!");
           }
           return sectionDocument;
         })
         .then((sectionDocument) => {
-          return this.createWorkspaceFromSectionDocument(user.id, sectionDocument);
+          return this.createDocumentFromSectionDocument(user.id, sectionDocument);
         })
-        .then((workspace) => {
-          this.updateGroupUserSectionDocumentListeners(workspace);
-          this.monitorSectionWorkspaceVisibility(workspace);
-          resolve(workspace);
+        .then((sectionDocument) => {
+          this.listeners.updateGroupUserSectionDocumentListeners(sectionDocument);
+          this.listeners.monitorSectionDocumentVisibility(sectionDocument);
+          resolve(sectionDocument);
         })
         .catch(reject);
     });
   }
 
-  public createUserDocument(type: DBUserDocumentType) {
+  public createDocument(type: DBDocumentType, content?: string) {
     const {user} = this.stores;
-    return new Promise<{document: DBUserDocument, metadata: DBUserDocumentMetadata}>((resolve, reject) => {
-      const documentRef = this.ref(this.getUserDocumentPath(user)).push();
+    return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
+      const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
-      const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey));
-      const document: DBUserDocument = {
-        version: "1.0",
-        self: {
-          uid: user.id,
-          documentKey,
-        },
-        type
-      };
-      let metadata: DBUserDocumentMetadata;
+      const metadataRef = this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey));
+      const version = "1.0";
+      const self = {uid: user.id, documentKey};
+      const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
+      const {classHash, offeringId} = user;
+      const document: DBDocument = {version, self, type};
+      if (content) {
+        document.content = content;
+      }
 
-      const metadataBase: DBUserDocumentMetadata = {
-        version: "1.0",
-        self: {
-          uid: user.id,
-          documentKey,
-        },
-        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-        type
-      };
-      if (type === "section") {
-        metadata = Object.assign({
-          classHash: user.classHash,
-          offeringId: user.offeringId
-        }, metadataBase);
-      } else {
-        metadata = metadataBase;
+      let metadata: DBDocumentMetadata;
+
+      switch (type) {
+        case SectionDocument:
+          metadata = {version, self, createdAt, type, classHash, offeringId};
+          break;
+        case LearningLogDocument:
+          metadata = {version, self, createdAt, type};
+          break;
+        case PublicationDocument:
+          metadata = {version, self, createdAt, type, classHash, offeringId};
+          break;
       }
 
       return documentRef.set(document)
@@ -373,72 +336,65 @@ export class DB {
     });
   }
 
-  public createOfferingDocument(type: DBOfferingDocumentType, workspace: SectionWorkspaceModelType) {
+  public publishDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
-    const documentModel = workspace.document;
     const content = JSON.stringify(documentModel.content);
-    return new Promise<{document: DBOfferingDocument, metadata: DBOfferingDocumentMetadata}>((resolve, reject) => {
-      const documentRef = this.ref(this.getOfferingDocumentsPath(user)).push();
-      const documentKey = documentRef.key!;
-      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
-      const document: DBOfferingDocument = {
-        version: "1.0",
-        self: {
-          classHash: user.classHash,
-          offeringId: user.offeringId,
-          documentKey,
-        },
-        type,
-        content
-      };
+    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+      this.createDocument(PublicationDocument, content).then(({document, metadata}) => {
+        const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
+        const userGroup = groups.groupForUser(user.id)!;
+        const groupUserConnections: DBGroupUserConnections = userGroup.users
+          .filter(groupUser => groupUser.id !== user.id)
+          .reduce((allUsers: DBGroupUserConnections, groupUser) => {
+            allUsers[groupUser.id] = groupUser.connected;
+            return allUsers;
+          }, {});
+        const publication: DBPublication = {
+          version: "1.0",
+          self: {
+            classHash: user.classHash,
+            offeringId: user.offeringId,
+          },
+          documentKey: document.self.documentKey,
+          groupId: userGroup.id,
+          userId: user.id,
+          sectionId: documentModel.sectionId!,
+          groupUserConnections
+        };
 
-      const userGroup = groups.groupForUser(user.id)!;
-      const groupUserConnections: DBGroupUserConnections = userGroup.users
-        .filter(groupUser => groupUser.id !== user.id)
-        .reduce((allUsers: DBGroupUserConnections, groupUser) => {
-          allUsers[groupUser.id] = groupUser.connected;
-          return allUsers;
-        }, {});
-      const metadata: DBPublishedDocumentMetadata = {
-        version: "1.0",
-        type,
-        self: {
-          classHash: user.classHash,
-          offeringId: user.offeringId,
-          documentKey,
-        },
-        createdAt: firebase.database.ServerValue.TIMESTAMP as number,
-        groupId: userGroup.id,
-        userId: user.id,
-        sectionId: workspace.sectionId,
-        groupUserConnections
-      };
-
-      return documentRef.set(document)
-        .then(() => metadataRef.set(metadata))
-        .then(() => {
-          resolve({document, metadata});
-        })
-        .catch(reject);
+        publicationRef.set(publication)
+          .then(() => {
+            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+          })
+          .catch(reject);
+      });
     });
   }
 
-  public openUserDocument(userId: string, documentKey: string) {
-    const { user } = this.stores;
+  public openDocument(options: OpenDocumentOptions) {
+    const {documentKey, type, title, userId, sectionId, groupId, visibility} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
-      const documentRef = this.ref(this.getUserDocumentPath(user, documentKey, userId));
-      const metadataRef = this.ref(this.getUserDocumentMetadataPath(user, documentKey, userId));
+      const {user} = this.stores;
+      const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, userId);
+      const documentRef = this.firebase.ref(documentPath);
+      const metadataRef = this.firebase.ref(metadataPath);
 
       return Promise.all([documentRef.once("value"), metadataRef.once("value")])
         .then(([documentSnapshot, metadataSnapshot]) => {
           const document: DBDocument|null = documentSnapshot.val();
           const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
           if (!document || !metadata) {
-            throw new Error(`Unable to open document ${documentKey}`);
+            throw new Error("Unable to open document");
           }
 
           const content = this.parseDocumentContent(document, true);
           return DocumentModel.create({
+            type,
+            title,
+            sectionId,
+            groupId,
+            visibility,
             uid: userId,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
@@ -452,40 +408,11 @@ export class DB {
     });
   }
 
-  public openOfferingDocument(documentKey: string) {
-    const { user } = this.stores;
-    return new Promise<DocumentModelType>((resolve, reject) => {
-      const documentRef = this.ref(this.getOfferingDocumentsPath(user, documentKey));
-      const metadataRef = this.ref(this.getOfferingDocumentMetadataPath(user, documentKey));
-
-      return Promise.all([documentRef.once("value"), metadataRef.once("value")])
-        .then(([documentSnapshot, metadataSnapshot]) => {
-          const document: DBDocument|null = documentSnapshot.val();
-          const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
-          if (!document || !metadata) {
-            throw new Error(`Unable to open document ${documentKey}`);
-          }
-
-          const content = this.parseDocumentContent(document, true);
-          return DocumentModel.create({
-            uid: user.id,
-            key: document.self.documentKey,
-            createdAt: metadata.createdAt,
-            content: content ? content : {}
-          });
-        })
-        .then((document) => {
-          resolve(document);
-        })
-        .catch(reject);
-    });
-  }
-
-  public createLearningLogWorkspace(title: string) {
+  public createLearningLogDocument(title: string) {
     const {user} = this.stores;
 
-    return new Promise<LearningLogWorkspaceModelType>((resolve, reject) => {
-      return this.createUserDocument("learningLog")
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      return this.createDocument(LearningLogDocument)
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
@@ -496,21 +423,22 @@ export class DB {
             },
             title
           };
-          return this.ref(this.getLearningLogPath(user, documentKey)).set(learningLog).then(() => learningLog);
+          return this.firebase.ref(this.firebase.getLearningLogPath(user, documentKey)).set(learningLog)
+                  .then(() => learningLog);
         })
         .then((learningLog) => {
-          return this.createWorkspaceFromLearningLog(learningLog);
+          return this.createDocumentFromLearningLog(learningLog);
         })
         .then(resolve)
         .catch(reject);
     });
   }
 
-  public openLearningLogWorkspace(documentKey: string) {
+  public openLearningLogDocument(documentKey: string) {
     const { user } = this.stores;
 
-    return new Promise<LearningLogWorkspaceModelType>((resolve, reject) => {
-      const learningLogRef = this.ref(this.getLearningLogPath(user, documentKey));
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const learningLogRef = this.firebase.ref(this.firebase.getLearningLogPath(user, documentKey));
       return learningLogRef.once("value")
         .then((snapshot) => {
           const learningLog: DBLearningLog|null = snapshot.val();
@@ -520,51 +448,18 @@ export class DB {
           return learningLog;
         })
         .then((learningLog) => {
-          return this.createWorkspaceFromLearningLog(learningLog);
+          return this.createDocumentFromLearningLog(learningLog);
         })
         .then(resolve)
         .catch(reject);
     });
   }
 
-  public publishWorkspace(workspace: SectionWorkspaceModelType) {
-    return this.createOfferingDocument("published", workspace);
-  }
-
-  public ref(path: string = "") {
-    if (!this.isConnected) {
-      throw new Error("ref() requested before db connected!");
-    }
-    return firebase.database().ref(this.getFullPath(path));
-  }
-
-  public getFullPath(path: string = "") {
-    return `${this.getRootFolder()}${path}`;
-  }
-
-  public getRootFolder() {
-    // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
-    const { appMode } = this;
-    const parts = [`${appMode}`];
-
-    if ((appMode === "dev") || (appMode === "test")) {
-      parts.push(this.firebaseUserId);
-    }
-    parts.push("portals");
-    parts.push(this.escapeKey(this.stores.user.portal));
-
-    return `/${parts.join("/")}/`;
-  }
-
-  public escapeKey(s: string): string {
-    return s.replace(/[.$[\]#\/]/g, "_");
-  }
-
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
       const clearPath = (path?: string) => {
-        this.ref(path).set(null).then(resolve).catch(reject);
+        this.firebase.ref(path).set(null).then(resolve).catch(reject);
       };
 
       if (this.stores.appMode !== "qa") {
@@ -576,10 +471,10 @@ export class DB {
           clearPath();
           break;
         case "class":
-          clearPath(this.getClassPath(user));
+          clearPath(this.firebase.getClassPath(user));
           break;
         case "offering":
-          clearPath(this.getOfferingPath(user));
+          clearPath(this.firebase.getOfferingPath(user));
           break;
         default:
           reject(`Invalid clear level: ${level}`);
@@ -588,390 +483,60 @@ export class DB {
     });
   }
 
-  //
-  // Paths
-  //
-
-  public getUserPath(user: UserModelType, userId?: string) {
-    return `users/${userId || user.id}`;
-  }
-
-  public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
-    const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getUserPath(user, userId)}/documents${suffix}`;
-  }
-
-  public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
-    const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
-  }
-
-  public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
-    const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
-  }
-
-  public getClassPath(user: UserModelType) {
-    return `classes/${user.classHash}`;
-  }
-
-  public getOfferingPath(user: UserModelType) {
-    return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
-  }
-
-  public getOfferingUsersPath(user: UserModelType) {
-    return `${this.getOfferingPath(user)}/users`;
-  }
-
-  public getOfferingUserPath(user: UserModelType, userId?: string) {
-    return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
-  }
-
-  public getSectionDocumentPath(user: UserModelType, sectionId?: string, userId?: string) {
-    const suffix = sectionId ? `/${sectionId}` : "";
-    return `${this.getOfferingUserPath(user, userId)}/sectionDocuments${suffix}`;
-  }
-
-  public getGroupsPath(user: UserModelType) {
-    return `${this.getOfferingPath(user)}/groups`;
-  }
-
-  public getGroupPath(user: UserModelType, groupId: string) {
-    return `${this.getGroupsPath(user)}/${groupId}`;
-  }
-
-  public getGroupUserPath(user: UserModelType, groupId: string, userId?: string) {
-    return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
-  }
-
-  public getOfferingDocumentsPath(user: UserModelType, documentKey?: string) {
-    const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getOfferingPath(user)}/documents${suffix}`;
-  }
-
-  public getOfferingDocumentMetadataPath(user: UserModelType, documentKey?: string) {
-    const suffix = documentKey ? `/${documentKey}` : "";
-    return `${this.getOfferingPath(user)}/documentMetadata${suffix}`;
-  }
-
-  //
-  // Listeners
-  //
-
-  private startListeners() {
-    return new Promise<void>((resolve, reject) => {
-      // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
-      this.startLatestGroupIdListener()
-        .then(() => {
-          return this.startGroupsListener();
-        })
-        .then(() => {
-          return this.startWorkspaceListener();
-        })
-        .then(() => {
-          return this.startLearningLogsListener();
-        })
-        .then(() => {
-          return this.startPublicationsListener();
-        })
-        .then(() => {
-          this.isListening = true;
-        })
-        .then(resolve)
-        .catch(reject);
-    });
-  }
-
-  private stopListeners() {
-    this.stopLatestGroupIdListener();
-    this.stopGroupListeners();
-    this.stopWorkspaceListener();
-    this.stopModelListeners();
-    this.stopLearningLogsListener();
-    this.isListening = false;
-  }
-
-  private startLatestGroupIdListener() {
-    return new Promise<void>((resolve, reject) => {
-      const latestGroupIdRef = this.latestGroupIdRef = this.getLatestGroupIdRef();
-      // use once() so we are ensured that latestGroupId is set before we resolve
-      latestGroupIdRef.once("value", (snapshot) => {
-        this.handleLatestGroupIdRef(snapshot);
-        latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
+  public createDocumentFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
+    const {documentKey} = sectionDocument;
+    const {sectionId} = sectionDocument.self;
+    const group = this.stores.groups.groupForUser(userId);
+    return this.openDocument({
+        type: SectionDocument,
+        userId,
+        groupId: group && group.id,
+        documentKey,
+        sectionId,
+        visibility: sectionDocument.visibility
       })
-      .then(snapshot => {
-        resolve();
-      })
-      .catch(reject);
-    });
-  }
-
-  private getLatestGroupIdRef() {
-    return this.ref(this.getUserPath(this.stores.user)).child("latestGroupId");
-  }
-
-  private stopLatestGroupIdListener() {
-    if (this.latestGroupIdRef) {
-      this.latestGroupIdRef.off("value");
-      this.latestGroupIdRef = null;
-    }
-  }
-
-  private stopModelListeners() {
-    Object.keys(this.modelListeners).forEach((docKey) => {
-      const listeners = this.modelListeners[docKey];
-      if (listeners) {
-        if (listeners.modelDisposer) {
-          listeners.modelDisposer();
-        }
-
-        if (listeners.ref) {
-          listeners.ref.off();
-        }
-      }
-    });
-  }
-
-  private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
-    this.stores.user.setLatestGroupId(snapshot.val() || undefined);
-  }
-
-  private startGroupsListener() {
-    return new Promise<void>((resolve, reject) => {
-      const {user, groups} = this.stores;
-      const groupsRef = this.groupsRef = this.ref(this.getGroupsPath(user));
-
-      // use once() so we are ensured that groups are set before we resolve
-      groupsRef.once("value")
-        .then((snapshot) => {
-          const dbGroups: DBOfferingGroupMap = snapshot.val() || {};
-          // Groups may be invalid at this point, but the listener will resolve it once connection times are set
-          groups.updateFromDB(user.id, dbGroups, this.stores.class);
-
-          const group = groups.groupForUser(user.id);
-          if (group) {
-            // update our connection time so we report as connected/disconnected
-            const userRef = this.ref(this.getGroupUserPath(user, group.id));
-            return this.setConnectionHandlers(userRef);
-          }
-          else if (user.latestGroupId) {
-            // if we are not currently in a group try to join the latest group
-            return this.joinGroup(user.latestGroupId);
-          }
-        })
-        .then(() => {
-          groupsRef.on("value", this.handleGroupsRef);
-        })
-        .then(resolve)
-        .catch(reject);
-    });
-  }
-
-  private stopGroupListeners() {
-    if (this.groupsRef) {
-      this.groupsRef.off("value", this.handleGroupsRef);
-      this.groupsRef = null;
-    }
-  }
-
-  private startWorkspaceListener() {
-    this.workspaceRef = this.ref(this.getSectionDocumentPath(this.stores.user));
-    this.workspaceRef.on("child_added", this.handleWorkspaceChildAdded);
-  }
-
-  private stopWorkspaceListener() {
-    if (this.workspaceRef) {
-      this.workspaceRef.off("child_added", this.handleWorkspaceChildAdded);
-    }
-
-    Object.keys(this.workspaceModelDisposers).forEach((sectionId) => {
-      this.workspaceModelDisposers[sectionId]();
-    });
-  }
-
-  private startLearningLogsListener() {
-    this.learningLogsRef = this.ref(this.getLearningLogPath(this.stores.user));
-    this.learningLogsRef.on("child_added", this.handleLearningLogChildAdded);
-    this.learningLogsRef.on("child_changed", this.handleLearningLogChildChanged);
-    this.learningLogsRef.on("child_removed", this.handleLearningLogChildRemoved);
-  }
-
-  private stopLearningLogsListener() {
-    if (this.learningLogsRef) {
-      this.learningLogsRef.off("child_added", this.handleLearningLogChildAdded);
-      this.learningLogsRef.off("child_changed", this.handleLearningLogChildChanged);
-      this.learningLogsRef.off("child_removed", this.handleLearningLogChildRemoved);
-    }
-  }
-
-  private handleLearningLogChildAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {workspaces} = this.stores;
-    const learningLog: DBLearningLog|null = snapshot.val();
-    if (learningLog) {
-      this.createWorkspaceFromLearningLog(learningLog)
-        .then(this.monitorLearningLogWorkspace)
-        .then(workspaces.addLearningLogWorkspace);
-    }
-  }
-
-  private handleLearningLogChildChanged = (snapshot: firebase.database.DataSnapshot) => {
-    const {workspaces} = this.stores;
-    const learningLog: DBLearningLog|null = snapshot.val();
-    if (learningLog) {
-      const learningLogWorkspace = workspaces.getLearningLogWorkspace(learningLog.self.documentKey);
-      if (learningLogWorkspace) {
-        learningLogWorkspace.setTitle(learningLog.title);
-        // TODO: for future drag to order story add ordinal to learning log and update here
-      }
-    }
-  }
-
-  private handleLearningLogChildRemoved = (snapshot: firebase.database.DataSnapshot) => {
-    const {workspaces} = this.stores;
-    const learningLog: DBLearningLog|null = snapshot.val();
-    if (learningLog) {
-      const learningLogWorkspace = workspaces.getLearningLogWorkspace(learningLog.self.documentKey);
-      if (learningLogWorkspace) {
-        workspaces.deleteLearningLogWorkspace(learningLogWorkspace);
-        // TODO: still need UI for delete
-      }
-    }
-  }
-
-  private startPublicationsListener() {
-    this.publicationsRef = this.ref(this.getOfferingDocumentMetadataPath(this.stores.user));
-    this.publicationsRef.on("child_added", this.handlePublicationAdded);
-  }
-
-  private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {workspaces} = this.stores;
-    const metadata: DBPublishedDocumentMetadata|null = snapshot.val();
-    if (metadata) {
-      this.createWorkspaceFromPublication(metadata)
-        .then((workspace) => {
-          workspaces.addPublishedWorkspace(workspace);
-        });
-    }
-  }
-
-  private handleWorkspaceChildAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {user, workspaces, ui} = this.stores;
-    const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
-    // If a workspace has already been created, or is currently been created, then its listeners are already set
-    if (sectionDocument
-          && !workspaces.getSectionWorkspace(sectionDocument.self.sectionId)
-          && this.creatingWorkspaces.indexOf(sectionDocument.self.sectionId) === -1) {
-      this.createWorkspaceFromSectionDocument(user.id, sectionDocument)
-        .then((workspace) => {
-          this.updateGroupUserSectionDocumentListeners(workspace);
-          this.monitorSectionWorkspaceVisibility(workspace);
-          return workspace;
-        })
-        .then(workspaces.addSectionWorkspace);
-    }
-  }
-
-  private handleGroupsRef = (snapshot: firebase.database.DataSnapshot) => {
-    const {user, workspaces} = this.stores;
-    const groups: DBOfferingGroupMap = snapshot.val() || {};
-    const myGroupIds: string[] = [];
-    const overSubscribedUserUpdates: any = {};
-
-    // ensure that the current user is not in more than 1 group and groups are not oversubscribed
-    Object.keys(groups).forEach((groupId) => {
-      const groupUsers = groups[groupId].users || {};
-      const userKeys = Object.keys(groupUsers);
-      if (userKeys.indexOf(user.id) !== -1) {
-        myGroupIds.push(groupId);
-      }
-      if (userKeys.length > 4) {
-        // sort the users by connected timestamp and find the newest users to kick out
-        const users = userKeys.map((uid) => groupUsers[uid]);
-        users.sort((a, b) => a.connectedTimestamp - b.connectedTimestamp);
-        users.splice(0, 4);
-        users.forEach((userToRemove) => {
-          const userPath = this.getFullPath(this.getGroupUserPath(user, groupId, userToRemove.self.uid));
-          overSubscribedUserUpdates[userPath] = null;
-        });
-      }
-    });
-
-    // if there is a problem with the groups fix the problem in the next timeslice
-    const numUpdates = Object.keys(overSubscribedUserUpdates).length;
-    if ((numUpdates > 0) || (myGroupIds.length > 1)) {
-      setTimeout(() => {
-        if (numUpdates > 0) {
-          firebase.database().ref().update(overSubscribedUserUpdates);
-        }
-        if (myGroupIds.length > 1) {
-          this.leaveGroup();
-        }
-      }, 1);
-    }
-    else {
-      // otherwise set the groups
-      this.stores.groups.updateFromDB(user.id, groups, this.stores.class);
-
-      workspaces.sections.map(workspace => workspace.sectionId).forEach((sectionId) => {
-        const workspace = workspaces.getSectionWorkspace(sectionId);
-        if (workspace) {
-          this.updateGroupUserSectionDocumentListeners(workspace);
-        }
-      });
-    }
-  }
-
-  private setConnectionHandlers(userRef: firebase.database.Reference) {
-    if (this.groupOnDisconnect) {
-      this.groupOnDisconnect.cancel();
-    }
-    const groupDisconnectedRef = userRef.child("disconnectedTimestamp");
-    this.groupOnDisconnect = groupDisconnectedRef.onDisconnect();
-    this.groupOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
-
-    if (this.connectedRef) {
-      this.connectedRef.off("value");
-    }
-    else if (!this.connectedRef) {
-      this.connectedRef = firebase.database().ref(".info/connected");
-    }
-    // once() ensures that the connected timestamp is set before resolving
-    return this.connectedRef.once("value", (snapshot) => {
-        return this.handleConnectedRef(userRef, snapshot);
-      })
-      .then(() => {
-        if (this.connectedRef) {
-          this.connectedRef.on("value", (snapshot) => {
-            this.handleConnectedRef(userRef, snapshot || undefined);
-          });
-        }
-      });
-  }
-
-  private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
-    if (snapshot && snapshot.val()) {
-      return userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
-    }
-  }
-
-  private createWorkspaceFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    return this.openUserDocument(userId, sectionDocument.documentKey)
       .then((document) => {
-        this.monitorDocumentModel(document);
-        this.monitorDocumentRef(document);
-
-        const workspace = SectionWorkspaceModel.create({
-          mode: "1-up",
-          tool: "select",
-          sectionId: sectionDocument.self.sectionId,
-          document,
-          visibility: sectionDocument.visibility,
-        });
-        return workspace;
+        this.listeners.monitorDocumentModel(document);
+        this.listeners.monitorDocumentRef(document);
+        return document;
       });
   }
 
-  private parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentModelType|null {
+  public createDocumentFromLearningLog(learningLog: DBLearningLog) {
+    const {title, self: {uid, documentKey}} = learningLog;
+    const group = this.stores.groups.groupForUser(uid);
+    const groupId = group && group.id;
+    return this.openDocument({type: LearningLogDocument, userId: uid, documentKey, groupId, title})
+      .then((document) => {
+        this.listeners.monitorDocumentModel(document);
+        this.listeners.monitorDocumentRef(document);
+        return document;
+      });
+  }
+
+  public createDocumentFromPublication(publication: DBPublication) {
+    const {user} = this.stores;
+    const {groupId, sectionId, groupUserConnections, userId, documentKey} = publication;
+
+    // groupUserConnections returns as an array and must be converted back to a map
+    const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
+      .reduce((allUsers, groupUserId) => {
+        allUsers[groupUserId] = groupUserConnections[groupUserId];
+        return allUsers;
+      }, {} as DBGroupUserConnections);
+
+    return this.openDocument({
+      documentKey,
+      type: "publication",
+      userId,
+      groupId,
+      sectionId,
+      visibility: "public",
+      groupUserConnections: groupUserConnectionsMap,
+    });
+  }
+
+  public parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentModelType|null {
     if (document.content == null) {
       return null;
     }
@@ -991,205 +556,5 @@ export class DB {
       });
     }
     return DocumentContentModel.create(content);
-  }
-
-  private monitorDocumentRef = (document: DocumentModelType) => {
-    const { user, workspaces } = this.stores;
-    const documentKey = document.key;
-    const documentRef = this.ref(this.getUserDocumentPath(user, documentKey));
-
-    const docListener = this.getOrCreateModelListener(`document:${documentKey}`);
-    if (docListener.ref) {
-      docListener.ref.off("value");
-    }
-    docListener.ref = documentRef;
-
-    let initialLoad = true;
-    documentRef.on("value", (snapshot) => {
-      if (snapshot && snapshot.val()) {
-        const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.parseDocumentContent(updatedDoc, initialLoad);
-        initialLoad = false;
-        if (updatedContent) {
-          const workspace = workspaces.getWorkspace(documentKey);
-          if (workspace) {
-            const workspaceDoc = workspace.document;
-            workspaceDoc.setContent(updatedContent);
-            this.monitorDocumentModel(workspaceDoc);
-          }
-        }
-      }
-    });
-  }
-
-  private monitorDocumentModel = (document: DocumentModelType) => {
-    const { user } = this.stores;
-    const { key, content } = document;
-
-    const docListener = this.getOrCreateModelListener(`document:${key}`);
-    if (docListener.modelDisposer) {
-      docListener.modelDisposer();
-    }
-
-    const updateRef = this.ref(this.getUserDocumentPath(user, key));
-    docListener.modelDisposer = (onSnapshot(content, (newContent) => {
-      updateRef.update({
-        content: JSON.stringify(newContent)
-      });
-    }));
-  }
-
-  private getOrCreateModelListener(uniqueKeyForModel: string) {
-    if (!this.modelListeners[uniqueKeyForModel]) {
-      this.modelListeners[uniqueKeyForModel] = {};
-    }
-    return this.modelListeners[uniqueKeyForModel];
-  }
-
-  private monitorSectionWorkspaceVisibility = (workspace: SectionWorkspaceModelType) => {
-    const { user } = this.stores;
-    const updateRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId));
-    const disposer = (onSnapshot(workspace, (newWorkspace) => {
-      updateRef.update({
-        visibility: newWorkspace.visibility
-      });
-    }));
-    this.workspaceModelDisposers[workspace.sectionId] = disposer;
-  }
-
-  private updateGroupUserSectionDocumentListeners(workspace: SectionWorkspaceModelType) {
-    const { user, groups } = this.stores;
-    const userGroup = groups.groupForUser(user.id);
-    const groupUsers = userGroup && userGroup.users;
-    if (groupUsers) {
-      groupUsers.forEach((groupUser) => {
-        if (groupUser.id === user.id) {
-          return;
-        }
-        const currentSectionDocsListener = this.getOrCreateGroupUserSectionDocumentListeners(workspace, groupUser.id)
-          .sectionDocsRef;
-        if (currentSectionDocsListener) {
-          currentSectionDocsListener.off();
-        }
-        const groupUserSectionDocsRef = this.ref(this.getSectionDocumentPath(user, workspace.sectionId, groupUser.id));
-        this.getOrCreateGroupUserSectionDocumentListeners(workspace, groupUser.id)
-          .sectionDocsRef = groupUserSectionDocsRef;
-        groupUserSectionDocsRef.on("value", this.handleGroupUserSectionDocRef(workspace));
-      });
-    }
-  }
-
-  private handleGroupUserSectionDocRef(workspace: SectionWorkspaceModelType) {
-    return (snapshot: firebase.database.DataSnapshot|null) => {
-      const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
-      if (sectionDocument) {
-        const groupUserId = sectionDocument.self.uid;
-        const sectionId = sectionDocument.self.sectionId;
-        const docKey = sectionDocument.documentKey;
-        if (sectionDocument.visibility === "public") {
-          const mainUser = this.stores.user;
-          const currentDocContentListener = this.getOrCreateGroupUserSectionDocumentListeners(workspace, groupUserId)
-              .docContentRef;
-          if (currentDocContentListener) {
-            currentDocContentListener.off();
-          }
-          const groupUserDocRef = this.ref(this.getUserDocumentPath(mainUser, docKey, groupUserId));
-          this.getOrCreateGroupUserSectionDocumentListeners(workspace, groupUserId)
-            .docContentRef = groupUserDocRef;
-          groupUserDocRef.on("value", (docContentSnapshot) => {
-            this.handleGroupUserDocRef(docContentSnapshot, workspace);
-          });
-        } else {
-          workspace.clearGroupDocument(groupUserId);
-        }
-      }
-    };
-  }
-
-  private handleGroupUserDocRef(snapshot: firebase.database.DataSnapshot|null, workspace: SectionWorkspaceModelType) {
-    if (snapshot) {
-      const rawGroupDoc: DBUserDocument = snapshot.val();
-      if (rawGroupDoc) {
-        const groupUserId = rawGroupDoc.self.uid;
-        const {documentKey} = rawGroupDoc.self;
-        this.openUserDocument(groupUserId, documentKey).then((groupUserDoc) => {
-          workspace.setGroupDocument(groupUserId, groupUserDoc);
-        });
-      }
-    }
-  }
-
-  private getOrCreateGroupUserSectionDocumentListeners(workspace: SectionWorkspaceModelType, userId: string) {
-    const {sectionId} = workspace;
-    if (!this.groupUserSectionDocumentsListeners[sectionId]) {
-      this.groupUserSectionDocumentsListeners[sectionId] = {};
-    }
-
-    if (!this.groupUserSectionDocumentsListeners[sectionId][userId]) {
-      this.groupUserSectionDocumentsListeners[sectionId][userId] = {};
-    }
-
-    return this.groupUserSectionDocumentsListeners[sectionId][userId];
-  }
-
-  private createWorkspaceFromPublication(publication: DBPublishedDocumentMetadata) {
-    const {groupId, sectionId, groupUserConnections, userId, self: {documentKey}} = publication;
-    // groupUserConnections returns as an array and must be converted back to a map
-    const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
-      .reduce((allUsers, groupUserId) => {
-        allUsers[groupUserId] = groupUserConnections[groupUserId];
-        return allUsers;
-      }, {} as DBGroupUserConnections);
-    return this.openOfferingDocument(documentKey)
-      .then((document) => {
-        return PublishedWorkspaceModel.create({
-          document,
-          createdAt: document.createdAt,
-          sectionId,
-          groupId,
-          userId,
-          groupUserConnections: groupUserConnectionsMap
-        });
-      });
-  }
-
-  private createWorkspaceFromLearningLog(learningLog: DBLearningLog) {
-    const {title, self: {uid, documentKey}} = learningLog;
-    return this.openUserDocument(uid, documentKey)
-      .then((document) => {
-        this.monitorDocumentModel(document);
-        this.monitorDocumentRef(document);
-
-        return LearningLogWorkspaceModel.create({
-          tool: "select",
-          title,
-          document,
-          createdAt: document.createdAt,
-        });
-      })
-      .then((learningLogModel) => {
-        // TODO: add model listener for renames
-        return learningLogModel;
-      });
-  }
-
-  private monitorLearningLogWorkspace = (learningLog: LearningLogWorkspaceModelType) => {
-    const { user } = this.stores;
-    const { key } = learningLog.document;
-
-    const listener = this.getOrCreateModelListener(`learningLogWorkspace:${key}`);
-    if (listener.modelDisposer) {
-      listener.modelDisposer();
-    }
-
-    const updateRef = this.ref(this.getLearningLogPath(user, key));
-    listener.modelDisposer = (onSnapshot(learningLog, (newLearningLog) => {
-      updateRef.update({
-        title: newLearningLog.title,
-        // TODO: for future ordering story add original to model and update here
-      });
-    }));
-
-    return learningLog;
   }
 }

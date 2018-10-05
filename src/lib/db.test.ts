@@ -10,6 +10,7 @@ describe("db", () => {
   beforeEach(() => {
     stores = createStores({
       user: UserModel.create({id: "1", portal: "example.com"}),
+      appMode: "test",
     });
   });
 
@@ -17,7 +18,7 @@ describe("db", () => {
     const db = new DB();
     return db.connect({appMode: "test", stores})
       .then(() => {
-        expect(db.isConnected).toBe(true);
+        expect(db.firebase.isConnected).toBe(true);
       })
       .then(() => db.disconnect());
   }, 10000);
@@ -26,18 +27,19 @@ describe("db", () => {
     const db = new DB();
     return db.connect({appMode: "test", stores})
       .then(() => {
-        expect(db.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
-        expect(db.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
+        expect(db.firebase.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
+        expect(db.firebase.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
       })
       .then(() => db.disconnect());
   });
 
   it("resolves paths in dev mode", () => {
     const db = new DB();
+    stores.appMode = "dev";
     return db.connect({appMode: "dev", stores})
       .then(() => {
-        expect(db.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
-        expect(db.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
+        expect(db.firebase.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
+        expect(db.firebase.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
       })
       .then(() => db.disconnect());
   });
@@ -47,7 +49,7 @@ describe("db", () => {
     return db.connect({appMode: "test", stores})
       .then(() => {
         const testString = "this is a test!";
-        const ref = db.ref("write-test");
+        const ref = db.firebase.ref("write-test");
         return ref.set(testString)
           .then(() => {
             return ref.once("value", (snapshot) => {
@@ -62,7 +64,7 @@ describe("db", () => {
     const db = new DB();
     // tslint:disable-next-line:max-line-length
     const storedJsonString = "{\"tiles\":[{\"id\":\"9d1cfc99-121a-4817-bc08-2144d00ba6d0\",\"content\":{\"type\":\"Text\",\"text\":\"{\\\"object\\\":\\\"value\\\",\\\"document\\\":{\\\"object\\\":\\\"document\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"block\\\",\\\"type\\\":\\\"line\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"text\\\",\\\"leaves\\\":[{\\\"object\\\":\\\"leaf\\\",\\\"text\\\":\\\"laaa\\\",\\\"marks\\\":[]}]}]}]}}\"}},{\"id\":\"72c8d88f-edea-4ac4-a7e7-0d70ecf960c0\",\"content\":{\"type\":\"Text\",\"text\":\"{\\\"object\\\":\\\"value\\\",\\\"document\\\":{\\\"object\\\":\\\"document\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"block\\\",\\\"type\\\":\\\"line\\\",\\\"data\\\":{},\\\"nodes\\\":[{\\\"object\\\":\\\"text\\\",\\\"leaves\\\":[{\\\"object\\\":\\\"leaf\\\",\\\"text\\\":\\\"Testing\\\",\\\"marks\\\":[]}]}]}]}}\",\"format\":\"slate\"}}]}";
-    const docContent = db._private.parseDocumentContent({content: storedJsonString} as DBDocument);
+    const docContent = db.parseDocumentContent({content: storedJsonString} as DBDocument);
 
     if (docContent == null) {
       fail();

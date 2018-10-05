@@ -1,9 +1,7 @@
 import { types } from "mobx-state-tree";
-import { SectionWorkspaceModelType,
-        LearningLogWorkspaceModelType,
-        PublishedWorkspaceModelType,
-        WorkspaceModelType } from "./workspaces";
+import { WorkspaceModel } from "./workspace";
 import { ToolTileModelType } from "./tools/tool-tile";
+import { DocumentModelType } from "./document";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
@@ -30,15 +28,11 @@ export const UIModel = types
     activeSectionIndex: 0,
     activeRightNavTab: "My Work",
     selectedTileId: types.maybe(types.string),
-    primaryWorkspaceDocumentKey: types.maybe(types.string),
-    comparisonWorkspaceDocumentKey: types.maybe(types.string),
-    comparisonWorkspaceVisible: false,
-    llPrimaryWorkspaceDocumentKey: types.maybe(types.string),
-    llComparisonWorkspaceDocumentKey: types.maybe(types.string),
-    llComparisonWorkspaceVisible: false,
     showDemo: false,
     showDemoCreator: false,
     dialog: types.maybe(UIDialogModel),
+    sectionWorkspace: WorkspaceModel,
+    learningLogWorkspace: WorkspaceModel,
   })
   .views((self) => ({
     get allContracted() {
@@ -75,20 +69,30 @@ export const UIModel = types
       }
     };
 
-    const setPrimaryWorkspace = (workspace?: WorkspaceModelType) => {
-      self.primaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    const alert = (text: string, title?: string) => {
+      self.dialog = UIDialogModel.create({type: "alert", text, title});
+      dialogResolver = undefined;
     };
 
-    const setComparisonWorkspace = (workspace?: WorkspaceModelType) => {
-      self.comparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    const confirm = (text: string, title?: string) => {
+      self.dialog = UIDialogModel.create({type: "confirm", text, title});
+      return new Promise<boolean>((resolve, reject) => {
+        dialogResolver = resolve;
+      });
     };
 
-    const setLLPrimaryWorkspace = (workspace?: WorkspaceModelType) => {
-      self.llPrimaryWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    const prompt = (text: string, defaultValue: string = "", title?: string) => {
+      self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title});
+      return new Promise<string>((resolve, reject) => {
+        dialogResolver = resolve;
+      });
     };
 
-    const setLLComparisonWorkspace = (workspace?: WorkspaceModelType) => {
-      self.llComparisonWorkspaceDocumentKey = workspace ? workspace.document.key : undefined;
+    const resolveDialog = (value: string | boolean) => {
+      if (dialogResolver) {
+        dialogResolver(value);
+      }
+      closeDialog();
     };
 
     const closeDialog = () => {
@@ -98,10 +102,10 @@ export const UIModel = types
 
     return {
       contractAll,
-      setPrimaryWorkspace,
-      setComparisonWorkspace,
-      setLLPrimaryWorkspace,
-      setLLComparisonWorkspace,
+      alert,
+      prompt,
+      confirm,
+      resolveDialog,
 
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
@@ -124,62 +128,26 @@ export const UIModel = types
       setSelectedTile(tile?: ToolTileModelType) {
         self.selectedTileId = tile ? tile.id : undefined;
       },
-      setAvailableWorkspace(workspace?: WorkspaceModelType) {
-        if (self.comparisonWorkspaceVisible) {
-          setComparisonWorkspace(workspace);
-        }
-        else {
-          setPrimaryWorkspace(workspace);
-        }
-      },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
       },
-      toggleComparisonWorkspaceVisible(override?: boolean) {
-        const visible = typeof override !== "undefined" ? override : !self.comparisonWorkspaceVisible;
-        self.comparisonWorkspaceVisible = visible;
-        if (!visible) {
-          self.comparisonWorkspaceDocumentKey = undefined;
-        }
-      },
-      setAvailableLLWorkspace(workspace?: LearningLogWorkspaceModelType | SectionWorkspaceModelType) {
-        if (self.llComparisonWorkspaceVisible) {
-          setLLComparisonWorkspace(workspace);
+      closeDialog,
+
+      rightNavDocumentSelected(document: DocumentModelType) {
+        if (self.bottomNavExpanded) {
+          if (self.learningLogWorkspace.primaryDocumentKey) {
+            self.learningLogWorkspace.setComparisonDocument(document);
+            self.learningLogWorkspace.toggleComparisonVisible(true);
+          }
+          else {
+            alert("Please select a Learning Log first.", "Select for Learning Log");
+          }
         }
         else {
-          setLLPrimaryWorkspace(workspace);
+          self.sectionWorkspace.setAvailableDocument(document);
+          contractAll();
         }
-      },
-      toggleLLComparisonWorkspaceVisible(override?: boolean) {
-        const visible = typeof override !== "undefined" ? override : !self.llComparisonWorkspaceVisible;
-        self.llComparisonWorkspaceVisible = visible;
-        if (!visible) {
-          self.llComparisonWorkspaceDocumentKey = undefined;
-        }
-      },
-      alert(text: string, title?: string) {
-        self.dialog = UIDialogModel.create({type: "alert", text, title});
-        dialogResolver = undefined;
-      },
-      confirm(text: string, title?: string) {
-        self.dialog = UIDialogModel.create({type: "confirm", text, title});
-        return new Promise<boolean>((resolve, reject) => {
-          dialogResolver = resolve;
-        });
-      },
-      prompt(text: string, defaultValue: string = "", title?: string) {
-        self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title});
-        return new Promise<string>((resolve, reject) => {
-          dialogResolver = resolve;
-        });
-      },
-      resolveDialog(value: string | boolean) {
-        if (dialogResolver) {
-          dialogResolver(value);
-        }
-        closeDialog();
-      },
-      closeDialog
+      }
     };
   });
 

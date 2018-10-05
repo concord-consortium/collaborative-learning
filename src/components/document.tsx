@@ -1,34 +1,36 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { WorkspaceTool,
-         WorkspaceModelType,
-         LearningLogWorkspaceModelType,
-         SectionWorkspaceModelType
-       } from "../models/workspaces";
 import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
-import { kSectionID, kLearningLogID, kPublicationID } from "../models/workspaces";
+import { DocumentModelType,
+         SectionDocument,
+         LearningLogDocument,
+         PublicationDocument,
+         DocumentTool
+       } from "../models/document";
+import { WorkspaceModelType } from "../models/workspace";
 
-import "./workspace.sass";
+import "./document.sass";
 
 export type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
+  document: DocumentModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
 }
 
 @inject("stores")
 @observer
-export class WorkspaceComponent extends BaseComponent<IProps, {}> {
+export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     return (
-      <div className="workspace">
+      <div className="document">
         {this.renderTitleBar()}
         {this.isPrimary() ? this.renderToolbar() : null}
         {this.renderCanvas()}
@@ -38,24 +40,24 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTitleBar() {
-    const { workspace } = this.props;
-    if (workspace.type === kSectionID) {
-      return this.renderSectionTitleBar();
+    const { document, side } = this.props;
+    if (document.type === SectionDocument) {
+      return this.renderSectionTitleBar(side === "comparison");
     }
-    if (workspace.type === kLearningLogID) {
+    if (document.type === LearningLogDocument) {
       return this.renderLearningLogTitleBar();
     }
-    if (workspace.type === kPublicationID) {
+    if (document.type === PublicationDocument) {
       return this.renderSectionTitleBar(true);
     }
   }
 
   private renderSectionTitleBar(hideButtons?: boolean) {
     const {ui, problem} = this.stores;
-    const workspace = this.sectionWorkspace;
-    const activeSection = problem.getSectionById(workspace.sectionId);
-    const show4up = !ui.comparisonWorkspaceVisible && !ui.bottomNavExpanded;
-    const share = workspace.visibility === "private" ? "share" : "unshare";
+    const {workspace, document} = this.props;
+    const activeSection = problem.getSectionById(document.sectionId!);
+    const show4up = !workspace.comparisonVisible;
+    const share = document.visibility === "private" ? "share" : "unshare";
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
@@ -75,7 +77,7 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderMode() {
-    const workspace = this.sectionWorkspace;
+    const {workspace} = this.props;
     const mode = workspace.mode === "1-up" ? "up1" : "up";
     return (
       <svg className={`icon icon-${mode}`} onClick={this.handleToggleWorkspaceMode}>
@@ -85,65 +87,62 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderLearningLogTitleBar() {
-    const workspace = this.learningLogWorkspace;
+    const {workspace, document} = this.props;
     return (
       <div className="titlebar">
-        <div className="title">Learning Log: {workspace.title}</div>
+        <div className="title">Learning Log: {document.title}</div>
         <div className="actions" />
       </div>
     );
   }
 
   private renderToolbar() {
-    const workspace = this.props.workspace;
-    if (!workspace.tool) {
-      return;
-    }
-    const className = (tool: WorkspaceTool) => {
-      return `tool ${tool}${tool === workspace.tool ? " active" : ""}`;
-    };
-    const handleSelectTool = (tool: WorkspaceTool) => {
+    const {document} = this.props;
+    const handleClickTool = (tool: DocumentTool) => {
       const { ui } = this.stores;
       return (e: React.MouseEvent<HTMLDivElement>) => {
         switch (tool) {
           case "delete":
             if (ui.selectedTileId) {
-              workspace.deleteTile(ui.selectedTileId);
+              document.deleteTile(ui.selectedTileId);
             }
             break;
           default:
-            workspace.selectTool(tool);
+            document.addTile(tool);
         }
       };
     };
     return (
       <div className="toolbar">
-        <div className={className("select")} title="Select" onClick={handleSelectTool("select")}>↖</div>
-        <div className={className("text")} title="Text" onClick={handleSelectTool("text")}>T</div>
-        <div className={className("geometry")} title="Geometry" onClick={handleSelectTool("geometry")}/>
-        <div className={className("image")} title="Image" onClick={handleSelectTool("image")}/>
-        <div className={className("delete")} title="Delete" onClick={handleSelectTool("delete")}>{"\u274c"}</div>
+        <div className="tool select" title="Select" onClick={handleClickTool("select")}>↖</div>
+        <div className="tool text" title="Text" onClick={handleClickTool("text")}>T</div>
+        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}/>
+        <div className="tool image" title="Image" onClick={handleClickTool("image")}/>
+        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>{"\u274c"}</div>
       </div>
     );
   }
 
   private renderCanvas() {
-    const { workspace } = this.props;
-    if (workspace.type === kSectionID) {
+    const { document, workspace, side } = this.props;
+    if (document.type === SectionDocument) {
       return (
         <div className="canvas-area">
-          {this.sectionWorkspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas()}
+          {side === "primary"
+            ? (workspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas())
+            : this.render1UpCanvas()
+          }
         </div>
       );
     }
-    if (workspace.type === kLearningLogID) {
+    if (document.type === LearningLogDocument) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas()}
         </div>
       );
     }
-    if (workspace.type === kPublicationID) {
+    if (document.type === PublicationDocument) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas(true)}
@@ -155,20 +154,21 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   private render1UpCanvas(forceReadOnly?: boolean) {
     const readOnly = forceReadOnly ? true : this.props.readOnly;
     return (
-      <CanvasComponent context="1-up" document={this.props.workspace.document} readOnly={readOnly} />
+      <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly} />
     );
   }
 
   private render4UpCanvas() {
+    const {sectionWorkspace} = this.stores.ui;
     return (
-      <FourUpComponent workspace={this.sectionWorkspace} />
+      <FourUpComponent document={this.props.document} workspace={sectionWorkspace} />
     );
   }
 
   private renderStatusBar() {
-    const {workspace} = this.props;
+    const {document} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (workspace.type === kSectionID);
+    const showContents = isPrimary && (document.type === SectionDocument);
     return (
       <div className="statusbar">
         <div className="supports">
@@ -184,23 +184,14 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderTwoUpButton() {
     const {ui} = this.stores;
-    const mode = ui.comparisonWorkspaceVisible ? "up" : "up2";
-    const llMode = ui.llComparisonWorkspaceVisible ? "up" : "up2";
+    const {workspace} = this.props;
+    const mode = workspace.comparisonVisible ? "up" : "up2";
 
-    if (this.props.workspace.type === kLearningLogID) {
-      return (
-        <svg className={`icon icon-${llMode}`} onClick={this.handleToggleLLTwoUp}>
-          <use xlinkHref={`#icon-${llMode}`} />
-        </svg>
-      );
-    }
-    else if (this.props.workspace.mode === "1-up") {
-      return (
-        <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
-          <use xlinkHref={`#icon-${mode}`} />
-        </svg>
-      );
-    }
+    return (
+      <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
+        <use xlinkHref={`#icon-${mode}`} />
+      </svg>
+    );
   }
 
   private renderSupportIcons() {
@@ -243,11 +234,11 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToggleWorkspaceMode = () => {
-    this.sectionWorkspace.toggleMode();
+    this.props.workspace.toggleMode();
   }
 
   private handleToggleVisibility = () => {
-    this.sectionWorkspace.toggleVisibility();
+    this.props.document.toggleVisibility();
   }
 
   private handleToggleSupport = (support: SupportItemModelType) => {
@@ -255,32 +246,20 @@ export class WorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToggleTwoUp = () => {
-    this.stores.ui.toggleComparisonWorkspaceVisible();
-  }
-
-  private handleToggleLLTwoUp = () => {
-    this.stores.ui.toggleLLComparisonWorkspaceVisible();
+    this.props.workspace.toggleComparisonVisible();
   }
 
   private handlePublishWorkspace = () => {
-    const { db } = this.stores;
+    const { db, ui } = this.stores;
     // TODO: Disable publish button while publishing
-    db.publishWorkspace(this.sectionWorkspace)
-      .then(() => alert("Published"));
+    db.publishDocument(this.props.document)
+      .then(() => ui.alert("Your document was published.", "Document Published"));
   }
 
   private getSupportsWithIndices() {
-    return this.stores.supports.getAllForSection(this.sectionWorkspace.sectionId).map((support, index) => {
+    return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
       return {index: index + 1, item: support};
     });
-  }
-
-  private get sectionWorkspace() {
-    return this.props.workspace as SectionWorkspaceModelType;
-  }
-
-  private get learningLogWorkspace() {
-    return this.props.workspace as LearningLogWorkspaceModelType;
   }
 
   private isPrimary() {

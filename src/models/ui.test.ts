@@ -1,14 +1,23 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "./curriculum/section";
-import { SectionWorkspaceModel } from "./workspaces";
-import { DocumentModel } from "./document";
+import { WorkspaceModel, SectionWorkspace, WorkspaceModelType, LearningLogWorkspace } from "./workspace";
+import { DocumentModel, SectionDocument, DocumentModelType } from "./document";
 import { ToolTileModel } from "./tools/tool-tile";
 
 describe("ui model", () => {
   let ui: UIModelType;
 
   beforeEach(() => {
-    ui = UIModel.create({});
+    ui = UIModel.create({
+      sectionWorkspace: {
+        type: SectionWorkspace,
+        mode: "1-up"
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
   });
 
   it("has default values", () => {
@@ -27,7 +36,15 @@ describe("ui model", () => {
     ui = UIModel.create({
       rightNavExpanded: true,
       showDemoCreator: true,
-      error: "test"
+      error: "test",
+      sectionWorkspace: {
+        type: SectionWorkspace,
+        mode: "1-up"
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
     });
     expect(ui.allContracted).toBe(false);
     expect(ui.rightNavExpanded).toBe(true);
@@ -137,154 +154,6 @@ describe("ui model", () => {
     const activeRightNavTab = "M";
     ui.setActiveRightNavTab(activeRightNavTab);
     expect(ui.activeRightNavTab).toBe(activeRightNavTab);
-  });
-
-  it("allows primaryWorkspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setPrimaryWorkspace(workspace);
-    expect(ui.primaryWorkspaceDocumentKey).toBe("test");
-    ui.setPrimaryWorkspace(undefined);
-    expect(ui.primaryWorkspaceDocumentKey).toBe(undefined);
-  });
-
-  it("allows available workspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setAvailableWorkspace(workspace);
-    expect(ui.primaryWorkspaceDocumentKey).toBe("test");
-    ui.setAvailableWorkspace(undefined);
-    ui.toggleComparisonWorkspaceVisible();
-    ui.setAvailableWorkspace(workspace);
-    expect(ui.primaryWorkspaceDocumentKey).toBe(undefined);
-    expect(ui.comparisonWorkspaceDocumentKey).toBe("test");
-  });
-
-  it("allows ComparisonWorkspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setComparisonWorkspace(workspace);
-    expect(ui.comparisonWorkspaceDocumentKey).toBe("test");
-    ui.setComparisonWorkspace(undefined);
-    expect(ui.comparisonWorkspaceDocumentKey).toBe(undefined);
-  });
-
-  it("allows comparisonWorkspaceVisible to be set", () => {
-    ui.toggleComparisonWorkspaceVisible();
-    expect(ui.comparisonWorkspaceVisible).toBe(true);
-    ui.toggleComparisonWorkspaceVisible();
-    expect(ui.comparisonWorkspaceVisible).toBe(false);
-    ui.toggleComparisonWorkspaceVisible(true);
-    expect(ui.comparisonWorkspaceVisible).toBe(true);
-    ui.toggleComparisonWorkspaceVisible(false);
-    expect(ui.comparisonWorkspaceVisible).toBe(false);
-  });
-
-  it("allows llPrimaryWorkspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setLLPrimaryWorkspace(workspace);
-    expect(ui.llPrimaryWorkspaceDocumentKey).toBe("test");
-    ui.setLLPrimaryWorkspace(undefined);
-    expect(ui.llPrimaryWorkspaceDocumentKey).toBe(undefined);
-  });
-
-  it("allows LL available workspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setAvailableLLWorkspace(workspace);
-    expect(ui.llPrimaryWorkspaceDocumentKey).toBe("test");
-    ui.setAvailableLLWorkspace(undefined);
-    ui.toggleLLComparisonWorkspaceVisible();
-    ui.setAvailableLLWorkspace(workspace);
-    expect(ui.llPrimaryWorkspaceDocumentKey).toBe(undefined);
-    expect(ui.llComparisonWorkspaceDocumentKey).toBe("test");
-  });
-
-  it("allows llComparisonWorkspace to be set", () => {
-    const workspace = SectionWorkspaceModel.create({
-      mode: "1-up",
-      tool: "select",
-      sectionId: "1",
-      visibility: "public",
-      document: DocumentModel.create({
-        uid: "1",
-        key: "test",
-        createdAt: 1,
-        content: {}
-      }),
-      groupDocuments: {},
-    });
-    ui.setLLComparisonWorkspace(workspace);
-    expect(ui.llComparisonWorkspaceDocumentKey).toBe("test");
-    ui.setLLComparisonWorkspace(undefined);
-    expect(ui.llComparisonWorkspaceDocumentKey).toBe(undefined);
-  });
-
-  it("allows llComparisonWorkspaceVisible to be set", () => {
-    ui.toggleLLComparisonWorkspaceVisible();
-    expect(ui.llComparisonWorkspaceVisible).toBe(true);
-    ui.toggleLLComparisonWorkspaceVisible();
-    expect(ui.llComparisonWorkspaceVisible).toBe(false);
-    ui.toggleLLComparisonWorkspaceVisible(true);
-    expect(ui.llComparisonWorkspaceVisible).toBe(true);
-    ui.toggleLLComparisonWorkspaceVisible(false);
-    expect(ui.llComparisonWorkspaceVisible).toBe(false);
   });
 
   it("allows demo creator to be shown", () => {

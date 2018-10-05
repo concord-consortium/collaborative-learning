@@ -5,9 +5,10 @@ import "./learning-log.sass";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
-import { LearningLogWorkspaceModelType } from "../models/workspaces";
 import { timeAgo, niceDateTime } from "../utilities/time";
-import { WorkspaceComponent, WorkspaceSide } from "./workspace";
+import { DocumentComponent, WorkspaceSide } from "./document";
+import { DocumentModelType, DocumentDragKey, LearningLogDocument } from "../models/document";
+import { LearningLogWorkspace } from "../models/workspace";
 
 interface IProps extends IBaseProps {}
 
@@ -18,7 +19,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   public render() {
     return (
       <div className="learning-log">
-        {this.renderWorkspaces()}
+        {this.renderDocuments()}
         <div className="logs">
           <button onClick={this.handleCreateLearningLog}>Create</button>
           {this.renderLearningLogs()}
@@ -27,13 +28,14 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private renderWorkspaces() {
-    const {ui, workspaces} = this.stores;
-    const primaryWorkspace = ui.llPrimaryWorkspaceDocumentKey
-                        ? workspaces.getWorkspace(ui.llPrimaryWorkspaceDocumentKey)
+  private renderDocuments() {
+    const {ui, documents} = this.stores;
+    const {learningLogWorkspace} = ui;
+    const primaryWorkspace = learningLogWorkspace.primaryDocumentKey
+                        ? documents.getDocument(learningLogWorkspace.primaryDocumentKey)
                         : null;
-    const comparisonWorkspace = ui.llComparisonWorkspaceDocumentKey
-                        ? workspaces.getWorkspace(ui.llComparisonWorkspaceDocumentKey)
+    const comparisonWorkspace = learningLogWorkspace.comparisonDocumentKey
+                        ? documents.getDocument(learningLogWorkspace.comparisonDocumentKey)
                         : null;
 
     if (!primaryWorkspace) {
@@ -44,16 +46,21 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
       );
     }
 
-    if (ui.llComparisonWorkspaceVisible) {
+    if (learningLogWorkspace.comparisonVisible) {
       return (
         <div className="workspaces">
           {this.renderWorkspace(
               "left-workspace",
               "primary",
-              <WorkspaceComponent workspace={primaryWorkspace} side="primary" />
+              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary" />
           )}
           {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
-              ? <WorkspaceComponent workspace={comparisonWorkspace} readOnly={true} side="comparison" />
+              ? <DocumentComponent
+                  document={comparisonWorkspace}
+                  workspace={learningLogWorkspace}
+                  readOnly={true}
+                  side="comparison"
+                />
               : this.renderComparisonPlaceholder())}
         </div>
       );
@@ -64,7 +71,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "single-workspace",
               "primary",
-              <WorkspaceComponent workspace={primaryWorkspace} side="primary"/>
+              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary"/>
           )}
         </div>
       );
@@ -101,10 +108,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
       <div className="list">
         {learningLogs.map((learningLog) => {
           return (
-            <div
-              className="list-item"
-              key={learningLog.document.key}
-            >
+            <div className="list-item" key={learningLog.key}>
               <div
                 className="scaled-list-item-container"
                 onClick={this.handleLearningLogClicked(learningLog)}
@@ -112,7 +116,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
                 draggable={true}
               >
                 <div className="scaled-list-item">
-                  <CanvasComponent document={learningLog.document} readOnly={true} context="learning-log" />
+                  <CanvasComponent document={learningLog} readOnly={true} context="learning-log" />
                 </div>
               </div>
               <div className="info">
@@ -134,27 +138,27 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (e.dataTransfer.getData("workspace.document.key")) {
+    if (e.dataTransfer.getData(DocumentDragKey)) {
       e.preventDefault();
     }
   }
 
   private handleDrop = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      const {ui, workspaces} = this.stores;
-      const documentKey = e.dataTransfer.getData("workspace.document.key");
-      const workspace = documentKey ? workspaces.getWorkspace(documentKey) : null;
-      if (workspace) {
+      const {ui, documents} = this.stores;
+      const documentKey = e.dataTransfer.getData(DocumentDragKey);
+      const document = documentKey && documents.getDocument(documentKey);
+      if (document) {
         if (side === "primary") {
-          if (workspace.type === "learningLog") {
-            ui.setLLPrimaryWorkspace(workspace);
+          if (document.type === LearningLogWorkspace) {
+            ui.learningLogWorkspace.setPrimaryDocument(document);
           }
           else {
             ui.alert("Please select a Learning Log first.", "Drop into Learning Log");
           }
         }
         else {
-          ui.setLLComparisonWorkspace(workspace);
+          ui.learningLogWorkspace.setComparisonDocument(document);
         }
       }
     };
@@ -163,30 +167,29 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   private handleCreateLearningLog = () => {
     this.stores.ui.prompt("Enter name of learning log", "", "Create Learning Log")
       .then((title: string) => {
-        this.stores.db.createLearningLogWorkspace(title)
+        this.stores.db.createLearningLogDocument(title)
           .then(this.handleSelectLearningLog)
           .catch(this.stores.ui.setError);
       });
   }
 
-  private handleLearningLogClicked = (learningLog: LearningLogWorkspaceModelType) => {
+  private handleLearningLogClicked = (learningLog: DocumentModelType) => {
     return (e: React.MouseEvent<HTMLDivElement>) => {
       this.handleSelectLearningLog(learningLog);
     };
   }
 
-  private handleSelectLearningLog = (learningLog: LearningLogWorkspaceModelType) => {
-    const {ui} = this.stores;
-    ui.setAvailableLLWorkspace(learningLog);
+  private handleSelectLearningLog = (learningLog: DocumentModelType) => {
+    this.stores.ui.learningLogWorkspace.setAvailableDocument(learningLog);
   }
 
-  private handleLearningLogDragStart = (workspace: LearningLogWorkspaceModelType) => {
+  private handleLearningLogDragStart = (learningLog: DocumentModelType) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      e.dataTransfer.setData("workspace.document.key", workspace.document.key);
+      e.dataTransfer.setData(DocumentDragKey, learningLog.key);
     };
   }
 
-  private handleRenameLearningLog = (learningLog: LearningLogWorkspaceModelType) => {
+  private handleRenameLearningLog = (learningLog: DocumentModelType) => {
     const {ui} = this.stores;
     return (e: React.MouseEvent<HTMLSpanElement>) => {
       this.stores.ui.prompt("Enter new name of learning log", learningLog.title, "Renaming Learning Log")
@@ -203,6 +206,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   }
 
   private getSortedLearningLogs() {
-    return this.stores.workspaces.learningLogs.slice().sort((a, b) => b.createdAt - a.createdAt);
+    const {documents, user} = this.stores;
+    return documents.byTypeForUser(LearningLogDocument, user.id).slice().sort((a, b) => b.createdAt - a.createdAt);
   }
 }

@@ -4,11 +4,12 @@ import { HeaderComponent } from "./header";
 import { LeftNavComponent } from "./left-nav";
 import { RightNavComponent } from "./right-nav";
 import { BottomNavComponent } from "./bottom-nav";
-import { WorkspaceComponent } from "./workspace";
+import { DocumentComponent } from "./document";
 import { BaseComponent, IBaseProps } from "./base";
 import { DialogComponent } from "./dialog";
 
 import "./app-container.sass";
+import { DocumentDragKey } from "../models/document";
 
 type WorkspaceSide = "primary" | "comparison";
 
@@ -22,7 +23,7 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="app-container">
         <HeaderComponent />
-        {this.renderWorkspaces()}
+        {this.renderDocuments()}
         <LeftNavComponent />
         <BottomNavComponent />
         <RightNavComponent />
@@ -31,47 +32,47 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleRemoveBlocker = () => {
-    this.stores.ui.contractAll();
-  }
+  private renderDocuments() {
+    const {ui, documents} = this.stores;
+    const {sectionWorkspace} = ui;
+    const primaryDocument = sectionWorkspace.primaryDocumentKey
+                            && documents.getDocument(sectionWorkspace.primaryDocumentKey);
+    const comparisonDocument = sectionWorkspace.comparisonDocumentKey
+                               && documents.getDocument(sectionWorkspace.comparisonDocumentKey);
 
-  private renderWorkspaces() {
-    const {ui, workspaces} = this.stores;
-    const primaryWorkspace = ui.primaryWorkspaceDocumentKey
-                        ? workspaces.getWorkspace(ui.primaryWorkspaceDocumentKey)
-                        : null;
-    const comparisonWorkspace = ui.comparisonWorkspaceDocumentKey
-                        ? workspaces.getWorkspace(ui.comparisonWorkspaceDocumentKey)
-                        : null;
-
-    if (!primaryWorkspace) {
-      return this.renderWorkspace("single-workspace", "primary");
+    if (!primaryDocument) {
+      return this.renderDocument("single-workspace", "primary");
     }
 
-    if (ui.comparisonWorkspaceVisible) {
+    if (sectionWorkspace.comparisonVisible) {
       return (
         <div onMouseOver={this.handleMouseOver}>
-          {this.renderWorkspace(
+          {this.renderDocument(
             "left-workspace",
             "primary",
-            <WorkspaceComponent workspace={primaryWorkspace} side="primary" />
+            <DocumentComponent document={primaryDocument} workspace={sectionWorkspace} side="primary" />
           )}
-          {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
-              ? <WorkspaceComponent workspace={comparisonWorkspace} readOnly={true} side="comparison" />
+          {this.renderDocument("right-workspace", "comparison", comparisonDocument
+              ? <DocumentComponent
+                  document={comparisonDocument}
+                  workspace={sectionWorkspace}
+                  readOnly={true}
+                  side="comparison"
+                />
               : this.renderComparisonPlaceholder())}
         </div>
       );
     }
     else {
-      return this.renderWorkspace(
+      return this.renderDocument(
                "single-workspace",
                "primary",
-               <WorkspaceComponent workspace={primaryWorkspace} side="primary" />
+               <DocumentComponent document={primaryDocument} workspace={sectionWorkspace} side="primary" />
              );
     }
   }
 
-  private renderWorkspace(className: string, side: WorkspaceSide, child?: JSX.Element) {
+  private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     return (
       <div
         className={className}
@@ -98,22 +99,23 @@ export class AppContainerComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (e.dataTransfer.types.find((type) => type === "workspace.document.key")) {
+    if (e.dataTransfer.types.find((type) => type === DocumentDragKey)) {
       e.preventDefault();
     }
   }
 
   private handleDrop = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      const {ui, workspaces} = this.stores;
-      const documentKey = e.dataTransfer.getData("workspace.document.key");
-      const workspace = documentKey ? workspaces.getWorkspace(documentKey) : null;
-      if (workspace) {
+      const {ui, documents} = this.stores;
+      const {sectionWorkspace} = ui;
+      const documentKey = e.dataTransfer.getData(DocumentDragKey);
+      const document = documentKey ? documents.getDocument(documentKey) : null;
+      if (document) {
         if (side === "primary") {
-          ui.setPrimaryWorkspace(workspace);
+          sectionWorkspace.setPrimaryDocument(document);
         }
         else {
-          ui.setComparisonWorkspace(workspace);
+          sectionWorkspace.setComparisonDocument(document);
         }
       }
     };

@@ -14,7 +14,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   public render() {
     const {appMode, db, user, problem, groups} = this.stores;
     const myGroup = groups.groupForUser(user.id);
-    const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebaseUserId}` : undefined;
+    const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
     return (
       <div className="header">
