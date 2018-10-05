@@ -3,6 +3,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
+import { DB } from "../../lib/db";
 
 import "./image-tool.sass";
 
@@ -12,9 +13,15 @@ interface IProps {
   readOnly?: boolean;
 }
 
+interface IState {
+  currentFile?: File;
+}
+
 @inject("stores")
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
+
+  public state: IState = {};
 
   public render() {
     const { readOnly, model } = this.props;
@@ -50,17 +57,73 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleUploadButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log('Ready to upload to the database.');
-  }
+    const { db } = this.stores;
+    const { currentFile } = this.state;
+    console.log("Ready to upload to the database.");
 
-  private handleOnChange = (e: React.MouseEvent<HTMLInputElement>) => {
+    console.log(db.firebase.storeRef);
+    console.log(db.firebase.getRootFolder());
+
+    if (currentFile) {
+      const fileReader = new FileReader();
+      const fileString = fileReader.readAsBinaryString(currentFile);
+      const ref = db.firebase.storeRef("/" + currentFile.name);
+      ref.put(currentFile).then((snapshot) => {
+        console.log(`"${currentFile.name}" (${currentFile.size} bytes): ${snapshot.bytesTransferred} transferred`);
+        // this.updateURL(db.firebase.getRootFolder()
+        this.getUrlFromFirestore();
+      });
+    }
+  }
+  private getUrlFromFirestore() {
+    const { db } = this.stores;
+    const { currentFile } = this.state;
+    if (currentFile) {
+      const imageRef = db.firebase.storeRef().child(currentFile.name);
+      // Get the download URL
+      imageRef.getDownloadURL().then((url) => {
+        console.log(url);
+        this.updateURL(url);
+      }).catch((error) => {
+        console.log(error);
+      });
+      // imageRef.getDownloadURL().then((url) => {
+      //   // Insert url into an <img> tag to "download"
+      // }).catch((error) => {
+
+      //   // A full list of error codes is available at
+      //   // https://firebase.google.com/docs/storage/web/handle-errors
+      //   switch (error.code) {
+      //     case 'storage/object-not-found':
+      //       // File doesn't exist
+      //       break;
+
+      //     case 'storage/unauthorized':
+      //       // User doesn't have permission to access the object
+      //       break;
+
+      //     case 'storage/canceled':
+      //       // User canceled the upload
+      //       break;
+
+      //     ...
+
+      //     case 'storage/unknown':
+      //       // Unknown error occurred, inspect the server response
+      //       break;
+      //   }
+      // });
+    }
+  }
+  private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files as FileList;
-    var fileReader = new FileReader();
+    const fileReader = new FileReader();
     fileReader.onloadend = () => {
       const fileContent = fileReader.result;
       console.log(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
     };
-    fileReader.readAsBinaryString(files[0]);
+    this.setState({ currentFile: files[0] });
+
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
