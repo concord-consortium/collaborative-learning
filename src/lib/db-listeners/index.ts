@@ -255,7 +255,11 @@ export class DBListeners {
             this.handleGroupUserDocRef(docContentSnapshot, document);
           });
         } else {
-          this.db.stores.ui.sectionWorkspace.clearGroupDocument(groupUserId);
+          const { documents } = this.db.stores;
+          const hideDoc = documents.getDocument(sectionDocument.documentKey);
+          if (hideDoc) {
+            this.db.stores.documents.remove(hideDoc);
+          }
         }
       }
     };
@@ -278,7 +282,6 @@ export class DBListeners {
           groupId: group && group.id,
           visibility: "public",
         }).then((groupUserDoc) => {
-          this.db.stores.ui.sectionWorkspace.setGroupDocument(groupUserId, groupUserDoc);
           this.db.stores.documents.update(groupUserDoc);
         });
       }

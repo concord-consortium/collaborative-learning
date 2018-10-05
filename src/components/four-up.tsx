@@ -103,7 +103,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale} readOnly={!this.props.isGhostUser}
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale} readOnly={this.props.isGhostUser}
                             document={groupDoc(0)} {...others} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}

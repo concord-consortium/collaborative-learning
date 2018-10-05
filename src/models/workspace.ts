@@ -25,7 +25,6 @@ export const WorkspaceModel = types
     primaryDocumentKey: types.maybe(types.string),
     comparisonDocumentKey: types.maybe(types.string),
     comparisonVisible: false,
-    groupDocumentKeys: types.map(types.string),
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
@@ -43,14 +42,6 @@ export const WorkspaceModel = types
         self.mode = typeof override === "undefined"
           ? (self.mode === "1-up" ? "4-up" : "1-up")
           : override;
-      },
-
-      setGroupDocument(uid: string, document: DocumentModelType) {
-        self.groupDocumentKeys.set(uid, document.key);
-      },
-
-      clearGroupDocument(uid: string) {
-        self.groupDocumentKeys.delete(uid);
       },
 
       setAvailableDocument(document?: DocumentModelType) {
