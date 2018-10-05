@@ -83,31 +83,39 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
           switch (error.code) {
           case "storage/object-not-found":
             // File doesn't exist
+            this.showMessage("file does not exist!");
             break;
 
           case "storage/unauthorized":
             // User doesn't have permission to access the object
+            this.showMessage("You do not have permission");
             break;
 
           case "storage/canceled":
             // User canceled the upload
+            this.showMessage("Upload cancelled");
             break;
 
           case "storage/unknown":
             // Unknown error occurred, inspect the server response
+            this.showMessage("Unknown error uploading image");
             break;
         }
       });
     }
   }
+  private showMessage(message: string) {
+    // TODO: Figure out user-friendly way to show information
+    // console.log(message);
+  }
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files as FileList;
-    const fileReader = new FileReader();
-    fileReader.onloadend = () => {
-      this.setState({ currentFile: files[0] });
+    // const fileReader = new FileReader();
+    // fileReader.onloadend = () => {
       // const fileContent = fileReader.result;
       // console.log(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
-    };
+    // };
+    this.setState({ currentFile: files[0] });
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
