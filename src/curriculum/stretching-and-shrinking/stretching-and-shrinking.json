@@ -217,7 +217,7 @@
               }
             },
             {
-              "type": "Extra Workspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -346,7 +346,7 @@
               ]
             },
             {
-              "type": "Extra Workspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -399,19 +399,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "&#x2220;BAC or BAC"
+                      "text": "∠BAC or BAC"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "&#x2220;BCA or BCA"
+                      "text": "∠BCA or BCA"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "&#x2220;ABC or ABC"
+                      "text": "∠ABC or ABC"
                     }
                   },
                   {
@@ -552,7 +552,7 @@
               "supports": []
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -803,7 +803,7 @@
               "supports": []
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -972,7 +972,7 @@
               ]
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -1167,7 +1167,7 @@
               ]
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -1411,7 +1411,7 @@
               }
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -1582,7 +1582,7 @@
               "supports": []
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
@@ -1698,7 +1698,7 @@
               "supports": []
             },
             {
-              "type": "ExtraWorkspace",
+              "type": "extraWorkspace",
               "content": {
                 "tiles": [
                   {
