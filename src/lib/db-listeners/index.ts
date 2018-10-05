@@ -237,35 +237,29 @@ export class DBListeners {
       const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
       if (sectionDocument) {
         const groupUserId = sectionDocument.self.uid;
-        const sectionId = sectionDocument.self.sectionId;
         const docKey = sectionDocument.documentKey;
-        if (sectionDocument.visibility === "public") {
-          const mainUser = this.db.stores.user;
-          const currentDocContentListener =
-            this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId).docContentRef;
-          if (currentDocContentListener) {
-            currentDocContentListener.off();
-          }
-          const groupUserDocRef = this.db.firebase.ref(
-            this.db.firebase.getUserDocumentPath(mainUser, docKey, groupUserId)
-          );
-          this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId)
-            .docContentRef = groupUserDocRef;
-          groupUserDocRef.on("value", (docContentSnapshot) => {
-            this.handleGroupUserDocRef(docContentSnapshot, document);
-          });
-        } else {
-          const { documents } = this.db.stores;
-          const hideDoc = documents.getDocument(sectionDocument.documentKey);
-          if (hideDoc) {
-            this.db.stores.documents.remove(hideDoc);
-          }
+        const mainUser = this.db.stores.user;
+        const currentDocContentListener =
+          this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId).docContentRef;
+        if (currentDocContentListener) {
+          currentDocContentListener.off();
         }
+        const groupUserDocRef = this.db.firebase.ref(
+          this.db.firebase.getUserDocumentPath(mainUser, docKey, groupUserId)
+        );
+        this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId)
+          .docContentRef = groupUserDocRef;
+        groupUserDocRef.on("value", (docContentSnapshot) => {
+          this.handleGroupUserDocRef(docContentSnapshot, sectionDocument);
+        });
       }
     };
   }
 
-  private handleGroupUserDocRef(snapshot: firebase.database.DataSnapshot|null, document: DocumentModelType) {
+  private handleGroupUserDocRef(
+    snapshot: firebase.database.DataSnapshot|null,
+    sectionDocument: DBOfferingUserSectionDocument)
+  {
     if (snapshot) {
       const rawGroupDoc: DBDocumentMetadata = snapshot.val();
       if (rawGroupDoc) {
@@ -277,10 +271,10 @@ export class DBListeners {
         this.db.openDocument({
           documentKey,
           type: SectionDocument,
-          sectionId: document.sectionId,
+          sectionId: sectionDocument.self.sectionId,
           userId: groupUserId,
           groupId: group && group.id,
-          visibility: "public",
+          visibility: sectionDocument.visibility
         }).then((groupUserDoc) => {
           this.db.stores.documents.update(groupUserDoc);
         });

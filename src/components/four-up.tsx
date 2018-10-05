@@ -13,7 +13,7 @@ import { WorkspaceModelType } from "../models/workspace";
 interface IProps extends IBaseProps {
   document?: DocumentModelType;
   workspace: WorkspaceModelType;
-  isGhostUser: boolean;
+  isGhostUser?: boolean;
 }
 
 interface FourUpUser {
@@ -88,7 +88,9 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       : [];
 
     const groupDoc = (index: number) => {
-      return groupUsers[index] && groupUsers[index].doc;
+      const doc = groupUsers[index] && groupUsers[index].doc;
+      const showDoc = doc && (index === 0 || doc.visibility === "public" || this.props.isGhostUser);
+      return showDoc ? doc : undefined;
     };
 
     // if we have a document then make it the first of the group
