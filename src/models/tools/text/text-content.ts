@@ -4,6 +4,10 @@ import Plain from "slate-plain-serializer";
 
 export const kTextToolID = "Text";
 
+export function defaultTextContent(initialText?: string) {
+  return TextContentModel.create({ text: initialText || "" });
+}
+
 export const StringOrArray = types.union(types.string, types.array(types.string));
 
 export const emptyJson: ValueJSON = {

@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { types, Instance } from "mobx-state-tree";
 import { values } from "lodash";
 import { UnitModelType } from "./curriculum/unit";
 import { SupportModelType } from "./curriculum/support";
@@ -46,18 +46,10 @@ export const SupportsModel = types
         };
 
         unit.supports.forEach(createItem(SupportItemType.unit));
-        unit.investigations.forEach((investigationItem) => {
-          if (investigationItem === investigation) {
-            investigationItem.supports.forEach(createItem(SupportItemType.investigation));
-            investigationItem.problems.forEach((problemItem) => {
-              if (problemItem === problem) {
-                problemItem.supports.forEach(createItem(SupportItemType.problem));
-                problemItem.sections.forEach((sectionItem) => {
-                  sectionItem.supports.forEach(createItem(SupportItemType.section, sectionItem.id));
-                });
-              }
-            });
-          }
+        investigation && investigation.supports.forEach(createItem(SupportItemType.investigation));
+        problem && problem.supports.forEach(createItem(SupportItemType.problem));
+        problem && problem.sections.forEach((section) => {
+          section.supports.forEach(createItem(SupportItemType.section, section.id));
         });
 
         self.supports.replace(supports);
@@ -82,5 +74,5 @@ export const SupportsModel = types
     };
   });
 
-export type SupportItemModelType = typeof SupportItemModel.Type;
-export type SupportsModelType = typeof SupportsModel.Type;
+export type SupportItemModelType = Instance<typeof SupportItemModel>;
+export type SupportsModelType = Instance<typeof SupportsModel>;

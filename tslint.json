@@ -2,6 +2,7 @@
   "extends": ["tslint:recommended", "tslint-react"],
   "rules": {
     "arrow-parens": false,
+    "curly": [true, "ignore-same-line"],
     "interface-name" : false,
     "jsx-alignment": false,
     "jsx-curly-spacing": false,
@@ -11,6 +12,7 @@
     "no-console": false,
     "no-debugger": false,
     "no-empty-interface": false,
+    "no-unused-expression": [true, "allow-fast-null-checks"],
     "no-var-requires": false,
     "object-literal-sort-keys": false,
     "one-line": false,

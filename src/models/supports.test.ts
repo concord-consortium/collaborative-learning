@@ -4,8 +4,9 @@ import { UnitModel } from "./curriculum/unit";
 import { SupportModel } from "./curriculum/support";
 import { InvestigationModel } from "./curriculum/investigation";
 import { ProblemModel } from "./curriculum/problem";
-import { SectionModel, SectionType } from "./curriculum/section";
+import { SectionType } from "./curriculum/section";
 import { omitUndefined } from "../utilities/test-utils";
+import { cloneDeep } from "lodash";
 
 describe("supports model", () => {
 
@@ -60,179 +61,180 @@ describe("supports model", () => {
 
   it("can load supports from units", () => {
     const supports = SupportsModel.create({});
-    const problem1 = ProblemModel.create({
+    const problem1 = {
       ordinal: 1,
       title: "Problem 1",
       sections: [
-        SectionModel.create({
+        {
           type: SectionType.introduction,
           supports: [
-            SupportModel.create({text: "support #1"}),
-            SupportModel.create({text: "support #2"})
+            SupportModel.create({text: "Investigation 1, Problem 1, section: introduction, support #1"}),
+            SupportModel.create({text: "Investigation 1, Problem 1, section: introduction, support #2"})
           ]
-        }),
-        SectionModel.create({
+        },
+        {
           type: SectionType.initialChallenge,
           supports: [
-            SupportModel.create({text: "support #3"}),
-            SupportModel.create({text: "support #4"})
+            SupportModel.create({text: "Investigation 1, Problem 1, section: initial challenge, support #1"}),
+            SupportModel.create({text: "Investigation 1, Problem 1, section: initial challenge, support #2"})
           ]
-        })
+        }
       ],
       supports: [
-        SupportModel.create({text: "support #3"}),
-        SupportModel.create({text: "support #4"})
+        SupportModel.create({text: "Investigation 1, Problem 1, support #1"}),
+        SupportModel.create({text: "Investigation 1, Problem 1, support #2"})
       ]
-    });
-    const investigation1 = InvestigationModel.create({
+    };
+    const investigation1 = {
       ordinal: 1,
       title: "Investigation 1",
       problems: [
         problem1,
-        ProblemModel.create({
+        {
           ordinal: 2,
           title: "Problem 2",
           sections: [
-            SectionModel.create({
+            {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "support #5"}),
-                SupportModel.create({text: "support #6"})
+                SupportModel.create({text: "Investigation 1, Problem 2, section: introduction, support #1"}),
+                SupportModel.create({text: "Investigation 1, Problem 2, section: introduction, support #2"})
               ]
-            }),
-            SectionModel.create({
+            },
+            {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "support #7"}),
-                SupportModel.create({text: "support #8"})
+                SupportModel.create({text: "Investigation 1, Problem 2, section: initial challenge, support #1"}),
+                SupportModel.create({text: "Investigation 1, Problem 2, section: initial challenge, support #2"})
               ]
-            })
+            }
           ],
           supports: [
-            SupportModel.create({text: "support #9"}),
-            SupportModel.create({text: "support #10"})
+            SupportModel.create({text: "Investigation 1, Problem 1, support #1"}),
+            SupportModel.create({text: "Investigation 1, Problem 1, support #2"})
           ]
-        })
+        }
       ],
       supports: [
-        SupportModel.create({text: "support #11"}),
-        SupportModel.create({text: "support #12"})
+        SupportModel.create({text: "Investigation 1, support #1"}),
+        SupportModel.create({text: "Investigation 1, support #2"})
       ]
-    });
-    const investigation2 = InvestigationModel.create({
+    };
+    const investigation2 = {
       ordinal: 1,
       title: "Investigation 2",
       problems: [
-        ProblemModel.create({
+        {
           ordinal: 1,
           title: "Problem 1",
           sections: [
-            SectionModel.create({
+            {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "support #13"}),
-                SupportModel.create({text: "support #14"})
+                SupportModel.create({text: "Investigation 2, Problem 1, section: introduction, support #1"}),
+                SupportModel.create({text: "Investigation 2, Problem 1, section: introduction, support #2"})
               ]
-            }),
-            SectionModel.create({
+            },
+            {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "support #15"}),
-                SupportModel.create({text: "support #16"})
+                SupportModel.create({text: "Investigation 2, Problem 1, section: initial challenge, support #1"}),
+                SupportModel.create({text: "Investigation 2, Problem 1, section: initial challenge, support #2"})
               ]
-            })
+            }
           ],
           supports: [
-            SupportModel.create({text: "support #17"}),
-            SupportModel.create({text: "support #18"})
+            SupportModel.create({text: "Investigation 2, Problem 1, support #1"}),
+            SupportModel.create({text: "Investigation 2, Problem 1, support #2"})
           ]
-        }),
-        ProblemModel.create({
+        },
+        {
           ordinal: 2,
           title: "Problem 2",
           sections: [
-            SectionModel.create({
+            {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "support #19"}),
-                SupportModel.create({text: "support #20"})
+                SupportModel.create({text: "Investigation 2, Problem 2, section: introduction, support #1"}),
+                SupportModel.create({text: "Investigation 2, Problem 2, section: introduction, support #2"})
               ]
-            }),
-            SectionModel.create({
+            },
+            {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "support #21"}),
-                SupportModel.create({text: "support #22"})
+                SupportModel.create({text: "Investigation 2, Problem 2, section: initial challenge, support #1"}),
+                SupportModel.create({text: "Investigation 2, Problem 2, section: initial challenge, support #2"})
               ]
-            })
+            }
           ],
           supports: [
-            SupportModel.create({text: "support #23"}),
-            SupportModel.create({text: "support #24"})
+            SupportModel.create({text: "Investigation 2, Problem 2, support #1"}),
+            SupportModel.create({text: "Investigation 2, Problem 2, support #2"})
           ]
-        })
+        }
       ],
       supports: [
-        SupportModel.create({text: "support #25"}),
-        SupportModel.create({text: "support #26"})
+        SupportModel.create({text: "Investigation 2, support #1"}),
+        SupportModel.create({text: "Investigation 2, support #2"})
       ]
-    });
+    };
 
     supports.createFromUnit(UnitModel.create({
       title: "Unit 1",
       investigations: [investigation1, investigation2],
       supports: [
-        SupportModel.create({text: "support #27"}),
-        SupportModel.create({text: "support #28"})
+        SupportModel.create({text: "Unit 1, support #1"}),
+        SupportModel.create({text: "Unit 1, support #2"})
       ]
-    }), investigation1, problem1);
+    }), InvestigationModel.create(cloneDeep(investigation1)),
+        ProblemModel.create(cloneDeep(problem1)));
 
     expect(supports.getAllForSection(SectionType.introduction)).toEqual([
       {
         sectionId: undefined,
-        text: "support #27",
+        text: "Unit 1, support #1",
         type: "unit",
         visible: false
       },
       {
         sectionId: undefined,
-        text: "support #28",
+        text: "Unit 1, support #2",
         type: "unit",
         visible: false
       },
       {
         sectionId: undefined,
-        text: "support #11",
+        text: "Investigation 1, support #1",
         type: "investigation",
         visible: false,
       },
       {
         sectionId: undefined,
-        text: "support #12",
+        text: "Investigation 1, support #2",
         type: "investigation",
         visible: false,
       },
       {
         sectionId: undefined,
-        text: "support #3",
+        text: "Investigation 1, Problem 1, support #1",
         type: "problem",
         visible: false,
       },
       {
         sectionId: undefined,
-        text: "support #4",
+        text: "Investigation 1, Problem 1, support #2",
         type: "problem",
         visible: false,
       },
       {
         sectionId: "introduction",
-        text: "support #1",
+        text: "Investigation 1, Problem 1, section: introduction, support #1",
         type: "section",
         visible: false,
       },
       {
         sectionId: "introduction",
-        text: "support #2",
+        text: "Investigation 1, Problem 1, section: introduction, support #2",
         type: "section",
         visible: false,
       }

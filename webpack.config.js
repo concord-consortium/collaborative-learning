@@ -57,7 +57,7 @@ module.exports = (env, argv) => {
             name: 'assets/[name].[ext]',
             publicPath: function(url) {
               // cf. https://github.com/webpack-contrib/file-loader/issues/160#issuecomment-349771544
-              return url.replace(/assets/, '.');
+              return devMode ? url : url.replace(/assets/, '.');
             }
           }
         }

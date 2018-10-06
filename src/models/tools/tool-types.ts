@@ -1,29 +1,32 @@
 import { IAnyType, types } from "mobx-state-tree";
-import { kGeometryToolID, GeometryContentModel } from "./geometry/geometry-content";
-import { kRichTextToolID, RichTextContentModel } from "./rich-text/rich-text-content";
-import { kTableToolID, TableContentModel } from "./table/table-content";
-import { kTextToolID, TextContentModel } from "./text/text-content";
-import { kImageToolID, ImageContentModel } from "./image/image-content";
-import { kUnknownToolID, UnknownContentModel } from "./unknown-content";
+import { kGeometryToolID, GeometryContentModel, GeometryContentModelType } from "./geometry/geometry-content";
+import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
+import { kTableToolID, TableContentModel, TableContentModelType } from "./table/table-content";
+import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
+import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./unknown-content";
 
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",
                               [
                                 kGeometryToolID,
-                                kRichTextToolID,
+                                kImageToolID,
                                 kTableToolID,
                                 kTextToolID,
-                                kImageToolID,
                                 kUnknownToolID
                               ]);
 export const ToolContentUnion = types.union(
                                   { dispatcher: toolFactory },
                                   GeometryContentModel,
-                                  RichTextContentModel,
+                                  ImageContentModel,
                                   TableContentModel,
                                   TextContentModel,
-                                  ImageContentModel,
                                   UnknownContentModel);
+
+export type ToolContentUnionType = GeometryContentModelType |
+                                    ImageContentModelType |
+                                    TableContentModelType |
+                                    TextContentModelType |
+                                    UnknownContentModelType;
 
 interface IToolMap {
   [id: string]: IAnyType;
@@ -36,10 +39,9 @@ interface IPrivate {
 export const _private: IPrivate = {
   toolMap: {
     [kGeometryToolID]: GeometryContentModel,
-    [kRichTextToolID]: RichTextContentModel,
+    [kImageToolID]: ImageContentModel,
     [kTableToolID]: TableContentModel,
     [kTextToolID]: TextContentModel,
-    [kImageToolID]: ImageContentModel,
     [kUnknownToolID]: UnknownContentModel
   }
 };

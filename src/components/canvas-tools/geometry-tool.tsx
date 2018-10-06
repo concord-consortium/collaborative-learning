@@ -116,14 +116,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public render() {
     const { model, readOnly } = this.props;
-    const { layout } = model;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
-    const style = layout && layout.height
-                    ? { height: layout.height }
-                    : {};
     return (
-      <div id={this.state.elementId} className={classes} style={style} />
+      <div id={this.state.elementId} className={classes} />
     );
   }
 
