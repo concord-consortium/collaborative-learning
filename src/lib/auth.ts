@@ -312,9 +312,9 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     let basePortalUrl: string;
 
     if ((appMode === "demo") || (appMode === "qa")) {
-      const {fakeClass, fakeUser, fakeOffering} = urlParams;
-      if (!fakeClass || !fakeUser || !fakeOffering) {
-        return reject("Missing fakeClass or fakeUser or fakeOffering parameter for demo!");
+      const {fakeClass, fakeUser} = urlParams;
+      if (!fakeClass || !fakeUser) {
+        return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
       const [userType, userId, ...rest] = fakeUser.split(":");
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
@@ -324,7 +324,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         appMode,
         classId: fakeClass,
         userType, userId,
-        offeringId: fakeOffering
+        problemOrdinal: urlParams.problem || DefaultProblemOrdinal
       }));
     }
 
@@ -417,15 +417,19 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
 };
 
 export const generateDevAuthentication = (problemOrdinal: string) => {
-  // create fake offeringIds per problem so we keep section documents separate
-  const [major, minor, ...rest] = problemOrdinal.split(".");
-  const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
-  const offeringId = `${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
+  const offeringId = createOfferingIdFromProblem(problemOrdinal);
   DEV_STUDENT.offeringId = offeringId;
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
 
   return {authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO};
+};
+
+const createOfferingIdFromProblem = (problemOrdinal: string) => {
+  // create fake offeringIds per problem so we keep section documents separate
+  const [major, minor, ...rest] = problemOrdinal.split(".");
+  const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
+  return `${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
 
 export const parseUrl = (url: string) => {
@@ -482,11 +486,12 @@ export interface CreateFakeAuthenticationOptions {
   classId: string;
   userType: UserType;
   userId: string;
-  offeringId: string;
+  problemOrdinal: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, offeringId} = options;
+  const {appMode, classId, userType, userId, problemOrdinal} = options;
+  const offeringId = createOfferingIdFromProblem(problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
@@ -500,7 +505,8 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
         appMode,
         classId,
         userType: "student",
-        userId: `${i}`, offeringId
+        userId: `${i}`,
+        offeringId
       }) as StudentUser
     );
   }
@@ -510,7 +516,8 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
         appMode,
         classId,
         userType: "teacher",
-        userId: `${i}`, offeringId
+        userId: `${i}`,
+        offeringId
       }) as TeacherUser
     );
   }

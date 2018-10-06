@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
@@ -44,13 +44,11 @@ export const DocumentModel = types
     addTile(tool: DocumentTool) {
       switch (tool) {
         case "geometry":
-          self.content.addGeometryTile();
-          break;
+          return self.content.addGeometryTile();
         case "text":
-          self.content.addTextTile();
-          break;
+          return self.content.addTextTile();
         case "image":
-          self.content.addImageTile();
+          return self.content.addImageTile();
       }
     },
 
@@ -60,3 +58,4 @@ export const DocumentModel = types
   }));
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
+export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;

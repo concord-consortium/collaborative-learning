@@ -12,9 +12,18 @@ import ImageToolComponent from "./image-tool";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
+export const kDragRowHeight = "org.concord.clue.row.height";
+export const kDragTileSource = "org.concord.clue.tile.src";
+export const kDragTileId = "org.concord.clue.tile.id";
+export const kDragTileContent = "org.concord.clue.tile.content";
+// allows source compatibility to be checked in dragOver
+export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id}`;
+
 interface IProps {
   context: string;
+  docId: string;
   scale?: number;
+  rowHeight?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -52,13 +61,20 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // set the drag data
-    const snapshot = cloneDeep(getSnapshot(this.props.model));
+    const { model, docId, rowHeight, scale } = this.props;
+    const snapshot = cloneDeep(getSnapshot(model));
+    const id = snapshot.id;
     delete snapshot.id;
     const dragData = JSON.stringify(snapshot);
-    e.dataTransfer.setData("org.concord.clue.tile", dragData);
+    e.dataTransfer.setData(kDragTileSource, docId);
+    if (rowHeight) {
+      e.dataTransfer.setData(kDragRowHeight, String(rowHeight));
+    }
+    e.dataTransfer.setData(kDragTileId, id);
+    e.dataTransfer.setData(kDragTileContent, dragData);
+    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
 
     // set the drag image
-    const { model, scale } = this.props;
     const ToolComponent = kToolComponentMap[model.content.type];
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image

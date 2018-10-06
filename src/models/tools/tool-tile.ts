@@ -1,5 +1,4 @@
 import { types, Instance } from "mobx-state-tree";
-import { TileLayoutModel } from "./tile-layout";
 import { ToolContentUnion } from "./tool-types";
 import * as uuid from "uuid/v4";
 
@@ -10,9 +9,7 @@ export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
     id: types.optional(types.identifier, () => uuid()),
-    // optional information about placement of tile
-    layout: types.maybe(TileLayoutModel),
-    // e.g. "GeometryContentModel", "RichTextContentModel", "TableContentModel", "TextContentModel"
+    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel"
     content: ToolContentUnion
   })
   .views(self => ({
