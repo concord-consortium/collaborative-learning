@@ -25,6 +25,18 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public state: IState = {};
 
+  constructor(props: IProps) {
+    super(props);
+    const { model: { content } } = props;
+    const imageContent = content as ImageContentModelType;
+    let imageUrl = imageContent.url;
+
+    if (imageContent.storePath) {
+      imageUrl = this.getUrlFromStore(imageContent.storePath);
+    }
+    this.state = { imageUrl };
+  }
+
   public render() {
     const { readOnly, model } = this.props;
     const { content } = model;
@@ -37,11 +49,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const fileInputClasses = `image-file ${selectedClass}`;
     const fileUploadClasses = `image-file-upload ${selectedClass}`;
 
-    if (imageContent.storePath) {
-      // Access token for url may have expired
-      // Each time we load the control we need to check for the current tokenized url
-      this.getUrlFromStore(imageContent.storePath);
-    }
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} >
         <img src={imageContent.url} />
@@ -68,7 +75,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const storage = db.firebase.firestore();
     const ref = storage.ref(storePath);
-    this.getUrlFromFirestore(ref);
+    return this.getUrlFromFirestore(ref);
   }
 
   private handleUploadButton = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -81,16 +88,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         this.showMessage(`"${currentFile.name}" (${currentFile.size} bytes): ${snapshot.bytesTransferred} transferred`);
         if (currentFile) {
           const imageRef = db.firebase.storeRef().child(currentFile.name);
-          this.getUrlFromFirestore(imageRef);
+          const url = this.getUrlFromFirestore(imageRef, true);
         }
       });
     }
   }
-  private getUrlFromFirestore(imageRef: firebase.storage.Reference) {
+  private getUrlFromFirestore(imageRef: firebase.storage.Reference, updateUrl: boolean = false) {
     // Get the download URL - returns a url with an authentication token for the current session
     imageRef.getDownloadURL().then((url) => {
       this.showMessage(" image ref? " + imageRef.fullPath);
-      this.updateURL(url, imageRef.fullPath);
+      if (updateUrl) {
+        this.updateURL(url, imageRef.fullPath);
+      }
+      return url;
     }).catch((error) => {
       switch (error.code) {
         case "storage/object-not-found":
@@ -113,6 +123,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
           this.showMessage("Unknown error uploading image");
           break;
       }
+      return "assets/image_placeholder.png";
     });
   }
   // TODO: This will not exist once this branch work has been completed - leaving in for now for WIP development
