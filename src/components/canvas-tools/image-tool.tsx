@@ -3,7 +3,7 @@ import firebase from "firebase";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { ImageContentModelType } from "../../models/tools/image/image-content";
+import { ImageContentModelType, ImageContentModel } from "../../models/tools/image/image-content";
 
 import "./image-tool.sass";
 
@@ -23,19 +23,22 @@ interface IState {
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
-  public state: IState = {};
-
-  constructor(props: IProps) {
-    super(props);
+  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
     const { model: { content } } = props;
     const imageContent = content as ImageContentModelType;
-    let imageUrl = imageContent.url;
-
-    if (imageContent.storePath) {
-      imageUrl = this.getUrlFromStore(imageContent.storePath);
-    }
-    this.state = { imageUrl };
+    const newState: IState = { imageUrl: imageContent.url };
+    return newState;
   }
+  public state: IState = {};
+
+  // public componentDidMount() {
+  //   const { model: { content } } = this.props;
+  //   const imageContent = content as ImageContentModelType;
+  //   if (imageContent.storePath) {
+  //     // may call a state update when it completes
+  //     this.getUrlFromStore(imageContent.storePath);
+  //   }
+  // }
 
   public render() {
     const { readOnly, model } = this.props;
@@ -88,19 +91,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         this.showMessage(`"${currentFile.name}" (${currentFile.size} bytes): ${snapshot.bytesTransferred} transferred`);
         if (currentFile) {
           const imageRef = db.firebase.storeRef().child(currentFile.name);
-          const url = this.getUrlFromFirestore(imageRef, true);
+          this.getUrlFromFirestore(imageRef);
         }
       });
     }
   }
-  private getUrlFromFirestore(imageRef: firebase.storage.Reference, updateUrl: boolean = false) {
+  private getUrlFromFirestore(imageRef: firebase.storage.Reference) {
     // Get the download URL - returns a url with an authentication token for the current session
     imageRef.getDownloadURL().then((url) => {
       this.showMessage(" image ref? " + imageRef.fullPath);
-      if (updateUrl) {
-        this.updateURL(url, imageRef.fullPath);
-      }
-      return url;
+      this.updateURL(url, imageRef.fullPath);
     }).catch((error) => {
       switch (error.code) {
         case "storage/object-not-found":
@@ -123,7 +123,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
           this.showMessage("Unknown error uploading image");
           break;
       }
-      return "assets/image_placeholder.png";
+      this.updateURL("assets/image_placeholder.png");
     });
   }
   // TODO: This will not exist once this branch work has been completed - leaving in for now for WIP development
@@ -169,6 +169,5 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl, storePath);
     this.showMessage("---path set!--- " + storePath, true);
-
   }
 }
