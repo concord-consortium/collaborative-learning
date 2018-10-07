@@ -51,29 +51,32 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const inputClasses = `image-url ${selectedClass}`;
     const fileInputClasses = `image-file ${selectedClass}`;
     const fileUploadClasses = `image-file-upload ${selectedClass}`;
+    const imageToolControlContainerClasses = `image-tool-controls ${selectedClass}`;
 
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} >
         <img src={imageContent.url} />
-        <input
-          className={inputClasses}
-          defaultValue={imageContent.url}
-          onBlur={this.handleBlur}
-          onKeyUp={this.handleKeyUp}
-        />
-        <input
-          className={fileInputClasses}
-          type="file"
-          accept="image/png, image/jpeg"
-          onChange={this.handleOnChange}
-        />
-        <button
-          className={fileUploadClasses}
-          onClick={this.handleUploadButton}>Upload</button>
+        <div className={imageToolControlContainerClasses}>
+          <input
+            className={inputClasses}
+            defaultValue={imageContent.url}
+            onBlur={this.handleBlur}
+            onKeyUp={this.handleKeyUp}
+          />
+          <input
+            className={fileInputClasses}
+            type="file"
+            accept="image/png, image/jpeg"
+            onChange={this.handleOnChange}
+          />
+          <button
+            className={fileUploadClasses}
+            onClick={this.handleUploadButton}>Upload</button>
+        </div>
       </div>
     );
   }
-
+  // If we need to refresh the url + token then use the stored Firebase storage path
   private getUrlFromStore(storePath: string) {
     const { db } = this.stores;
     const storage = db.firebase.firestore();
@@ -126,6 +129,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       this.updateURL("assets/image_placeholder.png");
     });
   }
+
   // TODO: This will not exist once this branch work has been completed - leaving in for now for WIP development
   private showMessage(message: string, append: boolean = false) {
     const { logOutput } = this.state;
