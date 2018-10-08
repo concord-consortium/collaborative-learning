@@ -43,7 +43,7 @@ describe("GeometryContent", () => {
     expect(isBoard(board)).toBe(true);
     const boardId = board.id;
 
-    const boundingBox = clone(board.boundingBox);
+    const boundingBox = clone(board.attr.boundingbox);
     const change: JXGChange = {
             operation: "update",
             target: "board",

@@ -5,16 +5,39 @@ import { assign, each } from "lodash";
 export const isBoard = (v: any) => v instanceof JXG.Board;
 
 export const boardChangeAgent: JXGChangeAgent = {
-  create: (board: JXG.Board|string, change: JXGChange) => {
-    const domElementID = board as string;
+  create: (boardDomId: JXG.Board|string, change: JXGChange) => {
+    const domElementID = boardDomId as string;
     const defaults = {
             keepaspectratio: true,
             showCopyright: false,
             showNavigation: false,
             minimizeReflow: "none"
           };
-    const props = assign(defaults, change.properties);
-    return JXG.JSXGraph.initBoard(domElementID, props);
+    // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
+    const overrides = { axis: false, grid: true };
+    const props = assign(defaults, change.properties, overrides);
+    const board = JXG.JSXGraph.initBoard(domElementID, props);
+    const xAxis = board.create("axis", [ [0, 0], [1, 0] ]);
+    xAxis.removeAllTicks();
+    board.create("ticks", [xAxis, 5], {
+                  strokeColor: "#bbb",
+                  majorHeight: -1,
+                  drawLabels: true,
+                  label: { offset: [-8, -10] },
+                  minorTicks: 4,
+                  drawZero: true
+                });
+    const yAxis = board.create("axis", [ [0, 0], [0, 1] ]);
+    yAxis.removeAllTicks();
+    board.create("ticks", [yAxis, 5], {
+                  strokeColor: "#bbb",
+                  majorHeight: -1,
+                  drawLabels: true,
+                  label: { offset: [-10, -1] },
+                  minorTicks: 4,
+                  drawZero: false
+                });
+    return board;
   },
 
   update: (board: JXG.Board, change: JXGChange) => {

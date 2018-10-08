@@ -55,7 +55,7 @@ function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: numb
 class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { context, model: { id, content } } = nextProps;
+    const { context, model: { id, content }, scale } = nextProps;
     if (!prevState.elementId) {
       // elide uuid for readability/debugging
       const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
@@ -68,9 +68,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const nextState: IState = {};
 
     const { readOnly, size } = nextProps;
-    if (size && (size.width != null) && (size.height != null) && prevState.size &&
-        ((size.width !== prevState.size.width) || (size.height !== prevState.size.height))) {
-      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height);
+    if (size && size.width && size.height && (!prevState.size ||
+        ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
+      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height, scale);
       nextState.size = size;
     }
 
@@ -115,8 +115,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly } = this.props;
-    const editableClass = readOnly ? "read-only" : "editable";
+    const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     return (
       <div id={this.state.elementId} className={classes} />
@@ -313,16 +312,22 @@ export default class GeometryToolComponent extends React.Component<IProps, {}> {
 
   public static getDragImageNode(dragTargetNode: HTMLElement) {
     // dragTargetNode is the tool-tile div
-    // firstChild is SizeMe div
-    const child = dragTargetNode.firstChild;
-    // firstChild's firstChild is the actual SVG, which works as a drag image
-    return child && child.firstChild;
+    const geometryElts = dragTargetNode.getElementsByClassName("geometry-tool");
+    const geometryElt = geometryElts && geometryElts[0];
+    // geometryElt's firstChild is the actual SVG, which works as a drag image
+    return geometryElt && geometryElt.firstChild;
   }
 
   public render() {
     return (
-      <SizeMe>
-        {() => <GeometryToolComponentImpl {...this.props} />}
+      <SizeMe monitorHeight={true}>
+        {({ size }: SizeMeProps) => {
+          return (
+            <div className="geometry-size-me" style={{ width: "100%", height: "100%" }}>
+              <GeometryToolComponentImpl size={size} {...this.props} />
+            </div>
+          );
+        }}
       </SizeMe>
     );
   }
