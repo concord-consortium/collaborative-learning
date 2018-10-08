@@ -62,10 +62,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const { content } = this.props;
-    const { types } = e.dataTransfer;
-    if (content && !this.props.readOnly &&
-        this.hasDragType(e.dataTransfer, kDragTileContent)) {
+    const { content, readOnly } = this.props;
+    if (content && !readOnly && this.hasDragType(e.dataTransfer, kDragTileContent)) {
       const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
       e.dataTransfer.dropEffect = withinDocument && !e.altKey ? "move" : "copy";
       // indicate we'll accept the drop
