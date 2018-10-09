@@ -42,7 +42,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className="teacher-dashboard">
-        <HeaderComponent />
+        <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <TabSetComponent>
             {tabs.map((tab) => {

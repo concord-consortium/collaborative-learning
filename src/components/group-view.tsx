@@ -30,7 +30,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
     const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     return (
       <div className="group-view">
-        <HeaderComponent />
+        <HeaderComponent isGhostUser={isGhostUser} />
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />
         <BottomNavComponent />
@@ -145,21 +145,24 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
 
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
-      const sectionId = parseGhostSectionDocumentKey(documentKey);
-      if (sectionId) {
-        if (!ghostSectionDocuments[sectionId]) {
-          ghostSectionDocuments[sectionId] = DocumentModel.create({
+      const ghostSectionId = parseGhostSectionDocumentKey(documentKey);
+      if (ghostSectionId) {
+        if (!ghostSectionDocuments[ghostSectionId]) {
+          // Ghosts don't store section documents in Firebase, so we create fake ones here for convenience
+          ghostSectionDocuments[ghostSectionId] = DocumentModel.create({
             uid: "ghost",
             type: SectionDocument,
-            key: sectionId,
-            sectionId,
+            key: ghostSectionId,
+            sectionId: ghostSectionId,
             createdAt: 1,
             content: {},
           });
 
-          this.stores.db.listeners.updateGroupUserSectionDocumentListeners(ghostSectionDocuments[sectionId]);
+          // The creation of normal documents would start listeners for group documents in the same section
+          // Since the creation of ghost documents is faked, listeners must be started manually here
+          this.stores.db.listeners.updateGroupUserSectionDocumentListeners(ghostSectionDocuments[ghostSectionId]);
         }
-        return ghostSectionDocuments[sectionId];
+        return ghostSectionDocuments[ghostSectionId];
       }
       return this.stores.documents.getDocument(documentKey);
     }

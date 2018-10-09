@@ -58,7 +58,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
 
   private handleOpenDocument = () => {
     const { db, ui, documents, user, groups } = this.stores;
-    const { section } = this.props;
+    const { section, isGhostUser } = this.props;
     const { sectionWorkspace } = ui;
 
     if (section) {
@@ -71,7 +71,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
         this.openDocumentButton!.disabled = false;
       };
 
-      if (groups.ghostUserId === user.id) {
+      if (isGhostUser) {
         sectionWorkspace.setPrimaryGhostSection(section);
         ui.contractAll();
       }

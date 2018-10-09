@@ -67,7 +67,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     };
 
     const { groups, user, documents } = this.stores;
-    const { workspace, document, ...others } = this.props;
+    const { workspace, document, isGhostUser, ...others } = this.props;
 
     const group = groups.groupForUser(user.id);
     const groupDocuments = group &&
@@ -89,12 +89,13 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
 
     const groupDoc = (index: number) => {
       const doc = groupUsers[index] && groupUsers[index].doc;
-      const showDoc = doc && (index === 0 || doc.visibility === "public" || this.props.isGhostUser);
+      // Ghost users can see all documents
+      const showDoc = doc && (index === 0 || doc.visibility === "public" || isGhostUser);
       return showDoc ? doc : undefined;
     };
 
-    // if we have a document then make it the first of the group
-    if (!this.props.isGhostUser) {
+    // If the user is real, their document should be displayed first
+    if (!isGhostUser) {
       groupUsers.unshift({
         doc: document,
         initials: user.initials
@@ -105,8 +106,9 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale} readOnly={this.props.isGhostUser}
-                            document={groupDoc(0)} {...others} />
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+              readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
+              document={groupDoc(0)} {...others} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>

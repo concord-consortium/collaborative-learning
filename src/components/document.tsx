@@ -22,7 +22,7 @@ interface IProps extends IBaseProps {
   document: DocumentModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
-  isGhostUser: boolean;
+  isGhostUser?: boolean;
 }
 
 @inject("stores")
