@@ -5,8 +5,8 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
-import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
-import { assign, cloneDeep, isEqual } from "lodash";
+import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
+import { assign, cloneDeep, each, isEqual, some } from "lodash";
 import { SizeMe } from "react-sizeme";
 
 import "./geometry-tool.sass";
@@ -291,15 +291,56 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
 
     const handlePointerDown = (evt: any) => {
-      // console.log(`Polygon handlePointerDown!`);
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+      });
     };
 
     const handleDrag = (evt: any) => {
-      // console.log(`Polygon handleDrag!`);
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        if (!this.dragPts[pt.id]) {
+          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        }
+        this.dragPts[pt.id].final = cloneDeep(pt.coords);
+      });
+    };
+
+    const didPolygonMove = () => {
+      return some(polygon.ancestors, point => {
+        const dragEntry = this.dragPts[point.id];
+        return dragEntry.final
+                ? !isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)
+                : false;
+      });
     };
 
     const handlePointerUp = (evt: any) => {
-      // console.log(`Polygon handlePointerUp!`);
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        const dragEntry = this.dragPts[pt.id];
+        if (!dragEntry) {
+          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        }
+        dragEntry.final = cloneDeep(pt.coords);
+      });
+
+      if (!didPolygonMove()) return;
+
+      const { content } = this.props.model;
+      const { board } = this.state;
+      if ((content.type === "Geometry") && board) {
+        const idArray: string[] = [];
+        const propsArray: JXGProperties[] = [];
+        each(polygon.ancestors, point => {
+          const dragEntry = this.dragPts[point.id];
+          const coords = dragEntry.final!.usrCoords.slice(1) as JXGCoordPair;
+          idArray.push(point.id);
+          propsArray.push({ position: coords });
+        });
+        this.applyChange(() => content.updateObjects(board, idArray, propsArray));
+      }
     };
 
     polygon.on("down", handlePointerDown);
