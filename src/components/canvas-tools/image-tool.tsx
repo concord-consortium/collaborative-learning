@@ -20,8 +20,8 @@ interface IState {
 }
 
 const ImageConstants = {
-  maxWidth: 300,
-  maxHeight: 300
+  maxWidth: 512,
+  maxHeight: 512
 };
 
 @inject("stores")
