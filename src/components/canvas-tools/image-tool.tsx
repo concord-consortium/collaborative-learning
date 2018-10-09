@@ -3,8 +3,8 @@ import firebase from "firebase";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { ImageContentModelType, ImageContentModel } from "../../models/tools/image/image-content";
-
+import { ImageContentModelType } from "../../models/tools/image/image-content";
+import { resizeImage } from "../../utilities/image-resize";
 import "./image-tool.sass";
 
 interface IProps {
@@ -14,10 +14,15 @@ interface IProps {
 }
 
 interface IState {
-  currentFile?: File;
   imageUrl?: string;
   logOutput?: string;
+  isEditing?: boolean;
 }
+
+const ImageConstants = {
+  maxWidth: 300,
+  maxHeight: 300
+};
 
 @inject("stores")
 @observer
@@ -43,20 +48,21 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   public render() {
     const { readOnly, model } = this.props;
     const { content } = model;
+    const { isEditing } = this.state;
     const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
-    const selectedClass = ui.isSelectedTile(model) ? "selected" : "";
+    // Include states for selected and editing separately to clean up UI a little
+    const selectedClass = ui.isSelectedTile(model) ? (isEditing ? "editing" : "selected") : "";
     const divClasses = `image-tool ${editableClass}`;
     const inputClasses = `image-url ${selectedClass}`;
     const fileInputClasses = `image-file ${selectedClass}`;
-    const fileUploadClasses = `image-file-upload ${selectedClass}`;
     const imageToolControlContainerClasses = `image-tool-controls ${selectedClass}`;
 
     return (
-      <div className={divClasses} onMouseDown={this.handleMouseDown} >
-        <img src={imageContent.url} />
-        <div className={imageToolControlContainerClasses}>
+      <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
+        <img className="image-tool-image" src={imageContent.url} />
+        <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
             defaultValue={imageContent.url}
@@ -69,9 +75,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
             accept="image/png, image/jpeg"
             onChange={this.handleOnChange}
           />
-          <button
-            className={fileUploadClasses}
-            onClick={this.handleUploadButton}>Upload</button>
         </div>
       </div>
     );
@@ -84,25 +87,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     return this.getUrlFromFirestore(ref);
   }
 
-  private handleUploadButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const { db } = this.stores;
-    const { currentFile } = this.state;
-
-    if (currentFile) {
-      const ref = db.firebase.storeRef("/" + currentFile.name);
-      ref.put(currentFile).then((snapshot) => {
-        this.showMessage(`"${currentFile.name}" (${currentFile.size} bytes): ${snapshot.bytesTransferred} transferred`);
-        if (currentFile) {
-          const imageRef = db.firebase.storeRef().child(currentFile.name);
-          this.getUrlFromFirestore(imageRef);
-        }
-      });
-    }
-  }
   private getUrlFromFirestore(imageRef: firebase.storage.Reference) {
     // Get the download URL - returns a url with an authentication token for the current session
     imageRef.getDownloadURL().then((url) => {
-      this.showMessage(" image ref? " + imageRef.fullPath);
       this.updateURL(url, imageRef.fullPath);
     }).catch((error) => {
       switch (error.code) {
@@ -141,20 +128,41 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     }
     this.setState({ logOutput: newOutput });
   }
+
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files as FileList;
-    const fileReader = new FileReader();
-    fileReader.onloadend = () => {
-      const fileContent = fileReader.result;
-      this.showMessage(`File Content of "${files[0].name}" (${files[0].size} bytes): ` + fileContent);
-    };
-    this.setState({ currentFile: files[0] });
+    const currentFile = files[0];
+
+    this.showMessage(`File selected "${currentFile.name}" (${currentFile.size} bytes)`);
+
+    resizeImage(currentFile, ImageConstants.maxWidth, ImageConstants.maxHeight).then((resizedImage: Blob) => {
+      this.uploadImage(currentFile.name, currentFile, resizedImage);
+    });
+  }
+
+  private uploadImage(fileName: string, file: File, imageData?: Blob) {
+    const { db } = this.stores;
+    const ref = db.firebase.storeRef("/" + fileName);
+    const fileData = imageData ? imageData : file;
+    ref.put(fileData).then((snapshot) => {
+      // Confirm upload and get fs path to store
+      this.showMessage(`"${fileName}": ${snapshot.bytesTransferred} transferred`);
+      const imageRef = db.firebase.storeRef().child(fileName);
+      this.getUrlFromFirestore(imageRef);
+    });
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.setSelectedTile(this.props.model);
     const imageContent = this.props.model.content as ImageContentModelType;
     this.showMessage(imageContent.storePath + " " + imageContent.url);
+  }
+
+  private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { isEditing } = this.state;
+    if (!isEditing) {
+      this.setState({ isEditing: true });
+    }
   }
 
   private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -166,12 +174,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    this.updateURL(e.currentTarget.value);
+    if (e.currentTarget.value !== this.state.imageUrl) {
+      this.updateURL(e.currentTarget.value);
+    }
+  }
+
+  private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    this.setState({ isEditing: false });
   }
 
   private updateURL = (newUrl: string, storePath?: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl, storePath);
     this.showMessage("---path set!--- " + storePath, true);
+    this.setState({ isEditing: false });
   }
 }

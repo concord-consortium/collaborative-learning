@@ -9,20 +9,34 @@
   &.editable
     border: 1px solid #cccccc
 
+  img
+    max-width: 400px
+    max-height: 400px
+
   .image-tool-controls
-    width: 90%
-    height: 100px
+    width: 20px
+    height: 20px
     position: absolute
     top: 4px
     opacity: 0
-    background: rgba(255,255,255, 0.9)
-    border: 2px solid white
-    transition: 0.5s
-    z-index: -1
+    border-radius: 2px
+    border: 1px solid white
+    transition: 0.3s
+    z-index: 1
 
     &.selected
       opacity: 1
-      z-index: 1
+
+      background: rgba(255,255,255, 0.9)
+      background-image: url("../../assets/logo_image_tool.svg")
+      background-size: contain
+      background-repeat: no-repeat
+
+    &.editing
+      width: 90%
+      height: 100px
+      opacity: 1
+      background: rgba(255,255,255, 0.9)
 
   .image-url
     position: relative
@@ -35,7 +49,7 @@
     visibility: hidden
     width: 200px
 
-    &.selected
+    &.editing
       visibility: visible
 
     &:focus
@@ -48,7 +62,7 @@
     visibility: hidden
     width: 100%
 
-    &.selected
+    &.editing
       visibility: visible
 
   .image-file-upload
@@ -58,5 +72,5 @@
     visibility: hidden
     width: 100px
 
-    &.selected
+    &.editing
       visibility: visible
