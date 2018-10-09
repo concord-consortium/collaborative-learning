@@ -3,8 +3,8 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
-import { isBoard } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
+import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
 import { assign, cloneDeep, isEqual } from "lodash";
 import { SizeMe } from "react-sizeme";
@@ -127,20 +127,25 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const { model: { content }, readOnly } = this.props;
     if ((content.type !== "Geometry") || !this.state.elementId) { return; }
 
-    let board: JXG.Board | undefined;
-    const elements = content.initializeBoard(this.state.elementId, readOnly);
-    elements.forEach(elt => {
-      if (isBoard(elt)) {
-        board = elt as JXG.Board;
-        this.installBoardEventHandlers(board);
-      }
-      else if (isPoint(elt)) {
-        this.installPointEventHandlers(elt as JXG.Point);
-      }
-    });
+    const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
+    if (board) {
+      this.handleCreateBoard(board);
+    }
     const newState = assign({ syncedChanges: content.changes.length },
-                            board ? { board } : null);
+                              board ? { board } : null);
     this.setState(newState);
+  }
+
+  private handleCreateElement = (elt: JXG.GeometryElement) => {
+    if (this.props.readOnly && (elt != null)) {
+      elt.setAttribute({ fixed: true });
+    }
+    if (isPoint(elt)) {
+      this.handleCreatePoint(elt as JXG.Point);
+    }
+    else if (isPolygon(elt)) {
+      this.handleCreatePolygon(elt as JXG.Polygon);
+    }
   }
 
   private applyChange(change: () => void) {
@@ -163,7 +168,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
-  private installBoardEventHandlers(board: JXG.Board) {
+  private handleCreateBoard = (board: JXG.Board) => {
 
     const handlePointerDown = (evt: any) => {
       const { model, readOnly, scale } = this.props;
@@ -220,8 +225,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (content.type === "Geometry") {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          const pt = content.addPoint(board, [x, y], props) as JXG.Point;
-          this.installPointEventHandlers(pt);
+          const point = content.addPoint(board, [x, y], props) as JXG.Point;
+          this.handleCreatePoint(point);
         });
       }
     };
@@ -230,7 +235,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     board.on("up", handlePointerUp);
   }
 
-  private installPointEventHandlers(point: JXG.Point) {
+  private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
       const id = point.id;
@@ -239,7 +244,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const { model: { content } } = this.props;
         const { board } = this.state;
         if (board && (content.type === "Geometry")) {
-          this.applyChange(() => content.connectFreePoints(board));
+          this.applyChange(() => {
+            const polygon = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+            this.handleCreatePolygon(polygon);
+          });
           this.lastPointDown = undefined;
         }
       }
@@ -279,6 +287,25 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     point.on("down", handlePointerDown);
     point.on("drag", handleDrag);
     point.on("up", handlePointerUp);
+  }
+
+  private handleCreatePolygon = (polygon: JXG.Polygon) => {
+
+    const handlePointerDown = (evt: any) => {
+      // console.log(`Polygon handlePointerDown!`);
+    };
+
+    const handleDrag = (evt: any) => {
+      // console.log(`Polygon handleDrag!`);
+    };
+
+    const handlePointerUp = (evt: any) => {
+      // console.log(`Polygon handlePointerUp!`);
+    };
+
+    polygon.on("down", handlePointerDown);
+    polygon.on("drag", handleDrag);
+    polygon.on("up", handlePointerUp);
   }
 }
 

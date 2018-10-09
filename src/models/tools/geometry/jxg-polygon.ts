@@ -10,7 +10,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const parents = (change.parents || [])
                       .map(id => board.objects[id])
                       .filter(pt => pt != null);
-    const props = assign({ id: uuid() }, change.properties);
+    const props = assign({ id: uuid(), hasInnerPoints: true }, change.properties);
     return parents.length ? board.create("polygon", parents, props) : undefined;
   },
 

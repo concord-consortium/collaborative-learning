@@ -64,6 +64,7 @@ declare namespace JXG {
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
+    on: (event: string, handler: (evt: any) => void) => void;
   }
 
   const JSXGraph: {
@@ -72,7 +73,6 @@ declare namespace JXG {
   };
 
   class Point extends CoordsElement {
-    on: (event: string, handler: (evt: any) => void) => void;
   }
 
   class Polygon extends GeometryElement {
