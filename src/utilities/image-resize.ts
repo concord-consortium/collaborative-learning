@@ -29,7 +29,7 @@ export function resizeImage(file: File, maxWidth: number, maxHeight: number): Pr
 
       context!.drawImage(image, 0, 0, newWidth, newHeight);
 
-      canvas.toBlob(resolve, file.type);
+      canvas.toBlob(resolve as any, file.type);
     };
     image.onerror = reject;
   });
