@@ -159,6 +159,47 @@ export class Firebase {
   }
 
   //
+  // Firestore
+  //
+
+  public getPublicUrlFromStore(storePath: string): Promise<any> {
+    const ref = this.firestore().ref(storePath);
+    // Get the download URL - returns a url with an authentication token for the current session
+    return ref.getDownloadURL().then((url) => {
+      return url;
+    }).catch((error) => {
+      switch (error.code) {
+        case "storage/object-not-found":
+          // File doesn't exist
+          break;
+
+        case "storage/unauthorized":
+          // User doesn't have permission to access the object
+          break;
+
+        case "storage/canceled":
+          // User canceled the upload
+          break;
+
+        case "storage/unknown":
+          // Unknown error occurred, inspect the server response
+          break;
+      }
+      return null;
+    });
+  }
+
+  public uploadImage(fileName: string, file: File, imageData?: Blob): Promise<any> {
+    const ref = this.firestore().ref("/" + fileName);
+    const fileData = imageData ? imageData : file;
+    return ref.put(fileData).then((snapshot) => {
+      return snapshot.ref.fullPath;
+    }).catch((error) => {
+      return error.code;
+    });
+  }
+
+  //
   // Refs
   //
 

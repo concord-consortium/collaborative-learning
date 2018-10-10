@@ -4,7 +4,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { resizeImage } from "../../utilities/image-resize";
+import { resizeImage } from "../../utilities/image-utils";
 import "./image-tool.sass";
 
 interface IProps {
@@ -15,7 +15,6 @@ interface IProps {
 
 interface IState {
   imageUrl?: string;
-  logOutput?: string;
   isEditing?: boolean;
 }
 
@@ -35,15 +34,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     return newState;
   }
   public state: IState = {};
-
-  // public componentDidMount() {
-  //   const { model: { content } } = this.props;
-  //   const imageContent = content as ImageContentModelType;
-  //   if (imageContent.storePath) {
-  //     // may call a state update when it completes
-  //     this.getUrlFromStore(imageContent.storePath);
-  //   }
-  // }
 
   public render() {
     const { readOnly, model } = this.props;
@@ -79,83 +69,23 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       </div>
     );
   }
-  // If we need to refresh the url + token then use the stored Firebase storage path
-  private getUrlFromStore(storePath: string) {
-    const { db } = this.stores;
-    const storage = db.firebase.firestore();
-    const ref = storage.ref(storePath);
-    return this.getUrlFromFirestore(ref);
-  }
-
-  private getUrlFromFirestore(imageRef: firebase.storage.Reference) {
-    // Get the download URL - returns a url with an authentication token for the current session
-    imageRef.getDownloadURL().then((url) => {
-      this.updateURL(url, imageRef.fullPath);
-    }).catch((error) => {
-      switch (error.code) {
-        case "storage/object-not-found":
-          // File doesn't exist
-          this.showMessage("file does not exist!");
-          break;
-
-        case "storage/unauthorized":
-          // User doesn't have permission to access the object
-          this.showMessage("You do not have permission");
-          break;
-
-        case "storage/canceled":
-          // User canceled the upload
-          this.showMessage("Upload cancelled");
-          break;
-
-        case "storage/unknown":
-          // Unknown error occurred, inspect the server response
-          this.showMessage("Unknown error uploading image");
-          break;
-      }
-      this.updateURL("assets/image_placeholder.png");
-    });
-  }
-
-  // TODO: This will not exist once this branch work has been completed - leaving in for now for WIP development
-  private showMessage(message: string, append: boolean = false) {
-    const { logOutput } = this.state;
-    // TODO: Figure out user-friendly way to show information
-    // console.log(message);
-    let newOutput = message;
-    if (logOutput && append) {
-      newOutput = logOutput + "\n " + message;
-    }
-    this.setState({ logOutput: newOutput });
-  }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
 
-    this.showMessage(`File selected "${currentFile.name}" (${currentFile.size} bytes)`);
-
     resizeImage(currentFile, ImageConstants.maxWidth, ImageConstants.maxHeight).then((resizedImage: Blob) => {
-      this.uploadImage(currentFile.name, currentFile, resizedImage);
-    });
-  }
-
-  private uploadImage(fileName: string, file: File, imageData?: Blob) {
-    const { db } = this.stores;
-    const ref = db.firebase.storeRef("/" + fileName);
-    const fileData = imageData ? imageData : file;
-    ref.put(fileData).then((snapshot) => {
-      // Confirm upload and get fs path to store
-      this.showMessage(`"${fileName}": ${snapshot.bytesTransferred} transferred`);
-      const imageRef = db.firebase.storeRef().child(fileName);
-      this.getUrlFromFirestore(imageRef);
+      db.firebase.uploadImage(currentFile.name, currentFile, resizedImage).then((uploadRef) => {
+        db.firebase.getPublicUrlFromStore(uploadRef).then((url) => {
+          this.updateURL(url, uploadRef);
+        });
+      });
     });
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.setSelectedTile(this.props.model);
-    const imageContent = this.props.model.content as ImageContentModelType;
-    this.showMessage(imageContent.storePath + " " + imageContent.url);
   }
 
   private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -186,7 +116,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   private updateURL = (newUrl: string, storePath?: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl, storePath);
-    this.showMessage("---path set!--- " + storePath, true);
     this.setState({ isEditing: false });
   }
 }
