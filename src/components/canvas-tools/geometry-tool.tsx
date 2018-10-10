@@ -3,10 +3,10 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
-import { isBoard } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
-import { JXGCoordPair } from "../../models/tools/geometry/jxg-changes";
-import { assign, cloneDeep, isEqual } from "lodash";
+import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
+import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
+import { assign, cloneDeep, each, isEqual, some } from "lodash";
 import { SizeMe } from "react-sizeme";
 
 import "./geometry-tool.sass";
@@ -55,7 +55,7 @@ function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: numb
 class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { context, model: { id, content } } = nextProps;
+    const { context, model: { id, content }, scale } = nextProps;
     if (!prevState.elementId) {
       // elide uuid for readability/debugging
       const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
@@ -68,9 +68,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const nextState: IState = {};
 
     const { readOnly, size } = nextProps;
-    if (size && (size.width != null) && (size.height != null) && prevState.size &&
-        ((size.width !== prevState.size.width) || (size.height !== prevState.size.height))) {
-      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height);
+    if (size && size.width && size.height && (!prevState.size ||
+        ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
+      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height, scale);
       nextState.size = size;
     }
 
@@ -115,8 +115,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly } = this.props;
-    const editableClass = readOnly ? "read-only" : "editable";
+    const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     return (
       <div id={this.state.elementId} className={classes} />
@@ -127,20 +126,25 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const { model: { content }, readOnly } = this.props;
     if ((content.type !== "Geometry") || !this.state.elementId) { return; }
 
-    let board: JXG.Board | undefined;
-    const elements = content.initializeBoard(this.state.elementId, readOnly);
-    elements.forEach(elt => {
-      if (isBoard(elt)) {
-        board = elt as JXG.Board;
-        this.installBoardEventHandlers(board);
-      }
-      else if (isPoint(elt)) {
-        this.installPointEventHandlers(elt as JXG.Point);
-      }
-    });
+    const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
+    if (board) {
+      this.handleCreateBoard(board);
+    }
     const newState = assign({ syncedChanges: content.changes.length },
-                            board ? { board } : null);
+                              board ? { board } : null);
     this.setState(newState);
+  }
+
+  private handleCreateElement = (elt: JXG.GeometryElement) => {
+    if (this.props.readOnly && (elt != null)) {
+      elt.setAttribute({ fixed: true });
+    }
+    if (isPoint(elt)) {
+      this.handleCreatePoint(elt as JXG.Point);
+    }
+    else if (isPolygon(elt)) {
+      this.handleCreatePolygon(elt as JXG.Polygon);
+    }
   }
 
   private applyChange(change: () => void) {
@@ -163,7 +167,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
-  private installBoardEventHandlers(board: JXG.Board) {
+  private handleCreateBoard = (board: JXG.Board) => {
 
     const handlePointerDown = (evt: any) => {
       const { model, readOnly, scale } = this.props;
@@ -220,8 +224,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (content.type === "Geometry") {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          const pt = content.addPoint(board, [x, y], props) as JXG.Point;
-          this.installPointEventHandlers(pt);
+          const point = content.addPoint(board, [x, y], props) as JXG.Point;
+          this.handleCreatePoint(point);
         });
       }
     };
@@ -230,7 +234,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     board.on("up", handlePointerUp);
   }
 
-  private installPointEventHandlers(point: JXG.Point) {
+  private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
       const id = point.id;
@@ -239,7 +243,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const { model: { content } } = this.props;
         const { board } = this.state;
         if (board && (content.type === "Geometry")) {
-          this.applyChange(() => content.connectFreePoints(board));
+          this.applyChange(() => {
+            const polygon = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+            this.handleCreatePolygon(polygon);
+          });
           this.lastPointDown = undefined;
         }
       }
@@ -280,22 +287,88 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     point.on("drag", handleDrag);
     point.on("up", handlePointerUp);
   }
+
+  private handleCreatePolygon = (polygon: JXG.Polygon) => {
+
+    const handlePointerDown = (evt: any) => {
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+      });
+    };
+
+    const handleDrag = (evt: any) => {
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        if (!this.dragPts[pt.id]) {
+          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        }
+        this.dragPts[pt.id].final = cloneDeep(pt.coords);
+      });
+    };
+
+    const didPolygonMove = () => {
+      return some(polygon.ancestors, point => {
+        const dragEntry = this.dragPts[point.id];
+        return dragEntry.final
+                ? !isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)
+                : false;
+      });
+    };
+
+    const handlePointerUp = (evt: any) => {
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        const dragEntry = this.dragPts[pt.id];
+        if (!dragEntry) {
+          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        }
+        dragEntry.final = cloneDeep(pt.coords);
+      });
+
+      if (!didPolygonMove()) return;
+
+      const { content } = this.props.model;
+      const { board } = this.state;
+      if ((content.type === "Geometry") && board) {
+        const idArray: string[] = [];
+        const propsArray: JXGProperties[] = [];
+        each(polygon.ancestors, point => {
+          const dragEntry = this.dragPts[point.id];
+          const coords = dragEntry.final!.usrCoords.slice(1) as JXGCoordPair;
+          idArray.push(point.id);
+          propsArray.push({ position: coords });
+        });
+        this.applyChange(() => content.updateObjects(board, idArray, propsArray));
+      }
+    };
+
+    polygon.on("down", handlePointerDown);
+    polygon.on("drag", handleDrag);
+    polygon.on("up", handlePointerUp);
+  }
 }
 
 export default class GeometryToolComponent extends React.Component<IProps, {}> {
 
   public static getDragImageNode(dragTargetNode: HTMLElement) {
     // dragTargetNode is the tool-tile div
-    // firstChild is SizeMe div
-    const child = dragTargetNode.firstChild;
-    // firstChild's firstChild is the actual SVG, which works as a drag image
-    return child && child.firstChild;
+    const geometryElts = dragTargetNode.getElementsByClassName("geometry-tool");
+    const geometryElt = geometryElts && geometryElts[0];
+    // geometryElt's firstChild is the actual SVG, which works as a drag image
+    return geometryElt && geometryElt.firstChild;
   }
 
   public render() {
     return (
-      <SizeMe>
-        {() => <GeometryToolComponentImpl {...this.props} />}
+      <SizeMe monitorHeight={true}>
+        {({ size }: SizeMeProps) => {
+          return (
+            <div className="geometry-size-me" style={{ width: "100%", height: "100%" }}>
+              <GeometryToolComponentImpl size={size} {...this.props} />
+            </div>
+          );
+        }}
       </SizeMe>
     );
   }

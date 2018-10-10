@@ -4,22 +4,27 @@ import { JXGChange, JXGElement, JXGProperties } from "./jxg-changes";
 import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
+import { isBoard } from "./jxg-board";
 
 export const kGeometryToolID = "Geometry";
 
 export const kGeometryDefaultHeight = 200;
+// matches curriculum images
+export const kGeometryDefaultPixelsPerUnit = 35.5;
+export const kGeometryDefaultAxisMin = -1;
+
+export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
 export function defaultGeometryContent(overrides?: JXGProperties) {
-  const axisMin = -0.5;
-  const xAxisMax = 20;
-  const yAxisMax = 5;
+  const xAxisMax = 30;
+  const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - kGeometryDefaultAxisMin;
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: assign({
                   id: uuid(),
                   axis: true,
-                  boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
+                  boundingBox: [kGeometryDefaultAxisMin, yAxisMax, xAxisMax, kGeometryDefaultAxisMin],
                   grid: {}  // defaults to 1-unit gridlines
                 }, overrides)
   };
@@ -39,24 +44,35 @@ export const GeometryContentModel = types
     // views
 
     // actions
-    function initializeBoard(domElementID: string, readOnly?: boolean): JXGElement[] {
+    function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
-      return applyChanges(domElementID, changes)
-              .filter(result => result != null)
-              .map(elt => {
-                if (readOnly && (elt instanceof JXG.GeometryElement)) {
-                  elt.setAttribute({ fixed: true });
-                }
-                return elt;
-              }) as JXGElement[];
+      let board;
+      applyChanges(domElementID, changes)
+        .filter(result => result != null)
+        .forEach(elt => {
+          if (isBoard(elt)) {
+            board = elt as JXG.Board;
+          }
+          else if (elt && onCreate) {
+            onCreate(elt as JXG.GeometryElement);
+          }
+        });
+      return board;
     }
 
     function destroyBoard(board: JXG.Board) {
       JXG.JSXGraph.freeBoard(board);
     }
 
-    function resizeBoard(board: JXG.Board, width: number, height: number) {
-      board.resizeContainer(width, height);
+    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
+      const scaledWidth = width / (scale || 1);
+      const scaledHeight = height / (scale || 1);
+      const unitXY = kGeometryDefaultPixelsPerUnit;
+      const [xMin, , , yMin] = board.attr.boundingbox;
+      const newXMax = scaledWidth / unitXY - xMin;
+      const newYMax = scaledHeight / unitXY - yMin;
+      board.resizeContainer(scaledWidth, scaledHeight, false, true);
+      board.setBoundingBox([xMin, newYMax, newXMax, yMin], true);
       board.update();
     }
 
@@ -64,14 +80,15 @@ export const GeometryContentModel = types
       self.changes.push(JSON.stringify(change));
     }
 
-    function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties) {
+    function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties): JXG.Point | undefined {
       const change: JXGChange = {
         operation: "create",
         target: "point",
         parents,
         properties: assign({ id: uuid() }, properties)
       };
-      return _applyChange(board, change);
+      const point = _applyChange(board, change);
+      return point ? point as JXG.Point : undefined;
     }
 
     function removeObjects(board: JXG.Board, id: string | string[]) {
@@ -93,7 +110,7 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function connectFreePoints(board: JXG.Board) {
+    function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt))
                           .map(pt => pt.id);
@@ -102,9 +119,10 @@ export const GeometryContentModel = types
                 operation: "create",
                 target: "polygon",
                 parents: freePtIds,
-                properties: { id: uuid() }
+                properties: assign({ id: uuid() }, properties)
               };
-        return _applyChange(board, change);
+        const polygon = _applyChange(board, change);
+        return polygon ? polygon as JXG.Polygon : undefined;
       }
     }
 
@@ -134,7 +152,7 @@ export const GeometryContentModel = types
         addPoint,
         removeObjects,
         updateObjects,
-        connectFreePoints,
+        createPolygonFromFreePoints,
         applyChange: _applyChange,
         syncChange
       }

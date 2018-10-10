@@ -5,7 +5,9 @@ import { BaseComponent, IBaseProps } from "./base";
 import "./header.sass";
 import { GroupModelType, GroupUserModelType } from "../models/groups";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  isGhostUser: boolean;
+}
 
 @inject("stores")
 @observer
@@ -59,10 +61,17 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    this.stores.ui.confirm("Do you want to change groups?", "Change Groups")
+    const {isGhostUser} = this.props;
+    const {ui, db, groups} = this.stores;
+    ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
-          this.stores.db.leaveGroup();
+          if (isGhostUser) {
+            groups.ghostGroup();
+          }
+          else {
+            db.leaveGroup();
+          }
         }
       });
   }

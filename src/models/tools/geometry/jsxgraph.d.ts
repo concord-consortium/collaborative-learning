@@ -13,14 +13,19 @@ declare namespace JXG {
 
   class Board {
     id: string;
+    attr: {
+      // [x1,y1,x2,y2] upper left corner, lower right corner
+      boundingbox: [number, number, number, number]
+    };
     axis: boolean;
-    boundingBox: number[];
     canvasWidth: number;
     canvasHeight: number;
     keepaspectratio: boolean;
     showCopyright: boolean;
     showNavigation: boolean;
     showZoom: boolean;
+    unitX: number;
+    unitY: number;
     zoomFactor: number;
     zoomX: number;
     zoomY: number;
@@ -35,7 +40,7 @@ declare namespace JXG {
     getCoordsTopLeftCorner: () => number[];
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => void;
-    setBoundingBox: (boundingBox: number[]) => void;
+    setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => void;
     update: (drag?: JXG.GeometryElement) => void;
   }
 
@@ -58,12 +63,14 @@ declare namespace JXG {
   class GeometryElement {
     id: string;
     type: number;
+    ancestors: { [id: string]: GeometryElement };
     visProp: { [prop: string]: any };
     fixed: boolean;
 
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
+    on: (event: string, handler: (evt: any) => void) => void;
   }
 
   const JSXGraph: {
@@ -72,7 +79,6 @@ declare namespace JXG {
   };
 
   class Point extends CoordsElement {
-    on: (event: string, handler: (evt: any) => void) => void;
   }
 
   class Polygon extends GeometryElement {

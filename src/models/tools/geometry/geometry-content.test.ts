@@ -23,8 +23,7 @@ describe("GeometryContent", () => {
     const divStyle = "width:200px;height:200px";
     document.body.innerHTML = `<div id="${divId}" style="${divStyle}"></div>`;
 
-    const elts = content.initializeBoard(divId, readOnly);
-    return elts[0] as JXG.Board;
+    return content.initializeBoard(divId) as JXG.Board;
   }
 
   it("can create/destroy a JSXGraph board", () => {
@@ -44,7 +43,7 @@ describe("GeometryContent", () => {
     expect(isBoard(board)).toBe(true);
     const boardId = board.id;
 
-    const boundingBox = clone(board.boundingBox);
+    const boundingBox = clone(board.attr.boundingbox);
     const change: JXGChange = {
             operation: "update",
             target: "board",
@@ -63,7 +62,7 @@ describe("GeometryContent", () => {
 
     content.syncChange(null as any as JXG.Board, null as any as JXGChange);
 
-    const polygon = content.connectFreePoints(board);
+    const polygon = content.createPolygonFromFreePoints(board);
     expect(polygon).toBeUndefined();
 
     // can delete board with change
@@ -116,7 +115,7 @@ describe("GeometryContent", () => {
     content.addChange({ operation: "create", target: "point", parents: [3, 3], properties: { id: "p2" } });
     content.addChange({ operation: "create", target: "point", parents: [5, 1], properties: { id: "p3" } });
     const board = createDefaultBoard(content);
-    let polygon: JXG.Polygon | undefined = content.connectFreePoints(board) as JXG.Polygon;
+    let polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon.id;
     expect(isUuid(polygonId)).toBe(true);

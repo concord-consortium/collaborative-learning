@@ -10,6 +10,9 @@ import { DocumentComponent, WorkspaceSide } from "./document";
 import { DocumentModelType, DocumentDragKey, LearningLogDocument } from "../models/document";
 import { LearningLogWorkspace } from "../models/workspace";
 
+// cf. learning-log.sass: $list-item-scale
+const kLearningLogItemScale = 0.08;
+
 interface IProps extends IBaseProps {}
 
 @inject("stores")
@@ -52,7 +55,10 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "left-workspace",
               "primary",
-              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary" />
+              <DocumentComponent
+                document={primaryWorkspace}
+                workspace={learningLogWorkspace}
+                side="primary" />
           )}
           {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
               ? <DocumentComponent
@@ -71,7 +77,10 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "single-workspace",
               "primary",
-              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary"/>
+              <DocumentComponent
+                document={primaryWorkspace}
+                workspace={learningLogWorkspace}
+                side="primary"/>
           )}
         </div>
       );
@@ -116,7 +125,8 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
                 draggable={true}
               >
                 <div className="scaled-list-item">
-                  <CanvasComponent document={learningLog} readOnly={true} context="learning-log" />
+                  <CanvasComponent context="learning-log" document={learningLog}
+                                    readOnly={true} scale={kLearningLogItemScale} />
                 </div>
               </div>
               <div className="info">
