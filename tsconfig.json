@@ -10,6 +10,7 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
+    "types": ["jest"],
     "jsx": "react",
     "lib": [
       "dom",

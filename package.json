@@ -8,6 +8,10 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/cypress/"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "src/utilities/test-utils.ts"
@@ -39,7 +43,10 @@
     "test:coverage": "jest --coverage",
     "test:debug": "node --nolazy --inspect-brk ./node_modules/.bin/jest --runInBand --no-cache",
     "test:watch": "jest --watchAll",
-    "test:coverage:watch": "jest --coverage --watchAll"
+    "test:coverage:watch": "jest --coverage --watchAll",
+    "test:cypress": "cypress run",
+    "test:cypress:open": "cypress open",
+    "test:full": "npm-run-all test cypress:test"
   },
   "repository": {
     "type": "git",
@@ -52,6 +59,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "^3.0.0",
     "@firebase/app-types": "^0.3.2",
     "@types/enzyme": "^3.1.14",
     "@types/enzyme-adapter-react-16": "^1.0.3",
@@ -72,6 +80,7 @@
     "babel-jest": "^23.6.0",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^1.0.0",
+    "cypress": "^3.1.0",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
     "file-loader": "^2.0.0",
@@ -117,6 +126,7 @@
     "slate-plain-serializer": "^0.6.7",
     "slate-react": "^0.18.10",
     "superagent": "^3.8.3",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "wait-on": "^3.0.1"
   }
 }
