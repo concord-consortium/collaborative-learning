@@ -6,6 +6,9 @@ import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
 import { DocumentDragKey, SectionDocument, DocumentModelType } from "../models/document";
 
+// cf. right-nav.sass: $list-item-scale
+const kMyWorkItemScale = 0.11;
+
 interface IProps extends IBaseProps {}
 
 @inject("stores")
@@ -37,7 +40,8 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
                   draggable={true}
                 >
                   <div className="scaled-list-item">
-                    <CanvasComponent context="my-work" document={document} readOnly={true} />
+                    <CanvasComponent context="my-work" document={document}
+                                    readOnly={true} scale={kMyWorkItemScale}/>
                   </div>
                 </div>
                 <div className="info">

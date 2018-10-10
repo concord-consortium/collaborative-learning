@@ -9,20 +9,22 @@ import { isBoard } from "./jxg-board";
 export const kGeometryToolID = "Geometry";
 
 export const kGeometryDefaultHeight = 200;
+// matches curriculum images
+export const kGeometryDefaultPixelsPerUnit = 35.5;
+export const kGeometryDefaultAxisMin = -1;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
 export function defaultGeometryContent(overrides?: JXGProperties) {
-  const axisMin = -0.5;
-  const xAxisMax = 20;
-  const yAxisMax = 5;
+  const xAxisMax = 30;
+  const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - kGeometryDefaultAxisMin;
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: assign({
                   id: uuid(),
                   axis: true,
-                  boundingBox: [axisMin, yAxisMax, xAxisMax, axisMin],
+                  boundingBox: [kGeometryDefaultAxisMin, yAxisMax, xAxisMax, kGeometryDefaultAxisMin],
                   grid: {}  // defaults to 1-unit gridlines
                 }, overrides)
   };
@@ -62,8 +64,15 @@ export const GeometryContentModel = types
       JXG.JSXGraph.freeBoard(board);
     }
 
-    function resizeBoard(board: JXG.Board, width: number, height: number) {
-      board.resizeContainer(width, height);
+    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
+      const scaledWidth = width / (scale || 1);
+      const scaledHeight = height / (scale || 1);
+      const unitXY = kGeometryDefaultPixelsPerUnit;
+      const [xMin, , , yMin] = board.attr.boundingbox;
+      const newXMax = scaledWidth / unitXY - xMin;
+      const newYMax = scaledHeight / unitXY - yMin;
+      board.resizeContainer(scaledWidth, scaledHeight, false, true);
+      board.setBoundingBox([xMin, newYMax, newXMax, yMin], true);
       board.update();
     }
 
