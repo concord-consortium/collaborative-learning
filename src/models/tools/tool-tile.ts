@@ -21,6 +21,9 @@ export const ToolTileModel = types
     // e.g. width of all columns for table
     get maxWidth(): number | undefined {
       return;
+    },
+    get isUserResizable() {
+      return !!(self.content as any).isUserResizable;
     }
   }));
 

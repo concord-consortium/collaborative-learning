@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import * as uuid from "uuid/v4";
+import { ToolTileModelType } from "../tools/tool-tile";
 
 export const TileLayoutModel = types
   .model("TileLayout", {
@@ -12,7 +13,21 @@ export const TileRowModel = types
     id: types.optional(types.identifier, () => uuid()),
     height: types.maybe(types.number),
     tiles: types.array(TileLayoutModel)
-  });
+  })
+  .views(self => ({
+    isUserResizable(tileMap: any) {
+      return self.tiles.every(tileLayout => {
+        const tile: ToolTileModelType = tileMap.get(tileLayout.tileId);
+        return tile && tile.isUserResizable;
+      });
+    }
+  }))
+  .actions(self => ({
+    // undefined height == default to content height
+    setRowHeight(height?: number) {
+      self.height = height;
+    }
+  }));
 
 export type TileRowModelType = Instance<typeof TileRowModel>;
 export type TileRowSnapshotType = SnapshotIn<typeof TileRowModel>;

@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentContentModelType } from "../models/document-content";
-import { TileRowComponent } from "./document/tile-row";
+import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeScreenY,
+        extractDragResizeModelHeight, extractDragResizeDomHeight } from "./document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
         dragTileSrcDocId, kDragRowHeight } from "./canvas-tools/tool-tile";
 import { assign } from "lodash";
@@ -15,9 +16,20 @@ interface IProps extends IBaseProps {
   readOnly?: boolean;
 }
 
+interface IState {
+  dragResizeRow?: {
+    id: string;
+    modelHeight?: number;
+    domHeight?: number;
+    deltaHeight: number;
+  } | null;
+}
+
 @inject("stores")
 @observer
-export class DocumentContentComponent extends BaseComponent<IProps, {}> {
+export class DocumentContentComponent extends BaseComponent<IProps, IState> {
+
+  public state: IState = {};
 
   private domElement: HTMLElement | null;
 
@@ -35,15 +47,31 @@ export class DocumentContentComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private getRowHeight(rowId: string) {
+    const { content } = this.props;
+    if (!content) return;
+    const { rowMap } = content;
+    const row = rowMap.get(rowId);
+    const { dragResizeRow } = this.state;
+    const dragResizeRowId = dragResizeRow && dragResizeRow.id;
+    if (rowId !== dragResizeRowId) {
+      return row && row.height;
+    }
+    const rowHeight = dragResizeRow && (dragResizeRow.domHeight || dragResizeRow.modelHeight);
+    if (!dragResizeRow || !rowHeight) return;
+    return rowHeight + dragResizeRow.deltaHeight;
+  }
+
   private renderRows() {
     const { content, ...others } = this.props;
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap } = content;
     return rowOrder.map(rowId => {
       const row = rowMap.get(rowId);
+      const rowHeight = this.getRowHeight(rowId);
       return row
-              ? <TileRowComponent key={row.id} docId={content.contentId}
-                                  model={row} tileMap={tileMap} {...others} />
+              ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
+                                  height={rowHeight} tileMap={tileMap} {...others} />
               : null;
     });
   }
@@ -61,12 +89,36 @@ export class DocumentContentComponent extends BaseComponent<IProps, {}> {
     return dataTransfer.types.findIndex(t => t === type) >= 0;
   }
 
+  private getDragResizeRowInfo(e: React.DragEvent<HTMLDivElement>) {
+    const rowId = extractDragResizeRowId(e.dataTransfer);
+    const startScreenY = extractDragResizeScreenY(e.dataTransfer);
+    const modelHeight = extractDragResizeModelHeight(e.dataTransfer);
+    const domHeight = extractDragResizeDomHeight(e.dataTransfer);
+    const deltaHeight = e.screenY - (startScreenY || 0);
+    if (rowId && (deltaHeight != null)) {
+      const originalHeight = domHeight || modelHeight;
+      const newHeight = originalHeight && originalHeight + deltaHeight;
+      return { id: rowId, modelHeight, domHeight, deltaHeight, newHeight };
+    }
+  }
+
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
-    if (content && !readOnly && this.hasDragType(e.dataTransfer, kDragTileContent)) {
-      const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
+    if (!content || readOnly) return;
+
+    const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
+    if (this.hasDragType(e.dataTransfer, kDragTileContent)) {
       e.dataTransfer.dropEffect = withinDocument && !e.altKey ? "move" : "copy";
       // indicate we'll accept the drop
+      e.preventDefault();
+    }
+    else if (withinDocument && this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
+      const dragResizeRow = this.getDragResizeRowInfo(e);
+      if (dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
+        this.setState({ dragResizeRow });
+      }
+      // indicate we'll accept the drop
+      e.dataTransfer.dropEffect = "move";
       e.preventDefault();
     }
   }
@@ -103,7 +155,19 @@ export class DocumentContentComponent extends BaseComponent<IProps, {}> {
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
 
-    if (!content || !dragTileId || !dragTileContent) return;
+    if (!content) return;
+
+    if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
+      const dragResizeRow = this.getDragResizeRowInfo(e);
+      if (dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
+        const row = content.rowMap.get(dragResizeRow.id);
+        row && row.setRowHeight(dragResizeRow.newHeight);
+        this.setState({ dragResizeRow: null });
+      }
+      return;
+    }
+
+    if (!dragTileId || !dragTileContent) return;
 
     e.preventDefault();
 
