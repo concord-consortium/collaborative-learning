@@ -52,7 +52,10 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "left-workspace",
               "primary",
-              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary" />
+              <DocumentComponent
+                document={primaryWorkspace}
+                workspace={learningLogWorkspace}
+                side="primary" />
           )}
           {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
               ? <DocumentComponent
@@ -71,7 +74,10 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "single-workspace",
               "primary",
-              <DocumentComponent document={primaryWorkspace} workspace={learningLogWorkspace} side="primary"/>
+              <DocumentComponent
+                document={primaryWorkspace}
+                workspace={learningLogWorkspace}
+                side="primary"/>
           )}
         </div>
       );

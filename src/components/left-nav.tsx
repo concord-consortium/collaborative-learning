@@ -7,7 +7,9 @@ import { TabSetComponent } from "./tab-set";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "./base";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  isGhostUser: boolean;
+}
 
 @inject("stores")
 @observer
@@ -41,7 +43,7 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
           aria-labelledby={this.getTabId(activeSectionIndex)}
           aria-hidden={ui.leftNavExpanded}
         >
-          <LeftNavPanelComponent section={activeSection} />
+          <LeftNavPanelComponent section={activeSection} isGhostUser={this.props.isGhostUser} />
         </div>
       </div>
     );

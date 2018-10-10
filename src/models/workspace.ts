@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
+import { SectionModelType } from "./curriculum/section";
 
 export const SectionWorkspace = "section";
 export const LearningLogWorkspace = "learningLog";
@@ -10,6 +11,13 @@ export type WorkspaceType = typeof WorkspaceTypeEnum.Type;
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 
+const GhostSectionPrefix = "ghostSection";
+export const createGhostSectionDocumentKey = (sectionId: string) => `${GhostSectionPrefix}:${sectionId}`;
+export const parseGhostSectionDocumentKey = (documentKey: string) => {
+  const [prefix, sectionId, ...rest] = documentKey.split(":");
+  return prefix === GhostSectionPrefix ? sectionId : null;
+};
+
 export const WorkspaceModel = types
   .model("Workspace", {
     type: WorkspaceTypeEnum,
@@ -17,7 +25,6 @@ export const WorkspaceModel = types
     primaryDocumentKey: types.maybe(types.string),
     comparisonDocumentKey: types.maybe(types.string),
     comparisonVisible: false,
-    groupDocumentKeys: types.map(types.string),
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
@@ -37,14 +44,6 @@ export const WorkspaceModel = types
           : override;
       },
 
-      setGroupDocument(uid: string, document: DocumentModelType) {
-        self.groupDocumentKeys.set(uid, document.key);
-      },
-
-      clearGroupDocument(uid: string) {
-        self.groupDocumentKeys.delete(uid);
-      },
-
       setAvailableDocument(document?: DocumentModelType) {
         if (self.comparisonVisible) {
           setComparisonDocument(document);
@@ -60,6 +59,10 @@ export const WorkspaceModel = types
         if (!visible) {
           self.comparisonDocumentKey = undefined;
         }
+      },
+
+      setPrimaryGhostSection(section: SectionModelType) {
+        self.primaryDocumentKey = createGhostSectionDocumentKey(section.id);
       },
     };
   });

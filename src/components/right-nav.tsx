@@ -8,7 +8,9 @@ import { BaseComponent, IBaseProps } from "./base";
 import { MyWorkComponent } from "./my-work";
 import { ClassWorkComponent } from "./class-work";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  isGhostUser: boolean;
+}
 
 @inject("stores")
 @observer
@@ -16,7 +18,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const tabs = ["My Work", "Class Work"];
+    const tabs = this.props.isGhostUser ? ["Class Work"] : ["My Work", "Class Work"];
 
     return (
       <div className="right-nav">

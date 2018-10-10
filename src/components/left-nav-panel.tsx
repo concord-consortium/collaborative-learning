@@ -11,6 +11,7 @@ import { DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
+  isGhostUser: boolean;
 }
 
 @inject("stores")
@@ -56,9 +57,10 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleOpenDocument = () => {
-    const { db, ui, documents, user } = this.stores;
-    const { section } = this.props;
+    const { db, ui, documents, user, groups } = this.stores;
+    const { section, isGhostUser } = this.props;
     const { sectionWorkspace } = ui;
+
     if (section) {
       const document = documents.getSectionDocument(user.id, section.id);
       const done = (finalDocument: DocumentModelType) => {
@@ -69,14 +71,20 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
         this.openDocumentButton!.disabled = false;
       };
 
-      this.openDocumentButton!.disabled = true;
-      if (document) {
-        done(document);
+      if (isGhostUser) {
+        sectionWorkspace.setPrimaryGhostSection(section);
+        ui.contractAll();
       }
       else {
-        db.createSectionDocument(section.id)
-          .then(done)
-          .catch(ui.setError);
+        this.openDocumentButton!.disabled = true;
+        if (document) {
+          done(document);
+        }
+        else {
+          db.createSectionDocument(section.id)
+            .then(done)
+            .catch(ui.setError);
+        }
       }
     }
   }

@@ -53,13 +53,11 @@ export function createStores(params?: ICreateStores): IStores {
         type: SectionWorkspace,
         mode: "1-up",
         visibility: "private",
-        groupDocumentKeys: {}
       },
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up",
         visibility: "private",
-        groupDocumentKeys: {}
       },
     }),
     groups: params && params.groups || GroupsModel.create({}),

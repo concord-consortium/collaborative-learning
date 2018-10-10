@@ -28,6 +28,8 @@ export const GroupModel = types
 export const GroupsModel = types
   .model("Groups", {
     allGroups: types.array(GroupModel),
+    ghostUserId: types.maybe(types.string),
+    ghostGroupId: types.maybe(types.string),
   })
   .actions((self) => {
     return {
@@ -55,12 +57,19 @@ export const GroupsModel = types
           return GroupModel.create({id: groupId, users});
         });
         self.allGroups.replace(allGroups);
+      },
+      ghostGroup(uid?: string, groupId?: string) {
+        self.ghostUserId = uid;
+        self.ghostGroupId = groupId;
       }
     };
   })
   .views((self) => {
     return {
       groupForUser(uid: string) {
+        if (uid === self.ghostUserId) {
+          return self.allGroups.find((group) => group.id === self.ghostGroupId);
+        }
         return self.allGroups.find((group) => {
           return !!group.users.find((user) => user.id === uid);
         });

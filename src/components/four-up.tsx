@@ -13,6 +13,7 @@ import { WorkspaceModelType } from "../models/workspace";
 interface IProps extends IBaseProps {
   document?: DocumentModelType;
   workspace: WorkspaceModelType;
+  isGhostUser?: boolean;
 }
 
 interface FourUpUser {
@@ -66,12 +67,12 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     };
 
     const { groups, user, documents } = this.stores;
-    const { workspace, document, ...others } = this.props;
+    const { workspace, document, isGhostUser, ...others } = this.props;
 
     const group = groups.groupForUser(user.id);
     const groupDocuments = group &&
                            document &&
-                           documents.getSectionDocumentsForGroup(document.sectionId!, document.groupId!);
+                           documents.getSectionDocumentsForGroup(document.sectionId!, group.id);
     const groupUsers: FourUpUser[] = group
       ? group.users
           .filter((groupUser) => groupUser.id !== user.id)
@@ -87,11 +88,14 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       : [];
 
     const groupDoc = (index: number) => {
-      return groupUsers[index] && groupUsers[index].doc;
+      const doc = groupUsers[index] && groupUsers[index].doc;
+      // Ghost users can see all documents
+      const showDoc = doc && (index === 0 || doc.visibility === "public" || isGhostUser);
+      return showDoc ? doc : undefined;
     };
 
-    // if we have a document then make it the first of the group
-    if (document) {
+    // If the user is real, their document should be displayed first
+    if (!isGhostUser) {
       groupUsers.unshift({
         doc: document,
         initials: user.initials
@@ -103,7 +107,8 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
             <CanvasComponent context="four-up-nw" scale={nwCell.scale}
-                            document={groupDoc(0)} {...others} />
+              readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
+              document={groupDoc(0)} {...others} />
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
