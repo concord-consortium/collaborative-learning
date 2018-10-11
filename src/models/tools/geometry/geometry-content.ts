@@ -10,7 +10,7 @@ export const kGeometryToolID = "Geometry";
 
 export const kGeometryDefaultHeight = 200;
 // matches curriculum images
-export const kGeometryDefaultPixelsPerUnit = 35.5;
+export const kGeometryDefaultPixelsPerUnit = 26;
 export const kGeometryDefaultAxisMin = -1;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -69,8 +69,8 @@ export const GeometryContentModel = types
       const scaledHeight = height / (scale || 1);
       const unitXY = kGeometryDefaultPixelsPerUnit;
       const [xMin, , , yMin] = board.attr.boundingbox;
-      const newXMax = scaledWidth / unitXY - xMin;
-      const newYMax = scaledHeight / unitXY - yMin;
+      const newXMax = scaledWidth / unitXY + xMin;
+      const newYMax = scaledHeight / unitXY + yMin;
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox([xMin, newYMax, newXMax, yMin], true);
       board.update();
@@ -142,6 +142,9 @@ export const GeometryContentModel = types
       views: {
         get nextViewId() {
           return ++viewCount;
+        },
+        get isUserResizable() {
+          return true;
         }
       },
       actions: {
