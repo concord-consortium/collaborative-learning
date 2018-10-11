@@ -25,6 +25,11 @@ export const ImageContentModel = types
     }
 
     return {
+      views: {
+        get placeholder() {
+          return placeholderImage;
+        }
+      },
       actions: {
         setUrl
       }

@@ -16,6 +16,7 @@ interface IProps {
 interface IState {
   imageUrl?: string;
   isEditing?: boolean;
+  hasUpdatedUrl?: boolean;
 }
 
 const ImageConstants = {
@@ -38,7 +39,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   public render() {
     const { readOnly, model } = this.props;
     const { content } = model;
-    const { isEditing } = this.state;
+    const { isEditing, imageUrl } = this.state;
     const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -51,7 +52,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
-        <img className="image-tool-image" src={imageContent.url} />
+        <img className="image-tool-image" src={imageUrl} onError={this.handleImageUrlError} />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
@@ -68,6 +69,33 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
+  }
+
+  private handleImageUrlError() {
+    const { hasUpdatedUrl } = this.state;
+    const { db } = this.stores;
+    const { model } = this.props;
+    const { content } = model;
+
+    if (!hasUpdatedUrl) {
+      const imageContent = content as ImageContentModelType;
+      if (imageContent.storePath) {
+        // fetch current live url from firebase
+        db.firebase.getPublicUrlFromStore(imageContent.storePath).then((url) => {
+          if (url) {
+            this.updateURL(url, imageContent.storePath);
+          } else {
+            this.updateURL(imageContent.placeholder());
+          }
+        }).catch(() => {
+          this.updateURL(imageContent.placeholder());
+        });
+      } else {
+        // No firebase storage path
+        this.updateURL(imageContent.placeholder());
+      }
+      this.setState({ hasUpdatedUrl: true });
+    }
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
