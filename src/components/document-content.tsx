@@ -148,6 +148,42 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return dropIndex;
   }
 
+  private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    const dragResizeRow = this.getDragResizeRowInfo(e);
+    if (content && dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
+      const row = content.rowMap.get(dragResizeRow.id);
+      row && row.setRowHeight(dragResizeRow.newHeight);
+      this.setState({ dragResizeRow: null });
+    }
+  }
+
+  private handleMoveTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    if (!content) return;
+    const dragTileId = e.dataTransfer.getData(kDragTileId);
+    const srcRowId = content.findRowContainingTile(dragTileId);
+    if (!srcRowId) return;
+    const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
+    const dropRowIndex = this.getDropRowIndex(e);
+
+    if ((srcRowIndex >= 0) && (dropRowIndex !== srcRowIndex)) {
+      content.moveRowToIndex(srcRowIndex, dropRowIndex);
+    }
+  }
+
+  private handleCopyTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    const dragTileContent = e.dataTransfer.getData(kDragTileContent);
+    if (!content || !dragTileContent) return;
+    const dropRowIndex = this.getDropRowIndex(e);
+    let dragRowHeight;
+    if (e.dataTransfer.getData(kDragRowHeight)) {
+      dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
+    }
+    content.copyTileIntoRow(dragTileContent, dragTileId, dropRowIndex, dragRowHeight);
+  }
+
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
@@ -157,39 +193,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content) return;
 
     if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
-      const dragResizeRow = this.getDragResizeRowInfo(e);
-      if (dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
-        const row = content.rowMap.get(dragResizeRow.id);
-        row && row.setRowHeight(dragResizeRow.newHeight);
-        this.setState({ dragResizeRow: null });
-      }
+      this.handleRowResizeDrop(e);
       return;
     }
 
-    if (!dragTileId || !dragTileContent) return;
-
     e.preventDefault();
 
-    const dropRowIndex = this.getDropRowIndex(e);
-
     // handle drop within document - reorder tiles/rows
-    if ((dragSrc === content.contentId) && !e.altKey) {
-      const srcRowId = content.findRowContainingTile(dragTileId);
-      if (!srcRowId) return;
-      const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
-
-      if (dropRowIndex !== srcRowIndex) {
-        content.moveRowToIndex(srcRowIndex, dropRowIndex);
-      }
+    if (dragTileId && (dragSrc === content.contentId) && !e.altKey) {
+      this.handleMoveTileDrop(e);
       return;
     }
 
     // handle drop - copy contents to new row
-    let dragRowHeight;
-    if (e.dataTransfer.getData(kDragRowHeight)) {
-      dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
+    if (dragTileContent) {
+      this.handleCopyTileDrop(e);
     }
-    content.copyTileIntoRow(dragTileContent, dragTileId, dropRowIndex, dragRowHeight);
   }
 
 }
