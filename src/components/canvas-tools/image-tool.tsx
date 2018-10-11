@@ -102,9 +102,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
+    const storePath = db.firebase.getFullPath(currentFile.name);
 
     resizeImage(currentFile, ImageConstants.maxWidth, ImageConstants.maxHeight).then((resizedImage: Blob) => {
-      db.firebase.uploadImage(currentFile.name, currentFile, resizedImage).then((uploadRef) => {
+      db.firebase.uploadImage(storePath, currentFile, resizedImage).then((uploadRef) => {
         db.firebase.getPublicUrlFromStore(uploadRef).then((url) => {
           this.updateURL(url, uploadRef);
         });

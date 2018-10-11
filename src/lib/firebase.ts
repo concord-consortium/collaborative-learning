@@ -189,8 +189,8 @@ export class Firebase {
     });
   }
 
-  public uploadImage(fileName: string, file: File, imageData?: Blob): Promise<any> {
-    const ref = this.firestore().ref("/" + fileName);
+  public uploadImage(storePath: string, file: File, imageData?: Blob): Promise<any> {
+    const ref = this.firestore().ref(storePath);
     const fileData = imageData ? imageData : file;
     return ref.put(fileData).then((snapshot) => {
       return snapshot.ref.fullPath;
