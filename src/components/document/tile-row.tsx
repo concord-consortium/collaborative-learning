@@ -10,8 +10,8 @@ import "./tile-row.sass";
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
 // allows source compatibility to be checked in dragOver
 export const dragResizeRowId = (id: string) => `org.concord.clue.row-resize.id.${id}`;
-export const dragResizeRowScreenY =
-              (screenY: number) => `org.concord.clue.row-resize.screen-y.${screenY}`;
+export const dragResizeRowPageY =
+              (pageY: number) => `org.concord.clue.row-resize.page-y.${pageY}`;
 export const dragResizeRowModelHeight =
               (modelHeight: number) => `org.concord.clue.row-resize.model-height.${modelHeight}`;
 export const dragResizeRowDomHeight =
@@ -24,9 +24,9 @@ export function extractDragResizeRowId(dataTransfer: DataTransfer) {
   }
 }
 
-export function extractDragResizeScreenY(dataTransfer: DataTransfer) {
+export function extractDragResizePageY(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
-    const result = /org\.concord\.clue\.row-resize\.screen-y\.(.*)$/.exec(type);
+    const result = /org\.concord\.clue\.row-resize\.page-y\.(.*)$/.exec(type);
     if (result) return +result[1];
   }
 }
@@ -98,7 +98,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(kDragResizeRowId, id);
     e.dataTransfer.setData(dragResizeRowId(id), id);
-    e.dataTransfer.setData(dragResizeRowScreenY(e.screenY), String(e.screenY));
+    e.dataTransfer.setData(dragResizeRowPageY(e.pageY), String(e.pageY));
     if (model.height) {
       e.dataTransfer.setData(dragResizeRowModelHeight(model.height), String(model.height));
     }
