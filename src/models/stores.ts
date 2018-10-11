@@ -1,3 +1,4 @@
+import uuid from "uuid";
 import { ProblemModel, ProblemModelType } from "./curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
@@ -43,11 +44,12 @@ export interface ICreateStores {
 }
 
 export function createStores(params?: ICreateStores): IStores {
+  const user = params && params.user || UserModel.create({id: "0"});
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     // for ease of testing, we create a null problem if none is provided
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
-    user: params && params.user || UserModel.create({id: "0"}),
+    user,
     ui: params && params.ui || UIModel.create({
       sectionWorkspace: {
         type: SectionWorkspace,

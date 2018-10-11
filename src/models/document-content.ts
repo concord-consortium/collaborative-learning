@@ -8,10 +8,12 @@ import { ToolTileModel } from "./tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
 import { cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
+import { Logger, LogEventName } from "../lib/logger";
 
 export interface NewRowOptions {
   rowHeight?: number;
   rowIndex?: number;
+  action?: LogEventName;
 }
 
 export const DocumentContentModel = types
@@ -67,6 +69,10 @@ export const DocumentContentModel = types
       else {
         self.rowOrder.push(row.id);
       }
+
+      const action = o.action || LogEventName.CREATE_TILE;
+      Logger.logTileEvent(action, tile);
+
       return tile.id;
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
@@ -87,6 +93,8 @@ export const DocumentContentModel = types
       return self.addTileInNewRow(defaultImageContent());
     },
     deleteTile(tileId: string) {
+      Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
+
       const rowsToDelete: TileRowModelType[] = [];
       self.rowMap.forEach(row => {
         // remove from row
