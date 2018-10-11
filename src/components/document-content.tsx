@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentContentModelType } from "../models/document-content";
-import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeScreenY,
+import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizePageY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "./document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
         dragTileSrcDocId, kDragRowHeight } from "./canvas-tools/tool-tile";
@@ -91,10 +91,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private getDragResizeRowInfo(e: React.DragEvent<HTMLDivElement>) {
     const rowId = extractDragResizeRowId(e.dataTransfer);
-    const startScreenY = extractDragResizeScreenY(e.dataTransfer);
+    const startPageY = extractDragResizePageY(e.dataTransfer);
     const modelHeight = extractDragResizeModelHeight(e.dataTransfer);
     const domHeight = extractDragResizeDomHeight(e.dataTransfer);
-    const deltaHeight = e.screenY - (startScreenY || 0);
+    const deltaHeight = e.pageY - (startPageY || 0);
     if (rowId && (deltaHeight != null)) {
       const originalHeight = domHeight || modelHeight;
       const newHeight = originalHeight && originalHeight + deltaHeight;
@@ -128,7 +128,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!this.domElement) return content ? content.rowOrder.length : 0;
 
     const rowElements = this.domElement.getElementsByClassName("tile-row");
-    const dropY = e.clientY;
+    const dropY = e.pageY;
     let dropIndex = 0;
     let dropDistance = Infinity;
     let dist;
