@@ -71,7 +71,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleImageUrlError() {
+  private handleImageUrlError = () => {
     const { hasUpdatedUrl } = this.state;
     const { db } = this.stores;
     const { model } = this.props;
@@ -85,14 +85,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
           if (url) {
             this.updateURL(url, imageContent.storePath);
           } else {
-            this.updateURL(imageContent.placeholder());
+            this.updateURL("assets/image_placeholder.png");
           }
         }).catch(() => {
-          this.updateURL(imageContent.placeholder());
+          this.updateURL("assets/image_placeholder.png");
         });
       } else {
         // No firebase storage path
-        this.updateURL(imageContent.placeholder());
+        this.updateURL("assets/image_placeholder.png");
       }
       this.setState({ hasUpdatedUrl: true });
     }
