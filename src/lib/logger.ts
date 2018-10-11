@@ -2,6 +2,7 @@ import { UserModelType } from "../models/user";
 import uuid = require("uuid");
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores";
+import { getSnapshot } from "mobx-state-tree";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -43,7 +44,7 @@ export class Logger {
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
-        // serializedObject: tile.content...
+        serializedObject: getSnapshot(tile).content
       };
     }
     Logger.log(event, parameters);

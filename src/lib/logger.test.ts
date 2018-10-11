@@ -50,6 +50,10 @@ describe("logger", () => {
       expect(request.event).toBe("CREATE_TILE");
       expect(request.parameters.objectId).toBe(tile.id);
       expect(request.parameters.objectType).toBe("Text");
+      expect(request.parameters.serializedObject).toEqual({
+        type: "Text",
+        text: ""
+      });
 
       done();
       return res.status(201);
