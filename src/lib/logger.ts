@@ -39,12 +39,19 @@ export class Logger {
   }
 
   public static logTileEvent(event: LogEventName, tile?: ToolTileModelType) {
+    if (!this._instance) return;
+
     let parameters = {};
     if (tile) {
+      const sourceDocument = Logger.Instance.stores.documents.findDocumentOfTile(tile.id);
+      // eventually we will want to know/assume that a tile with no document is from the instructions
+      const documentKey = sourceDocument ? sourceDocument.key : "";
+
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
-        serializedObject: getSnapshot(tile).content
+        serializedObject: getSnapshot(tile).content,
+        documentKey
       };
     }
     Logger.log(event, parameters);
@@ -74,7 +81,6 @@ export class Logger {
       application: applicationName,
       username:  user.id,
       classHash: user.classHash,
-      // documentKey: ...
       session: this.session,
       appMode: this.stores.appMode,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
