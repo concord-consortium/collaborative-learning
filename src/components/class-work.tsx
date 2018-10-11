@@ -18,13 +18,14 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
     const sections = problem.sections;
     const publications: DocumentModelType[] = [];
     sections.forEach((section) => {
-      publications.push(...documents.getLatestPublicationsForSection(section.id));
+      publications.push(...documents.getLatestPublicationsForSection(section.id, this.stores.class));
     });
 
     return (
       <div className="class-work">
         <div className="list">
           {publications.map((publication) => {
+            const user = this.stores.class.getStudentById(publication.uid);
             return (
               <div
                 className="list-item"
@@ -42,7 +43,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
                 </div>
                 <div className="info">
                   <div>{problem.getSectionById(publication.sectionId!)!.title}</div>
-                  <div>{`Group: ${publication.groupId}`}</div>
+                  <div>{user && user.fullName}</div>
                 </div>
               </div>
             );

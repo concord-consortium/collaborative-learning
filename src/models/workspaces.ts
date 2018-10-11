@@ -121,28 +121,6 @@ export const WorkspacesModel = types
     return {
       findByDocumentId,
 
-      // Returns the most recently published docs for the given section, sorted by group ID number
-      getLatestPublicationsForSection(sectionId: string) {
-        const latestPublications: PublishedWorkspaceModelType[] = [];
-        self.publications
-          .filter((publication) => publication.sectionId === sectionId)
-          .forEach((publication) => {
-            if (publication.sectionId !== sectionId) {
-              return;
-            }
-            const groupId = publication.groupId;
-            const latestIndex = latestPublications.findIndex((pub) => pub.groupId === groupId);
-            if (latestIndex === -1) {
-              latestPublications.push(publication);
-            } else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
-              latestPublications[latestIndex] = publication;
-            }
-          });
-
-        return latestPublications
-          .sort((pub1, pub2) => parseInt(pub1.groupId, 10) - parseInt(pub2.groupId, 10));
-      },
-
       getSectionWorkspace(sectionId: string) {
         return self.sections.find((workspace) => workspace.sectionId === sectionId);
       },
