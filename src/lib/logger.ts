@@ -19,6 +19,10 @@ interface LogMessage {
   parameters: any;
 }
 
+interface LoggingMetaData {
+  originalTileId?: string;
+}
+
 export enum LogEventName {
   CREATE_TILE,
   COPY_TILE,
@@ -38,21 +42,30 @@ export class Logger {
     sendToLoggingService(logMessage);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType) {
+  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: LoggingMetaData) {
     if (!this._instance) return;
 
     let parameters = {};
     if (tile) {
-      const sourceDocument = Logger.Instance.stores.documents.findDocumentOfTile(tile.id);
-      // eventually we will want to know/assume that a tile with no document is from the instructions
-      const documentKey = sourceDocument ? sourceDocument.key : "";
+      const document = Logger.Instance.getDocumentInfo(tile.id);
 
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
-        documentKey
+        documentKey: document.key,
+        documentType: document.type
       };
+
+      if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
+        const sourceDocument = Logger.Instance.getDocumentInfo(metaData.originalTileId);
+        parameters = {
+          ...parameters,
+          souceObjectId: metaData.originalTileId,
+          sourceDocumentKey: sourceDocument.key,
+          sourceDocumentType: sourceDocument.type
+        };
+      }
     }
     Logger.log(event, parameters);
   }
@@ -88,6 +101,21 @@ export class Logger {
       method: "do",           // eventually we will want to support undo, redo
       parameters
     };
+  }
+
+  private getDocumentInfo(tileId: string): {key: string, type: string} {
+    const document = this.stores.documents.findDocumentOfTile(tileId);
+    if (document) {
+      return {
+        key: document.key,
+        type: document.type
+      };
+    } else {
+      return {
+        key: "",
+        type: "Instructions"        // is this assumption valid?
+      };
+    }
   }
 }
 

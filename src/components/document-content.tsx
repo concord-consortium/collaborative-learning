@@ -198,7 +198,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (snapshot) {
         const dragRowHeight = e.dataTransfer.getData(kDragRowHeight);
         const rowHeight = dragRowHeight ? { rowHeight: +dragRowHeight } : undefined;
-        const newRowOptions = assign({ rowIndex: dropRowIndex, action: LogEventName.COPY_TILE }, rowHeight);
+        const newRowOptions = assign({
+          rowIndex: dropRowIndex,
+          action: LogEventName.COPY_TILE,
+          loggingMeta: {
+            originalTileId: dragTileId
+          }
+        }, rowHeight);
         content.addTileInNewRow(snapshot.content, newRowOptions);
       }
     }

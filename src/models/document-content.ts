@@ -14,6 +14,7 @@ export interface NewRowOptions {
   rowHeight?: number;
   rowIndex?: number;
   action?: LogEventName;
+  loggingMeta?: {};
 }
 
 export const DocumentContentModel = types
@@ -71,7 +72,7 @@ export const DocumentContentModel = types
       }
 
       const action = o.action || LogEventName.CREATE_TILE;
-      Logger.logTileEvent(action, tile);
+      Logger.logTileEvent(action, tile, o.loggingMeta);
 
       return tile.id;
     },
