@@ -1,9 +1,12 @@
 import mock from "xhr-mock";
 import { IStores, createStores } from "../models/stores";
 import { Logger, LogEventName } from "./logger";
-import { ToolTileModel } from "../models/tools/tool-tile";
+import { ToolTileModel, ToolTileModelType } from "../models/tools/tool-tile";
 import { defaultTextContent } from "../models/tools/text/text-content";
 import { SectionDocument, DocumentModel } from "../models/document";
+import { createSingleTileContent } from "../utilities/test-utils";
+import { DocumentContentModel } from "../models/document-content";
+import { getSnapshot } from "mobx-state-tree";
 
 describe("logger", () => {
   let stores: IStores;
@@ -86,12 +89,69 @@ describe("logger", () => {
         text: "test"
       });
       expect(request.parameters.documentKey).toBe("source-document");
+      expect(request.parameters.documentType).toBe("section");
 
       done();
       return res.status(201);
     });
 
-    const tile = ToolTileModel.create({content: defaultTextContent()});
     await document.content.addTextTile("test");
+  });
+
+  it("can log copying tiles between documents", async (done) => {
+    const sourceDocument = DocumentModel.create({
+      type: SectionDocument,
+      uid: "1",
+      key: "source-document",
+      createdAt: 1,
+      content: {},
+      visibility: "public"
+    });
+    const content = createSingleTileContent({ type: "Text", text: "test" });
+    sourceDocument.setContent(DocumentContentModel.create(content));
+
+    const destinationDocument = DocumentModel.create({
+      type: SectionDocument,
+      uid: "2",
+      key: "destination-document",
+      createdAt: 1,
+      content: {},
+      visibility: "public"
+    });
+
+    stores.documents.add(sourceDocument);
+    stores.documents.add(destinationDocument);
+
+    let tileToCopy: ToolTileModelType;
+
+    mock.post(/.*/, (req, res) => {
+      const request = JSON.parse(req.body());
+
+      expect(request.event).toBe("COPY_TILE");
+      // expect(request.parameters.objectId).toBe(tile.id);
+      expect(request.parameters.objectType).toBe("Text");
+      expect(request.parameters.serializedObject).toEqual({
+        type: "Text",
+        text: "test"
+      });
+      expect(request.parameters.documentKey).toBe("destination-document");
+      expect(request.parameters.documentType).toBe("section");
+      expect(request.parameters.objectId).not.toBe(tileToCopy.id);
+      expect(request.parameters.sourceDocumentKey).toBe("source-document");
+      expect(request.parameters.sourceDocumentType).toBe("section");
+      expect(request.parameters.souceObjectId).toBe(tileToCopy.id);
+
+      done();
+      return res.status(201);
+    });
+
+    // annoying way to get a tile...
+    const firstRow = sourceDocument.content.rowMap.get(sourceDocument.content.rowOrder[0]);
+    const tileIdToCopy = firstRow!.tiles[0].tileId;
+    tileToCopy = sourceDocument.content.tileMap.get(tileIdToCopy) as ToolTileModelType;
+
+    const serialized = JSON.stringify(getSnapshot(tileToCopy));
+
+    await destinationDocument.content.copyTileIntoRow(serialized, tileToCopy.id, 0);
   });
 });

@@ -93,6 +93,28 @@ export const DocumentContentModel = types
     addImageTile() {
       return self.addTileInNewRow(defaultImageContent());
     },
+    copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
+      let snapshot;
+      try {
+        snapshot = JSON.parse(serializedTile);
+      }
+      catch (e) {
+        snapshot = null;
+      }
+      if (snapshot) {
+        const newRowOptions: NewRowOptions = {
+          rowIndex,
+          action: LogEventName.COPY_TILE,
+          loggingMeta: {
+            originalTileId
+          }
+        };
+        if (originalRowHeight) {
+          newRowOptions.rowHeight = originalRowHeight;
+        }
+        self.addTileInNewRow(snapshot.content, newRowOptions);
+      }
+    },
     deleteTile(tileId: string) {
       Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
 

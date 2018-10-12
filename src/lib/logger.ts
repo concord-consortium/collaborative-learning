@@ -1,4 +1,3 @@
-import { UserModelType } from "../models/user";
 import uuid = require("uuid");
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores";

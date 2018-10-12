@@ -6,8 +6,6 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "./document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
         dragTileSrcDocId, kDragRowHeight } from "./canvas-tools/tool-tile";
-import { assign } from "lodash";
-import { LogEventName } from "../lib/logger";
 
 import "./document-content.sass";
 
@@ -187,27 +185,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
 
     // handle drop - copy contents to new row
-    let snapshot;
-    if (content && dragTileContent) {
-      try {
-        snapshot = JSON.parse(dragTileContent);
-      }
-      catch (e) {
-        snapshot = null;
-      }
-      if (snapshot) {
-        const dragRowHeight = e.dataTransfer.getData(kDragRowHeight);
-        const rowHeight = dragRowHeight ? { rowHeight: +dragRowHeight } : undefined;
-        const newRowOptions = assign({
-          rowIndex: dropRowIndex,
-          action: LogEventName.COPY_TILE,
-          loggingMeta: {
-            originalTileId: dragTileId
-          }
-        }, rowHeight);
-        content.addTileInNewRow(snapshot.content, newRowOptions);
-      }
+    let dragRowHeight;
+    if (e.dataTransfer.getData(kDragRowHeight)) {
+      dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
     }
+    content.copyTileIntoRow(dragTileContent, dragTileId, dropRowIndex, dragRowHeight);
   }
 
 }
