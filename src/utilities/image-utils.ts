@@ -47,7 +47,7 @@ export function uploadImage(firebase: Firebase, storePath: string, currentFile: 
   });
 }
 
-export function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
+function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.src = URL.createObjectURL(file);
@@ -77,27 +77,24 @@ export function resizeImage(file: File, maxWidth: number, maxHeight: number): Pr
       const context = canvas.getContext("2d");
 
       context!.drawImage(image, 0, 0, newWidth, newHeight);
-
       canvas.toBlob(resolve as any, file.type);
     };
     image.onerror = reject;
   });
 }
 
-interface ImageDimensions {
-  width: number;
-  height: number;
-}
-
-export function getImageDimensions(file: File): Promise<ImageDimensions> {
-  return new Promise((resolve, reject) => {
+export function getImageDimensions(callback: any, file?: File, url?: string) {
     const image = new Image();
-    image.src = URL.createObjectURL(file);
     image.onload = () => {
       const width = image.width;
       const height = image.height;
 
-      resolve({ width, height });
+      callback({ width, height });
     };
-  });
+
+    if (file) {
+      image.src = URL.createObjectURL(file);
+    } else {
+      image.src = url!;
+    }
 }

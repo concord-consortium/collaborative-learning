@@ -1,11 +1,11 @@
 import * as React from "react";
-import firebase from "firebase";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { fetchImageUrl, uploadImage } from "../../utilities/image-utils";
+import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
 import "./image-tool.sass";
+import { url } from "inspector";
 
 interface IProps {
   context: string;
@@ -18,12 +18,10 @@ interface IState {
   isEditing?: boolean;
   isLoading?: boolean;
   hasUpdatedUrl?: boolean;
+  imageDimensions?: any;
 }
 
-const ImageConstants = {
-  maxWidth: 512,
-  maxHeight: 512
-};
+const defaultImagePlaceholderSize = { width: 200, height: 200 };
 
 @inject("stores")
 @observer
@@ -43,14 +41,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
     fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-      this.setState({ imageUrl: fullUrl, isLoading: false });
+      getImageDimensions((dimensions: any) => {
+        this.setState({ imageUrl: fullUrl, imageDimensions: dimensions, isLoading: false });
+      }, undefined, fullUrl);
     });
   }
 
   public render() {
     const { readOnly, model } = this.props;
     const { content } = model;
-    const { isEditing, isLoading, imageUrl } = this.state;
+    const { isEditing, isLoading, imageUrl, imageDimensions } = this.state;
     const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -63,10 +63,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const imageToolControlContainerClasses = !readOnly ? `image-tool-controls ${selectedClass}`
       : `image-tool-controls readonly`;
 
+    const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
+    // Set image display properties for the div, since this won't resize automatically when the image changes
+    const imageDisplayStyle = {
+      background: "url(" + imageUrl + ")",
+      backgroundRepeat: "no-repeat",
+      width: dimensions.width + "px ",
+      height: dimensions.height + "px"
+    };
+
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
         {isLoading && <div className="loading-spinner" />}
-        <img className="image-tool-image" src={imageUrl} onError={this.handleImageUrlError} />
+        <div className="image-tool-image" style={imageDisplayStyle} onError={this.handleImageUrlError} />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
@@ -93,10 +102,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     if (!hasUpdatedUrl) {
       const imageContent = content as ImageContentModelType;
+      let updatedUrl = imageContent.url;
       fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-        this.setState({ imageUrl: fullUrl });
+        updatedUrl = fullUrl;
       });
-      this.setState({ hasUpdatedUrl: true });
+      this.setState({ hasUpdatedUrl: true, imageUrl: updatedUrl });
     }
   }
 
@@ -110,8 +120,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     // Set loading state for showing spinner
     this.setState({ isLoading: true });
 
-    uploadImage(db.firebase, storePath, currentFile, (url: string) => {
-      this.updateURL(url);
+    uploadImage(db.firebase, storePath, currentFile, (imageUrl: string) => {
+      getImageDimensions((dimensions: any) => {
+        this.setState({ imageDimensions: dimensions, isLoading: false, isEditing: false});
+        this.updateURL(imageUrl);
+      }, undefined, imageUrl);
     });
   }
 
@@ -147,6 +160,5 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   private updateURL = (newUrl: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl);
-    this.setState({ isEditing: false, isLoading: false });
   }
 }
