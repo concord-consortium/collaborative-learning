@@ -701,7 +701,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use the coordinate rules to draw the Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
+                      "text": "Use the coordinate rules to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
                     }
                   },
                   {
@@ -717,10 +717,10 @@
                   "text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"
                 },
                 {
-                  "text": "Describe the shape of Mug?"
+                  "text": "Describe the shape of Mug"
                 },
                 {
-                  "text": "What measures help you identify the imposters?"
+                  "text": "What measures help you identify the impostors?"
                 },
                 {
                   "text": "What features are the same about Mug and the others? What features are different?"
@@ -996,7 +996,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures."
+                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:"
                     }
                   },
                   {
@@ -1049,6 +1049,12 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "text": " The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from impostors."
+                    }
+                  },
                   {
                     "content": {
                       "type": "Image",
