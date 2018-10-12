@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
+import { ClassModelType } from "./class";
 
 type DocumentTypeOption = "section" | "publication" | "learningLog";
 
@@ -39,14 +40,14 @@ export const DocumentsModel = types
         });
       },
 
-      // Returns the most recently published docs for the given section, sorted by group ID number
-      getLatestPublicationsForSection(sectionId: string) {
+      // Returns the most recently published docs for the given section per user, sorted by name
+      getLatestPublicationsForSection(sectionId: string, clazz: ClassModelType) {
         const latestPublications: DocumentModelType[] = [];
         byType("publication")
           .filter((publication) => publication.sectionId === sectionId)
           .forEach((publication) => {
-            const groupId = publication.groupId;
-            const latestIndex = latestPublications.findIndex((pub) => pub.groupId === groupId);
+            const uid = publication.uid;
+            const latestIndex = latestPublications.findIndex((pub) => pub.uid === uid);
             if (latestIndex === -1) {
               latestPublications.push(publication);
             }
@@ -55,8 +56,15 @@ export const DocumentsModel = types
             }
           });
 
-        return latestPublications
-          .sort((pub1, pub2) => parseInt(pub1.groupId!, 10) - parseInt(pub2.groupId!, 10));
+        return latestPublications.sort((pub1, pub2) => {
+          const user1 = clazz.getStudentById(pub1.uid);
+          const user2 = clazz.getStudentById(pub2.uid);
+          // Every publication should have a user, but if it's missing, sort that document last
+          if (!user1 || !user2) return (user2 ? 1 : 0) - (user1 ? 1 : 0);
+          return user1.lastName !== user2.lastName
+            ? user1.lastName.localeCompare(user2.lastName)
+            : user1.firstName.localeCompare(user2.firstName);
+        });
       },
     };
   })
