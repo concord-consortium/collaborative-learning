@@ -246,7 +246,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_500w.png"
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
                     }   
                   },
                   {
@@ -284,7 +284,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How are the original figure and its image alike?"
+                      "text": "How are the original figure and its image alike? Different? How do you know?"
                     }
                   }
                 ]
@@ -387,7 +387,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_500w.png"
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
                     }   
                   },
                   {
@@ -399,25 +399,25 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BAC or BAC"
+                      "text": "Angle BAC or ∠BAC"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BCA or BCA"
+                      "text": "Angle BCA or ∠BCA"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠ABC or ABC"
+                      "text": "Angle ABC or ∠ABC"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of BAC."
+                      "text": "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of ∠BAC."
                     }
                   },
                   {
@@ -429,19 +429,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "BAC can also be called A"
+                      "text": "∠BAC can also be called ∠A"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "BCA can also be called C"
+                      "text": "∠BCA can also be called ∠C"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "ABC can also be called B"
+                      "text": "∠ABC can also be called ∠B"
                     }
                   },
                   {
@@ -494,31 +494,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Compare the original figure to each of the images. Explain how you can use the percent setting to predict the relationship between the following features in the original and the Copy 1; and Copy 2."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- Corresponding angles?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- Corresponding side lengths?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Corresponding perimeters?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Corresponding areas?"
+                      "text": "1. Compare the original figure to each of the images. Explain how you can use the percent setting to predict the relationship between the following features in and Copy 1, and the original and Copy 2./n/n- Corresponding angles?/n/n- Corresponding side lengths?/n/n- Corresponding perimeters?/n/n- Corresponding areas?
+"
                     }
                   },
                   {
@@ -530,7 +507,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Amelia thinks that the copier creates images that are similar to those made with the rubber-band stretchers and the photograph. Do you agree? Explain why."
+                      "text": "3. Amelia thinks that the copier creates images that are similar to those made with the rubber-band stretchers and the photograph. Do you agree? Explain why."
                     }
                   }
                 ]
@@ -1791,7 +1768,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_resized_350w.png"
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
                     }
                   }, {
                     "content": {
@@ -1801,7 +1778,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SSS_4_1_In_31_proportion_resized_350w.png"
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SSS_4_1_In_31_proportion_350w.png"
                     }
                   }, {
                     "content": {
@@ -1876,7 +1853,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Find the scale factor from one figure to a similar figure. What information does the scale factor give you? How does the scale factor relate to the proportions of the ratios of adjacent sides? Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why? Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain. Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal. Is this true? Explain."
+                      "text": "1. Find the scale factor from one figure to a similar figure. What information does the scale factor give you? \nn2.How does the scale factor relate to the proportions of the ratios of adjacent sides? \n\n3. Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why? \n\n4. Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain. \n\n5. Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal. Is this true? Explain."
                     }
                   }
                 ]
@@ -1964,7 +1941,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_350w.png"
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
                     }
                   }, {
                     "content": {
@@ -1984,7 +1961,7 @@
                   }, {
                     "content": {
                       "type": "Text",
-                      "text": "4.If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain."
+                      "text": "4. If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain."
                     }
                   }
                 ]
@@ -2070,17 +2047,12 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_350w.png"
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
                     }
                   }, {
                     "content": {
                       "type": "Text",
                       "text": "Examine the diagram of the shadow method. How can you use this method to find the height of the Statue of Liberty? What is the height?"
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "text": "If the sun is shining, try the shadow method to find the height of an object outside your building. You will need"
                     }
                   }, {
                     "content": {
@@ -2113,7 +2085,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_350w.png"
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
                     }
                   }, {
                     "content": {
