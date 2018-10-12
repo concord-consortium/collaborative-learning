@@ -60,6 +60,7 @@ export class Logger {
         const sourceDocument = Logger.Instance.getDocumentInfo(metaData.originalTileId);
         parameters = {
           ...parameters,
+          sourceUsername: sourceDocument.uid,
           souceObjectId: metaData.originalTileId,
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type
@@ -108,6 +109,7 @@ export class Logger {
       return {
         key: document.key,
         type: document.type
+        uid: document.uid
       };
     } else {
       return {

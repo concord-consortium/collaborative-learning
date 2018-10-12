@@ -101,7 +101,7 @@ describe("logger", () => {
   it("can log copying tiles between documents", async (done) => {
     const sourceDocument = DocumentModel.create({
       type: SectionDocument,
-      uid: "1",
+      uid: "source-user",
       key: "source-document",
       createdAt: 1,
       content: {},
@@ -112,7 +112,7 @@ describe("logger", () => {
 
     const destinationDocument = DocumentModel.create({
       type: SectionDocument,
-      uid: "2",
+      uid: "destination-user",
       key: "destination-document",
       createdAt: 1,
       content: {},
@@ -140,6 +140,7 @@ describe("logger", () => {
       expect(request.parameters.sourceDocumentKey).toBe("source-document");
       expect(request.parameters.sourceDocumentType).toBe("section");
       expect(request.parameters.souceObjectId).toBe(tileToCopy.id);
+      expect(request.parameters.sourceUsername).toBe("source-user");
 
       done();
       return res.status(201);
