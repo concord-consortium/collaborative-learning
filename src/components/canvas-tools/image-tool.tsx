@@ -4,7 +4,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { resizeImage } from "../../utilities/image-utils";
+import { fetchImageUrl, uploadImage } from "../../utilities/image-utils";
 import "./image-tool.sass";
 
 interface IProps {
@@ -16,6 +16,7 @@ interface IProps {
 interface IState {
   imageUrl?: string;
   isEditing?: boolean;
+  isLoading?: boolean;
   hasUpdatedUrl?: boolean;
 }
 
@@ -32,26 +33,41 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { model: { content } } = props;
     const imageContent = content as ImageContentModelType;
     const newState: IState = { imageUrl: imageContent.url };
+    console.log("got derived state");
     return newState;
   }
-  public state: IState = {};
+
+  public state: IState = { isLoading: true };
+
+  public componentDidMount() {
+    const { model: { content } } = this.props;
+    const { db } = this.stores;
+    const imageContent = content as ImageContentModelType;
+    fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
+      console.log("got new url");
+      this.setState({ imageUrl: fullUrl, isLoading: false });
+    });
+  }
 
   public render() {
     const { readOnly, model } = this.props;
     const { content } = model;
-    const { isEditing, imageUrl } = this.state;
+    const { isEditing, isLoading, imageUrl } = this.state;
     const { ui } = this.stores;
     const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
+
     // Include states for selected and editing separately to clean up UI a little
-    const selectedClass = ui.isSelectedTile(model) ? (isEditing ? "editing" : "selected") : "";
+    const selectedClass = ui.isSelectedTile(model) ? (isEditing && !readOnly ? "editing" : "selected") : "";
     const divClasses = `image-tool ${editableClass}`;
     const inputClasses = `image-url ${selectedClass}`;
     const fileInputClasses = `image-file ${selectedClass}`;
-    const imageToolControlContainerClasses = `image-tool-controls ${selectedClass}`;
+    const imageToolControlContainerClasses = !readOnly ? `image-tool-controls ${selectedClass}`
+      : `image-tool-controls readonly`;
 
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
+        {isLoading && <div className="loading-spinner" />}
         <img className="image-tool-image" src={imageUrl} onError={this.handleImageUrlError} />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
@@ -79,21 +95,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     if (!hasUpdatedUrl) {
       const imageContent = content as ImageContentModelType;
-      if (imageContent.storePath) {
-        // fetch current live url from firebase
-        db.firebase.getPublicUrlFromStore(imageContent.storePath).then((url) => {
-          if (url) {
-            this.updateURL(url, imageContent.storePath);
-          } else {
-            this.updateURL("assets/image_placeholder.png");
-          }
-        }).catch(() => {
-          this.updateURL("assets/image_placeholder.png");
-        });
-      } else {
-        // No firebase storage path
-        this.updateURL("assets/image_placeholder.png");
-      }
+      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
+        this.setState({ imageUrl: fullUrl });
+      });
       this.setState({ hasUpdatedUrl: true });
     }
   }
@@ -102,14 +106,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
+    // Getting the path at this level gives the correct path to the user's current storage location
     const storePath = db.firebase.getFullPath(currentFile.name);
 
-    resizeImage(currentFile, ImageConstants.maxWidth, ImageConstants.maxHeight).then((resizedImage: Blob) => {
-      db.firebase.uploadImage(storePath, currentFile, resizedImage).then((uploadRef) => {
-        db.firebase.getPublicUrlFromStore(uploadRef).then((url) => {
-          this.updateURL(url, uploadRef);
-        });
-      });
+    // Set loading state for showing spinner
+    this.setState({ isLoading: true });
+
+    uploadImage(db.firebase, storePath, currentFile, (url: string) => {
+      this.updateURL(url);
     });
   }
 
@@ -142,9 +146,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     this.setState({ isEditing: false });
   }
 
-  private updateURL = (newUrl: string, storePath?: string) => {
+  private updateURL = (newUrl: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
-    imageContent.setUrl(newUrl, storePath);
-    this.setState({ isEditing: false });
+    imageContent.setUrl(newUrl);
+    this.setState({ isEditing: false, isLoading: false });
   }
 }

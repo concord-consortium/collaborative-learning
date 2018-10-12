@@ -13,15 +13,13 @@ export function defaultImageContent() {
 export const ImageContentModel = types
   .model("ImageTool", {
     type: types.optional(types.literal(kImageToolID), kImageToolID),
-    url: types.maybe(types.string),
-    storePath: types.maybe(types.string)
+    url: types.string
   })
   .extend(self => {
 
     // actions
-    function setUrl(url?: string, storePath?: string) {
+    function setUrl(url: string) {
       self.url = url;
-      self.storePath = storePath;
     }
 
     return {

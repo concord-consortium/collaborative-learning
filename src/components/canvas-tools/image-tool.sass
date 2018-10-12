@@ -9,6 +9,16 @@
   &.editable
     border: 1px solid #cccccc
 
+  .loading-spinner
+    background-image: url("../../assets/Spinner-1s-200px.svg")
+    background-size: auto
+    background-repeat: no-repeat
+    width: 200px
+    height: 200px
+    position: absolute
+    left: 0px
+    top: 0px
+
   .image-tool-controls
     width: 20px
     height: 20px
@@ -20,9 +30,12 @@
     transition: 0.3s
     z-index: 1
 
+    &.readonly
+      opacity: 0
+      display: none
+
     &.selected
       opacity: 1
-
       background: rgba(255,255,255, 0.9)
       background-image: url("../../assets/logo_image_tool.svg")
       background-size: contain
