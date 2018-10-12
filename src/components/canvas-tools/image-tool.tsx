@@ -33,7 +33,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { model: { content } } = props;
     const imageContent = content as ImageContentModelType;
     const newState: IState = { imageUrl: imageContent.url };
-    console.log("got derived state");
     return newState;
   }
 
@@ -44,7 +43,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
     fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-      console.log("got new url");
       this.setState({ imageUrl: fullUrl, isLoading: false });
     });
   }
