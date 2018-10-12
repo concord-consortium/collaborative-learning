@@ -7,6 +7,14 @@ import { SectionDocument, DocumentModel } from "../models/document";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { DocumentContentModel } from "../models/document-content";
 import { getSnapshot } from "mobx-state-tree";
+import { InvestigationModel } from "../models/curriculum/investigation";
+
+const investigation = InvestigationModel.create({
+  ordinal: 1,
+  title: "Investigation 1",
+  problems: [ { ordinal: 1, title: "Problem 1.1" } ]
+});
+const problem = investigation.getProblem(1);
 
 describe("logger", () => {
   let stores: IStores;
@@ -17,7 +25,7 @@ describe("logger", () => {
       appMode: "test"
     });
 
-    Logger.initializeLogger(stores);
+    Logger.initializeLogger(stores, investigation, problem);
   });
 
   afterEach(() => {
@@ -32,6 +40,8 @@ describe("logger", () => {
 
       expect(request.application).toBe("CLUE");
       expect(request.username).toBe("0");
+      expect(request.investigation).toBe("Investigation 1");
+      expect(request.problem).toBe("Problem 1.1");
       expect(request.session).toEqual(expect.anything());
       expect(request.time).toEqual(expect.anything());
       expect(request.event).toBe("CREATE_TILE");
@@ -58,7 +68,7 @@ describe("logger", () => {
         type: "Text",
         text: ""
       });
-      expect(request.parameters.documentKey).toBe("");
+      expect(request.parameters.documentKey).toBe(undefined);
 
       done();
       return res.status(201);
@@ -103,6 +113,7 @@ describe("logger", () => {
       type: SectionDocument,
       uid: "source-user",
       key: "source-document",
+      sectionId: "source-section",
       createdAt: 1,
       content: {},
       visibility: "public"
@@ -114,6 +125,7 @@ describe("logger", () => {
       type: SectionDocument,
       uid: "destination-user",
       key: "destination-document",
+      sectionId: "destination-section",
       createdAt: 1,
       content: {},
       visibility: "public"
@@ -137,10 +149,12 @@ describe("logger", () => {
       expect(request.parameters.documentKey).toBe("destination-document");
       expect(request.parameters.documentType).toBe("section");
       expect(request.parameters.objectId).not.toBe(tileToCopy.id);
+      expect(request.parameters.section).toBe("destination-section");
       expect(request.parameters.sourceDocumentKey).toBe("source-document");
       expect(request.parameters.sourceDocumentType).toBe("section");
       expect(request.parameters.souceObjectId).toBe(tileToCopy.id);
       expect(request.parameters.sourceUsername).toBe("source-user");
+      expect(request.parameters.sourceSection).toBe("source-section");
 
       done();
       return res.status(201);

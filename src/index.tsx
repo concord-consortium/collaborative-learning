@@ -24,7 +24,7 @@ const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
-Logger.initializeLogger(stores);
+Logger.initializeLogger(stores, investigation, problem);
 
 document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
 stores.ui.setShowDemoCreator(!!showDemoCreator);
