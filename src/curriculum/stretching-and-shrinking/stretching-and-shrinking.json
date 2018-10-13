@@ -573,62 +573,6 @@
       "ordinal": 2,
       "title": "Similar Figures",
       "introduction": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle, Carlos, a programmer for a video game company, about computer animation."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions."
-            }
-          },
-          {
-            "content": {
-              "type": "Image",
-              "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_12_play_500w.png"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points on the new figure, using key points from the original figure."
-            }
-          },
-          {
-            "content": {
-              "type": "Image",
-              "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_500w.png"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": ""
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Did You Know?"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "You can make figures and then rotate, slide, flip, stretch, and copy them using a computer graphics program. There are two basic kinds of graphics programs. Paint programs make images out of pixels. Draw programs make images out of lines that are drawn from mathematical equations."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "The images you make in a graphics program are displayed on the computer screen. A beam of electrons activates a chemical in the screen, called phosphor, to make the images appear on your screen. If you have a laptop computer with a liquid crystal screen, an electric current makes the images appear on the screen."
-            }
-          }
-        ]
       },
       "problems": [
         {
@@ -641,6 +585,61 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "text": "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle, Carlos, a programmer for a video game company, about computer animation."
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions."
+                      }
+                    },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_12_play_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points on the new figure, using key points from the original figure."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": ""
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Did You Know?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can make figures and then rotate, slide, flip, stretch, and copy them using a computer graphics program. There are two basic kinds of graphics programs. Paint programs make images out of pixels. Draw programs make images out of lines that are drawn from mathematical equations."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "The images you make in a graphics program are displayed on the computer screen. A beam of electrons activates a chemical in the screen, called phosphor, to make the images appear on your screen. If you have a laptop computer with a liquid crystal screen, an electric current makes the images appear on the screen."
+                    }
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -664,7 +663,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "To draw Mug on a coordinate graph paper, refer to the columns for Zug, Lug, Bug and Glug in the table on the next page."
+                      "text": "To draw Mug on a coordinate graph paper, refer to the columns for Zug, Lug, Bug and Glug in the table below"
                     }
                   },
                   {
@@ -708,7 +707,13 @@
                       "type": "Text",
                       "text": "Which characters are imposters? How do you know?"
                     }
-                  }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_IC_14_table_500w.png"
+                    }
+                  },
                 ]
               },
               "supports": [
@@ -716,7 +721,7 @@
                   "text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"
                 },
                 {
-                  "text": "Describe the shape of Mug"
+                  "text": "Describe the shape of Mug."
                 },
                 {
                   "text": "What measures help you identify the impostors?"
@@ -1246,6 +1251,18 @@
                     "content": {
                       "type": "Text",
                       "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
                     }
                   },
                   {
