@@ -618,30 +618,6 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": ""
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Did You Know?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "You can make figures and then rotate, slide, flip, stretch, and copy them using a computer graphics program. There are two basic kinds of graphics programs. Paint programs make images out of pixels. Draw programs make images out of lines that are drawn from mathematical equations."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "The images you make in a graphics program are displayed on the computer screen. A beam of electrons activates a chemical in the screen, called phosphor, to make the images appear on your screen. If you have a laptop computer with a liquid crystal screen, an electric current makes the images appear on the screen."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
                       "text": "Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members."
                     }
                   },
@@ -712,7 +688,7 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_IC_14_table_500w.png"
                     }
-                  },
+                  }
                 ]
               },
               "supports": [
