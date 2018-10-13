@@ -246,7 +246,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_500w.png"
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
                     }   
                   },
                   {
@@ -284,7 +284,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How are the original figure and its image alike?"
+                      "text": "How are the original figure and its image alike? Different? How do you know?"
                     }
                   }
                 ]
@@ -387,7 +387,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_500w.png"
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
                     }   
                   },
                   {
@@ -399,25 +399,25 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BAC or BAC"
+                      "text": "Angle BAC or ∠BAC"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BCA or BCA"
+                      "text": "Angle BCA or ∠BCA"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠ABC or ABC"
+                      "text": "Angle ABC or ∠ABC"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of BAC."
+                      "text": "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of ∠BAC."
                     }
                   },
                   {
@@ -429,19 +429,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "BAC can also be called A"
+                      "text": "∠BAC can also be called ∠A"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "BCA can also be called C"
+                      "text": "∠BCA can also be called ∠C"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "ABC can also be called B"
+                      "text": "∠ABC can also be called ∠B"
                     }
                   },
                   {
@@ -494,31 +494,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Compare the original figure to each of the images. Explain how you can use the percent setting to predict the relationship between the following features in the original and the Copy 1; and Copy 2."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- Corresponding angles?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- Corresponding side lengths?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Corresponding perimeters?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Corresponding areas?"
+                      "text": "1. Compare the original figure to each of the images. Explain how you can use the percent setting to predict the relationship between the following features in and Copy 1, and the original and Copy 2.\n\n- Corresponding angles?\n\n- Corresponding side lengths?\n\n- Corresponding perimeters?\n\n- Corresponding areas?"
                     }
                   },
                   {
@@ -530,7 +506,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Amelia thinks that the copier creates images that are similar to those made with the rubber-band stretchers and the photograph. Do you agree? Explain why."
+                      "text": "3. Amelia thinks that the copier creates images that are similar to those made with the rubber-band stretchers and the photograph. Do you agree? Explain why."
                     }
                   }
                 ]
@@ -724,7 +700,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use the coordinate rules to draw the Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
+                      "text": "Use the coordinate rules to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
                     }
                   },
                   {
@@ -740,10 +716,10 @@
                   "text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"
                 },
                 {
-                  "text": "Describe the shape of Mug?"
+                  "text": "Describe the shape of Mug"
                 },
                 {
-                  "text": "What measures help you identify the imposters?"
+                  "text": "What measures help you identify the impostors?"
                 },
                 {
                   "text": "What features are the same about Mug and the others? What features are different?"
@@ -1019,7 +995,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures."
+                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:"
                     }
                   },
                   {
@@ -1072,6 +1048,12 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "text": "The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from impostors."
+                    }
+                  },
                   {
                     "content": {
                       "type": "Image",
@@ -1087,7 +1069,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Identify paris of triangles that are similar. For those that are similar, what is the scale factor?"
+                      "text": "2. Identify pairs of triangles that are similar. For those that are similar, what is the scale factor?"
                     }
                   },
                   {
@@ -1114,7 +1096,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says factor 1/2. Who is correct? Explain why."
+                      "text": "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says the factor is 1/2. Who is correct? Explain why."
                     }
                   },
                   {
@@ -1237,40 +1219,6 @@
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "Scaling Perimeter and Area",
-      "introduction": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
-            }
-          },
-          {
-            "content": {
-              "type": "Image",
-              "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_500w.png"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
-            }
-          }
-        ]
-      },
       "problems": [
         {
           "description": "Problem 3.1",
@@ -1278,6 +1226,44 @@
           "title": "Rep-Tile Quadrilaterals",
           "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
           "sections": [
+             {
+              "type": "introduction",
+              "content": {
+                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
             {
               "type": "initialChallenge",
               "content": {
@@ -1359,7 +1345,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2.Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                      "text": "2. Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
                     }
                   },
                   {
@@ -1574,7 +1560,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "to draw similar figures? to find missing information about angle measures? Areas? Perimeters?"
+                      "text": "- to draw similar figures? \n\n- to find missing information about angle measures? Areas? Perimeters?"
                     }
                   }
                 ]
@@ -1670,7 +1656,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2.Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
+                      "text": "2. Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
                     }
                   },
                   {
@@ -1738,12 +1724,427 @@
       },
       "supports": []
     },
-    {
+     {
       "description": "Investigation 4",
       "ordinal": 4,
       "title": "Similarity and Ratios",
-      "problems": [],
-      "supports": []
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "Ratios Within Similar Parallelograms",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can enhance a report or story by adding photographs, drawings, or diagrams. If you place a graphic in an electronic document, you can enlarge, reduce, or move it. When you click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can change the size and shape of the image by dragging the handles."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "In the Comparing Bits and Pieces unit, you used ratios to describe and compare quantities. A ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "This table gives the ratios of height to width for the images."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you notice about the height-to-width ratios? The comparisons “10 to 8” and “5 to 4” are equivalent ratios. Equivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "For this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal. Is this always true?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "You know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Rectangles"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Triangles"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Parallelograms"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "For each set of shapes, which are similar? Why? If two figures are similar, how does the ratio of adjacent side lengths of one figure compare to the corresponding ratio of side lengths of the other figure?"
+                    }
+                  }
+                ]
+              },
+              "supports" : [
+                {
+                  "text": "Can finding corresponding angles help?"
+                },
+                {
+                  "text": "Can finding corresponding side lengths help?"
+                },
+                {
+                  "text": "How are rectangles different from other parallelograms?"
+                }
+              ]
+            }, {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. Find the scale factor from one figure to a similar figure. What information does the scale factor give you? \nn2.How does the scale factor relate to the proportions of the ratios of adjacent sides? \n\n3. Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why? \n\n4. Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain. \n\n5. Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal. Is this true? Explain."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Use this extra workspace for additional problem solving."
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ]
+        }, {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "Finding Missing Parts",
+          "subtitle": "Using Similarity to Find Measurements",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Similar figures are useful in determining missing measurements such as finding the distance across a river without crossing the river."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "The pairs of figures in A, B, and C are similar."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. Find the missing side lengths in each pair. Explain how you know your answers are correct."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. What are the missing angle measures for each parallelogram?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_36_Q2B_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_37_Q2C_350w.png"
+                    }
+                  }
+                ]
+              },
+              "supports" : []
+            }, {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "The two figures are similar. Each side length is in centimeters. "
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. Find the value x. Explain how you found it."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. Find the value y. Explain."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. If you know the perimeter of one figure, how can you find the area of the other figure? Is there another way? Explain."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "4. If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "If two shapes are similar, how can you use information about the shapes to find unknown side lengths, perimeters, areas, or angle measures?"
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Use this extra workspace for additional problem solving."
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ], 
+          "supports": [
+            { "text": "How could you use scale factors?"},
+            { "text": "How could you use ratio of adjacent side lengths?"}
+          ]
+        }, {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "Using Shadows to Find Height",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In the last problem you found two ways to find missing lengths in pairs of similar figures."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Scale Factor Method: Use the scale factor from one figure to the other."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "OR"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Ratios of Side Lengths within Figures Method: Use the ratios of adjacent side lengths within each figure."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram below shows two triangles."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "Examine the diagram of the shadow method. How can you use this method to find the height of the Statue of Liberty? What is the height?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "If the sun is shining, try the shadow method to find the height of an object outside your building. You will need \n\n* A building, tree, or other object whose height you want to measure \n\n* A meter stick \n\n* The length of the shadow of the stick’s shadow \n\n* The length of the shadow of the building’s shadow"
+                    }
+                  }
+                ]
+              },
+              "supports" : []
+            }, {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. When you use the shadow method, what problems might affect the accuracy of your answers?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow 4.5 feet length. How tall is the tree?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. Ashton’s class used the mirror method to measure heights. The school principal visits Ashton’s class one day. Ashton uses the mirror method to estimate the principal’s height. This diagram shows the measurements he records."
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "* Does this method work? Why?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "* What estimate should Ashton give for the principal’s height?"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "text": "4. What other ways have you used in this unit to create similar figures?"
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Describe how similar figures can be used to find missing measurements of objects that cannot be measured directly. Is there another method? Explain."
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Use this extra workspace for additional problem solving."
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
     }
   ],
   "supports": [ ]
