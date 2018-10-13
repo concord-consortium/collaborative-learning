@@ -1052,7 +1052,7 @@
                    {
                     "content": {
                       "type": "Text",
-                      "text": " The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from impostors."
+                      "text": "The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from impostors."
                     }
                   },
                   {
@@ -1070,7 +1070,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Identify paris of triangles that are similar. For those that are similar, what is the scale factor?"
+                      "text": "2. Identify pairs of triangles that are similar. For those that are similar, what is the scale factor?"
                     }
                   },
                   {
@@ -1097,7 +1097,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says factor 1/2. Who is correct? Explain why."
+                      "text": "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says the factor is 1/2. Who is correct? Explain why."
                     }
                   },
                   {
@@ -1220,40 +1220,6 @@
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "Scaling Perimeter and Area",
-      "introduction": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
-            }
-          },
-          {
-            "content": {
-              "type": "Image",
-              "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_500w.png"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
-            }
-          }
-        ]
-      },
       "problems": [
         {
           "description": "Problem 3.1",
@@ -1261,6 +1227,44 @@
           "title": "Rep-Tile Quadrilaterals",
           "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
           "sections": [
+             {
+              "type": "introduction",
+              "content": {
+                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
             {
               "type": "initialChallenge",
               "content": {
@@ -1342,7 +1346,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2.Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                      "text": "2. Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
                     }
                   },
                   {
@@ -1557,7 +1561,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "to draw similar figures? to find missing information about angle measures? Areas? Perimeters?"
+                      "text": "- to draw similar figures? \n\n- to find missing information about angle measures? Areas? Perimeters?"
                     }
                   }
                 ]
@@ -1653,7 +1657,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2.Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
+                      "text": "2. Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
                     }
                   },
                   {
