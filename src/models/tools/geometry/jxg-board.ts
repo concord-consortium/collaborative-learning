@@ -1,6 +1,7 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import "./jxg";
 import { assign, each } from "lodash";
+import * as uuid from "uuid/v4";
 
 export const isBoard = (v: any) => v instanceof JXG.Board;
 
@@ -8,6 +9,7 @@ export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
     const domElementID = boardDomId as string;
     const defaults = {
+            id: uuid(),
             keepaspectratio: true,
             showCopyright: false,
             showNavigation: false,

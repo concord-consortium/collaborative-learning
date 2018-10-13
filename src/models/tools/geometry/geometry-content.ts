@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGElement, JXGProperties } from "./jxg-changes";
+import { JXGChange, JXGElement, JXGProperties, JXGCoordPair } from "./jxg-changes";
 import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
@@ -80,6 +80,21 @@ export const GeometryContentModel = types
       self.changes.push(JSON.stringify(change));
     }
 
+    function addImage(board: JXG.Board,
+                      url: string,
+                      coords: JXGCoordPair,
+                      size: JXGCoordPair,
+                      properties?: JXGProperties): JXG.Image | undefined {
+      const change: JXGChange = {
+        operation: "create",
+        target: "image",
+        parents: [url, coords, size],
+        properties: assign({ id: uuid() }, properties)
+      };
+      const image = _applyChange(board, change);
+      return image ? image as JXG.Image : undefined;
+    }
+
     function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties): JXG.Point | undefined {
       const change: JXGChange = {
         operation: "create",
@@ -152,6 +167,7 @@ export const GeometryContentModel = types
         destroyBoard,
         resizeBoard,
         addChange,
+        addImage,
         addPoint,
         removeObjects,
         updateObjects,

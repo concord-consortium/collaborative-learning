@@ -1,10 +1,10 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "object" | "point" | "polygon";
-
-export type JXGParentType = string | number;
+export type JXGObjectType = "board" | "object" | "image" | "point" | "polygon";
 
 export type JXGCoordPair = [number, number];
+
+export type JXGParentType = string | number | JXGCoordPair;
 
 export interface JXGProperties {
   position?: JXGCoordPair;

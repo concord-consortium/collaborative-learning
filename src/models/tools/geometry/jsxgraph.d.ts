@@ -78,6 +78,11 @@ declare namespace JXG {
     freeBoard: (board: JXG.Board | string) => void;
   };
 
+  class Image extends CoordsElement {
+    size: [number, number];
+    url: string;
+  }
+
   class Point extends CoordsElement {
   }
 
