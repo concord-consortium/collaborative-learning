@@ -5,7 +5,6 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
 import "./image-tool.sass";
-import { url } from "inspector";
 
 interface IProps {
   context: string;
@@ -27,14 +26,7 @@ const defaultImagePlaceholderSize = { width: 200, height: 200 };
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
-  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
-    const { model: { content } } = props;
-    const imageContent = content as ImageContentModelType;
-    const newState: IState = { imageUrl: imageContent.url };
-    return newState;
-  }
-
-  public state: IState = { isLoading: true };
+  public state: IState = { isLoading: true, imageUrl: "assets/image_placeholder.png" };
 
   public componentDidMount() {
     const { model: { content } } = this.props;
@@ -51,10 +43,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { readOnly, model } = this.props;
-    const { content } = model;
     const { isEditing, isLoading, imageUrl, imageDimensions } = this.state;
     const { ui } = this.stores;
-    const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
 
     // Include states for selected and editing separately to clean up UI a little
@@ -73,7 +63,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       width: dimensions.width + "px ",
       height: dimensions.height + "px"
     };
-
     return (
       <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
         {isLoading && <div className="loading-spinner" />}
@@ -81,7 +70,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
-            defaultValue={imageContent.url}
+            defaultValue={imageUrl}
             onBlur={this.handleBlur}
             onKeyUp={this.handleKeyUp}
           />
@@ -97,11 +86,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleImageUrlError = () => {
+
     const { hasUpdatedUrl } = this.state;
     const { db } = this.stores;
     const { model } = this.props;
     const { content } = model;
-
     if (!hasUpdatedUrl) {
       const imageContent = content as ImageContentModelType;
       let updatedUrl = imageContent.url;
@@ -113,6 +102,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
     const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
@@ -124,17 +114,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     uploadImage(db.firebase, storePath, currentFile, (imageUrl: string) => {
       getImageDimensions((dimensions: any) => {
-        this.setState({ imageDimensions: dimensions, isLoading: false, isEditing: false});
-        this.updateURL(imageUrl);
+        this.setState({ imageDimensions: dimensions, isLoading: false, isEditing: false, imageUrl });
+        this.updateStoredURL(storePath);
       }, undefined, imageUrl);
     });
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+
     this.stores.ui.setSelectedTile(this.props.model);
   }
 
   private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+
     const { isEditing } = this.state;
     if (!isEditing) {
       this.setState({ isEditing: true });
@@ -142,24 +134,28 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
     // If we detect an enter key, treat the same way we handle losing focus,
     // i.e., attempt to change the URL for the image.
     if (e.keyCode === 13) {
-      this.updateURL(e.currentTarget.value);
+      this.updateStoredURL(e.currentTarget.value);
     }
   }
 
   private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+
     if (e.currentTarget.value !== this.state.imageUrl) {
-      this.updateURL(e.currentTarget.value);
+      this.updateStoredURL(e.currentTarget.value);
     }
   }
 
   private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+
     this.setState({ isEditing: false });
   }
 
-  private updateURL = (newUrl: string) => {
+  private updateStoredURL = (newUrl: string) => {
+
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl);
   }

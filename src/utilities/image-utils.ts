@@ -4,22 +4,31 @@ const ImageConstants = {
   maxWidth: 512,
   maxHeight: 512
 };
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
 
 const imageUrlLookupTable: Map<string, string> = new Map();
+const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
 
+// Firebase calls with callbacks
 export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: any) {
   if (imageUrlLookupTable.get(imagePath)) {
     callback(imageUrlLookupTable.get(imagePath));
   }
 
-  const isFullUrl: RegExp = new RegExp("/^https?://");
-  const isFireStorePath: RegExp = new RegExp("/^gs://");
+  const isFullUrl = imagePath.startsWith("http");
+  const isLocalFilePath = imagePath.startsWith("assets/");
 
-  if (imagePath.match(isFullUrl)) {
+  if (isFullUrl) {
     imageUrlLookupTable.set(imagePath, imagePath);
     callback(imageUrlLookupTable.get(imagePath));
   }
-  else if (imagePath.match(isFireStorePath)) {
+  else if (isLocalFilePath) {
+    callback(imagePath);
+  }
+  else {
     firebase.getPublicUrlFromStore(imagePath).then((url) => {
       if (url) {
         imageUrlLookupTable.set(imagePath, url);
@@ -30,9 +39,6 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
     }).catch(() => {
       callback("assets/image_placeholder.png");
     });
-  }
-  else {
-    callback(imagePath);
   }
 }
 
@@ -47,6 +53,7 @@ export function uploadImage(firebase: Firebase, storePath: string, currentFile: 
   });
 }
 
+// Image size functions
 function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -74,6 +81,8 @@ function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<B
       canvas.width = newWidth;
       canvas.height = newHeight;
 
+      imageDimensionsLookupTable.set(image.src, { width: newWidth, height: newHeight });
+
       const context = canvas.getContext("2d");
 
       context!.drawImage(image, 0, 0, newWidth, newHeight);
@@ -89,6 +98,7 @@ export function getImageDimensions(callback: any, file?: File, url?: string) {
       const width = image.width;
       const height = image.height;
 
+      imageDimensionsLookupTable.set(image.src, { width, height });
       callback({ width, height });
     };
 
