@@ -4,14 +4,17 @@ import { defaultGeometryContent, kGeometryDefaultHeight } from "./tools/geometry
 import { defaultImageContent } from "./tools/image/image-content";
 import { defaultTextContent } from "./tools/text/text-content";
 import { ToolContentUnionType } from "./tools/tool-types";
-import { ToolTileModel } from "./tools/tool-tile";
+import { ToolTileModel, ToolTileModelType } from "./tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
 import { cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
+import { Logger, LogEventName } from "../lib/logger";
 
 export interface NewRowOptions {
   rowHeight?: number;
   rowIndex?: number;
+  action?: LogEventName;
+  loggingMeta?: {};
 }
 
 export const DocumentContentModel = types
@@ -47,6 +50,12 @@ export const DocumentContentModel = types
       },
       findRowContainingTile(tileId: string) {
         return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
+      },
+      getRowByIndex(index: number) {
+        return self.rowMap.get(self.rowOrder[index]);
+      },
+      getTile(tileId: string) {
+        return self.tileMap.get(tileId);
       }
     };
   })
@@ -67,6 +76,10 @@ export const DocumentContentModel = types
       else {
         self.rowOrder.push(row.id);
       }
+
+      const action = o.action || LogEventName.CREATE_TILE;
+      Logger.logTileEvent(action, tile, o.loggingMeta);
+
       return tile.id;
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
@@ -86,7 +99,31 @@ export const DocumentContentModel = types
     addImageTile() {
       return self.addTileInNewRow(defaultImageContent());
     },
+    copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
+      let snapshot;
+      try {
+        snapshot = JSON.parse(serializedTile);
+      }
+      catch (e) {
+        snapshot = null;
+      }
+      if (snapshot) {
+        const newRowOptions: NewRowOptions = {
+          rowIndex,
+          action: LogEventName.COPY_TILE,
+          loggingMeta: {
+            originalTileId
+          }
+        };
+        if (originalRowHeight) {
+          newRowOptions.rowHeight = originalRowHeight;
+        }
+        self.addTileInNewRow(snapshot.content, newRowOptions);
+      }
+    },
     deleteTile(tileId: string) {
+      Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
+
       const rowsToDelete: TileRowModelType[] = [];
       self.rowMap.forEach(row => {
         // remove from row
