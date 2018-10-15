@@ -15,7 +15,7 @@ install:
 #- travis_retry cypress install
 script:
 - npm run build
-- npm run test:coverage -- --runInBand
+#- npm run test:coverage -- --runInBand
 #- npm run start &
 #- wait-on http://localhost:8080
 # - $(npm bin)/cypress run --config video=false
