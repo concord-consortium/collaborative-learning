@@ -35,7 +35,7 @@ export const boardChangeAgent: JXGChangeAgent = {
                   strokeColor: "#bbb",
                   majorHeight: -1,
                   drawLabels: true,
-                  label: { offset: [-10, -1] },
+                  label: { offset: [-16, -1] },
                   minorTicks: 4,
                   drawZero: false
                 });
