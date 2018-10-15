@@ -7,6 +7,7 @@ const ImageConstants = {
 interface ImageDimensions {
   width: number;
   height: number;
+  src?: string;
 }
 
 const imageUrlLookupTable: Map<string, string> = new Map();
@@ -97,9 +98,8 @@ export function getImageDimensions(callback: any, file?: File, url?: string) {
     image.onload = () => {
       const width = image.width;
       const height = image.height;
-
       imageDimensionsLookupTable.set(image.src, { width, height });
-      callback({ width, height });
+      callback({ width, height, src: image.src });
     };
 
     if (file) {

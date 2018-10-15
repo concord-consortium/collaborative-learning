@@ -121,7 +121,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-
     this.stores.ui.setSelectedTile(this.props.model);
   }
 
@@ -134,11 +133,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-
     // If we detect an enter key, treat the same way we handle losing focus,
     // i.e., attempt to change the URL for the image.
     if (e.keyCode === 13) {
-      this.updateStoredURL(e.currentTarget.value);
+      getImageDimensions((dimensions: any) => {
+        this.setState({
+          imageUrl: dimensions.src, imageDimensions: dimensions,
+          isLoading: false, hasUpdatedUrl: true
+        });
+        this.updateStoredURL(dimensions.src);
+      }, undefined, e.currentTarget.value);
     }
   }
 
