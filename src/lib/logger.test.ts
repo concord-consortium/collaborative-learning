@@ -161,9 +161,9 @@ describe("logger", () => {
     });
 
     // annoying way to get a tile...
-    const firstRow = sourceDocument.content.rowMap.get(sourceDocument.content.rowOrder[0]);
+    const firstRow = sourceDocument.content.getRowByIndex(0);
     const tileIdToCopy = firstRow!.tiles[0].tileId;
-    tileToCopy = sourceDocument.content.tileMap.get(tileIdToCopy) as ToolTileModelType;
+    tileToCopy = sourceDocument.content.getTile(tileIdToCopy) as ToolTileModelType;
 
     const serialized = JSON.stringify(getSnapshot(tileToCopy));
 

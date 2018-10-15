@@ -4,7 +4,7 @@ import { defaultGeometryContent, kGeometryDefaultHeight } from "./tools/geometry
 import { defaultImageContent } from "./tools/image/image-content";
 import { defaultTextContent } from "./tools/text/text-content";
 import { ToolContentUnionType } from "./tools/tool-types";
-import { ToolTileModel } from "./tools/tool-tile";
+import { ToolTileModel, ToolTileModelType } from "./tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
 import { cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
@@ -50,6 +50,12 @@ export const DocumentContentModel = types
       },
       findRowContainingTile(tileId: string) {
         return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
+      },
+      getRowByIndex(index: number) {
+        return self.rowMap.get(self.rowOrder[index]);
+      },
+      getTile(tileId: string) {
+        return self.tileMap.get(tileId);
       }
     };
   })
