@@ -8,9 +8,9 @@ import { isBoard } from "./jxg-board";
 
 export const kGeometryToolID = "Geometry";
 
-export const kGeometryDefaultHeight = 200;
+export const kGeometryDefaultHeight = 320;
 // matches curriculum images
-export const kGeometryDefaultPixelsPerUnit = 26;
+export const kGeometryDefaultPixelsPerUnit = 18.3;
 export const kGeometryDefaultAxisMin = -1;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
