@@ -1,7 +1,12 @@
 import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
+import Plain from "slate-plain-serializer";
 
 export const kTextToolID = "Text";
+
+export function defaultTextContent(initialText?: string) {
+  return TextContentModel.create({ text: initialText || "" });
+}
 
 export const StringOrArray = types.union(types.string, types.array(types.string));
 
@@ -48,8 +53,12 @@ export const TextContentModel = types
               ? self.text.join("\n")
               : self.text;
 
-    },
-    getSlate() {
+    }
+  }))
+  .extend(self => {
+
+    // views
+    function getSlate() {
       const text = Array.isArray(self.text) ? "" : self.text;
       let parsed = emptyJson;
       if (text) {
@@ -63,16 +72,46 @@ export const TextContentModel = types
       }
       return Value.fromJSON(parsed);
     }
-  }))
-  .actions(self => ({
-    setText(text: string) {
+
+    function convertSlate(value?: Value): Value {
+      switch (self.format) {
+        case "slate":
+          const json = value && JSON.stringify(value.toJSON());
+          return value && (json === self.text) ? value : getSlate();
+        case "markdown":
+          // handle markdown import here; for now we treat as text
+        default:
+          return Plain.deserialize(self.joinText);
+      }
+    }
+
+    // actions
+    function setText(text: string) {
       self.format = undefined;
       self.text = text;
-    },
-    setSlate(value: any) {
-      self.format = "slate";
-      self.text = JSON.stringify(value);
     }
-  }));
+
+    function setMarkdown(text: string) {
+      self.format = "markdown";
+      self.text = text;
+    }
+
+    function setSlate(value: Value) {
+      self.format = "slate";
+      self.text = JSON.stringify(value.toJSON());
+    }
+
+    return {
+      views: {
+        getSlate,
+        convertSlate
+      },
+      actions: {
+        setText,
+        setMarkdown,
+        setSlate
+      }
+    };
+  });
 
 export type TextContentModelType = Instance<typeof TextContentModel>;

@@ -1,0 +1,176 @@
+@import vars
+
+.document
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  color: #000
+  background-color: #F8FCFE
+  margin: $margin
+  border: $border-width solid $border-color
+  border-radius: $border-radius
+
+  .titlebar
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    height: $workspace-titlebar-height
+    background-color: $color1-3
+    display: flex
+    flex-direction: row
+    flex-wrap: nowrap
+    justify-content: flex-start
+    border-top-left-radius: $border-radius
+    border-top-right-radius: $border-radius
+
+    .title
+      flex-grow: 1
+      text-align: center
+      padding: $margin
+      font-weight: bold
+      white-space: nowrap
+      overflow: hidden
+      text-overflow: ellipsis
+
+    .actions
+      flex-grow: 0
+      padding: 1px 0
+
+      .icon
+        background-color: #b3ca9d
+        color: #9EBA83
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
+
+        &:last-child
+          border-top-right-radius: $border-radius
+
+  .toolbar
+    position: absolute
+    top: $workspace-titlebar-height
+    bottom: $workspace-statusbar-height
+    width: $workspace-toolbar-width
+    border-right: $border-width solid $border-color
+
+    display: flex
+    flex-direction: column
+
+    .tool
+      width: $workspace-toolbar-width
+      height: $workspace-toolbar-width
+      background-color: #C9C9C9
+      display: flex
+      justify-content: center
+      align-items: center
+      text-align: center
+      font-size: 20px
+      font-weight: bold
+      margin-bottom: $quarter-margin
+
+      &.geometry
+        background-image: url("../assets/logo_tw.png")
+        background-size: contain
+        background-repeat: no-repeat
+
+      &.image
+        background-image: url("../assets/logo_image_tool.svg")
+        background-size: contain
+        background-repeat: no-repeat
+
+      &.active
+        color: #fff
+        background-color: #888888
+
+  .canvas-area
+    position: absolute
+    top: $workspace-titlebar-height
+    bottom: $workspace-statusbar-height
+    left: $workspace-toolbar-width
+    right: 0
+    border-top: $border-width solid $border-color
+
+  .learning-log-canvas-area
+    .canvas
+      border-bottom-right-radius: $border-radius
+
+  .statusbar
+    position: absolute
+    background: $color1-3
+    bottom: 0
+    left: 0
+    right: 0
+    height: $workspace-statusbar-height
+    border-bottom-left-radius: $border-radius
+    border-bottom-right-radius: $border-radius
+    border-top: $border-width solid $border-color
+    display: flex
+    flex-direction: row
+    flex-wrap: nowrap
+    justify-content: flex-start
+
+    .supports
+      flex-grow: 1
+
+      .supports-list
+        display: inline
+        margin: 0 $margin
+
+        span
+          display: inline-block
+          padding: $half-padding
+          margin: $half-margin $half-margin 0 0
+          color: #fff
+          background: #aaa
+          border-radius: 15px
+          width: 18px
+          text-align: center
+
+          &.active
+            background-color: #00f
+
+      .visible-supports
+        position: absolute
+        bottom: $workspace-statusbar-height + $border-width
+        left: 0
+        right: 0
+
+        .supports-list
+          margin: 0
+
+          div
+            background-color: $color1-3
+            padding: $half-padding $padding
+
+            span
+              display: inline-block
+              padding: $half-padding
+              margin-right: $quarter-margin
+              color: #fff
+              background: #aaa
+              border-radius: 15px
+              width: 18px
+              text-align: center
+              background-color: #00f
+
+    .actions
+      flex-grow: 0
+      padding: 1px 0
+
+      .icon
+        background-color: #b3ca9d
+        color: #9EBA83
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
+
+        &:last-child
+          border-bottom-right-radius: $border-radius
+
+
+

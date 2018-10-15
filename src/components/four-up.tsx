@@ -1,18 +1,27 @@
-import { observer } from "mobx-react";
+import { observer, inject } from "mobx-react";
 import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
-         FourUpGridModelType, IGridUpdate } from "../models/four-up-grid";
-import { WorkspaceModelType } from "../models/workspaces";
+         FourUpGridModelType } from "../models/four-up-grid";
 import { CanvasComponent } from "./canvas";
 import { BaseComponent, IBaseProps } from "./base";
 
 import "./four-up.sass";
+import { DocumentModelType } from "../models/document";
+import { WorkspaceModelType } from "../models/workspace";
 
 interface IProps extends IBaseProps {
+  document?: DocumentModelType;
   workspace: WorkspaceModelType;
+  isGhostUser?: boolean;
 }
 
+interface FourUpUser {
+  doc: DocumentModelType|undefined;
+  initials: string;
+}
+
+@inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, {}> {
   private grid: FourUpGridModelType;
@@ -57,27 +66,72 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
+    const { groups, user, documents } = this.stores;
+    const { workspace, document, isGhostUser, ...others } = this.props;
+
+    const group = groups.groupForUser(user.id);
+    const groupDocuments = group &&
+                           document &&
+                           documents.getSectionDocumentsForGroup(document.sectionId!, group.id);
+    const groupUsers: FourUpUser[] = group
+      ? group.users
+          .filter((groupUser) => groupUser.id !== user.id)
+          .map((groupUser) => {
+            const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
+              return groupDocument.uid === groupUser.id;
+            });
+            return {
+              doc: groupUserDoc,
+              initials: groupUser.initials
+            };
+          })
+      : [];
+
+    const groupDoc = (index: number) => {
+      const doc = groupUsers[index] && groupUsers[index].doc;
+      // Ghost users can see all documents
+      const showDoc = doc && (index === 0 || doc.visibility === "public" || isGhostUser);
+      return showDoc ? doc : undefined;
+    };
+
+    // If the user is real, their document should be displayed first
+    if (!isGhostUser) {
+      groupUsers.unshift({
+        doc: document,
+        initials: user.initials
+      });
+    }
+
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent document={this.props.workspace.userDocument} />
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+              readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
+              document={groupDoc(0)} {...others} />
           </div>
+          {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-ne" scale={neCell.scale}
+                            readOnly={true} document={groupDoc(1)} {...others} />
           </div>
+          {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-se" scale={seCell.scale}
+                            readOnly={true} document={groupDoc(2)} {...others}/>
           </div>
+          {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent readOnly={true} />
+            <CanvasComponent context="four-up-sw" scale={swCell.scale}
+                            readOnly={true} document={groupDoc(3)} {...others}/>
           </div>
+          {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
         </div>
         <div
           className="horizontal splitter"

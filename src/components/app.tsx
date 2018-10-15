@@ -1,18 +1,23 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { authenticate } from "../lib/auth";
-import { AppContainerComponent } from "./app-container";
+import { GroupViewComponent } from "./group-view";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo-creator";
+import { TeacherDashboardComponent } from "./teacher-dashboard";
 
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
 import { IStores } from "../models/stores";
 
 interface IProps extends IBaseProps {}
+interface IState {
+  qaCleared: boolean;
+  qaClearError?: string;
+}
 
-export const authAndConnect = (stores: IStores) => {
+export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
   const {appMode, user, db, ui} = stores;
 
   authenticate(appMode, urlParams)
@@ -32,7 +37,26 @@ export const authAndConnect = (stores: IStores) => {
         }
       }
       else {
-        db.connect({appMode, stores}).catch(ui.setError);
+        db.connect({appMode, stores})
+          .then(() => {
+            if (appMode === "qa") {
+              const {qaClear, qaGroup} = urlParams;
+              if (qaClear) {
+                const cleared = (err?: string) => {
+                  if (onQAClear) {
+                    onQAClear(!err, err);
+                  }
+                };
+                db.clear(qaClear)
+                  .then(() => cleared())
+                  .catch(cleared);
+              }
+              else if (qaGroup) {
+                db.leaveGroup().then(() => db.joinGroup(qaGroup));
+              }
+            }
+          })
+          .catch(ui.setError);
       }
     })
     .catch((error) => {
@@ -47,10 +71,17 @@ export const authAndConnect = (stores: IStores) => {
 
 @inject("stores")
 @observer
-export class AppComponent extends BaseComponent<IProps, {}> {
+export class AppComponent extends BaseComponent<IProps, IState> {
+
+  public state: IState = {
+    qaCleared: false,
+    qaClearError: undefined
+  };
 
   public componentWillMount() {
-    authAndConnect(this.stores);
+    authAndConnect(this.stores, (qaCleared, qaClearError) => {
+      this.setState({qaCleared, qaClearError});
+    });
   }
 
   public componentWillUnmount() {
@@ -68,15 +99,29 @@ export class AppComponent extends BaseComponent<IProps, {}> {
       return this.renderApp(this.renderError(ui.error));
     }
 
-    if (!user.authenticated || !db.isListening) {
+    if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
     }
 
-    if (!groups.groupForUser(user.id)) {
-      return this.renderApp(<GroupChooserComponent />);
+    if (urlParams.qaClear) {
+      const {qaCleared, qaClearError} = this.state;
+      return this.renderApp(
+        <span className="qa-clear">
+          {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}
+        </span>
+      );
     }
 
-    return this.renderApp(<AppContainerComponent />);
+    if (!groups.groupForUser(user.id)) {
+      if (user.type === "teacher") {
+        return this.renderApp(<TeacherDashboardComponent />);
+      }
+      else {
+        return this.renderApp(<GroupChooserComponent />);
+      }
+    }
+
+    return this.renderApp(<GroupViewComponent />);
   }
 
   private renderApp(children: JSX.Element | JSX.Element[]) {

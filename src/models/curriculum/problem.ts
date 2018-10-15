@@ -1,12 +1,14 @@
 import { types } from "mobx-state-tree";
 import { SectionModel, SectionModelType } from "./section";
+import { SupportModel } from "./support";
 
 export const ProblemModel = types
   .model("Problem", {
     ordinal: types.integer,
     title: types.string,
     subtitle: "",
-    sections: types.array(SectionModel)
+    sections: types.array(SectionModel),
+    supports: types.array(SupportModel),
   })
   .views((self) => {
     return {

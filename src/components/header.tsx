@@ -5,15 +5,18 @@ import { BaseComponent, IBaseProps } from "./base";
 import "./header.sass";
 import { GroupModelType, GroupUserModelType } from "../models/groups";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  isGhostUser: boolean;
+}
 
 @inject("stores")
 @observer
 export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const {user, problem, groups} = this.stores;
+    const {appMode, db, user, problem, groups} = this.stores;
     const myGroup = groups.groupForUser(user.id);
+    const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
     return (
       <div className="header">
@@ -23,11 +26,9 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
             <div className="class">{user.className}</div>
           </div>
         </div>
-        <div className="group">
-          {myGroup ? this.renderGroup(myGroup) : null}
-        </div>
+        {myGroup ? this.renderGroup(myGroup) : null}
         <div className="user">
-          <div className="name">{user.name}</div>
+          <div className="name" title={userTitle}>{user.name}</div>
         </div>
       </div>
     );
@@ -35,7 +36,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
 
   private renderGroup(group: GroupModelType) {
     return (
-      <div>
+      <div className="group">
         <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
         <div className="members">
           {group.users.map((user) => this.renderGroupUser(user))}
@@ -60,8 +61,18 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    if (confirm("Do you want to change groups?")) {
-      this.stores.db.leaveGroup();
-    }
+    const {isGhostUser} = this.props;
+    const {ui, db, groups} = this.stores;
+    ui.confirm("Do you want to leave this group?", "Leave Group")
+      .then((ok) => {
+        if (ok) {
+          if (isGhostUser) {
+            groups.ghostGroup();
+          }
+          else {
+            db.leaveGroup();
+          }
+        }
+      });
   }
 }

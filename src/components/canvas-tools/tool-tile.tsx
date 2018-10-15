@@ -1,47 +1,90 @@
-import { observer } from "mobx-react";
 import * as React from "react";
+import { observer, inject } from "mobx-react";
+import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
-import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
+import { kImageToolID } from "../../models/tools/image/image-content";
+import { BaseComponent } from "../base";
+import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
+import ImageToolComponent from "./image-tool";
+import { cloneDeep } from "lodash";
+import "./tool-tile.sass";
+
+export const kDragRowHeight = "org.concord.clue.row.height";
+export const kDragTileSource = "org.concord.clue.tile.src";
+export const kDragTileId = "org.concord.clue.tile.id";
+export const kDragTileContent = "org.concord.clue.tile.content";
+// allows source compatibility to be checked in dragOver
+export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id}`;
 
 interface IProps {
+  context: string;
+  docId: string;
+  scale?: number;
+  rowHeight?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
 
+const kToolComponentMap: any = {
+        [kGeometryToolID]: GeometryToolComponent,
+        [kImageToolID]: ImageToolComponent,
+        [kTextToolID]: TextToolComponent
+      };
+
+@inject("stores")
 @observer
-export class ToolTileComponent extends React.Component<IProps, {}> {
+export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { model } = this.props;
-    switch (model.content.type) {
-      case kGeometryToolID: return this.renderGeometryTile();
-      case kTableToolID: return this.renderTableTile();
-      case kTextToolID: return this.renderTextTile();
-    }
-    return this.renderUnknownTile();
-  }
-
-  private renderGeometryTile() {
-    // return <GeometryTile />
-    return null;
-  }
-
-  private renderTableTile() {
-    // return <TableTile />
-    return null;
-  }
-
-  private renderTextTile() {
+    const { ui } = this.stores;
+    const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
+    const ToolComponent = kToolComponentMap[model.content.type];
     return (
-      <TextToolComponent key={this.props.model.id} {...this.props} />
+      <div className={`tool-tile${selectedClass}`}
+        onDragStart={this.handleToolDragStart}
+        draggable={true}
+      >
+        {this.renderTile(ToolComponent)}
+      </div>
     );
   }
 
-  private renderUnknownTile() {
-    // return <UnknownTile />
-    return null;
+  private renderTile(ToolComponent: any) {
+    return ToolComponent != null
+            ? <ToolComponent key={this.props.model.id} {...this.props} />
+            : null;
   }
+
+  private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // set the drag data
+    const { model, docId, rowHeight, scale } = this.props;
+    const snapshot = cloneDeep(getSnapshot(model));
+    const id = snapshot.id;
+    delete snapshot.id;
+    const dragData = JSON.stringify(snapshot);
+    e.dataTransfer.setData(kDragTileSource, docId);
+    if (rowHeight) {
+      e.dataTransfer.setData(kDragRowHeight, String(rowHeight));
+    }
+    e.dataTransfer.setData(kDragTileId, id);
+    e.dataTransfer.setData(kDragTileContent, dragData);
+    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
+
+    // set the drag image
+    const ToolComponent = kToolComponentMap[model.content.type];
+    const dragElt = e.target as HTMLElement;
+    // tool components can provide alternate dom node for drag image
+    const dragImage = ToolComponent && ToolComponent.getDragImageNode
+                        ? ToolComponent.getDragImageNode(dragElt)
+                        : dragElt;
+    const clientRect = dragElt.getBoundingClientRect();
+    const offsetX = (e.clientX - clientRect.left) / (scale || 1);
+    const offsetY = (e.clientY - clientRect.top) / (scale || 1);
+    e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
+  }
+
 }

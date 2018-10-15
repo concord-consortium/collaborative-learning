@@ -1,0 +1,12 @@
+@import ../vars
+
+.tool-tile
+  // create z-index stacking context ("what happens in tool tiles, stays in tool tiles")
+  position: relative
+  z-index: 0
+  width: 100%
+  height: 100%
+  border: $half-border-width solid white
+
+  &.selected
+    border: $half-border-width solid pink

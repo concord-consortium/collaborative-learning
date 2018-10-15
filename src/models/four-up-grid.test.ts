@@ -2,9 +2,9 @@ import { CellPositions, DEFAULT_SPLITTER_SIZE, FourUpGridModel, FourUpGridCellMo
 
 describe("four-up grid model", () => {
 
-  it("throws an exception is the cells aren't empty", () => {
+  it("throws an exception if the cells aren't empty", () => {
     const invalidCells = () => {
-      const grid = FourUpGridModel.create({
+      FourUpGridModel.create({
         cells: [
           FourUpGridCellModel.create({})
         ]
@@ -158,9 +158,9 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.cells[CellPositions.NorthWest].update({});
+    grid.cells[CellPositions.NorthWest].update({right: 10});
     grid.cells[CellPositions.NorthEast].update({});
-    grid.cells[CellPositions.SouthEast].update({});
-    grid.cells[CellPositions.SouthWest].update({});
+    grid.cells[CellPositions.SouthEast].update({bottom: 0});
+    grid.cells[CellPositions.SouthWest].update({right: 10, bottom: 0});
   });
 });

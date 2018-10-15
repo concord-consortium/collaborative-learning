@@ -3,12 +3,17 @@ import * as React from "react";
 
 import "./tab-set.sass";
 
+interface IProps {
+  className?: string;
+}
+
 @observer
-export class TabSetComponent extends React.Component<{}, {}> {
+export class TabSetComponent extends React.Component<IProps, {}> {
 
   public render() {
+    const className = `tabs${this.props.className ? ` ${this.props.className}` : ""}`;
     return (
-      <div className="tabs" role="tablist">
+      <div className={className} role="tablist">
         {this.props.children}
       </div>
     );

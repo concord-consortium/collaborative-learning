@@ -1,34 +1,55 @@
-import { UIModel, UIModelType } from "./ui";
+import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "./curriculum/section";
+import { WorkspaceModel, SectionWorkspace, WorkspaceModelType, LearningLogWorkspace } from "./workspace";
+import { DocumentModel, SectionDocument, DocumentModelType } from "./document";
+import { ToolTileModel } from "./tools/tool-tile";
 
 describe("ui model", () => {
   let ui: UIModelType;
 
   beforeEach(() => {
-    ui = UIModel.create({});
+    ui = UIModel.create({
+      sectionWorkspace: {
+        type: SectionWorkspace,
+        mode: "1-up"
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
   });
 
   it("has default values", () => {
     expect(ui.allContracted).toBe(true);
-    expect(ui.learningLogExpanded).toBe(false);
+    expect(ui.rightNavExpanded).toBe(false);
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.bottomNavExpanded).toBe(false);
     expect(ui.error).toBe(null);
     expect(ui.activeSectionIndex).toBe(0);
-    expect(ui.activeLearningLogTab).toBe("LL");
+    expect(ui.activeRightNavTab).toBe("My Work");
     expect(ui.showDemoCreator).toBe(false);
+    expect(ui.dialog).toBe(undefined);
   });
 
   it("uses overtide values", () => {
     ui = UIModel.create({
-      learningLogExpanded: true,
+      rightNavExpanded: true,
       showDemoCreator: true,
-      error: "test"
+      error: "test",
+      sectionWorkspace: {
+        type: SectionWorkspace,
+        mode: "1-up"
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
     });
     expect(ui.allContracted).toBe(false);
-    expect(ui.learningLogExpanded).toBe(true);
+    expect(ui.rightNavExpanded).toBe(true);
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.bottomNavExpanded).toBe(false);
     expect(ui.error).toBe("test");
     expect(ui.showDemoCreator).toBe(true);
   });
@@ -51,57 +72,64 @@ describe("ui model", () => {
     expect(ui.leftNavExpanded).toBe(true);
   });
 
-  it("allows the learning log to be toggled", () => {
-    ui.toggleLearningLog();
+  it("allows the right nav to be toggled", () => {
+    ui.toggleRightNav();
     expect(ui.allContracted).toBe(false);
-    expect(ui.learningLogExpanded).toBe(true);
-    ui.toggleLearningLog();
+    expect(ui.rightNavExpanded).toBe(true);
+    ui.toggleRightNav();
     expect(ui.allContracted).toBe(true);
-    expect(ui.learningLogExpanded).toBe(false);
+    expect(ui.rightNavExpanded).toBe(false);
   });
 
-  it("allows the learning log to be explicitly set", () => {
-    ui.toggleLearningLog(false);
+  it("allows the right nav to be explicitly set", () => {
+    ui.toggleRightNav(false);
     expect(ui.allContracted).toBe(true);
-    expect(ui.learningLogExpanded).toBe(false);
-    ui.toggleLearningLog(true);
+    expect(ui.rightNavExpanded).toBe(false);
+    ui.toggleRightNav(true);
     expect(ui.allContracted).toBe(false);
-    expect(ui.learningLogExpanded).toBe(true);
+    expect(ui.rightNavExpanded).toBe(true);
   });
 
-  it("allows my work to be toggled", () => {
-    ui.toggleMyWork();
+  it("allows bottom nav to be toggled", () => {
+    ui.toggleBottomNav();
     expect(ui.allContracted).toBe(false);
-    expect(ui.myWorkExpanded).toBe(true);
-    ui.toggleMyWork();
+    expect(ui.bottomNavExpanded).toBe(true);
+    ui.toggleBottomNav();
     expect(ui.allContracted).toBe(true);
-    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.bottomNavExpanded).toBe(false);
   });
 
-  it("allows my work to be explicitly set", () => {
-    ui.toggleMyWork(false);
+  it("allows bottom nav to be explicitly set", () => {
+    ui.toggleBottomNav(false);
     expect(ui.allContracted).toBe(true);
-    expect(ui.myWorkExpanded).toBe(false);
-    ui.toggleMyWork(true);
+    expect(ui.bottomNavExpanded).toBe(false);
+    ui.toggleBottomNav(true);
     expect(ui.allContracted).toBe(false);
-    expect(ui.myWorkExpanded).toBe(true);
+    expect(ui.bottomNavExpanded).toBe(true);
   });
 
-  it("only allows one component to be expanded at a time", () => {
+  it("only allows some components to be expanded at a time", () => {
     ui.toggleLeftNav();
     expect(ui.leftNavExpanded).toBe(true);
-    expect(ui.learningLogExpanded).toBe(false);
-    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.rightNavExpanded).toBe(false);
+    expect(ui.bottomNavExpanded).toBe(false);
 
-    ui.toggleLearningLog();
+    ui.toggleRightNav();
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.learningLogExpanded).toBe(true);
-    expect(ui.myWorkExpanded).toBe(false);
+    expect(ui.rightNavExpanded).toBe(true);
+    expect(ui.bottomNavExpanded).toBe(false);
 
-    ui.toggleMyWork();
+    ui.toggleBottomNav();
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.learningLogExpanded).toBe(false);
-    expect(ui.myWorkExpanded).toBe(true);
+    expect(ui.rightNavExpanded).toBe(true);
+    expect(ui.bottomNavExpanded).toBe(true);
+  });
+
+  it("allows all components to be contracted", () => {
+    ui.toggleLeftNav();
+    expect(ui.allContracted).toBe(false);
+    ui.contractAll();
+    expect(ui.allContracted).toBe(true);
   });
 
   it("allows error to be set", () => {
@@ -113,7 +141,7 @@ describe("ui model", () => {
   });
 
   it("allows activeSection to be set", () => {
-    const section = SectionModel.create({
+    SectionModel.create({
       type: SectionType.introduction
     });
     ui.setActiveSectionIndex(1);
@@ -122,18 +150,77 @@ describe("ui model", () => {
     expect(ui.activeSectionIndex).toBe(0);
   });
 
-  it("allows activeLearningLogTab to be set", () => {
-    const activeLearningLogTab = "M";
-    ui.setActiveLearningLogTab(activeLearningLogTab);
-    expect(ui.activeLearningLogTab).toBe(activeLearningLogTab);
+  it("allows activeRightNavTab to be set", () => {
+    const activeRightNavTab = "M";
+    ui.setActiveRightNavTab(activeRightNavTab);
+    expect(ui.activeRightNavTab).toBe(activeRightNavTab);
   });
 
-  it("allows activeWorkspaceSectionId to be set", () => {
-    const activeWorkspaceSectionId = "1";
-    ui.setActiveWorkspaceSectionId(activeWorkspaceSectionId);
-    expect(ui.activeWorkspaceSectionId).toBe(activeWorkspaceSectionId);
-    ui.setActiveWorkspaceSectionId(undefined);
-    expect(ui.activeWorkspaceSectionId).toBe(undefined);
+  it("allows demo creator to be shown", () => {
+    expect(ui.showDemoCreator).toBe(false);
+    ui.setShowDemoCreator(true);
+    expect(ui.showDemoCreator).toBe(true);
   });
 
+  it("allows selected tile to be set", () => {
+    expect(ui.selectedTileId).toBe(undefined);
+    ui.setSelectedTile(ToolTileModel.create({
+      id: "1",
+      content: {
+        type: "Text",
+        text: "test"
+      }
+    }));
+    expect(ui.selectedTileId).toBe("1");
+    ui.setSelectedTile();
+    expect(ui.selectedTileId).toBe(undefined);
+  });
+
+  it("allows alert dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.alert("alert test");
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(ui.dialog).not.toBe(undefined);
+    expect(dialog.type).toBe("alert");
+    expect(dialog.text).toBe("alert test");
+    expect(dialog.title).toBe(undefined);
+
+    ui.alert("alert test", "Test Alert Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Alert Title");
+  });
+
+  it("allows comfirm dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.confirm("confirm test");
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(ui.dialog).not.toBe(undefined);
+    expect(dialog.type).toBe("confirm");
+    expect(dialog.text).toBe("confirm test");
+    expect(dialog.title).toBe(undefined);
+
+    ui.confirm("confirm test", "Test Confirm Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Confirm Title");
+  });
+
+  it("allows prompt dialogs", () => {
+    expect(ui.dialog).toBe(undefined);
+    ui.prompt("prompt test");
+    expect(ui.dialog).not.toBe(undefined);
+    let dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.type).toBe("prompt");
+    expect(dialog.text).toBe("prompt test");
+    expect(dialog.defaultValue).toBe("");
+    expect(dialog.title).toBe(undefined);
+
+    ui.prompt("prompt test", "default value");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.defaultValue).toBe("default value");
+    expect(dialog.title).toBe(undefined);
+
+    ui.prompt("prompt test", undefined, "Test Prompt Title");
+    dialog = ui.dialog as UIDialogModelType;
+    expect(dialog.title).toBe("Test Prompt Title");
+  });
 });

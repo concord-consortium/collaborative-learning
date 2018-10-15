@@ -17,6 +17,10 @@ module.exports = (env, argv) => {
       filename: 'assets/index.[hash].js'
     },
     performance: { hints: false },
+    externals: {
+      // ignore optional dependency of JSXGraph
+      'canvas': 'canvas'
+    },
     module: {
       rules: [
         {
@@ -45,7 +49,18 @@ module.exports = (env, argv) => {
             'sass-loader'
           ]
         },
-        { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader' }
+        {
+          test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+          loader: 'url-loader',
+          options: {
+            limit: 8192,
+            name: 'assets/[name].[ext]',
+            publicPath: function(url) {
+              // cf. https://github.com/webpack-contrib/file-loader/issues/160#issuecomment-349771544
+              return devMode ? url : url.replace(/assets/, '.');
+            }
+          }
+        }
       ]
     },
     resolve: {
@@ -66,7 +81,16 @@ module.exports = (env, argv) => {
       }),
       new CopyWebpackPlugin([
         {from: 'src/public'}
-      ])
+      ]),
+      new CopyWebpackPlugin([{
+        from: 'src/assets',
+        to: 'assets'
+      }]),
+      new CopyWebpackPlugin([{
+        from: 'src/curriculum',
+        ignore: ['**/*.json', '**/*.{ts,tsx}'],
+        to: 'assets/curriculum'
+      }])
     ]
   };
 };

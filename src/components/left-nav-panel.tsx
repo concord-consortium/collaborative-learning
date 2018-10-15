@@ -6,15 +6,18 @@ import { DocumentContentModelType } from "../models/document-content";
 
 import "./left-nav-panel.sass";
 import { CanvasComponent } from "./canvas";
+import { WorkspaceModelType } from "../models/workspace";
+import { DocumentModelType } from "../models/document";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
+  isGhostUser: boolean;
 }
 
 @inject("stores")
 @observer
 export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
-  private openWorkspaceButton: HTMLButtonElement | null;
+  private openDocumentButton: HTMLButtonElement | null;
 
   public render() {
     const { section } = this.props;
@@ -32,48 +35,56 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
       <div className="section">
         <div className="section-header">
           <h1>{section.title}</h1>
-          {this.renderButtons()}
         </div>
-        {content ? this.renderContent(content) : null}
+        {content ? this.renderContent(section, content) : null}
       </div>
     );
   }
 
-  private renderContent(content: DocumentContentModelType) {
+  private renderContent(section: SectionModelType, content: DocumentContentModelType) {
     return (
-      <CanvasComponent readOnly={true} content={content}/>
+      <CanvasComponent context="left-nav" readOnly={true} content={content}>
+        <div className="buttons">
+          <button
+            ref={(el) => this.openDocumentButton = el}
+            onClick={this.handleOpenDocument}
+          >
+            Open {section.title} Section
+          </button>
+        </div>
+      </CanvasComponent>
     );
   }
 
-  private renderButtons() {
-    return (
-      <div className="buttons">
-        <button ref={(el) => this.openWorkspaceButton = el} onClick={this.handleOpenWorkspace}>Open Workspace</button>
-      </div>
-    );
-  }
+  private handleOpenDocument = () => {
+    const { db, ui, documents, user, groups } = this.stores;
+    const { section, isGhostUser } = this.props;
+    const { sectionWorkspace } = ui;
 
-  private handleOpenWorkspace = () => {
-    const { db, ui, workspaces } = this.stores;
-    const { section } = this.props;
     if (section) {
-      // TODO: create section id instead of using type
-      const workspace = workspaces.getWorkspaceBySectionId(section.id);
-      const done = () => {
-        ui.setActiveWorkspaceSectionId(section.id);
+      const document = documents.getSectionDocument(user.id, section.id);
+      const done = (finalDocument: DocumentModelType) => {
+        sectionWorkspace.toggleComparisonVisible(false);
+        sectionWorkspace.setComparisonDocument();
+        sectionWorkspace.setPrimaryDocument(finalDocument);
         ui.contractAll();
-        this.openWorkspaceButton!.disabled = false;
+        this.openDocumentButton!.disabled = false;
       };
 
-      this.openWorkspaceButton!.disabled = true;
-      if (workspace) {
-        done();
+      if (isGhostUser) {
+        sectionWorkspace.setPrimaryGhostSection(section);
+        ui.contractAll();
       }
       else {
-        db.createWorkspace(section.id)
-          .then(workspaces.addWorkspace)
-          .then(done)
-          .catch(ui.setError);
+        this.openDocumentButton!.disabled = true;
+        if (document) {
+          done(document);
+        }
+        else {
+          db.createSectionDocument(section.id)
+            .then(done)
+            .catch(ui.setError);
+        }
       }
     }
   }

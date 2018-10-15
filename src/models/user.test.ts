@@ -4,8 +4,9 @@ import { AuthenticatedUser } from "../lib/auth";
 describe("user model", () => {
 
   it("sets default values", () => {
-    const user = UserModel.create();
+    const user = UserModel.create({type: "student"});
     expect(user.authenticated).toBe(false);
+    expect(user.type).toBe("student");
     expect(user.name).toBe("Anonymous User");
     expect(user.className).toBe("");
     expect(user.latestGroupId).toBe(undefined);
@@ -15,12 +16,14 @@ describe("user model", () => {
   it("uses override values", () => {
     const user = UserModel.create({
         authenticated: true,
+        type: "student",
         name: "Test User",
         className: "Test Class",
         latestGroupId: "1",
         id: "2",
     });
     expect(user.authenticated).toBe(true);
+    expect(user.type).toBe("student");
     expect(user.name).toBe("Test User");
     expect(user.className).toBe("Test Class");
     expect(user.latestGroupId).toBe("1");
@@ -31,6 +34,7 @@ describe("user model", () => {
   it("can change its name", () => {
     const user = UserModel.create({
       name: "Test User",
+      type: "student",
       id: "2",
     });
     expect(user.name).toBe("Test User");
@@ -65,10 +69,32 @@ describe("user model", () => {
     expect(user.id).toBe(id);
   });
 
-  it("can set an authenticated user", () => {
+  it("can set an authenticated student user", () => {
     const user = UserModel.create();
     const authenticatedUser: AuthenticatedUser = {
       type: "student",
+      id: "1",
+      portal: "test",
+      firstName: "Fred",
+      lastName: "Flintstone",
+      fullName: "Fred Flintstone",
+      initials: "FF",
+      className: "Bedrock",
+      classHash: "test",
+      offeringId: "1",
+    };
+    user.setAuthenticatedUser(authenticatedUser);
+    expect(user.authenticated).toBe(true);
+    expect(user.id).toBe(authenticatedUser.id);
+    expect(user.name).toBe(authenticatedUser.fullName);
+    expect(user.className).toBe(authenticatedUser.className);
+    expect(user.latestGroupId).toBe(undefined);
+  });
+
+  it("can set an authenticated teacher user", () => {
+    const user = UserModel.create();
+    const authenticatedUser: AuthenticatedUser = {
+      type: "teacher",
       id: "1",
       portal: "test",
       firstName: "Fred",

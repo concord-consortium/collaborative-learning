@@ -2,10 +2,10 @@
 
 .left-nav
   position: fixed
-  top: $header-height
-  left: -($left-nav-expanded-width - $left-nav-contracted-width)
+  top: $header-height + $nav-expanded-peek
+  left: -($left-nav-expanded-width - $left-nav-contracted-width - $nav-expanded-peek)
   width: $left-nav-expanded-width
-  bottom: 0
+  bottom: $double-nav-expanded-peek
   color: #000
   transition: left $animation-speed
 
@@ -16,28 +16,42 @@
   .tabs
     display: flex
     flex-direction: column
-    width: $left-nav-contracted-width
+    width: $left-nav-contracted-width + 1 // the +1 moves it over the expanded border
     position: absolute
+    top: 15px
     right: 0
 
     .tab
-      border: 2px solid $tab-border-color
-      border-left: 2px solid $tab-background-color
-      border-top-right-radius: $tab-border-radius
-      border-bottom-right-radius: $tab-border-radius
-      padding: 3px 6px
-      background: $tab-background-color
-      margin-top: 5px
+      +tab(left)
+      min-height: $tab-min-height
+      background: $color4
+      border: $border-width solid $border-color
+      border-radius: 0px $border-radius $border-radius 0px
+      box-shadow: $half-border-width $half-border-width 0 0 rgba(0,0,0,0.20)
+      margin-top: $half-margin
+      padding: 0 $padding
 
       &.active
-        background: $active-tab-background-color
-        color: $active-tab-color
-        border-left: 2px solid $active-tab-background-color
+        background: $color4-selected
+        border-left: $border-width solid $color4-selected
+        z-index: 1
+
+      &:hover
+        background: $color4-hover
+        border-left: $border-width solid $color4-hover
+        z-index: 2
 
   .expanded-area
     position: relative
     width: $left-nav-expanded-width - $left-nav-contracted-width
-    background: $tab-background-color
-    border-right: 2px solid $tab-border-color
+    background: $color4
+    border-radius: 0 $border-radius $border-radius 0
+    border-top: $border-width solid $border-color
+    border-right: $border-width solid $border-color
+    border-bottom: $border-width solid $border-color
     margin-left: -1px
     height: 100%
+    box-shadow: $half-border-width $half-border-width 0 0 rgba(0,0,0,0.20)
+
+    &.expanded
+      background: $color4-selected

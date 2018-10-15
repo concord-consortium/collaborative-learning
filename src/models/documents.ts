@@ -1,0 +1,107 @@
+import { types } from "mobx-state-tree";
+import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
+import { ClassModelType } from "./class";
+
+type DocumentTypeOption = "section" | "publication" | "learningLog";
+
+export const DocumentsModel = types
+  .model("Documents", {
+    all: types.array(DocumentModel),
+  })
+  .views((self) => {
+    const getDocument = (documentKey: string) => {
+      return self.all.find((document) => document.key === documentKey);
+    };
+    const byType = (type: DocumentTypeOption) => {
+      return self.all.filter((document) => document.type === type);
+    };
+    const byTypeForUser = (type: DocumentTypeOption, userId: string) => {
+      return self.all.filter((document) => {
+        return (document.type === type) && (document.uid === userId);
+      });
+    };
+
+    return {
+      getDocument,
+      byType,
+      byTypeForUser,
+
+      getSectionDocument(userId: string, sectionId: string) {
+        return self.all.find((document) => {
+          return (document.type === SectionDocument) && (document.uid === userId) && (document.sectionId === sectionId);
+        });
+      },
+
+      getSectionDocumentsForGroup(sectionId: string, groupId: string) {
+        return self.all.filter((document) => {
+          return (document.type === SectionDocument) &&
+                 (document.sectionId === sectionId) &&
+                 (document.groupId === groupId);
+        });
+      },
+
+      // Returns the most recently published docs for the given section per user, sorted by name
+      getLatestPublicationsForSection(sectionId: string, clazz: ClassModelType) {
+        const latestPublications: DocumentModelType[] = [];
+        byType("publication")
+          .filter((publication) => publication.sectionId === sectionId)
+          .forEach((publication) => {
+            const uid = publication.uid;
+            const latestIndex = latestPublications.findIndex((pub) => pub.uid === uid);
+            if (latestIndex === -1) {
+              latestPublications.push(publication);
+            }
+            else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+              latestPublications[latestIndex] = publication;
+            }
+          });
+
+        return latestPublications.sort((pub1, pub2) => {
+          const user1 = clazz.getStudentById(pub1.uid);
+          const user2 = clazz.getStudentById(pub2.uid);
+          // Every publication should have a user, but if it's missing, sort that document last
+          if (!user1 || !user2) return (user2 ? 1 : 0) - (user1 ? 1 : 0);
+          return user1.lastName !== user2.lastName
+            ? user1.lastName.localeCompare(user2.lastName)
+            : user1.firstName.localeCompare(user2.firstName);
+        });
+      },
+    };
+  })
+  .actions((self) => {
+    const add = (document: DocumentModelType) => {
+      if (!self.getDocument(document.key)) {
+        self.all.push(document);
+      }
+    };
+
+    const remove = (document: DocumentModelType) => {
+      self.all.remove(document);
+    };
+
+    const update = (document: DocumentModelType) => {
+      if (!self.getDocument(document.key)) {
+        add(document);
+      }
+      else {
+        const i = self.all.findIndex((currDoc) => currDoc.key === document.key);
+        if (i !== -1) {
+          self.all[i] = document;
+        }
+      }
+    };
+
+    const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
+      const parentDocument = self.all.find(document => !!document.content.tileMap.get(tileId));
+      return parentDocument || null;
+    };
+
+    return {
+      add,
+      remove,
+      update,
+      findDocumentOfTile
+    };
+  });
+
+export type DocumentsModelType = typeof DocumentsModel.Type;
