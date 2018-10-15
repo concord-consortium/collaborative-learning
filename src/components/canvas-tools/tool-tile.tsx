@@ -23,7 +23,8 @@ interface IProps {
   context: string;
   docId: string;
   scale?: number;
-  rowHeight?: number;
+  widthPct?: number;
+  height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -39,14 +40,19 @@ const kToolComponentMap: any = {
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { model } = this.props;
+    const { model, widthPct } = this.props;
     const { ui } = this.stores;
     const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
     const ToolComponent = kToolComponentMap[model.content.type];
+    const style: React.CSSProperties = {};
+    if (widthPct) {
+      style.width = `${Math.round(100 * widthPct / 100)}%`;
+    }
     return (
       <div className={`tool-tile${selectedClass}`}
-        onDragStart={this.handleToolDragStart}
-        draggable={true}
+          style={style}
+          onDragStart={this.handleToolDragStart}
+          draggable={true}
       >
         {this.renderTile(ToolComponent)}
       </div>
@@ -61,14 +67,14 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // set the drag data
-    const { model, docId, rowHeight, scale } = this.props;
+    const { model, docId, height, scale } = this.props;
     const snapshot = cloneDeep(getSnapshot(model));
     const id = snapshot.id;
     delete snapshot.id;
     const dragData = JSON.stringify(snapshot);
     e.dataTransfer.setData(kDragTileSource, docId);
-    if (rowHeight) {
-      e.dataTransfer.setData(kDragRowHeight, String(rowHeight));
+    if (height) {
+      e.dataTransfer.setData(kDragRowHeight, String(height));
     }
     e.dataTransfer.setData(kDragTileId, id);
     e.dataTransfer.setData(kDragTileContent, dragData);

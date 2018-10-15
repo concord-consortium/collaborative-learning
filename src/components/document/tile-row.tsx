@@ -4,14 +4,13 @@ import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
 import { ToolTileComponent, dragTileSrcDocId } from "../canvas-tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { every } from "lodash";
 import "./tile-row.sass";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
 // allows source compatibility to be checked in dragOver
 export const dragResizeRowId = (id: string) => `org.concord.clue.row-resize.id.${id}`;
-export const dragResizeRowPageY =
-              (pageY: number) => `org.concord.clue.row-resize.page-y.${pageY}`;
+export const dragResizeRowY =
+              (y: number) => `org.concord.clue.row-resize.event-y.${y}`;
 export const dragResizeRowModelHeight =
               (modelHeight: number) => `org.concord.clue.row-resize.model-height.${modelHeight}`;
 export const dragResizeRowDomHeight =
@@ -24,9 +23,9 @@ export function extractDragResizeRowId(dataTransfer: DataTransfer) {
   }
 }
 
-export function extractDragResizePageY(dataTransfer: DataTransfer) {
+export function extractDragResizeY(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
-    const result = /org\.concord\.clue\.row-resize\.page-y\.(.*)$/.exec(type);
+    const result = /org\.concord\.clue\.row-resize\.event-y\.(.*)$/.exec(type);
     if (result) return +result[1];
   }
 }
@@ -80,15 +79,17 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
 
     return tiles.map(tileRef => {
       const tileModel: ToolTileModelType = tileMap.get(tileRef.tileId);
+      const tileWidthPct = model.renderWidth(tileRef.tileId);
       return tileModel
-              ? <ToolTileComponent key={tileModel.id} model={tileModel} rowHeight={rowHeight} {...others} />
+              ? <ToolTileComponent key={tileModel.id} model={tileModel}
+                                    widthPct={tileWidthPct} height={rowHeight} {...others} />
               : null;
     });
   }
 
   private renderBottomResizeHandle() {
     const { model, tileMap } = this.props;
-    if (this.props.readOnly || !model.isUserResizable(tileMap)) return null;
+    if (this.props.readOnly || !model.isUserResizable) return null;
     return <div className="bottom-resize-handle" draggable={true} onDragStart={this.handleStartResizeRow}/>;
   }
 
@@ -98,7 +99,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(kDragResizeRowId, id);
     e.dataTransfer.setData(dragResizeRowId(id), id);
-    e.dataTransfer.setData(dragResizeRowPageY(e.pageY), String(e.pageY));
+    e.dataTransfer.setData(dragResizeRowY(e.clientY), String(e.clientY));
     if (model.height) {
       e.dataTransfer.setData(dragResizeRowModelHeight(model.height), String(model.height));
     }

@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentContentModelType } from "../models/document-content";
-import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizePageY,
+import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "./document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
         dragTileSrcDocId, kDragRowHeight } from "./canvas-tools/tool-tile";
@@ -90,10 +90,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private getDragResizeRowInfo(e: React.DragEvent<HTMLDivElement>) {
     const rowId = extractDragResizeRowId(e.dataTransfer);
-    const startPageY = extractDragResizePageY(e.dataTransfer);
+    const startY = extractDragResizeY(e.dataTransfer);
     const modelHeight = extractDragResizeModelHeight(e.dataTransfer);
     const domHeight = extractDragResizeDomHeight(e.dataTransfer);
-    const deltaHeight = e.pageY - (startPageY || 0);
+    const deltaHeight = e.clientY - (startY || 0);
     if (rowId && (deltaHeight != null)) {
       const originalHeight = domHeight || modelHeight;
       const newHeight = originalHeight && originalHeight + deltaHeight;
@@ -122,13 +122,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private getDropRowIndex = (e: React.DragEvent<HTMLDivElement>) => {
-    const { content } = this.props;
-    if (!this.domElement) return content ? content.rowOrder.length : 0;
+  private isPointInRect(x: number, y: number, rect: ClientRect | DOMRect) {
+    if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) return false;
+    return ((x >= rect.left) && (x <= rect.right) && (y >= rect.top) && (y <= rect.bottom));
+  }
 
+  private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
+
+    const dropInfo: DropRowInfo = {
+      rowInsertIndex: 0
+    };
     const rowElements = this.domElement.getElementsByClassName("tile-row");
-    const dropY = e.pageY;
-    let dropIndex = 0;
+    const dropY = e.clientY;
     let dropDistance = Infinity;
     let dist;
     for (let i = 0; i < rowElements.length; ++i) {
@@ -136,16 +143,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const rowBounds = rowElt.getBoundingClientRect();
       if (i === 0) {
         dist = Math.abs(dropY - rowBounds.top);
-        dropIndex = i;
+        dropInfo.rowInsertIndex = i;
         dropDistance = dist;
       }
       dist = Math.abs(dropY - rowBounds.bottom);
       if (dist < dropDistance) {
-        dropIndex = i + 1;
+        dropInfo.rowInsertIndex = i + 1;
         dropDistance = dist;
       }
+      if (this.isPointInRect(e.clientX, e.clientY, rowBounds)) {
+        dropInfo.rowDropIndex = i;
+        dropInfo.dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
+        dropInfo.dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
+        dropInfo.dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
+        dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+      }
     }
-    return dropIndex;
+    return dropInfo;
   }
 
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -159,16 +173,40 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMoveTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const kSideDropThreshold = 20;
     const { content } = this.props;
     if (!content) return;
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const srcRowId = content.findRowContainingTile(dragTileId);
     if (!srcRowId) return;
     const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
-    const dropRowIndex = this.getDropRowIndex(e);
+    const dropRowInfo  = this.getDropRowInfo(e);
+    const { rowInsertIndex, rowDropIndex, dropOffsetLeft,
+            dropOffsetTop, dropOffsetRight, dropOffsetBottom } = dropRowInfo;
+    if ((rowDropIndex != null) &&
+        (dropOffsetLeft != null) &&
+        (dropOffsetLeft < kSideDropThreshold) &&
+        (dropOffsetLeft < dropOffsetRight!)) {
+      content.moveTileToRow(dragTileId, rowDropIndex, 0);
+      return;
+    }
+    if ((rowDropIndex != null) &&
+        (dropOffsetRight != null) &&
+        (dropOffsetRight < kSideDropThreshold) &&
+        (dropOffsetRight <= dropOffsetLeft!)) {
+      content.moveTileToRow(dragTileId, rowDropIndex);
+      return;
+    }
 
-    if ((srcRowIndex >= 0) && (dropRowIndex !== srcRowIndex)) {
-      content.moveRowToIndex(srcRowIndex, dropRowIndex);
+    if ((srcRowIndex >= 0)) {
+      if (content.numTilesInRow(srcRowId) === 1) {
+        if (rowInsertIndex !== srcRowIndex) {
+          content.moveRowToIndex(srcRowIndex, rowInsertIndex);
+        }
+      }
+      else {
+        content.moveTileToNewRow(dragTileId, rowInsertIndex);
+      }
     }
   }
 
@@ -176,12 +214,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
     if (!content || !dragTileContent) return;
-    const dropRowIndex = this.getDropRowIndex(e);
+    const dragTileId = e.dataTransfer.getData(kDragTileId);
+    const { rowInsertIndex } = this.getDropRowInfo(e);
     let dragRowHeight;
     if (e.dataTransfer.getData(kDragRowHeight)) {
       dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
     }
-    content.copyTileIntoRow(dragTileContent, dragTileId, dropRowIndex, dragRowHeight);
+    content.copyTileIntoRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -211,4 +250,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+}
+
+interface DropRowInfo {
+  rowInsertIndex: number;
+  rowDropIndex?: number;
+  dropOffsetLeft?: number;
+  dropOffsetTop?: number;
+  dropOffsetRight?: number;
+  dropOffsetBottom?: number;
 }
