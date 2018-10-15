@@ -1,4 +1,4 @@
-import uuid = require("uuid");
+import * as uuid from "uuid/v4";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores";
@@ -94,7 +94,7 @@ export class Logger {
     this.stores = stores;
     if (investigation) this.investigationTitle = investigation.title;
     if (problem) this.problemTitle = problem.title;
-    this.session = uuid.v4();
+    this.session = uuid();
   }
 
   private createLogMessage(event: string, parameters: {}): LogMessage {

@@ -1,4 +1,3 @@
-import uuid from "uuid";
 import { ProblemModel, ProblemModelType } from "./curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
