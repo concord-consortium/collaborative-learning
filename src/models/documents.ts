@@ -91,10 +91,16 @@ export const DocumentsModel = types
       }
     };
 
+    const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
+      const parentDocument = self.all.find(document => !!document.content.tileMap.get(tileId));
+      return parentDocument || null;
+    };
+
     return {
       add,
       remove,
-      update
+      update,
+      findDocumentOfTile
     };
   });
 

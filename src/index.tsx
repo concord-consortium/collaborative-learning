@@ -9,6 +9,7 @@ import { createFromJson } from "./models/curriculum/unit";
 import * as curriculumJson from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
+import { Logger } from "./lib/logger";
 
 import "./index.sass";
 
@@ -23,6 +24,7 @@ const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
+Logger.initializeLogger(stores, investigation, problem);
 
 document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
 stores.ui.setShowDemoCreator(!!showDemoCreator);
