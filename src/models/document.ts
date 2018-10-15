@@ -41,10 +41,10 @@ export const DocumentModel = types
         : overide;
     },
 
-    addTile(tool: DocumentTool) {
+    addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
       switch (tool) {
         case "geometry":
-          return self.content.addGeometryTile();
+          return self.content.addGeometryTile(addSidecarNotes);
         case "text":
           return self.content.addTextTile();
         case "image":
