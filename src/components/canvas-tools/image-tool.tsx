@@ -40,11 +40,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { model: { content } } = this.props;
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-    fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-      getImageDimensions((dimensions: any) => {
-        this.setState({ imageUrl: fullUrl, imageDimensions: dimensions, isLoading: false });
-      }, undefined, fullUrl);
-    });
+    if (!this.state.hasUpdatedUrl) {
+      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
+        getImageDimensions((dimensions: any) => {
+          this.setState({ imageUrl: fullUrl, imageDimensions: dimensions, isLoading: false, hasUpdatedUrl: true });
+        }, undefined, fullUrl);
+      });
+    }
   }
 
   public render() {
