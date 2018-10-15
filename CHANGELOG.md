@@ -1,5 +1,50 @@
 # Changelog
 
+## Version 0.0.4 - released October 15, 2018
+
+- Added static supports to workspaces [#160359307]
+- Added db#getOrCreateDocumentListener helper
+- Moved the Open button in left nav to below document content [#160530029]
+- Add ability to create Geometry tool [#159979566]
+- Clicks on board create points [#159979616]
+- [With Dave] Support dragging tool tiles [#159979496]
+- Added inital learning logs, plus styling and 2-up view [#159980496] [#160073076] [#160179071] [#160529990]
+- Support tool selection [#160300212]
+- Add delete tool which deletes the currently selected tile [#160407213]
+- Fix bleed-through of geometry labels onto other layers (e.g. learning log) [#160686040] - create stacking context in tool-tile such that tool-specific z-indexes are contained - "what happens in tool tiles, stays in tools tiles"
+- Enabled rename of learning logs [#160073076]
+- Replaced yarn with npm [#160686153]
+- Fix delete of text tool [[#160702405]] - text tool no longer deselects tile on loss of focus - text tool still selects on tile on focus
+- Fix TypeError: Cannot read property 'uid' of undefined [#160687074]
+- Fixed area below My Work tab prevents clicking content [#160688301]
+- Bring test code coverage back up [#160687173]
+- Guarantee unique IDs for geometry components [#160686176]
+- GeometryTool renders in 4-up view [#160686176] GeometryTool resizes when appropriate [#160688141] - the 4-up issue turned out to be a resize issue
+- GeometryTool synchronizes changes received from Firebase [#160686305]
+- Added static image tool [#160574813]
+- More styling changes [#160179071]
+- fix geometry tool drag image [#160767277]
+- Save/synchronize dragged point locations [#160815181] - handle point drag events - synchronize point location to model on drop - add uuids for synchronizing updates
+- Implement double-click on free point to connect free points into polygon [#160575042]
+- Fix drop on empty canvas [#160767277]
+- Added teacher authentication [#160798757]
+- Added QA mode [#160736716]
+- Add/improve geometry tool unit tests [#160687622]
+- Fixed learning log title wrapping [#160797339]
+- Fixed missing 2-up button [#160826065]
+- Fixed non-unique offerId per problem in dev mode [#160796641]
+- Added non-javascript dialogs for alert/confirm/prompt [#160839797]
+- Massive refactor of documents out of workspaces [#160896259]
+- Fix group assumptions in createDocumentFromSectionDocument and createDocumentFromLearningLog [#160978892]
+- Added groups to teacher dashboard [#160575177]
+- Add "extraWorkspace"/"Extra Workspace" to section enumeration Replace Unicode escape for angle character ("&#x2220;") with UTF-8 angle character ("∠")
+- Allow placing point at origin [#160993969]
+- Move layout information from tiles to document content [#160937149] - introduce rows of tiles into layout - migrate legacy content - fix asset paths in developer builds [#160691920]
+- Implement drag-reorder of tile rows [#160937149] - dragging row within a document reorders by default - dragging row between documents copies - dragging row within document with option key copies - cursor feedback indicates expected drop result
+- Refactor element creation; add onCreate callback - set `hasInnerPoints` attribute to enable dragging of polygons [#161034052]
+- Fix geometry resizing [#160688141] - fix geometry scaling in My Work and Learning Log thumbnails - maintain consistent grid size and tick spacing
+- Support drag-resize of height of geometry tiles [#161129942] - tiles opt-in to user-resizability -- only geometry tool supports it for now - row can only be resized when all tiles within it support resize - fix computational error in geometry scaling calculations
+
 ## Version 0.0.3 - released September 12, 2018
 
 - Added active section and active LL tab [#160284706]
