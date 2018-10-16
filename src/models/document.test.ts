@@ -52,14 +52,16 @@ describe("document model", () => {
     expect(document.content.tileMap.size).toBe(0);
     document.addTile("text");
     expect(document.content.tileMap.size).toBe(1);
+    // adding geometry tool adds sidecar text tool
     document.addTile("geometry");
-    expect(document.content.tileMap.size).toBe(2);
+    expect(document.content.tileMap.size).toBe(3);
   });
 
   it("allows tiles to be deleted", () => {
-    const textId = document.addTile("text");
+    const result = document.addTile("text");
+    const tileId = result && result.tile.id;
     expect(document.content.tileMap.size).toBe(1);
-    document.deleteTile(textId!);
+    document.deleteTile(tileId!);
     expect(document.content.tileMap.size).toBe(0);
   });
 

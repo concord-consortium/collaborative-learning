@@ -4,7 +4,7 @@ import { defaultGeometryContent, kGeometryDefaultHeight } from "./tools/geometry
 import { defaultImageContent } from "./tools/image/image-content";
 import { defaultTextContent } from "./tools/text/text-content";
 import { ToolContentUnionType } from "./tools/tool-types";
-import { ToolTileModel } from "./tools/tool-tile";
+import { ToolTileModel, ToolTileModelType } from "./tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
 import { cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
@@ -15,6 +15,11 @@ export interface NewRowOptions {
   rowIndex?: number;
   action?: LogEventName;
   loggingMeta?: {};
+}
+
+export interface INewRowTile {
+  row: TileRowModelType;
+  tile: ToolTileModelType;
 }
 
 export const DocumentContentModel = types
@@ -87,7 +92,7 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions) {
+    addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = ToolTileModel.create({ content });
       const o = options || {};
       const row = TileRowModel.create();
@@ -101,13 +106,18 @@ export const DocumentContentModel = types
       const action = o.action || LogEventName.CREATE_TILE;
       Logger.logTileEvent(action, tile, o.loggingMeta);
 
-      return tile.id;
+      return { row, tile };
     },
   }))
   .actions((self) => ({
-    addGeometryTile() {
-      return self.addTileInNewRow(defaultGeometryContent(),
-                                  { rowHeight: kGeometryDefaultHeight });
+    addGeometryTile(addSidecarNotes?: boolean) {
+      const result = self.addTileInNewRow(defaultGeometryContent(),
+                                          { rowHeight: kGeometryDefaultHeight });
+      const { row } = result;
+      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      self.tileMap.put(tile);
+      row.insertTileInRow(tile, 1);
+      return result;
     },
     addTextTile(initialText?: string) {
       return self.addTileInNewRow(defaultTextContent(initialText));
