@@ -17,6 +17,7 @@ const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
 export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: any) {
   if (imageUrlLookupTable.get(imagePath)) {
     callback(imageUrlLookupTable.get(imagePath));
+    return;
   }
 
   const isFullUrl = imagePath.startsWith("http");

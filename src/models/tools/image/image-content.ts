@@ -15,13 +15,10 @@ export const ImageContentModel = types
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.string
   })
-  .views(self => ({
-    get isUserResizable() {
-      return true;
-    }
+  .volatile(self => ({
+    displayUrl: ""
   }))
   .extend(self => {
-
     // actions
     function setUrl(url: string) {
       self.url = url;
@@ -30,6 +27,10 @@ export const ImageContentModel = types
     return {
       actions: {
         setUrl
+        ,
+        setDisplayUrl(url: string) {
+          self.displayUrl = url;
+        }
       }
     };
   });
