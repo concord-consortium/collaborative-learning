@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
 import { SectionModelType } from "./curriculum/section";
+import { LogEventName, Logger } from "../lib/logger";
 
 export const SectionWorkspace = "section";
 export const LearningLogWorkspace = "learningLog";
@@ -28,10 +29,20 @@ export const WorkspaceModel = types
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
-      self.primaryDocumentKey = document && document.key;
+      if (document) {
+        self.primaryDocumentKey = document.key;
+        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, document);
+      } else {
+        delete self.primaryDocumentKey;
+      }
     };
     const setComparisonDocument = (document?: DocumentModelType) => {
-      self.comparisonDocumentKey = document && document.key;
+      if (document) {
+        self.comparisonDocumentKey = document.key;
+        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
+      } else {
+        delete self.comparisonDocumentKey;
+      }
     };
 
     return {
@@ -42,6 +53,11 @@ export const WorkspaceModel = types
         self.mode = typeof override === "undefined"
           ? (self.mode === "1-up" ? "4-up" : "1-up")
           : override;
+
+        const logEvent = self.mode === "1-up"
+          ? LogEventName.VIEW_ENTER_ONE_UP
+          : LogEventName.VIEW_ENTER_FOUR_UP;
+        Logger.log(logEvent);
       },
 
       setAvailableDocument(document?: DocumentModelType) {
@@ -53,11 +69,18 @@ export const WorkspaceModel = types
         }
       },
 
-      toggleComparisonVisible(override?: boolean) {
+      toggleComparisonVisible({override, muteLog = false}: {override?: boolean; muteLog?: boolean} = {}) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
         if (!visible) {
           self.comparisonDocumentKey = undefined;
+        }
+
+        if (!muteLog) {
+          const logEvent = self.comparisonVisible
+            ? LogEventName.VIEW_SHOW_COMPARISON_PANEL
+            : LogEventName.VIEW_HIDE_COMPARISON_PANEL;
+          Logger.log(logEvent);
         }
       },
 
