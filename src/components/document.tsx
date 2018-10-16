@@ -110,7 +110,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
             }
             break;
           default:
-            document.addTile(tool);
+            document.addTile(tool, tool === "geometry");
         }
       };
     };

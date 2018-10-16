@@ -2,5 +2,6 @@
   "baseUrl": "http://localhost:8080",
   "video": false,
   "fixturesFolder": false,
-  "supportFile": false
+  "supportFile": false,
+  "defaultCommandTimeout": 8000
 }

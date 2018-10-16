@@ -17,6 +17,11 @@ export interface NewRowOptions {
   loggingMeta?: {};
 }
 
+export interface INewRowTile {
+  row: TileRowModelType;
+  tile: ToolTileModelType;
+}
+
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
@@ -48,50 +53,71 @@ export const DocumentContentModel = types
       get contentId() {
         return contentId;
       },
-      findRowContainingTile(tileId: string) {
-        return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
+      getTile(tileId: string) {
+        return self.tileMap.get(tileId);
+      },
+      getRow(rowId: string) {
+        return self.rowMap.get(rowId);
       },
       getRowByIndex(index: number) {
         return self.rowMap.get(self.rowOrder[index]);
       },
-      getTile(tileId: string) {
-        return self.tileMap.get(tileId);
+      findRowContainingTile(tileId: string) {
+        return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
+      },
+      numTilesInRow(rowId: string) {
+        const row = self.rowMap.get(rowId);
+        return row ? row.tiles.length : 0;
       }
     };
   })
   .actions(self => ({
-    addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions) {
-      const tile = ToolTileModel.create({ content });
-      const o = options || {};
-      const rowSpec: TileRowSnapshotType = { tiles: [{ tileId: tile.id }] };
-      if (o.rowHeight) {
-        rowSpec.height = o.rowHeight;
-      }
-      const row = TileRowModel.create(rowSpec);
-      self.tileMap.put(tile);
+    afterCreate() {
+      self.rowMap.forEach(row => {
+        row.updateLayout(self.tileMap);
+      });
+    },
+    insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
-      if ((o.rowIndex != null) && (o.rowIndex < self.rowOrder.length)) {
-        self.rowOrder.splice(o.rowIndex, 0, row.id);
+      if ((index != null) && (index < self.rowOrder.length)) {
+        self.rowOrder.splice(index, 0, row.id);
       }
       else {
         self.rowOrder.push(row.id);
       }
+    },
+    deleteRow(rowId: string) {
+      self.rowOrder.remove(rowId);
+      self.rowMap.delete(rowId);
+    }
+  }))
+  .actions(self => ({
+    addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
+      const tile = ToolTileModel.create({ content });
+      const o = options || {};
+      const row = TileRowModel.create();
+      row.insertTileInRow(tile);
+      if (o.rowHeight) {
+        row.setRowHeight(o.rowHeight);
+      }
+      self.tileMap.put(tile);
+      self.insertRow(row, o.rowIndex);
 
       const action = o.action || LogEventName.CREATE_TILE;
       Logger.logTileEvent(action, tile, o.loggingMeta);
 
-      return tile.id;
+      return { row, tile };
     },
-    moveRowToIndex(rowIndex: number, newRowIndex: number) {
-      const rowId = self.rowOrder[rowIndex];
-      self.rowOrder.splice(rowIndex, 1);
-      self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
-    }
   }))
   .actions((self) => ({
-    addGeometryTile() {
-      return self.addTileInNewRow(defaultGeometryContent(),
-                                  { rowHeight: kGeometryDefaultHeight });
+    addGeometryTile(addSidecarNotes?: boolean) {
+      const result = self.addTileInNewRow(defaultGeometryContent(),
+                                          { rowHeight: kGeometryDefaultHeight });
+      const { row } = result;
+      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      self.tileMap.put(tile);
+      row.insertTileInRow(tile, 1);
+      return result;
     },
     addTextTile(initialText?: string) {
       return self.addTileInNewRow(defaultTextContent(initialText));
@@ -127,21 +153,78 @@ export const DocumentContentModel = types
       const rowsToDelete: TileRowModelType[] = [];
       self.rowMap.forEach(row => {
         // remove from row
-        if (row.tiles.findIndex(tile => tile.tileId === tileId) >= 0) {
-          row.tiles.replace(row.tiles.filter(tile => tile.tileId !== tileId));
+        if (row.hasTile(tileId)) {
+          row.removeTileFromRow(tileId);
         }
-        // remove empty rows
+        // track empty rows
         if (row.tiles.length === 0) {
           rowsToDelete.push(row);
         }
       });
       // remove empty rows
       rowsToDelete.forEach(row => {
-        self.rowOrder.remove(row.id);
-        self.rowMap.delete(row.id);
+        self.deleteRow(row.id);
       });
       // delete tile
       self.tileMap.delete(tileId);
+    },
+    moveRowToIndex(rowIndex: number, newRowIndex: number) {
+      const rowId = self.rowOrder[rowIndex];
+      self.rowOrder.splice(rowIndex, 1);
+      self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
+    },
+    moveTileToRow(tileId: string, rowIndex: number, tileIndex?: number) {
+      const srcRowId = self.findRowContainingTile(tileId);
+      const srcRow = srcRowId && self.rowMap.get(srcRowId);
+      const dstRowId = self.rowOrder[rowIndex];
+      const dstRow = dstRowId && self.rowMap.get(dstRowId);
+      const tile = self.getTile(tileId);
+      if (srcRow && dstRow && tile) {
+        if (srcRow === dstRow) {
+          // move a tile within a row
+          const srcIndex = srcRow.indexOfTile(tileId);
+          const dstIndex = tileIndex != null ? tileIndex : dstRow.tiles.length;
+          dstRow.moveTileInRow(tileId, srcIndex, dstIndex);
+        }
+        else {
+          // move a tile from one row to another
+          dstRow.insertTileInRow(tile, tileIndex);
+          if (srcRow.height && tile.isUserResizable &&
+              (!dstRow.height || (srcRow.height > dstRow.height))) {
+            dstRow.height = srcRow.height;
+          }
+          srcRow.removeTileFromRow(tileId);
+          if (!srcRow.tiles.length) {
+            self.deleteRow(srcRow.id);
+          }
+        }
+      }
+    },
+    moveTileToNewRow(tileId: string, rowIndex: number) {
+      const srcRowId = self.findRowContainingTile(tileId);
+      const srcRow = srcRowId && self.rowMap.get(srcRowId);
+      const tile = self.getTile(tileId);
+      if (!srcRowId || !srcRow || !tile) return;
+
+      // create tile, insert tile, insert row
+      const rowSpec: TileRowSnapshotType = {};
+      if (tile.isUserResizable) {
+        rowSpec.height = srcRow.height;
+      }
+      const dstRow = TileRowModel.create(rowSpec);
+      dstRow.insertTileInRow(tile);
+      self.insertRow(dstRow, rowIndex);
+
+      // remove tile from source row
+      srcRow.removeTileFromRow(tileId);
+      if (!srcRow.tiles.length) {
+        self.deleteRow(srcRowId);
+      }
+      else {
+        if (!srcRow.isUserResizable) {
+          srcRow.height = undefined;
+        }
+      }
     }
   }));
 

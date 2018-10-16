@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGElement, JXGProperties } from "./jxg-changes";
+import { JXGChange, JXGElement, JXGProperties, JXGCoordPair } from "./jxg-changes";
 import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
@@ -8,9 +8,9 @@ import { isBoard } from "./jxg-board";
 
 export const kGeometryToolID = "Geometry";
 
-export const kGeometryDefaultHeight = 200;
+export const kGeometryDefaultHeight = 320;
 // matches curriculum images
-export const kGeometryDefaultPixelsPerUnit = 26;
+export const kGeometryDefaultPixelsPerUnit = 18.3;
 export const kGeometryDefaultAxisMin = -1;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -78,6 +78,21 @@ export const GeometryContentModel = types
 
     function addChange(change: JXGChange) {
       self.changes.push(JSON.stringify(change));
+    }
+
+    function addImage(board: JXG.Board,
+                      url: string,
+                      coords: JXGCoordPair,
+                      size: JXGCoordPair,
+                      properties?: JXGProperties): JXG.Image | undefined {
+      const change: JXGChange = {
+        operation: "create",
+        target: "image",
+        parents: [url, coords, size],
+        properties: assign({ id: uuid() }, properties)
+      };
+      const image = _applyChange(board, change);
+      return image ? image as JXG.Image : undefined;
     }
 
     function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties): JXG.Point | undefined {
@@ -152,6 +167,7 @@ export const GeometryContentModel = types
         destroyBoard,
         resizeBoard,
         addChange,
+        addImage,
         addPoint,
         removeObjects,
         updateObjects,
