@@ -69,7 +69,7 @@ export const WorkspaceModel = types
         }
       },
 
-      toggleComparisonVisible(override?: boolean, muteLog = false) {
+      toggleComparisonVisible({override, muteLog = false}: {override?: boolean; muteLog?: boolean} = {}) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
         if (!visible) {
