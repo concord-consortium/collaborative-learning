@@ -18,6 +18,21 @@ export const kDragTileId = "org.concord.clue.tile.id";
 export const kDragTileContent = "org.concord.clue.tile.content";
 // allows source compatibility to be checked in dragOver
 export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id}`;
+export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
+
+export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
+  for (const type of dataTransfer.types) {
+    const result = /org\.concord\.clue\.src\.(.*)$/.exec(type);
+    if (result) return result[1];
+  }
+}
+
+export function extractDragTileType(dataTransfer: DataTransfer) {
+  for (const type of dataTransfer.types) {
+    const result = /org\.concord\.clue\.tile\.type\.(.*)$/.exec(type);
+    if (result) return result[1];
+  }
+}
 
 interface IProps {
   context: string;
@@ -79,6 +94,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(kDragTileId, id);
     e.dataTransfer.setData(kDragTileContent, dragData);
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
+    e.dataTransfer.setData(dragTileType(model.content.type), model.content.type);
 
     // set the drag image
     const ToolComponent = kToolComponentMap[model.content.type];
