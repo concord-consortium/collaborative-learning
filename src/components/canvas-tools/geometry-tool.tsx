@@ -2,7 +2,7 @@ import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { GeometryContentModelType } from "../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/geometry-content";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
@@ -10,6 +10,8 @@ import { assign, cloneDeep, each, isEqual, some } from "lodash";
 import { SizeMe } from "react-sizeme";
 
 import "./geometry-tool.sass";
+import { extractDragTileType, kDragTileContent } from "./tool-tile";
+import { getImageDimensions } from "../../utilities/image-utils";
 
 interface SizeMeProps {
   size?: {
@@ -125,7 +127,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     return (
-      <div id={this.state.elementId} className={classes} />
+      <div id={this.state.elementId} className={classes}
+          onDragOver={this.handleDragOver} onDrop={this.handleDrop} />
     );
   }
 
@@ -144,6 +147,55 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const newState = assign({ syncedChanges: content.changes.length },
                                 board ? { board } : null);
       this.setState(newState);
+    }
+  }
+
+  private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    const toolType = extractDragTileType(e.dataTransfer);
+    const kImgDragMargin = 25;
+    if (toolType === "image") {
+      const eltBounds = e.currentTarget.getBoundingClientRect();
+      if ((e.clientX > eltBounds.left + kImgDragMargin) &&
+          (e.clientX < eltBounds.right - kImgDragMargin) &&
+          (e.clientY > eltBounds.top + kImgDragMargin) &&
+          (e.clientY < eltBounds.bottom - kImgDragMargin)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (this.isAcceptableImageDrag(e)) {
+      e.dataTransfer.dropEffect = "copy";
+      e.preventDefault();
+    }
+  }
+
+  private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (this.isAcceptableImageDrag(e)) {
+      const dragContent = e.dataTransfer.getData(kDragTileContent);
+      let parsedContent;
+      try {
+        parsedContent = JSON.parse(dragContent);
+      }
+      catch (e) {
+        // ignore errors
+      }
+      const { board } = this.state;
+      if (parsedContent && board) {
+        const { model: { content } } = this.props;
+        const geometryContent = content as GeometryContentModelType;
+        const droppedContent = parsedContent.content;
+        const urlOrProxy = droppedContent && droppedContent.url;
+        getImageDimensions(dimensions => {
+          const width = dimensions.width / kGeometryDefaultPixelsPerUnit;
+          const height = dimensions.height / kGeometryDefaultPixelsPerUnit;
+          geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
+        }, undefined, urlOrProxy);
+        e.preventDefault();
+        e.stopPropagation();
+      }
     }
   }
 
