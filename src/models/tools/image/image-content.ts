@@ -13,18 +13,23 @@ export function defaultImageContent() {
 export const ImageContentModel = types
   .model("ImageTool", {
     type: types.optional(types.literal(kImageToolID), kImageToolID),
-    url: types.maybe(types.string),
+    url: types.string
   })
+  .views(self => ({
+    get isUserResizable() {
+      return true;
+    }
+  }))
   .extend(self => {
 
     // actions
-    function setUrl(url?: string) {
+    function setUrl(url: string) {
       self.url = url;
     }
 
     return {
       actions: {
-        setUrl,
+        setUrl
       }
     };
   });

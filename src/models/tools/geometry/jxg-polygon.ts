@@ -8,7 +8,7 @@ export const isPolygon = (v: any) => v instanceof JXG.Polygon;
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
     const parents = (change.parents || [])
-                      .map(id => board.objects[id])
+                      .map(id => board.objects[id as string])
                       .filter(pt => pt != null);
     const props = assign({ id: uuid(), hasInnerPoints: true }, change.properties);
     return parents.length ? board.create("polygon", parents, props) : undefined;
