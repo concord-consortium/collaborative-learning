@@ -64,7 +64,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
     if (section) {
       const document = documents.getSectionDocument(user.id, section.id);
       const done = (finalDocument: DocumentModelType) => {
-        sectionWorkspace.toggleComparisonVisible(false);
+        sectionWorkspace.toggleComparisonVisible(false, true);
         sectionWorkspace.setComparisonDocument();
         sectionWorkspace.setPrimaryDocument(finalDocument);
         ui.contractAll();
