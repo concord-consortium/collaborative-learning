@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGElement, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
 import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
@@ -74,6 +74,22 @@ export const GeometryContentModel = types
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox([xMin, newYMax, newXMax, yMin], true);
       board.update();
+    }
+
+    function updateScale(board: JXG.Board, scale: number) {
+      // Ostensibly, the "right" thing to do here is to call
+      // board.updateCSSTransforms(), but that call inexplicably incorporates
+      // the scale factor multiple times as it walks the DOM hierarchy, so we
+      // just skip the DOM walk and set the transform to the correct value.
+      if (board) {
+        const invScale = 1 / (scale || 1);
+        const cssTransMat = [
+                [1, 0, 0],
+                [0, invScale, 0],
+                [0, 0, invScale]
+              ];
+        board.cssTransMat = cssTransMat;
+      }
     }
 
     function addChange(change: JXGChange) {
@@ -166,6 +182,7 @@ export const GeometryContentModel = types
         initializeBoard,
         destroyBoard,
         resizeBoard,
+        updateScale,
         addChange,
         addImage,
         addPoint,

@@ -29,6 +29,7 @@ interface IProps extends SizeMeProps {
 
 interface IState extends SizeMeProps {
   elementId?: string;
+  scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges?: number;
@@ -70,14 +71,20 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const nextState: IState = {};
 
     const { readOnly, size } = nextProps;
+    const geometryContent = content as GeometryContentModelType;
     if (size && size.width && size.height && (!prevState.size ||
         ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
-      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height, scale);
+      geometryContent.resizeBoard(prevState.board, size.width, size.height, scale);
       nextState.size = size;
     }
 
+    if (scale && (scale !== prevState.scale)) {
+      // let JSXGraph know about the scale change
+      geometryContent.updateScale(prevState.board, scale);
+      nextState.scale = scale;
+    }
+
     if (content !== prevState.content) {
-      const geometryContent = content as GeometryContentModelType;
       if (geometryContent.changes.length !== prevState.syncedChanges) {
         for (let i = prevState.syncedChanges || 0; i < geometryContent.changes.length; ++i) {
           try {
