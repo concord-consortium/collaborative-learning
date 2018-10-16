@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 0.0.5 - released October 16, 2018
+
+- Spike: add image to geometry in curriculum [#161137053] - add support for images to geometry tool
+- Support multiple tiles per row [#160634560] - drop tile at left or right edge of row (w/in 20px) to add tile to row - sized components (e.g. geometry tool) carry their size with them - deleting/removing a tile from a row resizes if there are no more sized components - tiles in row stretch to fill vertical height of row - drag handlers revert to using `clientY` rather than `pageY` since `pageY` reflects page scroll not element scroll
+- Adjust default geometry tool height and grid size [#160864536]
+- Image upload functionality (#105)
+- Support dragging image tool to geometry to overlay image [#160604676] - image drop zone is central area more than 25 pixels from edge (to avoid conflict with tile drop zones) - only works for simple URLs (e.g. curriculum images) - no image upload support yet
+
+### Asset Sizes
+
+| File | Size | % Increase from 0.0.3 |
+|---|---|---|
+| index.css | 34,385 bytes | 190% |
+| index.js | 2,565,366 bytes | 72% |
+
 ## Version 0.0.4 - released October 15, 2018
 
 - Added static supports to workspaces [#160359307]
