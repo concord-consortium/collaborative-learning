@@ -149,12 +149,13 @@ describe("logger", () => {
       expect(request.parameters.documentKey).toBe("destination-document");
       expect(request.parameters.documentType).toBe("section");
       expect(request.parameters.objectId).not.toBe(tileToCopy.id);
-      expect(request.parameters.section).toBe("destination-section");
       expect(request.parameters.sourceDocumentKey).toBe("source-document");
       expect(request.parameters.sourceDocumentType).toBe("section");
       expect(request.parameters.souceObjectId).toBe(tileToCopy.id);
       expect(request.parameters.sourceUsername).toBe("source-user");
       expect(request.parameters.sourceSection).toBe("source-section");
+
+      expect(request.section).toBe("destination-section");
 
       done();
       return res.status(201);
