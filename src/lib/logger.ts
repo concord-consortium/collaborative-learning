@@ -37,6 +37,11 @@ export class Logger {
     this._instance = new Logger(stores, investigation, problem);
   }
 
+  public static updateProblem(investigation: InvestigationModelType, problem: ProblemModelType) {
+    this._instance.problemTitle = problem.title;
+    this._instance.investigationTitle = investigation.title;
+  }
+
   public static log(event: LogEventName, parameters: object) {
     if (!this._instance) return;
 

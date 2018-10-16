@@ -56,7 +56,7 @@ const BAD_TEACHER_TOKEN = "badTeacherToken";
 
 const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
 
-const OFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
+const OFFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
 const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/66";
 
 const RAW_CORRECT_STUDENT: RawUser = {
@@ -84,6 +84,10 @@ const RAW_CLASS_INFO: RawClassInfo = {
   class_hash: "test hash",
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
   teachers: [RAW_CORRECT_TEACHER],
+};
+
+const PARTIAL_RAW_OFFERING_INFO = {
+  activity_url: "https://foo.bar/?problem=3.2"
 };
 
 describe("dev mode", () => {
@@ -340,11 +344,11 @@ describe("teacher authentication", () => {
     token: GOOD_TEACHER_TOKEN,
     reportType: "offering",
     class: CLASS_INFO_URL,
-    offering: OFERING_INFO_URL
+    offering: OFFERING_INFO_URL
   };
 
   beforeEach(() => {
-    urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFERING_INFO_URL};
+    urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
 
     nock(CLASS_INFO_URL, {
       reqheaders: {
@@ -353,6 +357,14 @@ describe("teacher authentication", () => {
     })
     .get("")
     .reply(200, RAW_CLASS_INFO);
+
+    nock(OFFERING_INFO_URL, {
+      reqheaders: {
+        Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
+      }
+    })
+    .get("")
+    .reply(200, PARTIAL_RAW_OFFERING_INFO);
   });
 
   afterEach(() => {
@@ -380,7 +392,7 @@ describe("teacher authentication", () => {
       token: RAW_TEACHER_FIREBASE_JWT,
     });
 
-    authenticate("authed", urlParams).then(({authenticatedUser}) => {
+    authenticate("authed", urlParams).then(({authenticatedUser, problemId}) => {
       expect(authenticatedUser).toEqual({
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
@@ -421,6 +433,7 @@ describe("teacher authentication", () => {
         rawPortalJWT: RAW_TEACHER_PORTAL_JWT,
         rawFirebaseJWT: RAW_TEACHER_FIREBASE_JWT,
       });
+      expect(problemId).toBe("3.2");
       done();
     })
     .catch(done);
