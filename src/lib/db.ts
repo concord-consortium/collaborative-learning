@@ -24,6 +24,7 @@ import { DocumentModelType,
 import { DocumentContentSnapshotType } from "../models/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
+import { Logger, LogEventName } from "./logger";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -424,6 +425,10 @@ export class DB {
                   .then(() => learningLog);
         })
         .then((learningLog) => {
+          Logger.log(LogEventName.CREATE_LEARNING_LOG, {
+            title: learningLog.title
+          });
+
           return this.createDocumentFromLearningLog(learningLog);
         })
         .then(resolve)

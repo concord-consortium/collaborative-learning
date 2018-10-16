@@ -31,7 +31,11 @@ interface TileLoggingMetadata {
 export enum LogEventName {
   CREATE_TILE,
   COPY_TILE,
-  DELETE_TILE
+  DELETE_TILE,
+
+  VIEW_SHOW_DOCUMENT,
+  VIEW_SHOW_COMPARISON_DOCUMENT
+
 }
 
 export class Logger {
@@ -82,6 +86,15 @@ export class Logger {
       }
     }
 
+    Logger.log(event, parameters);
+  }
+
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
+    const parameters = {
+      documentKey: document.key,
+      documentType: document.type,
+      section: document.sectionId
+    };
     Logger.log(event, parameters);
   }
 

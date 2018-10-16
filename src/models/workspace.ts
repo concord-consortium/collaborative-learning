@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
 import { SectionModelType } from "./curriculum/section";
+import { LogEventName, Logger } from "../lib/logger";
 
 export const SectionWorkspace = "section";
 export const LearningLogWorkspace = "learningLog";
@@ -28,10 +29,20 @@ export const WorkspaceModel = types
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
-      self.primaryDocumentKey = document && document.key;
+      if (document) {
+        self.primaryDocumentKey = document.key;
+        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, document);
+      } else {
+        delete self.primaryDocumentKey;
+      }
     };
     const setComparisonDocument = (document?: DocumentModelType) => {
-      self.comparisonDocumentKey = document && document.key;
+      if (document) {
+        self.comparisonDocumentKey = document.key;
+        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
+      } else {
+        delete self.comparisonDocumentKey;
+      }
     };
 
     return {
