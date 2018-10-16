@@ -107,6 +107,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.initializeContent();
   }
 
+  public componentDidUpdate() {
+    // if we didn't initialize before now, try again
+    if (!this.state.board) {
+      this.initializeContent();
+    }
+  }
+
   public componentWillUnmount() {
     const { model: { content } } = this.props;
     if ((content.type === "Geometry") && this.state.board) {
@@ -123,16 +130,21 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private initializeContent() {
-    const { model: { content }, readOnly } = this.props;
+    const { model: { content } } = this.props;
     if ((content.type !== "Geometry") || !this.state.elementId) { return; }
 
-    const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
-    if (board) {
-      this.handleCreateBoard(board);
+    const domElt = document.getElementById(this.state.elementId);
+    const eltBounds = domElt && domElt.getBoundingClientRect();
+    // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
+    if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
+      const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
+      if (board) {
+        this.handleCreateBoard(board);
+      }
+      const newState = assign({ syncedChanges: content.changes.length },
+                                board ? { board } : null);
+      this.setState(newState);
     }
-    const newState = assign({ syncedChanges: content.changes.length },
-                              board ? { board } : null);
-    this.setState(newState);
   }
 
   private handleCreateElement = (elt: JXG.GeometryElement) => {

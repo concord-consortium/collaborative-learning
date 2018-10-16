@@ -4,8 +4,9 @@
   // create z-index stacking context ("what happens in tool tiles, stays in tool tiles")
   position: relative
   z-index: 0
-  width: 100%
+  overflow: hidden
   height: 100%
+  flex: 1 1 auto
   border: $half-border-width solid white
 
   &.selected
