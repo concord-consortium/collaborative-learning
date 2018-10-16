@@ -20,6 +20,7 @@ declare namespace JXG {
     axis: boolean;
     canvasWidth: number;
     canvasHeight: number;
+    cssTransMat: number[][];
     keepaspectratio: boolean;
     showCopyright: boolean;
     showNavigation: boolean;
