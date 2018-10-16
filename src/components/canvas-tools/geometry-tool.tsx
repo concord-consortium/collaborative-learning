@@ -188,7 +188,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const geometryContent = content as GeometryContentModelType;
         const droppedContent = parsedContent.content;
         const urlOrProxy = droppedContent && droppedContent.url;
-        getImageDimensions(dimensions => {
+        getImageDimensions((dimensions: any) => {
           const width = dimensions.width / kGeometryDefaultPixelsPerUnit;
           const height = dimensions.height / kGeometryDefaultPixelsPerUnit;
           geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
