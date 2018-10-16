@@ -137,7 +137,7 @@ export const UIModel = types
         if (self.bottomNavExpanded) {
           if (self.learningLogWorkspace.primaryDocumentKey) {
             self.learningLogWorkspace.setComparisonDocument(document);
-            self.learningLogWorkspace.toggleComparisonVisible(true);
+            self.learningLogWorkspace.toggleComparisonVisible({override: true});
           }
           else {
             alert("Please select a Learning Log first.", "Select for Learning Log");

@@ -62,7 +62,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
       if (ui.bottomNavExpanded) {
         if (learningLogWorkspace.primaryDocumentKey) {
           learningLogWorkspace.setComparisonDocument(document);
-          learningLogWorkspace.toggleComparisonVisible(true);
+          learningLogWorkspace.toggleComparisonVisible({override: true});
         }
         else {
           ui.alert("Please select a Learning Log first.", "Select for Learning Log");

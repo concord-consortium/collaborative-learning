@@ -10,6 +10,7 @@ import * as curriculumJson from "./curriculum/stretching-and-shrinking/stretchin
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
+import { setTitle } from "./lib/misc";
 
 import "./index.sass";
 
@@ -26,7 +27,7 @@ const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
 Logger.initializeLogger(stores, investigation, problem);
 
-document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
+setTitle(showDemoCreator, problem);
 stores.ui.setShowDemoCreator(!!showDemoCreator);
 
 stores.supports.createFromUnit(unit, investigation, problem);
