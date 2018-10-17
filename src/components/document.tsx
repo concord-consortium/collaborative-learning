@@ -33,14 +33,14 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {document, isGhostUser, readOnly} = this.props;
     const isPublication = document.type === PublicationDocument;
     const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    return (
-      <div className="document">
-        {this.renderTitleBar()}
-        {showToolbar ? this.renderToolbar() : null}
-        {this.renderCanvas()}
-        {this.renderStatusBar()}
-      </div>
-    );
+    return [
+        showToolbar ? this.renderToolbar() : null,
+        <div key="document" className="document">
+          {this.renderTitleBar()}
+          {this.renderCanvas()}
+          {this.renderStatusBar()}
+        </div>
+    ];
   }
 
   private renderTitleBar() {
@@ -120,7 +120,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
       };
     };
     return (
-      <div className="toolbar">
+      <div key="toolbar" className="toolbar">
         <div className="tool select" title="Select" onClick={handleClickTool("select")}>↖</div>
         <div className="tool text" title="Text" onClick={handleClickTool("text")}>T</div>
         <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}/>

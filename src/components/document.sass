@@ -50,47 +50,11 @@
         &:last-child
           border-top-right-radius: $border-radius
 
-  .toolbar
-    position: absolute
-    top: $workspace-titlebar-height
-    bottom: $workspace-statusbar-height
-    width: $workspace-toolbar-width
-    border-right: $border-width solid $border-color
-
-    display: flex
-    flex-direction: column
-
-    .tool
-      width: $workspace-toolbar-width
-      height: $workspace-toolbar-width
-      background-color: #C9C9C9
-      display: flex
-      justify-content: center
-      align-items: center
-      text-align: center
-      font-size: 20px
-      font-weight: bold
-      margin-bottom: $quarter-margin
-
-      &.geometry
-        background-image: url("../assets/logo_tw.png")
-        background-size: contain
-        background-repeat: no-repeat
-
-      &.image
-        background-image: url("../assets/logo_image_tool.svg")
-        background-size: contain
-        background-repeat: no-repeat
-
-      &.active
-        color: #fff
-        background-color: #888888
-
   .canvas-area
     position: absolute
     top: $workspace-titlebar-height
     bottom: $workspace-statusbar-height
-    left: $workspace-toolbar-width
+    left: 0
     right: 0
     border-top: $border-width solid $border-color
 
@@ -172,5 +136,46 @@
         &:last-child
           border-bottom-right-radius: $border-radius
 
+.toolbar
+    position: absolute
+    top: $margin + $border-width + $workspace-titlebar-height
+    bottom: $workspace-statusbar-height
+    left: $margin - $workspace-toolbar-width - $border-width 
+    width: $workspace-toolbar-width
 
+    display: flex
+    flex-direction: column
+
+    .tool
+      width: $workspace-toolbar-width
+      height: $workspace-toolbar-width
+      background-color: #C9C9C9
+      display: flex
+      justify-content: center
+      align-items: center
+      text-align: center
+      font-size: 20px
+      font-weight: bold
+      margin-bottom: -$border-width
+      border: $border-width solid $border-color
+
+      &.select
+        border-top-left-radius: $border-radius
+
+      &.geometry
+        background-image: url("../assets/logo_tw.png")
+        background-size: contain
+        background-repeat: no-repeat
+
+      &.image
+        background-image: url("../assets/logo_image_tool.svg")
+        background-size: contain
+        background-repeat: no-repeat
+
+      &.delete
+        border-bottom-left-radius: $border-radius
+
+      &.active
+        color: #fff
+        background-color: #888888
 
