@@ -14,6 +14,7 @@ import { DocumentModelType,
 import { WorkspaceModelType } from "../models/workspace";
 
 import "./document.sass";
+import { ToolbarComponent } from "./toolbar";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -101,33 +102,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
-    const {document} = this.props;
-    const handleClickTool = (tool: DocumentTool) => {
-      const { ui } = this.stores;
-      return (e: React.MouseEvent<HTMLDivElement>) => {
-        switch (tool) {
-          case "delete":
-            if (ui.selectedTileId) {
-              document.deleteTile(ui.selectedTileId);
-            }
-            break;
-          default:
-            const rowTile = document.addTile(tool, tool === "geometry");
-            if (rowTile && rowTile.tileId) {
-              ui.setSelectedTileId(rowTile.tileId);
-            }
-        }
-      };
-    };
-    return (
-      <div key="toolbar" className="toolbar">
-        <div className="tool select" title="Select" onClick={handleClickTool("select")}>↖</div>
-        <div className="tool text" title="Text" onClick={handleClickTool("text")}>T</div>
-        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}/>
-        <div className="tool image" title="Image" onClick={handleClickTool("image")}/>
-        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>{"\u274c"}</div>
-      </div>
-    );
+    return <ToolbarComponent key="toolbar" document={this.props.document} />;
   }
 
   private renderCanvas() {
