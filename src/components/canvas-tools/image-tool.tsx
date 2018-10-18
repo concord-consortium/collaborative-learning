@@ -19,7 +19,7 @@ interface IState {
   imageDimensions?: any;
 }
 
-const defaultImagePlaceholderSize = { width: 200, height: 200 };
+const defaultImagePlaceholderSize = { width: 128, height: 128 };
 
 @inject("stores")
 @observer
@@ -32,7 +32,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { model: { content } } = this.props;
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-
     // Migrate Firebase storage relative URLs to full URLs
     fetchImageUrl(imageContent.url, db.firebase, ((url: string) => {
       this.handleUpdateImageDimensions(url);
@@ -76,7 +75,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
     const imageToUseForDisplay =
       imageContent.url && imageContent.url.length > 0 ? imageContent.url : imageUrl;
-
+    const imagePath = imageToUseForDisplay && imageToUseForDisplay.startsWith("http") ? imageToUseForDisplay : "";
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
       backgroundImage: "url(" + imageToUseForDisplay + ")",
@@ -92,7 +91,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
-            defaultValue={imageToUseForDisplay}
+            defaultValue={imagePath}
             onBlur={this.handleBlur}
             onKeyUp={this.handleKeyUp}
           />

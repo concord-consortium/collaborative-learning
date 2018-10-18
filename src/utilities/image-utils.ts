@@ -22,8 +22,11 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
 
   const isFullUrl = imagePath.startsWith("http");
   const isLocalFilePath = imagePath.startsWith("assets/");
+  const isFirebaseStorageUrl = imagePath.startsWith("https://firebasestorage");
+  const placeholderImage = "assets/image_placeholder.png";
+  const imageUrlAsReference = isFirebaseStorageUrl ? imagePath : undefined;
 
-  if (isFullUrl) {
+  if (isFullUrl && !isFirebaseStorageUrl) {
     imageUrlLookupTable.set(imagePath, imagePath);
     callback(imageUrlLookupTable.get(imagePath));
   }
@@ -31,15 +34,14 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
     callback(imagePath);
   }
   else {
-    firebase.getPublicUrlFromStore(imagePath).then((url) => {
-      if (url) {
-        imageUrlLookupTable.set(imagePath, url);
-        callback(url);
-      } else {
-        callback("assets/image_placeholder.png");
-      }
+    // Pass in the imagePath as the second argument to get the ref to firebase by url
+    // This is needed if an image of the same name has been uploaded in two different components,
+    // since each public URL becomes invalid and a new url generated on upload
+    firebase.getPublicUrlFromStore(imagePath, imageUrlAsReference).then((url) => {
+      imageUrlLookupTable.set(imagePath, url ? url : placeholderImage);
+      callback(url ? url : placeholderImage);
     }).catch(() => {
-      callback("assets/image_placeholder.png");
+      callback(placeholderImage);
     });
   }
 }
