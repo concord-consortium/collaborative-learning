@@ -1,5 +1,7 @@
 @import vars
 
+$member-size: 18px
+
 .header
   position: fixed
   top: 0
@@ -38,16 +40,38 @@
       padding: $half-padding $padding
 
     .members
-      .member
-        display: inline
-        font-size: 10px
-        margin: 0 3px
-        padding: 3px
-        background-color: #2da343
-        &.disconnected
-          background-color: #777
-        &.teacher
-          background-color: #EA6D2F !important
+      display: flex
+      flex-direction: column
+      .row
+        display: flex
+        flex-direction: row
+        .member
+          font-size: 10px
+          line-height: $member-size
+          margin: 1px
+          padding: 3px
+          width: $member-size
+          height: $member-size
+          background-color: #2da343
+          color: white
+          &.nw
+            background-color: blue
+            border-top-left-radius: $border-radius
+          &.ne
+            background-color: orange
+            border-top-right-radius: $border-radius
+          &.se
+            background-color: green
+            border-bottom-right-radius: $border-radius
+          &.sw
+            background-color: purple
+            border-bottom-left-radius: $border-radius
+          &.disconnected
+            background-color: #777
+          &.teacher
+            background-color: #EA6D2F !important
+          &.empty
+            background-color: $color1-4
 
   .user
     flex-grow: 0
