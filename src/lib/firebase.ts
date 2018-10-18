@@ -27,7 +27,7 @@ export class Firebase {
     return firebase.database().ref(this.getFullPath(path));
   }
 
-  public firestore() {
+  public firebaseStorage() {
     return firebase.storage();
   }
 
@@ -71,6 +71,11 @@ export class Firebase {
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
+  }
+
+  public getUserImagePath(user: UserModelType, imageKey?: string, userId?: string) {
+    const suffix = imageKey ? `/${imageKey}` : "";
+    return `${this.getUserPath(user, userId)}/images${suffix}`;
   }
 
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
@@ -163,7 +168,7 @@ export class Firebase {
   //
 
   public getPublicUrlFromStore(storePath: string): Promise<any> {
-    const ref = this.firestore().ref(storePath);
+    const ref = this.firebaseStorage().ref(storePath);
     // Get the download URL - returns a url with an authentication token for the current session
     return ref.getDownloadURL().then((url) => {
       return url;
@@ -190,7 +195,7 @@ export class Firebase {
   }
 
   public uploadImage(storePath: string, file: File, imageData?: Blob): Promise<any> {
-    const ref = this.firestore().ref(storePath);
+    const ref = this.firebaseStorage().ref(storePath);
     const fileData = imageData ? imageData : file;
     return ref.put(fileData).then((snapshot) => {
       return snapshot.ref.fullPath;

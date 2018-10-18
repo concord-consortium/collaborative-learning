@@ -15,9 +15,6 @@ export const ImageContentModel = types
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.string
   })
-  .volatile(self => ({
-    displayUrl: ""
-  }))
   .extend(self => {
     // actions
     function setUrl(url: string) {
@@ -27,10 +24,6 @@ export const ImageContentModel = types
     return {
       actions: {
         setUrl
-        ,
-        setDisplayUrl(url: string) {
-          self.displayUrl = url;
-        }
       }
     };
   });

@@ -3,7 +3,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
+import { fetchImageUrl, uploadImage, getDimensions } from "../../utilities/image-utils";
 import "./image-tool.sass";
 
 interface IProps {
@@ -16,7 +16,6 @@ interface IState {
   imageUrl?: string;
   isEditing?: boolean;
   isLoading?: boolean;
-  hasUpdatedUrl?: boolean;
   imageDimensions?: any;
 }
 
@@ -26,32 +25,27 @@ const defaultImagePlaceholderSize = { width: 200, height: 200 };
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { model: { content } } = nextProps;
-    const nextState: IState = {};
-
-    const imageContent = content as ImageContentModelType;
-    if (prevState.imageUrl && prevState.hasUpdatedUrl && imageContent.displayUrl !== prevState.imageUrl) {
-      getImageDimensions((dimensions: any) => {
-        nextState.imageUrl = imageContent.displayUrl;
-        nextState.imageDimensions = dimensions;
-        return nextState;
-      }, undefined, imageContent.displayUrl);
-    }
-    return nextState;
-  }
   public state: IState = { isLoading: true, imageUrl: "assets/image_placeholder.png" };
+  private _asyncRequest: any;
 
   public componentDidMount() {
     const { model: { content } } = this.props;
-    const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-    if (!this.state.hasUpdatedUrl) {
-      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-        getImageDimensions((dimensions: any) => {
-          this.setState({ imageUrl: fullUrl, imageDimensions: dimensions, isLoading: false, hasUpdatedUrl: true });
-        }, undefined, fullUrl);
-      });
+    this.handleUpdateImageDimensions(imageContent.url);
+  }
+  public componentWillUnmount() {
+    if (this._asyncRequest) {
+      this._asyncRequest = null;
+    }
+  }
+
+  public componentDidUpdate(nextProps: IProps) {
+    const { model: { content } } = nextProps;
+    const { imageUrl, isLoading } = this.state;
+
+    const imageContent = content as ImageContentModelType;
+    if (!isLoading && imageUrl && imageContent.url && imageContent.url !== imageUrl) {
+      this.handleUpdateImageDimensions(imageContent.url);
     }
   }
 
@@ -74,12 +68,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
     const imageToUseForDisplay =
-      imageContent.displayUrl && imageContent.displayUrl.length > 0 ? imageContent.displayUrl : imageUrl;
+      imageContent.url && imageContent.url.length > 0 ? imageContent.url : imageUrl;
 
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
       background: "url(" + imageToUseForDisplay + ")",
-      backgroundRepeat: "no-repeat",
       width: dimensions.width + "px ",
       height: dimensions.height + "px"
     };
@@ -105,19 +98,25 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private handleUpdateImageDimensions = (imageDisplayUrl: string) => {
+    this._asyncRequest = getDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
+      this._asyncRequest = null;
+      this.setState({
+        imageUrl: imageDisplayUrl,
+        imageDimensions: dimensions,
+        isLoading: false
+      });
+    });
+  }
+
   private handleImageUrlError = () => {
-    const { hasUpdatedUrl } = this.state;
     const { db } = this.stores;
     const { model } = this.props;
     const { content } = model;
-    if (!hasUpdatedUrl) {
-      const imageContent = content as ImageContentModelType;
-      let updatedUrl = imageContent.url;
-      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-        updatedUrl = fullUrl;
-      });
-      this.setState({ hasUpdatedUrl: true, imageUrl: updatedUrl });
-    }
+    const imageContent = content as ImageContentModelType;
+    fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
+      this.handleUpdateImageDimensions(fullUrl);
+    });
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,10 +130,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     this.setState({ isLoading: true });
 
     uploadImage(db.firebase, storePath, currentFile, (imageUrl: string) => {
-      getImageDimensions((dimensions: any) => {
-        this.setState({ imageDimensions: dimensions, isLoading: false, isEditing: false, imageUrl });
-        this.updateStoredURL(storePath, imageUrl);
-      }, undefined, imageUrl);
+      this.handleUpdateImageDimensions(imageUrl);
+      this.updateStoredURL(imageUrl);
     });
   }
 
@@ -169,24 +166,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   // User has input a new url into the input box, check the dimensions and update model and state
   private updateImageFromInput = (newUrl: string) => {
-    getImageDimensions((dimensions: any) => {
-      this.setState({
-        imageUrl: dimensions.src, imageDimensions: dimensions,
-        isLoading: false, hasUpdatedUrl: true
-      });
-      this.updateStoredURL(newUrl, newUrl);
-    }, undefined, newUrl);
+    this.handleUpdateImageDimensions(newUrl);
+    this.updateStoredURL(newUrl);
   }
 
   private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     this.setState({ isEditing: false });
   }
 
-  private updateStoredURL = (newUrl: string, displayUrl: string) => {
+  private updateStoredURL = (newUrl: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
-    // displayUrl is volatile - will not be stored in Firebase,
-    // but can be used for display
-    imageContent.setDisplayUrl(displayUrl);
     imageContent.setUrl(newUrl);
   }
+
 }
