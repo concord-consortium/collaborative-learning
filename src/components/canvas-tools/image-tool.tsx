@@ -30,9 +30,18 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public componentDidMount() {
     const { model: { content } } = this.props;
+    const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-    this.handleUpdateImageDimensions(imageContent.url);
+
+    // Migrate Firebase storage relative URLs to full URLs
+    fetchImageUrl(imageContent.url, db.firebase, ((url: string) => {
+      this.handleUpdateImageDimensions(url);
+      if (url !== imageContent.url) {
+        this.updateStoredURL(url);
+      }
+    }));
   }
+
   public componentWillUnmount() {
     if (this._asyncRequest) {
       this._asyncRequest = null;
