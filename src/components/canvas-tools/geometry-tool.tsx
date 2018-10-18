@@ -158,9 +158,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
     const kImgDragMargin = 25;
-    if (toolType === "image") {
+    if (!readOnly && (toolType === "image")) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       if ((e.clientX > eltBounds.left + kImgDragMargin) &&
           (e.clientX < eltBounds.right - kImgDragMargin) &&
