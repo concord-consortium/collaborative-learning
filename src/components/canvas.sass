@@ -9,3 +9,34 @@
 
   .document
     text-align: left
+
+  .icon
+    width: 40px
+    height: 40px
+    color: white
+    position: absolute
+    opacity: .4
+
+    &.west
+      left: 0
+
+    &.east
+      right: 0
+
+    &.north
+      top: 0
+
+    &.south
+      bottom: 0
+
+    &.north.west
+      background-color: blue
+    
+    &.north.east
+      background-color: orange
+    
+    &.south.east
+      background-color: green
+
+    &.south.west
+      background-color: purple
