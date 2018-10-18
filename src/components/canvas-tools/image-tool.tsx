@@ -36,9 +36,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     // Migrate Firebase storage relative URLs to full URLs
     fetchImageUrl(imageContent.url, db.firebase, ((url: string) => {
       this.handleUpdateImageDimensions(url);
-      if (url !== imageContent.url) {
-        this.updateStoredURL(url);
-      }
+      this.updateStoredURL(url);
     }));
   }
 
@@ -81,7 +79,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
-      background: "url(" + imageToUseForDisplay + ")",
+      backgroundImage: "url(" + imageToUseForDisplay + ")",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "cover",
       width: dimensions.width + "px ",
       height: dimensions.height + "px"
     };
@@ -175,7 +175,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   private updateStoredURL = (newUrl: string) => {
     const imageContent = this.props.model.content as ImageContentModelType;
-    imageContent.setUrl(newUrl);
+    if (newUrl !== imageContent.url) {
+      imageContent.setUrl(newUrl);
+    }
   }
-
 }
