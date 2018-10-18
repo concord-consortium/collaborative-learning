@@ -77,12 +77,14 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
       );
     }
     else {
+      const readOnly = primaryDocument.type === "publication";
       return this.renderDocument(
                "single-workspace",
                "primary",
                <DocumentComponent
                  document={primaryDocument}
                  workspace={sectionWorkspace}
+                 readOnly={readOnly}
                  side="primary"
                  isGhostUser={isGhostUser}
                />
