@@ -34,11 +34,31 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
     };
     return (
       <div className="toolbar">
-        <div className="tool select" title="Select" onClick={handleClickTool("select")}>↖</div>
-        <div className="tool text" title="Text" onClick={handleClickTool("text")}>T</div>
-        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}/>
-        <div className="tool image" title="Image" onClick={handleClickTool("image")}/>
-        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>{"\u274c"}</div>
+        <div className="tool select" title="Select" onClick={handleClickTool("select")}>
+          <svg className={`icon icon-select-tool`}>
+            <use xlinkHref={`#icon-select-tool`} />
+          </svg>
+        </div>
+        <div className="tool text" title="Text" onClick={handleClickTool("text")}>
+          <svg className={`icon icon-text-tool`}>
+            <use xlinkHref={`#icon-text-tool`} />
+          </svg>
+        </div>
+        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}>
+          <svg className={`icon icon-geometry-tool`}>
+            <use xlinkHref={`#icon-geometry-tool`} />
+          </svg>
+        </div>
+        <div className="tool image" title="Image" onClick={handleClickTool("image")}>
+        <svg className={`icon icon-image-tool`}>
+            <use xlinkHref={`#icon-image-tool`} />
+          </svg>
+        </div>
+        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>
+          <svg className={`icon icon-delete-tool`}>
+            <use xlinkHref={`#icon-delete-tool`} />
+          </svg>
+        </div>
       </div>
     );
   }
