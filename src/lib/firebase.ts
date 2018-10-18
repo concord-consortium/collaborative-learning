@@ -73,11 +73,6 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
   }
 
-  public getUserImagePath(user: UserModelType, imageKey?: string, userId?: string) {
-    const suffix = imageKey ? `/${imageKey}` : "";
-    return `${this.getUserPath(user, userId)}/images${suffix}`;
-  }
-
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
