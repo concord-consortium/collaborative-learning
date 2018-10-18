@@ -30,8 +30,9 @@ interface IProps extends IBaseProps {
 export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const {isGhostUser, readOnly} = this.props;
-    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly;
+    const {document, isGhostUser, readOnly} = this.props;
+    const isPublication = document.type === PublicationDocument;
+    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
     return (
       <div className="document">
         {this.renderTitleBar()}
