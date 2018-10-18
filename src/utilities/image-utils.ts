@@ -17,6 +17,7 @@ const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
 export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: any) {
   if (imageUrlLookupTable.get(imagePath)) {
     callback(imageUrlLookupTable.get(imagePath));
+    return;
   }
 
   const isFullUrl = imagePath.startsWith("http");
@@ -107,4 +108,23 @@ export function getImageDimensions(callback: any, file?: File, url?: string) {
     } else {
       image.src = url!;
     }
+}
+
+export function getDimensions(file?: File, url?: string): Promise<any> {
+  const image = new Image();
+
+  if (file) {
+    image.src = URL.createObjectURL(file);
+  } else {
+    image.src = url!;
+  }
+
+  return new Promise((resolve, reject) => {
+    image.onload = () => {
+      const width = image.width;
+      const height = image.height;
+      imageDimensionsLookupTable.set(image.src, { width, height });
+      resolve({ width, height, src: image.src });
+    };
+  });
 }

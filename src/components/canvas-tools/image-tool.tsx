@@ -3,7 +3,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
+import { fetchImageUrl, uploadImage, getDimensions } from "../../utilities/image-utils";
 import "./image-tool.sass";
 
 interface IProps {
@@ -16,7 +16,6 @@ interface IState {
   imageUrl?: string;
   isEditing?: boolean;
   isLoading?: boolean;
-  hasUpdatedUrl?: boolean;
   imageDimensions?: any;
 }
 
@@ -27,24 +26,36 @@ const defaultImagePlaceholderSize = { width: 200, height: 200 };
 export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public state: IState = { isLoading: true, imageUrl: "assets/image_placeholder.png" };
+  private _asyncRequest: any;
 
   public componentDidMount() {
     const { model: { content } } = this.props;
-    const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-    if (!this.state.hasUpdatedUrl) {
-      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-        getImageDimensions((dimensions: any) => {
-          this.setState({ imageUrl: fullUrl, imageDimensions: dimensions, isLoading: false, hasUpdatedUrl: true });
-        }, undefined, fullUrl);
-      });
+    this.handleUpdateImageDimensions(imageContent.url);
+  }
+  public componentWillUnmount() {
+    if (this._asyncRequest) {
+      this._asyncRequest = null;
+    }
+  }
+
+  public componentDidUpdate(nextProps: IProps) {
+    const { model: { content } } = nextProps;
+    const { imageUrl, isLoading } = this.state;
+
+    const imageContent = content as ImageContentModelType;
+    if (!isLoading && imageUrl && imageContent.url && imageContent.url !== imageUrl) {
+      this.handleUpdateImageDimensions(imageContent.url);
     }
   }
 
   public render() {
     const { readOnly, model } = this.props;
+    const { content } = model;
     const { isEditing, isLoading, imageUrl, imageDimensions } = this.state;
     const { ui } = this.stores;
+
+    const imageContent = content as ImageContentModelType;
     const editableClass = readOnly ? "read-only" : "editable";
 
     // Include states for selected and editing separately to clean up UI a little
@@ -56,10 +67,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       : `image-tool-controls readonly`;
 
     const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
+    const imageToUseForDisplay =
+      imageContent.url && imageContent.url.length > 0 ? imageContent.url : imageUrl;
+
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
-      background: "url(" + imageUrl + ")",
-      backgroundRepeat: "no-repeat",
+      background: "url(" + imageToUseForDisplay + ")",
       width: dimensions.width + "px ",
       height: dimensions.height + "px"
     };
@@ -70,7 +83,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
-            defaultValue={imageUrl}
+            defaultValue={imageToUseForDisplay}
             onBlur={this.handleBlur}
             onKeyUp={this.handleKeyUp}
           />
@@ -85,24 +98,28 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleImageUrlError = () => {
+  private handleUpdateImageDimensions = (imageDisplayUrl: string) => {
+    this._asyncRequest = getDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
+      this._asyncRequest = null;
+      this.setState({
+        imageUrl: imageDisplayUrl,
+        imageDimensions: dimensions,
+        isLoading: false
+      });
+    });
+  }
 
-    const { hasUpdatedUrl } = this.state;
+  private handleImageUrlError = () => {
     const { db } = this.stores;
     const { model } = this.props;
     const { content } = model;
-    if (!hasUpdatedUrl) {
-      const imageContent = content as ImageContentModelType;
-      let updatedUrl = imageContent.url;
-      fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
-        updatedUrl = fullUrl;
-      });
-      this.setState({ hasUpdatedUrl: true, imageUrl: updatedUrl });
-    }
+    const imageContent = content as ImageContentModelType;
+    fetchImageUrl(imageContent.url, db.firebase, (fullUrl: string) => {
+      this.handleUpdateImageDimensions(fullUrl);
+    });
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
     const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
@@ -113,10 +130,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     this.setState({ isLoading: true });
 
     uploadImage(db.firebase, storePath, currentFile, (imageUrl: string) => {
-      getImageDimensions((dimensions: any) => {
-        this.setState({ imageDimensions: dimensions, isLoading: false, isEditing: false, imageUrl });
-        this.updateStoredURL(storePath);
-      }, undefined, imageUrl);
+      this.handleUpdateImageDimensions(imageUrl);
+      this.updateStoredURL(imageUrl);
     });
   }
 
@@ -125,7 +140,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-
     const { isEditing } = this.state;
     if (!isEditing) {
       this.setState({ isEditing: true });
@@ -136,31 +150,33 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     // If we detect an enter key, treat the same way we handle losing focus,
     // i.e., attempt to change the URL for the image.
     if (e.keyCode === 13) {
-      getImageDimensions((dimensions: any) => {
-        this.setState({
-          imageUrl: dimensions.src, imageDimensions: dimensions,
-          isLoading: false, hasUpdatedUrl: true
-        });
-        this.updateStoredURL(dimensions.src);
-      }, undefined, e.currentTarget.value);
+      const newUrl = e.currentTarget.value;
+      if (newUrl !== this.state.imageUrl) {
+        this.updateImageFromInput(newUrl);
+      }
     }
   }
 
   private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-
-    if (e.currentTarget.value !== this.state.imageUrl) {
-      this.updateStoredURL(e.currentTarget.value);
+    const newUrl = e.currentTarget.value;
+    if (newUrl !== this.state.imageUrl) {
+      this.updateImageFromInput(newUrl);
     }
   }
 
-  private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  // User has input a new url into the input box, check the dimensions and update model and state
+  private updateImageFromInput = (newUrl: string) => {
+    this.handleUpdateImageDimensions(newUrl);
+    this.updateStoredURL(newUrl);
+  }
 
+  private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     this.setState({ isEditing: false });
   }
 
   private updateStoredURL = (newUrl: string) => {
-
     const imageContent = this.props.model.content as ImageContentModelType;
     imageContent.setUrl(newUrl);
   }
+
 }

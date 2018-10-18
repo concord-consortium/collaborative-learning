@@ -15,13 +15,7 @@ export const ImageContentModel = types
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.string
   })
-  .views(self => ({
-    get isUserResizable() {
-      return true;
-    }
-  }))
   .extend(self => {
-
     // actions
     function setUrl(url: string) {
       self.url = url;
