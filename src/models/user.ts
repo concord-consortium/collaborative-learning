@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { AuthenticatedUser } from "../lib/auth";
+import { AuthenticatedUser, PortalFirebaseStudentJWT } from "../lib/auth";
 const initials = require("initials");
 
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
@@ -16,6 +16,7 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
+    loggingRemoteEndpoint: types.maybe(types.string)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -43,6 +44,9 @@ export const UserModel = types
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
+      if (user.firebaseJWT && (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl) {
+        self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
+      }
     },
   }))
   .views((self) => ({

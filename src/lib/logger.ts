@@ -11,6 +11,7 @@ const applicationName = "CLUE";
 
 interface LogMessage {
   application: string;
+  run_remote_endpoint?: string;
   username: string;
   classHash: string;
   session: string;
@@ -140,7 +141,7 @@ export class Logger {
     }
     if (parameters) delete parameters.section;
 
-    return {
+    const logMessage: LogMessage = {
       application: applicationName,
       username:  user.id,
       classHash: user.classHash,
@@ -154,6 +155,12 @@ export class Logger {
       method: "do",           // eventually we will want to support undo, redo
       parameters
     };
+
+    if (user.loggingRemoteEndpoint) {
+      logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
+    }
+
+    return logMessage;
   }
 
   private getDocumentForTile(tileId: string): {type: string, key?: string, section?: string, uid?: string } {
