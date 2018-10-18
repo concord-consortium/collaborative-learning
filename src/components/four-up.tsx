@@ -21,6 +21,9 @@ interface FourUpUser {
   initials: string;
 }
 
+// The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
+export const BORDER_SIZE = 4;
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, {}> {
@@ -39,7 +42,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   public componentDidMount() {
     if (this.container) {
       this.grid.update({
-        height: this.container.offsetHeight,
+        height: this.container.offsetHeight - BORDER_SIZE,
         initSplitters: true,
         width: this.container.offsetWidth,
       });
@@ -160,7 +163,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   private handleResizeWindow = (e: UIEvent) => {
     if (this.container) {
       this.grid.update({
-        height: this.container.offsetHeight,
+        height: this.container.offsetHeight - BORDER_SIZE,
         resizeSplitters: true,
         width: this.container.offsetWidth,
       });
