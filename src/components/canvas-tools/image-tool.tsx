@@ -109,7 +109,15 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   private handleUpdateImageDimensions = (imageDisplayUrl: string) => {
     this._asyncRequest = getDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
-      this._asyncRequest = null;
+      // in case we were unmounted
+      if (this._asyncRequest) {
+        this._asyncRequest = null;
+        this.setState({
+          imageUrl: imageDisplayUrl,
+          imageDimensions: dimensions,
+          isLoading: false
+        });
+      }
       this.setState({
         imageUrl: imageDisplayUrl,
         imageDimensions: dimensions,
