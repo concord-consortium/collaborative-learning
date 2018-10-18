@@ -96,24 +96,8 @@ function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<B
   });
 }
 
-export function getImageDimensions(callback: any, file?: File, url?: string) {
-    const image = new Image();
-    image.onload = () => {
-      const width = image.width;
-      const height = image.height;
-      imageDimensionsLookupTable.set(image.src, { width, height });
-      callback({ width, height, src: image.src });
-    };
-
-    if (file) {
-      image.src = URL.createObjectURL(file);
-    } else {
-      image.src = url!;
-    }
-}
-
 // new Promise-based way to get dimensions
-export function getDimensions(file?: File, url?: string): Promise<any> {
+export function getImageDimensions(file?: File, url?: string): Promise<any> {
   const image = new Image();
   if (file) {
     image.src = URL.createObjectURL(file);

@@ -3,7 +3,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { fetchImageUrl, uploadImage, getDimensions } from "../../utilities/image-utils";
+import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
 import "./image-tool.sass";
 
 interface IProps {
@@ -107,7 +107,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleUpdateImageDimensions = (imageDisplayUrl: string) => {
-    this._asyncRequest = getDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
+    this._asyncRequest = getImageDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
       // in case we were unmounted
       if (this._asyncRequest) {
         this._asyncRequest = null;
