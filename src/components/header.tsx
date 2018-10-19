@@ -35,31 +35,38 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderGroup(group: GroupModelType) {
+    const {user} = this.stores;
+    const groupUsers = group.users.slice();
+    const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
+    // Put the main user first to match 4-up colors
+    if (userIndex > -1) {
+      groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
+    }
     return (
       <div className="group">
         <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
         <div className="members">
           <div className="row">
-            {this.renderGroupUser(group, 0, "nw")}
-            {this.renderGroupUser(group, 1, "ne")}
+            {this.renderGroupUser(groupUsers, 0, "nw")}
+            {this.renderGroupUser(groupUsers, 1, "ne")}
           </div>
           <div className="row">
-            {this.renderGroupUser(group, 3, "sw")}
-            {this.renderGroupUser(group, 2, "se")}
+            {this.renderGroupUser(groupUsers, 3, "sw")}
+            {this.renderGroupUser(groupUsers, 2, "se")}
           </div>
         </div>
       </div>
     );
   }
 
-  private renderGroupUser(group: GroupModelType, index: number, direction: "nw" | "ne" | "se" | "sw") {
-    if (group.users.length <= index) {
+  private renderGroupUser(groupUsers: GroupUserModelType[], index: number, direction: "nw" | "ne" | "se" | "sw") {
+    if (groupUsers.length <= index) {
       return (
         <div key={`empty-${index}`} className={`member empty ${direction}`}/>
       );
     }
 
-    const user = group.users[index];
+    const user = groupUsers[index];
     const className = `member ${user.connected ? "connected" : "disconnected"}`;
     const title = `${user.name}: ${user.connected ? "connected" : "disconnected"}`;
     return (
