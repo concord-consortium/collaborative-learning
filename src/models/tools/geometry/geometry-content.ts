@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { JXGChange, JXGProperties, JXGCoordPair, JXGObjectType } from "./jxg-changes";
 import { isFreePoint } from "./jxg-point";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
@@ -40,6 +40,8 @@ export const GeometryContentModel = types
   .extend(self => {
 
     let viewCount = 0;
+    let suspendCount = 0;
+    let batchChanges: string[] = [];
 
     // views
 
@@ -141,6 +143,17 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
+    function updateObjectsOfType(board: JXG.Board, type: JXGObjectType,
+                                 ids: string | string[], properties: JXGProperties | JXGProperties[]) {
+      const change: JXGChange = {
+              operation: "update",
+              target: type,
+              targetID: ids,
+              properties
+            };
+      return _applyChange(board, change);
+    }
+
     function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt))
@@ -157,9 +170,19 @@ export const GeometryContentModel = types
       }
     }
 
+    function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
+      return board.objectsList.filter(test);
+    }
+
     function _applyChange(board: JXG.Board, change: JXGChange) {
       const result = syncChange(board, change);
-      self.changes.push(JSON.stringify(change));
+      const jsonChange = JSON.stringify(change);
+      if (suspendCount <= 0) {
+        self.changes.push(jsonChange);
+      }
+      else {
+        batchChanges.push(jsonChange);
+      }
       return result;
     }
 
@@ -176,6 +199,9 @@ export const GeometryContentModel = types
         },
         get isUserResizable() {
           return true;
+        },
+        get batchChangeCount() {
+          return batchChanges.length;
         }
       },
       actions: {
@@ -188,9 +214,21 @@ export const GeometryContentModel = types
         addPoint,
         removeObjects,
         updateObjects,
+        updateObjectsOfType,
         createPolygonFromFreePoints,
+        findObjects,
         applyChange: _applyChange,
-        syncChange
+        syncChange,
+
+        suspendSync() {
+          ++suspendCount;
+        },
+        resumeSync() {
+          if (--suspendCount <= 0) {
+            self.changes.push.apply(self.changes, batchChanges);
+            batchChanges = [];
+          }
+        }
       }
     };
   });

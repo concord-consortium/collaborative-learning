@@ -63,6 +63,7 @@ declare namespace JXG {
 
   class GeometryElement {
     id: string;
+    elType: string;
     type: number;
     ancestors: { [id: string]: GeometryElement };
     visProp: { [prop: string]: any };
@@ -82,6 +83,8 @@ declare namespace JXG {
   class Image extends CoordsElement {
     size: [number, number];
     url: string;
+
+    setSize: (width: number, height: number) => void;
   }
 
   class Point extends CoordsElement {
