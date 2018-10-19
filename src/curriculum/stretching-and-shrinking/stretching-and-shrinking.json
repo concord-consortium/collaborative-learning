@@ -101,32 +101,31 @@
       "ordinal": 1,
       "title": "Enlarging and Reducing Shapes",
       "introduction": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
-            }
-          },
-          {
-            "content": {
-              "type": "Image",
-              "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
-            }
-          }
-        ]
+        "tiles": [ ]
       },
       "problems": [
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "Solving a Mystery",
+          "title": "1.1 Solving a Mystery",
           "subtitle": "An Introduction to Similarity",
           "sections": [
             {
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
+                    }
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -216,7 +215,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -229,7 +228,7 @@
         {
           "description": "Problem 1.2",
           "ordinal": 2,
-          "title": "Stretching a Figure",
+          "title": "1.2 Stretching a Figure",
           "subtitle": "Comparing Similar Figures",
           "sections": [
             {
@@ -345,7 +344,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -358,7 +357,7 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "Scaling Up and Down",
+          "title": "1.3 Scaling Up and Down",
           "subtitle": "Corresponding Sides and Angles",
           "sections": [
             {
@@ -527,7 +526,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -571,7 +570,7 @@
         {
           "description": "Problem 2.1",
           "ordinal": 1,
-          "title": "Drawing Wumps",
+          "title": "2.1 Drawing Wumps",
           "subtitle": "Making Similar Figures",
           "sections": [
             {
@@ -758,7 +757,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -771,7 +770,7 @@
         {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "Hats Off to the Wumps",
+          "title": "2.2 Hats Off to the Wumps",
           "subtitle": "Changing a Figure's Size and Location",
           "sections": [
             {
@@ -927,7 +926,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -940,7 +939,7 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "Mouthing Off and Nosing Around",
+          "title": "2.3 Mouthing Off and Nosing Around",
           "subtitle": "Scale Factors",
           "sections": [
             {
@@ -1128,7 +1127,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1196,7 +1195,7 @@
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "Rep-Tile Quadrilaterals",
+          "title": "3.1 Rep-Tile Quadrilaterals",
           "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
           "sections": [
              {
@@ -1388,7 +1387,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1401,7 +1400,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "Designing Under Constraints",
+          "title": "3.2 Designing Under Constraints",
           "subtitle": "Scale Factors and Similar Shapes",
           "sections": [
             {
@@ -1559,7 +1558,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1572,7 +1571,7 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "Out of Reach",
+          "title": "3.3 Out of Reach",
           "subtitle": "Finding Lengths with Similar Triangles",
           "sections": [
             {
@@ -1675,7 +1674,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1717,7 +1716,7 @@
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "Ratios Within Similar Parallelograms",
+          "title": "4.1 Ratios Within Similar Parallelograms",
           "subtitle": "",
           "sections": [
             {
@@ -1859,7 +1858,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1870,7 +1869,7 @@
         }, {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "Finding Missing Parts",
+          "title": "4.2 Finding Missing Parts",
           "subtitle": "Using Similarity to Find Measurements",
           "sections": [
             {
@@ -1979,7 +1978,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
@@ -1994,7 +1993,7 @@
         }, {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "Using Shadows to Find Height",
+          "title": "4.3 Using Shadows to Find Height",
           "subtitle": "",
           "sections": [
             {
@@ -2118,7 +2117,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use this extra workspace for additional problem solving."
+                      "text": ""
                     }
                   }
                 ],
