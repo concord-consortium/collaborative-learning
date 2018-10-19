@@ -40,6 +40,8 @@ export const GeometryContentModel = types
   .extend(self => {
 
     let viewCount = 0;
+    let suspendCount = 0;
+    let batchChanges: string[] = [];
 
     // views
 
@@ -157,9 +159,19 @@ export const GeometryContentModel = types
       }
     }
 
+    function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
+      return board.objectsList.filter(test);
+    }
+
     function _applyChange(board: JXG.Board, change: JXGChange) {
       const result = syncChange(board, change);
-      self.changes.push(JSON.stringify(change));
+      const jsonChange = JSON.stringify(change);
+      if (suspendCount <= 0) {
+        self.changes.push(jsonChange);
+      }
+      else {
+        batchChanges.push(jsonChange);
+      }
       return result;
     }
 
@@ -176,6 +188,9 @@ export const GeometryContentModel = types
         },
         get isUserResizable() {
           return true;
+        },
+        get batchChangeCount() {
+          return batchChanges.length;
         }
       },
       actions: {
@@ -189,8 +204,19 @@ export const GeometryContentModel = types
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
+        findObjects,
         applyChange: _applyChange,
-        syncChange
+        syncChange,
+
+        suspendSync() {
+          ++suspendCount;
+        },
+        resumeSync() {
+          if (--suspendCount <= 0) {
+            self.changes.push.apply(self.changes, batchChanges);
+            batchChanges = [];
+          }
+        }
       }
     };
   });

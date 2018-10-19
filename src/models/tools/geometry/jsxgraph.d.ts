@@ -63,6 +63,7 @@ declare namespace JXG {
 
   class GeometryElement {
     id: string;
+    elType: string;
     type: number;
     ancestors: { [id: string]: GeometryElement };
     visProp: { [prop: string]: any };
