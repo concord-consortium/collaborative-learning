@@ -38,17 +38,50 @@
     .actions
       flex-grow: 0
       padding: 1px 0
+      display: flex
+
+      .mode
+        border-top-right-radius: $border-radius
+
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
+      .visibility.private
+        .icon
+          color: $color1-4
+        &:hover .icon
+          color: $color1-6
+        &:active .icon
+          color: $color1-7
+
+      .visibility.public
+        .icon
+          color: $color1-6
+        &:hover .icon
+          color: $color1-5
+        &:active .icon
+          color: $color1-4
 
       .icon
-        background-color: #b3ca9d
-        color: #9EBA83
+        background-color: $color1-3
+        color: $color1-7
         height: 30px
         width: 30px
         padding: $half-padding
         margin-left: $half-margin
+        cursor: pointer
 
-        &:last-child
-          border-top-right-radius: $border-radius
+        &:hover
+          background-color: $color1-4
+
+        &:active
+          background-color: $color1-5
 
   .canvas-area
     position: absolute
@@ -125,14 +158,29 @@
       flex-grow: 0
       padding: 1px 0
 
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
       .icon
-        background-color: #b3ca9d
-        color: #9EBA83
+        background-color: $color1-3
+        color: $color1-7
         height: 30px
         width: 30px
         padding: $half-padding
         margin-left: $half-margin
+        border-bottom-right-radius: $border-radius
+        cursor: pointer
 
-        &:last-child
-          border-bottom-right-radius: $border-radius
+        &:hover
+          background-color: $color1-4
+
+        &:active
+          background-color: $color1-5
+
 

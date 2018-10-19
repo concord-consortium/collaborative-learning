@@ -68,12 +68,12 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         {!hideButtons &&
           <div className="actions">
-            <svg className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
-              <use xlinkHref={`#icon-publish`} />
-            </svg>
-            <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
-              <use xlinkHref={`#icon-${share}`} />
-            </svg>
+            {[
+              <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
+                <use xlinkHref={`#icon-publish`} />
+              </svg>,
+              this.renderShare()
+            ]}
             {show4up ? this.renderMode() : null}
           </div>
         }
@@ -81,13 +81,34 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private renderShare() {
+    const {document} = this.props;
+    const currVis = document.visibility === "private" ? "private" : "public";
+    return (
+      <div key="share" className={`visibility action ${currVis}`}>
+        <svg id="currVis" className={`share icon icon-share`} onClick={this.handleToggleVisibility}>
+          <use xlinkHref={`#icon-share`} />
+        </svg>
+      </div>
+    );
+  }
+
   private renderMode() {
     const {workspace} = this.props;
-    const mode = workspace.mode === "1-up" ? "up1" : "up";
+    const currMode = workspace.mode === "1-up" ? "up1" : "up4";
+    const nextMode = workspace.mode === "1-up" ? "up4" : "up1";
+    // render both icons and show the correct one with CSS
     return (
-      <svg className={`icon icon-${mode}`} onClick={this.handleToggleWorkspaceMode}>
-        <use xlinkHref={`#icon-${mode}`} />
-      </svg>
+      <div className="mode action">
+        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleWorkspaceMode}>
+          <use xlinkHref={`#icon-${currMode}`} />
+        </svg>
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
+          onClick={this.handleToggleWorkspaceMode}
+        >
+          <use xlinkHref={`#icon-${nextMode}`} />
+        </svg>
+      </div>
     );
   }
 
@@ -169,14 +190,21 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTwoUpButton() {
-    const {ui} = this.stores;
     const {workspace} = this.props;
-    const mode = workspace.comparisonVisible ? "up" : "up2";
+    const currMode = workspace.comparisonVisible ? "up2" : "up1";
+    const nextMode = workspace.comparisonVisible ? "up1" : "up2";
 
     return (
-      <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
-        <use xlinkHref={`#icon-${mode}`} />
-      </svg>
+      <div className="mode action">
+        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleTwoUp}>
+          <use xlinkHref={`#icon-${currMode}`} />
+        </svg>
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
+          onClick={this.handleToggleTwoUp}
+        >
+          <use xlinkHref={`#icon-${nextMode}`} />
+        </svg>
+      </div>
     );
   }
 
