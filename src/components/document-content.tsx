@@ -224,12 +224,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    const { content } = this.props;
+    const { content, readOnly } = this.props;
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
 
-    if (!content) return;
+    if (!content || readOnly) return;
 
     if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
       this.handleRowResizeDrop(e);
