@@ -59,7 +59,7 @@ describe("document model", () => {
 
   it("allows tiles to be deleted", () => {
     const result = document.addTile("text");
-    const tileId = result && result.tile.id;
+    const tileId = result && result.tileId;
     expect(document.content.tileMap.size).toBe(1);
     document.deleteTile(tileId!);
     expect(document.content.tileMap.size).toBe(0);

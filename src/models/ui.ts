@@ -128,6 +128,9 @@ export const UIModel = types
       setSelectedTile(tile?: ToolTileModelType) {
         self.selectedTileId = tile ? tile.id : undefined;
       },
+      setSelectedTileId(tileId: string) {
+        self.selectedTileId = tileId;
+      },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
       },
