@@ -18,8 +18,8 @@ export interface NewRowOptions {
 }
 
 export interface INewRowTile {
-  row: TileRowModelType;
-  tile: ToolTileModelType;
+  rowId: string;
+  tileId: string;
 }
 
 export const DocumentContentModel = types
@@ -106,17 +106,18 @@ export const DocumentContentModel = types
       const action = o.action || LogEventName.CREATE_TILE;
       Logger.logTileEvent(action, tile, o.loggingMeta);
 
-      return { row, tile };
+      return { rowId: row.id, tileId: tile.id };
     },
   }))
   .actions((self) => ({
     addGeometryTile(addSidecarNotes?: boolean) {
       const result = self.addTileInNewRow(defaultGeometryContent(),
                                           { rowHeight: kGeometryDefaultHeight });
-      const { row } = result;
+      const { rowId } = result;
+      const row = self.rowMap.get(rowId);
       const tile = ToolTileModel.create({ content: defaultTextContent() });
       self.tileMap.put(tile);
-      row.insertTileInRow(tile, 1);
+      row!.insertTileInRow(tile, 1);
       return result;
     },
     addTextTile(initialText?: string) {

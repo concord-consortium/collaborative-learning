@@ -153,14 +153,7 @@
                   }
                 ]
               },
-              "supports": [
-                {
-                  "text": "TEST: problem 1.1 level support #1"
-                },
-                {
-                  "text": "TEST: problem 1.1 level support #2"
-                }
-              ]
+              "supports": [ ]
             },
             {
               "type": "initialChallenge",

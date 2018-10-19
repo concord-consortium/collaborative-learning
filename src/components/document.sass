@@ -38,59 +38,56 @@
     .actions
       flex-grow: 0
       padding: 1px 0
+      display: flex
+
+      .mode
+        border-top-right-radius: $border-radius
+
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
+      .visibility.private
+        .icon
+          color: $color1-4
+        &:hover .icon
+          color: $color1-6
+        &:active .icon
+          color: $color1-7
+
+      .visibility.public
+        .icon
+          color: $color1-6
+        &:hover .icon
+          color: $color1-5
+        &:active .icon
+          color: $color1-4
 
       .icon
-        background-color: #b3ca9d
-        color: #9EBA83
+        background-color: $color1-3
+        color: $color1-7
         height: 30px
         width: 30px
         padding: $half-padding
         margin-left: $half-margin
+        cursor: pointer
 
-        &:last-child
-          border-top-right-radius: $border-radius
+        &:hover
+          background-color: $color1-4
 
-  .toolbar
-    position: absolute
-    top: $workspace-titlebar-height
-    bottom: $workspace-statusbar-height
-    width: $workspace-toolbar-width
-    border-right: $border-width solid $border-color
-
-    display: flex
-    flex-direction: column
-
-    .tool
-      width: $workspace-toolbar-width
-      height: $workspace-toolbar-width
-      background-color: #C9C9C9
-      display: flex
-      justify-content: center
-      align-items: center
-      text-align: center
-      font-size: 20px
-      font-weight: bold
-      margin-bottom: $quarter-margin
-
-      &.geometry
-        background-image: url("../assets/logo_tw.png")
-        background-size: contain
-        background-repeat: no-repeat
-
-      &.image
-        background-image: url("../assets/logo_image_tool.svg")
-        background-size: contain
-        background-repeat: no-repeat
-
-      &.active
-        color: #fff
-        background-color: #888888
+        &:active
+          background-color: $color1-5
 
   .canvas-area
     position: absolute
     top: $workspace-titlebar-height
     bottom: $workspace-statusbar-height
-    left: $workspace-toolbar-width
+    left: 0
     right: 0
     border-top: $border-width solid $border-color
 
@@ -161,16 +158,29 @@
       flex-grow: 0
       padding: 1px 0
 
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
       .icon
-        background-color: #b3ca9d
-        color: #9EBA83
+        background-color: $color1-3
+        color: $color1-7
         height: 30px
         width: 30px
         padding: $half-padding
         margin-left: $half-margin
+        border-bottom-right-radius: $border-radius
+        cursor: pointer
 
-        &:last-child
-          border-bottom-right-radius: $border-radius
+        &:hover
+          background-color: $color1-4
 
+        &:active
+          background-color: $color1-5
 
 

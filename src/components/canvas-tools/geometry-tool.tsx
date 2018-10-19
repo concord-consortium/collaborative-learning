@@ -29,6 +29,7 @@ interface IProps extends SizeMeProps {
 
 interface IState extends SizeMeProps {
   elementId?: string;
+  scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges?: number;
@@ -70,14 +71,20 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const nextState: IState = {};
 
     const { readOnly, size } = nextProps;
+    const geometryContent = content as GeometryContentModelType;
     if (size && size.width && size.height && (!prevState.size ||
         ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
-      (content as GeometryContentModelType).resizeBoard(prevState.board, size.width, size.height, scale);
+      geometryContent.resizeBoard(prevState.board, size.width, size.height, scale);
       nextState.size = size;
     }
 
+    if (scale && (scale !== prevState.scale)) {
+      // let JSXGraph know about the scale change
+      geometryContent.updateScale(prevState.board, scale);
+      nextState.scale = scale;
+    }
+
     if (content !== prevState.content) {
-      const geometryContent = content as GeometryContentModelType;
       if (geometryContent.changes.length !== prevState.syncedChanges) {
         for (let i = prevState.syncedChanges || 0; i < geometryContent.changes.length; ++i) {
           try {
@@ -151,9 +158,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
     const kImgDragMargin = 25;
-    if (toolType === "image") {
+    if (!readOnly && (toolType === "image")) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       if ((e.clientX > eltBounds.left + kImgDragMargin) &&
           (e.clientX < eltBounds.right - kImgDragMargin) &&
@@ -188,11 +196,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const geometryContent = content as GeometryContentModelType;
         const droppedContent = parsedContent.content;
         const urlOrProxy = droppedContent && droppedContent.url;
-        getImageDimensions((dimensions: any) => {
+        getImageDimensions(undefined, urlOrProxy).then((dimensions: any) => {
           const width = dimensions.width / kGeometryDefaultPixelsPerUnit;
           const height = dimensions.height / kGeometryDefaultPixelsPerUnit;
           geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
-        }, undefined, urlOrProxy);
+        });
         e.preventDefault();
         e.stopPropagation();
       }

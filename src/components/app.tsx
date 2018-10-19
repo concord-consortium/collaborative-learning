@@ -10,6 +10,7 @@ import { TeacherDashboardComponent } from "./teacher-dashboard";
 import "./app.sass";
 import { GroupChooserComponent } from "./group-chooser";
 import { IStores } from "../models/stores";
+import { updateProblem } from "../lib/misc";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -21,10 +22,13 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   const {appMode, user, db, ui} = stores;
 
   authenticate(appMode, urlParams)
-    .then(({authenticatedUser, classInfo}) => {
+    .then(({authenticatedUser, classInfo, problemId}) => {
       user.setAuthenticatedUser(authenticatedUser);
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
+      }
+      if (problemId) {
+        updateProblem(stores, problemId);
       }
 
       if (appMode === "authed")  {

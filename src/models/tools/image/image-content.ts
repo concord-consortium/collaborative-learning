@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+const placeholderImage = "assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 

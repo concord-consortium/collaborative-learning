@@ -29,13 +29,39 @@
 
     .canvas-scaler
       position: absolute
+      background-color: white
       top: 0
       left: 0
 
     .member
       position: absolute
       font-size: 10px
+      color: white
       padding: $half-padding
-      border: 1px solid #777
+      opacity: .5
+
+    .member:hover
+      opacity: 1
+
+    &.north-west .member
       bottom: 0
       right: 0
+      background-color: blue
+
+    &.north-east .member
+      bottom: 0
+      left: 0
+      background-color: orange
+      border-top-right-radius: $border-radius
+
+    &.south-east .member
+      top: 0
+      left: 0
+      background-color: green
+      border-bottom-right-radius: $border-radius
+
+    &.south-west .member
+      top: 0
+      right: 0
+      background-color: purple
+      border-bottom-left-radius: $border-radius

@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 import { WorkspaceModel } from "./workspace";
 import { ToolTileModelType } from "./tools/tool-tile";
-import { DocumentModelType } from "./document";
+import { DocumentModelType, PublicationDocument } from "./document";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
@@ -128,21 +128,36 @@ export const UIModel = types
       setSelectedTile(tile?: ToolTileModelType) {
         self.selectedTileId = tile ? tile.id : undefined;
       },
+      setSelectedTileId(tileId: string) {
+        self.selectedTileId = tileId;
+      },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
       },
       closeDialog,
 
       rightNavDocumentSelected(document: DocumentModelType) {
+        // learning log
         if (self.bottomNavExpanded) {
           if (self.learningLogWorkspace.primaryDocumentKey) {
             self.learningLogWorkspace.setComparisonDocument(document);
-            self.learningLogWorkspace.toggleComparisonVisible(true);
+            self.learningLogWorkspace.toggleComparisonVisible({override: true});
           }
           else {
             alert("Please select a Learning Log first.", "Select for Learning Log");
           }
         }
+        // class work
+        else if (document.type === PublicationDocument) {
+          if (self.sectionWorkspace.primaryDocumentKey) {
+            self.sectionWorkspace.setComparisonDocument(document);
+            self.sectionWorkspace.toggleComparisonVisible({override: true});
+          }
+          else {
+            alert("Please select a primary document first.", "Select Primary Document");
+          }
+        }
+        // my work
         else {
           self.sectionWorkspace.setAvailableDocument(document);
           contractAll();

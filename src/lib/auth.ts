@@ -4,6 +4,7 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo-creator";
+import { ProblemModelType } from "../models/curriculum/problem";
 
 const initials = require("initials");
 
@@ -306,7 +307,8 @@ export const getClassInfo = (params: GetClassInfoParams) => {
 };
 
 export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
-  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo}>((resolve, reject) => {
+  // tslint:disable-next-line:max-line-length
+  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo, problemId?: string}>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
@@ -395,7 +397,12 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                       authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
                       authenticatedUser.id = uidAsString;
                       authenticatedUser.portal = portal;
-                      resolve({authenticatedUser, classInfo});
+
+                      getProblemIdForAuthenticatedUser(bearerToken, urlParams).then((problemId) => {
+                        if (authenticatedUser) {
+                          resolve({authenticatedUser, classInfo, problemId});
+                        }
+                      });
                     }
                     else {
                       reject("Current user not found in class roster");
@@ -413,6 +420,29 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
           .catch(reject);
       })
       .catch(reject);
+  });
+};
+
+export const getProblemIdForAuthenticatedUser = (bearerToken: string, urlParams?: QueryParams) => {
+  return new Promise<string|undefined>((resolve, reject) => {
+    if (urlParams && urlParams.offering) {
+      superagent
+      .get(urlParams.offering)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const activityUrl = ((res.body || {}).activity_url) || "";
+          const [ignore, query, ...rest] = activityUrl.split("?");
+          const params = queryString.parse(query);
+          resolve(params.problem);
+        }
+      });
+    }
+    else {
+      resolve(undefined);
+    }
   });
 };
 

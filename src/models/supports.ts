@@ -4,6 +4,7 @@ import { UnitModelType } from "./curriculum/unit";
 import { SupportModelType } from "./curriculum/support";
 import { ProblemModelType } from "./curriculum/problem";
 import { InvestigationModelType } from "./curriculum/investigation";
+import { Logger, LogEventName } from "../lib/logger";
 
 export enum SupportItemType {
   unit = "unit",
@@ -70,6 +71,11 @@ export const SupportsModel = types
         self.supports.forEach((supportItem) => {
           supportItem.setVisible((support === supportItem) && visible);
         });
+        if (visible) {
+          Logger.log(LogEventName.VIEW_SHOW_SUPPORT, {
+            text: support.text
+          });
+        }
       }
     };
   });

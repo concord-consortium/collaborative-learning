@@ -31,6 +31,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
+  private mutationObserver: MutationObserver;
+
+  public componentDidMount() {
+    if (this.domElement && (window as any).MutationObserver) {
+      this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
+      this.mutationObserver.observe(this.domElement, { childList: true });
+    }
+  }
+
+  public componentWillUnmount() {
+    this.mutationObserver.disconnect();
+  }
 
   public render() {
     return (
@@ -81,6 +93,37 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
       ui.setSelectedTile();
+    }
+  }
+
+  private handleRowElementsChanged = (mutationsList: MutationRecord[], mutationsObserver: MutationObserver) => {
+    if (!this.domElement) return;
+
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        // auto-scroll to new tile rows
+        if (mutation.addedNodes.length) {
+          const newRow = mutation.addedNodes[mutation.addedNodes.length - 1] as Element;
+          const newRowBounds = newRow.getBoundingClientRect();
+          const contentBounds = this.domElement.getBoundingClientRect();
+          const visibleContent = {
+                  top: this.domElement.scrollTop,
+                  bottom: this.domElement.scrollTop + contentBounds.height
+                };
+          const newRowInContent = {
+                  top: newRowBounds.top - contentBounds.top + this.domElement.scrollTop,
+                  bottom: newRowBounds.bottom - contentBounds.top + this.domElement.scrollTop
+                };
+          const kScrollTopMargin = 2;
+          const kScrollBottomMargin = 10;
+          if (newRowInContent.bottom > visibleContent.bottom) {
+            this.domElement.scrollTop += newRowInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
+          }
+          else if (newRowInContent.top < visibleContent.top) {
+            this.domElement.scrollTop += newRowInContent.top - kScrollTopMargin - visibleContent.top;
+          }
+        }
+      }
     }
   }
 
@@ -224,12 +267,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    const { content } = this.props;
+    const { content, readOnly } = this.props;
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
 
-    if (!content) return;
+    if (!content || readOnly) return;
 
     if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
       this.handleRowResizeDrop(e);
