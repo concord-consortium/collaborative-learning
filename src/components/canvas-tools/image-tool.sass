@@ -20,13 +20,18 @@
     top: 0px
 
   .image-tool-controls
-    width: 20px
-    height: 20px
+    width: $double-margin
+    height: $double-margin
     position: absolute
-    top: 4px
+    top: 0px
+    left: $double-margin
     opacity: 0
-    border-radius: 2px
-    border: 1px solid white
+    border-radius: $border-radius
+    border-top-left-radius: 0
+    border-bottom-left-radius: 0
+    border-top-right-radius: 0
+    border: $border-width solid $border-color
+    border-top: 0
     transition: 0.3s
     z-index: 1
 
@@ -40,6 +45,7 @@
       background-image: url("../../assets/logo_image_tool.svg")
       background-size: contain
       background-repeat: no-repeat
+      background-position: center
 
     &.editing
       width: 90%
