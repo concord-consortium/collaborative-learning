@@ -297,7 +297,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
           const point = content.addPoint(board, [x, y], props) as JXG.Point;
-          this.handleCreatePoint(point);
+          if (point) {
+            this.handleCreatePoint(point);
+          }
         });
       }
     };
@@ -317,7 +319,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (board && (content.type === "Geometry")) {
           this.applyChange(() => {
             const polygon = content.createPolygonFromFreePoints(board) as JXG.Polygon;
-            this.handleCreatePolygon(polygon);
+            if (polygon) {
+              this.handleCreatePolygon(polygon);
+            }
           });
           this.lastPointDown = undefined;
         }
