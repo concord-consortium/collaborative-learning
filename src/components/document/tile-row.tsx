@@ -65,7 +65,8 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     const height = this.props.height || model.height;
     const style = height ? { height } : undefined;
     return (
-      <div className={`tile-row`} style={style} ref={elt => this.tileRowDiv = elt}>
+      <div className={`tile-row`} data-row-id={model.id}
+          style={style} ref={elt => this.tileRowDiv = elt}>
         {this.renderTiles(height)}
         {this.renderBottomResizeHandle()}
       </div>

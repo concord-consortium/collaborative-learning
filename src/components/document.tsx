@@ -57,7 +57,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderSectionTitleBar(hideButtons?: boolean) {
-    const {ui, problem} = this.stores;
+    const {problem} = this.stores;
     const {workspace, document} = this.props;
     const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
@@ -91,7 +91,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderLearningLogTitleBar() {
-    const {workspace, document} = this.props;
+    const {document} = this.props;
     return (
       <div className="titlebar">
         <div className="title">Learning Log: {document.title}</div>
@@ -112,7 +112,10 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
             }
             break;
           default:
-            document.addTile(tool, tool === "geometry");
+            const rowTile = document.addTile(tool, tool === "geometry");
+            if (rowTile && rowTile.tileId) {
+              ui.setSelectedTileId(rowTile.tileId);
+            }
         }
       };
     };

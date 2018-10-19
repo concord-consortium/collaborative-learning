@@ -65,6 +65,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className={`tool-tile${selectedClass}`}
+          data-tool-id={model.id}
           style={style}
           onDragStart={this.handleToolDragStart}
           draggable={true}
