@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.0.6 - released October 18, 2018
+
+- Fixed problem display in teacher dashboard [#161252954]
+- Fix scaled geometry clicks [#161234989] - fixes clicks, drags, double-clicks in four-up and other scaled views
+- Disable dragging to read-only geometry tool instances [#161287045]
+- Fix comparison workspace [#161270806][#161270843]
+- Publications only show in comparison view [#161331884]
+- Published documents should be read-only [#161328541]
+- Don't allow drops on read-only canvases [#161272097]
+- Auto-select and scroll to new tile rows [#161151927]
+- Adds remote endpoint to log messages
+- Full support for image upload
+- Updates to UI including editability icons, group styling and new icons with hover behavior
+
 ## Version 0.0.5 - released October 16, 2018
 
 - Spike: add image to geometry in curriculum [#161137053] - add support for images to geometry tool
