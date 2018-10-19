@@ -8,7 +8,7 @@ export const isImage = (v: any) => v instanceof JXG.Image;
 export const imageChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
     const parents = change.parents;
-    const props = assign({ id: uuid() }, change.properties);
+    const props = assign({ id: uuid(), fixed: true }, change.properties);
     return parents && parents.length >= 3
             ? board.create("image", change.parents, props)
             : undefined;
