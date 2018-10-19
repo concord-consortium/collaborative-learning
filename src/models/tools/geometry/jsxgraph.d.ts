@@ -83,6 +83,8 @@ declare namespace JXG {
   class Image extends CoordsElement {
     size: [number, number];
     url: string;
+
+    setSize: (width: number, height: number) => void;
   }
 
   class Point extends CoordsElement {
