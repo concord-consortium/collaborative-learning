@@ -17,12 +17,16 @@ const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
 export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: any) {
   if (imageUrlLookupTable.get(imagePath)) {
     callback(imageUrlLookupTable.get(imagePath));
+    return;
   }
 
   const isFullUrl = imagePath.startsWith("http");
   const isLocalFilePath = imagePath.startsWith("assets/");
+  const isFirebaseStorageUrl = imagePath.startsWith("https://firebasestorage");
+  const placeholderImage = "assets/image_placeholder.png";
+  const imageUrlAsReference = isFirebaseStorageUrl ? imagePath : undefined;
 
-  if (isFullUrl) {
+  if (isFullUrl && !isFirebaseStorageUrl) {
     imageUrlLookupTable.set(imagePath, imagePath);
     callback(imageUrlLookupTable.get(imagePath));
   }
@@ -30,15 +34,14 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
     callback(imagePath);
   }
   else {
-    firebase.getPublicUrlFromStore(imagePath).then((url) => {
-      if (url) {
-        imageUrlLookupTable.set(imagePath, url);
-        callback(url);
-      } else {
-        callback("assets/image_placeholder.png");
-      }
+    // Pass in the imagePath as the second argument to get the ref to firebase by url
+    // This is needed if an image of the same name has been uploaded in two different components,
+    // since each public URL becomes invalid and a new url generated on upload
+    firebase.getPublicUrlFromStore(imagePath, imageUrlAsReference).then((url) => {
+      imageUrlLookupTable.set(imagePath, url ? url : placeholderImage);
+      callback(url ? url : placeholderImage);
     }).catch(() => {
-      callback("assets/image_placeholder.png");
+      callback(placeholderImage);
     });
   }
 }
@@ -93,18 +96,20 @@ function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<B
   });
 }
 
-export function getImageDimensions(callback: any, file?: File, url?: string) {
-    const image = new Image();
+// new Promise-based way to get dimensions
+export function getImageDimensions(file?: File, url?: string): Promise<any> {
+  const image = new Image();
+  if (file) {
+    image.src = URL.createObjectURL(file);
+  } else {
+    image.src = url!;
+  }
+  return new Promise((resolve, reject) => {
     image.onload = () => {
       const width = image.width;
       const height = image.height;
       imageDimensionsLookupTable.set(image.src, { width, height });
-      callback({ width, height, src: image.src });
+      resolve({ width, height, src: image.src });
     };
-
-    if (file) {
-      image.src = URL.createObjectURL(file);
-    } else {
-      image.src = url!;
-    }
+  });
 }
