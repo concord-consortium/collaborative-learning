@@ -14,6 +14,7 @@ import { DocumentModelType,
 import { WorkspaceModelType } from "../models/workspace";
 
 import "./document.sass";
+import { ToolbarComponent } from "./toolbar";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -33,14 +34,14 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {document, isGhostUser, readOnly} = this.props;
     const isPublication = document.type === PublicationDocument;
     const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    return (
-      <div className="document">
-        {this.renderTitleBar()}
-        {showToolbar ? this.renderToolbar() : null}
-        {this.renderCanvas()}
-        {this.renderStatusBar()}
-      </div>
-    );
+    return [
+        showToolbar ? this.renderToolbar() : null,
+        <div key="document" className="document">
+          {this.renderTitleBar()}
+          {this.renderCanvas()}
+          {this.renderStatusBar()}
+        </div>
+    ];
   }
 
   private renderTitleBar() {
@@ -67,12 +68,12 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         {!hideButtons &&
           <div className="actions">
-            <svg className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
-              <use xlinkHref={`#icon-publish`} />
-            </svg>
-            <svg className={`icon icon-${share}`} onClick={this.handleToggleVisibility}>
-              <use xlinkHref={`#icon-${share}`} />
-            </svg>
+            {[
+              <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
+                <use xlinkHref={`#icon-publish`} />
+              </svg>,
+              this.renderShare()
+            ]}
             {show4up ? this.renderMode() : null}
           </div>
         }
@@ -80,13 +81,34 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private renderShare() {
+    const {document} = this.props;
+    const currVis = document.visibility === "private" ? "private" : "public";
+    return (
+      <div key="share" className={`visibility action ${currVis}`}>
+        <svg id="currVis" className={`share icon icon-share`} onClick={this.handleToggleVisibility}>
+          <use xlinkHref={`#icon-share`} />
+        </svg>
+      </div>
+    );
+  }
+
   private renderMode() {
     const {workspace} = this.props;
-    const mode = workspace.mode === "1-up" ? "up1" : "up";
+    const currMode = workspace.mode === "1-up" ? "up1" : "up4";
+    const nextMode = workspace.mode === "1-up" ? "up4" : "up1";
+    // render both icons and show the correct one with CSS
     return (
-      <svg className={`icon icon-${mode}`} onClick={this.handleToggleWorkspaceMode}>
-        <use xlinkHref={`#icon-${mode}`} />
-      </svg>
+      <div className="mode action">
+        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleWorkspaceMode}>
+          <use xlinkHref={`#icon-${currMode}`} />
+        </svg>
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
+          onClick={this.handleToggleWorkspaceMode}
+        >
+          <use xlinkHref={`#icon-${nextMode}`} />
+        </svg>
+      </div>
     );
   }
 
@@ -101,33 +123,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
-    const {document} = this.props;
-    const handleClickTool = (tool: DocumentTool) => {
-      const { ui } = this.stores;
-      return (e: React.MouseEvent<HTMLDivElement>) => {
-        switch (tool) {
-          case "delete":
-            if (ui.selectedTileId) {
-              document.deleteTile(ui.selectedTileId);
-            }
-            break;
-          default:
-            const rowTile = document.addTile(tool, tool === "geometry");
-            if (rowTile && rowTile.tileId) {
-              ui.setSelectedTileId(rowTile.tileId);
-            }
-        }
-      };
-    };
-    return (
-      <div className="toolbar">
-        <div className="tool select" title="Select" onClick={handleClickTool("select")}>↖</div>
-        <div className="tool text" title="Text" onClick={handleClickTool("text")}>T</div>
-        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}/>
-        <div className="tool image" title="Image" onClick={handleClickTool("image")}/>
-        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>{"\u274c"}</div>
-      </div>
-    );
+    return <ToolbarComponent key="toolbar" document={this.props.document} />;
   }
 
   private renderCanvas() {
@@ -194,14 +190,21 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTwoUpButton() {
-    const {ui} = this.stores;
     const {workspace} = this.props;
-    const mode = workspace.comparisonVisible ? "up" : "up2";
+    const currMode = workspace.comparisonVisible ? "up2" : "up1";
+    const nextMode = workspace.comparisonVisible ? "up1" : "up2";
 
     return (
-      <svg className={`icon icon-${mode}`} onClick={this.handleToggleTwoUp}>
-        <use xlinkHref={`#icon-${mode}`} />
-      </svg>
+      <div className="mode action">
+        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleTwoUp}>
+          <use xlinkHref={`#icon-${currMode}`} />
+        </svg>
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
+          onClick={this.handleToggleTwoUp}
+        >
+          <use xlinkHref={`#icon-${nextMode}`} />
+        </svg>
+      </div>
     );
   }
 

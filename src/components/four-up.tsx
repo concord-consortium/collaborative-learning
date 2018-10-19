@@ -21,6 +21,9 @@ interface FourUpUser {
   initials: string;
 }
 
+// The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
+export const BORDER_SIZE = 4;
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, {}> {
@@ -39,7 +42,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   public componentDidMount() {
     if (this.container) {
       this.grid.update({
-        height: this.container.offsetHeight,
+        height: this.container.offsetHeight - BORDER_SIZE,
         initSplitters: true,
         width: this.container.offsetWidth,
       });
@@ -106,7 +109,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+            <CanvasComponent context="four-up-nw" scale={nwCell.scale} showEditability={groupUsers[0] && "north west"}
               readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
               document={groupDoc(0)} {...others} />
           </div>
@@ -114,21 +117,21 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent context="four-up-ne" scale={neCell.scale}
+            <CanvasComponent context="four-up-ne" scale={neCell.scale} showEditability={groupUsers[1] && "north east"}
                             readOnly={true} document={groupDoc(1)} {...others} />
           </div>
           {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent context="four-up-se" scale={seCell.scale}
+            <CanvasComponent context="four-up-se" scale={seCell.scale} showEditability={groupUsers[2] && "south east"}
                             readOnly={true} document={groupDoc(2)} {...others}/>
           </div>
           {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent context="four-up-sw" scale={swCell.scale}
+            <CanvasComponent context="four-up-sw" scale={swCell.scale} showEditability={groupUsers[3] && "south west"}
                             readOnly={true} document={groupDoc(3)} {...others}/>
           </div>
           {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
@@ -160,7 +163,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   private handleResizeWindow = (e: UIEvent) => {
     if (this.container) {
       this.grid.update({
-        height: this.container.offsetHeight,
+        height: this.container.offsetHeight - BORDER_SIZE,
         resizeSplitters: true,
         width: this.container.offsetWidth,
       });

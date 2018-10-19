@@ -1,0 +1,41 @@
+@import vars
+
+.toolbar
+  position: absolute
+  top: $margin + $border-width + $workspace-titlebar-height
+  bottom: $workspace-statusbar-height
+  left: $margin - $workspace-toolbar-width - $border-width 
+  width: $workspace-toolbar-width
+
+  display: flex
+  flex-direction: column
+
+  .tool
+    width: $workspace-toolbar-width
+    height: $workspace-toolbar-width
+    background-color: $color3
+    display: flex
+    justify-content: center
+    align-items: center
+    text-align: center
+    font-size: 20px
+    font-weight: bold
+    margin-bottom: -$border-width
+    border: $border-width solid $border-color
+    cursor: pointer
+
+    .icon
+      color: $color3-1
+      pointer-events: none
+
+    &.select
+      border-top-left-radius: $border-radius
+
+    &.delete
+      border-bottom-left-radius: $border-radius
+
+    &:hover
+      background-color: $color3-6
+
+    &:active
+      background-color: $color3-7
