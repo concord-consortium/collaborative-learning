@@ -462,6 +462,12 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
+                    }   
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -514,6 +520,24 @@
                       "type": "Text",
                       "text": "For similar figures, what things stay the same? What things change? Explain how. Has your answer to this question changed from Problem 1.2? Explain."
                     }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you know about similarity?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                    }
                   }
                 ]
               },
@@ -538,24 +562,6 @@
       ],
       "reflections": {
         "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "What do you know about similarity?"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-            }
-          }
         ]
       },
       "supports": []
