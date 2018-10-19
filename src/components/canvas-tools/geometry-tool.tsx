@@ -52,6 +52,24 @@ function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: numb
 
   return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
 }
+
+function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
+                          syncedChanges?: number, readOnly?: boolean) {
+  for (let i = syncedChanges || 0; i < content.changes.length; ++i) {
+    try {
+      const change = JSON.parse(content.changes[i]);
+      const result = content.syncChange(board, change);
+      if (readOnly && (result instanceof JXG.GeometryElement)) {
+        const obj = result as JXG.GeometryElement;
+        obj.setAttribute({ fixed: true });
+      }
+    }
+    catch (e) {
+      // ignore exceptions
+    }
+  }
+  return content.changes.length;
+}
 ​
 @inject("stores")
 @observer
@@ -86,20 +104,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     if (content !== prevState.content) {
       if (geometryContent.changes.length !== prevState.syncedChanges) {
-        for (let i = prevState.syncedChanges || 0; i < geometryContent.changes.length; ++i) {
-          try {
-            const change = JSON.parse(geometryContent.changes[i]);
-            const result = geometryContent.syncChange(prevState.board, change);
-            if (readOnly && (result instanceof JXG.GeometryElement)) {
-              const obj = result as JXG.GeometryElement;
-              obj.setAttribute({ fixed: true });
-            }
-          }
-          catch (e) {
-            // ignore exceptions
-          }
-        }
-        nextState.syncedChanges = geometryContent.changes.length;
+        nextState.syncedChanges = syncBoardChanges(prevState.board, geometryContent,
+                                                  prevState.syncedChanges, readOnly);
       }
       nextState.content = geometryContent;
     }
@@ -199,7 +205,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         getImageDimensions(undefined, urlOrProxy).then((dimensions: any) => {
           const width = dimensions.width / kGeometryDefaultPixelsPerUnit;
           const height = dimensions.height / kGeometryDefaultPixelsPerUnit;
-          geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
+          const imageIds = geometryContent
+                            .findObjects(board, obj => obj.elType === "image")
+                            .map(obj => obj.id);
+          this.applyChanges(() => {
+            if (imageIds.length) {
+              // change URL if there's already an image present
+              const imageId = imageIds[imageIds.length - 1];
+              geometryContent.updateObjectsOfType(board, "image", imageId, {
+                                                    url: urlOrProxy,
+                                                    size: [width, height]
+                                                  });
+            }
+            else {
+              geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
+            }
+          });
         });
         e.preventDefault();
         e.stopPropagation();
@@ -221,6 +242,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private applyChange(change: () => void) {
     this.setState({ syncedChanges: (this.state.syncedChanges || 0) + 1 }, change);
+  }
+
+  private applyChanges(changes: () => void) {
+    const { model: { content }, readOnly } = this.props;
+    const geometryContent = content as GeometryContentModelType;
+    const { board } = this.state;
+    if (!geometryContent || !board) return;
+
+    // update the geometry without updating the model
+    geometryContent.suspendSync();
+    changes();
+
+    // update the model as a batch
+    const changeCount = geometryContent.batchChangeCount;
+    this.setState({ syncedChanges: (this.state.syncedChanges || 0) + changeCount },
+                  () => geometryContent.resumeSync());
   }
 
   private isSqrDistanceWithinThreshold(threshold: number, c1?: JXG.Coords, c2?: JXG.Coords) {
@@ -297,7 +334,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
           const point = content.addPoint(board, [x, y], props) as JXG.Point;
-          this.handleCreatePoint(point);
+          if (point) {
+            this.handleCreatePoint(point);
+          }
         });
       }
     };
@@ -317,7 +356,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (board && (content.type === "Geometry")) {
           this.applyChange(() => {
             const polygon = content.createPolygonFromFreePoints(board) as JXG.Polygon;
-            this.handleCreatePolygon(polygon);
+            if (polygon) {
+              this.handleCreatePolygon(polygon);
+            }
           });
           this.lastPointDown = undefined;
         }

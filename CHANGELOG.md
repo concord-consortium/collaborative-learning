@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.0.7 - released October 19, 2018
+
+- Add null test before handleCreatePolygon() [#161349320]
+- Prevent geometry background images from being dragged [#161343613]
+- Remove previous image when dropping image on geometry [#161343613]
+- The group view in the header now matches 4-up group view [#161358684]
+- Adding a drag handle in the upper left of each tile
+
 ## Version 0.0.6 - released October 18, 2018
 
 - Fixed problem display in teacher dashboard [#161252954]

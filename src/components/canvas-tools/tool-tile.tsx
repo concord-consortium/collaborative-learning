@@ -70,6 +70,11 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
+        <div className="tool-tile-drag-handle tool select">
+          <svg className={`icon icon-select-tool`}>
+            <use xlinkHref={`#icon-select-tool`} />
+          </svg>
+        </div>
         {this.renderTile(ToolComponent)}
       </div>
     );
