@@ -212,10 +212,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             if (imageIds.length) {
               // change URL if there's already an image present
               const imageId = imageIds[imageIds.length - 1];
-              geometryContent.updateObjectsOfType(board, "image", imageId, {
-                                                    url: urlOrProxy,
-                                                    size: [width, height]
-                                                  });
+              geometryContent.updateObjects(board, imageId, {
+                                              url: urlOrProxy,
+                                              size: [width, height]
+                                            });
             }
             else {
               geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
