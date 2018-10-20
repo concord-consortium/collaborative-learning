@@ -143,17 +143,6 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function updateObjectsOfType(board: JXG.Board, type: JXGObjectType,
-                                 ids: string | string[], properties: JXGProperties | JXGProperties[]) {
-      const change: JXGChange = {
-              operation: "update",
-              target: type,
-              targetID: ids,
-              properties
-            };
-      return _applyChange(board, change);
-    }
-
     function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt))
@@ -214,7 +203,6 @@ export const GeometryContentModel = types
         addPoint,
         removeObjects,
         updateObjects,
-        updateObjectsOfType,
         createPolygonFromFreePoints,
         findObjects,
         applyChange: _applyChange,
