@@ -9,6 +9,7 @@ import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/
 import { cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName } from "../lib/logger";
+import { defaultDrawingContent, kDrawingDefaultHeight } from "./tools/drawing/drawing-content";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -125,6 +126,10 @@ export const DocumentContentModel = types
     },
     addImageTile() {
       return self.addTileInNewRow(defaultImageContent());
+    },
+    addDrawingTile() {
+      return self.addTileInNewRow(defaultDrawingContent(),
+                                  { rowHeight: kDrawingDefaultHeight });
     },
     copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
       let snapshot;

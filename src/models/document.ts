@@ -10,7 +10,7 @@ export const PublicationDocument = "publication";
 export const DocumentTypeEnum = types.enumeration("type", [SectionDocument, LearningLogDocument, PublicationDocument]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
-export const DocumentToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text", "image"]);
+export const DocumentToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text", "image", "drawing"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types
@@ -49,6 +49,8 @@ export const DocumentModel = types
           return self.content.addTextTile();
         case "image":
           return self.content.addImageTile();
+          case "drawing":
+            return self.content.addDrawingTile();
       }
     },
 
