@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { ToolContentUnion } from "./tool-types";
+import { ToolContentUnion, findMetadata } from "./tool-types";
 import * as uuid from "uuid/v4";
 
 // generally negotiated with app, e.g. single column width for table
@@ -24,6 +24,15 @@ export const ToolTileModel = types
     },
     get isUserResizable() {
       return !!(self.content as any).isUserResizable;
+    }
+  }))
+  .actions(self => ({
+    afterCreate() {
+      const metadata = findMetadata(self.content.type, self.id);
+      const content = self.content as any;
+      if (metadata && content.doPostCreate) {
+        content.doPostCreate(metadata);
+      }
     }
   }));
 
