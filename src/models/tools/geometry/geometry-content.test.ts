@@ -74,7 +74,7 @@ describe("GeometryContent", () => {
     const board = createDefaultBoard(content);
     expect(isPoint(board)).toBe(false);
     const p1Id = "point-1";
-    let p1: JXG.Point = board.objects[p1Id];
+    let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
     expect(p1).toBeUndefined();
     p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
     expect(isPoint(p1)).toBe(true);

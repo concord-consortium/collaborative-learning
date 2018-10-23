@@ -23,6 +23,7 @@ interface SizeMeProps {
 interface IProps extends SizeMeProps {
   context: string;
   scale?: number;
+  tabIndex?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
@@ -114,6 +115,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
+  private domElement: HTMLDivElement | null;
+
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
@@ -141,6 +144,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const classes = `geometry-tool ${editableClass}`;
     return (
       <div id={this.state.elementId} className={classes}
+          ref={elt => this.domElement = elt}
+          tabIndex={this.props.tabIndex}
+          onKeyDown={this.handleKeyDown}
           onDragOver={this.handleDragOver} onDrop={this.handleDrop} />
     );
   }
@@ -177,6 +183,18 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     }
     return false;
+  }
+
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const { board } = this.state;
+    const kBackspaceKeyCode = 8;
+    const kDeleteKeyCode = 46;
+    if (board && ((e.keyCode === kBackspaceKeyCode) || (e.keyCode === kDeleteKeyCode))) {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      if (geometryContent.hasSelection()) {
+        geometryContent.deleteSelection(board);
+      }
+    }
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -282,6 +300,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { model, readOnly, scale } = this.props;
       const { ui } = this.stores;
 
+      // clicked tile gets keyboard focus
+      if (this.domElement) {
+        // requires non-empty tabIndex
+        this.domElement.focus();
+        evt.preventDefault();
+      }
       // first click selects the tile; subsequent clicks create points
       if (!ui.isSelectedTile(model)) {
         ui.setSelectedTile(model);
@@ -308,6 +332,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const coords = getEventCoords(board, evt, scale, index);
       const [ , x, y] = this.lastBoardDown.coords.usrCoords;
       if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
+        return;
+      }
+
+      // clicks on background of board clear the selection
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      const elements = board.getAllObjectsUnderMouse(evt);
+      if ((!elements || !elements.length) && geometryContent.hasSelection()) {
+        geometryContent.deselectAll(board);
         return;
       }
 
@@ -348,14 +380,15 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      const { board } = this.state;
+      if (!board) return;
       const id = point.id;
       const coords = cloneDeep(point.coords);
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
-        const { model: { content } } = this.props;
-        const { board } = this.state;
         if (board && (content.type === "Geometry")) {
           this.applyChange(() => {
-            const polygon = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+            const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
             }
@@ -366,6 +399,21 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       else {
         this.dragPts[id] = { initial: coords };
         this.lastPointDown = { evt, coords };
+
+        // click on selected element - deselect unless appropriate modifier key is down
+        if (geometryContent.isSelected(id)) {
+          if (evt.ctrlKey || evt.metaKey) {
+            geometryContent.deselectElement(board, id);
+          }
+        }
+        // click on unselected element
+        else {
+          // deselect other elements unless appropriate modifier key is down
+          if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+            geometryContent.deselectAll(board);
+          }
+          geometryContent.selectElement(board, id);
+        }
       }
     };
 
