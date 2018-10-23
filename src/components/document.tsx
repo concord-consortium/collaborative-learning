@@ -210,21 +210,30 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private renderSupportIcons() {
     const supports = this.getSupportsWithIndices();
+    const anyActive = supports.some((support) => support.item.visible);
     return (
       <div className="supports-list">
         {supports.map((support) => {
+          const {index, item} = support;
+          const visibility = !anyActive || item.visible ? "show" : "hide";
           return (
-            <span
-              key={support.index}
-              onClick={this.handleToggleSupport(support.item)}
-              className={support.item.visible ? "active" : undefined}
+            <svg
+              key={index}
+              onClick={this.handleToggleSupport(item)}
+              className={`icon ${this.getSupportName(index)} ${visibility}`}
             >
-              {support.index}
-            </span>
+              <use xlinkHref={`#${this.getSupportName(index)}`} />
+            </svg>
           );
         })}
       </div>
     );
+  }
+
+  private getSupportName(supportIndex: number) {
+    // There are currently 4 (0-based) support icons defined in index.html
+    const safeIndex = Math.min(supportIndex, 3);
+    return `icon-support${safeIndex}`;
   }
 
   private renderVisibleSupports() {
@@ -238,7 +247,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
           {supports.map((support) => {
             return (
               <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
-                <span>{support.index}</span> {support.item.text}
+                {support.item.text}
               </div>
             );
           })}
@@ -272,7 +281,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private getSupportsWithIndices() {
     return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
-      return {index: index + 1, item: support};
+      return {index, item: support};
     });
   }
 

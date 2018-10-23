@@ -191,42 +191,6 @@ describe("supports model", () => {
 
     expect(supports.getAllForSection(SectionType.introduction)).toEqual([
       {
-        sectionId: undefined,
-        text: "Unit 1, support #1",
-        type: "unit",
-        visible: false
-      },
-      {
-        sectionId: undefined,
-        text: "Unit 1, support #2",
-        type: "unit",
-        visible: false
-      },
-      {
-        sectionId: undefined,
-        text: "Investigation 1, support #1",
-        type: "investigation",
-        visible: false,
-      },
-      {
-        sectionId: undefined,
-        text: "Investigation 1, support #2",
-        type: "investigation",
-        visible: false,
-      },
-      {
-        sectionId: undefined,
-        text: "Investigation 1, Problem 1, support #1",
-        type: "problem",
-        visible: false,
-      },
-      {
-        sectionId: undefined,
-        text: "Investigation 1, Problem 1, support #2",
-        type: "problem",
-        visible: false,
-      },
-      {
         sectionId: "introduction",
         text: "Investigation 1, Problem 1, section: introduction, support #1",
         type: "section",

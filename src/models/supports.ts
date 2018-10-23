@@ -58,7 +58,7 @@ export const SupportsModel = types
 
       getAllForSection(sectionId: string) {
         return self.supports.filter((support) => {
-          return (support.type !== SupportItemType.section) || (support.sectionId === sectionId);
+          return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
         });
       },
 
