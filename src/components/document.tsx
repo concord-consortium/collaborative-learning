@@ -220,14 +220,20 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
             <svg
               key={index}
               onClick={this.handleToggleSupport(item)}
-              className={`icon icon-support${index} ${visibility}`}
+              className={`icon ${this.getSupportName(index)} ${visibility}`}
             >
-              <use xlinkHref={`#icon-support${index}`} />
+              <use xlinkHref={`#${this.getSupportName(index)}`} />
             </svg>
           );
         })}
       </div>
     );
+  }
+
+  private getSupportName(supportIndex: number) {
+    // There are currently 4 (0-based) support icons defined in index.html
+    const safeIndex = Math.min(supportIndex, 3);
+    return `icon-support${safeIndex}`;
   }
 
   private renderVisibleSupports() {
@@ -275,7 +281,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private getSupportsWithIndices() {
     return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
-      return {index: index + 1, item: support};
+      return {index, item: support};
     });
   }
 
