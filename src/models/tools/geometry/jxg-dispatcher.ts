@@ -1,5 +1,4 @@
-import { JXGChange, JXGChangeAgent, JXGChangeResult,
-        JXGCreateHandler, JXGUpdateHandler } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType } from "./jxg-changes";
 import { boardChangeAgent, isBoard } from "./jxg-board";
 import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
@@ -43,7 +42,7 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
   const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
   ids.forEach((id, index) => {
     const obj = id && board.objects[id];
-    const target = obj && obj.elType;
+    const target = obj ? obj.elType as JXGObjectType : "object";
     const props = Array.isArray(change.properties)
                     ? change.properties[index]
                     : change.properties;

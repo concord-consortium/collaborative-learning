@@ -31,18 +31,20 @@ declare namespace JXG {
     zoomX: number;
     zoomY: number;
 
-    objects: { [id: string]: any };
-
-    objectsList: any[];
+    objects: { [id: string]: GeometryElement };
+    objectsList: GeometryElement[];
 
     create: (elementType: string, parents?: any, attributes?: any) => any;
-    removeObject: (object: GeometryElement) => void;
+    removeObject: (object: GeometryElement) => JXG.Board;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
+    getAllObjectsUnderMouse: (evt: any) => GeometryElement[];
+
     resizeContainer: (canvasWidth: number, canvasHeight: number,
-                      dontSet?: boolean, dontSetBoundingBox?: boolean) => void;
-    setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => void;
-    update: (drag?: JXG.GeometryElement) => void;
+                      dontSet?: boolean, dontSetBoundingBox?: boolean) => JXG.Board;
+    setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => JXG.Board;
+    showInfobox: (value: boolean) => JXG.Board;
+    update: (drag?: JXG.GeometryElement) => JXG.Board;
   }
 
   class Coords {
@@ -66,9 +68,13 @@ declare namespace JXG {
     elType: string;
     type: number;
     ancestors: { [id: string]: GeometryElement };
+    parents: GeometryElement[];
+    childElements: { [id: string]: GeometryElement };
     visProp: { [prop: string]: any };
     fixed: boolean;
 
+    removeChild: (child: GeometryElement) => JXG.Board;
+    hasPoint: (x: number, y: number) => boolean;
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
