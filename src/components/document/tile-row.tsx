@@ -55,6 +55,7 @@ interface IProps {
   docId: string;
   scale?: number;
   model: TileRowModelType;
+  tabIndex?: number;
   height?: number;
   tileMap: any;
   readOnly?: boolean;
@@ -100,15 +101,16 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTiles(rowHeight?: number) {
-    const { model, tileMap, ...others } = this.props;
+    const { model, tileMap, tabIndex, ...others } = this.props;
     const { tiles } = model;
     if (!tiles) { return null; }
 
-    return tiles.map(tileRef => {
+    return tiles.map((tileRef, index) => {
       const tileModel: ToolTileModelType = tileMap.get(tileRef.tileId);
       const tileWidthPct = model.renderWidth(tileRef.tileId);
+      const _tabIndex = tabIndex ? tabIndex + index : tabIndex;
       return tileModel
-              ? <ToolTileComponent key={tileModel.id} model={tileModel}
+              ? <ToolTileComponent key={tileModel.id} model={tileModel} tabIndex={_tabIndex}
                                     widthPct={tileWidthPct} height={rowHeight} {...others} />
               : null;
     });

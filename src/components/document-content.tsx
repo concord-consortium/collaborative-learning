@@ -83,12 +83,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { dragDropInfo } = this.state;
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap } = content;
+    let tabIndex = 1;
     return rowOrder.map(rowId => {
       const row = rowMap.get(rowId);
       const rowHeight = this.getRowHeight(rowId);
+      const _tabIndex = tabIndex;
+      tabIndex += row ? row.tiles.length : 0;
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-          height={rowHeight} tileMap={tileMap} dragDropInfo={dragDropInfo} {...others} />
+                                  height={rowHeight} tileMap={tileMap} dragDropInfo={dragDropInfo}
+                                  tabIndex={_tabIndex} {...others} />
               : null;
     });
   }

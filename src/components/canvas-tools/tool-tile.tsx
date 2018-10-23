@@ -38,6 +38,7 @@ interface IProps {
   context: string;
   docId: string;
   scale?: number;
+  tabIndex?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
