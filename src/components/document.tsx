@@ -210,17 +210,20 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private renderSupportIcons() {
     const supports = this.getSupportsWithIndices();
+    const anyActive = supports.some((support) => support.item.visible);
     return (
       <div className="supports-list">
         {supports.map((support) => {
+          const {index, item} = support;
+          const visibility = !anyActive || item.visible ? "show" : "hide";
           return (
-            <span
-              key={support.index}
-              onClick={this.handleToggleSupport(support.item)}
-              className={support.item.visible ? "active" : undefined}
+            <svg
+              key={index}
+              onClick={this.handleToggleSupport(item)}
+              className={`icon icon-support${index} ${visibility}`}
             >
-              {support.index}
-            </span>
+              <use xlinkHref={`#icon-support${index}`} />
+            </svg>
           );
         })}
       </div>
@@ -238,7 +241,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
           {supports.map((support) => {
             return (
               <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
-                <span>{support.index}</span> {support.item.text}
+                {support.item.text}
               </div>
             );
           })}
