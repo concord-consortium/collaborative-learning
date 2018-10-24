@@ -4,8 +4,8 @@ import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
 import { ToolTileComponent, dragTileSrcDocId } from "../canvas-tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { IDropRowInfo } from "../document-content";
 import "./tile-row.sass";
-import { string } from "prop-types";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
 // allows source compatibility to be checked in dragOver
@@ -58,7 +58,7 @@ interface IProps {
   height?: number;
   tileMap: any;
   readOnly?: boolean;
-  dragDropInfo?: DropRowInfo;
+  dragDropInfo?: IDropRowInfo;
 }
 interface IState {
   isDragging?: boolean;
@@ -189,11 +189,4 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     }
     return highlights.join(" ");
   }
-}
-
-interface DropRowInfo {
-  dropOffsetLeft?: number;
-  dropOffsetTop?: number;
-  dropOffsetRight?: number;
-  dropOffsetBottom?: number;
 }

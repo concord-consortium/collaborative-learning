@@ -22,7 +22,7 @@ interface IState {
     domHeight?: number;
     deltaHeight: number;
   } | null;
-  dragDropInfo?: DropRowInfo;
+  dragDropInfo?: IDropRowInfo;
 }
 
 // Interval in ms between recalculation for highlighting drag/drop zones
@@ -188,7 +188,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
 
-    const dropInfo: DropRowInfo = {
+    const dropInfo: IDropRowInfo = {
       rowInsertIndex: 0
     };
     const rowElements = this.domElement.getElementsByClassName("tile-row");
@@ -311,7 +311,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
 }
 
-interface DropRowInfo {
+export interface IDropRowInfo {
   rowInsertIndex: number;
   rowDropIndex?: number;
   dropOffsetLeft?: number;
