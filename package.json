@@ -110,11 +110,11 @@
     "xhr-mock": "^2.4.1"
   },
   "dependencies": {
+    "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "firebase": "^5.5.2",
     "immutable": "^3.8.2",
     "initials": "^3.0.0",
     "jsonwebtoken": "^8.3.0",
-    "jsxgraph": "^0.99.7",
     "lodash": "^4.17.11",
     "mobx": "^5.5.0",
     "mobx-react": "^5.2.8",
