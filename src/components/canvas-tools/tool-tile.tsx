@@ -70,12 +70,13 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
-        <div className="tool-tile-drag-handle tool select">
+        <div className="tool-tile-drag-handle">
           <svg className={`icon icon-select-tool`}>
             <use xlinkHref={`#icon-select-tool`} />
           </svg>
         </div>
         {this.renderTile(ToolComponent)}
+        <div className="tool-tile-drop-area" />
       </div>
     );
   }
@@ -114,5 +115,4 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const offsetY = (e.clientY - clientRect.top) / (scale || 1);
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
-
 }

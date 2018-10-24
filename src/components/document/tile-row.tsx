@@ -5,6 +5,7 @@ import { BaseComponent } from "../base";
 import { ToolTileComponent, dragTileSrcDocId } from "../canvas-tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import "./tile-row.sass";
+import { string } from "prop-types";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
 // allows source compatibility to be checked in dragOver
@@ -15,6 +16,11 @@ export const dragResizeRowModelHeight =
               (modelHeight: number) => `org.concord.clue.row-resize.model-height.${modelHeight}`;
 export const dragResizeRowDomHeight =
               (domHeight: number) => `org.concord.clue.row-resize.dom-height.${domHeight}`;
+
+const dragDropHighlightClasses = {
+  none: "tile-row",
+  baseHighlight: "tile-row drag-highlight"
+};
 
 export function extractDragResizeRowId(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
@@ -52,21 +58,41 @@ interface IProps {
   height?: number;
   tileMap: any;
   readOnly?: boolean;
+  dragDropInfo?: DropRowInfo;
 }
-
+interface IState {
+  isDragging?: boolean;
+  rowClass?: string;
+}
 @inject("stores")
 @observer
 export class TileRowComponent extends BaseComponent<IProps, {}> {
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    if (!nextProps.dragDropInfo && prevState.rowClass !== dragDropHighlightClasses.none) {
+      // Remove highlighting relating to dragging
+      return { isDragging: false, rowClass: dragDropHighlightClasses.none };
+    } else {
+      return {};
+    }
+  }
+  public state: IState = { rowClass: "tile-row" };
 
   private tileRowDiv: HTMLElement | null;
 
   public render() {
     const { model } = this.props;
+    const { rowClass } = this.state;
     const height = this.props.height || model.height;
     const style = height ? { height } : undefined;
+
     return (
-      <div className={`tile-row`} data-row-id={model.id}
-          style={style} ref={elt => this.tileRowDiv = elt}>
+      <div className={rowClass} data-row-id={model.id}
+        style={style}
+        ref={elt => this.tileRowDiv = elt}
+        onDragOver={this.handleDragOver}
+        onDragExit={this.handleDragExit}
+        onDragEnd={this.handleDragEnd}
+      >
         {this.renderTiles(height)}
         {this.renderBottomResizeHandle()}
       </div>
@@ -109,4 +135,65 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
       e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
     }
   }
+
+  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const { dragDropInfo } = this.props;
+    if (!this.state.isDragging) {
+      this.setState({ isDragging: true });
+    } else {
+      if (dragDropInfo) {
+        const highlightList = [];
+        if (dragDropInfo &&
+          dragDropInfo.dropOffsetLeft && dragDropInfo.dropOffsetRight &&
+          dragDropInfo.dropOffsetTop && dragDropInfo.dropOffsetBottom) {
+          // Check left/right
+          if (dragDropInfo.dropOffsetLeft < dragDropInfo.dropOffsetRight) {
+            highlightList.push("left");
+          } else {
+            highlightList.push("right");
+          }
+          // Check top/bottom
+          if (dragDropInfo.dropOffsetTop < dragDropInfo.dropOffsetBottom) {
+            highlightList.push("top");
+          } else {
+            highlightList.push("bottom");
+          }
+
+          const highlights = this.buildHighlightClass(highlightList);
+          if (this.state.rowClass !== highlights) {
+            this.setState({ rowClass: highlights });
+          }
+        }
+      } else {
+        this.setState({ rowClass: dragDropHighlightClasses.none });
+      }
+    }
+  }
+  private handleDragExit = (e: React.DragEvent<HTMLDivElement>) => {
+    this.clearDragHighlighting();
+  }
+  private handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    this.clearDragHighlighting();
+  }
+  private clearDragHighlighting = () => {
+    this.setState({ isDragging: false, rowClass: dragDropHighlightClasses.none });
+  }
+
+  private buildHighlightClass = (highlightList: string[]) => {
+    const highlights = highlightList.length > 0 ? highlightList : [];
+    if (highlights.length > 0) {
+      highlights.unshift(dragDropHighlightClasses.baseHighlight);
+    }
+    else {
+      highlights.push(dragDropHighlightClasses.none);
+    }
+    return highlights.join(" ");
+  }
+}
+
+interface DropRowInfo {
+  dropOffsetLeft?: number;
+  dropOffsetTop?: number;
+  dropOffsetRight?: number;
+  dropOffsetBottom?: number;
 }

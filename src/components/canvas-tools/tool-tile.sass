@@ -9,22 +9,20 @@
   flex: 1 1 auto
   border: $half-border-width solid white
 
-  &.selected
-    border: $half-border-width solid $color2-4
-
   .tool-tile-drag-handle
     position: absolute
+    right: 0px
     width: $double-margin
     height: $double-margin
     border-radius: $border-radius
     border-top-left-radius: 0
-    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
     border-top-right-radius: 0
     background-color: $color3
     border: $border-width solid $border-color
-    border-left: 0
+    border-right: 0
     border-top: 0
-    z-index: 1
+    z-index: 2
     opacity: 0
     transition: 0.3s
 
@@ -37,3 +35,28 @@
       height: 20px
       left: 0px
 
+  &.selected
+    border: $half-border-width solid $color2-4
+
+    .tool-tile-drag-handle
+      opacity: 1
+
+  .tool-tile-drop-area
+    position: absolute
+    width: $margin
+    height: 100%
+    background-color: $color3-1
+    border: $border-width solid $border-color
+    border-left: 0
+    border-top: 0
+    z-index: 1
+    opacity: 0
+    transition: 0.3s
+    right: 0px
+    top: 1px
+
+    &:hover
+      opacity: 1
+
+    &.dragging
+      opacity: 1

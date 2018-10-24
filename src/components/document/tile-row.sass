@@ -1,9 +1,22 @@
+@import ../vars
+
 .tile-row
   position: relative
   min-height: 18px
   display: flex
   flex-direction: row
   align-content: flex-start
+  transition: border-width $animation-speed
+
+  &.drag-highlight
+    &.top
+      border-top: $padding solid $color1
+    &.bottom
+      border-bottom: $padding solid $color1
+    &.left
+      border-left: $padding solid $color1
+    &.right
+      border-right: $padding solid $color1
 
   .bottom-resize-handle
     position: absolute

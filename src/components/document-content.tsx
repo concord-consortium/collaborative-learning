@@ -22,7 +22,11 @@ interface IState {
     domHeight?: number;
     deltaHeight: number;
   } | null;
+  dragDropInfo?: DropRowInfo;
 }
+
+// Interval in ms between recalculation for highlighting drag/drop zones
+const kDragUpdateInterval = 200;
 
 @inject("stores")
 @observer
@@ -49,6 +53,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       <div className="document-content"
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}
+        onDragEnd={this.handleDragEnd}
         onDrop={this.handleDrop}
         ref={(elt) => this.domElement = elt}
       >
@@ -75,6 +80,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private renderRows() {
     const { content, ...others } = this.props;
+    const { dragDropInfo } = this.state;
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap } = content;
     return rowOrder.map(rowId => {
@@ -82,7 +88,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const rowHeight = this.getRowHeight(rowId);
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  height={rowHeight} tileMap={tileMap} {...others} />
+          height={rowHeight} tileMap={tileMap} dragDropInfo={dragDropInfo} {...others} />
               : null;
     });
   }
@@ -146,12 +152,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
-    if (!content || readOnly) return;
+    const { dragDropInfo } = this.state;
 
+    if (!content || readOnly) return;
     const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
     if (this.hasDragType(e.dataTransfer, kDragTileContent)) {
       e.dataTransfer.dropEffect = withinDocument && !e.altKey ? "move" : "copy";
-      // indicate we'll accept the drop
+      // indicate where we'll accept the drop - throttle this update
+      const now = new Date().getTime();
+      if (!dragDropInfo || !dragDropInfo.lastUpdate || (now - dragDropInfo.lastUpdate > kDragUpdateInterval)) {
+        const currentDragDropInfo = this.getDropRowInfo(e);
+        this.setState({ dragDropInfo: currentDragDropInfo });
+      }
       e.preventDefault();
     }
     else if (withinDocument && this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
@@ -164,7 +176,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       e.preventDefault();
     }
   }
-
+  private handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    this.setState({ dragDropInfo: undefined });
+  }
   private isPointInRect(x: number, y: number, rect: ClientRect | DOMRect) {
     if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) return false;
     return ((x >= rect.left) && (x <= rect.right) && (y >= rect.top) && (y <= rect.bottom));
@@ -202,6 +216,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
       }
     }
+    dropInfo.lastUpdate = new Date().getTime();
     return dropInfo;
   }
 
@@ -211,7 +226,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (content && dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
       const row = content.rowMap.get(dragResizeRow.id);
       row && row.setRowHeight(dragResizeRow.newHeight);
-      this.setState({ dragResizeRow: null });
+      this.setState({ dragResizeRow: null, dragDropInfo: undefined });
     }
   }
 
@@ -271,6 +286,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
+    this.setState({ dragDropInfo: undefined });
 
     if (!content || readOnly) return;
 
@@ -302,4 +318,5 @@ interface DropRowInfo {
   dropOffsetTop?: number;
   dropOffsetRight?: number;
   dropOffsetBottom?: number;
+  lastUpdate?: number;
 }
