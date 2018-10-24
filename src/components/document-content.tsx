@@ -243,8 +243,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!srcRowId) return;
     const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
     const dropRowInfo  = this.getDropRowInfo(e);
-    const { rowInsertIndex, rowDropIndex, dropOffsetLeft,
-            dropOffsetTop, dropOffsetRight, dropOffsetBottom } = dropRowInfo;
+    const { rowInsertIndex, rowDropIndex, dropOffsetLeft, dropOffsetRight } = dropRowInfo;
     if ((rowDropIndex != null) &&
         (dropOffsetLeft != null) &&
         (dropOffsetLeft < kSideDropThreshold) &&
