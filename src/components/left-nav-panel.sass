@@ -35,8 +35,24 @@
         padding: $padding
 
       .buttons
-        margin: $margin 0
+        margin: $margin
         text-align: right
 
         button
           padding: $half-padding $padding
+          background-color: $color1-3
+          border: $border-width solid $border-color
+          color: $color1-7
+          cursor: pointer
+          border-radius: $border-radius
+          font-family: 'Lato', sans-serif
+          box-shadow: 3px 3px
+          height: 70px
+          outline: 0
+          font-size: 14px
+          &:hover, &:focus
+            background-color: $color1-5
+            color: $border-color
+          &:active
+            background-color: $color1-6
+            color: $border-color

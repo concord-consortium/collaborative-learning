@@ -49,7 +49,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
             ref={(el) => this.openDocumentButton = el}
             onClick={this.handleOpenDocument}
           >
-            Open {section.title} Section
+            Open {section.title}
           </button>
         </div>
       </CanvasComponent>
