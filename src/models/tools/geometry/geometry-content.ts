@@ -292,6 +292,9 @@ export const GeometryContentModel = types
         get isUserResizable() {
           return true;
         },
+        get isSyncSuspended() {
+          return suspendCount > 0;
+        },
         get batchChangeCount() {
           return batchChanges.length;
         }
