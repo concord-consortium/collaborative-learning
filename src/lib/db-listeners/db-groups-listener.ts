@@ -1,6 +1,6 @@
 import { DB } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
-import firebase from "firebase";
+import * as firebase from "@concord-consortium/firebase/app";
 import { SectionDocument } from "../../models/document";
 
 export class DBGroupsListener {

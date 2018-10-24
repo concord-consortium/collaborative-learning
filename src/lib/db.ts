@@ -1,4 +1,7 @@
-import * as firebase from "firebase";
+import * as firebase from "@concord-consortium/firebase/app";
+import "@concord-consortium/firebase/auth";
+import "@concord-consortium/firebase/database";
+import "@concord-consortium/firebase/storage";
 import { AppMode, IStores } from "../models/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup,
