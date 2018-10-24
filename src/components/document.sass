@@ -117,18 +117,29 @@
         display: inline
         margin: 0 $margin
 
-        span
+        svg
           display: inline-block
           padding: $half-padding
-          margin: $half-margin $half-margin 0 0
-          color: #fff
-          background: #aaa
-          border-radius: 15px
-          width: 18px
-          text-align: center
+          margin: $quarter-margin $quarter-margin 0 0
+          color: $color1-5
+          width: 25px
+          height: 25px
+          cursor: pointer
 
-          &.active
-            background-color: #00f
+          &.show
+            color: $color1-6
+            &:hover
+              color: $color1-7
+            // FIXME: Darker color needed for &:active
+            &:active
+              color: $color1-7
+
+          &.hide
+            color: $color1-4
+            &:hover
+              color: $color1-5
+            &:active
+              color: $color1-6
 
       .visible-supports
         position: absolute
@@ -142,17 +153,6 @@
           div
             background-color: $color1-3
             padding: $half-padding $padding
-
-            span
-              display: inline-block
-              padding: $half-padding
-              margin-right: $quarter-margin
-              color: #fff
-              background: #aaa
-              border-radius: 15px
-              width: 18px
-              text-align: center
-              background-color: #00f
 
     .actions
       flex-grow: 0
