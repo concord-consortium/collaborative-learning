@@ -91,7 +91,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderBottomResizeHandle() {
-    const { model, tileMap } = this.props;
+    const { model } = this.props;
     if (this.props.readOnly || !model.isUserResizable) return null;
     return <div className="bottom-resize-handle" draggable={true} onDragStart={this.handleStartResizeRow}/>;
   }

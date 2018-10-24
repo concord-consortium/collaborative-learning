@@ -282,7 +282,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private applyChanges(changes: () => void) {
-    const { model: { content }, readOnly } = this.props;
+    const { model: { content } } = this.props;
     const geometryContent = content as GeometryContentModelType;
     const { board } = this.state;
     if (!geometryContent || !board) return;
