@@ -4,6 +4,7 @@ import { IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentContentModelType } from "../models/document-content";
+import { IToolApiInterface } from "./canvas-tools/tool-tile";
 
 import "./canvas.sass";
 
@@ -16,6 +17,7 @@ interface IProps extends IBaseProps {
   document?: DocumentModelType;
   content?: DocumentContentModelType;
   editabilityLocation?: EditabilityLocation;
+  toolApiInterface?: IToolApiInterface;
 }
 
 @observer

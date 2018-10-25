@@ -2,16 +2,17 @@ import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit, setElementColor
+        } from "../../models/tools/geometry/geometry-content";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
 import { assign, cloneDeep, each, isEqual, some } from "lodash";
 import { SizeMe } from "react-sizeme";
+import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
+import { getImageDimensions } from "../../utilities/image-utils";
 
 import "./geometry-tool.sass";
-import { extractDragTileType, kDragTileContent } from "./tool-tile";
-import { getImageDimensions } from "../../utilities/image-utils";
 
 interface SizeMeProps {
   size?: {
@@ -26,6 +27,7 @@ interface IProps extends SizeMeProps {
   tabIndex?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  toolApiInterface?: IToolApiInterface;
 }
 
 interface IState extends SizeMeProps {
@@ -119,10 +121,27 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
+  private lastSelectDown?: any;
   private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
 
   public componentDidMount() {
     this.initializeContent();
+
+    if (this.props.toolApiInterface) {
+      this.props.toolApiInterface.register(this.props.model.id, {
+        hasSelection: () => {
+          const geometryContent = this.props.model.content as GeometryContentModelType;
+          return geometryContent.hasSelection();
+        },
+        deleteSelection: () => {
+          const geometryContent = this.props.model.content as GeometryContentModelType;
+          const { board } = this.state;
+          if (board) {
+            geometryContent.deleteSelection(board);
+          }
+        }
+      });
+    }
   }
 
   public componentDidUpdate() {
@@ -343,31 +362,44 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
+      // extended clicks don't create new points
       const clickTimeThreshold = 500;
       if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
         return;
       }
 
+      // clicks that move don't create new points
       const clickSqrDistanceThreshold = 9;
       if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastBoardDown.coords, coords)) {
         return;
       }
 
-      let el;
-      for (el in board.objects) {
-        if (isVisiblePoint(board.objects[el]) &&
-            board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+      // clicks on visible points don't create new points
+      for (const elt of board.objectsList) {
+        if (isVisiblePoint(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
       }
 
+      // clicks that affect selection don't create new points
+      if (this.lastSelectDown &&
+          (evt.timeStamp - this.lastSelectDown.timeStamp < clickTimeThreshold)) {
+        return;
+      }
+
+      // clicks on board background create new points
       const { model: { content } } = this.props;
       if (content.type === "Geometry") {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
+          const metadata = content.metadata;
           const point = content.addPoint(board, [x, y], props) as JXG.Point;
           if (point) {
             this.handleCreatePoint(point);
+
+            // select newly created points without referring to content
+            metadata.select(point.id);
+            setElementColor(board, point.id, true);
           }
         });
       }
@@ -386,7 +418,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const id = point.id;
       const coords = cloneDeep(point.coords);
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
-        if (board && (content.type === "Geometry")) {
+        if (board) {
           this.applyChange(() => {
             const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
             if (polygon) {
@@ -414,6 +446,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           }
           geometryContent.selectElement(board, id);
         }
+        this.lastSelectDown = evt;
       }
     };
 
@@ -451,10 +484,47 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
 
+    const isInVertex = (evt: any) => {
+      const { scale } = this.props;
+      const { board } = this.state;
+      if (!board) return false;
+      const index = evt[JXG.touchProperty] ? 0 : undefined;
+      const coords = getEventCoords(board, evt, scale, index);
+      let inVertex = false;
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        if (pt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          inVertex = true;
+        }
+      });
+      return inVertex;
+    };
+
+    const areAllVerticesSelected = () => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      let allSelected = true;
+      each(polygon.ancestors, point => {
+        const pt = point as JXG.Point;
+        if (!geometryContent.isSelected(pt.id)) {
+          allSelected = false;
+        }
+      });
+      return allSelected;
+    };
+
     const handlePointerDown = (evt: any) => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      const { board } = this.state;
+      const inVertex = isInVertex(evt);
+      if (!inVertex && !areAllVerticesSelected()) {
+        this.lastSelectDown = evt;
+      }
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
         this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        if (board && !inVertex) {
+          geometryContent.selectElement(board, pt.id);
+        }
       });
     };
 

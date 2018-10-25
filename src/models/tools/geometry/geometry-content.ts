@@ -1,11 +1,10 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
-import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
-import { assign, each, size as _size } from "lodash";
+import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { assign, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { isBoard } from "./jxg-board";
-import { isPolygon } from "./jxg-polygon";
 
 export const kGeometryToolID = "Geometry";
 
@@ -65,7 +64,7 @@ export const GeometryMetadataModel = types
   }));
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
-function setElementColor(board: JXG.Board, id: string, selected: boolean) {
+export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
   if (element) {
     element.setAttribute({

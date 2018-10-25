@@ -5,15 +5,17 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
          FourUpGridModelType } from "../models/four-up-grid";
 import { CanvasComponent } from "./canvas";
 import { BaseComponent, IBaseProps } from "./base";
-
-import "./four-up.sass";
 import { DocumentModelType } from "../models/document";
 import { WorkspaceModelType } from "../models/workspace";
+import { IToolApiInterface } from "./canvas-tools/tool-tile";
+
+import "./four-up.sass";
 
 interface IProps extends IBaseProps {
   document?: DocumentModelType;
   workspace: WorkspaceModelType;
   isGhostUser?: boolean;
+  toolApiInterface?: IToolApiInterface;
 }
 
 interface FourUpUser {
