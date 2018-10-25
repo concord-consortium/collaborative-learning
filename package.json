@@ -46,7 +46,7 @@
     "test:coverage:watch": "jest --coverage --watchAll",
     "test:cypress": "cypress run",
     "test:cypress:open": "cypress open",
-    "test:full": "npm-run-all test cypress:test"
+    "test:full": "npm-run-all test test:cypress"
   },
   "repository": {
     "type": "git",

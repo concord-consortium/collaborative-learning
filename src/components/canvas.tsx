@@ -15,7 +15,7 @@ interface IProps extends IBaseProps {
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
-  showEditability?: EditabilityLocation;
+  editabilityLocation?: EditabilityLocation;
 }
 
 @observer
@@ -31,11 +31,11 @@ export class CanvasComponent extends React.Component<IProps, {}> {
   }
 
   private renderEditability() {
-    const {showEditability, readOnly} = this.props;
-    if (showEditability) {
+    const {editabilityLocation, readOnly} = this.props;
+    if (editabilityLocation) {
       const iconName = readOnly ? "icon-copy-only" : "icon-edit";
       return (
-        <svg key="edit" className={`icon ${iconName} ${showEditability}`}>
+        <svg key="edit" className={`icon editability ${iconName} ${editabilityLocation}`}>
           <use xlinkHref={`#${iconName}`} />
         </svg>
       );

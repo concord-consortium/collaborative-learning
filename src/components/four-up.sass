@@ -30,6 +30,10 @@
     .canvas-scaler
       position: absolute
       background-color: white
+      display: flex
+      justify-content: center
+      align-items: center
+      text-align: center
       top: 0
       left: 0
 
@@ -42,6 +46,20 @@
 
     .member:hover
       opacity: 1
+
+    .unshared
+      width: 500px
+      font-size: 32px
+      
+      &.ne
+        color: orange
+      &.se
+        color: green
+      &.sw
+        color: purple
+
+      .icon
+        height: 75px
 
     &.north-west .member
       bottom: 0

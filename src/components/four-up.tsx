@@ -19,6 +19,7 @@ interface IProps extends IBaseProps {
 interface FourUpUser {
   doc: DocumentModelType|undefined;
   initials: string;
+  name: string;
 }
 
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
@@ -85,54 +86,77 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
             });
             return {
               doc: groupUserDoc,
-              initials: groupUser.initials
+              initials: groupUser.initials,
+              name: groupUser.name
             };
           })
       : [];
 
     const groupDoc = (index: number) => {
-      const doc = groupUsers[index] && groupUsers[index].doc;
-      // Ghost users can see all documents
-      const showDoc = doc && (index === 0 || doc.visibility === "public" || isGhostUser);
-      return showDoc ? doc : undefined;
+      return groupUsers[index] && groupUsers[index].doc;
+    };
+
+    const hideCanvas = (index: number) => {
+      const doc = groupDoc(index);
+      const unopenedDoc = groupUsers[index] && !doc;
+      // Don't hide anything from ghost users, and treat unopened documents as private by default
+      return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
     };
 
     // If the user is real, their document should be displayed first
     if (!isGhostUser) {
       groupUsers.unshift({
         doc: document,
-        initials: user.initials
+        initials: user.initials,
+        name: user.name
       });
     }
+
+    const nwCanvas = (
+      <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+                       editabilityLocation={groupUsers[0] && "north west"}
+                       readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
+                       document={groupDoc(0)} {...others} />
+    );
+    const neCanvas = (
+      <CanvasComponent context="four-up-ne" scale={neCell.scale}
+                       editabilityLocation={groupUsers[1] && "north east"}
+                       readOnly={true} document={groupDoc(1)} {...others} />
+    );
+    const seCanvas = (
+      <CanvasComponent context="four-up-se" scale={seCell.scale}
+                       editabilityLocation={groupUsers[2] && "south east"}
+                       readOnly={true} document={groupDoc(2)} {...others}/>
+    );
+    const swCanvas = (
+      <CanvasComponent context="four-up-sw" scale={swCell.scale}
+                       editabilityLocation={groupUsers[3] && "south west"}
+                       readOnly={true} document={groupDoc(3)} {...others}/>
+    );
 
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            <CanvasComponent context="four-up-nw" scale={nwCell.scale} showEditability={groupUsers[0] && "north west"}
-              readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
-              document={groupDoc(0)} {...others} />
+            {nwCanvas}
           </div>
           {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            <CanvasComponent context="four-up-ne" scale={neCell.scale} showEditability={groupUsers[1] && "north east"}
-                            readOnly={true} document={groupDoc(1)} {...others} />
+            {hideCanvas(1) ? this.renderUnshownMessage(groupUsers[1], "ne") : neCanvas}
           </div>
           {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            <CanvasComponent context="four-up-se" scale={seCell.scale} showEditability={groupUsers[2] && "south east"}
-                            readOnly={true} document={groupDoc(2)} {...others}/>
+            {hideCanvas(2) ? this.renderUnshownMessage(groupUsers[2], "se") : seCanvas}
           </div>
           {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            <CanvasComponent context="four-up-sw" scale={swCell.scale} showEditability={groupUsers[3] && "south west"}
-                            readOnly={true} document={groupDoc(3)} {...others}/>
+            {hideCanvas(3) ? this.renderUnshownMessage(groupUsers[3], "sw") : swCanvas}
           </div>
           {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
         </div>
@@ -156,6 +180,20 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
           }}
           onMouseDown={this.handleCenter}
         />
+      </div>
+    );
+  }
+
+  private renderUnshownMessage = (groupUser: FourUpUser, location: "ne" | "se" | "sw") => {
+    const groupUserName = groupUser ? groupUser.name : "User";
+    return (
+      <div className={`unshared ${location}`}>
+        <svg className={`icon icon-unshare`}>
+          <use xlinkHref={`#icon-unshare`} />
+        </svg>
+        <div>
+          {`${groupUserName} has not shared their workspace.`}
+        </div>
       </div>
     );
   }

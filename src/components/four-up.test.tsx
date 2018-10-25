@@ -87,7 +87,11 @@ describe("Four Up Component", () => {
     });
 
     const comp = mount(<FourUpComponent document={document} workspace={workspace} stores={stores}/>);
-    expect(comp.find(CanvasComponent)).toHaveLength(4);
+    // A canvas will be rendered unless an "unshared document" message is displayed.
+    // User 2 has no document, so it will display an "unshared document" message.
+    // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.
+    expect(comp.find(CanvasComponent)).toHaveLength(3);
+    // Users 1, 2 and 3 should be labelled
     expect(comp.find(".member")).toHaveLength(3);
     // First member is the current user, followed by group members
     expect(comp.find(".member").at(0).text()).toBe("U3");

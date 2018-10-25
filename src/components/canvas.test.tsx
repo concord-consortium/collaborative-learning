@@ -36,6 +36,7 @@ describe("Canvas Component", () => {
       uid: "1",
       key: "test",
       createdAt: 1,
+      visibility: "public",
       content: createSingleTileContent({
         type: "Text",
         text: "test"
