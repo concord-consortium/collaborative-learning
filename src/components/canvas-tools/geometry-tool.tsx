@@ -323,7 +323,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (this.domElement) {
         // requires non-empty tabIndex
         this.domElement.focus();
-        evt.preventDefault();
       }
       // first click selects the tile; subsequent clicks create points
       if (!ui.isSelectedTile(model)) {
