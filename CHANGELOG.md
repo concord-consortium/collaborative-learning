@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.0.8 - released October 25, 2018
+
+- Styling left nav canvas buttons [#161403821]
+- Implement selection of points [#160969495] - clicking on a single point selects it - ctrl/shift/cmd-click to select multiple points - backspace/delete keys delete selected points [#161272021]
+- Support deleting points with toolbar red-X [#161272021]
+- Adding 4-up messages to unshared group content
+
 ## Version 0.0.7 - released October 19, 2018
 
 - Add null test before handleCreatePolygon() [#161349320]
