@@ -1,8 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGProperties, JXGCoordPair, JXGObjectType } from "./jxg-changes";
-import { isFreePoint } from "./jxg-point";
-import { assign } from "lodash";
+import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { assign, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { isBoard } from "./jxg-board";
 
@@ -32,11 +32,100 @@ export function defaultGeometryContent(overrides?: JXGProperties) {
   return GeometryContentModel.create({ changes: [changeJson] });
 }
 
+// track selection in metadata object so it is not saved to firebase but
+// also is preserved across document/content reloads
+export const GeometryMetadataModel = types
+  .model("GeometryMetadata", {
+    id: types.string,
+    selection: types.map(types.boolean)
+  })
+  .views(self => ({
+    isSelected(id: string) {
+      return !!self.selection.get(id);
+    },
+    hasSelection() {
+      let hasSelection = false;
+      // TODO: short-circuit after first true
+      self.selection.forEach(value => {
+        if (value) {
+          hasSelection = true;
+        }
+      });
+      return hasSelection;
+    }
+  }))
+  .actions(self => ({
+    select(id: string) {
+      self.selection.set(id, true);
+    },
+    deselect(id: string) {
+      self.selection.set(id, false);
+    }
+  }));
+export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
+
+export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
+  const element = board.objects[id];
+  if (element) {
+    element.setAttribute({
+              fillColor: selected ? kPointDefaults.selectedFillColor : kPointDefaults.fillColor,
+              strokeColor: selected ? kPointDefaults.selectedStrokeColor : kPointDefaults.strokeColor
+            });
+  }
+}
+
 export const GeometryContentModel = types
   .model("GeometryContent", {
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     changes: types.array(types.string)
   })
+  .volatile(self => ({
+    metadata: undefined as any as GeometryMetadataModelType
+  }))
+  .views(self => ({
+    isSelected(id: string) {
+      return self.metadata.isSelected(id);
+    },
+    hasSelection() {
+      return self.metadata.hasSelection();
+    }
+  }))
+  .actions(self => ({
+    selectElement(board: JXG.Board, id: string) {
+      if (!self.isSelected(id)) {
+        self.metadata.select(id);
+        setElementColor(board, id, true);
+      }
+    },
+    deselectElement(board: JXG.Board, id: string) {
+      if (self.isSelected(id)) {
+        self.metadata.deselect(id);
+        setElementColor(board, id, false);
+      }
+    }
+  }))
+  .actions(self => ({
+    doPostCreate(metadata: GeometryMetadataModelType) {
+      self.metadata = metadata;
+    },
+    selectObjects(board: JXG.Board, ids: string | string[]) {
+      const _ids = Array.isArray(ids) ? ids : [ids];
+      _ids.forEach(id => {
+        self.selectElement(board, id);
+      });
+    },
+    deselectObjects(board: JXG.Board, ids: string | string[]) {
+      const _ids = Array.isArray(ids) ? ids : [ids];
+      _ids.forEach(id => {
+        self.deselectElement(board, id);
+      });
+    },
+    deselectAll(board: JXG.Board) {
+      self.metadata.selection.forEach((value, id) => {
+        self.deselectElement(board, id);
+      });
+    }
+  }))
   .extend(self => {
 
     let viewCount = 0;
@@ -143,17 +232,6 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function updateObjectsOfType(board: JXG.Board, type: JXGObjectType,
-                                 ids: string | string[], properties: JXGProperties | JXGProperties[]) {
-      const change: JXGChange = {
-              operation: "update",
-              target: type,
-              targetID: ids,
-              properties
-            };
-      return _applyChange(board, change);
-    }
-
     function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt))
@@ -172,6 +250,20 @@ export const GeometryContentModel = types
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return board.objectsList.filter(test);
+    }
+
+    function deleteSelection(board: JXG.Board) {
+      const ids: string[] = [];
+      self.metadata.selection.forEach((value, id) => {
+        if (value) {
+          ids.push(id);
+        }
+      });
+      if (ids.length) {
+        self.deselectAll(board);
+        board.showInfobox(false);
+        removeObjects(board, ids);
+      }
     }
 
     function _applyChange(board: JXG.Board, change: JXGChange) {
@@ -200,6 +292,9 @@ export const GeometryContentModel = types
         get isUserResizable() {
           return true;
         },
+        get isSyncSuspended() {
+          return suspendCount > 0;
+        },
         get batchChangeCount() {
           return batchChanges.length;
         }
@@ -214,9 +309,9 @@ export const GeometryContentModel = types
         addPoint,
         removeObjects,
         updateObjects,
-        updateObjectsOfType,
         createPolygonFromFreePoints,
         findObjects,
+        deleteSelection,
         applyChange: _applyChange,
         syncChange,
 

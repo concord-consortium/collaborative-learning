@@ -1,4 +1,4 @@
-import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType } from "./jxg-changes";
 import { boardChangeAgent, isBoard } from "./jxg-board";
 import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
@@ -29,6 +29,34 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXG
 }
 
 export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
+  const target = change.target.toLowerCase();
+  if ((change.operation === "update") && (target === "object")) {
+    // special case for update/object, where we dispatch by object type
+    applyUpdateObjects(board as JXG.Board, change);
+    return;
+  }
+  return dispatchChange(board, change);
+}
+
+function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
+  const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
+  ids.forEach((id, index) => {
+    const obj = id && board.objects[id];
+    const target = obj ? obj.elType as JXGObjectType : "object";
+    const props = Array.isArray(change.properties)
+                    ? change.properties[index]
+                    : change.properties;
+    return dispatchChange(board, {
+                            operation: "update",
+                            target,
+                            targetID: id,
+                            parents: change.parents,
+                            properties: props
+                          });
+  });
+}
+
+function dispatchChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
   const target = change.target.toLowerCase();
   const agent = agents[target];
   const handler = agent && agent[change.operation];
