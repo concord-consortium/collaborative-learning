@@ -3,32 +3,28 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document";
+import { IToolApiMap } from "./canvas-tools/tool-tile";
 
 import "./toolbar.sass";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
+  toolApiMap: IToolApiMap;
 }
 
 @inject("stores")
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, {}> {
   public render() {
-    const {document} = this.props;
     const handleClickTool = (tool: DocumentTool) => {
-      const { ui } = this.stores;
       return (e: React.MouseEvent<HTMLDivElement>) => {
         switch (tool) {
           case "delete":
-            if (ui.selectedTileId) {
-              document.deleteTile(ui.selectedTileId);
-            }
+            this.handleDelete();
             break;
           default:
-            const rowTile = document.addTile(tool, tool === "geometry");
-            if (rowTile && rowTile.tileId) {
-              ui.setSelectedTileId(rowTile.tileId);
-            }
+            this.handleAddToolTile(tool);
+            break;
         }
       };
     };
@@ -61,5 +57,29 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
+  }
+
+  private handleAddToolTile(tool: DocumentTool) {
+    const { document } = this.props;
+    const { ui } = this.stores;
+    const rowTile = document.addTile(tool, tool === "geometry");
+    if (rowTile && rowTile.tileId) {
+      ui.setSelectedTileId(rowTile.tileId);
+    }
+  }
+
+  private handleDelete() {
+    const { document } = this.props;
+    const { ui: { selectedTileId } } = this.stores;
+    if (selectedTileId) {
+      const toolApi = this.props.toolApiMap[selectedTileId];
+      // if there is selected content inside the selected tile, delete it first
+      if (toolApi && toolApi.hasSelection()) {
+        toolApi.deleteSelection();
+      }
+      else {
+        document.deleteTile(selectedTileId);
+      }
+    }
   }
 }

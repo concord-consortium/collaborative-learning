@@ -12,6 +12,20 @@ import ImageToolComponent from "./image-tool";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
+export interface IToolApi {
+  hasSelection: () => boolean;
+  deleteSelection: () => void;
+}
+
+export interface IToolApiInterface {
+  register: (id: string, toolApi: IToolApi) => void;
+  unregister: (id: string) => void;
+}
+
+export interface IToolApiMap {
+  [id: string]: IToolApi;
+}
+
 export const kDragRowHeight = "org.concord.clue.row.height";
 export const kDragTileSource = "org.concord.clue.tile.src";
 export const kDragTileId = "org.concord.clue.tile.id";
@@ -38,6 +52,7 @@ interface IProps {
   context: string;
   docId: string;
   scale?: number;
+  tabIndex?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;

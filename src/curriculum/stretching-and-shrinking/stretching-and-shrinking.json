@@ -558,12 +558,48 @@
               }
             }
           ]
+        },
+        {
+          "description": "Reflection 1.4",
+          "ordinal": 4,
+          "title": "1.MR Mathematical Reflection 1",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Mathematical Reflection 1"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you know about similarity?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
         }
       ],
-      "reflections": {
-        "tiles": [
-        ]
-      },
       "supports": []
     },
     {
@@ -1142,48 +1178,55 @@
             }
           ],
           "supports": []
+        },
+        {
+          "description": "Reflection 2.4",
+          "ordinal": 4,
+          "title": "2.MR Mathematical Reflection 2",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Mathematical Reflection 2"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures using coordinate rules and grids."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you know about similarity?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {
+                  "text": "What measurements change from one similar figure to another?"
+                }, 
+                {
+                  "text": "How is the change related to the scale factor?"
+                }
+              ]
+            }
+          ]
         }
       ],
-      "reflections": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures using coordinate rules and grid paper."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Now what do you know about similar figures?"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Just-in-Time Supports"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "What measurements change from one similar figure to another?"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "How is the change related to the scale factor?"
-            }
-          }
-        ]
-      },
       "supports": [
         {
           "text": "What measurements change from one similar figure to another?"
@@ -1688,30 +1731,49 @@
               }
             }
           ]
+        },
+        {
+          "description": "Reflection 3.4",
+          "ordinal": 4,
+          "title": "3.MR Mathematical Reflection 3",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Mathematical Reflection 3"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, we explored similar polygons, scale factors and measures related to similar figures."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you know about similarity?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            }
+          ]
         }
       ],
-      "reflections": {
-        "tiles": [
-          {
-            "content": {
-              "type": "Text",
-              "text": "In this Investigation, we explored similar polygons, scale factors and measures related to similar figures."
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Now what do you know about similarity?"
-            }
-          },
-          {
-            "content": {
-              "type": "Text",
-              "text": "Discuss your ideas with other students and your teacher. Then write a summary of your findings."
-            }
-          }
-        ]
-      },
       "supports": []
     },
      {
@@ -2129,6 +2191,45 @@
                 ],
                 "supports": []
               }
+            }
+          ]
+        }, {
+          "description": "Reflection 4.4",
+          "ordinal": 4,
+          "title": "4.MR Mathematical Reflection 4",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Mathematical Reflection 4"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In this Investigation, we explored ways to use similar figures to find information about shapes."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What do you know about similarity?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
             }
           ]
         }

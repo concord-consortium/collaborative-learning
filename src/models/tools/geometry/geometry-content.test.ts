@@ -1,11 +1,13 @@
 import { GeometryContentModel, GeometryContentModelType,
-          kGeometryToolID, defaultGeometryContent } from "./geometry-content";
+          kGeometryToolID, defaultGeometryContent, GeometryMetadataModel } from "./geometry-content";
 import { JXGChange } from "./jxg-changes";
 import { isBoard } from "./jxg-board";
 import { isPoint, isFreePoint } from "./jxg-point";
 import { isPolygon } from "./jxg-polygon";
 import { isUuid } from "../../../utilities/test-utils";
 import { clone } from "lodash";
+
+const placeholderImage = require("../../../assets/image_placeholder.png");
 
 describe("GeometryContent", () => {
 
@@ -23,7 +25,11 @@ describe("GeometryContent", () => {
     const divStyle = "width:200px;height:200px";
     document.body.innerHTML = `<div id="${divId}" style="${divStyle}"></div>`;
 
-    return content.initializeBoard(divId) as JXG.Board;
+    function onCreate(elt: JXG.GeometryElement) {
+      // handle a point
+    }
+
+    return content.initializeBoard(divId, onCreate) as JXG.Board;
   }
 
   it("can create/destroy a JSXGraph board", () => {
@@ -35,6 +41,8 @@ describe("GeometryContent", () => {
     expect(isUuid(board.id)).toBe(true);
 
     content.resizeBoard(board, 200, 200);
+    content.updateScale(board, 0.5);
+    expect(board.cssTransMat).toEqual([[1, 0, 0], [0, 2, 0], [0, 0, 2]]);
 
     content.destroyBoard(board);
 
@@ -74,7 +82,7 @@ describe("GeometryContent", () => {
     const board = createDefaultBoard(content);
     expect(isPoint(board)).toBe(false);
     const p1Id = "point-1";
-    let p1: JXG.Point = board.objects[p1Id];
+    let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
     expect(p1).toBeUndefined();
     p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
     expect(isPoint(p1)).toBe(true);
@@ -124,5 +132,77 @@ describe("GeometryContent", () => {
     // can't create polygon without vertices
     polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as JXG.Polygon;
     expect(polygon).toBeUndefined();
+  });
+
+  it("can add an image", () => {
+    const content = defaultGeometryContent();
+    const board = createDefaultBoard(content);
+    const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
+    expect(image!.elType).toBe("image");
+    content.updateObjects(board, image!.id, { url: placeholderImage });
+    expect(image!.url).toBe(placeholderImage);
+    content.updateObjects(board, image!.id, { size: [10, 10] });
+    content.updateObjects(board, image!.id, { url: placeholderImage, size: [10, 10] });
+    expect(image!.url).toBe(placeholderImage);
+
+    const change: JXGChange = {
+      operation: "create",
+      target: "image",
+      parents: [placeholderImage],
+      properties: { id: "image-fail" }
+    };
+    const failedImage = content.applyChange(board, change);
+    expect(failedImage).toBeUndefined();
+  });
+
+  it("can select points, etc.", () => {
+    const content = defaultGeometryContent();
+    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
+    content.doPostCreate(metadata);
+    const board = createDefaultBoard(content);
+    const p1 = content.addPoint(board, [0, 0]);
+    const p2 = content.addPoint(board, [1, 1]);
+    const p3 = content.addPoint(board, [1, 0]);
+    const poly = content.createPolygonFromFreePoints(board);
+    content.selectObjects(board, p1!.id);
+    expect(content.isSelected(p1!.id)).toBe(true);
+    expect(content.isSelected(p2!.id)).toBe(false);
+    content.selectObjects(board, poly!.id);
+    expect(content.isSelected(poly!.id)).toBe(true);
+    expect(content.hasSelection()).toBe(true);
+    let found = content.findObjects(board, obj => {
+                  return obj.id === p1!.id;
+                });
+    expect(found.length).toBe(1);
+    content.deselectObjects(board, p1!.id);
+    expect(content.isSelected(p1!.id)).toBe(false);
+    content.deselectAll(board);
+    expect(content.hasSelection()).toBe(false);
+    content.selectObjects(board, p1!.id);
+    content.deleteSelection(board);
+    expect(content.hasSelection()).toBe(false);
+    found = content.findObjects(board, obj => {
+              return obj.id === p1!.id;
+            });
+    expect(found.length).toBe(0);
+    content.deleteSelection(board);
+    expect(found.length).toBe(0);
+  });
+
+  it("can suspend/resume syncChanges", () => {
+    const content = defaultGeometryContent();
+    const board = createDefaultBoard(content);
+    expect(content.isSyncSuspended).toBe(false);
+    content.suspendSync();
+    expect(content.isSyncSuspended).toBe(true);
+    content.suspendSync();
+    expect(content.isSyncSuspended).toBe(true);
+    content.addPoint(board, [1, 1], { id: "p1" });
+    content.resumeSync();
+    expect(content.isSyncSuspended).toBe(true);
+    content.resumeSync();
+    expect(content.isSyncSuspended).toBe(false);
+    expect(content.batchChangeCount).toBe(0);
+    expect(content.isUserResizable).toBe(true);
   });
 });

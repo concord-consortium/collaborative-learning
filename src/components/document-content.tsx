@@ -77,12 +77,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content, ...others } = this.props;
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap } = content;
+    let tabIndex = 1;
     return rowOrder.map(rowId => {
       const row = rowMap.get(rowId);
       const rowHeight = this.getRowHeight(rowId);
+      const _tabIndex = tabIndex;
+      tabIndex += row ? row.tiles.length : 0;
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  height={rowHeight} tileMap={tileMap} {...others} />
+                                  tabIndex={_tabIndex} height={rowHeight} tileMap={tileMap}
+                                  {...others} />
               : null;
     });
   }
@@ -224,8 +228,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!srcRowId) return;
     const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
     const dropRowInfo  = this.getDropRowInfo(e);
-    const { rowInsertIndex, rowDropIndex, dropOffsetLeft,
-            dropOffsetTop, dropOffsetRight, dropOffsetBottom } = dropRowInfo;
+    const { rowInsertIndex, rowDropIndex, dropOffsetLeft, dropOffsetRight } = dropRowInfo;
     if ((rowDropIndex != null) &&
         (dropOffsetLeft != null) &&
         (dropOffsetLeft < kSideDropThreshold) &&

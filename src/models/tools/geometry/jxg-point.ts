@@ -11,15 +11,27 @@ export const isFreePoint = (v: any) => isVisiblePoint(v) &&
                                         (size(v.childElements) <= 1) &&
                                         (size(v.descendants) <= 1);
 
+export const kPointDefaults = {
+              fillColor: "#CCCCCC",
+              strokeColor: "#888888",
+              selectedFillColor: "#FF0000",
+              selectedStrokeColor: "#FF0000"
+            };
+
+const defaultProps = {
+        fillColor: kPointDefaults.fillColor,
+        strokeColor: kPointDefaults.strokeColor
+      };
+
 export const pointChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
-    const props = changeProps.id
-                    ? changeProps
+    const props = assign(
                     // If id is not provided we generate one, but this will prevent
                     // model-level synchronization. This should only occur for very
                     // old geometry tiles created before the introduction of the uuid.
-                    : assign({ id: uuid() }, changeProps);
+                    changeProps.id ? {} : { id: uuid() },
+                    defaultProps, changeProps);
     return (board as JXG.Board).create("point", change.parents, props);
   },
 

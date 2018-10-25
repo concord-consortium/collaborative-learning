@@ -4,6 +4,7 @@ import { IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentContentModelType } from "../models/document-content";
+import { IToolApiInterface } from "./canvas-tools/tool-tile";
 
 import "./canvas.sass";
 
@@ -15,7 +16,8 @@ interface IProps extends IBaseProps {
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
-  showEditability?: EditabilityLocation;
+  editabilityLocation?: EditabilityLocation;
+  toolApiInterface?: IToolApiInterface;
 }
 
 @observer
@@ -31,11 +33,11 @@ export class CanvasComponent extends React.Component<IProps, {}> {
   }
 
   private renderEditability() {
-    const {showEditability, readOnly} = this.props;
-    if (showEditability) {
+    const {editabilityLocation, readOnly} = this.props;
+    if (editabilityLocation) {
       const iconName = readOnly ? "icon-copy-only" : "icon-edit";
       return (
-        <svg key="edit" className={`icon ${iconName} ${showEditability}`}>
+        <svg key="edit" className={`icon editability ${iconName} ${editabilityLocation}`}>
           <use xlinkHref={`#${iconName}`} />
         </svg>
       );

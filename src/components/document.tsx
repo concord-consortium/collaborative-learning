@@ -6,15 +6,12 @@ import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType,
-         SectionDocument,
-         LearningLogDocument,
-         PublicationDocument,
-         DocumentTool
-       } from "../models/document";
+          SectionDocument, LearningLogDocument, PublicationDocument } from "../models/document";
+import { ToolbarComponent } from "./toolbar";
+import { IToolApi, IToolApiInterface, IToolApiMap } from "./canvas-tools/tool-tile";
 import { WorkspaceModelType } from "../models/workspace";
 
 import "./document.sass";
-import { ToolbarComponent } from "./toolbar";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -29,6 +26,22 @@ interface IProps extends IBaseProps {
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, {}> {
+
+  private toolApiMap: IToolApiMap = {};
+  private toolApiInterface: IToolApiInterface;
+
+  constructor(props: IProps) {
+    super(props);
+
+    this.toolApiInterface = {
+      register: (id: string, toolApi: IToolApi) => {
+        this.toolApiMap[id] = toolApi;
+      },
+      unregister: (id: string) => {
+        delete this.toolApiMap[id];
+      }
+    };
+  }
 
   public render() {
     const {document, isGhostUser, readOnly} = this.props;
@@ -62,7 +75,6 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {workspace, document} = this.props;
     const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
-    const share = document.visibility === "private" ? "share" : "unshare";
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
@@ -123,7 +135,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderToolbar() {
-    return <ToolbarComponent key="toolbar" document={this.props.document} />;
+    return <ToolbarComponent key="toolbar" document={this.props.document}
+                              toolApiMap={this.toolApiMap} />;
   }
 
   private renderCanvas() {
@@ -160,7 +173,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   private render1UpCanvas(forceReadOnly?: boolean) {
     const readOnly = forceReadOnly ? true : this.props.readOnly;
     return (
-      <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly} />
+      <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
+                        toolApiInterface={this.toolApiInterface} />
     );
   }
 
@@ -168,7 +182,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {isGhostUser, document} = this.props;
     const {sectionWorkspace} = this.stores.ui;
     return (
-      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser} />
+      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser}
+                        toolApiInterface={this.toolApiInterface} />
     );
   }
 
@@ -210,21 +225,30 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private renderSupportIcons() {
     const supports = this.getSupportsWithIndices();
+    const anyActive = supports.some((support) => support.item.visible);
     return (
       <div className="supports-list">
         {supports.map((support) => {
+          const {index, item} = support;
+          const visibility = !anyActive || item.visible ? "show" : "hide";
           return (
-            <span
-              key={support.index}
-              onClick={this.handleToggleSupport(support.item)}
-              className={support.item.visible ? "active" : undefined}
+            <svg
+              key={index}
+              onClick={this.handleToggleSupport(item)}
+              className={`icon ${this.getSupportName(index)} ${visibility}`}
             >
-              {support.index}
-            </span>
+              <use xlinkHref={`#${this.getSupportName(index)}`} />
+            </svg>
           );
         })}
       </div>
     );
+  }
+
+  private getSupportName(supportIndex: number) {
+    // There are currently 4 (0-based) support icons defined in index.html
+    const safeIndex = Math.min(supportIndex, 3);
+    return `icon-support${safeIndex}`;
   }
 
   private renderVisibleSupports() {
@@ -238,7 +262,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
           {supports.map((support) => {
             return (
               <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
-                <span>{support.index}</span> {support.item.text}
+                {support.item.text}
               </div>
             );
           })}
@@ -272,7 +296,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private getSupportsWithIndices() {
     return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
-      return {index: index + 1, item: support};
+      return {index, item: support};
     });
   }
 

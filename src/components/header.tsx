@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
+import * as PackageJson from "../../package.json";
 
 import "./header.sass";
 import { GroupModelType, GroupUserModelType } from "../models/groups";
@@ -44,6 +45,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className="group">
+        <div className="version">Version {PackageJson.version}</div>
         <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
         <div className="members">
           <div className="row">
