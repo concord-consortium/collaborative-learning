@@ -53,7 +53,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
 
     if (sectionWorkspace.comparisonVisible) {
       return (
-        <div onMouseOver={this.handleMouseOver}>
+        <div onClick={this.handleClick}>
           {this.renderDocument(
             "left-workspace",
             "primary",
@@ -96,7 +96,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
         className={className}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop(side)}
-        onMouseOver={this.handleMouseOver}
+        onClick={this.handleClick}
       >
         {child}
       </div>
@@ -109,7 +109,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
         className="comparison-placeholder"
         onDragOver={(this.handleDragOver)}
         onDrop={this.handleDrop("comparison")}
-        onMouseOver={this.handleMouseOver}
+        onClick={this.handleClick}
       >
         Click or drag an item in the right tabs to show it here
       </div>
@@ -139,7 +139,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
     };
   }
 
-  private handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
+  private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.contractAll();
   }
 
