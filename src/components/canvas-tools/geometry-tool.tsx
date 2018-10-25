@@ -127,7 +127,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this.initializeContent();
 
-    if (this.props.toolApiInterface) {
+    if (!this.props.readOnly && this.props.toolApiInterface) {
       this.props.toolApiInterface.register(this.props.model.id, {
         hasSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
@@ -205,13 +205,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const { board } = this.state;
     const kBackspaceKeyCode = 8;
     const kDeleteKeyCode = 46;
-    if (board && ((e.keyCode === kBackspaceKeyCode) || (e.keyCode === kDeleteKeyCode))) {
+    if (!this.props.readOnly && this.state.board &&
+        ((e.keyCode === kBackspaceKeyCode) || (e.keyCode === kDeleteKeyCode))) {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       if (geometryContent.hasSelection()) {
-        geometryContent.deleteSelection(board);
+        geometryContent.deleteSelection(this.state.board);
       }
     }
   }
@@ -398,8 +398,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             this.handleCreatePoint(point);
 
             // select newly created points without referring to content
-            metadata.select(point.id);
-            setElementColor(board, point.id, true);
+            // metadata.select(point.id);
+            // setElementColor(board, point.id, true);
           }
         });
       }
@@ -432,7 +432,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         this.dragPts[id] = { initial: coords };
         this.lastPointDown = { evt, coords };
 
-        // click on selected element - deselect unless appropriate modifier key is down
+        // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
           if (evt.ctrlKey || evt.metaKey) {
             geometryContent.deselectElement(board, id);
