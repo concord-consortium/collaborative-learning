@@ -103,7 +103,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
       <div key="bottom-drop-feedback"
           className={`drop-feedback ${dropHighlight === "bottom" ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"
-        className={`bottom-resize-handle`}
+        className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}
         onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
     ];
