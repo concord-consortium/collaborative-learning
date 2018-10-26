@@ -30,13 +30,15 @@ interface IDropRowInfo {
   dropOffsetTop?: number;
   dropOffsetRight?: number;
   dropOffsetBottom?: number;
-  lastUpdate?: number;
+  updateTimestamp?: number;
 }
 
 interface IState {
   dragResizeRow?: IDragResizeRow;
   dropRowInfo?: IDropRowInfo;
 }
+// Interval in ms between recalculation for highlighting drag/drop zones
+const kDragUpdateInterval = 50;
 
 @inject("stores")
 @observer
@@ -171,12 +173,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
+    const { dropRowInfo } = this.state;
     if (!content || readOnly) return;
 
     const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
     if (this.hasDragType(e.dataTransfer, kDragTileContent)) {
-      const dropRowInfo = this.getDropRowInfo(e);
-      this.setState({ dropRowInfo });
+      // Throttle calculation rate slightly to reduce load while dragging
+      const lastUpdate = dropRowInfo && dropRowInfo.updateTimestamp ? dropRowInfo.updateTimestamp : 0;
+      const now = new Date().getTime();
+      if (now - lastUpdate > kDragUpdateInterval) {
+        const nextDropRowInfo = this.getDropRowInfo(e);
+        this.setState({ dropRowInfo: nextDropRowInfo });
+      }
       // indicate we'll accept the drop
       e.dataTransfer.dropEffect = withinDocument && !e.altKey ? "move" : "copy";
       e.preventDefault();
@@ -234,7 +242,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         dropInfo.dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
         dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
 
-        const kSideDropThreshold = 20;
+        const kSideDropThreshold = 60;
         if ((dropInfo.dropOffsetLeft < kSideDropThreshold) &&
             (dropInfo.dropOffsetLeft < dropInfo.dropOffsetRight!)) {
           dropInfo.rowDropLocation = "left";
@@ -251,7 +259,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         }
       }
     }
-    dropInfo.lastUpdate = new Date().getTime();
+    dropInfo.updateTimestamp = new Date().getTime();
     return dropInfo;
   }
 

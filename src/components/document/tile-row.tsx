@@ -95,15 +95,17 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     const { model: { isUserResizable }, dropHighlight } = this.props;
     return [
       <div key="top-drop-feedback"
-          className={`top-drop-feedback ${dropHighlight === "top" ? "show-feedback" : ""}`} />,
+          className={`drop-feedback ${dropHighlight === "top" ? "show top" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`left-drop-feedback ${dropHighlight === "left" ? "show-feedback" : ""}`} />,
+          className={`drop-feedback ${dropHighlight === "left" ? "show left" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`right-drop-feedback ${dropHighlight === "right" ? "show-feedback" : ""}`} />,
+          className={`drop-feedback ${dropHighlight === "right" ? "show right" : ""}`} />,
+      <div key="bottom-drop-feedback"
+          className={`drop-feedback ${dropHighlight === "bottom" ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"
-          className={`bottom-resize-handle ${dropHighlight === "bottom" ? "show-feedback" : ""}`}
-          draggable={isUserResizable}
-          onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
+        className={`bottom-resize-handle`}
+        draggable={isUserResizable}
+        onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
     ];
   }
 
