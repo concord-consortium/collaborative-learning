@@ -53,6 +53,7 @@ interface IProps {
   height?: number;
   tileMap: any;
   readOnly?: boolean;
+  dropHighlight?: string;
 }
 
 @inject("stores")
@@ -69,7 +70,7 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
       <div className={`tile-row`} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
         {this.renderTiles(height)}
-        {this.renderBottomResizeHandle()}
+        {!this.props.readOnly && this.renderDragDropHandles()}
       </div>
     );
   }
@@ -90,10 +91,20 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
     });
   }
 
-  private renderBottomResizeHandle() {
-    const { model } = this.props;
-    if (this.props.readOnly || !model.isUserResizable) return null;
-    return <div className="bottom-resize-handle" draggable={true} onDragStart={this.handleStartResizeRow}/>;
+  private renderDragDropHandles() {
+    const { model: { isUserResizable }, dropHighlight } = this.props;
+    return [
+      <div key="top-drop-feedback"
+          className={`top-drop-feedback ${dropHighlight === "top" ? "show-feedback" : ""}`} />,
+      <div key="left-drop-feedback"
+          className={`left-drop-feedback ${dropHighlight === "left" ? "show-feedback" : ""}`} />,
+      <div key="right-drop-feedback"
+          className={`right-drop-feedback ${dropHighlight === "right" ? "show-feedback" : ""}`} />,
+      <div key="bottom-resize-handle"
+          className={`bottom-resize-handle ${dropHighlight === "bottom" ? "show-feedback" : ""}`}
+          draggable={isUserResizable}
+          onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
+    ];
   }
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
