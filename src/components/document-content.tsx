@@ -242,7 +242,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         dropInfo.dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
         dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
 
-        const kSideDropThreshold = 60;
+        const kSideDropThreshold = rowBounds.width * 0.25;
         if ((dropInfo.dropOffsetLeft < kSideDropThreshold) &&
             (dropInfo.dropOffsetLeft < dropInfo.dropOffsetRight!)) {
           dropInfo.rowDropLocation = "left";
