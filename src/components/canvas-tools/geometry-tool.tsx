@@ -119,6 +119,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private domElement: HTMLDivElement | null;
 
+  private disposeSelectionObserver: any;
+
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
@@ -152,9 +154,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    const { model: { content } } = this.props;
-    if ((content.type === "Geometry") && this.state.board) {
-      content.destroyBoard(this.state.board);
+    if (this.disposeSelectionObserver) {
+      this.disposeSelectionObserver();
+    }
+    if (this.state.board) {
+      JXG.JSXGraph.freeBoard(this.state.board);
     }
   }
 
@@ -404,6 +408,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     };
 
+    // synchronize selection changes
+    const _geometryContent = this.props.model.content as GeometryContentModelType;
+    this.disposeSelectionObserver = _geometryContent.metadata.selection.observe(change => {
+      if (this.state.board) {
+        setElementColor(this.state.board, change.name, (change as any).newValue.value);
+      }
+    });
+
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
   }
@@ -434,7 +446,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
           if (evt.ctrlKey || evt.metaKey) {
-            geometryContent.deselectElement(board, id);
+            geometryContent.deselectElement(id);
           }
         }
         // click on unselected element
@@ -443,7 +455,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
             geometryContent.deselectAll(board);
           }
-          geometryContent.selectElement(board, id);
+          geometryContent.selectElement(id);
         }
         this.lastSelectDown = evt;
       }
@@ -522,7 +534,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const pt = point as JXG.Point;
         this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
         if (board && !inVertex) {
-          geometryContent.selectElement(board, pt.id);
+          geometryContent.selectElement(pt.id);
         }
       });
     };

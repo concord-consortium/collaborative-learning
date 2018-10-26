@@ -44,14 +44,7 @@ export const GeometryMetadataModel = types
       return !!self.selection.get(id);
     },
     hasSelection() {
-      let hasSelection = false;
-      // TODO: short-circuit after first true
-      self.selection.forEach(value => {
-        if (value) {
-          hasSelection = true;
-        }
-      });
-      return hasSelection;
+      return Array.from(self.selection.values()).some(isSelected => isSelected);
     }
   }))
   .actions(self => ({
@@ -91,16 +84,14 @@ export const GeometryContentModel = types
     }
   }))
   .actions(self => ({
-    selectElement(board: JXG.Board, id: string) {
+    selectElement(id: string) {
       if (!self.isSelected(id)) {
         self.metadata.select(id);
-        setElementColor(board, id, true);
       }
     },
-    deselectElement(board: JXG.Board, id: string) {
+    deselectElement(id: string) {
       if (self.isSelected(id)) {
         self.metadata.deselect(id);
-        setElementColor(board, id, false);
       }
     }
   }))
@@ -108,21 +99,21 @@ export const GeometryContentModel = types
     doPostCreate(metadata: GeometryMetadataModelType) {
       self.metadata = metadata;
     },
-    selectObjects(board: JXG.Board, ids: string | string[]) {
+    selectObjects(ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.selectElement(board, id);
+        self.selectElement(id);
       });
     },
     deselectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.deselectElement(board, id);
+        self.deselectElement(id);
       });
     },
     deselectAll(board: JXG.Board) {
       self.metadata.selection.forEach((value, id) => {
-        self.deselectElement(board, id);
+        self.deselectElement(id);
       });
     }
   }))
