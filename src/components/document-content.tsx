@@ -235,7 +235,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         dropInfo.rowInsertIndex = i + 1;
         dropDistance = dist;
       }
-      if (this.isPointInRect(e.clientX, e.clientY, rowBounds)) {
+      if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
+          // below the last row - highlight bottom of last row
+          ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
         dropInfo.rowDropIndex = i;
         dropInfo.dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
         dropInfo.dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
