@@ -57,6 +57,7 @@ interface IProps {
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
 const kToolComponentMap: any = {
