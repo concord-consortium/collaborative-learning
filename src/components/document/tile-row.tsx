@@ -56,9 +56,15 @@ interface IProps {
   dropHighlight?: string;
 }
 
+interface IState {
+  tileAcceptDrop?: string;
+}
+
 @inject("stores")
 @observer
-export class TileRowComponent extends BaseComponent<IProps, {}> {
+export class TileRowComponent extends BaseComponent<IProps, IState> {
+
+  public state: IState = {};
 
   private tileRowDiv: HTMLElement | null;
 
@@ -86,27 +92,34 @@ export class TileRowComponent extends BaseComponent<IProps, {}> {
       const _tabIndex = tabIndex ? tabIndex + index : tabIndex;
       return tileModel
               ? <ToolTileComponent key={tileModel.id} model={tileModel} tabIndex={_tabIndex}
-                                    widthPct={tileWidthPct} height={rowHeight} {...others} />
+                                    widthPct={tileWidthPct} height={rowHeight}
+                                    onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
+                                    {...others} />
               : null;
     });
   }
 
   private renderDragDropHandles() {
     const { model: { isUserResizable }, dropHighlight } = this.props;
+    const highlight = this.state.tileAcceptDrop ? undefined : dropHighlight;
     return [
       <div key="top-drop-feedback"
-          className={`drop-feedback ${dropHighlight === "top" ? "show top" : ""}`} />,
+          className={`drop-feedback ${highlight === "top" ? "show top" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`drop-feedback ${dropHighlight === "left" ? "show left" : ""}`} />,
+          className={`drop-feedback ${highlight === "left" ? "show left" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`drop-feedback ${dropHighlight === "right" ? "show right" : ""}`} />,
+          className={`drop-feedback ${highlight === "right" ? "show right" : ""}`} />,
       <div key="bottom-drop-feedback"
-          className={`drop-feedback ${dropHighlight === "bottom" ? "show bottom" : ""}`} />,
+          className={`drop-feedback ${highlight === "bottom" ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}
         onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
     ];
+  }
+
+  private handleSetCanAcceptDrop = (tileId?: string) => {
+    this.setState({ tileAcceptDrop: tileId });
   }
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {

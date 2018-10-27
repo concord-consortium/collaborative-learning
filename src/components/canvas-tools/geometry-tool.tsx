@@ -28,6 +28,7 @@ interface IProps extends SizeMeProps {
   model: ToolTileModelType;
   readOnly?: boolean;
   toolApiInterface?: IToolApiInterface;
+  onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
 interface IState extends SizeMeProps {
@@ -170,7 +171,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           ref={elt => this.domElement = elt}
           tabIndex={this.props.tabIndex}
           onKeyDown={this.handleKeyDown}
-          onDragOver={this.handleDragOver} onDrop={this.handleDrop} />
+          onDragOver={this.handleDragOver}
+          onDragLeave={this.handleDragLeave}
+          onDrop={this.handleDrop} />
     );
   }
 
@@ -195,13 +198,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
-    const kImgDragMargin = 25;
+    // image drop area is central 80% in each dimension
+    const kImgDropMarginPct = 0.1;
     if (!readOnly && (toolType === "image")) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
-      if ((e.clientX > eltBounds.left + kImgDragMargin) &&
-          (e.clientX < eltBounds.right - kImgDragMargin) &&
-          (e.clientY > eltBounds.top + kImgDragMargin) &&
-          (e.clientY < eltBounds.bottom - kImgDragMargin)) {
+      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+          (e.clientX < eltBounds.right - kImgDropMarginX) &&
+          (e.clientY > eltBounds.top + kImgDropMarginY) &&
+          (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
         return true;
       }
     }
@@ -221,10 +227,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (this.isAcceptableImageDrag(e)) {
+    const isAcceptableDrag = this.isAcceptableImageDrag(e);
+    this.props.onSetCanAcceptDrop(isAcceptableDrag ? this.props.model.id : undefined);
+    if (isAcceptableDrag) {
       e.dataTransfer.dropEffect = "copy";
       e.preventDefault();
     }
+  }
+
+  private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    this.props.onSetCanAcceptDrop();
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
