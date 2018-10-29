@@ -16,11 +16,7 @@ interface IProps {
 interface IState {
 }
 ​
-@inject("stores")
-@observer
 export default class DrawingToolComponent extends BaseComponent<IProps, IState> {
-
-  private toolbarElement: HTMLDivElement;
 
   public componentWillMount() {
     (this.props.model.content as DrawingContentModelType).reset();
@@ -32,14 +28,10 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
     const className = `drawing-tool${editableClass}`;
     return (
       <div className={className}>
-        <ToolbarView
-            model={model}
-            readOnly={!!readOnly}/>
+        <ToolbarView model={model} readOnly={!!readOnly}/>
         <div style={{left: TOOLBAR_WIDTH}}
             onMouseDown={this.handleMouseDown}>
-          <DrawingLayerView
-            model={model}
-            readOnly={!!readOnly}
+          <DrawingLayerView model={model} readOnly={!!readOnly}
           />
         </div>
       </div>
