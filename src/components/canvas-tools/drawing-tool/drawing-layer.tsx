@@ -351,7 +351,7 @@ class RectangleDrawingTool extends DrawingTool {
       rectangle.model.y = Math.min(start.y, end.y);
       rectangle.model.width = Math.max(start.x, end.x) - rectangle.model.x;
       rectangle.model.height = Math.max(start.y, end.y) - rectangle.model.y;
-      if (e2.ctrlKey || e2.altKey) {
+      if (e2.ctrlKey || e2.altKey || e2.shiftKey) {
         let {x, y} = rectangle.model;
         const {width, height} = rectangle.model;
         const squareSize = Math.max(width, height);
@@ -416,7 +416,7 @@ class EllipseDrawingTool extends DrawingTool {
       if (!end) return;
       ellipse.model.rx = Math.abs(start.x - end.x);
       ellipse.model.ry = Math.abs(start.y - end.y);
-      if (e2.ctrlKey || e2.altKey) {
+      if (e2.ctrlKey || e2.altKey || e2.shiftKey) {
         ellipse.model.rx = ellipse.model.ry = Math.max(ellipse.model.rx, ellipse.model.ry);
       }
       this.drawingLayer.setState({currentDrawingObject: ellipse});
