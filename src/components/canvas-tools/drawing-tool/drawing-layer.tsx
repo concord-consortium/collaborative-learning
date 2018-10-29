@@ -735,6 +735,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         this.setSelectedObjects(objectsToInteract);
         needToAddHoverToSelection = false;
       }
+      this.setState({objects: this.state.objects});
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
