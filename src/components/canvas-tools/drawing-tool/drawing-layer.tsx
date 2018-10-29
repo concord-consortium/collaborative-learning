@@ -19,7 +19,7 @@ interface BoundingBox {
   se: Point;
 }
 interface DrawingObjectOptions {
-  key: any;
+  id: any;
   handleHover?: (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => void;
   drawingLayer: DrawingLayerView;
 }
@@ -29,20 +29,9 @@ abstract class DrawingObject {
 
   constructor(model: DrawingObjectDataType) {
     this.model = model;
-    this.model.key = this.model.key || uuid();
+    this.model.id = this.model.id || uuid();
   }
 
-  public serialize() {
-    return JSON.stringify(this.model);
-  }
-
-  public update(json: any) {
-    for (const key in json) {
-      if (json.hasOwnProperty(key)) {
-        this.model[key] = json[key];
-      }
-    }
-  }
   public inSelection(selectionBox: SelectionBox) {
     const {nw, se} = this.getBoundingBox();
     return selectionBox.overlaps(nw, se);
@@ -86,10 +75,10 @@ class LineObject extends DrawingObject {
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
     const {x, y, deltaPoints, stroke, strokeWidth, strokeDashArray} = this.model;
-    const {key, handleHover} = options;
+    const {id, handleHover} = options;
     const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
     return <path
-              key={key}
+              key={id}
               d={commands}
               stroke={stroke}
               fill="none"
@@ -117,9 +106,9 @@ class VectorObject extends DrawingObject {
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
     const {x, y, dx, dy, stroke, strokeWidth, strokeDashArray} = this.model;
-    const {key, handleHover} = options;
+    const {id, handleHover} = options;
     return <line
-              key={key}
+              key={id}
               x1={x}
               y1={y}
               x2={x + dx}
@@ -148,9 +137,9 @@ class RectangleObject extends DrawingObject {
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
     const {x, y, width, height, stroke, strokeWidth, strokeDashArray, fill} = this.model;
-    const {key, handleHover} = options;
+    const {id, handleHover} = options;
     return <rect
-              key={key}
+              key={id}
               x={x}
               y={y}
               width={width}
@@ -181,9 +170,9 @@ class EllipseObject extends DrawingObject {
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
     const {x, y, rx, ry, stroke, strokeWidth, strokeDashArray, fill} = this.model;
-    const {key, handleHover} = options;
+    const {id, handleHover} = options;
     return <ellipse
-              key={key}
+              key={id}
               cx={x}
               cy={y}
               rx={rx}
@@ -665,8 +654,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.setState({selectionBox: null, selectedObjects});
 
     const drawingContent = this.props.model.content as DrawingContentModelType;
-    const selectedObjectKeys = selectedObjects.map(object => object.model.key || "");
-    drawingContent.setSelectedObjectKeys(selectedObjectKeys);
+    const selectedObjectIds = selectedObjects.map(object => object.model.id || "");
+    drawingContent.setSelectedObjectIds(selectedObjectIds);
   }
 
   public setCurrentTool(tool: DrawingTool|null) {
@@ -682,7 +671,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public handleDelete() {
     const {selectedObjects} = this.state;
     if (selectedObjects.length > 0) {
-      const deletedObjects = selectedObjects.map(object => object.model.key);
+      const deletedObjects = selectedObjects.map(object => object.model.id);
       this.sendChange({action: "delete", data: deletedObjects as DrawingToolDeletion});
     }
   }
@@ -712,7 +701,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {selectedObjects, hoverObject} = this.state;
     let objectsToInteract: DrawingObject[];
     let needToAddHoverToSelection = false;
-    if (hoverObject && !selectedObjects.some(object => object.model.key === hoverObject.model.key)) {
+    if (hoverObject && !selectedObjects.some(object => object.model.id === hoverObject.model.id)) {
       objectsToInteract = [hoverObject, ...selectedObjects];
       needToAddHoverToSelection = true;
     } else {
@@ -755,7 +744,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (moved) {
         if (objectsToInteract.length > 0) {
           const moves: DrawingToolMove = objectsToInteract.map((object) => ({
-            key: object!.model.key || "",
+            id: object!.model.id || "",
             destination: {x: object.model.x, y: object.model.y}
           }));
           this.sendChange({action: "move", data: moves});
@@ -800,13 +789,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
   public renderObjects(filter: (object: DrawingObject) => boolean) {
-    return Object.keys(this.state.objects).map((key) => {
-      const object = this.state.objects[key];
+    return Object.keys(this.state.objects).map((id) => {
+      const object = this.state.objects[id];
       if (!object || !filter(object)) {
         return null;
       }
       return object.render({
-        key,
+        id,
         handleHover: this.handleObjectHover,
         drawingLayer: this
       });
@@ -865,7 +854,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
               ? SELECTION_COLOR : HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
-            ? this.state.currentDrawingObject.render({key: "current", drawingLayer: this})
+            ? this.state.currentDrawingObject.render({id: "current", drawingLayer: this})
             : null}
           {this.state.selectionBox ? this.state.selectionBox.render() : null}
         </svg>
@@ -910,15 +899,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         drawingObject = new EllipseObject(data);
         break;
     }
-    if (drawingObject && drawingObject.model.key) {
-      this.state.objects[drawingObject.model.key] = drawingObject;
+    if (drawingObject && drawingObject.model.id) {
+      this.state.objects[drawingObject.model.id] = drawingObject;
       this.setState({objects: this.state.objects});
     }
   }
 
   private moveDrawingObjects(moves: DrawingToolMove) {
     for (const move of moves) {
-      const drawingObject = this.state.objects[move.key];
+      const drawingObject = this.state.objects[move.id];
       if (drawingObject) {
         drawingObject.model.x = move.destination.x;
         drawingObject.model.y = move.destination.y;
@@ -927,25 +916,25 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private updateDrawingObjects(update: DrawingToolUpdate) {
-    const {keys, update: {prop, newValue}} = update;
-    for (const key of keys) {
-      const drawingObject = this.state.objects[key];
+    const {ids, update: {prop, newValue}} = update;
+    for (const id of ids) {
+      const drawingObject = this.state.objects[id];
       if (drawingObject && drawingObject.model.hasOwnProperty(prop)) {
         drawingObject.model[prop] = newValue;
       }
     }
   }
 
-  private deleteDrawingObjects(keysToDelete: string[]) {
-    for (const key of keysToDelete) {
-      const drawingObject = this.state.objects[key];
+  private deleteDrawingObjects(idsToDelete: string[]) {
+    for (const id of idsToDelete) {
+      const drawingObject = this.state.objects[id];
       if (drawingObject) {
         const {selectedObjects} = this.state;
         const index = selectedObjects.indexOf(drawingObject);
         if (index !== -1) {
           selectedObjects.splice(index, 1);
         }
-        delete this.state.objects[key];
+        delete this.state.objects[id];
         this.setState({objects: this.state.objects, selectedObjects, hoverObject: null});
       }
     }
@@ -967,10 +956,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   private forEachObject(callback: (object: DrawingObject, key?: string) => void) {
     const {objects} = this.state;
-    Object.keys(objects).forEach((key) => {
-      const object = objects[key];
+    Object.keys(objects).forEach((id) => {
+      const object = objects[id];
       if (object) {
-        callback(object, key);
+        callback(object, id);
       }
     });
   }

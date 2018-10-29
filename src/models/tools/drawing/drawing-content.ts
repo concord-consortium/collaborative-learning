@@ -61,9 +61,9 @@ export const computeStrokeDashArray = (type: string, strokeWidth: string|number)
 
 export type DrawingToolChangeAction = "create" | "move" | "update" | "delete" ;
 
-export type DrawingToolMove = Array<{key: string, destination: Point}>;
+export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
-  keys: string[];
+  ids: string[];
   update: {
     prop: string;
     newValue: string|number;
@@ -92,7 +92,7 @@ export const DrawingContentModel = types
     fill: DefaultToolbarSettings.fill,
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
-    selectedObjectKeys: types.array(types.string)
+    selectedObjectIds: types.array(types.string)
   })
   .extend(self => {
 
@@ -101,21 +101,21 @@ export const DrawingContentModel = types
     }
 
     function deleteSelectedObjects() {
-      if (self.selectedObjectKeys.length > 0) {
+      if (self.selectedObjectIds.length > 0) {
         const deletionChange: DrawingToolChange = {
           action: "delete",
-          data: self.selectedObjectKeys
+          data: self.selectedObjectIds
         };
         applyChange(deletionChange);
       }
     }
 
     function updateSelectedObjects(prop: string, newValue: string|number) {
-      if (self.selectedObjectKeys.length > 0) {
+      if (self.selectedObjectIds.length > 0) {
         const updateChange: DrawingToolChange = {
           action: "update",
           data: {
-            keys: self.selectedObjectKeys,
+            ids: self.selectedObjectIds,
             update: {
               prop,
               newValue
@@ -153,8 +153,9 @@ export const DrawingContentModel = types
         setSelectedButton(button: ToolbarModalButton) {
           self.selectedButton = button;
         },
-        setSelectedObjectKeys(keys: string[]) {
-          self.selectedObjectKeys.replace(keys);
+
+        setSelectedObjectIds(ids: string[]) {
+          self.selectedObjectIds.replace(ids);
         },
 
         applyChange,

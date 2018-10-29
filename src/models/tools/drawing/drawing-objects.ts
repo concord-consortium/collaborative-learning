@@ -11,7 +11,7 @@ export interface BoundingBox {
 export interface LineDrawingObjectData {
   [key: string]: any;
   type: "line";
-  key?: string;
+  id?: string;
   x: number;
   y: number;
   deltaPoints: DeltaPoint[];
@@ -23,7 +23,7 @@ export interface LineDrawingObjectData {
 export interface VectorDrawingObjectData {
   [key: string]: any;
   type: "vector";
-  key?: string;
+  id?: string;
   x: number;
   y: number;
   dx: number;
@@ -36,7 +36,7 @@ export interface VectorDrawingObjectData {
 export interface RectangleDrawingObjectData {
   [key: string]: any;
   type: "rectangle";
-  key?: string;
+  id?: string;
   x: number;
   y: number;
   width: number;
@@ -49,7 +49,7 @@ export interface RectangleDrawingObjectData {
 export interface EllipseDrawingObjectData {
   [key: string]: any;
   type: "ellipse";
-  key?: string;
+  id?: string;
   x: number;
   y: number;
   rx: number;
