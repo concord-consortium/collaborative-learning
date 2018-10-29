@@ -10,7 +10,7 @@ import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
-import DrawingToolComponent from "./drawing-tool";
+import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
