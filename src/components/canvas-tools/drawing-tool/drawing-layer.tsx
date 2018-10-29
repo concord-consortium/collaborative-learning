@@ -560,7 +560,7 @@ interface DrawingToolMap {
 
 interface DrawingLayerViewProps {
   model: ToolTileModelType;
-  readOnly?: boolean;
+  readOnly: boolean;
 }
 
 interface DrawingLayerViewState {
@@ -691,25 +691,26 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (this.currentTool) {
+    if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleMouseDown(e);
     }
   }
 
   public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject) => {
-    if (this.currentTool) {
+    if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleObjectClick(e, obj);
     }
   }
 
   public handleObjectHover = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => {
-    if (this.currentTool === this.tools.selection) {
+    if (!this.props.readOnly && this.currentTool === this.tools.selection) {
       this.setState({hoverObject: hovering ? obj : null});
     }
   }
 
   // handles dragging of selected/hovered objects
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObject) => {
+    if (this.props.readOnly) return;
     let moved = false;
     const {selectedObjects, hoverObject} = this.state;
     let objectsToInteract: DrawingObject[];

@@ -11,7 +11,7 @@ import "./drawing-tool.scss";
 
 interface IProps {
   model: ToolTileModelType;
-  readOnly?: boolean;
+  readOnly: boolean;
 }
 
 interface IState {
@@ -29,19 +29,20 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
 
   public render() {
     const { model, readOnly } = this.props;
-    const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `text-tool ${editableClass}`;
+    const editableClass = readOnly ? " read-only" : "";
+    const className = `drawing-tool${editableClass}`;
     return (
-      <div className="drawing-tool">
-        <ToolbarView model={model}/>
+      <div className={className}>
+        <ToolbarView
+            model={model}
+            readOnly={!!readOnly}/>
         <div style={{left: TOOLBAR_WIDTH}}
             onMouseDown={this.handleMouseDown}>
           <DrawingLayerView
             model={model}
-            readOnly={readOnly}
+            readOnly={!!readOnly}
           />
         </div>
-        {readOnly ? <div className="read-only-blocker" /> : null}
       </div>
     );
   }

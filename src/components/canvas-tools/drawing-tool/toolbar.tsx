@@ -95,6 +95,7 @@ export class ToolbarFlyoutView extends React.Component<ToolbarFlyoutViewProps, T
 
 export interface ToolbarViewProps {
   model: ToolTileModelType;
+  readOnly: boolean;
 }
 
 export interface ToolbarViewState {
@@ -115,7 +116,8 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
     return (
       <div className="drawing-tool-toolbar" style={{width: TOOLBAR_WIDTH}}>
         <div className="drawing-tool-buttons">
-          <div className="drawing-tool-button" title="Settings" onClick={this.handleSettingsButton}>
+          <div className="drawing-tool-button" title="Settings" onClick={
+            this.handleSettingsButton}>
             <span className="drawing-tool-icon drawing-tool-icon-menu" />
           </div>
           <div className={this.modalButtonClass("select")} title="Select"
@@ -147,40 +149,57 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
     );
   }
 
-  private handleSettingsButton = () => this.setState({showSettings: !this.state.showSettings});
+  private handleSettingsButton = () => {
+    if (this.props.readOnly) return;
+    this.setState({showSettings: !this.state.showSettings});
+  }
   private handleLineDrawingToolButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("line");
   }
   private handleVectorToolButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("vector");
   }
   private handleSelectionToolButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("select");
   }
   private handleRectangleToolButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("rectangle");
   }
   private handleEllipseToolButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("ellipse");
   }
   private handleDeleteButton = () => {
+    if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.deleteSelectedObjects();
   }
 
-  private handleStrokeChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    (this.props.model.content as DrawingContentModelType).setStroke(e.target.value)
-  private handleFillChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-  (this.props.model.content as DrawingContentModelType).setFill(e.target.value)
-  private handleStrokeDashArrayChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    (this.props.model.content as DrawingContentModelType).setStrokeDashArray(e.target.value)
-  private handleStrokeWidthChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    (this.props.model.content as DrawingContentModelType).setStrokeWidth(+e.target.value)
+  private handleStrokeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (this.props.readOnly) return;
+    (this.props.model.content as DrawingContentModelType).setStroke(e.target.value);
+  }
+  private handleFillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (this.props.readOnly) return;
+    (this.props.model.content as DrawingContentModelType).setFill(e.target.value);
+  }
+  private handleStrokeDashArrayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (this.props.readOnly) return;
+    (this.props.model.content as DrawingContentModelType).setStrokeDashArray(e.target.value);
+  }
+  private handleStrokeWidthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (this.props.readOnly) return;
+    (this.props.model.content as DrawingContentModelType).setStrokeWidth(+e.target.value);
+  }
 
   private modalButtonClass(type: ToolbarModalButton) {
     const drawingContent = this.props.model.content as DrawingContentModelType;

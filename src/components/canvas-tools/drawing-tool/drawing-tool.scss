@@ -16,7 +16,6 @@
 
 .drawing-tool-toolbar {
   background-color: #eee;
-  cursor: pointer;
 
   .drawing-tool-buttons {
     padding: 5px;
@@ -43,6 +42,7 @@
       @extend %no-select;
       padding: 2px;
       margin-bottom: 5px;
+      cursor: pointer;
       &.selected {
         background-color: #ccc;
         color: #fff;
@@ -107,77 +107,8 @@
   }
 }
 
-.workspace {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0; /* set in code */
-  bottom: 0;
-
-  .firepad {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    cursor: text;
-
-    a.powered-by-firepad {
-      display: none;
-    }
-  }
-  .CodeMirror {
-    background-color: initial;
-    font-size: 16px;
-    font-family: Arial, Helvetica, sans-serif;
-    padding: 1px;
-  }
-
-  .text-editor-wrapper {
-    position: absolute;
-  }
-
-  .text-editor-resizer {
-    position: absolute;
-    top: 0;
-    width: 5px;
-    background-color: #ccc;
-    cursor: ew-resize;
-  }
-
-  .drawing-layer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 2;
-    cursor: pointer;
-
-    svg {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-
-    .background-image {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-  }
-}
-
-.read-only-blocker {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  background-color: #000;
-  opacity: 0;
+.drawing-tool.read-only .drawing-tool-toolbar .drawing-tool-button {
+  cursor: default;
 }
 
 @font-face {
@@ -220,3 +151,4 @@
 .drawing-tool-icon-menu:before {
   content: "\e9bd";
 }
+
