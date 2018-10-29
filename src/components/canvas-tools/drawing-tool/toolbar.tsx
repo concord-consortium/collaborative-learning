@@ -3,7 +3,6 @@ import * as React from "react";
 import { DrawingContentModelType, Color, ToolbarModalButton, TOOLBAR_WIDTH,
   colors, computeStrokeDashArray } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { inject, observer } from "mobx-react";
 
 export interface TextButtonData {
   color: string;

@@ -2,12 +2,11 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { TextContentModelType } from "../../../models/tools/text/text-content";
 import { ToolbarView } from "./toolbar";
 import { DrawingLayerView } from "./drawing-layer";
 import { TOOLBAR_WIDTH, DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 
-import "./drawing-tool.scss";
+import "./drawing-tool.sass";
 
 interface IProps {
   model: ToolTileModelType;
@@ -17,8 +16,8 @@ interface IProps {
 interface IState {
 }
 ​
-// @inject("stores")
-// @observer
+@inject("stores")
+@observer
 export default class DrawingToolComponent extends BaseComponent<IProps, IState> {
 
   private toolbarElement: HTMLDivElement;

@@ -1,15 +1,12 @@
 // tslint:disable:jsx-no-lambda
 import * as React from "react";
 import { v4 as uuid } from "uuid";
-import { TOOLBAR_WIDTH, DefaultToolbarSettings, computeStrokeDashArray,
+import { DefaultToolbarSettings, computeStrokeDashArray,
   ToolbarSettings, DrawingContentModelType, DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
   DrawingToolUpdate} from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
   EllipseDrawingObjectData, Point} from "../../../models/tools/drawing/drawing-objects";
-import { inject, observer } from "mobx-react";
-import { string } from "prop-types";
-import { number } from "mobx-state-tree/dist/internal";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";

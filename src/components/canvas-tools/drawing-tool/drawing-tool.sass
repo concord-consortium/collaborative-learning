@@ -1,0 +1,116 @@
+%no-select
+  -webkit-touch-callout: none
+  -webkit-user-select: none
+  -khtml-user-select: none
+  -moz-user-select: none
+  -ms-user-select: none
+  user-select: none
+
+.drawing-tool
+  display: flex
+  border: 1px solid #BBB
+  height: 99%
+
+.drawing-tool-toolbar
+  background-color: #eee
+  .drawing-tool-buttons
+    padding: 5px
+    font-size: 24px
+    text-align: center
+    .flyout-top-button
+      position: relative
+      .flyout-toggle
+        position: absolute
+        top: 16px
+        left: 22px
+        font-size: 9px
+        padding: 5px
+      .flyout-toggle:hover
+        background-color: #fff
+        color: #000
+    .drawing-tool-button
+      @extend %no-select
+      padding: 2px
+      margin-bottom: 5px
+      cursor: pointer
+      &.selected
+        background-color: #ccc
+        color: #fff
+      img
+        max-width: 24px
+        max-height: 24px
+        display: inline
+        padding-top: 4px
+      .drawing-tool-icon
+        font-size: 18px
+    a
+      text-decoration: none
+      color: #000
+  .settings
+    position: absolute
+    top: 0
+    width: 100px
+    left: 0
+    /* set in code */
+    bottom: 0
+    background-color: #bbb
+    cursor: pointer
+    font-size: 14px
+    border-right: 1px solid #aaa
+    opacity: 0.75
+    .title
+      padding: 5px
+      background-color: #999
+      color: #fff
+      font-size: 12px
+      .drawing-tool-icon
+        font-size: 12px
+        margin: 0 2px 0 10px
+    .form-group
+      margin: 10px
+    label
+      display: block
+      font-weight: bold
+      margin-bottom: 3px
+      font-size: 12px
+    select
+      background-color: #fff
+      width: 80px
+
+.drawing-tool.read-only .drawing-tool-toolbar .drawing-tool-button
+  cursor: default
+
+@font-face
+  font-family: 'icomoon'
+  src: url("icons/icomoon.eot?skr0ys")
+  src: url("icons/icomoon.eot?skr0ys#iefix") format("embedded-opentype"), url("icons/icomoon.ttf?skr0ys") format("truetype"), url("icons/icomoon.woff?skr0ys") format("woff"), url("icons/icomoon.svg?skr0ys#icomoon") format("svg")
+  font-weight: normal
+  font-style: normal
+
+
+[class^="drawing-tool-icon-"], [class*=" drawing-tool-icon-"]
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important
+  font-style: normal
+  font-weight: normal
+  font-variant: normal
+  text-transform: none
+  line-height: 1
+  /* Better Font Rendering */
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+
+.drawing-tool-icon-mouse-pointer:before
+  content: "\e900"
+
+.drawing-tool-icon-pencil:before
+  content: "\e905"
+
+.drawing-tool-icon-cog:before
+  content: "\e994"
+
+.drawing-tool-icon-bin:before
+  content: "\e9ac"
+
+.drawing-tool-icon-menu:before
+  content: "\e9bd"
