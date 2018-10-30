@@ -1,6 +1,13 @@
 import * as firebase from "@concord-consortium/firebase/app";
 import { UserModelType } from "../models/user";
 import { DB } from "./db";
+import { urlParams } from "../utilities/url-params";
+
+// Set this during database testing in combination with the urlParam testMigration=true to
+// override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
+// will write to and read from the "authed-copy" key. Once the migration is performed, this should
+// be reset to undefined so the test database is no longer referenced.
+const FIREBASE_ROOT_OVERRIDE = "authed-copy";
 
 export class Firebase {
   public user: firebase.User | null = null;
@@ -39,27 +46,21 @@ export class Firebase {
   }
 
   public getFullPath(path: string = "") {
-    return `${this.getDemoRootFolder()}${path}`;
+    return `${this.getRootFolder()}${path}`;
   }
 
   public getRootFolder() {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode, user } = this.db.stores;
-    const parts = [`${appMode}`];
-
-    if ((appMode === "dev") || (appMode === "test")) {
-      parts.push(this.userId);
+    const parts = [];
+    if (urlParams.testMigration && FIREBASE_ROOT_OVERRIDE) {
+      parts.push(FIREBASE_ROOT_OVERRIDE);
+    } else {
+      parts.push(`${appMode}`);
+      if ((appMode === "dev") || (appMode === "test")) {
+        parts.push(this.userId);
+      }
     }
-    parts.push("portals");
-    parts.push(this.escapeKey(user.portal));
-
-    return `/${parts.join("/")}/`;
-  }
-
-  // Only used for testing in demo DB. Calls to this function should never be committed to master.
-  public getDemoRootFolder() {
-    const { user } = this.db.stores;
-    const parts = ["authed-copy"];
     parts.push("portals");
     parts.push(this.escapeKey(user.portal));
 
