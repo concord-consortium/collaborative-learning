@@ -24,6 +24,7 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
   const isLocalFilePath = imagePath.startsWith("assets/");
   const isFirebaseStorageUrl = imagePath.startsWith("https://firebasestorage");
   const placeholderImage = "assets/image_placeholder.png";
+  const isImageData = imagePath.startsWith("data:image");
   const imageUrlAsReference = isFirebaseStorageUrl ? imagePath : undefined;
 
   if (isFullUrl && !isFirebaseStorageUrl) {
@@ -31,6 +32,9 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
     callback(imageUrlLookupTable.get(imagePath));
   }
   else if (isLocalFilePath) {
+    callback(imagePath);
+  }
+  else if (isImageData) {
     callback(imagePath);
   }
   else {
@@ -48,6 +52,7 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
 
 export function uploadImage(firebase: Firebase, storePath: string, currentFile: File, callback: any) {
   resizeImage(currentFile, ImageConstants.maxWidth, ImageConstants.maxHeight).then((resizedImage: Blob) => {
+
     firebase.uploadImage(storePath, currentFile, resizedImage).then((uploadRef) => {
       firebase.getPublicUrlFromStore(uploadRef).then((url) => {
         imageUrlLookupTable.set(storePath, url);
@@ -57,8 +62,12 @@ export function uploadImage(firebase: Firebase, storePath: string, currentFile: 
   });
 }
 
+export function importImage(file: File): Promise<any> {
+  return resizeImage(file, ImageConstants.maxWidth, ImageConstants.maxHeight);
+}
+
 // Image size functions
-function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
+function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.src = URL.createObjectURL(file);
@@ -66,14 +75,13 @@ function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<B
       const width = image.width;
       const height = image.height;
 
-      if (width <= maxWidth && height <= maxHeight) {
-        resolve(file);
-      }
-
       let newWidth;
       let newHeight;
 
-      if (width > height) {
+      if (width <= maxWidth && height <= maxHeight) {
+        newWidth = width;
+        newHeight = height;
+      } else if (width > height) {
         newHeight = height * (maxWidth / width);
         newWidth = maxWidth;
       } else {
@@ -90,7 +98,8 @@ function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<B
       const context = canvas.getContext("2d");
 
       context!.drawImage(image, 0, 0, newWidth, newHeight);
-      canvas.toBlob(resolve as any, file.type);
+      // Return Base64 string of image
+      resolve(canvas.toDataURL());
     };
     image.onerror = reject;
   });

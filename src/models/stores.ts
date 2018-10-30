@@ -45,7 +45,7 @@ export interface ICreateStores {
 }
 
 export function createStores(params?: ICreateStores): IStores {
-  const user = params && params.user || UserModel.create({id: "0"});
+  const user = params && params.user || UserModel.create({ id: "0" });
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     // for ease of testing, we create a null problem if none is provided
@@ -64,7 +64,7 @@ export function createStores(params?: ICreateStores): IStores {
       },
     }),
     groups: params && params.groups || GroupsModel.create({}),
-    class: params && params.class || ClassModel.create({name: "Null Class", classHash: ""}),
+    class: params && params.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params && params.db || new DB(),
     documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
