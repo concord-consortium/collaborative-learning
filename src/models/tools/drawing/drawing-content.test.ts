@@ -1,4 +1,4 @@
-import { DrawingContentModel, kDrawingToolID } from "./drawing-content";
+import { DrawingContentModel, kDrawingToolID, DrawingToolMetadataModel } from "./drawing-content";
 
 describe("DrawingContentModel", () => {
 
@@ -19,6 +19,9 @@ describe("DrawingContentModel", () => {
 
   it("can delete a set of selected drawing objects", () => {
     const model = DrawingContentModel.create();
+    const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
+    model.doPostCreate(metadata);
+
     model.setSelection(["a", "b"]);
     model.deleteSelectedObjects();
     expect(model.changes.length).toBe(1);
@@ -30,6 +33,9 @@ describe("DrawingContentModel", () => {
 
   it("can update the properties of a set of selected drawing objects", () => {
     const model = DrawingContentModel.create();
+    const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
+    model.doPostCreate(metadata);
+
     model.setSelection(["a", "b"]);
     model.setStroke("#000000");
     model.setStrokeWidth(2);
