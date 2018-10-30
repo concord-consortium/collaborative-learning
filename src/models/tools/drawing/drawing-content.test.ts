@@ -19,7 +19,7 @@ describe("DrawingContentModel", () => {
 
   it("can delete a set of selected drawing objects", () => {
     const model = DrawingContentModel.create();
-    model.setSelectedObjectIds(["a", "b"]);
+    model.setSelection(["a", "b"]);
     model.deleteSelectedObjects();
     expect(model.changes.length).toBe(1);
 
@@ -30,7 +30,7 @@ describe("DrawingContentModel", () => {
 
   it("can update the properties of a set of selected drawing objects", () => {
     const model = DrawingContentModel.create();
-    model.setSelectedObjectIds(["a", "b"]);
+    model.setSelection(["a", "b"]);
     model.setStroke("#000000");
     model.setStrokeWidth(2);
     expect(model.changes.length).toBe(2);

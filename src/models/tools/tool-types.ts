@@ -5,7 +5,8 @@ import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/
 import { kTableToolID, TableContentModel, TableContentModelType } from "./table/table-content";
 import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
 import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./unknown-content";
-import { DrawingContentModelType, DrawingContentModel, kDrawingToolID } from "./drawing/drawing-content";
+import { DrawingContentModelType, DrawingContentModel, kDrawingToolID,
+          DrawingToolMetadataModel, DrawingToolMetadataModelType } from "./drawing/drawing-content";
 
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",
@@ -33,7 +34,8 @@ export type ToolContentUnionType = GeometryContentModelType |
                                     DrawingContentModelType |
                                     UnknownContentModelType;
 
-export type ToolMetadataUnionType = GeometryMetadataModelType;
+export type ToolMetadataUnionType = GeometryMetadataModelType |
+                                    DrawingToolMetadataModelType;
 
 interface IToolMap {
   [id: string]: IAnyType;
@@ -57,6 +59,7 @@ export const _private: IPrivate = {
 
   metadataMap: {
     [kGeometryToolID]: GeometryMetadataModel,
+    [kDrawingToolID]: DrawingToolMetadataModel
   },
 
   metadata: {}

@@ -655,7 +655,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     const drawingContent = this.props.model.content as DrawingContentModelType;
     const selectedObjectIds = selectedObjects.map(object => object.model.id || "");
-    drawingContent.setSelectedObjectIds(selectedObjectIds);
+    drawingContent.setSelection(selectedObjectIds);
   }
 
   public setCurrentTool(tool: DrawingTool|null) {

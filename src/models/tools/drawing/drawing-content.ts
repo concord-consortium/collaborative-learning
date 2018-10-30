@@ -76,6 +76,20 @@ export interface DrawingToolChange {
   data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
 }
 
+// track selection in metadata object so it is not saved to firebase but
+// also is preserved across document/content reloads
+export const DrawingToolMetadataModel = types
+  .model("DrawingToolMetadata", {
+    id: types.string,
+    selection: types.array(types.string)
+  })
+  .actions(self => ({
+    setSelection(selection: string[]) {
+      self.selection.replace(selection);
+    }
+  }));
+export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
+
 export function defaultDrawingContent() {
   return DrawingContentModel.create({
     type: kDrawingToolID,
@@ -91,9 +105,11 @@ export const DrawingContentModel = types
     stroke: DefaultToolbarSettings.stroke,
     fill: DefaultToolbarSettings.fill,
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
-    strokeWidth: DefaultToolbarSettings.strokeWidth,
-    selectedObjectIds: types.array(types.string)
+    strokeWidth: DefaultToolbarSettings.strokeWidth
   })
+  .volatile(self => ({
+    metadata: undefined as any as DrawingToolMetadataModelType
+  }))
   .extend(self => {
 
     function applyChange(change: DrawingToolChange) {
@@ -101,21 +117,21 @@ export const DrawingContentModel = types
     }
 
     function deleteSelectedObjects() {
-      if (self.selectedObjectIds.length > 0) {
+      if (self.metadata.selection.length > 0) {
         const deletionChange: DrawingToolChange = {
           action: "delete",
-          data: self.selectedObjectIds
+          data: self.metadata.selection
         };
         applyChange(deletionChange);
       }
     }
 
     function updateSelectedObjects(prop: string, newValue: string|number) {
-      if (self.selectedObjectIds.length > 0) {
+      if (self.metadata.selection.length > 0) {
         const updateChange: DrawingToolChange = {
           action: "update",
           data: {
-            ids: self.selectedObjectIds,
+            ids: self.metadata.selection,
             update: {
               prop,
               newValue
@@ -133,6 +149,10 @@ export const DrawingContentModel = types
         }
       },
       actions: {
+        doPostCreate(metadata: DrawingToolMetadataModelType) {
+          self.metadata = metadata;
+        },
+
         setStroke(stroke: string) {
           self.stroke = stroke;
           updateSelectedObjects("stroke", stroke);
@@ -154,8 +174,8 @@ export const DrawingContentModel = types
           self.selectedButton = button;
         },
 
-        setSelectedObjectIds(ids: string[]) {
-          self.selectedObjectIds.replace(ids);
+        setSelection(ids: string[]) {
+          self.metadata.setSelection(ids);
         },
 
         applyChange,
