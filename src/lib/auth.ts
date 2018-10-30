@@ -213,9 +213,14 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
   });
 };
 
-export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
+export const getFirebaseJWTParams = (classHash?: string) => {
+  return `${FIREBASE_JWT_QUERY}${classHash ? `&class_hash=${classHash}` : ""}`;
+};
+
+export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
+                                              rawToken: string, classHash?: string) => {
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
-    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${FIREBASE_JWT_QUERY}`;
+    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
     superagent
       .get(url)
       .set("Authorization", `${type} ${rawToken}`)
@@ -361,27 +366,25 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
 
     return getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken)
       .then(([rawPortalJWT, portalJWT]) => {
+        if ((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher")) {
+          const portal = parseUrl(basePortalUrl).host;
+          let classInfoUrl: string | undefined;
+          let offeringId: string | undefined;
 
-        return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken)
-          .then(([rawFirebaseJWT, firebaseJWT]) => {
+          if (portalJWT.user_type === "learner") {
+            classInfoUrl = portalJWT.class_info_url;
+            offeringId = `${portalJWT.offering_id}`;
+          }
+          else if (urlParams && urlParams.class && urlParams.offering) {
+            classInfoUrl = urlParams.class;
+            offeringId = urlParams.offering.split("/").pop() as string;
+          }
 
-            if ((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher")) {
-              const portal = parseUrl(basePortalUrl).host;
-              let classInfoUrl: string | undefined;
-              let offeringId: string | undefined;
-
-              if (portalJWT.user_type === "learner") {
-                classInfoUrl = portalJWT.class_info_url;
-                offeringId = `${portalJWT.offering_id}`;
-              }
-              else if (urlParams && urlParams.class && urlParams.offering) {
-                classInfoUrl = urlParams.class;
-                offeringId = urlParams.offering.split("/").pop() as string;
-              }
-
-              if (classInfoUrl && offeringId) {
-                return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
-                  .then((classInfo) => {
+          if (classInfoUrl && offeringId) {
+            return (getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
+              .then((classInfo) => {
+                return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
+                  .then(([rawFirebaseJWT, firebaseJWT]) => {
                     const uidAsString = `${portalJWT.uid}`;
                     let authenticatedUser: AuthenticatedUser | undefined;
                     if (portalJWT.user_type === "learner") {
@@ -407,17 +410,18 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                     else {
                       reject("Current user not found in class roster");
                     }
-                  });
-                }
-                else {
-                  reject("Unable to get classInfoUrl or offeringId");
-                }
-            }
-            else {
-              reject("Only student and teacher logins are currently supported!");
-            }
-          })
-          .catch(reject);
+                })
+                .catch(reject);
+              })
+            );
+          }
+          else {
+            reject("Unable to get classInfoUrl or offeringId");
+          }
+        }
+        else {
+          reject("Only student and teacher logins are currently supported!");
+        }
       })
       .catch(reject);
   });

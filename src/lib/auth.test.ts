@@ -9,7 +9,8 @@ import { authenticate,
         RawClassInfo,
         getAppMode,
         PortalTeacherJWT,
-        createFakeUser} from "./auth";
+        createFakeUser,
+        getFirebaseJWTParams} from "./auth";
 import * as nock from "nock";
 import { NUM_FAKE_STUDENTS } from "../components/demo-creator";
 import { QueryParams } from "../utilities/url-params";
@@ -54,6 +55,8 @@ const BAD_STUDENT_TOKEN = "badStudentToken";
 const GOOD_TEACHER_TOKEN = "goodTeacherToken";
 const BAD_TEACHER_TOKEN = "badTeacherToken";
 
+const CLASS_HASH = "testHash";
+
 const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
 
 const OFFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
@@ -81,7 +84,7 @@ const RAW_CLASS_INFO: RawClassInfo = {
   uri: "https://foo.bar",
   name: "test name",
   state: "test state",
-  class_hash: "test hash",
+  class_hash: CLASS_HASH,
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
   teachers: [RAW_CORRECT_TEACHER],
 };
@@ -214,7 +217,7 @@ describe("student authentication", () => {
         authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
@@ -229,7 +232,7 @@ describe("student authentication", () => {
         fullName: `${RAW_CORRECT_STUDENT.first_name} ${RAW_CORRECT_STUDENT.last_name}`,
         initials: "GG",
         className: RAW_CLASS_INFO.name,
-        classHash: "test hash",
+        classHash: CLASS_HASH,
         offeringId: "1033",
         portalJWT: {
           alg: "HS256",
@@ -387,7 +390,7 @@ describe("teacher authentication", () => {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_TEACHER_FIREBASE_JWT,
     });
@@ -402,7 +405,7 @@ describe("teacher authentication", () => {
         fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
         initials: "GG",
         className: RAW_CLASS_INFO.name,
-        classHash: "test hash",
+        classHash: CLASS_HASH,
         offeringId: "1033",
         portalJWT: {
           alg: "HS256",
