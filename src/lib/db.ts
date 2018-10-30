@@ -16,6 +16,7 @@ import { DBOfferingGroup,
          DBGroupUserConnections,
          DBPublication,
          DBDocumentType,
+         DBImage
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
@@ -24,6 +25,7 @@ import { DocumentModelType,
          LearningLogDocument,
          PublicationDocument
         } from "../models/document";
+import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
@@ -547,5 +549,48 @@ export class DB {
     }
 
     return JSON.parse(document.content);
+  }
+
+  public addImage(imageModel: ImageModelType) {
+    const { user } = this.stores;
+    return new Promise<{ image: DBImage }>((resolve, reject) => {
+      const imageRef = this.firebase.ref(this.firebase.getImagesPath(user)).push();
+      const imageKey = imageRef.key!;
+      const version = "1.0";
+      const self = {
+        uid: user.id,
+        classHash: user.classHash,
+        imageKey
+      };
+
+      const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
+      const image: DBImage = {
+        version,
+        self,
+        imageData: imageModel.imageData,
+        title: imageModel.title || "unknown",
+        originalSource: imageModel.originalSource || "unknown",
+        createdAt,
+        createdBy: user.id
+      };
+
+      return imageRef.set(image)
+        .then(() => {
+          resolve({ image });
+        })
+        .catch(reject);
+    });
+  }
+
+  public getImage(imageKey: string) {
+    const { user } = this.stores;
+    return new Promise<DBImage>((resolve, reject) => {
+      const imageRef = this.firebase.ref(this.firebase.getImagesPath(user) + "/" + imageKey);
+      return imageRef.once("value")
+        .then((snapshot) => {
+          resolve(snapshot.val());
+        })
+        .catch(reject);
+    });
   }
 }

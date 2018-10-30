@@ -87,6 +87,10 @@ export class Firebase {
     return `classes/${user.classHash}`;
   }
 
+  public getImagesPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/images`;
+  }
+
   public getOfferingPath(user: UserModelType) {
     return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
   }
@@ -159,7 +163,7 @@ export class Firebase {
   }
 
   //
-  // Firestore
+  // Firebase Storage
   //
 
   public getPublicUrlFromStore(storePath: string, storeUrl?: string): Promise<any> {

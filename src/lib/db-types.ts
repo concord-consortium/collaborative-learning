@@ -167,3 +167,17 @@ export interface DBOfferingGroupUser {
   connectedTimestamp: number;
   disconnectedTimestamp?: number;
 }
+
+export interface DBImage {
+  version: "1.0";
+  self: {
+    uid: string;
+    classHash: string;
+    imageKey: string;
+  };
+  imageData: string,
+  title: string, // may be redundant since we aren't yet allowing user-entered titles
+  originalSource: string, // web url or original filename
+  createdAt: number,
+  createdBy: string
+}

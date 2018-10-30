@@ -3,8 +3,10 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { fetchImageUrl, uploadImage, getImageDimensions } from "../../utilities/image-utils";
+import { ImageModelType, defaultImage } from "../../models/image";
+import { fetchImageUrl, uploadImage, getImageDimensions, importImage } from "../../utilities/image-utils";
 import "./image-tool.sass";
+import { ImageModel } from "../../models/image";
 
 interface IProps {
   context: string;
@@ -32,11 +34,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { model: { content } } = this.props;
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
-    // Migrate Firebase storage relative URLs to full URLs
-    fetchImageUrl(imageContent.url, db.firebase, ((url: string) => {
-      this.handleUpdateImageDimensions(url);
-      this.updateStoredURL(url);
-    }));
+
+    if (imageContent.imageId) {
+      // fetch from firebase and store image in state for now
+      this.getImage(imageContent.imageId);
+    } else {
+      // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
+      fetchImageUrl(imageContent.url, db.firebase, ((imageData: string) => {
+        // updating dimensions updates state
+        this.handleUpdateImageDimensions(imageData);
+        // store migrated image data and the original url source for provenance
+        // this.storeImage(imageData, imageContent.url);
+      }));
+    }
   }
 
   public componentWillUnmount() {
@@ -50,8 +60,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { imageUrl, isLoading } = this.state;
 
     const imageContent = content as ImageContentModelType;
-    if (!isLoading && imageUrl && imageContent.url && imageContent.url !== imageUrl) {
-      this.handleUpdateImageDimensions(imageContent.url);
+    if (!isLoading && !imageUrl && imageContent.imageId) {
+      this.getImage(imageContent.imageId);
+
     }
   }
 
@@ -73,8 +84,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       : `image-tool-controls readonly`;
 
     const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
-    const imageToUseForDisplay =
-      imageContent.url && imageContent.url.length > 0 ? imageContent.url : imageUrl;
+    const imageToUseForDisplay = imageUrl ? imageUrl : imageContent.url;
     const imagePath = imageToUseForDisplay && imageToUseForDisplay.startsWith("http") ? imageToUseForDisplay : "";
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
@@ -106,19 +116,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleUpdateImageDimensions = (imageDisplayUrl: string) => {
-    this._asyncRequest = getImageDimensions(undefined, imageDisplayUrl).then((dimensions: any) => {
+  private handleUpdateImageDimensions = (imageData: string) => {
+    this._asyncRequest = getImageDimensions(undefined, imageData).then((dimensions: any) => {
       // in case we were unmounted
       if (this._asyncRequest) {
         this._asyncRequest = null;
         this.setState({
-          imageUrl: imageDisplayUrl,
+          imageUrl: imageData,
           imageDimensions: dimensions,
           isLoading: false
         });
       }
       this.setState({
-        imageUrl: imageDisplayUrl,
+        imageUrl: imageData,
         imageDimensions: dimensions,
         isLoading: false
       });
@@ -129,15 +139,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
-    // Getting the path at this level gives the correct path to the user's current storage location
-    const storePath = db.firebase.getFullPath(currentFile.name);
 
     // Set loading state for showing spinner
     this.setState({ isLoading: true });
 
-    uploadImage(db.firebase, storePath, currentFile, (imageUrl: string) => {
-      this.handleUpdateImageDimensions(imageUrl);
-      this.updateStoredURL(imageUrl);
+    this._asyncRequest = importImage(currentFile).then(imageData => {
+      // in case we were unmounted
+      if (this._asyncRequest) {
+        this._asyncRequest = null;
+        this.handleUpdateImageDimensions(imageData);
+        this.storeImage(imageData, currentFile.name);
+      }
     });
   }
 
@@ -173,17 +185,41 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   // User has input a new url into the input box, check the dimensions and update model and state
   private updateImageFromInput = (newUrl: string) => {
     this.handleUpdateImageDimensions(newUrl);
-    this.updateStoredURL(newUrl);
+    this.storeImage(newUrl, newUrl);
   }
 
   private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     this.setState({ isEditing: false });
   }
 
-  private updateStoredURL = (newUrl: string) => {
+  private getImage = (imageId: string) => {
+    const { db } = this.stores;
+    this._asyncRequest = db.getImage(imageId).then(image => {
+      if (this._asyncRequest) {
+        this._asyncRequest = null;
+        this.handleUpdateImageDimensions(image.imageData);
+      }
+    });
+  }
+  private storeImage = (newImage: string, originalSource?: string) => {
+    const { user, db } = this.stores;
     const imageContent = this.props.model.content as ImageContentModelType;
-    if (newUrl !== imageContent.url) {
-      imageContent.setUrl(newUrl);
+    if (newImage !== imageContent.url) {
+      const image: ImageModelType = ImageModel.create({
+        key: "",
+        imageData: newImage,
+        title: "Placeholder",
+        originalSource: originalSource ? originalSource : "",
+        createdAt: 0,
+        createdBy: user.id
+      });
+
+      db.addImage(image).then(dbImage => {
+        image.setKey(dbImage.image.self.imageKey);
+        // images.add(image);
+        imageContent.setId(image.key);
+      });
+
     }
   }
 }
