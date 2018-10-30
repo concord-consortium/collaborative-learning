@@ -673,6 +673,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (selectedObjects.length > 0) {
       const deletedObjects = selectedObjects.map(object => object.model.id);
       this.sendChange({action: "delete", data: deletedObjects as DrawingToolDeletion});
+      this.setSelectedObjects([]);
     }
   }
 

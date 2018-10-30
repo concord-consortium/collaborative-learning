@@ -3,6 +3,7 @@ import * as React from "react";
 import { DrawingContentModelType, Color, ToolbarModalButton, TOOLBAR_WIDTH,
   colors, computeStrokeDashArray } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { observer } from "mobx-react";
 
 export interface TextButtonData {
   color: string;
@@ -101,6 +102,7 @@ export interface ToolbarViewState {
   showSettings: boolean;
 }
 
+@observer
 export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewState> {
   constructor(props: ToolbarViewProps){
     super(props);
@@ -112,6 +114,7 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
   public render() {
     const drawingContent = this.props.model.content as DrawingContentModelType;
     const {stroke} = drawingContent;
+    const deleteButtonClass = "drawing-tool-button" + (drawingContent.hasSelectedObjects ? "" : " disabled");
     return (
       <div className="drawing-tool-toolbar" style={{width: TOOLBAR_WIDTH}}>
         <div className="drawing-tool-buttons">
@@ -139,7 +142,7 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
               onClick={this.handleEllipseToolButton}>
             {this.renderSVGIcon("ellipse")}
           </div>
-          <div className="drawing-tool-button" title="Delete" onClick={this.handleDeleteButton}>
+          <div className={deleteButtonClass} title="Delete" onClick={this.handleDeleteButton}>
             <span className="drawing-tool-icon drawing-tool-icon-bin" />
           </div>
         </div>

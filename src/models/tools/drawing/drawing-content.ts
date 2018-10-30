@@ -123,6 +123,7 @@ export const DrawingContentModel = types
           data: self.metadata.selection
         };
         applyChange(deletionChange);
+        self.metadata.setSelection([]);
       }
     }
 
@@ -146,6 +147,9 @@ export const DrawingContentModel = types
       views: {
         get isUserResizable() {
           return true;
+        },
+        get hasSelectedObjects() {
+          return self.metadata.selection.length > 0;
         }
       },
       actions: {
