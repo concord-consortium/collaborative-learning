@@ -39,7 +39,7 @@ export class Firebase {
   }
 
   public getFullPath(path: string = "") {
-    return `${this.getRootFolder()}${path}`;
+    return `${this.getDemoRootFolder()}${path}`;
   }
 
   public getRootFolder() {
@@ -56,6 +56,16 @@ export class Firebase {
     return `/${parts.join("/")}/`;
   }
 
+  // Only used for testing in demo DB. Calls to this function should never be committed to master.
+  public getDemoRootFolder() {
+    const { user } = this.db.stores;
+    const parts = ["authed-copy"];
+    parts.push("portals");
+    parts.push(this.escapeKey(user.portal));
+
+    return `/${parts.join("/")}/`;
+  }
+
   public escapeKey(s: string): string {
     return s.replace(/[.$[\]#\/]/g, "_");
   }
@@ -64,8 +74,12 @@ export class Firebase {
   // Paths
   //
 
+  public getClassPath(user: UserModelType) {
+    return `classes/${user.classHash}`;
+  }
+
   public getUserPath(user: UserModelType, userId?: string) {
-    return `users/${userId || user.id}`;
+    return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
@@ -81,10 +95,6 @@ export class Firebase {
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
-  }
-
-  public getClassPath(user: UserModelType) {
-    return `classes/${user.classHash}`;
   }
 
   public getOfferingPath(user: UserModelType) {
