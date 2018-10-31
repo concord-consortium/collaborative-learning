@@ -7,6 +7,7 @@
 
 const admin = require("firebase-admin");
 const Confirm = require('prompt-confirm');
+const _ = require("lodash");
 
 /**
  * A service account key is required to gain admin access to the database. To obtain a service account key,
@@ -23,7 +24,7 @@ const serviceAccount = require("./serviceAccountKey.json");
  * run the migration on production, this should be set to "authed". This setting will trigger a confirmation
  * from the user when the script is run.
  */
-const FIREBASE_ROOT = undefined;
+const FIREBASE_ROOT = "authed-copy";
 
 const runMigration = () => {
   console.log("Running migration...");
@@ -31,9 +32,26 @@ const runMigration = () => {
   const rootRef = admin.database().ref(`/${FIREBASE_ROOT}/`);
   rootRef.once("value").then(snapshot => {
     const root = snapshot.val();
-    // Iterate through the data and set migrated values in Firebase.
-
-    process.exit();
+    _.forEach(root.portals, (portal, portalId) => {
+      _.forEach(portal.users, (user, userId) => {
+        const classHashes = [];
+        _.forEach(user.documentMetadata, (metadata) => {
+          const classHash = metadata.classHash;
+  
+          if (classHash && classHashes.indexOf(classHash) === -1) {
+            const classUserRef = admin.database().ref(`/authed-copy/portals/${portalId}/classes/${classHash}/users/${userId}/`);
+            classUserRef.set(user);
+            classHashes.push(classHash);
+          }
+        });
+  
+        if (classHashes.length === 0) {
+          const numLostDocs = _.size(user.documentMetadata); 
+          console.log(`No class found for User ${userId} with ${numLostDocs} documents.`);
+        }
+      });
+    });
+    console.log("Wait for updates to finish before closing...");
   });
 }
 
