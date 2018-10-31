@@ -53,7 +53,7 @@ export class Firebase {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode, user } = this.db.stores;
     const parts = [];
-    if (urlParams.testMigration && FIREBASE_ROOT_OVERRIDE) {
+    if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
@@ -80,7 +80,7 @@ export class Firebase {
   }
 
   public getUserPath(user: UserModelType, userId?: string) {
-    return urlParams.testMigration
+    return urlParams.testMigration === "true"
              ? `${this.getClassPath(user)}/users/${userId || user.id}`
              : `users/${userId || user.id}`;
   }
