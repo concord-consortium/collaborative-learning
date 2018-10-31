@@ -50,7 +50,7 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
             <use xlinkHref={`#icon-image-tool`} />
           </svg>
         </div>
-        <div className="tool drawing" title="Geometry" onClick={handleClickTool("drawing")}>
+        <div className="tool drawing" title="Drawing" onClick={handleClickTool("drawing")}>
           <svg className={`icon icon-drawing-tool`}>
             <use xlinkHref={`#icon-drawing-tool`} />
           </svg>

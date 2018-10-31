@@ -49,8 +49,8 @@ export const DocumentModel = types
           return self.content.addTextTile();
         case "image":
           return self.content.addImageTile();
-          case "drawing":
-            return self.content.addDrawingTile();
+        case "drawing":
+          return self.content.addDrawingTile();
       }
     },
 

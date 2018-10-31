@@ -1,6 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
 import { Point, DrawingObjectDataType } from "./drawing-objects";
-import { number } from "mobx-state-tree/dist/internal";
 
 export const kDrawingToolID = "Drawing";
 

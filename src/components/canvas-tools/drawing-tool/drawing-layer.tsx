@@ -309,7 +309,7 @@ class VectorDrawingTool extends DrawingTool {
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
-      if ((vector.model.x !== vector.model.x2) || (vector.model.y !== vector.model.y2)) {
+      if ((vector.model.dx !== 0) || (vector.model.dy !== 0)) {
         this.drawingLayer.addNewDrawingObject(vector.model);
       }
       this.drawingLayer.setState({currentDrawingObject: null});
@@ -636,9 +636,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public addListeners() {
     window.addEventListener("keyup", (e) => {
       if (!this.props.readOnly) {
-        switch (e.keyCode) {
-          case 8:
-          case 46:
+        switch (e.key) {
+          case "Backspace":
+          case "Delete":
             this.handleDelete();
             break;
         }
@@ -922,7 +922,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     for (const id of ids) {
       const drawingObject = this.state.objects[id];
       if (drawingObject && drawingObject.model.hasOwnProperty(prop)) {
-        drawingObject.model[prop] = newValue;
+        (drawingObject.model as any)[prop] = newValue;
       }
     }
   }
