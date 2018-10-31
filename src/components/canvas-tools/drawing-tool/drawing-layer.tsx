@@ -639,6 +639,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         switch (e.key) {
           case "Backspace":
           case "Delete":
+          case "Del":             // IE 9 and maybe Edge
             this.handleDelete();
             break;
         }
