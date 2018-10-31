@@ -39,7 +39,7 @@ const runMigration = () => {
           const classHash = metadata.classHash;
   
           if (classHash && classHashes.indexOf(classHash) === -1) {
-            const classUserRef = admin.database().ref(`/authed-copy/portals/${portalId}/classes/${classHash}/users/${userId}/`);
+            const classUserRef = admin.database().ref(`/${FIREBASE_ROOT}/portals/${portalId}/classes/${classHash}/users/${userId}/`);
             classUserRef.set(user);
             classHashes.push(classHash);
           }
