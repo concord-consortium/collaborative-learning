@@ -39,6 +39,16 @@ const runMigration = () => {
           const classHash = metadata.classHash;
   
           if (classHash && classHashes.indexOf(classHash) === -1) {
+            // Update all of the self keys
+            _.forEach(user.documentMetadata, (docMetadata) => {
+              docMetadata.self.classHash = classHash;
+            });
+            _.forEach(user.documents, (document) => {
+              document.self.classHash = classHash;
+            });
+            _.forEach(user.learningLogs, (learningLog) => {
+              learningLog.self.classHash = classHash;
+            });
             const classUserRef = admin.database().ref(`/${FIREBASE_ROOT}/portals/${portalId}/classes/${classHash}/users/${userId}/`);
             classUserRef.set(user);
             classHashes.push(classHash);
