@@ -8,7 +8,8 @@ import { UnitModelType, UnitModel } from "./curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
-import { WorkspaceModel, WorkspaceType, LearningLogWorkspace, SectionWorkspace } from "./workspace";
+import { LearningLogWorkspace, SectionWorkspace } from "./workspace";
+import { ClipboardModel, ClipboardModelType } from "./clipboard";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -25,6 +26,7 @@ export interface IStores {
   demo: DemoModelType;
   showDemoCreator: boolean;
   supports: SupportsModelType;
+  clipboard: ClipboardModelType;
 }
 
 export interface ICreateStores {
@@ -69,5 +71,6 @@ export function createStores(params?: ICreateStores): IStores {
     demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
+    clipboard: ClipboardModel.create()
   };
 }

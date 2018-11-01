@@ -11,6 +11,9 @@ import { assign, cloneDeep, each, isEqual, some } from "lodash";
 import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
 import { getImageDimensions } from "../../utilities/image-utils";
+import { safeJsonParse } from "../../utilities/js-utils";
+import { HotKeys } from "../../utilities/hot-keys";
+import * as uuid from "uuid/v4";
 
 import "./geometry-tool.sass";
 
@@ -36,7 +39,7 @@ interface IState extends SizeMeProps {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
-  syncedChanges?: number;
+  syncedChanges: number;
 }
 
 interface JXGPtrEvent {
@@ -90,7 +93,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     if (!prevState.board) { return null; }
 
-    const nextState: IState = {};
+    const nextState: IState = {} as any;
 
     const { readOnly, size } = nextProps;
     const geometryContent = content as GeometryContentModelType;
@@ -116,16 +119,21 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return nextState;
   }
 
-  public state: IState = {};
+  public state: IState = { syncedChanges: 0 };
 
   private domElement: HTMLDivElement | null;
 
   private disposeSelectionObserver: any;
 
+  private hotKeys: HotKeys = new HotKeys();
+
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
   private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
+
+  private lastPasteId: string;
+  private lastPasteCount: number;
 
   public componentDidMount() {
     this.initializeContent();
@@ -145,6 +153,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
       });
     }
+
+    this.initializeHotKeys();
   }
 
   public componentDidUpdate() {
@@ -177,6 +187,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     );
   }
 
+  private getContent() {
+    return this.props.model.content as GeometryContentModelType;
+  }
+
   private initializeContent() {
     const { model: { content } } = this.props;
     if ((content.type !== "Geometry") || !this.state.elementId) { return; }
@@ -193,6 +207,116 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                                 board ? { board } : null);
       this.setState(newState);
     }
+  }
+
+  private initializeHotKeys() {
+    this.hotKeys.register({
+      "backspace": this.handleDelete,
+      "delete": this.handleDelete,
+      "cmd-c": this.handleCopy,
+      "cmd-x": this.handleCut,
+      "cmd-v": this.handlePaste
+    });
+  }
+
+  private handleDelete = () => {
+    const content = this.getContent();
+    const { readOnly } = this.props;
+    const { board } = this.state;
+    if (!readOnly && board && content.hasSelection()) {
+      content.deleteSelection(board);
+      return true;
+    }
+  }
+
+  private handleCopy = () => {
+    const content = this.getContent();
+    const { board } = this.state;
+    if (board && content.hasSelection()) {
+      const { clipboard } = this.stores;
+      const changes = content.copySelection(board);
+      clipboard.clear();
+      clipboard.addTileContent(content.metadata.id, content.type, changes, this.stores);
+      return true;
+    }
+  }
+
+  private handleCut = () => {
+    this.handleCopy();
+    return this.handleDelete();
+  }
+
+  private handlePaste = () => {
+    const content = this.getContent();
+    const { readOnly } = this.props;
+    const { board } = this.state;
+    if (!readOnly && board) {
+      const { clipboard } = this.stores;
+      let changes: string[] = clipboard.getTileContent(content.type);
+      if (changes && changes.length) {
+        const pasteId = clipboard.getTileContentId(content.type);
+        const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
+        // track the number of times the same content has been pasted
+        if (pasteId) {
+          if (pasteId !== this.lastPasteId) {
+            this.lastPasteId = pasteId;
+            this.lastPasteCount = isSameTile ? 1 : 0;
+          }
+          else {
+            ++this.lastPasteCount;
+          }
+        }
+        // To handle multiple pastes of the same clipboard content,
+        // we must re-map ids to avoid duplication. We also offset
+        // the locations of points slightly so multiple pastes
+        // don't appear exactly on top of each other.
+        const idMap: { [id: string]: string } = {};
+        if (this.lastPasteCount > 0) {
+          changes = changes.map(jsonChange => {
+            const change = safeJsonParse(jsonChange);
+            const delta = this.lastPasteCount * 0.4;
+            switch (change && change.operation) {
+              case "create":
+                // map ids of newly create object
+                if (change.properties && change.properties.id) {
+                  idMap[change.properties.id] = uuid();
+                  change.properties.id = idMap[change.properties.id];
+                }
+                // after the first paste, names/labels are auto-generated
+                if (change.properties && change.properties.name) {
+                  delete change.properties.name;
+                }
+                if (change.target === "point") {
+                  // offset locations of points
+                  change.parents[0] += delta;
+                  change.parents[1] -= delta;
+                }
+                else if (change.target === "polygon") {
+                  // map ids of parent object references
+                  change.parents = change.parents.map((parentId: string) => idMap[parentId]);
+                }
+                break;
+              case "update":
+              case "delete":
+                if (Array.isArray(change.targetID)) {
+                  change.targetID = change.targetID.map((id: string) => idMap[id]);
+                }
+                else {
+                  change.targetID = idMap[change.targetID];
+                }
+                break;
+            }
+            return JSON.stringify(change);
+          });
+        }
+        this.applyBatchChanges(changes);
+      }
+      return true;
+    }
+  }
+
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    this.hotKeys.dispatch(e);
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -212,18 +336,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     }
     return false;
-  }
-
-  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const kBackspaceKeyCode = 8;
-    const kDeleteKeyCode = 46;
-    if (!this.props.readOnly && this.state.board &&
-        ((e.keyCode === kBackspaceKeyCode) || (e.keyCode === kDeleteKeyCode))) {
-      const geometryContent = this.props.model.content as GeometryContentModelType;
-      if (geometryContent.hasSelection()) {
-        geometryContent.deleteSelection(this.state.board);
-      }
-    }
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -294,7 +406,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private applyChange(change: () => void) {
-    this.setState({ syncedChanges: (this.state.syncedChanges || 0) + 1 }, change);
+    this.setState({ syncedChanges: this.state.syncedChanges + 1 }, change);
   }
 
   private applyChanges(changes: () => void) {
@@ -309,8 +421,26 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     // update the model as a batch
     const changeCount = geometryContent.batchChangeCount;
-    this.setState({ syncedChanges: (this.state.syncedChanges || 0) + changeCount },
+    this.setState({ syncedChanges: this.state.syncedChanges + changeCount },
                   () => geometryContent.resumeSync());
+  }
+
+  private applyBatchChanges(changes: string[]) {
+    this.applyChanges(() => {
+      changes.forEach(change => {
+        const content = this.getContent();
+        const { board } = this.state;
+        if (board) {
+          const parsedChange = safeJsonParse(change);
+          if (parsedChange) {
+            const result = content.applyChange(board, parsedChange);
+            if (result) {
+              this.handleCreateElement(result as JXG.GeometryElement);
+            }
+          }
+        }
+      });
+    });
   }
 
   private isSqrDistanceWithinThreshold(threshold: number, c1?: JXG.Coords, c2?: JXG.Coords) {
@@ -407,7 +537,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (content.type === "Geometry") {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          const metadata = content.metadata;
+          // const metadata = content.metadata;
           const point = content.addPoint(board, [x, y], props) as JXG.Point;
           if (point) {
             this.handleCreatePoint(point);

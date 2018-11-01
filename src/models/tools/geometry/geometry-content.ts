@@ -1,10 +1,10 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
-import { assign, size as _size } from "lodash";
-import * as uuid from "uuid/v4";
 import { isBoard } from "./jxg-board";
+import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { assign, each, keys, size as _size } from "lodash";
+import * as uuid from "uuid/v4";
 
 export const kGeometryToolID = "Geometry";
 
@@ -81,6 +81,13 @@ export const GeometryContentModel = types
     },
     hasSelection() {
       return self.metadata.hasSelection();
+    },
+    get selectedIds() {
+      const selected: string[] = [];
+      self.metadata.selection.forEach((isSelected, id) => {
+        isSelected && selected.push(id);
+      });
+      return selected;
     }
   }))
   .actions(self => ({
@@ -243,17 +250,96 @@ export const GeometryContentModel = types
       return board.objectsList.filter(test);
     }
 
-    function deleteSelection(board: JXG.Board) {
-      const ids: string[] = [];
-      self.metadata.selection.forEach((value, id) => {
-        if (value) {
-          ids.push(id);
+    // returns the currently selected objects and any descendant objects
+    // that should also be considered selected, i.e. all of whose
+    // ancestors are selected.
+    function getSelectedIdsAndChildren(board: JXG.Board) {
+      const selectedIds = self.selectedIds;
+      const children: { [id: string]: JXG.GeometryElement } = {};
+      // identify children (e.g. polygons) that may be selected as well
+      selectedIds.forEach(id => {
+        const obj = board.objects[id];
+        if (obj) {
+          each(obj.childElements, child => {
+            if (child && (child.elType === "polygon")) {
+              children[child.id] = child;
+            }
+          });
         }
       });
-      if (ids.length) {
+      // children (e.g. polygons) are selected if all ancestors are selected
+      each(children, child => {
+        let allVerticesSelected = true;
+        each(child.ancestors, point => {
+          if (!self.isSelected(point.id)) {
+            allVerticesSelected = false;
+          }
+        });
+        if (allVerticesSelected) {
+          selectedIds.push(child.id);
+        }
+      });
+      return selectedIds;
+    }
+
+    function copySelection(board: JXG.Board) {
+      // identify selected objects and children (e.g. polygons)
+      const selectedIds = getSelectedIdsAndChildren(board);
+
+      // sort into creation order
+      const idToIndexMap: { [id: string]: number } = {};
+      board.objectsList.forEach((obj, index) => {
+        idToIndexMap[obj.id] = index;
+      });
+      selectedIds.sort((a, b) => idToIndexMap[a] - idToIndexMap[b]);
+
+      // map old ids to new ones
+      const newIds: { [oldId: string]: string } = {};
+      selectedIds.forEach(id => {
+        newIds[id] = uuid();
+      });
+
+      // create change objects for each object to be copied
+      const changes: string[] = [];
+      selectedIds.forEach(id => {
+        const obj = board.objects[id];
+        if (obj) {
+          let x: number;
+          let y: number;
+          const change: JXGChange = {
+                  operation: "create",
+                  properties: { id: newIds[id], name: obj.name }
+                } as any;
+          switch (obj.elType) {
+            case "point":
+              [ , x, y] = (obj as JXG.Point).coords.usrCoords;
+              assign(change, {
+                target: "point",
+                parents: [x, y]
+              });
+              break;
+            case "polygon":
+              assign(change, {
+                target: "polygon",
+                parents: Array.from(keys(obj.ancestors))
+                          .map(parentId => newIds[parentId]),
+              });
+              break;
+          }
+          if (change.target) {
+            changes.push(JSON.stringify(change));
+          }
+        }
+      });
+      return changes;
+    }
+
+    function deleteSelection(board: JXG.Board) {
+      const selectedIds = self.selectedIds;
+      if (selectedIds.length) {
         self.deselectAll(board);
         board.showInfobox(false);
-        removeObjects(board, ids);
+        removeObjects(board, selectedIds);
       }
     }
 
@@ -288,7 +374,8 @@ export const GeometryContentModel = types
         },
         get batchChangeCount() {
           return batchChanges.length;
-        }
+        },
+        copySelection
       },
       actions: {
         initializeBoard,

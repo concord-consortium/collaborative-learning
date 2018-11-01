@@ -67,6 +67,7 @@ declare namespace JXG {
     id: string;
     elType: string;
     type: number;
+    name: string;
     ancestors: { [id: string]: GeometryElement };
     parents: GeometryElement[];
     childElements: { [id: string]: GeometryElement };
