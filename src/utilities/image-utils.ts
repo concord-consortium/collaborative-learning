@@ -1,4 +1,6 @@
 import { Firebase } from "../lib/firebase";
+import { DB } from "../lib/db";
+import { ImageModelType } from "../models/image";
 
 const ImageConstants = {
   maxWidth: 512,
@@ -12,14 +14,15 @@ interface ImageDimensions {
 
 const imageUrlLookupTable: Map<string, string> = new Map();
 const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
+const ccImageId = "ccimg://";
 
 // Firebase calls with callbacks
-export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: any) {
+export function fetchImageUrl(imagePath: string, db: DB, callback: any) {
   if (imageUrlLookupTable.get(imagePath)) {
     callback(imageUrlLookupTable.get(imagePath));
     return;
   }
-
+  const isCCUrl = imagePath.startsWith(ccImageId);
   const isFullUrl = imagePath.startsWith("http");
   const isLocalFilePath = imagePath.startsWith("assets/");
   const isFirebaseStorageUrl = imagePath.startsWith("https://firebasestorage");
@@ -27,7 +30,14 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
   const isImageData = imagePath.startsWith("data:image");
   const imageUrlAsReference = isFirebaseStorageUrl ? imagePath : undefined;
 
-  if (isFullUrl && !isFirebaseStorageUrl) {
+  if (isCCUrl) {
+    const imageId = imagePath.replace(ccImageId, "");
+    // fetch image from firebase realtime database
+    db.getImage(imageId).then(image => {
+      callback(image.imageData);
+    });
+  }
+  else if (isFullUrl && !isFirebaseStorageUrl) {
     imageUrlLookupTable.set(imagePath, imagePath);
     callback(imageUrlLookupTable.get(imagePath));
   }
@@ -38,16 +48,27 @@ export function fetchImageUrl(imagePath: string, firebase: Firebase, callback: a
     callback(imagePath);
   }
   else {
-    // Pass in the imagePath as the second argument to get the ref to firebase by url
+    // Pass in the imagePath as the second argument to get the ref to firebase storage by url
     // This is needed if an image of the same name has been uploaded in two different components,
     // since each public URL becomes invalid and a new url generated on upload
-    firebase.getPublicUrlFromStore(imagePath, imageUrlAsReference).then((url) => {
+    db.firebase.getPublicUrlFromStore(imagePath, imageUrlAsReference).then((url) => {
       imageUrlLookupTable.set(imagePath, url ? url : placeholderImage);
       callback(url ? url : placeholderImage);
     }).catch(() => {
       callback(placeholderImage);
     });
   }
+}
+export function storeImage(db: DB, image: ImageModelType): Promise<string> {
+  return new Promise((resolve) =>
+    db.addImage(image).then(dbImage => {
+      resolve(dbImage.image.self.imageKey);
+    })
+  );
+}
+
+export function getCCImagePath(imageKey: string) {
+  return ccImageId + imageKey;
 }
 
 export function uploadImage(firebase: Firebase, storePath: string, currentFile: File, callback: any) {

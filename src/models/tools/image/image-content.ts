@@ -6,17 +6,18 @@ export const kImageToolID = "Image";
 export function defaultImageContent() {
   return ImageContentModel.create({
                             type: "Image",
-                            url: placeholderImage,
-                            imageId: ""
+                            url: placeholderImage
                           });
 }
 
 export const ImageContentModel = types
   .model("ImageTool", {
     type: types.optional(types.literal(kImageToolID), kImageToolID),
-    url: types.string,
-    imageId: types.maybe(types.string)
+    url: types.string
   })
+  .volatile(self => ({
+    displayUrl: ""
+  }))
   .views(self => ({
     get isUserResizable() {
       return true;
@@ -29,14 +30,9 @@ export const ImageContentModel = types
       self.url = url;
     }
 
-    function setId(id: string) {
-      self.imageId = id;
-    }
-
     return {
       actions: {
-        setUrl,
-        setId
+        setUrl
       }
     };
   });

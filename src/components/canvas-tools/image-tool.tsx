@@ -3,8 +3,11 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { ImageModelType, defaultImage } from "../../models/image";
-import { fetchImageUrl, uploadImage, getImageDimensions, importImage } from "../../utilities/image-utils";
+import { ImageModelType } from "../../models/image";
+import {
+  fetchImageUrl, storeImage, getCCImagePath,
+  getImageDimensions, importImage
+} from "../../utilities/image-utils";
 import "./image-tool.sass";
 import { ImageModel } from "../../models/image";
 
@@ -35,18 +38,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
 
-    if (imageContent.imageId) {
-      // fetch from firebase and store image in state for now
-      this.getImage(imageContent.imageId);
-    } else {
       // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
-      fetchImageUrl(imageContent.url, db.firebase, ((imageData: string) => {
-        // updating dimensions updates state
-        this.handleUpdateImageDimensions(imageData);
-        // store migrated image data and the original url source for provenance
-        // this.storeImage(imageData, imageContent.url);
-      }));
-    }
+    fetchImageUrl(imageContent.url, db, ((imageData: string) => {
+      // updating dimensions updates state
+      this.handleUpdateImageDimensions(imageData);
+      // store migrated image data and the original url source for provenance
+      // this.storeImage(imageData, imageContent.url);
+    }));
   }
 
   public componentWillUnmount() {
@@ -60,8 +58,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const { imageUrl, isLoading } = this.state;
 
     const imageContent = content as ImageContentModelType;
-    if (!isLoading && !imageUrl && imageContent.imageId) {
-      this.getImage(imageContent.imageId);
+    if (!isLoading && !imageUrl && imageContent.url) {
+      this.getImage(imageContent.url);
 
     }
   }
@@ -213,12 +211,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
         createdAt: 0,
         createdBy: user.id
       });
-
-      db.addImage(image).then(dbImage => {
-        image.setKey(dbImage.image.self.imageKey);
-        // images.add(image);
-        imageContent.setId(image.key);
+      storeImage(db, image).then(imageKey => {
+        imageContent.setUrl(getCCImagePath(imageKey));
       });
+      // db.addImage(image).then(dbImage => {
+      //   image.setKey(dbImage.image.self.imageKey);
+      //   // images.add(image);
+      //   imageContent.setId(image.key);
+      // });
 
     }
   }
