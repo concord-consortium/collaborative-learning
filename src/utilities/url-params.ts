@@ -12,7 +12,7 @@ export interface QueryParams {
   // Used during migration testing to put the app into a "post-migration" mode.
   // In this mode, the new Firebase schema will be used and data is written to a demo portion of Firebase.
   // See `firebase.ts` for more information.
-  testMigration?: boolean;
+  testMigration?: string;
 
   //
   // Portal student auth parameters

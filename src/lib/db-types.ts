@@ -29,6 +29,7 @@ export interface DBBaseDocumentMetadata {
   version: "1.0";
   self: {
     uid: string;
+    classHash: string;
     documentKey: string;
   };
   createdAt: number;
@@ -70,6 +71,7 @@ export interface DBLearningLog {
   version: "1.0";
   self: {
     uid: string;
+    classHash: string;
     documentKey: string;
   };
   title: string;
@@ -80,6 +82,7 @@ export interface DBDocument {
   self: {
     uid: string;
     documentKey: string;
+    classHash: string;
   };
   content?: string;
   type: DBDocumentType;

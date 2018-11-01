@@ -401,7 +401,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                       authenticatedUser.id = uidAsString;
                       authenticatedUser.portal = portal;
 
-                      getProblemIdForAuthenticatedUser(bearerToken, urlParams).then((problemId) => {
+                      getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams).then((problemId) => {
                         if (authenticatedUser) {
                           resolve({authenticatedUser, classInfo, problemId});
                         }
@@ -427,12 +427,12 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   });
 };
 
-export const getProblemIdForAuthenticatedUser = (bearerToken: string, urlParams?: QueryParams) => {
+export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams?: QueryParams) => {
   return new Promise<string|undefined>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
       .get(urlParams.offering)
-      .set("Authorization", `Bearer ${bearerToken}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
         if (err) {
           reject(getErrorMessage(err, res));
