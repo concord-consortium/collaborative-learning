@@ -306,9 +306,9 @@ export class DB {
       const documentKey = documentRef.key!;
       const metadataRef = this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey));
       const version = "1.0";
-      const self = {uid: user.id, documentKey};
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
+      const self = {uid: user.id, documentKey, classHash};
       const document: DBDocument = {version, self, type};
       if (content) {
         document.content = content;
@@ -421,6 +421,7 @@ export class DB {
             self: {
               documentKey,
               uid: user.id,
+              classHash: user.classHash
             },
             title
           };

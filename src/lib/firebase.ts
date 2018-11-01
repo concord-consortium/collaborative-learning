@@ -1,6 +1,13 @@
 import * as firebase from "@concord-consortium/firebase/app";
 import { UserModelType } from "../models/user";
 import { DB } from "./db";
+import { urlParams } from "../utilities/url-params";
+
+// Set this during database testing in combination with the urlParam testMigration=true to
+// override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
+// will write to and read from the "authed-copy" key. Once the migration is performed, this should
+// be reset to undefined so the test database is no longer referenced.
+const FIREBASE_ROOT_OVERRIDE = undefined;
 
 export class Firebase {
   public user: firebase.User | null = null;
@@ -45,10 +52,14 @@ export class Firebase {
   public getRootFolder() {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode, user } = this.db.stores;
-    const parts = [`${appMode}`];
-
-    if ((appMode === "dev") || (appMode === "test")) {
-      parts.push(this.userId);
+    const parts = [];
+    if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
+      parts.push(FIREBASE_ROOT_OVERRIDE);
+    } else {
+      parts.push(`${appMode}`);
+      if ((appMode === "dev") || (appMode === "test")) {
+        parts.push(this.userId);
+      }
     }
     parts.push("portals");
     parts.push(this.escapeKey(user.portal));
@@ -64,8 +75,12 @@ export class Firebase {
   // Paths
   //
 
+  public getClassPath(user: UserModelType) {
+    return `classes/${user.classHash}`;
+  }
+
   public getUserPath(user: UserModelType, userId?: string) {
-    return `users/${userId || user.id}`;
+    return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
@@ -81,10 +96,6 @@ export class Firebase {
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
-  }
-
-  public getClassPath(user: UserModelType) {
-    return `classes/${user.classHash}`;
   }
 
   public getOfferingPath(user: UserModelType) {

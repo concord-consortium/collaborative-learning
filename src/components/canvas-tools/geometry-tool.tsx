@@ -499,10 +499,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // clicks on background of board clear the selection
+      // clicks on background (or images) of board clear the selection
       const geometryContent = this.props.model.content as GeometryContentModelType;
-      const elements = board.getAllObjectsUnderMouse(evt);
-      if ((!elements || !elements.length) && geometryContent.hasSelection()) {
+      const elements = board.getAllObjectsUnderMouse(evt)
+                            .filter(obj => obj && (obj.elType !== "image"));
+      if (!elements.length && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
         return;
       }

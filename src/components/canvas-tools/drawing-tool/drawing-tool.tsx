@@ -18,7 +18,9 @@ interface IState {
 export default class DrawingToolComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
-    (this.props.model.content as DrawingContentModelType).reset();
+    if (!this.props.readOnly) {
+      (this.props.model.content as DrawingContentModelType).reset();
+    }
   }
 
   public render() {
