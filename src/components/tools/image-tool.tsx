@@ -35,16 +35,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   public componentDidMount() {
     const { model: { content } } = this.props;
-    const { db } = this.stores;
     const imageContent = content as ImageContentModelType;
 
       // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
-    fetchImageUrl(imageContent.url, db, ((imageData: string) => {
-      // updating dimensions updates state
-      this.handleUpdateImageDimensions(imageData);
-      // store migrated image data and the original url source for provenance
-      // this.storeImage(imageData, imageContent.url);
-    }));
+    this.getImage(imageContent.url);
+
+    // store migrated image data and the original url source for provenance
+    //   // this.storeImage(imageData, imageContent.url);
+    // });
   }
 
   public componentWillUnmount() {
@@ -60,7 +58,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     const imageContent = content as ImageContentModelType;
     if (!isLoading && !imageUrl && imageContent.url) {
       this.getImage(imageContent.url);
-
     }
   }
 
@@ -192,13 +189,20 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
 
   private getImage = (imageId: string) => {
     const { db } = this.stores;
-    this._asyncRequest = db.getImage(imageId).then(image => {
+    const imageContent = this.props.model.content as ImageContentModelType;
+
+    this._asyncRequest = fetchImageUrl(imageId, db).then((imageData: any) => {
+      const img = imageData.image ? imageData.image : imageData;
       if (this._asyncRequest) {
         this._asyncRequest = null;
-        this.handleUpdateImageDimensions(image.imageData);
+        this.handleUpdateImageDimensions(img);
+        if (imageData.newUrl) imageContent.setUrl(imageData.newUrl);
+      } else {
+        this.handleUpdateImageDimensions(img);
       }
     });
   }
+
   private storeImage = (newImage: string, originalSource?: string) => {
     const { user, db } = this.stores;
     const imageContent = this.props.model.content as ImageContentModelType;
@@ -214,12 +218,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
       storeImage(db, image).then(imageKey => {
         imageContent.setUrl(getCCImagePath(imageKey));
       });
-      // db.addImage(image).then(dbImage => {
-      //   image.setKey(dbImage.image.self.imageKey);
-      //   // images.add(image);
-      //   imageContent.setId(image.key);
-      // });
-
     }
   }
 }
