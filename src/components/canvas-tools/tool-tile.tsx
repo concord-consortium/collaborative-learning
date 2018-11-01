@@ -5,10 +5,12 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
+import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
+import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
@@ -57,12 +59,14 @@ interface IProps {
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
 const kToolComponentMap: any = {
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,
-        [kTextToolID]: TextToolComponent
+        [kTextToolID]: TextToolComponent,
+        [kDrawingToolID]: DrawingToolComponent
       };
 
 @inject("stores")

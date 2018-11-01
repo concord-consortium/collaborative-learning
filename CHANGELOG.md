@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.0.9 - released November 1, 2018
+
+- Tile drag feedback
+- Sync selection on geometry
+- Add drawing tool
+- Copy and paste geometry features
+- Adding migration tools and first migration
+- Bug fixes
+
 ## Version 0.0.8 - released October 25, 2018
 
 - Styling left nav canvas buttons [#161403821]
