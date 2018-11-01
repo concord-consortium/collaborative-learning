@@ -7,7 +7,7 @@ import { urlParams } from "../utilities/url-params";
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
 // will write to and read from the "authed-copy" key. Once the migration is performed, this should
 // be reset to undefined so the test database is no longer referenced.
-const FIREBASE_ROOT_OVERRIDE = "authed-copy";
+const FIREBASE_ROOT_OVERRIDE = undefined;
 
 export class Firebase {
   public user: firebase.User | null = null;
@@ -80,9 +80,7 @@ export class Firebase {
   }
 
   public getUserPath(user: UserModelType, userId?: string) {
-    return urlParams.testMigration === "true"
-             ? `${this.getClassPath(user)}/users/${userId || user.id}`
-             : `users/${userId || user.id}`;
+    return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
