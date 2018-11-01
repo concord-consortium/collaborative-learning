@@ -9,6 +9,10 @@ export interface QueryParams {
   appMode?: AppMode;
   // ordinal string, e.g. "2.1", "3.2", etc.
   problem?: string;
+  // Used during migration testing to put the app into a "post-migration" mode.
+  // In this mode, the new Firebase schema will be used and data is written to a demo portion of Firebase.
+  // See `firebase.ts` for more information.
+  testMigration?: boolean;
 
   //
   // Portal student auth parameters
@@ -71,6 +75,7 @@ export const DefaultUrlParams: QueryParams = {
   fakeOffering: undefined,
   qaGroup: undefined,
   qaClear: undefined,
+  testMigration: undefined,
 };
 
 export const urlParams: QueryParams = params;
