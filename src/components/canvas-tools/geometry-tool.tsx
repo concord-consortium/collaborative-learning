@@ -503,7 +503,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const elements = board.getAllObjectsUnderMouse(evt)
                             .filter(obj => obj && (obj.elType !== "image"));
-      if (!elements.length && geometryContent.hasSelection()) {
+      if (!elements.length && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey &&
+          geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
         return;
       }
@@ -534,18 +535,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
 
       // clicks on board background create new points
-      const { model: { content } } = this.props;
-      if (content.type === "Geometry") {
+      if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          // const metadata = content.metadata;
-          const point = content.addPoint(board, [x, y], props) as JXG.Point;
+          const point = geometryContent.addPoint(board, [x, y], props) as JXG.Point;
           if (point) {
             this.handleCreatePoint(point);
-
-            // select newly created points without referring to content
-            // metadata.select(point.id);
-            // setElementColor(board, point.id, true);
           }
         });
       }
@@ -670,14 +665,32 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const { board } = this.state;
       const inVertex = isInVertex(evt);
-      if (!inVertex && !areAllVerticesSelected()) {
+      const allVerticesSelected = areAllVerticesSelected();
+      let selectVertices = false;
+      let deselectVertices = false;
+      if (!inVertex && !allVerticesSelected) {
+        // deselect other elements unless appropriate modifier key is down
+        if (board && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+          geometryContent.deselectAll(board);
+        }
+        selectVertices = true;
         this.lastSelectDown = evt;
+      }
+      else if (!inVertex && allVerticesSelected) {
+        if (board && (evt.ctrlKey || evt.metaKey || evt.shiftKey)) {
+          deselectVertices = true;
+        }
       }
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
         this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
         if (board && !inVertex) {
-          geometryContent.selectElement(pt.id);
+          if (selectVertices) {
+            geometryContent.selectElement(pt.id);
+          }
+          else if (deselectVertices) {
+            geometryContent.deselectElement(pt.id);
+          }
         }
       });
     };
