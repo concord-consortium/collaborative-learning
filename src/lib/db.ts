@@ -16,8 +16,6 @@ import { DBOfferingGroup,
          DBGroupUserConnections,
          DBPublication,
          DBDocumentType,
-         DBLearningLogDocumentMetadata,
-         DBLearningLogPublication,
          DBImage
         } from "./db-types";
 import { DocumentModelType,
