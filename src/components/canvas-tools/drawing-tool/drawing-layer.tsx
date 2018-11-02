@@ -547,6 +547,7 @@ interface DrawingToolMap {
 interface DrawingLayerViewProps {
   model: ToolTileModelType;
   readOnly: boolean;
+  scale?: number;
 }
 
 interface DrawingLayerViewState {
@@ -832,10 +833,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public getWorkspacePoint = (e: MouseEvent|React.MouseEvent<any>): Point|null => {
     if (this.svgRef) {
+      const scale = this.props.scale || 1;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: (e.clientX - rect.left) / scale,
+        y: (e.clientY - rect.top) / scale
       };
     }
     return null;

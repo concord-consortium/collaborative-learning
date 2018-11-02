@@ -10,6 +10,7 @@ import "./drawing-tool.sass";
 interface IProps {
   model: ToolTileModelType;
   readOnly: boolean;
+  scale?: number;
 }
 
 interface IState {
@@ -24,7 +25,7 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
   }
 
   public render() {
-    const { model, readOnly } = this.props;
+    const { model, readOnly, scale } = this.props;
     const editableClass = readOnly ? " read-only" : "";
     const className = `drawing-tool${editableClass}`;
     return (
@@ -32,8 +33,7 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
         <ToolbarView model={model} readOnly={!!readOnly}/>
         <div style={{left: TOOLBAR_WIDTH}}
             onMouseDown={this.handleMouseDown}>
-          <DrawingLayerView model={model} readOnly={!!readOnly}
-          />
+          <DrawingLayerView model={model} readOnly={!!readOnly} scale={scale} />
         </div>
       </div>
     );
