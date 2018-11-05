@@ -193,9 +193,9 @@ export interface DBImage {
     classHash: string;
     imageKey: string;
   };
-  imageData: string,
-  title: string, // may be redundant since we aren't yet allowing user-entered titles
-  originalSource: string, // web url or original filename
-  createdAt: number,
-  createdBy: string
+  imageData: string;
+  title: string; // may be redundant since we aren't yet allowing user-entered titles
+  originalSource: string; // web url or original filename
+  createdAt: number;
+  createdBy: string;
 }
