@@ -1,4 +1,3 @@
-import { Firebase } from "../lib/firebase";
 import { DB } from "../lib/db";
 import { ImageModelType, ImageModel } from "../models/image";
 
@@ -11,8 +10,13 @@ interface ImageDimensions {
   height: number;
   src?: string;
 }
+export interface ISimpleImage {
+  imageKey?: string;
+  imageUrl: string;
+  imageData?: string;
+}
 
-const imageUrlLookupTable: Map<string, string> = new Map();
+const imageLookupTable: Map<string, ISimpleImage> = new Map();
 const imageDimensionsLookupTable: Map<string, ImageDimensions> = new Map();
 const ccImageId = "ccimg://";
 const placeholderImage = "assets/image_placeholder.png";
@@ -49,82 +53,98 @@ function getUrlType(imagePath: string) {
 }
 
 // Firebase calls with promise
-export function fetchImageUrl(imagePath: string, db: DB): Promise<any> {
+export function getImage(imagePath: string, db: DB, userId: string): Promise<ISimpleImage> {
   const urlType = getUrlType(imagePath);
-
+  const lookupImage = imageLookupTable.get(imagePath);
+  const img: ISimpleImage = {
+    imageUrl: placeholderImage
+  };
   return new Promise((resolve) => {
 
-    if (imageUrlLookupTable.get(imagePath)) {
-      resolve(imageUrlLookupTable.get(imagePath));
+    if (lookupImage) {
+      resolve(lookupImage);
       return;
     }
 
     switch (urlType) {
       case URLTypes.invalid:
-        resolve(placeholderImage);
+        resolve(img);
         break;
 
       case URLTypes.cc:
         const imageId = imagePath.replace(ccImageId, "");
         // fetch image from firebase realtime database
         db.getImage(imageId).then(image => {
-          resolve(image.imageData);
+          img.imageData = image.imageData;
+          // url returned as-is
+          img.imageUrl = imagePath;
+          imageLookupTable.set(imagePath, img);
+          resolve(img);
         });
         break;
 
       case URLTypes.external:
-        imageUrlLookupTable.set(imagePath, imagePath);
-        resolve(imageUrlLookupTable.get(imagePath));
+        // upload images from external urls to our own firebase if possible
+        // this may fail depending on CORS settings on target image.
+        storeImage(db, userId, undefined, imagePath).then(simpleImage => {
+          imageLookupTable.set(simpleImage.imageUrl, simpleImage);
+          resolve(simpleImage);
+        }).catch(() => {
+          // If the silent upload has failed, do we retain the full url or
+          // encourage the user to download a copy and re-upload?
+          // For now, return a placeholder.
+          resolve(img);
+        });
         break;
 
       case URLTypes.local:
-        resolve(imagePath);
+        // Allow assets/images in authoring documents to be linked directly
+        img.imageUrl = imagePath;
+        imageLookupTable.set(imagePath, img);
+        resolve(img);
         break;
 
       case URLTypes.fbStorageUrl || URLTypes.fbStoragePath:
+        // All images from firebase storage must be migrated to realtime database
         const imageUrlAsReference = urlType === URLTypes.fbStorageUrl ? imagePath : undefined;
         // Pass in the imagePath as the second argument to get the ref to firebase storage by url
         // This is needed if an image of the same name has been uploaded in two different components,
         // since each public URL becomes invalid and a new url generated on upload
         db.firebase.getPublicUrlFromStore(imagePath, imageUrlAsReference).then(url => {
           if (url) {
-            resizeImage(url, ImageConstants.maxWidth, ImageConstants.maxHeight).then(imageData => {
-              const image: ImageModelType = ImageModel.create({
-                key: "",
-                imageData,
-                title: "Placeholder",
-                originalSource: imagePath,
-                createdAt: 0,
-                createdBy: ""
-              });
-              storeImage(db, image).then(imageKey => {
-                if (imageKey) {
-                  imageUrlLookupTable.set(imagePath, getCCImagePath(imageKey));
-                  db.getImage(imageKey).then(dbImage => {
-                    resolve({ imageData: dbImage.imageData, newUrl: getCCImagePath(imageKey) });
-                  });
-                }
-                resolve(placeholderImage);
-              });
+            storeImage(db, userId, undefined, imagePath).then(simpleImage => {
+              imageLookupTable.set(simpleImage.imageUrl, simpleImage);
+              // Image has been retrieved from Storage, now we can safely remove the old image
+              // TODO: remove old images
+              resolve(simpleImage);
             }).catch(() => {
-              resolve(placeholderImage);
+              resolve(img);
             });
           } else {
-            resolve(placeholderImage);
+            resolve(img);
           }
         });
         break;
 
       default:
-        resolve(placeholderImage);
+        resolve(img);
     }
   });
 }
 
-export function storeImage(db: DB, image: ImageModelType): Promise<string> {
-  return new Promise((resolve) =>
+function kUploadImage(db: DB, image: ImageModelType): Promise<ISimpleImage> {
+  const img: ISimpleImage = {
+    imageUrl: placeholderImage
+  };
+
+  return new Promise((resolve, reject) =>
     db.addImage(image).then(dbImage => {
-      resolve(dbImage.image.self.imageKey);
+      img.imageKey = dbImage.image.self.imageKey;
+      img.imageData = dbImage.image.imageData;
+      img.imageUrl = getCCImagePath(dbImage.image.self.imageKey);
+      resolve(img);
+    }).catch(() => {
+      reject();
     })
   );
 }
@@ -133,14 +153,36 @@ export function getCCImagePath(imageKey: string) {
   return ccImageId + imageKey;
 }
 
-export function importImage(file: File): Promise<any> {
-  const imageUrl = URL.createObjectURL(file);
-  return resizeImage(imageUrl, ImageConstants.maxWidth, ImageConstants.maxHeight);
+export function storeImage(db: DB, userId: string, file?: File, imagePath?: string): Promise<ISimpleImage> {
+  const img: ISimpleImage = {
+    imageUrl: placeholderImage
+  };
+
+  return new Promise((resolve, reject) => {
+    const imageUrl = file ? URL.createObjectURL(file) : imagePath ? imagePath : undefined;
+    const imageName = file ? file.name : imagePath;
+    if (!imageUrl) reject(img);
+
+    resizeImage(imageUrl!, ImageConstants.maxWidth, ImageConstants.maxHeight).then(imageData => {
+      const image: ImageModelType = ImageModel.create({
+        key: "",
+        imageData,
+        title: imageName,
+        originalSource: imageName,
+        createdAt: 0,
+        createdBy: userId
+      });
+      kUploadImage(db, image).then(storedImage => {
+        resolve(storedImage);
+      }).catch(() => {
+        resolve(img);
+      });
+    });
+  });
 }
 
 // Image size functions
 function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number): Promise<string> {
-  console.log(imageUrl);
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.src = imageUrl;
@@ -179,7 +221,6 @@ function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number): Pro
   });
 }
 
-// new Promise-based way to get dimensions
 export function getImageDimensions(file?: File, url?: string): Promise<any> {
   const image = new Image();
   if (file) {
@@ -187,7 +228,7 @@ export function getImageDimensions(file?: File, url?: string): Promise<any> {
   } else {
     image.src = url!;
   }
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     image.onload = () => {
       const width = image.width;
       const height = image.height;

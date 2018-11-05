@@ -3,13 +3,8 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { ImageModelType } from "../../models/image";
-import {
-  fetchImageUrl, storeImage, getCCImagePath,
-  getImageDimensions, importImage
-} from "../../utilities/image-utils";
+import { getImage, storeImage, getImageDimensions, ISimpleImage  } from "../../utilities/image-utils";
 import "./image-tool.sass";
-import { ImageModel } from "../../models/image";
 
 interface IProps {
   context: string;
@@ -36,13 +31,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   public componentDidMount() {
     const { model: { content } } = this.props;
     const imageContent = content as ImageContentModelType;
-
-      // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
+    // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
     this.getImage(imageContent.url);
-
-    // store migrated image data and the original url source for provenance
-    //   // this.storeImage(imageData, imageContent.url);
-    // });
   }
 
   public componentWillUnmount() {
@@ -131,21 +121,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { db } = this.stores;
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
-
-    // Set loading state for showing spinner
-    this.setState({ isLoading: true });
-
-    this._asyncRequest = importImage(currentFile).then(imageData => {
-      // in case we were unmounted
-      if (this._asyncRequest) {
-        this._asyncRequest = null;
-        this.handleUpdateImageDimensions(imageData);
-        this.storeImage(imageData, currentFile.name);
-      }
-    });
+    this.storeImage(currentFile);
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -165,22 +143,18 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     if (e.keyCode === 13) {
       const newUrl = e.currentTarget.value;
       if (newUrl !== this.state.imageUrl) {
-        this.updateImageFromInput(newUrl);
+        this.storeImage(undefined, newUrl);
       }
     }
   }
 
+  // User has input a new url into the input box, check the dimensions, upload to FB,
+  // then update state and finally model
   private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const newUrl = e.currentTarget.value;
     if (newUrl !== this.state.imageUrl) {
-      this.updateImageFromInput(newUrl);
+      this.storeImage(undefined, newUrl);
     }
-  }
-
-  // User has input a new url into the input box, check the dimensions and update model and state
-  private updateImageFromInput = (newUrl: string) => {
-    this.handleUpdateImageDimensions(newUrl);
-    this.storeImage(newUrl, newUrl);
   }
 
   private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -188,36 +162,38 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
   }
 
   private getImage = (imageId: string) => {
-    const { db } = this.stores;
-    const imageContent = this.props.model.content as ImageContentModelType;
+    const { db, user } = this.stores;
 
-    this._asyncRequest = fetchImageUrl(imageId, db).then((imageData: any) => {
-      const img = imageData.image ? imageData.image : imageData;
+    this._asyncRequest = getImage(imageId, db, user.id).then((image: ISimpleImage) => {
       if (this._asyncRequest) {
+        this.handleUpdateImageDimensions(image.imageData ? image.imageData : image.imageUrl);
+        const imageContent = this.props.model.content as ImageContentModelType;
+        if (image.imageUrl !== imageContent.url) {
+          imageContent.setUrl(image.imageUrl);
+        }
         this._asyncRequest = null;
-        this.handleUpdateImageDimensions(img);
-        if (imageData.newUrl) imageContent.setUrl(imageData.newUrl);
-      } else {
-        this.handleUpdateImageDimensions(img);
       }
     });
   }
 
-  private storeImage = (newImage: string, originalSource?: string) => {
+  private storeImage = (newImageFile?: File, newImagePath?: string) => {
     const { user, db } = this.stores;
-    const imageContent = this.props.model.content as ImageContentModelType;
-    if (newImage !== imageContent.url) {
-      const image: ImageModelType = ImageModel.create({
-        key: "",
-        imageData: newImage,
-        title: "Placeholder",
-        originalSource: originalSource ? originalSource : "",
-        createdAt: 0,
-        createdBy: user.id
-      });
-      storeImage(db, image).then(imageKey => {
-        imageContent.setUrl(getCCImagePath(imageKey));
-      });
-    }
+
+    // Set loading state for showing spinner
+    this.setState({ isLoading: true });
+
+    this._asyncRequest = storeImage(db, user.id, newImageFile, newImagePath).then(image => {
+      // in case we were unmounted
+      if (this._asyncRequest) {
+        this.handleUpdateImageDimensions(image.imageData ? image.imageData : image.imageUrl);
+
+        const imageContent = this.props.model.content as ImageContentModelType;
+        if (image.imageUrl !== imageContent.url) {
+          imageContent.setUrl(image.imageUrl);
+        }
+
+        this._asyncRequest = null;
+      }
+    });
   }
 }
