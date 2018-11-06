@@ -67,7 +67,9 @@ export class HotKeys {
     each(hotKeys, (handler, keys) => {
       const _keys = keys.toLowerCase()
                         .replace("cmd", cmdKey)
-                        .replace("option", "alt");
+                        .replace("control", "ctrl")
+                        .replace("option", "alt")
+                        .replace("arrow", "");
       this.hotKeyMap[_keys] = handler;
     });
   }

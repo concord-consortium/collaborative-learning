@@ -12,6 +12,7 @@ import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
 import { getImageDimensions } from "../../utilities/image-utils";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import * as uuid from "uuid/v4";
 
@@ -501,8 +502,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const elements = board.getAllObjectsUnderMouse(evt)
                             .filter(obj => obj && (obj.elType !== "image"));
-      if (!elements.length && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey &&
-          geometryContent.hasSelection()) {
+      if (!elements.length && !hasSelectionModifier(evt) && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
         return;
       }
@@ -535,7 +535,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
 
       // clicks on board background create new points
-      if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+      if (!hasSelectionModifier(evt)) {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
           const point = geometryContent.addPoint(board, [x, y], props) as JXG.Point;
@@ -583,14 +583,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
-          if (evt.ctrlKey || evt.metaKey) {
+          if (hasSelectionModifier(evt)) {
             geometryContent.deselectElement(id);
           }
         }
         // click on unselected element
         else {
           // deselect other elements unless appropriate modifier key is down
-          if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+          if (!hasSelectionModifier(evt)) {
             geometryContent.deselectAll(board);
           }
           geometryContent.selectElement(id);
@@ -670,14 +670,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
-        if (board && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+        if (board && !hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
         selectVertices = true;
         this.lastSelectDown = evt;
       }
       else if (!inVertex && allVerticesSelected) {
-        if (board && (evt.ctrlKey || evt.metaKey || evt.shiftKey)) {
+        if (board && hasSelectionModifier(evt)) {
           deselectVertices = true;
         }
       }
