@@ -476,8 +476,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
-      if (readOnly) { return; }
-
       const index = evt[JXG.touchProperty] ? 0 : undefined;
       const coords = getEventCoords(board, evt, scale, index);
       const x = coords.usrCoords[1];
@@ -489,7 +487,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     const handlePointerUp = (evt: any) => {
       const { readOnly, scale } = this.props;
-      if (readOnly || !this.lastBoardDown) { return; }
+      if (!this.lastBoardDown) { return; }
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
       const index = evt[JXG.touchProperty] ? 0 : undefined;
@@ -508,6 +506,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         geometryContent.deselectAll(board);
         return;
       }
+
+      if (readOnly) return;
 
       // extended clicks don't create new points
       const clickTimeThreshold = 500;
