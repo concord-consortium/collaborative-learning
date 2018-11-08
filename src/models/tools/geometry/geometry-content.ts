@@ -242,7 +242,7 @@ export const GeometryContentModel = types
                 properties: assign({ id: uuid() }, properties)
               };
         const polygon = _applyChange(board, change);
-        return polygon ? polygon as JXG.Polygon : undefined;
+        return polygon ? polygon as any as JXG.Polygon : undefined;
       }
     }
 
