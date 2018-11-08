@@ -81,7 +81,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
-        "cmd-option-c": this.handleCopyJson
+        "cmd-shift-c": this.handleCopyJson
       });
     }
   }
