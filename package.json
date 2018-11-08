@@ -65,6 +65,7 @@
     "@firebase/app-types": "^0.3.2",
     "@types/enzyme": "^3.1.14",
     "@types/enzyme-adapter-react-16": "^1.0.3",
+    "@types/file-saver": "^2.0.0",
     "@types/jest": "^23.3.2",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/lodash": "^4.14.116",
@@ -116,6 +117,7 @@
   "dependencies": {
     "@concord-consortium/firebase": "^5.5.6-cc.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
+    "file-saver": "^2.0.0-rc.4",
     "immutable": "^3.8.2",
     "initials": "^3.0.0",
     "jsonwebtoken": "^8.3.0",
