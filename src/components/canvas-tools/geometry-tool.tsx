@@ -4,10 +4,12 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit, setElementColor
         } from "../../models/tools/geometry/geometry-content";
+import { getEventCoords, copyCoords } from "./geometry-tool/geometry-utils";
+import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
-import { assign, cloneDeep, each, isEqual, some } from "lodash";
+import { assign, each, isEqual, size as _size, some } from "lodash";
 import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
 import { getImageDimensions } from "../../utilities/image-utils";
@@ -41,6 +43,7 @@ interface IState extends SizeMeProps {
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges: number;
+  disableRotate: boolean;
 }
 
 interface JXGPtrEvent {
@@ -50,16 +53,6 @@ interface JXGPtrEvent {
 
 // For snap to grid
 const kSnapUnit = 0.2;
-
-// cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: number) {
-  const cPos = board.getCoordsTopLeftCorner();
-  const absPos = JXG.getPosition(evt, index);
-  const dx = (absPos[0] - cPos[0]) / (scale || 1);
-  const dy = (absPos[1] - cPos[1]) / (scale || 1);
-
-  return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
-}
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           syncedChanges?: number, readOnly?: boolean) {
@@ -120,7 +113,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return nextState;
   }
 
-  public state: IState = { syncedChanges: 0 };
+  public state: IState = {
+          syncedChanges: 0,
+          disableRotate: false
+        };
 
   private domElement: HTMLDivElement | null;
 
@@ -177,14 +173,29 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
-    return (
-      <div id={this.state.elementId} className={classes}
+    return ([
+      <div id={this.state.elementId} key="jsxgraph"
+          className={classes}
           ref={elt => this.domElement = elt}
           tabIndex={this.props.tabIndex}
           onKeyDown={this.handleKeyDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
-          onDrop={this.handleDrop} />
+          onDrop={this.handleDrop} />,
+      this.renderRotateHandle()
+    ]);
+  }
+
+  private renderRotateHandle() {
+    const { board, disableRotate } = this.state;
+    const selectedPolygon = board && !disableRotate && !this.props.readOnly
+                              ? this.getOneSelectedPolygon() : undefined;
+    return (
+      <RotatePolygonIcon
+        key="rotate-polygon-icon"
+        board={board}
+        polygon={selectedPolygon}
+        onRotate={this.handleRotatePolygon} />
     );
   }
 
@@ -218,6 +229,73 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "cmd-x": this.handleCut,
       "cmd-v": this.handlePaste
     });
+  }
+
+  private getOneSelectedPolygon() {
+    const { board } = this.state;
+    if (!board) return;
+
+    // all vertices of polygon must be selected to show rotate handle
+    const content = this.getContent();
+    const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
+    const polygons = board.objectsList
+                          .filter(el => el.elType === "polygon")
+                          .filter(polygon => {
+                            const selected = { any: false, all: true };
+                            each(polygon.ancestors, vertex => {
+                              if (content.isSelected(vertex.id)) {
+                                selected.any = true;
+                              }
+                              else {
+                                selected.all = false;
+                              }
+                            });
+                            polygonSelection[polygon.id] = selected;
+                            return selected.any;
+                          });
+    const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
+    const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
+                              ? polygons[0] as JXG.Polygon : undefined;
+    // must not have any selected points other than the polygon vertices
+    if (selectedPolygon) {
+      const selectedPts = Array.from(content.metadata.selection.entries())
+                            .filter(entry => {
+                              const id = entry[0];
+                              const obj = board.objects[id];
+                              const isSelected = entry[1];
+                              return obj && (obj.elType === "point") && isSelected;
+                            });
+      return _size(selectedPolygon.ancestors) === selectedPts.length
+                ? selectedPolygon : undefined;
+    }
+  }
+
+  private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
+    const { board } = this.state;
+    if (!board) return;
+
+    polygon.vertices.forEach((vertex, index) => {
+      if (index < polygon.vertices.length - 1) {
+        const coords = vertexCoords[index];
+        vertex.setAttribute({ snapToGrid: false });
+        vertex.setPosition(JXG.COORDS_BY_USER, coords.usrCoords.slice(1));
+      }
+    });
+    board.update();
+
+    if (isComplete) {
+      const vertexCount = polygon.vertices.length - 1;
+      this.getContent()
+          .updateObjects(
+            board,
+            polygon.vertices
+              .map(vertex => vertex.id)
+              .slice(0, vertexCount),
+            vertexCoords
+              .map(coords => ({ snapToGrid: false,
+                                position: coords.usrCoords.slice(1) }))
+              .slice(0, vertexCount));
+    }
   }
 
   private handleDelete = () => {
@@ -565,7 +643,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { board } = this.state;
       if (!board) return;
       const id = point.id;
-      const coords = cloneDeep(point.coords);
+      const coords = copyCoords(point.coords);
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
@@ -603,17 +681,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const id = point.id;
       let dragEntry = this.dragPts[id];
       if (!dragEntry) {
-        dragEntry = this.dragPts[id] = { initial: cloneDeep(point.coords) };
+        dragEntry = this.dragPts[id] = { initial: copyCoords(point.coords) };
       }
-      dragEntry.final = cloneDeep(point.coords);
+      dragEntry.final = copyCoords(point.coords);
+      this.setState({ disableRotate: true });
     };
 
     const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
       const id = point.id;
       const dragEntry = this.dragPts[id];
       if (!dragEntry) { return; }
 
-      dragEntry.final = cloneDeep(point.coords);
+      dragEntry.final = copyCoords(point.coords);
 
       if (!isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)) {
         const { content } = this.props.model;
@@ -683,7 +763,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
-        this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+        this.dragPts[pt.id] = { initial: copyCoords(pt.coords) };
         if (board && !inVertex) {
           if (selectVertices) {
             geometryContent.selectElement(pt.id);
@@ -699,10 +779,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
         if (!this.dragPts[pt.id]) {
-          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+          this.dragPts[pt.id] = { initial: copyCoords(pt.coords) };
         }
-        this.dragPts[pt.id].final = cloneDeep(pt.coords);
+        this.dragPts[pt.id].final = copyCoords(pt.coords);
       });
+      this.setState({ disableRotate: true });
     };
 
     const didPolygonMove = () => {
@@ -715,13 +796,15 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
+
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
         const dragEntry = this.dragPts[pt.id];
         if (!dragEntry) {
-          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+          this.dragPts[pt.id] = { initial: copyCoords(pt.coords) };
         }
-        dragEntry.final = cloneDeep(pt.coords);
+        dragEntry.final = copyCoords(pt.coords);
       });
 
       if (!didPolygonMove()) return;
