@@ -11,6 +11,8 @@ import GeometryToolComponent from "./geometry-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
+import { HotKeys } from "../../utilities/hot-keys";
+import * as FileSaver from "file-saver";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 
@@ -73,6 +75,17 @@ const kToolComponentMap: any = {
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
+  private hotKeys: HotKeys = new HotKeys();
+
+  public componentDidMount() {
+    const { appMode } = this.stores;
+    if (appMode !== "authed") {
+      this.hotKeys.register({
+        "cmd-shift-c": this.handleCopyJson
+      });
+    }
+  }
+
   public render() {
     const { model, widthPct } = this.props;
     const { ui } = this.stores;
@@ -86,6 +99,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       <div className={`tool-tile${selectedClass}`}
           data-tool-id={model.id}
           style={style}
+          onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
@@ -103,6 +117,19 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     return ToolComponent != null
             ? <ToolComponent key={this.props.model.id} {...this.props} />
             : null;
+  }
+
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    this.hotKeys.dispatch(e);
+  }
+
+  private handleCopyJson = () => {
+    const { content } = this.props.model;
+    const json = JSON.stringify(content);
+    const { clipboard } = this.stores;
+    clipboard.clear();
+    clipboard.addJsonTileContent(this.props.model.id, content, this.stores);
+    return true;
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {

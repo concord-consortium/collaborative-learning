@@ -1,6 +1,10 @@
 import { types, Instance } from "mobx-state-tree";
 import { IStores } from "./stores";
+import { ToolContentUnionType } from "./tools/tool-types";
 import * as uuid from "uuid/v4";
+
+export const kTypeText = "text";
+export const kJsonTileContent = "org.concord.clue.clipboard.tileJson";
 
 export const ClipboardEntryModel = types
   .model("Clipboard", {
@@ -48,6 +52,20 @@ export const ClipboardModel = types
         // ignore errors
       }
       return content;
+    },
+    hasTextContent() {
+      return self.content.has(kTypeText);
+    },
+    getTextContent() {
+      const entry = self.content.get(kTypeText);
+      return entry && entry.content || "";
+    },
+    hasJsonTileContent() {
+      return self.content.has(kJsonTileContent);
+    },
+    getJsonTileContent() {
+      const entry = self.content.get(kJsonTileContent);
+      return entry && entry.content || "";
     }
   }))
   .actions(self => ({
@@ -66,6 +84,18 @@ export const ClipboardModel = types
         content: JSON.stringify(content)
       });
       self.content.set(clipType, entry);
+    },
+    addJsonTileContent(tileId: string, content: ToolContentUnionType, stores: IStores) {
+      const document = stores.documents.findDocumentOfTile(tileId);
+      const entry = ClipboardEntryModel.create({
+        userId: document ? document.uid : "",
+        srcDocumentId: document ? document.key : "",
+        srcDocumentType: document ? document.type : "",
+        srcTileId: tileId,
+        type: kJsonTileContent,
+        content: JSON.stringify(content)
+      });
+      self.content.set(kJsonTileContent, entry);
     }
   }));
 export type ClipboardModelType = Instance<typeof ClipboardModel>;

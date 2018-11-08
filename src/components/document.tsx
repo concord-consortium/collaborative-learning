@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import * as FileSaver from "file-saver";
 
 import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
@@ -71,16 +72,23 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderSectionTitleBar(hideButtons?: boolean) {
-    const {problem} = this.stores;
+    const {problem, appMode, clipboard} = this.stores;
     const {workspace, document} = this.props;
     const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
+    const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
+                            ? <svg key="download" className={`icon icon-download`}
+                                    onClick={this.handleDownloadTileJson}>
+                                <use xlinkHref={`#icon-publish`} />
+                              </svg>
+                            : undefined;
     return (
       <div className="titlebar">
         <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         {!hideButtons &&
           <div className="actions">
             {[
+              downloadButton,
               <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
                 <use xlinkHref={`#icon-publish`} />
               </svg>,
@@ -285,6 +293,16 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private handleToggleTwoUp = () => {
     this.props.workspace.toggleComparisonVisible();
+  }
+
+  private handleDownloadTileJson = () => {
+    const { clipboard } = this.stores;
+    const tileJson = clipboard.getJsonTileContent();
+    if (tileJson) {
+      const blobJson = new Blob([tileJson], {type: "text/plain;charset=utf-8"});
+      FileSaver.saveAs(blobJson, "tile-content.json");
+    }
+    clipboard.clear();
   }
 
   private handlePublishWorkspace = () => {
