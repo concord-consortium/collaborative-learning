@@ -7,6 +7,7 @@ import { TabSetComponent } from "./tab-set";
 import { BaseComponent, IBaseProps } from "./base";
 import { MyWorkComponent } from "./my-work";
 import { ClassWorkComponent } from "./class-work";
+import { ClassLogsComponent } from "./class-logs";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;
@@ -18,7 +19,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const tabs = this.props.isGhostUser ? ["Class Work"] : ["My Work", "Class Work"];
+    const tabs = this.props.isGhostUser ? ["Class Work", "Class Logs"] : ["My Work", "Class Work", "Class Logs"];
 
     return (
       <div className="right-nav">
@@ -60,6 +61,12 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
         return (
           <div className="contents">
             <ClassWorkComponent />
+          </div>
+        );
+      case "Class Logs":
+        return (
+          <div className="contents">
+            <ClassLogsComponent />
           </div>
         );
     }
