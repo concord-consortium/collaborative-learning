@@ -1,8 +1,6 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
+import { DocumentModel, DocumentModelType, DocumentType, SectionDocument } from "./document";
 import { ClassModelType } from "./class";
-
-type DocumentTypeOption = "section" | "publication" | "learningLog" | "learningLogPublication";
 
 export const DocumentsModel = types
   .model("Documents", {
@@ -12,10 +10,10 @@ export const DocumentsModel = types
     const getDocument = (documentKey: string) => {
       return self.all.find((document) => document.key === documentKey);
     };
-    const byType = (type: DocumentTypeOption) => {
+    const byType = (type: DocumentType) => {
       return self.all.filter((document) => document.type === type);
     };
-    const byTypeForUser = (type: DocumentTypeOption, userId: string) => {
+    const byTypeForUser = (type: DocumentType, userId: string) => {
       return self.all.filter((document) => {
         return (document.type === type) && (document.uid === userId);
       });

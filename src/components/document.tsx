@@ -5,8 +5,7 @@ import { SupportItemModelType } from "../models/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
-import { DocumentModelType,
-          SectionDocument, LearningLogDocument, PublicationDocument, LearningLogPublication } from "../models/document";
+import { DocumentModelType, SectionDocument, PublicationDocument } from "../models/document";
 import { ToolbarComponent } from "./toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "./canvas-tools/tool-tile";
 import { WorkspaceModelType } from "../models/workspace";
@@ -45,7 +44,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {document, isGhostUser, readOnly} = this.props;
-    const isPublication = document.type === PublicationDocument;
+    const isPublication = document.isPublished;
     const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
     return [
         showToolbar ? this.renderToolbar() : null,
@@ -59,14 +58,12 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private renderTitleBar() {
     const { document, side, isGhostUser } = this.props;
-    if (document.type === SectionDocument) {
-      return this.renderSectionTitleBar(isGhostUser || (side === "comparison"));
+    const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
+    if (document.isSection) {
+      return this.renderSectionTitleBar(hideButtons);
     }
-    if (document.type === LearningLogDocument || document.type === LearningLogPublication) {
-      return this.renderLearningLogTitleBar(isGhostUser || (side === "comparison"));
-    }
-    if (document.type === PublicationDocument) {
-      return this.renderSectionTitleBar(true);
+    if (document.isLearningLog) {
+      return this.renderLearningLogTitleBar(hideButtons);
     }
   }
 
@@ -149,37 +146,16 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private renderCanvas() {
     const { document, workspace, side, isGhostUser } = this.props;
-    if (document.type === SectionDocument) {
-      if (isGhostUser) {
-        return <div className="canvas-area">{this.render4UpCanvas()}</div>;
-      }
-      return (
-        <div className="canvas-area">
-          {side === "primary"
-            ? (workspace.mode === "1-up" ? this.render1UpCanvas() : this.render4UpCanvas())
-            : this.render1UpCanvas()
-          }
-        </div>
-      );
-    }
-    if (document.type === LearningLogDocument || document.type === LearningLogPublication) {
-      return (
-        <div className="canvas-area learning-log-canvas-area">
-          {this.render1UpCanvas()}
-        </div>
-      );
-    }
-    if (document.type === PublicationDocument) {
-      return (
-        <div className="canvas-area learning-log-canvas-area">
-          {this.render1UpCanvas(true)}
-        </div>
-      );
-    }
+    const fourUp = (document.type === SectionDocument) &&
+                    (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
+    const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
+    return (
+      <div className="canvas-area">{canvas}</div>
+    );
   }
 
   private render1UpCanvas(forceReadOnly?: boolean) {
-    const readOnly = forceReadOnly ? true : this.props.readOnly;
+    const readOnly = forceReadOnly || this.props.readOnly;
     return (
       <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
                         toolApiInterface={this.toolApiInterface} />

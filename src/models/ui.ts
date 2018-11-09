@@ -148,7 +148,7 @@ export const UIModel = types
           }
         }
         // class work or log
-        else if (document.type === PublicationDocument || document.type === LearningLogPublication) {
+        else if (document.isPublished) {
           if (self.sectionWorkspace.primaryDocumentKey) {
             self.sectionWorkspace.setComparisonDocument(document);
             self.sectionWorkspace.toggleComparisonVisible({override: true});
