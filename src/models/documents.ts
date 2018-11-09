@@ -2,7 +2,7 @@ import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
 import { ClassModelType } from "./class";
 
-type DocumentTypeOption = "section" | "publication" | "learningLog";
+type DocumentTypeOption = "section" | "publication" | "learningLog" | "learningLogPublication";
 
 export const DocumentsModel = types
   .model("Documents", {
@@ -37,6 +37,26 @@ export const DocumentsModel = types
           return (document.type === SectionDocument) &&
                  (document.sectionId === sectionId) &&
                  (document.groupId === groupId);
+        });
+      },
+
+      // Returns the most recently published learning logs per user, sorted by title
+      getLatestLogPublications() {
+        const latestPublications: DocumentModelType[] = [];
+        byType("learningLogPublication")
+          .forEach((publication) => {
+            const originDoc = publication.originDoc;
+            const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
+            if (latestIndex === -1) {
+              latestPublications.push(publication);
+            }
+            else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+              latestPublications[latestIndex] = publication;
+            }
+          });
+
+        return latestPublications.sort((pub1, pub2) => {
+          return (pub1.title || "").localeCompare(pub2.title || "");
         });
       },
 

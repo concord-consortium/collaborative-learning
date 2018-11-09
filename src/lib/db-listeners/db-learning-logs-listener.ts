@@ -1,9 +1,10 @@
 import { DB } from "../db";
-import { DBLearningLog } from "../db-types";
+import { DBLearningLog, DBLearningLogPublication } from "../db-types";
 
 export class DBLearningLogsListener {
   private db: DB;
   private learningLogsDocsRef: firebase.database.Reference | null  = null;
+  private publishedLogsRef: firebase.database.Reference | null  = null;
 
   constructor(db: DB) {
     this.db = db;
@@ -14,6 +15,9 @@ export class DBLearningLogsListener {
     this.learningLogsDocsRef.on("child_added", this.handleLearningLogChildAdded);
     this.learningLogsDocsRef.on("child_changed", this.handleLearningLogChildChanged);
     this.learningLogsDocsRef.on("child_removed", this.handleLearningLogChildRemoved);
+
+    this.publishedLogsRef = this.db.firebase.ref(this.db.firebase.getClassPublicationsPath(this.db.stores.user));
+    this.publishedLogsRef.on("child_added", this.handleLearningLogPublished);
   }
 
   public stop() {
@@ -21,6 +25,9 @@ export class DBLearningLogsListener {
       this.learningLogsDocsRef.off("child_added", this.handleLearningLogChildAdded);
       this.learningLogsDocsRef.off("child_changed", this.handleLearningLogChildChanged);
       this.learningLogsDocsRef.off("child_removed", this.handleLearningLogChildRemoved);
+    }
+    if (this.publishedLogsRef) {
+      this.publishedLogsRef.off("child_added", this.handleLearningLogPublished);
     }
   }
 
@@ -30,6 +37,15 @@ export class DBLearningLogsListener {
     if (learningLog) {
       this.db.createDocumentFromLearningLog(learningLog)
         .then(this.db.listeners.monitorLearningLogDocument)
+        .then(documents.add);
+    }
+  }
+
+  private handleLearningLogPublished = (snapshot: firebase.database.DataSnapshot) => {
+    const {documents} = this.db.stores;
+    const learningLog: DBLearningLogPublication|null = snapshot.val();
+    if (learningLog) {
+      this.db.createDocumentFromPublishedLog(learningLog)
         .then(documents.add);
     }
   }

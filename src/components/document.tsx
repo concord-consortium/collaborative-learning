@@ -6,7 +6,7 @@ import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "./four-up";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType,
-          SectionDocument, LearningLogDocument, PublicationDocument } from "../models/document";
+          SectionDocument, LearningLogDocument, PublicationDocument, LearningLogPublication } from "../models/document";
 import { ToolbarComponent } from "./toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "./canvas-tools/tool-tile";
 import { WorkspaceModelType } from "../models/workspace";
@@ -62,8 +62,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     if (document.type === SectionDocument) {
       return this.renderSectionTitleBar(isGhostUser || (side === "comparison"));
     }
-    if (document.type === LearningLogDocument) {
-      return this.renderLearningLogTitleBar();
+    if (document.type === LearningLogDocument || document.type === LearningLogPublication) {
+      return this.renderLearningLogTitleBar(isGhostUser || (side === "comparison"));
     }
     if (document.type === PublicationDocument) {
       return this.renderSectionTitleBar(true);
@@ -124,12 +124,20 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private renderLearningLogTitleBar() {
+  private renderLearningLogTitleBar(hideButtons?: boolean) {
     const {document} = this.props;
     return (
-      <div className="titlebar">
+      <div className="learning-log titlebar">
+        <div className="actions">
+          {!hideButtons &&
+            <div className="actions">
+              <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishLearningLog}>
+                <use xlinkHref={`#icon-publish`} />
+              </svg>
+            </div>
+          }
+        </div>
         <div className="title">Learning Log: {document.title}</div>
-        <div className="actions" />
       </div>
     );
   }
@@ -154,7 +162,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         </div>
       );
     }
-    if (document.type === LearningLogDocument) {
+    if (document.type === LearningLogDocument || document.type === LearningLogPublication) {
       return (
         <div className="canvas-area learning-log-canvas-area">
           {this.render1UpCanvas()}
@@ -292,6 +300,12 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     // TODO: Disable publish button while publishing
     db.publishDocument(this.props.document)
       .then(() => ui.alert("Your document was published.", "Document Published"));
+  }
+
+  private handlePublishLearningLog = () => {
+    const { db, ui } = this.stores;
+    db.publishLearningLog(this.props.document)
+      .then(() => ui.alert("Your document was published.", "Learning Log Published"));
   }
 
   private getSupportsWithIndices() {

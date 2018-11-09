@@ -6,8 +6,10 @@ export const DocumentDragKey = "org.concord.clue.document.key";
 export const SectionDocument = "section";
 export const LearningLogDocument = "learningLog";
 export const PublicationDocument = "publication";
+export const LearningLogPublication = "learningLogPublication";
 
-export const DocumentTypeEnum = types.enumeration("type", [SectionDocument, LearningLogDocument, PublicationDocument]);
+export const DocumentTypeEnum = types.enumeration("type",
+  [SectionDocument, LearningLogDocument, PublicationDocument, LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
 export const DocumentToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text", "image", "drawing"]);
@@ -25,6 +27,7 @@ export const DocumentModel = types
     groupId: types.maybe(types.string),
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
+    originDoc: types.maybe(types.string)
   })
   .actions((self) => ({
     setContent(content: DocumentContentModelType) {
