@@ -127,7 +127,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
-  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords, isTarget?: boolean }} = {};
+  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords,
+                                      isTarget?: boolean, snapToGrid?: boolean }} = {};
   private isVertexDrag: boolean;
 
   private lastPasteId: string;
@@ -549,11 +550,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (pt && isSelected) {
           this.dragPts[id] = {
             initial: copyCoords(pt.coords),
+            snapToGrid: pt.getAttribute("snapToGrid"),
             // targets are dragged by JSXGraph
             isTarget: (id === dragTarget.id) ||
                       (values(dragTarget.ancestors)
                         .findIndex(ancestor => ancestor.id === id) >= 0)
           };
+          pt.setAttribute({ snapToGrid: false });
         }
       });
     }
@@ -582,6 +585,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
+
+    each(this.dragPts, (entry, id) => {
+      const obj = board.objects[id];
+      if (obj) {
+        obj.setAttribute({ snapToGrid: !!entry.snapToGrid });
+      }
+    });
 
     this.dragSelectedPoints(evt, usrDiff);
 
