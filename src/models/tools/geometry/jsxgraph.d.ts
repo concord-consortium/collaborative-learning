@@ -98,6 +98,13 @@ declare namespace JXG {
     setSize: (width: number, height: number) => void;
   }
 
+  const Math: {
+    Statistics: {
+      add: (arr1: number | number[], arr2: number | number[]) => number | number[];
+      subtract: (arr1: number | number[], arr2: number | number[]) => number | number[];
+    }
+  };
+
   class Point extends CoordsElement {
   }
 
