@@ -13,6 +13,9 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
 }
 
+// cf. right-nav.sass: $list-item-scale
+const kRightNavItemScale = 0.11;
+
 @inject("stores")
 @observer
 export class RightNavComponent extends BaseComponent<IProps, {}> {
@@ -54,19 +57,19 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
       case "My Work":
         return (
           <div className="contents">
-            <MyWorkComponent />
+            <MyWorkComponent scale={kRightNavItemScale} />
           </div>
         );
       case "Class Work":
         return (
           <div className="contents">
-            <ClassWorkComponent />
+            <ClassWorkComponent scale={kRightNavItemScale} />
           </div>
         );
       case "Class Logs":
         return (
           <div className="contents">
-            <ClassLogsComponent />
+            <ClassLogsComponent scale={kRightNavItemScale} />
           </div>
         );
     }

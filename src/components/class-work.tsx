@@ -5,9 +5,9 @@ import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
 import { DocumentModelType, DocumentDragKey } from "../models/document";
 
-import "./my-work.sass";
-
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  scale: number;
+}
 
 @inject("stores")
 @observer
@@ -38,7 +38,8 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
                   draggable={true}
                 >
                   <div className="scaled-list-item">
-                    <CanvasComponent context="class-work" document={publication} readOnly={true} />
+                    <CanvasComponent context="class-work" document={publication}
+                                      readOnly={true} scale={this.props.scale} />
                   </div>
                 </div>
                 <div className="info">

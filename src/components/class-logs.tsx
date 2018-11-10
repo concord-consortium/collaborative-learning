@@ -3,11 +3,11 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
-import { DocumentModelType, DocumentDragKey, LearningLogPublication } from "../models/document";
+import { DocumentModelType, DocumentDragKey } from "../models/document";
 
-import "./my-work.sass";
-
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  scale: number;
+}
 
 @inject("stores")
 @observer
@@ -34,7 +34,8 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
                   draggable={true}
                 >
                   <div className="scaled-list-item">
-                    <CanvasComponent context="class-work" document={publication} readOnly={true} />
+                    <CanvasComponent context="class-work" document={publication}
+                                      readOnly={true} scale={this.props.scale} />
                   </div>
                 </div>
                 <div className="info">
