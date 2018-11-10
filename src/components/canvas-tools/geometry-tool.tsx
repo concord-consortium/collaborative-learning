@@ -548,15 +548,18 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         if (pt && isSelected) {
+          // targets are dragged by JSXGraph
+          const isTarget = (id === dragTarget.id) ||
+                            (values(dragTarget.ancestors)
+                              .findIndex(ancestor => ancestor.id === id) >= 0);
           this.dragPts[id] = {
             initial: copyCoords(pt.coords),
             snapToGrid: pt.getAttribute("snapToGrid"),
-            // targets are dragged by JSXGraph
-            isTarget: (id === dragTarget.id) ||
-                      (values(dragTarget.ancestors)
-                        .findIndex(ancestor => ancestor.id === id) >= 0)
+            isTarget
           };
-          pt.setAttribute({ snapToGrid: false });
+          if (!isTarget) {
+            pt.setAttribute({ snapToGrid: false });
+          }
         }
       });
     }
