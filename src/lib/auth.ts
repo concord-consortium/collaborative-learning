@@ -440,7 +440,7 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
           const activityUrl = ((res.body || {}).activity_url) || "";
           const [ignore, query, ...rest] = activityUrl.split("?");
           const params = queryString.parse(query);
-          resolve(params.problem);
+          resolve(params.problem as string);
         }
       });
     }

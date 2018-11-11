@@ -1,6 +1,7 @@
 import { parse } from "query-string";
 import { AppMode } from "../models/stores";
 import { DBClearLevel } from "../lib/db";
+import { assign } from "lodash";
 
 export const DefaultProblemOrdinal = "2.1";
 
@@ -58,8 +59,6 @@ export interface QueryParams {
 }
 
 const params = parse(location.search);
-// allows use of ?demo for url
-params.demo = typeof params.demo !== "undefined";
 
 export const DefaultUrlParams: QueryParams = {
   appMode: "dev",
@@ -77,5 +76,5 @@ export const DefaultUrlParams: QueryParams = {
   qaClear: undefined,
   testMigration: undefined,
 };
-
-export const urlParams: QueryParams = params;
+                                                    // allows use of ?demo for url
+export const urlParams: QueryParams = assign(params, { demo: typeof params.demo !== "undefined" });
