@@ -116,9 +116,9 @@
     "xhr-mock": "^2.4.1"
   },
   "dependencies": {
-    "@concord-consortium/firebase": "^5.5.6-cc.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "file-saver": "^2.0.0-rc.4",
+    "firebase": "^5.5.8",
     "immutable": "^3.8.2",
     "initials": "^3.0.0",
     "jsonwebtoken": "^8.3.0",
