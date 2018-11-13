@@ -1,15 +1,13 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import "./my-work.sass";
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./canvas";
 import { DocumentDragKey, SectionDocument, DocumentModelType } from "../models/document";
 
-// cf. right-nav.sass: $list-item-scale
-const kMyWorkItemScale = 0.11;
-
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  scale: number;
+}
 
 @inject("stores")
 @observer
@@ -41,7 +39,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
                 >
                   <div className="scaled-list-item">
                     <CanvasComponent context="my-work" document={document}
-                                    readOnly={true} scale={kMyWorkItemScale}/>
+                                    readOnly={true} scale={this.props.scale} />
                   </div>
                 </div>
                 <div className="info">
