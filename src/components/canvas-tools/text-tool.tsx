@@ -1,10 +1,16 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
-import { Change, Value } from "slate";
+import { Operation, Value } from "slate";
 import { Editor } from "slate-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
+import * as Immutable from "immutable";
+
+interface SlateChange {
+  operations: Immutable.List<Operation>;
+  value: Value;
+}
 
 import "./text-tool.sass";
 
@@ -36,7 +42,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
-  public onChange = (change: Change) => {
+  public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
     const { content } = model;
     const { ui } = this.stores;

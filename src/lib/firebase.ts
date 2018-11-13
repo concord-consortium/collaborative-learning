@@ -1,4 +1,4 @@
-import * as firebase from "@concord-consortium/firebase/app";
+import * as firebase from "firebase/app";
 import { UserModelType } from "../models/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
