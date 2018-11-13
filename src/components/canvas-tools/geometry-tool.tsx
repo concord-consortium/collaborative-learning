@@ -197,6 +197,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         key="rotate-polygon-icon"
         board={board}
         polygon={selectedPolygon}
+        scale={this.props.scale}
         onRotate={this.handleRotatePolygon} />
     );
   }
