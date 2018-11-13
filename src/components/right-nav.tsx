@@ -22,7 +22,9 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const tabs = this.props.isGhostUser ? ["Class Work", "Class Logs"] : ["My Work", "Class Work", "Class Logs"];
+    const teacherTabs = ["Class Work", "Class Logs"];
+    const studentTabs = ["My Work"].concat(teacherTabs);
+    const tabs = this.props.isGhostUser ? teacherTabs : studentTabs;
 
     return (
       <div className="right-nav">
@@ -53,25 +55,18 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   private renderTabContents() {
     const {activeRightNavTab} = this.stores.ui;
-    switch (activeRightNavTab) {
-      case "My Work":
-        return (
-          <div className="contents">
-            <MyWorkComponent scale={kRightNavItemScale} />
-          </div>
-        );
-      case "Class Work":
-        return (
-          <div className="contents">
-            <ClassWorkComponent scale={kRightNavItemScale} />
-          </div>
-        );
-      case "Class Logs":
-        return (
-          <div className="contents">
-            <ClassLogsComponent scale={kRightNavItemScale} />
-          </div>
-        );
+    const tabComponents: { [tab: string]: any } = {
+      "My Work": MyWorkComponent,
+      "Class Work": ClassWorkComponent,
+      "Class Logs": ClassLogsComponent
+    };
+    const _TabComponent = tabComponents[activeRightNavTab];
+    if (_TabComponent) {
+      return (
+        <div className="contents">
+          <_TabComponent scale={kRightNavItemScale} />
+        </div>
+      );
     }
   }
 
