@@ -4,6 +4,7 @@ import { copyCoords, getEventCoords, rotateCoords } from "./geometry-utils";
 interface IProps {
   board?: JXG.Board;
   polygon?: JXG.Polygon;
+  scale?: number;
   onRotate: (polygon: JXG.Polygon, vertexPositions: JXG.Coords[], isComplete: boolean) => void;
 }
 
@@ -73,9 +74,9 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
   }
 
   private computeAngle(center: JXG.Coords, e: MouseEvent | React.MouseEvent) {
-    const { board } = this.props;
+    const { board, scale } = this.props;
     if (!board) return 0;
-    const eventCoords = getEventCoords(board, e);
+    const eventCoords = getEventCoords(board, e, scale);
     const dx = eventCoords.usrCoords[1] - center.usrCoords[1];
     const dy = eventCoords.usrCoords[2] - center.usrCoords[2];
     return Math.atan2(dy, dx);
