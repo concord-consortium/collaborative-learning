@@ -39,8 +39,8 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
                   </div>
                 </div>
                 <div className="info">
-                  <div>{user && user.fullName}</div>
                   <div>{publication.title}</div>
+                  <div>{user && user.fullName}</div>
                 </div>
               </div>
             );
