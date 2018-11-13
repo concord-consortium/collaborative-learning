@@ -346,7 +346,7 @@ export class DB {
 
   public publishDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
-    const content = JSON.stringify(documentModel.content);
+    const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument(PublicationDocument, content).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
@@ -381,7 +381,7 @@ export class DB {
 
   public publishLearningLog(documentModel: DocumentModelType) {
     const {user} = this.stores;
-    const content = JSON.stringify(documentModel.content);
+    const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument(LearningLogPublication, content).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getClassPublicationsPath(user)).push();

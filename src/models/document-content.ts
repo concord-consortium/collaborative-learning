@@ -4,9 +4,9 @@ import { defaultGeometryContent, kGeometryDefaultHeight } from "./tools/geometry
 import { defaultImageContent } from "./tools/image/image-content";
 import { defaultTextContent } from "./tools/text/text-content";
 import { ToolContentUnionType } from "./tools/tool-types";
-import { ToolTileModel, ToolTileModelType } from "./tools/tool-tile";
-import { TileRowModel, TileRowModelType, TileRowSnapshotType } from "./document/tile-row";
-import { cloneDeep } from "lodash";
+import { ToolTileModel, ToolTileSnapshotOutType } from "./tools/tool-tile";
+import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "./document/tile-row";
+import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName } from "../lib/logger";
 import { defaultDrawingContent, kDrawingDefaultHeight } from "./tools/drawing/drawing-content";
@@ -69,6 +69,36 @@ export const DocumentContentModel = types
       numTilesInRow(rowId: string) {
         const row = self.rowMap.get(rowId);
         return row ? row.tiles.length : 0;
+      },
+      publish() {
+        const snapshot = cloneDeep(getSnapshot(self));
+        const idMap: { [id: string]: string } = {};
+
+        snapshot.tileMap = (tileMap => {
+          const _tileMap: { [id: string]: ToolTileSnapshotOutType } = {};
+          each(tileMap, (tile, id) => {
+            idMap[id] = tile.id = uuid();
+            _tileMap[tile.id] = tile;
+          });
+          return _tileMap;
+        })(snapshot.tileMap);
+
+        snapshot.rowMap = (rowMap => {
+          const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
+          each(rowMap, (row, id) => {
+            idMap[id] = row.id = uuid();
+            row.tiles = row.tiles.map(tileLayout => {
+              tileLayout.tileId = idMap[tileLayout.tileId];
+              return tileLayout;
+            });
+            _rowMap[row.id] = row;
+          });
+          return _rowMap;
+        })(snapshot.rowMap);
+
+        snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
+
+        return JSON.stringify(snapshot);
       }
     };
   })
