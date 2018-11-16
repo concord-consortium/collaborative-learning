@@ -1,12 +1,16 @@
 // tslint:disable:jsx-no-lambda
 import * as React from "react";
 import { v4 as uuid } from "uuid";
+import { extractDragTileType, kDragTileContent } from "../tool-tile";
 import { DefaultToolbarSettings, computeStrokeDashArray,
   ToolbarSettings, DrawingContentModelType, DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
   DrawingToolUpdate} from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
-  EllipseDrawingObjectData, Point} from "../../../models/tools/drawing/drawing-objects";
+  EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
+import { getImageDimensions } from "../../../utilities/image-utils";
+import { safeJsonParse } from "../../../utilities/js-utils";
+import { find } from "lodash";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -183,6 +187,34 @@ class EllipseObject extends DrawingObject {
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
               onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
               onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
+             />;
+  }
+}
+
+class ImageObject extends DrawingObject {
+  public model: ImageDrawingObjectData;
+
+  constructor(model: ImageDrawingObjectData) {
+    super(model);
+  }
+  public getBoundingBox() {
+    const {x, y, width, height} = this.model;
+    const nw: Point = {x, y};
+    const se: Point = {x: x + width, y: y + height};
+    return {nw, se};
+  }
+
+  public render(options: DrawingObjectOptions): JSX.Element|null {
+    const {url, x, y, width, height} = this.model;
+    const {id, handleHover} = options;
+    // will need to convert this url to a runtime url when image refactor is complete
+    return <image
+              key={id}
+              href={url}
+              x={x}
+              y={y}
+              width={width}
+              height={height}
              />;
   }
 }
@@ -548,6 +580,7 @@ interface DrawingLayerViewProps {
   model: ToolTileModelType;
   readOnly: boolean;
   scale?: number;
+  onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
 interface DrawingLayerViewState {
@@ -650,6 +683,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public addNewDrawingObject(drawingObjectModel: DrawingObjectDataType) {
     this.sendChange({action: "create", data: drawingObjectModel});
+  }
+
+  public addUpdateDrawingObjects(ids: string[], prop: string, newValue: number | string) {
+    const update: DrawingToolUpdate = { ids, update: { prop, newValue } };
+    this.sendChange({action: "update", data: update});
   }
 
   public setSelectedObjects(selectedObjects: DrawingObject[]) {
@@ -850,9 +888,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         : false;
 
     return (
-      <div className="drawing-layer" onMouseDown={this.handleMouseDown}>
+      <div className="drawing-layer"
+          onMouseDown={this.handleMouseDown}
+          onDragOver={this.handleDragOver}
+          onDragLeave={this.handleDragLeave}
+          onDrop={this.handleDrop} >
+
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects((object) => true)}
+          {this.renderObjects(object => object.model.type === "image")}
+          {this.renderObjects(object => object.model.type !== "image")}
           {this.renderSelectedObjects(this.state.selectedObjects, SELECTION_COLOR)}
           {this.state.hoverObject
             ? this.renderSelectedObjects([this.state.hoverObject], hoveringOverAlreadySelectedObject
@@ -865,6 +909,86 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         </svg>
       </div>
     );
+  }
+
+  private getContent() {
+    return this.props.model.content as DrawingContentModelType;
+  }
+
+  private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    const { readOnly } = this.props;
+    const toolType = extractDragTileType(e.dataTransfer);
+    // image drop area is central 80% in each dimension
+    const kImgDropMarginPct = 0.1;
+    if (!readOnly && (toolType === "image")) {
+      const eltBounds = e.currentTarget.getBoundingClientRect();
+      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+          (e.clientX < eltBounds.right - kImgDropMarginX) &&
+          (e.clientY > eltBounds.top + kImgDropMarginY) &&
+          (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const isAcceptableDrag = this.isAcceptableImageDrag(e);
+    this.props.onSetCanAcceptDrop(isAcceptableDrag ? this.props.model.id : undefined);
+    if (isAcceptableDrag) {
+      e.dataTransfer.dropEffect = "copy";
+      e.preventDefault();
+    }
+  }
+
+  private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    this.props.onSetCanAcceptDrop();
+  }
+
+  private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (this.isAcceptableImageDrag(e)) {
+      const dragContent = e.dataTransfer.getData(kDragTileContent);
+      const parsedContent = safeJsonParse(dragContent);
+      if (parsedContent) {
+        const droppedContent = parsedContent.content;
+        if (droppedContent && droppedContent.url) {
+          this.handleImageDrop(droppedContent.url);
+        }
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }
+
+  private handleImageDrop(url: string) {
+    getImageDimensions(undefined, url).then((dimensions: any) => {
+      const prevImage = find(this.state.objects,
+                              obj => !!obj && (obj.model.type === "image"));
+      if (!prevImage) {
+        const image = new ImageObject({
+                            type: "image",
+                            url,
+                            x: 0, y: 0,
+                            width: dimensions.width,
+                            height: dimensions.height
+                          });
+        this.addNewDrawingObject(image.model);
+      }
+      else if (prevImage && prevImage.model.id) {
+        const pImage = prevImage as ImageObject;
+        if (url !== pImage.model.url) {
+          this.addUpdateDrawingObjects([prevImage.model.id], "url", url);
+        }
+        if (dimensions.width !== pImage.model.width) {
+          this.addUpdateDrawingObjects([prevImage.model.id], "width", dimensions.width);
+        }
+        if (dimensions.height !== pImage.model.height) {
+          this.addUpdateDrawingObjects([prevImage.model.id], "height", dimensions.height);
+        }
+      }
+    });
   }
 
   private sendChange(change: DrawingToolChange): any {
@@ -902,6 +1026,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       case "ellipse":
         drawingObject = new EllipseObject(data);
+        break;
+      case "image":
+        drawingObject = new ImageObject(data);
         break;
     }
     if (drawingObject && drawingObject.model.id) {

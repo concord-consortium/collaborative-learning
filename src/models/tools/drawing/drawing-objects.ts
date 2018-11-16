@@ -57,5 +57,15 @@ export interface EllipseDrawingObjectData {
   fill: string;
 }
 
+export interface ImageDrawingObjectData {
+  type: "image";
+  id?: string;
+  url: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export type DrawingObjectDataType = LineDrawingObjectData | VectorDrawingObjectData
-  | RectangleDrawingObjectData | EllipseDrawingObjectData;
+  | RectangleDrawingObjectData | EllipseDrawingObjectData | ImageDrawingObjectData;
