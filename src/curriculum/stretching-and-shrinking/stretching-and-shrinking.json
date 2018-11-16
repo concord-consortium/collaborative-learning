@@ -148,7 +148,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
-                    }   
+                    }
                   }
                 ]
               },
@@ -202,7 +202,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_500w.png"
-                    }   
+                    }
                   }
                 ],
                 "supports": []
@@ -239,7 +239,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
-                    }   
+                    }
                   },
                   {
                     "content": {
@@ -257,7 +257,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
-                    }   
+                    }
                   }
                 ],
                 "supports": []
@@ -380,7 +380,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
-                    }   
+                    }
                   },
                   {
                     "content": {
@@ -452,7 +452,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
-                    }   
+                    }
                   }
                 ]
               },
@@ -466,7 +466,7 @@
                     "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
-                    }   
+                    }
                   },
                   {
                     "content": {
@@ -1218,7 +1218,7 @@
               "supports": [
                 {
                   "text": "What measurements change from one similar figure to another?"
-                }, 
+                },
                 {
                   "text": "How is the change related to the scale factor?"
                 }
@@ -1317,11 +1317,6 @@
                     "content": {
                       "type": "Text",
                       "text": "Triangles: a right triangle, an isosceles triangle, and a scalene triangle"
-                    }
-                  },
-                  {
-                    "content": {
-                      
                     }
                   },
                   {
@@ -2058,7 +2053,7 @@
                 "supports": []
               }
             }
-          ], 
+          ],
           "supports": [
             { "text": "How could you use scale factors?"},
             { "text": "How could you use ratio of adjacent side lengths?"}
