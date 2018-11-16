@@ -1480,6 +1480,15 @@
               "content": {
                 "tiles": [
                   {
+                    "layout": {
+                               "height": 260
+                             },
+                    "content": {	
+                    "type":"Geometry",
+                    "changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"id\":\"564d923f-96df-4990-b4b8-d185070e3a07\",\"axis\":true,\"boundingBox\":[-1,18.486338797814206,30,-1],\"grid\":{}}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[1.0229937987351876,3.910971940811687],\"properties\":{\"id\":\"d330edb2-5444-4093-a46e-28e8f2b1d86a\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[1.0229937987351876,0.13836188371093208],\"properties\":{\"id\":\"98bfeed8-681b-4e9b-8666-3aae0cb031d8\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[8.950942469454166,0.029010867563084103],\"properties\":{\"id\":\"a9342eaf-4180-4841-a24b-e5bf6eaad875\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[9.060293485602015,4.020322956959535],\"properties\":{\"id\":\"f1e31f26-a5b2-49bd-868b-f6c923df3b8e\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"polygon\",\"parents\":[\"d330edb2-5444-4093-a46e-28e8f2b1d86a\",\"98bfeed8-681b-4e9b-8666-3aae0cb031d8\",\"a9342eaf-4180-4841-a24b-e5bf6eaad875\",\"f1e31f26-a5b2-49bd-868b-f6c923df3b8e\"],\"properties\":{\"id\":\"45788595-2283-4201-a519-34e369952a87\"}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[12.01277092159391,0.08368637563700809],\"properties\":{\"id\":\"aa716f9a-be18-430e-8dd1-57388e1857e8\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[18.956560446982255,0.08368637563700809],\"properties\":{\"id\":\"3bcf5f26-19a2-4010-af7c-2058e79ddbaf\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[14.965248357585804,3.9656474488856115],\"properties\":{\"id\":\"d67b3075-49d9-44f7-8a69-ed7d14f29c36\",\"snapToGrid\":true,\"snapSizeX\":0.2,\"snapSizeY\":0.2}}","{\"operation\":\"create\",\"target\":\"polygon\",\"parents\":[\"aa716f9a-be18-430e-8dd1-57388e1857e8\",\"3bcf5f26-19a2-4010-af7c-2058e79ddbaf\",\"d67b3075-49d9-44f7-8a69-ed7d14f29c36\"],\"properties\":{\"id\":\"b07ba0d1-847d-4444-88bf-2e3a61bfc9db\"}}"]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "Constraints for A: For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning."
