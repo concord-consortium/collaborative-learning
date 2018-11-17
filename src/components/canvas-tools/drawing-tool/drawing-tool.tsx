@@ -11,6 +11,7 @@ interface IProps {
   model: ToolTileModelType;
   readOnly: boolean;
   scale?: number;
+  onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
 interface IState {
@@ -33,7 +34,7 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
         <ToolbarView model={model} readOnly={!!readOnly}/>
         <div style={{left: TOOLBAR_WIDTH}}
             onMouseDown={this.handleMouseDown}>
-          <DrawingLayerView model={model} readOnly={!!readOnly} scale={scale} />
+          <DrawingLayerView {...this.props} />
         </div>
       </div>
     );
