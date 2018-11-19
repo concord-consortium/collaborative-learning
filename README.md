@@ -36,16 +36,17 @@ You can view the status of all the branch deploys [here](https://travis-ci.org/c
 To deploy a production release:
 
 1. Increment version number in package.json
-2. Create new entry in CHANGELOG.md
-3. Run `git log --pretty=oneline --reverse <last release tag>...HEAD | grep '#' | grep -v Merge` and add contents (after edits if needed to CHANGELOG.md)
-4. Run `npm run build`
-5. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
-6. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
-7. Checkout master and pull
-8. Checkout production
-9. Run `git merge master --no-ff`
-10. Push production to GitHub
-11. Use https://github.com/concord-consortium/collaborative-learning/releases to create a new release tag
+1. Run `npm install` to make sure dependencies are up to date and commit version to `package-lock.json`.
+1. Create new entry in CHANGELOG.md
+1. Run `git log --pretty=oneline --reverse <last release tag>...HEAD | grep '#' | grep -v Merge` and add contents (after edits if needed to CHANGELOG.md)
+1. Run `npm run build`
+1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
+1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
+1. Checkout master and pull
+1. Checkout production
+1. Run `git merge master --no-ff`
+1. Push production to GitHub
+1. Use https://github.com/concord-consortium/collaborative-learning/releases to create a new release tag
 
 ### Testing
 

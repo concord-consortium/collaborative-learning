@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 0.1.0 - released November 19, 2018
+
+- DrawTool: Support background image
+- Geometry: polygon rotation
+- Geometry: Fix polygon (and other) selection issues
+- Geometry: All selected objects drag together
+- Geometry: Shape set in a graph for Rep-tiles unit
+- Add ability to publish Learning Logs
+- Bug fixes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 64,876 bytes | 8.9% |
+| index.js | 2,288,591 bytes | 2.6% |
+
 ## Version 0.0.9 - released November 1, 2018
 
 - Tile drag feedback
@@ -9,12 +26,26 @@
 - Adding migration tools and first migration
 - Bug fixes
 
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 59,586 bytes | 52.0% |
+| index.js | 2,230,580 bytes | 1.6% |
+
 ## Version 0.0.8 - released October 25, 2018
 
 - Styling left nav canvas buttons [#161403821]
 - Implement selection of points [#160969495] - clicking on a single point selects it - ctrl/shift/cmd-click to select multiple points - backspace/delete keys delete selected points [#161272021]
 - Support deleting points with toolbar red-X [#161272021]
 - Adding 4-up messages to unshared group content
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 39,212 bytes | 3.6% |
+| index.js | 2,195,223 bytes | -14.7% |
 
 ## Version 0.0.7 - released October 19, 2018
 
@@ -23,6 +54,13 @@
 - Remove previous image when dropping image on geometry [#161343613]
 - The group view in the header now matches 4-up group view [#161358684]
 - Adding a drag handle in the upper left of each tile
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 37,835 bytes | 2.1% |
+| index.js | 2,573,839 bytes | 0.0% |
 
 ## Version 0.0.6 - released October 18, 2018
 
@@ -38,6 +76,13 @@
 - Full support for image upload
 - Updates to UI including editability icons, group styling and new icons with hover behavior
 
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 37,068 bytes | 6.4% |
+| index.js | 2,572,874 bytes | 0.2% |
+
 ## Version 0.0.5 - released October 16, 2018
 
 - Spike: add image to geometry in curriculum [#161137053] - add support for images to geometry tool
@@ -48,7 +93,7 @@
 
 ### Asset Sizes
 
-| File | Size | % Increase from 0.0.3 |
+| File | Size | % Change from 0.0.3 |
 |---|---|---|
 | index.css | 34,385 bytes | 190% |
 | index.js | 2,565,366 bytes | 72% |
@@ -109,7 +154,7 @@
 
 ### Asset Sizes
 
-| File | Size | % Increase from Previous Release |
+| File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 11,863 bytes | 67.8% |
 | index.js | 1,495,031 bytes | 30.1% |
@@ -125,7 +170,7 @@
 
 ### Asset Sizes
 
-| File | Size | % Increase from Previous Release |
+| File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 7,068 bytes | 0.04% |
 | index.js | 1,149,144 bytes | 63.8% |
@@ -140,7 +185,7 @@
 
 ### Asset Sizes
 
-| File | Size | % Increase from Previous Release |
+| File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 7,041 bytes | n/a |
 | index.js | 703,783 bytes | n/a |
