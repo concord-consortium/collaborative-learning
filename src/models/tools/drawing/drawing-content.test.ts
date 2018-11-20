@@ -2,15 +2,22 @@ import { DrawingContentModel, kDrawingToolID, DrawingToolMetadataModel } from ".
 
 describe("DrawingContentModel", () => {
 
-  it("accepts default arguments on creation", () => {
+  function createDrawingContent() {
     const model = DrawingContentModel.create();
+    const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
+    model.doPostCreate(metadata);
+    return model;
+  }
+
+  it("accepts default arguments on creation", () => {
+    const model = createDrawingContent();
     expect(model.type).toBe(kDrawingToolID);
     expect(model.changes).toEqual([]);
     expect(model.selectedButton).toBe("select");
   });
 
   it("can reset the tool button", () => {
-    const model = DrawingContentModel.create();
+    const model = createDrawingContent();
     model.setSelectedButton("vector");
     expect(model.selectedButton).toBe("vector");
     model.reset();
@@ -18,9 +25,7 @@ describe("DrawingContentModel", () => {
   });
 
   it("can delete a set of selected drawing objects", () => {
-    const model = DrawingContentModel.create();
-    const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
-    model.doPostCreate(metadata);
+    const model = createDrawingContent();
 
     model.setSelection(["a", "b"]);
     model.deleteSelectedObjects();
@@ -32,9 +37,7 @@ describe("DrawingContentModel", () => {
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
-    const model = DrawingContentModel.create();
-    const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
-    model.doPostCreate(metadata);
+    const model = createDrawingContent();
 
     model.setSelection(["a", "b"]);
     model.setStroke("#000000");
