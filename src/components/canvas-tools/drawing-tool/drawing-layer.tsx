@@ -11,6 +11,7 @@ import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, 
 import { getImageDimensions } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { find } from "lodash";
+import { reaction, IReactionDisposer } from "mobx";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -598,6 +599,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public tools: DrawingToolMap;
   private svgRef: React.RefObject<{}>|null;
   private setSvgRef: (element: any) => void;
+  private disposeCurrentToolReaction: IReactionDisposer;
 
   constructor(props: DrawingLayerViewProps){
     super(props);
@@ -632,6 +634,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidMount() {
     this.syncChanges();
+
+    this.disposeCurrentToolReaction = reaction(
+        () => this.getContent().metadata.selectedButton,
+        selectedButton => this.syncCurrentTool(selectedButton)
+    );
+  }
+
+  public componentWillUnmount() {
+    if (this.disposeCurrentToolReaction) {
+      this.disposeCurrentToolReaction();
+    }
   }
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
@@ -645,25 +658,26 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (JSON.stringify(newSettings) !== JSON.stringify(prevSettings)) {
       this.setCurrentToolSettings(newSettings);
     }
+  }
 
-    if (drawingContent.selectedButton !== prevDrawingContent.selectedButton) {
-      switch (drawingContent.selectedButton) {
-        case "select":
-          this.setCurrentTool(this.tools.selection);
-          break;
-        case "line":
-          this.setCurrentTool((this.tools.line as LineDrawingTool).setSettings(newSettings));
-          break;
-        case "vector":
-          this.setCurrentTool((this.tools.vector as VectorDrawingTool).setSettings(newSettings));
-          break;
-        case "rectangle":
-          this.setCurrentTool((this.tools.rectangle as RectangleDrawingTool).setSettings(newSettings));
-          break;
-        case "ellipse":
-          this.setCurrentTool((this.tools.ellipse as EllipseDrawingTool).setSettings(newSettings));
-          break;
-      }
+  public syncCurrentTool(selectedButton: string) {
+    const settings = this.toolbarSettings(this.getContent());
+    switch (selectedButton) {
+      case "select":
+        this.setCurrentTool(this.tools.selection);
+        break;
+      case "line":
+        this.setCurrentTool((this.tools.line as LineDrawingTool).setSettings(settings));
+        break;
+      case "vector":
+        this.setCurrentTool((this.tools.vector as VectorDrawingTool).setSettings(settings));
+        break;
+      case "rectangle":
+        this.setCurrentTool((this.tools.rectangle as RectangleDrawingTool).setSettings(settings));
+        break;
+      case "ellipse":
+        this.setCurrentTool((this.tools.ellipse as EllipseDrawingTool).setSettings(settings));
+        break;
     }
   }
 
