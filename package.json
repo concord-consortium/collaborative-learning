@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "jest": {
