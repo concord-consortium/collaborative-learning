@@ -185,7 +185,7 @@ export const DrawingContentModel = types
         deleteSelectedObjects,
 
         // sets the model to how we want it to appear when a user first opens a document
-        reset: () => {
+        reset() {
           self.selectedButton = "select";
         }
       }

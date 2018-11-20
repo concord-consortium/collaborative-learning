@@ -1,4 +1,4 @@
-import * as firebase from "@concord-consortium/firebase/app";
+import * as firebase from "firebase/app";
 import { UserModelType } from "../models/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
@@ -81,6 +81,10 @@ export class Firebase {
 
   public getUserPath(user: UserModelType, userId?: string) {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
+  }
+
+  public getClassPublicationsPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/publications`;
   }
 
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {

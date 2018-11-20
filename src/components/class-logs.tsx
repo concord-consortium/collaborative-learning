@@ -11,15 +11,11 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class ClassWorkComponent extends BaseComponent<IProps, {}> {
+export class ClassLogsComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { documents, problem } = this.stores;
-    const sections = problem.sections;
-    const publications: DocumentModelType[] = [];
-    sections.forEach((section) => {
-      publications.push(...documents.getLatestPublicationsForSection(section.id, this.stores.class));
-    });
+    const { documents } = this.stores;
+    const publications = documents.getLatestLogPublications();
 
     return (
       <div className="class-work">
@@ -43,7 +39,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
                   </div>
                 </div>
                 <div className="info">
-                  <div>{problem.getSectionById(publication.sectionId!)!.title}</div>
+                  <div>{publication.title}</div>
                   <div>{user && user.fullName}</div>
                 </div>
               </div>

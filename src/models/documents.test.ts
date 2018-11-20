@@ -1,4 +1,4 @@
-import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
+import { DocumentModel, DocumentModelType, SectionDocument, DocumentType} from "./document";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { ClassModelType, ClassModel, ClassStudentModel } from "./class";
 
@@ -159,6 +159,61 @@ describe("documents model", () => {
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub2);
       expect(latestPubs[2]).toBe(pubNull);
+    });
+  });
+
+  describe("getLatestLogPublications", () => {
+    const getPublishedDocument = (createdAt: number, uid: string, type?: DocumentType, title?: string) => {
+      return DocumentModel.create({
+        uid,
+        type: type || "learningLogPublication",
+        key: `llDoc-${uid}-${title}-${createdAt}`,
+        originDoc: `llDoc-${uid}-${title}-origin`,
+        title,
+        createdAt,
+        content: {},
+        groupId: "1",
+      });
+    };
+
+    it("finds published learning logs", () => {
+      const pub1 = getPublishedDocument(0, "1");
+      const badPub1 = getPublishedDocument(10, "1", "section");
+
+      documents.add(pub1);
+      documents.add(badPub1);
+      expect(documents.all.length).toBe(2);
+
+      const latestPubs = documents.getLatestLogPublications();
+      expect(latestPubs.length).toBe(1);
+      expect(latestPubs[0]).toBe(pub1);
+    });
+
+    it("finds the newest document for a user", () => {
+      const pub1 = getPublishedDocument(0, "1");
+      const newerPub1 = getPublishedDocument(10, "1");
+
+      documents.add(pub1);
+      documents.add(newerPub1);
+      expect(documents.all.length).toBe(2);
+
+      const latestPubs = documents.getLatestLogPublications();
+      expect(latestPubs.length).toBe(1);
+      expect(latestPubs[0]).toBe(newerPub1);
+    });
+
+    it("sorts publications by title", () => {
+      const pub1 = getPublishedDocument(0, "1", "learningLogPublication", "aaa");
+      const pub3 = getPublishedDocument(10, "3", "learningLogPublication", "zzz");
+
+      documents.add(pub3);
+      documents.add(pub1);
+      expect(documents.all.length).toBe(2);
+
+      const latestPubs = documents.getLatestLogPublications();
+      expect(latestPubs.length).toBe(2);
+      expect(latestPubs[0]).toBe(pub1);
+      expect(latestPubs[1]).toBe(pub3);
     });
   });
 });

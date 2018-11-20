@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 import { WorkspaceModel } from "./workspace";
 import { ToolTileModelType } from "./tools/tool-tile";
-import { DocumentModelType, PublicationDocument } from "./document";
+import { DocumentModelType, PublicationDocument, LearningLogPublication } from "./document";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
@@ -147,8 +147,8 @@ export const UIModel = types
             alert("Please select a Learning Log first.", "Select for Learning Log");
           }
         }
-        // class work
-        else if (document.type === PublicationDocument) {
+        // class work or log
+        else if (document.isPublished) {
           if (self.sectionWorkspace.primaryDocumentKey) {
             self.sectionWorkspace.setComparisonDocument(document);
             self.sectionWorkspace.toggleComparisonVisible({override: true});

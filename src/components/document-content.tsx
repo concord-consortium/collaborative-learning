@@ -13,6 +13,7 @@ interface IProps extends IBaseProps {
   context: string;
   content?: DocumentContentModelType;
   readOnly?: boolean;
+  scale?: number;
 }
 
 interface IDragResizeRow {
@@ -159,11 +160,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getDragResizeRowInfo(e: React.DragEvent<HTMLDivElement>) {
+    const { scale } = this.props;
     const rowId = extractDragResizeRowId(e.dataTransfer);
     const startY = extractDragResizeY(e.dataTransfer);
     const modelHeight = extractDragResizeModelHeight(e.dataTransfer);
-    const domHeight = extractDragResizeDomHeight(e.dataTransfer);
-    const deltaHeight = e.clientY - (startY || 0);
+    const _domHeight = extractDragResizeDomHeight(e.dataTransfer);
+    const domHeight = _domHeight && _domHeight / (scale || 1);
+    const deltaHeight = (e.clientY - (startY || 0)) / (scale || 1);
     if (rowId && (deltaHeight != null)) {
       const originalHeight = domHeight || modelHeight;
       const newHeight = originalHeight && originalHeight + deltaHeight;

@@ -1,8 +1,6 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, SectionDocument } from "./document";
+import { DocumentModel, DocumentModelType, DocumentType, SectionDocument } from "./document";
 import { ClassModelType } from "./class";
-
-type DocumentTypeOption = "section" | "publication" | "learningLog";
 
 export const DocumentsModel = types
   .model("Documents", {
@@ -12,10 +10,10 @@ export const DocumentsModel = types
     const getDocument = (documentKey: string) => {
       return self.all.find((document) => document.key === documentKey);
     };
-    const byType = (type: DocumentTypeOption) => {
+    const byType = (type: DocumentType) => {
       return self.all.filter((document) => document.type === type);
     };
-    const byTypeForUser = (type: DocumentTypeOption, userId: string) => {
+    const byTypeForUser = (type: DocumentType, userId: string) => {
       return self.all.filter((document) => {
         return (document.type === type) && (document.uid === userId);
       });
@@ -37,6 +35,26 @@ export const DocumentsModel = types
           return (document.type === SectionDocument) &&
                  (document.sectionId === sectionId) &&
                  (document.groupId === groupId);
+        });
+      },
+
+      // Returns the most recently published learning logs per user, sorted by title
+      getLatestLogPublications() {
+        const latestPublications: DocumentModelType[] = [];
+        byType("learningLogPublication")
+          .forEach((publication) => {
+            const originDoc = publication.originDoc;
+            const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
+            if (latestIndex === -1) {
+              latestPublications.push(publication);
+            }
+            else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+              latestPublications[latestIndex] = publication;
+            }
+          });
+
+        return latestPublications.sort((pub1, pub2) => {
+          return (pub1.title || "").localeCompare(pub2.title || "");
         });
       },
 

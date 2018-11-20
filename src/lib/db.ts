@@ -1,7 +1,7 @@
-import * as firebase from "@concord-consortium/firebase/app";
-import "@concord-consortium/firebase/auth";
-import "@concord-consortium/firebase/database";
-import "@concord-consortium/firebase/storage";
+import * as firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
+import "firebase/storage";
 import { AppMode, IStores } from "../models/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup,
@@ -16,13 +16,16 @@ import { DBOfferingGroup,
          DBGroupUserConnections,
          DBPublication,
          DBDocumentType,
+         DBLearningLogDocumentMetadata,
+         DBLearningLogPublication,
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
          DocumentType,
          SectionDocument,
          LearningLogDocument,
-         PublicationDocument
+         PublicationDocument,
+         LearningLogPublication
         } from "../models/document";
 import { DocumentContentSnapshotType } from "../models/document-content";
 import { Firebase } from "./firebase";
@@ -60,6 +63,7 @@ export interface OpenDocumentOptions {
   visibility?: "public" | "private";
   title?: string;
   groupUserConnections?: {};
+  originDoc?: string;
 }
 
 export class DB {
@@ -326,6 +330,9 @@ export class DB {
         case PublicationDocument:
           metadata = {version, self, createdAt, type, classHash, offeringId};
           break;
+        case LearningLogPublication:
+          metadata = {version, self, createdAt, type};
+          break;
       }
 
       return documentRef.set(document)
@@ -339,7 +346,7 @@ export class DB {
 
   public publishDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
-    const content = JSON.stringify(documentModel.content);
+    const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument(PublicationDocument, content).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
@@ -372,8 +379,34 @@ export class DB {
     });
   }
 
+  public publishLearningLog(documentModel: DocumentModelType) {
+    const {user} = this.stores;
+    const content = documentModel.content.publish();
+    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+      this.createDocument(LearningLogPublication, content).then(({document, metadata}) => {
+        const publicationRef = this.firebase.ref(this.firebase.getClassPublicationsPath(user)).push();
+        const publication: DBLearningLogPublication = {
+          version: "1.0",
+          self: {
+            classHash: user.classHash,
+            documentKey: document.self.documentKey,
+          },
+          uid: user.id,
+          title: documentModel.title || "",
+          originDoc: documentModel.key
+        };
+
+        publicationRef.set(publication)
+          .then(() => {
+            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+          })
+          .catch(reject);
+      });
+    });
+  }
+
   public openDocument(options: OpenDocumentOptions) {
-    const {documentKey, type, title, userId, sectionId, groupId, visibility} = options;
+    const {documentKey, type, title, userId, sectionId, groupId, visibility, originDoc} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -397,6 +430,7 @@ export class DB {
             groupId,
             visibility,
             uid: userId,
+            originDoc,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
             content: content ? content : {}
@@ -516,6 +550,16 @@ export class DB {
       .then((document) => {
         this.listeners.monitorDocumentModel(document);
         this.listeners.monitorDocumentRef(document);
+        return document;
+      });
+  }
+
+  public createDocumentFromPublishedLog(learningLog: DBLearningLogPublication) {
+    const {title, uid, originDoc, self: {documentKey}} = learningLog;
+    const group = this.stores.groups.groupForUser(uid);
+    const groupId = group && group.id;
+    return this.openDocument({type: LearningLogPublication, userId: uid, documentKey, groupId, title, originDoc})
+      .then((document) => {
         return document;
       });
   }

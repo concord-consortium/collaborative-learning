@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { ToolContentUnion, findMetadata } from "./tool-types";
 import * as uuid from "uuid/v4";
 
@@ -37,3 +37,4 @@ export const ToolTileModel = types
   }));
 
 export type ToolTileModelType = Instance<typeof ToolTileModel>;
+export type ToolTileSnapshotOutType = SnapshotOut<typeof ToolTileModel>;

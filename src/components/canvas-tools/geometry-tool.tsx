@@ -4,14 +4,17 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit, setElementColor
         } from "../../models/tools/geometry/geometry-content";
+import { getEventCoords, copyCoords } from "./geometry-tool/geometry-utils";
+import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
-import { assign, cloneDeep, each, isEqual, some } from "lodash";
+import { assign, each, isEqual, size as _size, some, values } from "lodash";
 import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
 import { getImageDimensions } from "../../utilities/image-utils";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import * as uuid from "uuid/v4";
 
@@ -40,6 +43,7 @@ interface IState extends SizeMeProps {
   board?: JXG.Board;
   content?: GeometryContentModelType;
   syncedChanges: number;
+  disableRotate: boolean;
 }
 
 interface JXGPtrEvent {
@@ -49,16 +53,6 @@ interface JXGPtrEvent {
 
 // For snap to grid
 const kSnapUnit = 0.2;
-
-// cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: number) {
-  const cPos = board.getCoordsTopLeftCorner();
-  const absPos = JXG.getPosition(evt, index);
-  const dx = (absPos[0] - cPos[0]) / (scale || 1);
-  const dy = (absPos[1] - cPos[1]) / (scale || 1);
-
-  return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
-}
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           syncedChanges?: number, readOnly?: boolean) {
@@ -119,7 +113,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return nextState;
   }
 
-  public state: IState = { syncedChanges: 0 };
+  public state: IState = {
+          syncedChanges: 0,
+          disableRotate: false
+        };
 
   private domElement: HTMLDivElement | null;
 
@@ -130,7 +127,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
-  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords }} = {};
+  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords,
+                                      isTarget?: boolean, snapToGrid?: boolean }} = {};
+  private isVertexDrag: boolean;
 
   private lastPasteId: string;
   private lastPasteCount: number;
@@ -176,14 +175,30 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
-    return (
-      <div id={this.state.elementId} className={classes}
+    return ([
+      <div id={this.state.elementId} key="jsxgraph"
+          className={classes}
           ref={elt => this.domElement = elt}
           tabIndex={this.props.tabIndex}
           onKeyDown={this.handleKeyDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
-          onDrop={this.handleDrop} />
+          onDrop={this.handleDrop} />,
+      this.renderRotateHandle()
+    ]);
+  }
+
+  private renderRotateHandle() {
+    const { board, disableRotate } = this.state;
+    const selectedPolygon = board && !disableRotate && !this.props.readOnly
+                              ? this.getOneSelectedPolygon() : undefined;
+    return (
+      <RotatePolygonIcon
+        key="rotate-polygon-icon"
+        board={board}
+        polygon={selectedPolygon}
+        scale={this.props.scale}
+        onRotate={this.handleRotatePolygon} />
     );
   }
 
@@ -217,6 +232,73 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "cmd-x": this.handleCut,
       "cmd-v": this.handlePaste
     });
+  }
+
+  private getOneSelectedPolygon() {
+    const { board } = this.state;
+    if (!board) return;
+
+    // all vertices of polygon must be selected to show rotate handle
+    const content = this.getContent();
+    const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
+    const polygons = board.objectsList
+                          .filter(el => el.elType === "polygon")
+                          .filter(polygon => {
+                            const selected = { any: false, all: true };
+                            each(polygon.ancestors, vertex => {
+                              if (content.isSelected(vertex.id)) {
+                                selected.any = true;
+                              }
+                              else {
+                                selected.all = false;
+                              }
+                            });
+                            polygonSelection[polygon.id] = selected;
+                            return selected.any;
+                          });
+    const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
+    const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
+                              ? polygons[0] as JXG.Polygon : undefined;
+    // must not have any selected points other than the polygon vertices
+    if (selectedPolygon) {
+      const selectedPts = Array.from(content.metadata.selection.entries())
+                            .filter(entry => {
+                              const id = entry[0];
+                              const obj = board.objects[id];
+                              const isSelected = entry[1];
+                              return obj && (obj.elType === "point") && isSelected;
+                            });
+      return _size(selectedPolygon.ancestors) === selectedPts.length
+                ? selectedPolygon : undefined;
+    }
+  }
+
+  private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
+    const { board } = this.state;
+    if (!board) return;
+
+    polygon.vertices.forEach((vertex, index) => {
+      if (index < polygon.vertices.length - 1) {
+        const coords = vertexCoords[index];
+        vertex.setAttribute({ snapToGrid: false });
+        vertex.setPosition(JXG.COORDS_BY_USER, coords.usrCoords.slice(1));
+      }
+    });
+    board.update();
+
+    if (isComplete) {
+      const vertexCount = polygon.vertices.length - 1;
+      this.getContent()
+          .updateObjects(
+            board,
+            polygon.vertices
+              .map(vertex => vertex.id)
+              .slice(0, vertexCount),
+            vertexCoords
+              .map(coords => ({ snapToGrid: false,
+                                position: coords.usrCoords.slice(1) }))
+              .slice(0, vertexCount));
+    }
   }
 
   private handleDelete = () => {
@@ -459,10 +541,88 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
+  private beginDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board && !hasSelectionModifier(evt)) {
+      content.metadata.selection.forEach((isSelected, id) => {
+        const obj = board.objects[id];
+        const pt = isPoint(obj) ? obj as JXG.Point : undefined;
+        if (pt && isSelected) {
+          // targets are dragged by JSXGraph
+          const isTarget = (id === dragTarget.id) ||
+                            (values(dragTarget.ancestors)
+                              .findIndex(ancestor => ancestor.id === id) >= 0);
+          this.dragPts[id] = {
+            initial: copyCoords(pt.coords),
+            snapToGrid: pt.getAttribute("snapToGrid"),
+            isTarget
+          };
+          if (!isTarget) {
+            pt.setAttribute({ snapToGrid: false });
+          }
+        }
+      });
+    }
+  }
+
+  private dragSelectedPoints(evt: any, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+
+    each(this.dragPts, (entry, id) => {
+      if (entry && content) {
+        const obj = board.objects[id];
+        const pt = isPoint(obj) ? obj as JXG.Point : undefined;
+        // move the points not dragged by JSXGraph
+        if (pt && !entry.isTarget) {
+          const newUsrCoords = JXG.Math.Statistics.add(entry.initial.usrCoords, usrDiff) as number[];
+          pt.setPosition(JXG.COORDS_BY_USER, newUsrCoords);
+          entry.final = copyCoords(pt.coords);
+        }
+      }
+    });
+  }
+
+  private endDragSelectedPoints(evt: any, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+
+    each(this.dragPts, (entry, id) => {
+      const obj = board.objects[id];
+      if (obj) {
+        obj.setAttribute({ snapToGrid: !!entry.snapToGrid });
+      }
+    });
+
+    this.dragSelectedPoints(evt, usrDiff);
+
+    // only create a change object if there's actually a change
+    if ((usrDiff[0] !== 0) || (usrDiff[1] !== 0)) {
+      const ids: string[] = [];
+      const props: Array<{ position: number[] }> = [];
+      each(this.dragPts, (entry, id) => {
+        if (entry && content) {
+          const obj = board.objects[id];
+          const pt = isPoint(obj) ? obj as JXG.Point : undefined;
+          if (pt) {
+            const newUsrCoords = JXG.Math.Statistics.add(entry.initial.usrCoords, usrDiff) as number[];
+            ids.push(id);
+            props.push({ position: newUsrCoords });
+          }
+        }
+      });
+
+      this.applyChange(() => content.updateObjects(board, ids, props));
+    }
+  }
+
   private handleCreateBoard = (board: JXG.Board) => {
 
     const handlePointerDown = (evt: any) => {
-      const { model, readOnly, scale } = this.props;
+      const { model, scale } = this.props;
       const { ui } = this.stores;
 
       // clicked tile gets keyboard focus
@@ -476,8 +636,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
-      if (readOnly) { return; }
-
       const index = evt[JXG.touchProperty] ? 0 : undefined;
       const coords = getEventCoords(board, evt, scale, index);
       const x = coords.usrCoords[1];
@@ -489,7 +647,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     const handlePointerUp = (evt: any) => {
       const { readOnly, scale } = this.props;
-      if (readOnly || !this.lastBoardDown) { return; }
+      if (!this.lastBoardDown) { return; }
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
       const index = evt[JXG.touchProperty] ? 0 : undefined;
@@ -503,10 +661,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const elements = board.getAllObjectsUnderMouse(evt)
                             .filter(obj => obj && (obj.elType !== "image"));
-      if (!elements.length && geometryContent.hasSelection()) {
+      if (!elements.length && !hasSelectionModifier(evt) && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
         return;
       }
+
+      if (readOnly) return;
 
       // extended clicks don't create new points
       const clickTimeThreshold = 500;
@@ -534,18 +694,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
 
       // clicks on board background create new points
-      const { model: { content } } = this.props;
-      if (content.type === "Geometry") {
+      if (!hasSelectionModifier(evt)) {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          // const metadata = content.metadata;
-          const point = content.addPoint(board, [x, y], props) as JXG.Point;
+          const point = geometryContent.addPoint(board, [x, y], props) as JXG.Point;
           if (point) {
             this.handleCreatePoint(point);
-
-            // select newly created points without referring to content
-            // metadata.select(point.id);
-            // setElementColor(board, point.id, true);
           }
         });
       }
@@ -570,7 +724,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { board } = this.state;
       if (!board) return;
       const id = point.id;
-      const coords = cloneDeep(point.coords);
+      const coords = copyCoords(point.coords);
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
@@ -583,52 +737,62 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
       }
       else {
-        this.dragPts[id] = { initial: coords };
+        this.dragPts = { [id]: { initial: coords } };
         this.lastPointDown = { evt, coords };
 
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
-          if (evt.ctrlKey || evt.metaKey) {
+          if (hasSelectionModifier(evt)) {
             geometryContent.deselectElement(id);
           }
         }
         // click on unselected element
         else {
           // deselect other elements unless appropriate modifier key is down
-          if (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+          if (!hasSelectionModifier(evt)) {
             geometryContent.deselectAll(board);
           }
           geometryContent.selectElement(id);
         }
+
+        if (!this.props.readOnly) {
+          this.beginDragSelectedPoints(evt, point);
+        }
+
         this.lastSelectDown = evt;
       }
     };
 
     const handleDrag = (evt: any) => {
+      if (this.props.readOnly) return;
+
       const id = point.id;
       let dragEntry = this.dragPts[id];
       if (!dragEntry) {
-        dragEntry = this.dragPts[id] = { initial: cloneDeep(point.coords) };
+        dragEntry = this.dragPts[id] = { initial: copyCoords(point.coords) };
       }
-      dragEntry.final = cloneDeep(point.coords);
+      dragEntry.final = copyCoords(point.coords);
+      this.setState({ disableRotate: true });
+
+      const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
+                                                  dragEntry.initial.usrCoords) as number[];
+      this.dragSelectedPoints(evt, usrDiff);
     };
 
     const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
       const id = point.id;
       const dragEntry = this.dragPts[id];
       if (!dragEntry) { return; }
 
-      dragEntry.final = cloneDeep(point.coords);
-
-      if (!isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)) {
-        const { content } = this.props.model;
-        const { board } = this.state;
-        if ((content.type === "Geometry") && board) {
-          const coords = dragEntry.final.usrCoords.slice(1) as JXGCoordPair;
-          const props = { position: coords };
-          this.applyChange(() => content.updateObjects(board, id, props));
-        }
+      if (!this.props.readOnly) {
+        dragEntry.final = copyCoords(point.coords);
+        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
+                                                    dragEntry.initial.usrCoords) as number[];
+        this.endDragSelectedPoints(evt, usrDiff);
       }
+
+      this.dragPts = {};
     };
 
     point.on("down", handlePointerDown);
@@ -670,62 +834,71 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const { board } = this.state;
       const inVertex = isInVertex(evt);
-      if (!inVertex && !areAllVerticesSelected()) {
+      const allVerticesSelected = areAllVerticesSelected();
+      let selectVertices = false;
+      let deselectVertices = false;
+      if (!inVertex && !allVerticesSelected) {
+        // deselect other elements unless appropriate modifier key is down
+        if (board && !hasSelectionModifier(evt)) {
+          geometryContent.deselectAll(board);
+        }
+        selectVertices = true;
         this.lastSelectDown = evt;
+      }
+      else if (!inVertex && allVerticesSelected) {
+        if (board && hasSelectionModifier(evt)) {
+          deselectVertices = true;
+        }
       }
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
-        this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
         if (board && !inVertex) {
-          geometryContent.selectElement(pt.id);
+          if (selectVertices) {
+            geometryContent.selectElement(pt.id);
+          }
+          else if (deselectVertices) {
+            geometryContent.deselectElement(pt.id);
+          }
         }
       });
+
+      if (!this.props.readOnly) {
+        // point handles vertex drags
+        this.isVertexDrag = isInVertex(evt);
+        if (!this.isVertexDrag) {
+          this.beginDragSelectedPoints(evt, polygon);
+        }
+      }
     };
 
     const handleDrag = (evt: any) => {
-      each(polygon.ancestors, point => {
-        const pt = point as JXG.Point;
-        if (!this.dragPts[pt.id]) {
-          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
-        }
-        this.dragPts[pt.id].final = cloneDeep(pt.coords);
-      });
-    };
+      if (this.props.readOnly || this.isVertexDrag) return;
 
-    const didPolygonMove = () => {
-      return some(polygon.ancestors, point => {
-        const dragEntry = this.dragPts[point.id];
-        return dragEntry.final
-                ? !isEqual(dragEntry.initial.usrCoords, dragEntry.final.usrCoords)
-                : false;
-      });
+      const vertex = polygon.vertices[0];
+      const dragEntry = this.dragPts[vertex.id];
+      if (dragEntry && dragEntry.initial) {
+        const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                    dragEntry.initial.usrCoords) as number[];
+        this.dragSelectedPoints(evt, usrDiff);
+      }
+      this.setState({ disableRotate: true });
     };
 
     const handlePointerUp = (evt: any) => {
-      each(polygon.ancestors, point => {
-        const pt = point as JXG.Point;
-        const dragEntry = this.dragPts[pt.id];
-        if (!dragEntry) {
-          this.dragPts[pt.id] = { initial: cloneDeep(pt.coords) };
+      this.setState({ disableRotate: false });
+
+      if (!this.props.readOnly && !this.isVertexDrag) {
+        const vertex = polygon.vertices[0];
+        const dragEntry = this.dragPts[vertex.id];
+        if (dragEntry && dragEntry.initial) {
+          const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                      dragEntry.initial.usrCoords) as number[];
+          this.endDragSelectedPoints(evt, usrDiff);
         }
-        dragEntry.final = cloneDeep(pt.coords);
-      });
-
-      if (!didPolygonMove()) return;
-
-      const { content } = this.props.model;
-      const { board } = this.state;
-      if ((content.type === "Geometry") && board) {
-        const idArray: string[] = [];
-        const propsArray: JXGProperties[] = [];
-        each(polygon.ancestors, point => {
-          const dragEntry = this.dragPts[point.id];
-          const coords = dragEntry.final!.usrCoords.slice(1) as JXGCoordPair;
-          idArray.push(point.id);
-          propsArray.push({ position: coords });
-        });
-        this.applyChange(() => content.updateObjects(board, idArray, propsArray));
       }
+
+      this.dragPts = {};
+      this.isVertexDrag = false;
     };
 
     polygon.on("down", handlePointerDown);

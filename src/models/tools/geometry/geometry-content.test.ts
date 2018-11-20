@@ -130,7 +130,7 @@ describe("GeometryContent", () => {
     content.removeObjects(board, polygonId);
     expect(board.objects[polygonId]).toBeUndefined();
     // can't create polygon without vertices
-    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as JXG.Polygon;
+    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
     expect(polygon).toBeUndefined();
   });
 

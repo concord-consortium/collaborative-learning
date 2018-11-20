@@ -20,6 +20,8 @@ declare namespace JXG {
     axis: boolean;
     canvasWidth: number;
     canvasHeight: number;
+    container: string;
+    containerObj: HTMLElement;
     cssTransMat: number[][];
     keepaspectratio: boolean;
     showCopyright: boolean;
@@ -76,6 +78,8 @@ declare namespace JXG {
 
     removeChild: (child: GeometryElement) => JXG.Board;
     hasPoint: (x: number, y: number) => boolean;
+    // [x1,y1,x2,y2] upper left corner, lower right corner
+    bounds: () => [number, number, number, number];
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
@@ -94,10 +98,18 @@ declare namespace JXG {
     setSize: (width: number, height: number) => void;
   }
 
+  const Math: {
+    Statistics: {
+      add: (arr1: number | number[], arr2: number | number[]) => number | number[];
+      subtract: (arr1: number | number[], arr2: number | number[]) => number | number[];
+    }
+  };
+
   class Point extends CoordsElement {
   }
 
   class Polygon extends GeometryElement {
+    vertices: JXG.Point[];
   }
 
   const _ceil10: (value: number, exp: number) => number;
