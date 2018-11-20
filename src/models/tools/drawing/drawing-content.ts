@@ -80,13 +80,9 @@ export interface DrawingToolChange {
 export const DrawingToolMetadataModel = types
   .model("DrawingToolMetadata", {
     id: types.string,
-    selectedButton: "select",
     selection: types.array(types.string)
   })
   .actions(self => ({
-    setSelectedButton(button: ToolbarModalButton) {
-      self.selectedButton = button;
-    },
     setSelection(selection: string[]) {
       self.selection.replace(selection);
     }
@@ -104,6 +100,7 @@ export const DrawingContentModel = types
   .model("DrawingTool", {
     type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
     changes: types.array(types.string),
+    selectedButton: "select",
     stroke: DefaultToolbarSettings.stroke,
     fill: DefaultToolbarSettings.fill,
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
@@ -150,9 +147,6 @@ export const DrawingContentModel = types
         get isUserResizable() {
           return true;
         },
-        get selectedButton() {
-          return self.metadata.selectedButton;
-        },
         get hasSelectedObjects() {
           return self.metadata.selection.length > 0;
         }
@@ -180,7 +174,7 @@ export const DrawingContentModel = types
         },
 
         setSelectedButton(button: ToolbarModalButton) {
-          self.metadata.setSelectedButton(button);
+          self.selectedButton = button;
         },
 
         setSelection(ids: string[]) {
@@ -192,7 +186,7 @@ export const DrawingContentModel = types
 
         // sets the model to how we want it to appear when a user first opens a document
         reset() {
-          self.metadata.setSelectedButton("select");
+          self.selectedButton = "select";
         }
       }
     };
