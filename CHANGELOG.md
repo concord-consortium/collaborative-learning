@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.1.1 - released November 20, 2018
+
+- Bug fixes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 64,876 bytes | 0.0% |
+| index.js | 2,288,722 bytes | 0.0% |
+
 ## Version 0.1.0 - released November 19, 2018
 
 - DrawTool: Support background image
