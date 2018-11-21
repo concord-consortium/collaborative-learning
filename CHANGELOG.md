@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.1.2 - released November 20, 2018
+
+- Bug fixes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 64,876 bytes | 0.0% |
+| index.js | 2,289,028 bytes | 0.0% |
+
 ## Version 0.1.1 - released November 20, 2018
 
 - Bug fixes
