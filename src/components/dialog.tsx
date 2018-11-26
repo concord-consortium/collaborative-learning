@@ -65,7 +65,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
         <div className="dialog">
           <div className="dialog-background" />
           <div className="dialog-container">
-            <div className="dialog-title">{title}</div>
+            <div className="dialog-title" data-test="dialog-title">{title}</div>
             {contents}
           </div>
         </div>
@@ -80,7 +80,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="dialog-contents">
         <div className="dialog-text">{dialog.text}</div>
-        <div className="dialog-buttons">
+        <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handleCancelDialog}>Ok</button>
         </div>
       </div>
@@ -91,7 +91,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="dialog-contents">
         <div className="dialog-text">{dialog.text}</div>
-        <div className="dialog-buttons">
+        <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handleConfirmDialogYes}>Yes</button>
           <button id="cancelButton" onClick={this.handleConfirmDialogNo}>No</button>
         </div>
@@ -112,7 +112,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
             ref={(el) => this.input = el}
           />
         </div>
-        <div className="dialog-buttons">
+        <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handlePromptDialogOk} disabled={this.promptValue.length === 0}>Ok</button>
           <button id="cancelButton" onClick={this.handleCancelDialog}>Cancel</button>
         </div>
