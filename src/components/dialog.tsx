@@ -105,6 +105,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
         <div className="dialog-text">{dialog.text}</div>
         <div className="dialog-input">
           <input
+            data-test="dialog-text-input"
             type="text"
             value={this.state.promptValue}
             onChange={this.handlePromptValueChanged}
