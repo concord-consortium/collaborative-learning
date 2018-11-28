@@ -83,7 +83,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
       <div className="titlebar">
         <div className="title" data-test="document-title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
         {!hideButtons &&
-          <div className="actions">
+          <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
               <svg key="publish" className={`icon icon-publish`} data-test="publish-icon" onClick={this.handlePublishWorkspace}>
