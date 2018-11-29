@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { Point, DrawingObjectDataType } from "./drawing-objects";
+import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kDrawingToolID = "Drawing";
 
@@ -193,6 +194,34 @@ export const DrawingContentModel = types
         // sets the model to how we want it to appear when a user first opens a document
         reset() {
           self.metadata.setSelectedButton("select");
+        },
+        updateImageUrl(oldUrl: string, newUrl: string) {
+          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
+          // identify change entries to be modified
+          const updates: Array<{ index: number, change: string }> = [];
+          self.changes.forEach((changeJson, index) => {
+            const change: DrawingToolChange = safeJsonParse(changeJson);
+            switch (change && change.action) {
+              case "create":
+                const createData = change.data as DrawingObjectDataType;
+                if ((createData.type === "image") && (createData.url === oldUrl)) {
+                  createData.url = newUrl;
+                  updates.push({ index, change: JSON.stringify(change) });
+                }
+                break;
+              case "update":
+                const updateData = change.data as DrawingToolUpdate;
+                if ((updateData.update.prop === "url") && (updateData.update.newValue === oldUrl)) {
+                  updateData.update.newValue = newUrl;
+                  updates.push({ index, change: JSON.stringify(change) });
+                }
+                break;
+            }
+          });
+          // make the corresponding changes
+          updates.forEach(update => {
+            self.changes[update.index] = update.change;
+          });
         }
       }
     };

@@ -6,6 +6,7 @@ import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { assign, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
+import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kGeometryToolID = "Geometry";
 
@@ -410,7 +411,20 @@ export const GeometryContentModel = types
         get batchChangeCount() {
           return batchChanges.length;
         },
-        copySelection
+        copySelection,
+        getLastImageUrl(): string | undefined{
+          for (let i = self.changes.length - 1; i >= 0; --i) {
+            const jsonChange = self.changes[i];
+            const change: JXGChange = safeJsonParse(jsonChange);
+            if (change && (change.operation === "create") && (change.target === "image")) {
+              return change.parents && change.parents[0] as string;
+            }
+            if (change && (change.operation === "update") && change.properties &&
+                !Array.isArray(change.properties) && change.properties.url) {
+              return change.properties.url;
+            }
+          }
+        }
       },
       actions: {
         initializeBoard,
@@ -437,6 +451,38 @@ export const GeometryContentModel = types
             self.changes.push.apply(self.changes, batchChanges);
             batchChanges = [];
           }
+        },
+        updateImageUrl(oldUrl: string, newUrl: string) {
+          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
+          // identify change entries to be modified
+          const updates: Array<{ index: number, change: string }> = [];
+          self.changes.forEach((changeJson, index) => {
+            const change: JXGChange = safeJsonParse(changeJson);
+            switch (change && change.operation) {
+              case "create":
+                if (change.parents) {
+                  const createUrl = change.parents[0];
+                  if ((change.target === "image") && (createUrl === oldUrl)) {
+                    change.parents[0] = newUrl;
+                    updates.push({ index, change: JSON.stringify(change) });
+                  }
+                }
+                break;
+              case "update":
+                const updateUrl = change.properties &&
+                                    !Array.isArray(change.properties) &&
+                                    change.properties.url;
+                if (updateUrl && (updateUrl === oldUrl)) {
+                  (change.properties as JXGProperties).url = newUrl;
+                  updates.push({ index, change: JSON.stringify(change) });
+                }
+                break;
+            }
+          });
+          // make the corresponding changes
+          updates.forEach(update => {
+            self.changes[update.index] = update.change;
+          });
         }
       }
     };

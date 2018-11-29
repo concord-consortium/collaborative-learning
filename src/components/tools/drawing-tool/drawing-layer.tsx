@@ -8,10 +8,13 @@ import { DefaultToolbarSettings, computeStrokeDashArray,
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
   EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
-import { getImageDimensions } from "../../../utilities/image-utils";
+import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { find } from "lodash";
+import { assign, debounce, find } from "lodash";
 import { reaction, IReactionDisposer } from "mobx";
+import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
+import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
+const placeholderImage = require("../../../assets/image_placeholder.png");
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -591,6 +594,9 @@ interface DrawingLayerViewState {
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObject|null;
   actionsCount: number;
+  isLoading: boolean;
+  imageContentUrl?: string;
+  imageEntry?: ImageMapEntryType;
 }
 
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
@@ -599,9 +605,40 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public tools: DrawingToolMap;
   private svgRef: React.RefObject<{}>|null;
   private setSvgRef: (element: any) => void;
+  private _isMounted: boolean;
   private disposeCurrentToolReaction: IReactionDisposer;
+  private debouncedUpdateImage = debounce((url: string) => {
+            gImageMap.getImage(url)
+              .then(image => {
+                if (!this._isMounted) return;
+                // update image in drawing
+                const imageObj = find(this.state.objects,
+                                      obj => !!obj && (obj.model.type === "image"));
+                if (imageObj) {
+                  const _imageObj = imageObj as ImageObject;
+                  _imageObj.model.url = image.displayUrl || placeholderImage;
+                }
+                // update react state
+                this.setState({
+                  isLoading: false,
+                  imageContentUrl: undefined,
+                  imageEntry: image
+                });
+                // update mst content if conversion occurred
+                if (image.contentUrl && (url !== image.contentUrl)) {
+                  this.getContent().updateImageUrl(url, image.contentUrl);
+                }
+              })
+              .catch(() => {
+                this.setState({
+                  isLoading: false,
+                  imageContentUrl: undefined,
+                  imageEntry: undefined
+                });
+              });
+          }, 100);
 
-  constructor(props: DrawingLayerViewProps){
+  constructor(props: DrawingLayerViewProps) {
     super(props);
 
     this.state = {
@@ -610,7 +647,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
-      actionsCount: 0
+      actionsCount: 0,
+      isLoading: false
     };
 
     this.tools = {
@@ -633,6 +671,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public componentDidMount() {
+    this._isMounted = true;
+
     this.syncChanges();
 
     this.disposeCurrentToolReaction = reaction(
@@ -645,6 +685,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (this.disposeCurrentToolReaction) {
       this.disposeCurrentToolReaction();
     }
+
+    this._isMounted = false;
   }
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
@@ -966,9 +1008,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const dragContent = e.dataTransfer.getData(kDragTileContent);
       const parsedContent = safeJsonParse(dragContent);
       if (parsedContent) {
-        const droppedContent = parsedContent.content;
-        if (droppedContent && droppedContent.url) {
-          this.handleImageDrop(droppedContent.url);
+        const droppedContent: ImageContentSnapshotOutType = parsedContent.content;
+        const droppedUrl = getUrlFromImageContent(droppedContent);
+        if (droppedUrl) {
+          this.handleImageDrop(droppedUrl);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -977,32 +1020,37 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private handleImageDrop(url: string) {
-    getImageDimensions(undefined, url).then((dimensions: any) => {
-      const prevImage = find(this.state.objects,
-                              obj => !!obj && (obj.model.type === "image"));
-      if (!prevImage) {
-        const image = new ImageObject({
-                            type: "image",
-                            url,
-                            x: 0, y: 0,
-                            width: dimensions.width,
-                            height: dimensions.height
-                          });
-        this.addNewDrawingObject(image.model);
-      }
-      else if (prevImage && prevImage.model.id) {
-        const pImage = prevImage as ImageObject;
-        if (url !== pImage.model.url) {
-          this.addUpdateDrawingObjects([prevImage.model.id], "url", url);
+    gImageMap.getImage(url)
+      .then(imageEntry => {
+        if (!this._isMounted || !imageEntry.contentUrl) return;
+        const prevImage = find(this.state.objects,
+                                obj => !!obj && (obj.model.type === "image"));
+        const contentUrl = imageEntry.contentUrl || url;
+        const width = imageEntry.width!;
+        const height = imageEntry.height!;
+        if (!prevImage) {
+          const image = new ImageObject({
+                              type: "image",
+                              url,
+                              x: 0, y: 0,
+                              width,
+                              height
+                            });
+          this.addNewDrawingObject(image.model);
         }
-        if (dimensions.width !== pImage.model.width) {
-          this.addUpdateDrawingObjects([prevImage.model.id], "width", dimensions.width);
+        else if (prevImage && prevImage.model.id) {
+          const pImage = prevImage as ImageObject;
+          if (url !== pImage.model.url) {
+            this.addUpdateDrawingObjects([prevImage.model.id], "url", contentUrl);
+          }
+          if (width !== pImage.model.width) {
+            this.addUpdateDrawingObjects([prevImage.model.id], "width", width);
+          }
+          if (height !== pImage.model.height) {
+            this.addUpdateDrawingObjects([prevImage.model.id], "height", height);
+          }
         }
-        if (dimensions.height !== pImage.model.height) {
-          this.addUpdateDrawingObjects([prevImage.model.id], "height", dimensions.height);
-        }
-      }
-    });
+      });
   }
 
   private sendChange(change: DrawingToolChange): any {
@@ -1020,6 +1068,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       case "update":
         this.updateDrawingObjects(change.data as DrawingToolUpdate);
+        break;
       case "delete":
         this.deleteDrawingObjects(change.data as DrawingToolDeletion);
         break;
@@ -1042,7 +1091,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         drawingObject = new EllipseObject(data);
         break;
       case "image":
-        drawingObject = new ImageObject(data);
+        const imageEntry = gImageMap.getCachedImage(data.url);
+        const contentUrl = imageEntry && imageEntry.contentUrl || data.url;
+        const displayUrl = imageEntry && imageEntry.displayUrl || "";
+        if (contentUrl !== data.url) {
+          this.updateImageUrl(contentUrl);
+        }
+        drawingObject = new ImageObject(assign({}, data, { url: displayUrl }));
         break;
     }
     if (drawingObject && drawingObject.model.id) {
@@ -1061,12 +1116,25 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
+  private updateImageUrl(url: string) {
+    if (!this.state.isLoading) {
+      this.setState({ isLoading: true });
+    }
+    this.debouncedUpdateImage(url);
+  }
+
   private updateDrawingObjects(update: DrawingToolUpdate) {
     const {ids, update: {prop, newValue}} = update;
     for (const id of ids) {
       const drawingObject = this.state.objects[id];
       if (drawingObject && drawingObject.model.hasOwnProperty(prop)) {
-        (drawingObject.model as any)[prop] = newValue;
+        if ((drawingObject instanceof ImageObject) && (prop === "url")) {
+          const url = newValue as string;
+          this.updateImageUrl(url);
+        }
+        else {
+          (drawingObject.model as any)[prop] = newValue;
+        }
       }
     }
   }

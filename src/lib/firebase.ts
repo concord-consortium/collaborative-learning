@@ -181,7 +181,7 @@ export class Firebase {
   // Firebase Storage
   //
 
-  public getPublicUrlFromStore(storePath: string, storeUrl?: string): Promise<any> {
+  public getPublicUrlFromStore(storePath?: string, storeUrl?: string): Promise<any> {
     const ref = storeUrl ? this.firebaseStorage().refFromURL(storeUrl) : this.firebaseStorage().ref(storePath);
     // Get the download URL - returns a url with an authentication token for the current session
     return ref.getDownloadURL().then((url) => {
