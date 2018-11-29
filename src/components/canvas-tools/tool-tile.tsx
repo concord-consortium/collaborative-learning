@@ -12,7 +12,6 @@ import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import { HotKeys } from "../../utilities/hot-keys";
-import * as FileSaver from "file-saver";
 import { cloneDeep } from "lodash";
 import "./tool-tile.sass";
 

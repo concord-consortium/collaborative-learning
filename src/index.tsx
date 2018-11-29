@@ -11,6 +11,10 @@ import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
 import { setTitle } from "./lib/misc";
+import { gImageMap } from "./models/image-map";
+import { setLivelynessChecking } from "mobx-state-tree";
+// set to true to enable MST liveliness checking
+const kEnableLivelinessChecking = false;
 
 import "./index.sass";
 
@@ -25,7 +29,13 @@ const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
+gImageMap.initialize(stores.db, user.id);
+
 Logger.initializeLogger(stores, investigation, problem);
+
+if (kEnableLivelinessChecking) {
+  setLivelynessChecking("error");
+}
 
 setTitle(showDemoCreator, problem);
 stores.ui.setShowDemoCreator(!!showDemoCreator);

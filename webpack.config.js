@@ -11,7 +11,7 @@ module.exports = (env, argv) => {
   return {
     context: __dirname, // to automatically find tsconfig.json
     devtool: 'source-map',
-    entry: './src/index.tsx',
+    entry: ['whatwg-fetch', './src/index.tsx'],
     mode: 'development',
     output: {
       filename: 'assets/index.[hash].js'

@@ -12,6 +12,7 @@ import { DBOfferingGroup,
          DBDocument,
          DBOfferingUserSectionDocument,
          DBLearningLog,
+         DBLearningLogPublication,
          DBPublicationDocumentMetadata,
          DBGroupUserConnections,
          DBPublication,
@@ -635,5 +636,12 @@ export class DB {
         })
         .catch(reject);
     });
+  }
+
+  public getImageBlob(imageKey: string) {
+    return this.getImage(imageKey)
+            .then(image => fetch(image.imageData))
+            .then(response => response.blob())
+            .then(blob => URL.createObjectURL(blob));
   }
 }

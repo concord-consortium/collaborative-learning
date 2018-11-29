@@ -8,11 +8,11 @@ import { getEventCoords, copyCoords } from "./geometry-tool/geometry-utils";
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
-import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
-import { assign, each, isEqual, size as _size, some, values } from "lodash";
+import { assign, debounce, each, size as _size, values } from "lodash";
 import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
-import { getImageDimensions } from "../../utilities/image-utils";
+import { ImageMapEntryType, gImageMap } from "../../models/image-map";
+import { getUrlFromImageContent } from "../../utilities/image-utils";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
@@ -42,6 +42,9 @@ interface IState extends SizeMeProps {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
+  isLoading?: boolean;
+  imageContentUrl?: string;
+  imageEntry?: ImageMapEntryType;
   syncedChanges: number;
   disableRotate: boolean;
 }
@@ -105,6 +108,21 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     if (content !== prevState.content) {
       if (geometryContent.changes.length !== prevState.syncedChanges) {
+        // synchronize background image changes
+        let lastUrl;
+        for (let i = prevState.syncedChanges; i < geometryContent.changes.length; ++i) {
+          const jsonChange = geometryContent.changes[i];
+          const change = jsonChange && safeJsonParse(jsonChange);
+          const url = change && change.properties &&
+                        !Array.isArray(change.properties) &&
+                        change.properties.url;
+          if (url) lastUrl = url;
+        }
+        if (lastUrl) {
+          // signal update to be triggered in componentDidUpdate
+          nextState.imageContentUrl = lastUrl;
+        }
+        // synchronize remaining changes
         nextState.syncedChanges = syncBoardChanges(prevState.board, geometryContent,
                                                   prevState.syncedChanges, readOnly);
       }
@@ -119,6 +137,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         };
 
   private domElement: HTMLDivElement | null;
+  private _isMounted: boolean;
 
   private disposeSelectionObserver: any;
 
@@ -134,7 +153,35 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private lastPasteId: string;
   private lastPasteCount: number;
 
+  private debouncedUpdateImage = debounce((url: string) => {
+            gImageMap.getImage(url)
+              .then(image => {
+                if (!this._isMounted) return;
+                // update JSXGraph state
+                const { board } = this.state;
+                if (board) {
+                  const bgImage = this.getBackgroundImage(this.state.board);
+                  if (bgImage && image.displayUrl) {
+                    bgImage.url = image.displayUrl;
+                    board.update();
+                  }
+                }
+                // update react state
+                this.setState({
+                  isLoading: false,
+                  imageContentUrl: undefined,
+                  imageEntry: image
+                });
+                // update mst content if conversion occurred
+                if (image.contentUrl && (url !== image.contentUrl)) {
+                  this.getContent().updateImageUrl(url, image.contentUrl);
+                }
+              });
+          }, 100);
+
   public componentDidMount() {
+    this._isMounted = true;
+
     this.initializeContent();
 
     if (!this.props.readOnly && this.props.toolApiInterface) {
@@ -161,6 +208,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (!this.state.board) {
       this.initializeContent();
     }
+    if (this.state.imageContentUrl) {
+      this.updateImageUrl(this.state.imageContentUrl);
+    }
   }
 
   public componentWillUnmount() {
@@ -170,6 +220,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (this.state.board) {
       JXG.JSXGraph.freeBoard(this.state.board);
     }
+
+    this._isMounted = false;
   }
 
   public render() {
@@ -217,6 +269,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
       if (board) {
         this.handleCreateBoard(board);
+        const bgImage = this.getBackgroundImage(board);
+        if (bgImage && bgImage.url) {
+          this.updateImageUrl(bgImage.url);
+        }
       }
       const newState = assign({ syncedChanges: content.changes.length },
                                 board ? { board } : null);
@@ -232,6 +288,23 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "cmd-x": this.handleCut,
       "cmd-v": this.handlePaste
     });
+  }
+
+  private getBackgroundImage(_board?: JXG.Board) {
+    const board = _board || this.state.board;
+    if (!board) return;
+    const images = this.getContent()
+                      .findObjects(board, obj => obj.elType === "image");
+    return images.length > 0
+            ? images[images.length - 1] as JXG.Image
+            : undefined;
+  }
+
+  private updateImageUrl(url: string) {
+    if (!this.state.isLoading) {
+      this.setState({ isLoading: true });
+    }
+    this.debouncedUpdateImage(url);
   }
 
   private getOneSelectedPolygon() {
@@ -436,39 +509,39 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     if (this.isAcceptableImageDrag(e)) {
       const dragContent = e.dataTransfer.getData(kDragTileContent);
-      let parsedContent;
-      try {
-        parsedContent = JSON.parse(dragContent);
-      }
-      catch (e) {
-        // ignore errors
-      }
+      const parsedContent = safeJsonParse(dragContent);
       const { board } = this.state;
       if (parsedContent && board) {
         const { model: { content } } = this.props;
         const geometryContent = content as GeometryContentModelType;
         const droppedContent = parsedContent.content;
-        const urlOrProxy = droppedContent && droppedContent.url;
-        getImageDimensions(undefined, urlOrProxy).then((dimensions: any) => {
-          const width = dimensions.width / kGeometryDefaultPixelsPerUnit;
-          const height = dimensions.height / kGeometryDefaultPixelsPerUnit;
-          const imageIds = geometryContent
-                            .findObjects(board, obj => obj.elType === "image")
-                            .map(obj => obj.id);
-          this.applyChanges(() => {
-            if (imageIds.length) {
-              // change URL if there's already an image present
-              const imageId = imageIds[imageIds.length - 1];
-              geometryContent.updateObjects(board, imageId, {
-                                              url: urlOrProxy,
-                                              size: [width, height]
-                                            });
-            }
-            else {
-              geometryContent.addImage(board, urlOrProxy, [0, 0], [width, height]);
-            }
-          });
-        });
+        const url = getUrlFromImageContent(droppedContent);
+        if (url) {
+          gImageMap.getImage(url)
+            .then(image => {
+              if (!this._isMounted || !image.contentUrl) return;
+              const width = image.width! / kGeometryDefaultPixelsPerUnit;
+              const height = image.height! / kGeometryDefaultPixelsPerUnit;
+              const imageIds = geometryContent
+                                .findObjects(board, obj => obj.elType === "image")
+                                .map(obj => obj.id);
+              const contentUrl = image.contentUrl || url;
+              this.applyChanges(() => {
+                if (imageIds.length) {
+                  // change URL if there's already an image present
+                  const imageId = imageIds[imageIds.length - 1];
+                  geometryContent.updateObjects(board, imageId, {
+                                                  url: contentUrl,
+                                                  size: [width, height]
+                                                });
+                }
+                else {
+                  geometryContent.addImage(board, contentUrl, [0, 0], [width, height]);
+                }
+              });
+              this.updateImageUrl(contentUrl);
+            });
+        }
         e.preventDefault();
         e.stopPropagation();
       }

@@ -1,92 +1,114 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
-import { BaseComponent } from "../base";
+import { BaseComponent, IBaseProps } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { getImage, storeImage, getImageDimensions, ISimpleImage  } from "../../utilities/image-utils";
+import { gImageMap, ImageMapEntryType } from "../../models/image-map";
+import { debounce } from "lodash";
+const placeholderImage = require("../../assets/image_placeholder.png");
 import "./image-tool.sass";
 
-interface IProps {
+interface IProps extends IBaseProps {
   context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
 }
 
 interface IState {
-  imageUrl?: string;
   isEditing?: boolean;
   isLoading?: boolean;
-  imageDimensions?: any;
+  imageContentUrl?: string;
+  imageEntry?: ImageMapEntryType;
+  syncedChanges: number;
 }
 
 const defaultImagePlaceholderSize = { width: 128, height: 128 };
 
 @inject("stores")
 @observer
-export default class ImageToolComponent extends BaseComponent<IProps, {}> {
+export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
-  public state: IState = { isLoading: true, imageUrl: "assets/image_placeholder.png" };
-  private _asyncRequest: any;
-
-  public componentDidMount() {
-    const { model: { content } } = this.props;
-    const imageContent = content as ImageContentModelType;
-    // Migrate Firebase storage relative URLs and web-hosted URLs to stored images
-    this.getImage(imageContent.url);
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    const content = nextProps.model.content as ImageContentModelType;
+    if (content.changeCount > prevState.syncedChanges) {
+      return { isLoading: true, imageContentUrl: content.url, syncedChanges: content.changeCount };
+    }
+    return {};
   }
 
-  public componentWillUnmount() {
-    if (this._asyncRequest) {
-      this._asyncRequest = null;
+  public state: IState = { isLoading: true, syncedChanges: 0 };
+
+  private _isMounted = false;
+  private debouncedUpdateImage = debounce((url: string) => {
+            gImageMap.getImage(url)
+              .then(image => {
+                if (!this._isMounted) return;
+                // update react state
+                this.setState({
+                  isLoading: false,
+                  imageContentUrl: undefined,
+                  imageEntry: image
+                });
+                // update mst content if conversion occurred
+                if (image.contentUrl && (url !== image.contentUrl)) {
+                  this.getContent().updateImageUrl(url, image.contentUrl);
+                }
+              });
+          }, 100);
+
+  public componentDidMount() {
+    this._isMounted = true;
+    if (this.state.imageContentUrl) {
+      this.updateImageUrl(this.state.imageContentUrl);
     }
   }
 
-  public componentDidUpdate(nextProps: IProps) {
-    const { model: { content } } = nextProps;
-    const { imageUrl, isLoading } = this.state;
+  public componentWillUnmount() {
+    this._isMounted = false;
+  }
 
-    const imageContent = content as ImageContentModelType;
-    if (!isLoading && !imageUrl && imageContent.url) {
-      this.getImage(imageContent.url);
+  public componentDidUpdate() {
+    if (this.state.imageContentUrl) {
+      this.updateImageUrl(this.state.imageContentUrl);
     }
   }
 
   public render() {
     const { readOnly, model } = this.props;
-    const { content } = model;
-    const { isEditing, isLoading, imageUrl, imageDimensions } = this.state;
+    const { isEditing, isLoading, imageEntry } = this.state;
     const { ui } = this.stores;
 
-    const imageContent = content as ImageContentModelType;
-    const editableClass = readOnly ? "read-only" : "editable";
+    const contentUrl = this.getContent().url;
+    const isExternalUrl = gImageMap.isExternalUrl(contentUrl);
+    const editableUrl = isExternalUrl ? contentUrl : undefined;
 
     // Include states for selected and editing separately to clean up UI a little
+    const editableClass = readOnly ? "read-only" : "editable";
     const selectedClass = ui.isSelectedTile(model) ? (isEditing && !readOnly ? "editing" : "selected") : "";
     const divClasses = `image-tool ${editableClass}`;
     const inputClasses = `image-url ${selectedClass}`;
     const fileInputClasses = `image-file ${selectedClass}`;
-    const imageToolControlContainerClasses = !readOnly ? `image-tool-controls ${selectedClass}`
-      : `image-tool-controls readonly`;
-
-    const dimensions = imageDimensions ? imageDimensions : defaultImagePlaceholderSize;
-    const imageToUseForDisplay = imageUrl ? imageUrl : imageContent.url;
-    const imagePath = imageToUseForDisplay && imageToUseForDisplay.startsWith("http") ? imageToUseForDisplay : "";
+    const imageToolControlContainerClasses = `image-tool-controls ${readOnly ? "readonly" : selectedClass}`;
+    const imageWidth = imageEntry && imageEntry.width || defaultImagePlaceholderSize.width;
+    const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
+    const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || placeholderImage;
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle = {
       backgroundImage: "url(" + imageToUseForDisplay + ")",
-      backgroundRepeat: "no-repeat",
-      backgroundSize: "cover",
-      width: dimensions.width + "px ",
-      height: dimensions.height + "px"
+      width: imageWidth + "px",
+      height: imageHeight + "px"
     };
     return (
-      <div className={divClasses} onMouseDown={this.handleMouseDown} onBlur={this.handleExitBlur}>
+      <div className={divClasses}
+        onMouseDown={this.handleMouseDown}
+        onDragOver={this.handleDragOver}
+        onDrop={this.handleDrop} >
         {isLoading && <div className="loading-spinner" />}
-        <div className="image-tool-image" style={imageDisplayStyle} />
+        <div className="image-tool-image" style={imageDisplayStyle} onMouseDown={this.handleMouseDown} />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
-            defaultValue={imagePath}
+            defaultValue={editableUrl}
             onBlur={this.handleBlur}
             onKeyUp={this.handleKeyUp}
           />
@@ -101,39 +123,49 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleUpdateImageDimensions = (imageData: string) => {
-    this._asyncRequest = getImageDimensions(undefined, imageData).then((dimensions: any) => {
-      // in case we were unmounted
-      if (this._asyncRequest) {
-        this._asyncRequest = null;
-        this.setState({
-          imageUrl: imageData,
-          imageDimensions: dimensions,
-          isLoading: false
-        });
-      }
-      this.setState({
-        imageUrl: imageData,
-        imageDimensions: dimensions,
-        isLoading: false
-      });
-    });
+  private getContent() {
+    return this.props.model.content as ImageContentModelType;
+  }
+
+  private updateImageUrl(url: string) {
+    if (!this.state.isLoading) {
+      this.setState({ isLoading: true });
+    }
+    this.debouncedUpdateImage(url);
   }
 
   private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
-    this.storeImage(currentFile);
+    if (currentFile) {
+      this.setState({ isLoading: true, isEditing: false }, () => {
+        gImageMap.addFileImage(currentFile)
+          .then(image => {
+            if (this._isMounted) {
+              const content = this.getContent();
+              this.setState({ isLoading: false, imageEntry: image });
+              if (image.contentUrl && (image.contentUrl !== content.url)) {
+                content.setUrl(image.contentUrl);
+              }
+            }
+          });
+      });
+    }
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.setSelectedTile(this.props.model);
-  }
+    if (this.state.isEditing && (e.target === e.currentTarget)) {
+      this.setState({ isEditing: false });
+    }
+}
 
   private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { isEditing } = this.state;
-    if (!isEditing) {
+    if (!this.state.isEditing) {
       this.setState({ isEditing: true });
+    }
+    else if (e.target === e.currentTarget) {
+      this.setState({ isEditing: false });
     }
   }
 
@@ -141,59 +173,72 @@ export default class ImageToolComponent extends BaseComponent<IProps, {}> {
     // If we detect an enter key, treat the same way we handle losing focus,
     // i.e., attempt to change the URL for the image.
     if (e.keyCode === 13) {
-      const newUrl = e.currentTarget.value;
-      if (newUrl !== this.state.imageUrl) {
-        this.storeImage(undefined, newUrl);
-      }
+      this.storeNewImageUrl(e.currentTarget.value);
+    }
+    else if (e.keyCode === 27) {
+      this.setState({ isEditing: false });
     }
   }
 
   // User has input a new url into the input box, check the dimensions, upload to FB,
   // then update state and finally model
   private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const newUrl = e.currentTarget.value;
-    if (newUrl !== this.state.imageUrl) {
-      this.storeImage(undefined, newUrl);
+    this.setState({ isEditing: false });
+    this.storeNewImageUrl(e.currentTarget.value);
+  }
+
+  private storeNewImageUrl(newUrl: string) {
+    const { imageEntry } = this.state;
+    const isExternalUrl = gImageMap.isExternalUrl(newUrl);
+    const contentUrl = imageEntry && imageEntry.contentUrl;
+    if (isExternalUrl && (newUrl !== contentUrl)) {
+      gImageMap.getImage(newUrl)
+        .then(image => {
+          if (image.contentUrl && (image.displayUrl !== placeholderImage)) {
+            this.getContent().setUrl(image.contentUrl);
+          }
+        });
     }
   }
 
-  private handleExitBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    this.setState({ isEditing: false });
+  private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    const { readOnly } = this.props;
+    const hasUriList = e.dataTransfer.types.indexOf("text/uri-list") >= 0;
+    // image drop area is central 80% in each dimension
+    if (!readOnly && hasUriList) {
+      const kImgDropMarginPct = 0.1;
+      const eltBounds = e.currentTarget.getBoundingClientRect();
+      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+          (e.clientX < eltBounds.right - kImgDropMarginX) &&
+          (e.clientY > eltBounds.top + kImgDropMarginY) &&
+          (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  private getImage = (imageId: string) => {
-    const { db, user } = this.stores;
-
-    this._asyncRequest = getImage(imageId, db, user.id).then((image: ISimpleImage) => {
-      if (this._asyncRequest) {
-        this.handleUpdateImageDimensions(image.imageData ? image.imageData : image.imageUrl);
-        const imageContent = this.props.model.content as ImageContentModelType;
-        if (image.imageUrl !== imageContent.url) {
-          imageContent.setUrl(image.imageUrl);
-        }
-        this._asyncRequest = null;
-      }
-    });
+  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const isAcceptableDrag = this.isAcceptableImageDrag(e);
+    if (isAcceptableDrag) {
+      e.dataTransfer.dropEffect = "copy";
+      e.preventDefault();
+    }
   }
 
-  private storeImage = (newImageFile?: File, newImagePath?: string) => {
-    const { user, db } = this.stores;
-
-    // Set loading state for showing spinner
-    this.setState({ isLoading: true });
-
-    this._asyncRequest = storeImage(db, user.id, newImageFile, newImagePath).then(image => {
-      // in case we were unmounted
-      if (this._asyncRequest) {
-        this.handleUpdateImageDimensions(image.imageData ? image.imageData : image.imageUrl);
-
-        const imageContent = this.props.model.content as ImageContentModelType;
-        if (image.imageUrl !== imageContent.url) {
-          imageContent.setUrl(image.imageUrl);
-        }
-
-        this._asyncRequest = null;
+  private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (this.isAcceptableImageDrag(e)) {
+      const uriList = e.dataTransfer.getData("text/uri-list");
+      const uriArray = uriList && uriList.split(/[\r\n]+/);
+      const dropUrl = uriArray && uriArray[0];
+      if (dropUrl) {
+        this.setState({ isEditing: false });
+        this.storeNewImageUrl(dropUrl);
+        e.preventDefault();
+        e.stopPropagation();
       }
-    });
+    }
   }
 }
