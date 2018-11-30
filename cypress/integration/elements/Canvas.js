@@ -83,6 +83,10 @@ class Canvas{
         return cy.get('.canvas-area > .four-up >.canvas-container.south-west');
     }
 
+    getCenterSeparator(){
+        return cy.get('.canvas-area > .four-up > .center');
+    }
+
     getShareButton(){
         return cy.get('[data-test=document-titlebar-actions] >.visibility.private > .icon-share');
     }
