@@ -93,7 +93,7 @@ describe("ImageMap", () => {
             firebase: { getPublicUrlFromStore: (path?: string, url?: string) => Promise.resolve(kFBStorageUrl) },
             getImageBlob: jest.fn(() => Promise.resolve(kBlobUrl))
           };
-    const storeSpy = jest.spyOn(ImageUtils, "storeImage")
+    const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
                           .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
     return firebaseStorageImagesHandler.store(kFBStorageUrl, mockDB, "user")
       .then(imageResult => {
@@ -161,8 +161,8 @@ describe("ImageMap", () => {
     return firebaseStorageImagesHandler.store(kCCImgFBRTDB, mockDB, "user")
       .then(imageResult => {
         expect(storeSpy).toHaveBeenCalled();
-        expect(imageResult.contentUrl).toBe(placeholderImage);
-        expect(imageResult.displayUrl).toBe(placeholderImage);
+        expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
+        expect(imageResult.displayUrl).toBe(kBlobUrl);
       });
   });
 
@@ -264,7 +264,7 @@ describe("ImageMap", () => {
   });
 
   it("can add a file image", () => {
-    const storeSpy = jest.spyOn(ImageUtils, "storeImage")
+    const storeSpy = jest.spyOn(ImageUtils, "storeFileImage")
                           .mockImplementation(() =>
                             Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
     const file: any = { name: "foo" };

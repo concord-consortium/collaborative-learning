@@ -1094,7 +1094,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         const imageEntry = gImageMap.getCachedImage(data.url);
         const contentUrl = imageEntry && imageEntry.contentUrl || data.url;
         const displayUrl = imageEntry && imageEntry.displayUrl || "";
-        if (contentUrl !== data.url) {
+        if (contentUrl && (contentUrl !== data.url)) {
           this.updateImageUrl(contentUrl);
         }
         drawingObject = new ImageObject(assign({}, data, { url: displayUrl }));

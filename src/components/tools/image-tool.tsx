@@ -39,6 +39,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public state: IState = { isLoading: true, syncedChanges: 0 };
 
   private _isMounted = false;
+  private inputElt: HTMLInputElement | null;
   private debouncedUpdateImage = debounce((url: string) => {
             gImageMap.getImage(url)
               .then(image => {
@@ -115,6 +116,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
+            ref={elt => this.inputElt = elt}
             defaultValue={editableUrl}
             onBlur={this.handleBlur}
             onKeyUp={this.handleKeyUp}
@@ -153,6 +155,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
               this.setState({ isLoading: false, imageEntry: image });
               if (image.contentUrl && (image.contentUrl !== content.url)) {
                 content.setUrl(image.contentUrl);
+              }
+              if (this.inputElt) {
+                this.inputElt.value = "";
               }
             }
           });
@@ -203,6 +208,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         .then(image => {
           if (image.contentUrl && (image.displayUrl !== placeholderImage)) {
             this.getContent().setUrl(image.contentUrl);
+            if (this.inputElt) {
+              this.inputElt.value = image.contentUrl;
+            }
           }
         });
     }

@@ -26,21 +26,12 @@ export interface IImageHandler {
   store: (url: string, db?: DB, userId?: string) => Promise<ImageMapEntrySnapshot>;
 }
 
-interface IImageContext {
-  suspendCount: number;
-  url: string;
-  promise: Promise<ImageMapEntryType>;
-  resolve?: any;
-  reject?: any;
-}
-
 export const ImageMapModel = types
   .model("ImageMap", {
     images: types.map(ImageMapEntry)
   })
   .volatile(self => ({
-    handlers: [] as IImageHandler[],
-    contexts: {} as { [id: string]: IImageContext }
+    handlers: [] as IImageHandler[]
   }))
   .views(self => ({
     hasImage(url: string) {
@@ -278,9 +269,6 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                 // TODO: remove old images
                 const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
                 resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-              })
-              .catch(() => {
-                resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
               });
           }
           else {
