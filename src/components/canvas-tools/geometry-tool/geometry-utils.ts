@@ -1,15 +1,27 @@
+export function copyCoords(coords: JXG.Coords) {
+  return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
+}
+
 // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
 export function getEventCoords(board: JXG.Board, evt: any, scale?: number, index?: number) {
+  const _index = index != null
+                  ? index
+                  : (evt[JXG.touchProperty] ? 0 : undefined);
   const cPos = board.getCoordsTopLeftCorner();
-  const absPos = JXG.getPosition(evt, index);
+  const absPos = JXG.getPosition(evt, _index);
   const dx = (absPos[0] - cPos[0]) / (scale || 1);
   const dy = (absPos[1] - cPos[1]) / (scale || 1);
 
   return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
 }
 
-export function copyCoords(coords: JXG.Coords) {
-  return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
+// Replacement for Board.getAllObjectsUnderMouse() which doesn't handle scaled coordinates
+export function getAllObjectsUnderMouse(board: JXG.Board, evt: any, scale?: number) {
+  const coords = getEventCoords(board, evt, scale);
+  return board.objectsList.filter(obj => {
+    return obj.visPropCalc.visible && obj.hasPoint &&
+            obj.hasPoint(coords.scrCoords[1], coords.scrCoords[2]);
+  });
 }
 
 export function rotateCoords(coords: JXG.Coords, center: JXG.Coords, angle: number) {

@@ -4,7 +4,7 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit, setElementColor
         } from "../../models/tools/geometry/geometry-content";
-import { getEventCoords, copyCoords } from "./geometry-tool/geometry-utils";
+import { copyCoords, getEventCoords, getAllObjectsUnderMouse } from "./geometry-tool/geometry-utils";
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
@@ -636,8 +636,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
-      const index = evt[JXG.touchProperty] ? 0 : undefined;
-      const coords = getEventCoords(board, evt, scale, index);
+      const coords = getEventCoords(board, evt, scale);
       const x = coords.usrCoords[1];
       const y = coords.usrCoords[2];
       if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
@@ -650,8 +649,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (!this.lastBoardDown) { return; }
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
-      const index = evt[JXG.touchProperty] ? 0 : undefined;
-      const coords = getEventCoords(board, evt, scale, index);
+      const coords = getEventCoords(board, evt, scale);
       const [ , x, y] = this.lastBoardDown.coords.usrCoords;
       if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
         return;
@@ -659,7 +657,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       // clicks on background (or images) of board clear the selection
       const geometryContent = this.props.model.content as GeometryContentModelType;
-      const elements = board.getAllObjectsUnderMouse(evt)
+      const elements = getAllObjectsUnderMouse(board, evt, scale)
                             .filter(obj => obj && (obj.elType !== "image"));
       if (!elements.length && !hasSelectionModifier(evt) && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
@@ -806,8 +804,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { scale } = this.props;
       const { board } = this.state;
       if (!board) return false;
-      const index = evt[JXG.touchProperty] ? 0 : undefined;
-      const coords = getEventCoords(board, evt, scale, index);
+      const coords = getEventCoords(board, evt, scale);
       let inVertex = false;
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
