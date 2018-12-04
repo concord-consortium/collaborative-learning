@@ -40,7 +40,8 @@ declare namespace JXG {
     removeObject: (object: GeometryElement) => JXG.Board;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
-    getAllObjectsUnderMouse: (evt: any) => GeometryElement[];
+    // use geometry-utils.getAllObjectsUnderMouse() instead
+    // getAllObjectsUnderMouse: (evt: any) => GeometryElement[];
 
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => JXG.Board;
@@ -74,6 +75,7 @@ declare namespace JXG {
     parents: GeometryElement[];
     childElements: { [id: string]: GeometryElement };
     visProp: { [prop: string]: any };
+    visPropCalc: { [prop: string]: any };
     fixed: boolean;
 
     removeChild: (child: GeometryElement) => JXG.Board;
