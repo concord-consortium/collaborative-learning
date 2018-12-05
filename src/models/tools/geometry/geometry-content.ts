@@ -1,7 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
-import { isBoard } from "./jxg-board";
+import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { assign, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
@@ -9,9 +9,6 @@ import * as uuid from "uuid/v4";
 export const kGeometryToolID = "Geometry";
 
 export const kGeometryDefaultHeight = 320;
-// matches curriculum images
-export const kGeometryDefaultPixelsPerUnit = 18.3;
-export const kGeometryDefaultAxisMin = -1;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 

@@ -2,10 +2,10 @@ import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { GeometryContentModelType, kGeometryDefaultPixelsPerUnit, setElementColor
-        } from "../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, setElementColor } from "../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse } from "./geometry-tool/geometry-utils";
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
+import { kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
 import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
 import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
@@ -600,7 +600,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.dragSelectedPoints(evt, usrDiff);
 
     // only create a change object if there's actually a change
-    if ((usrDiff[0] !== 0) || (usrDiff[1] !== 0)) {
+    if (usrDiff[1] || usrDiff[2]) {
       const ids: string[] = [];
       const props: Array<{ position: number[] }> = [];
       each(this.dragPts, (entry, id) => {
