@@ -1,9 +1,27 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import "./jxg";
-import { assign, each } from "lodash";
+import { assign, each, cloneDeep } from "lodash";
 import * as uuid from "uuid/v4";
 
+// matches curriculum images
+export const kGeometryDefaultPixelsPerUnit = 18.3;
+export const kGeometryDefaultAxisMin = -1;
 export const isBoard = (v: any) => v instanceof JXG.Board;
+
+function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
+  const elt = document.getElementById(domElementID);
+  const eltBounds = elt && elt.getBoundingClientRect();
+  const props = cloneDeep(changeProps);
+  if (eltBounds) {
+    // adjust boundingBox to actual size of dom element
+    const { boundingBox, unitX, unitY } = changeProps;
+    const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
+    const xMax = xMin + eltBounds.width / (unitX || kGeometryDefaultPixelsPerUnit);
+    const yMax = yMin + eltBounds.height / (unitY || kGeometryDefaultPixelsPerUnit);
+    props.boundingBox = [xMin, yMax, xMax, yMin];
+  }
+  return assign(defaults, props, overrides);
+}
 
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
@@ -17,7 +35,7 @@ export const boardChangeAgent: JXGChangeAgent = {
           };
     // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
     const overrides = { axis: false, grid: true };
-    const props = assign(defaults, change.properties, overrides);
+    const props = combineProperties(domElementID, defaults, change.properties, overrides);
     const board = JXG.JSXGraph.initBoard(domElementID, props);
     const xAxis = board.create("axis", [ [0, 0], [1, 0] ]);
     xAxis.removeAllTicks();
