@@ -790,7 +790,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         this.endDragSelectedPoints(evt, usrDiff);
       }
 
-      this.dragPts = {};
+      delete this.dragPts[id];
     };
 
     point.on("down", handlePointerDown);
@@ -893,8 +893,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           this.endDragSelectedPoints(evt, usrDiff);
         }
       }
-
-      this.dragPts = {};
+      // remove this polygon's vertices from the dragPts map
+      polygon.vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
 
