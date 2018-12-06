@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.1.3 - released December 7, 2018
+
+- Fix polygon selection bug in four-up view
+- Fix for some point drags failing to save
+- Fix for some polygon drag bugs
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 64,876 bytes | 0.0% |
+| index.js | 2,288,515 bytes | 0.0% |
+
 ## Version 0.1.2 - released November 20, 2018
 
 - Bug fixes
