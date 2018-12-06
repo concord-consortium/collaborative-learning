@@ -3,7 +3,8 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType, setElementColor } from "../../models/tools/geometry/geometry-content";
-import { copyCoords, getEventCoords, getAllObjectsUnderMouse } from "./geometry-tool/geometry-utils";
+import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getDraggableObjectUnderMouse,
+          isDragTargetOrAncestor} from "./geometry-tool/geometry-utils";
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
@@ -127,8 +128,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
-  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords,
-                                      isTarget?: boolean, snapToGrid?: boolean }} = {};
+  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords, snapToGrid?: boolean }} = {};
   private isVertexDrag: boolean;
 
   private lastPasteId: string;
@@ -549,24 +549,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         if (pt && isSelected) {
-          // targets are dragged by JSXGraph
-          const isTarget = (id === dragTarget.id) ||
-                            (values(dragTarget.ancestors)
-                              .findIndex(ancestor => ancestor.id === id) >= 0);
           this.dragPts[id] = {
             initial: copyCoords(pt.coords),
-            snapToGrid: pt.getAttribute("snapToGrid"),
-            isTarget
+            snapToGrid: pt.getAttribute("snapToGrid")
           };
-          if (!isTarget) {
-            pt.setAttribute({ snapToGrid: false });
-          }
         }
       });
     }
   }
 
-  private dragSelectedPoints(evt: any, usrDiff: number[]) {
+  private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
@@ -576,8 +568,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         // move the points not dragged by JSXGraph
-        if (pt && !entry.isTarget) {
+        if (pt && !isDragTargetOrAncestor(pt, dragTarget)) {
           const newUsrCoords = JXG.Math.Statistics.add(entry.initial.usrCoords, usrDiff) as number[];
+          pt.setAttribute({ snapToGrid: false });
           pt.setPosition(JXG.COORDS_BY_USER, newUsrCoords);
           entry.final = copyCoords(pt.coords);
         }
@@ -585,7 +578,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     });
   }
 
-  private endDragSelectedPoints(evt: any, usrDiff: number[]) {
+  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
@@ -597,7 +590,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     });
 
-    this.dragSelectedPoints(evt, usrDiff);
+    this.dragSelectedPoints(evt, dragTarget, usrDiff);
 
     // only create a change object if there's actually a change
     if (usrDiff[1] || usrDiff[2]) {
@@ -774,7 +767,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                   dragEntry.initial.usrCoords) as number[];
-      this.dragSelectedPoints(evt, usrDiff);
+      this.dragSelectedPoints(evt, point, usrDiff);
     };
 
     const handlePointerUp = (evt: any) => {
@@ -787,7 +780,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         dragEntry.final = copyCoords(point.coords);
         const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                     dragEntry.initial.usrCoords) as number[];
-        this.endDragSelectedPoints(evt, usrDiff);
+        this.endDragSelectedPoints(evt, point, usrDiff);
       }
 
       delete this.dragPts[id];
@@ -828,8 +821,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
+      const { board, scale } = this.state;
+      if (!board || (polygon !== getDraggableObjectUnderMouse(board, evt, scale))) return;
       const geometryContent = this.props.model.content as GeometryContentModelType;
-      const { board } = this.state;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
       let selectVertices = false;
@@ -876,7 +870,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (dragEntry && dragEntry.initial) {
         const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                     dragEntry.initial.usrCoords) as number[];
-        this.dragSelectedPoints(evt, usrDiff);
+        this.dragSelectedPoints(evt, polygon, usrDiff);
       }
       this.setState({ disableRotate: true });
     };
@@ -890,7 +884,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (dragEntry && dragEntry.initial) {
           const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                       dragEntry.initial.usrCoords) as number[];
-          this.endDragSelectedPoints(evt, usrDiff);
+          this.endDragSelectedPoints(evt, polygon, usrDiff);
         }
       }
       // remove this polygon's vertices from the dragPts map

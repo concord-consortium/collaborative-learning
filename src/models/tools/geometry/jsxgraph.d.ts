@@ -74,6 +74,8 @@ declare namespace JXG {
     ancestors: { [id: string]: GeometryElement };
     parents: GeometryElement[];
     childElements: { [id: string]: GeometryElement };
+    isDraggable: boolean;
+    lastDragTime: Date;
     visProp: { [prop: string]: any };
     visPropCalc: { [prop: string]: any };
     fixed: boolean;
