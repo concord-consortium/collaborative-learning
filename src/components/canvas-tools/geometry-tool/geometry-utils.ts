@@ -1,3 +1,5 @@
+import { values } from "lodash";
+
 export function copyCoords(coords: JXG.Coords) {
   return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
 }
@@ -13,6 +15,38 @@ export function getEventCoords(board: JXG.Board, evt: any, scale?: number, index
   const dy = (absPos[1] - cPos[1]) / (scale || 1);
 
   return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
+}
+
+export function isDragTargetOrAncestor(elt: JXG.GeometryElement, dragTarget: JXG.GeometryElement) {
+  return (elt.id === dragTarget.id) ||
+          (values(dragTarget.ancestors)
+            .findIndex(ancestor => ancestor.id === elt.id) >= 0);
+
+}
+
+// This function is designed to replicate the logic in Board.initMoveObject().
+// When a click occurs on multiple overlapping objects, we want the one that
+// JSXGraph will choose to drag to be the one that gets selected.
+export function getDraggableObjectUnderMouse(board: JXG.Board, evt: any, scale?: number) {
+  const coords = getEventCoords(board, evt, scale);
+  const [ , x, y] = coords.scrCoords;
+  const count = board.objectsList.length;
+  let dragEl;
+  for (let i = 0; i < count; ++i) {
+    const pEl = board.objectsList[i];
+    const hasPoint = pEl && pEl.hasPoint && pEl.hasPoint(x, y);
+    const isFixed = pEl && pEl.getAttribute("fixed"); // !Type.evaluate(pEl.visProp.fixed)
+    if (hasPoint && pEl.isDraggable && pEl.visPropCalc.visible && !isFixed) {
+      if (!dragEl ||
+            (pEl.visProp.layer > dragEl.visProp.layer ||
+              (pEl.visProp.layer === dragEl.visProp.layer &&
+                pEl.lastDragTime.getTime() >= dragEl.lastDragTime.getTime()
+              ))) {
+        dragEl = pEl;
+      }
+    }
+  }
+  return dragEl;
 }
 
 // Replacement for Board.getAllObjectsUnderMouse() which doesn't handle scaled coordinates
