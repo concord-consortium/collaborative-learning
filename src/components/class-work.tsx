@@ -29,6 +29,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
             return (
               <div
                 className="list-item"
+                data-test="class-work-list-items"
                 key={publication.key}
               >
                 <div

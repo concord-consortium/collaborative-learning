@@ -81,12 +81,15 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
                             : undefined;
     return (
       <div className="titlebar">
-        <div className="title">{activeSection ? `Section: ${activeSection.title}` : "Section"}</div>
+        <div className="title" data-test="document-title">
+          {activeSection ? `Section: ${activeSection.title}` : "Section"}
+        </div>
         {!hideButtons &&
-          <div className="actions">
+          <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishWorkspace}>
+              <svg key="publish" className={`icon icon-publish`} data-test="publish-icon"
+                   onClick={this.handlePublishWorkspace}>
                 <use xlinkHref={`#icon-publish`} />
               </svg>,
               this.renderShare()
@@ -103,7 +106,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const currVis = document.visibility === "private" ? "private" : "public";
     return (
       <div key="share" className={`visibility action ${currVis}`}>
-        <svg id="currVis" className={`share icon icon-share`} onClick={this.handleToggleVisibility}>
+        <svg id="currVis" className={`share icon icon-share`} data-test="share-icon"
+             onClick={this.handleToggleVisibility}>
           <use xlinkHref={`#icon-share`} />
         </svg>
       </div>
@@ -136,13 +140,14 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <svg key="publish" className={`icon icon-publish`} onClick={this.handlePublishLearningLog}>
+              <svg key="publish" className={`icon icon-publish`} data-test="learning-log-publish-icon"
+                   onClick={this.handlePublishLearningLog}>
                 <use xlinkHref={`#icon-publish`} />
               </svg>
             </div>
           }
         </div>
-        <div className="title">Learning Log: {document.title}</div>
+        <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
       </div>
     );
   }
@@ -203,11 +208,12 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
     return (
       <div className="mode action">
-        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleTwoUp}>
+        <svg id="currMode" className={`mode icon icon-${currMode}`} data-test="two-up-curr-mode"
+             onClick={this.handleToggleTwoUp}>
           <use xlinkHref={`#icon-${currMode}`} />
         </svg>
-        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
-          onClick={this.handleToggleTwoUp}
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`} data-test="two-up-next-mode"
+             onClick={this.handleToggleTwoUp}
         >
           <use xlinkHref={`#icon-${nextMode}`} />
         </svg>
@@ -250,7 +256,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className="visible-supports">
-        <div className="supports-list">
+        <div className="supports-list" data-test="supports-list">
           {supports.map((support) => {
             return (
               <div key={support.index} onClick={this.handleToggleSupport(support.item)}>

@@ -25,7 +25,7 @@ export class CanvasComponent extends React.Component<IProps, {}> {
 
   public render() {
     return (
-      <div key="canvas" className="canvas">
+      <div key="canvas" className="canvas" data-test="canvas">
         {this.renderContent()}
         {this.renderEditability()}
       </div>

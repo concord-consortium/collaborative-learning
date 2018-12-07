@@ -23,8 +23,8 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="learning-log">
         {this.renderDocuments()}
-        <div className="logs">
-          <button onClick={this.handleCreateLearningLog}>Create</button>
+        <div className="logs" data-test="logs">
+          <button data-test="learning-log-create-button" onClick={this.handleCreateLearningLog}>Create</button>
           {this.renderLearningLogs()}
         </div>
       </div>
@@ -44,7 +44,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     if (!primaryWorkspace) {
       return (
         <div className="workspaces">
-          {this.renderWorkspace("single-workspace", "primary")}
+          {this.renderWorkspace("single-workspace", "primary", "learning-log-workspaces")}
         </div>
       );
     }
@@ -55,19 +55,20 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "left-workspace",
               "primary",
+              "learning-log-left-workspace",
               <DocumentComponent
                 document={primaryWorkspace}
                 workspace={learningLogWorkspace}
                 side="primary" />
           )}
-          {this.renderWorkspace("right-workspace", "comparison", comparisonWorkspace
+          {this.renderWorkspace(
+              "right-workspace", "comparison", "learning-log-right-workspace", comparisonWorkspace
               ? <DocumentComponent
                   document={comparisonWorkspace}
                   workspace={learningLogWorkspace}
                   readOnly={true}
-                  side="comparison"
-                />
-              : this.renderComparisonPlaceholder())}
+                  side="comparison" />
+               : this.renderComparisonPlaceholder())}
         </div>
       );
     }
@@ -77,7 +78,8 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
           {this.renderWorkspace(
               "single-workspace",
               "primary",
-              <DocumentComponent
+              "learning-log-single-workspace",
+               <DocumentComponent
                 document={primaryWorkspace}
                 workspace={learningLogWorkspace}
                 side="primary"/>
@@ -87,11 +89,12 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     }
   }
 
-  private renderWorkspace(className: string, side: WorkspaceSide, child?: JSX.Element) {
+  private renderWorkspace(className: string, side: WorkspaceSide, dataTest: string, child?: JSX.Element) {
     return (
       <div
         onMouseOver={this.handleContractRightNav}
         className={className}
+        data-test={dataTest}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop(side)}
       >
@@ -117,7 +120,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
       <div className="list">
         {learningLogs.map((learningLog) => {
           return (
-            <div className="list-item" key={learningLog.key}>
+            <div className="list-item" key={learningLog.key} data-test="learning-log-list-items">
               <div
                 className="scaled-list-item-container"
                 onClick={this.handleLearningLogClicked(learningLog)}
@@ -133,6 +136,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
                 <div
                   className="title"
                   title={learningLog.title}
+                  data-test="learning-log-list-item-title"
                   onClick={this.handleRenameLearningLog(learningLog)}>
                     {learningLog.title}
                 </div>

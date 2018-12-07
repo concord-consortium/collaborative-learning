@@ -48,6 +48,7 @@ export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
           <button
             ref={(el) => this.openDocumentButton = el}
             onClick={this.handleOpenDocument}
+            data-test="open-document-button"
           >
             Open {section.title}
           </button>
