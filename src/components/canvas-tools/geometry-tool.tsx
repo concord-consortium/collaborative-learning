@@ -3,8 +3,8 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { GeometryContentModelType, setElementColor } from "../../models/tools/geometry/geometry-content";
-import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getDraggableObjectUnderMouse,
-          isDragTargetOrAncestor} from "./geometry-tool/geometry-utils";
+import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
+          isDragTargetOrAncestor } from "./geometry-tool/geometry-utils";
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
@@ -821,8 +821,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
+      const { readOnly } = this.props;
       const { board, scale } = this.state;
-      if (!board || (polygon !== getDraggableObjectUnderMouse(board, evt, scale))) return;
+      if (!board || (polygon !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
@@ -853,7 +854,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
       });
 
-      if (!this.props.readOnly) {
+      if (!readOnly) {
         // point handles vertex drags
         this.isVertexDrag = isInVertex(evt);
         if (!this.isVertexDrag) {

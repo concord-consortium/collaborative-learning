@@ -27,7 +27,7 @@ export function isDragTargetOrAncestor(elt: JXG.GeometryElement, dragTarget: JXG
 // This function is designed to replicate the logic in Board.initMoveObject().
 // When a click occurs on multiple overlapping objects, we want the one that
 // JSXGraph will choose to drag to be the one that gets selected.
-export function getDraggableObjectUnderMouse(board: JXG.Board, evt: any, scale?: number) {
+export function getClickableObjectUnderMouse(board: JXG.Board, evt: any, draggable: boolean, scale?: number) {
   const coords = getEventCoords(board, evt, scale);
   const [ , x, y] = coords.scrCoords;
   const count = board.objectsList.length;
@@ -36,7 +36,8 @@ export function getDraggableObjectUnderMouse(board: JXG.Board, evt: any, scale?:
     const pEl = board.objectsList[i];
     const hasPoint = pEl && pEl.hasPoint && pEl.hasPoint(x, y);
     const isFixed = pEl && pEl.getAttribute("fixed"); // !Type.evaluate(pEl.visProp.fixed)
-    if (hasPoint && pEl.isDraggable && pEl.visPropCalc.visible && !isFixed) {
+    const isDraggable = pEl.isDraggable && !isFixed;
+    if (hasPoint && pEl.visPropCalc.visible && (!draggable || isDraggable)) {
       if (!dragEl ||
             (pEl.visProp.layer > dragEl.visProp.layer ||
               (pEl.visProp.layer === dragEl.visProp.layer &&
