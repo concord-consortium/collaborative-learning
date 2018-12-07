@@ -12,24 +12,24 @@
 // the project's config changing)
 
 // promisified fs module
-const fs = require('fs-extra')
-const path = require('path')
+const fs = require('fs-extra');
+const path = require('path');
 
 function getConfigFile (name) {
-    const pathToConfigFile = path.resolve('config', name)
+    const pathToConfigFile = path.resolve('config', name);
     return fs.readJson(pathToConfigFile)
     // Don't throw an error if config file does not exist. Just return an empty config.
         .catch(_ => {})
 }
 
 function getEnvVariablesStartingWith (prefix) {
-    const result = {}
+    const result = {};
     Object.keys(process.env).forEach(key => {
         if (key.startsWith(prefix)) {
-            const [_, configKey] = key.split(prefix)
+            const [_, configKey] = key.split(prefix);
             result[configKey] = process.env[key]
         }
-    })
+    });
     return result
 }
 
@@ -44,21 +44,14 @@ module.exports = (on, config) => {
     // variables set. It would work fine unless the same option is specified in our own environments.json or user-config.json.
     // In that case, env variable would be lost and overwritten. However, we always do want env variable to be the
     // most important, final value. That's why we read unprocessed process.env variables again and add them back to the set.
-    const unifiedCypressEnvVariables = Object.assign(getEnvVariablesStartingWith("CYPRESS_"), config.env)
-    const environment = unifiedCypressEnvVariables.testEnv || 'dev'
+    const unifiedCypressEnvVariables = Object.assign(getEnvVariablesStartingWith("CYPRESS_"), config.env);
+    const environment = unifiedCypressEnvVariables.testEnv || 'dev';
     // First, read environments.json.
     return getConfigFile('environments.json')
         .then(content => {
             // Pick correct set of values for given environment.
-            const envSpecificConfig = content[environment] || {}
-            // Then, get user-specific config.
-            return getConfigFile('user-config.json')
-                .then(content => {
-                    // Pick correct set of values for given environment again.
-                    const userSpecificConfig = content[environment] || {}
-                    // Return the final set of options. Env variables are the most important ones, then user-specific ones
-                    // and finally ones defined in environments.json file.
-                    return Object.assign(envSpecificConfig, userSpecificConfig, unifiedCypressEnvVariables)
-                })
+            const envSpecificConfig = content[environment] || {};
+            return Object.assign(envSpecificConfig, unifiedCypressEnvVariables)
+
         })
-}
+};
