@@ -30,6 +30,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
                 className="list-item"
                 key={document.sectionId}
                 title={title}
+                data-test="my-work-list-items"
               >
                 <div
                   className="scaled-list-item-container"

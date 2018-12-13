@@ -18,6 +18,6 @@ script:
 - npm run test:coverage -- --runInBand --forceExit
 - npm run start &
 - wait-on http://localhost:8080
-- $(npm bin)/cypress run --config video=false
+- npm run test:cypress
 after_script:
 - ./s3_deploy.sh

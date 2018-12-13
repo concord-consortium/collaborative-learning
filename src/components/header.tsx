@@ -23,13 +23,13 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
       <div className="header">
         <div className="info">
           <div>
-            <div className="problem">{problem.fullTitle}</div>
-            <div className="class">{user.className}</div>
+            <div className="problem" data-test="problem-title">{problem.fullTitle}</div>
+            <div className="class" data-test="user-class">{user.className}</div>
           </div>
         </div>
         {myGroup ? this.renderGroup(myGroup) : null}
         <div className="user">
-          <div className="name" title={userTitle}>{user.name}</div>
+          <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
         </div>
       </div>
     );
@@ -46,8 +46,8 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="group">
         <div className="version">Version {PackageJson.version}</div>
-        <div onClick={this.handleResetGroup} className="name">{`Group ${group.id}`}</div>
-        <div className="members">
+        <div onClick={this.handleResetGroup} className="name" data-test="group-name">{`Group ${group.id}`}</div>
+        <div className="members" data-test="group-members">
           <div className="row">
             {this.renderGroupUser(groupUsers, 0, "nw")}
             {this.renderGroupUser(groupUsers, 1, "ne")}

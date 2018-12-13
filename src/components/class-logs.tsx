@@ -25,6 +25,7 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
             return (
               <div
                 className="list-item"
+                data-test="class-log-list-items"
                 key={publication.key}
               >
                 <div
