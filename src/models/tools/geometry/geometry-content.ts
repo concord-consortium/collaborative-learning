@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { assign, each, keys, size as _size } from "lodash";
@@ -97,6 +97,9 @@ export const GeometryContentModel = types
       if (self.isSelected(id)) {
         self.metadata.deselect(id);
       }
+    },
+    selectedObjects(board: JXG.Board) {
+      return self.selectedIds.map(id => board.objects[id]);
     }
   }))
   .actions(self => ({
@@ -243,6 +246,19 @@ export const GeometryContentModel = types
       }
     }
 
+    function addVertexAngle(board: JXG.Board,
+                            parents: JXGParentType[],
+                            properties?: JXGProperties): JXG.Angle | undefined {
+      const change: JXGChange = {
+              operation: "create",
+              target: "vertexAngle",
+              parents,
+              properties: assign({ id: uuid(), radius: 1 }, properties)
+            };
+      const angle = _applyChange(board, change);
+      return angle ? angle as any as JXG.Angle : undefined;
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return board.objectsList.filter(test);
     }
@@ -385,6 +401,7 @@ export const GeometryContentModel = types
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
+        addVertexAngle,
         findObjects,
         deleteSelection,
         applyChange: _applyChange,

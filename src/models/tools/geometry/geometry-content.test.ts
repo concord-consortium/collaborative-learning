@@ -3,13 +3,43 @@ import { GeometryContentModel, GeometryContentModelType,
 import { JXGChange } from "./jxg-changes";
 import { isBoard } from "./jxg-board";
 import { isPoint, isFreePoint } from "./jxg-point";
-import { isPolygon } from "./jxg-polygon";
+import { isPointInPolygon, isPolygon, getPointsForVertexAngle } from "./jxg-polygon";
+import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import { isUuid } from "../../../utilities/test-utils";
 import { clone } from "lodash";
+import { destroy } from "mobx-state-tree";
 
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 describe("GeometryContent", () => {
+
+  const divId = "1234";
+  const divStyle = "width:200px;height:200px";
+  document.body.innerHTML = `<div id="${divId}" style="${divStyle}"></div>`;
+
+  function createDefaultBoard(content: GeometryContentModelType): JXG.Board {
+    function onCreate(elt: JXG.GeometryElement) {
+      // handle a point
+    }
+    const board = content.initializeBoard(divId, onCreate) as JXG.Board;
+    content.resizeBoard(board, 200, 200);
+    content.updateScale(board, 0.5);
+    return board;
+  }
+
+  function createContentAndBoard(
+              configContent?: (content: GeometryContentModelType) => void):
+              { content: GeometryContentModelType, board: JXG.Board } {
+    const content = defaultGeometryContent();
+    if (configContent) configContent(content);
+    const board = createDefaultBoard(content);
+    return { content, board };
+  }
+
+  function destroyContentAndBoard(content: GeometryContentModelType, board?: JXG.Board) {
+    if (board) content.destroyBoard(board);
+    destroy(content);
+  }
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
@@ -18,25 +48,14 @@ describe("GeometryContent", () => {
 
     expect(content.nextViewId).toBe(1);
     expect(content.nextViewId).toBe(2);
+    destroy(content);
   });
 
-  function createDefaultBoard(content: GeometryContentModelType, readOnly: boolean = false): JXG.Board {
-    const divId = "1234";
-    const divStyle = "width:200px;height:200px";
-    document.body.innerHTML = `<div id="${divId}" style="${divStyle}"></div>`;
-
-    function onCreate(elt: JXG.GeometryElement) {
-      // handle a point
-    }
-
-    return content.initializeBoard(divId, onCreate) as JXG.Board;
-  }
-
   it("can create/destroy a JSXGraph board", () => {
-    const content = defaultGeometryContent();
+    const { content, board } = createContentAndBoard(_content => {
+      _content.addChange({ operation: "create", target: "point", parents: [1, 1] });
+    });
     expect(content.nextViewId).toBe(1);
-
-    let board = createDefaultBoard(content);
     expect(isBoard(board)).toBe(true);
     expect(isUuid(board.id)).toBe(true);
 
@@ -44,13 +63,7 @@ describe("GeometryContent", () => {
     content.updateScale(board, 0.5);
     expect(board.cssTransMat).toEqual([[1, 0, 0], [0, 2, 0], [0, 0, 2]]);
 
-    content.destroyBoard(board);
-
-    content.addChange({ operation: "create", target: "point", parents: [1, 1] });
-    board = createDefaultBoard(content, true);
-    expect(isBoard(board)).toBe(true);
     const boardId = board.id;
-
     const boundingBox = clone(board.attr.boundingbox);
     const change: JXGChange = {
             operation: "update",
@@ -75,11 +88,12 @@ describe("GeometryContent", () => {
 
     // can delete board with change
     content.applyChange(board, { operation: "delete", target: "board", targetID: boardId });
+
+    destroyContentAndBoard(content);
   });
 
   it("can add/remove/update points", () => {
-    const content = defaultGeometryContent();
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     expect(isPoint(board)).toBe(false);
     const p1Id = "point-1";
     let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
@@ -115,28 +129,39 @@ describe("GeometryContent", () => {
     // requests to remove points with invalid IDs are ignored
     content.removeObjects(board, ["foo"]);
     content.applyChange(board, { operation: "delete", target: "point" });
+
+    destroyContentAndBoard(content, board);
   });
 
   it("can add/remove/update polygons", () => {
-    const content = defaultGeometryContent();
-    content.addChange({ operation: "create", target: "point", parents: [1, 1], properties: { id: "p1" } });
-    content.addChange({ operation: "create", target: "point", parents: [3, 3], properties: { id: "p2" } });
-    content.addChange({ operation: "create", target: "point", parents: [5, 1], properties: { id: "p3" } });
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addChange({ operation: "create", target: "point", parents: [1, 1], properties: { id: "p1" } });
+      _content.addChange({ operation: "create", target: "point", parents: [3, 3], properties: { id: "p2" } });
+      _content.addChange({ operation: "create", target: "point", parents: [5, 1], properties: { id: "p3" } });
+    });
     let polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon.id;
     expect(isUuid(polygonId)).toBe(true);
+
+    const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
+    const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
+    const ptOutPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [4, 4], board);
+    const [, ptOutScrX, ptOutScrY] = ptOutPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
+
     content.removeObjects(board, polygonId);
     expect(board.objects[polygonId]).toBeUndefined();
     // can't create polygon without vertices
     polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
     expect(polygon).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
   });
 
   it("can add an image", () => {
-    const content = defaultGeometryContent();
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
     expect(image!.elType).toBe("image");
     content.updateObjects(board, image!.id, { url: placeholderImage });
@@ -153,6 +178,7 @@ describe("GeometryContent", () => {
     };
     const failedImage = content.applyChange(board, change);
     expect(failedImage).toBeUndefined();
+    destroyContentAndBoard(content, board);
   });
 
   it("can select points, etc.", () => {
@@ -187,6 +213,36 @@ describe("GeometryContent", () => {
     expect(found.length).toBe(0);
     content.deleteSelection(board);
     expect(found.length).toBe(0);
+  });
+
+  it("can add a vertex angle to a polygon", () => {
+    const content = defaultGeometryContent();
+    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
+    content.doPostCreate(metadata);
+    const board = createDefaultBoard(content);
+    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
+    const px: JXG.Point = content.addPoint(board, [1, 0])!;
+    const py: JXG.Point = content.addPoint(board, [0, 1])!;
+    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+    const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
+    expect(canSupportVertexAngle(p0)).toBe(true);
+    expect(canSupportVertexAngle(pSolo)).toBe(false);
+    expect(getVertexAngle(p0)).toBeUndefined();
+    const va0 = content.addVertexAngle(board, [px.id, p0.id, py.id]);
+    const vax = content.addVertexAngle(board, [py.id, px.id, p0.id]);
+    const vay = content.addVertexAngle(board, [p0.id, py.id, px.id]);
+    expect(getVertexAngle(p0)!.id).toBe(va0!.id);
+    expect(getVertexAngle(px)!.id).toBe(vax!.id);
+    expect(getVertexAngle(py)!.id).toBe(vay!.id);
+    expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
+    expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
+    expect(getPointsForVertexAngle(py)!.map(p => p.id)).toEqual([p0.id, py.id, px.id]);
+    p0.setPosition(JXG.COORDS_BY_USER, [1, 1]);
+    updateVertexAnglesFromObjects([p0, px, py, poly]);
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
+
+    expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
   });
 
   it("can suspend/resume syncChanges", () => {
