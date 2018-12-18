@@ -3,8 +3,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { AppComponent } from "./components/app";
-import { createStores } from "./models/stores";
-import { UserModel } from "./models/user";
+import { createStores } from "./models/stores/stores";
+import { UserModel } from "./models/stores/user";
 import { createFromJson } from "./models/curriculum/unit";
 import * as curriculumJson from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";

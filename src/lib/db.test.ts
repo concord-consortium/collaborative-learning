@@ -1,8 +1,8 @@
 import { DB } from "./db";
-import { IStores, createStores } from "../models/stores";
-import { UserModel } from "../models/user";
+import { IStores, createStores } from "../models/stores/stores";
+import { UserModel } from "../models/stores/user";
 import { DBDocument } from "./db-types";
-import { DocumentContentModel } from "../models/document-content";
+import { DocumentContentModel } from "../models/document/document-content";
 import { TextContentModelType } from "../models/tools/text/text-content";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ToolTileModelType } from "../models/tools/tool-tile";

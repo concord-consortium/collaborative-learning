@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree";
 import { values } from "lodash";
-import { DocumentContentModel } from "../document-content";
+import { DocumentContentModel } from "../document/document-content";
 import { SupportModel } from "./support";
 
 export enum SectionType {

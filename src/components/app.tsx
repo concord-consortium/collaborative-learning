@@ -1,15 +1,15 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { authenticate } from "../lib/auth";
-import { GroupViewComponent } from "./group-view";
+import { GroupViewComponent } from "./group/group-view";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
-import { DemoCreatorComponment } from "./demo-creator";
-import { TeacherDashboardComponent } from "./teacher-dashboard";
+import { DemoCreatorComponment } from "./demo/demo-creator";
+import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 
 import "./app.sass";
-import { GroupChooserComponent } from "./group-chooser";
-import { IStores } from "../models/stores";
+import { GroupChooserComponent } from "./group/group-chooser";
+import { IStores } from "../models/stores/stores";
 import { updateProblem } from "../lib/misc";
 
 interface IProps extends IBaseProps {}

@@ -2,7 +2,7 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/storage";
-import { AppMode, IStores } from "../models/stores";
+import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup,
          DBOfferingGroupUser,
@@ -26,8 +26,8 @@ import { DocumentModelType,
          LearningLogDocument,
          PublicationDocument,
          LearningLogPublication
-        } from "../models/document";
-import { DocumentContentSnapshotType } from "../models/document-content";
+        } from "../models/document/document";
+import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";

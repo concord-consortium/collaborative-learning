@@ -1,9 +1,9 @@
 import * as jwt from "jsonwebtoken";
 import * as queryString from "query-string";
 import * as superagent from "superagent";
-import { AppMode } from "../models/stores";
+import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
-import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo-creator";
+import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
 import { ProblemModelType } from "../models/curriculum/problem";
 
 const initials = require("initials");

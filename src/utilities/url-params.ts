@@ -1,5 +1,5 @@
 import { parse } from "query-string";
-import { AppMode } from "../models/stores";
+import { AppMode } from "../models/stores/stores";
 import { DBClearLevel } from "../lib/db";
 import { assign } from "lodash";
 

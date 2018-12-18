@@ -1,6 +1,6 @@
 import { UnitModelType } from "../models/curriculum/unit";
 import { ProblemModelType } from "../models/curriculum/problem";
-import { IStores } from "../models/stores";
+import { IStores } from "../models/stores/stores";
 import { Logger } from "./logger";
 
 export const setTitle = (showDemoCreator?: boolean, problem?: ProblemModelType) => {

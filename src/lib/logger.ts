@@ -1,10 +1,10 @@
 import * as uuid from "uuid/v4";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../models/tools/tool-tile";
-import { IStores } from "../models/stores";
+import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
-import { DocumentModelType } from "../models/document";
+import { DocumentModelType } from "../models/document/document";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
