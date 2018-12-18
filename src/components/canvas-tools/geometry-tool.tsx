@@ -38,7 +38,6 @@ interface IProps extends SizeMeProps {
   tabIndex?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
-  isSelectedTile: boolean;
   toolApiInterface?: IToolApiInterface;
   onSetCanAcceptDrop: (tileId?: string) => void;
 }
@@ -213,8 +212,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private renderMenuButton() {
-    const { isSelectedTile, readOnly } = this.props;
+    const { model, readOnly } = this.props;
     const { board } = this.state;
+    const isSelectedTile = this.stores.ui.isSelectedTile(model);
     if (!isSelectedTile || readOnly || !board) return;
 
     const angleIcon = renderUnicodeCharAsIconElement("∡");

@@ -115,9 +115,8 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private renderTile(ToolComponent: any) {
     const tileId = this.props.model.id;
-    const isSelectedTile = (tileId === this.stores.ui.selectedTileId);
     return ToolComponent != null
-            ? <ToolComponent key={tileId} isSelectedTile={isSelectedTile} {...this.props} />
+            ? <ToolComponent key={tileId} {...this.props} />
             : null;
   }
 
