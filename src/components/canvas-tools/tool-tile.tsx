@@ -114,8 +114,9 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTile(ToolComponent: any) {
+    const tileId = this.props.model.id;
     return ToolComponent != null
-            ? <ToolComponent key={this.props.model.id} {...this.props} />
+            ? <ToolComponent key={tileId} {...this.props} />
             : null;
   }
 

@@ -1,4 +1,6 @@
 import * as React from "react";
+import { Button, Menu, MenuItem, Popover, Position } from "@blueprintjs/core";
+import { renderUnicodeCharAsIconElement } from "../../blueprint";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
@@ -8,9 +10,11 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./geometry-tool/rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../models/tools/geometry/jxg-point";
-import { isPolygon } from "../../models/tools/geometry/jxg-polygon";
-import { JXGCoordPair, JXGProperties } from "../../models/tools/geometry/jxg-changes";
-import { assign, each, isEqual, size as _size, some, values } from "lodash";
+import { isPolygon, getPointsForVertexAngle } from "../../models/tools/geometry/jxg-polygon";
+import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
+        } from "../../models/tools/geometry/jxg-vertex-angle";
+import { JXGChange } from "../../models/tools/geometry/jxg-changes";
+import { assign, castArray, each, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "./tool-tile";
 import { getImageDimensions } from "../../utilities/image-utils";
@@ -43,6 +47,7 @@ interface IState extends SizeMeProps {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
+  newElements?: JXG.GeometryElement[];
   syncedChanges: number;
   disableRotate: boolean;
 }
@@ -56,21 +61,32 @@ interface JXGPtrEvent {
 const kSnapUnit = 0.2;
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
-                          syncedChanges?: number, readOnly?: boolean) {
-  for (let i = syncedChanges || 0; i < content.changes.length; ++i) {
+                          prevSyncedChanges?: number, readOnly?: boolean) {
+  const newElements: JXG.GeometryElement[] = [];
+  const changedElements: JXG.GeometryElement[] = [];
+  const syncedChanges = content.changes.length;
+  for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
     try {
-      const change = JSON.parse(content.changes[i]);
+      const change: JXGChange = JSON.parse(content.changes[i]);
       const result = content.syncChange(board, change);
-      if (readOnly && (result instanceof JXG.GeometryElement)) {
-        const obj = result as JXG.GeometryElement;
-        obj.setAttribute({ fixed: true });
+      if (result instanceof JXG.GeometryElement) {
+        newElements.push(result);
+      }
+      if (change.operation === "update") {
+        const ids = castArray(change.targetID);
+        const targets = ids.map(id => board.objects[id]);
+        changedElements.push(...targets);
       }
     }
     catch (e) {
       // ignore exceptions
     }
   }
-  return content.changes.length;
+
+  // update vertex angles affected by changed points
+  updateVertexAnglesFromObjects(changedElements);
+
+  return { newElements: newElements.length ? newElements : undefined, syncedChanges };
 }
 ​
 @inject("stores")
@@ -106,8 +122,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
     if (content !== prevState.content) {
       if (geometryContent.changes.length !== prevState.syncedChanges) {
-        nextState.syncedChanges = syncBoardChanges(prevState.board, geometryContent,
-                                                  prevState.syncedChanges, readOnly);
+        assign(nextState, syncBoardChanges(prevState.board, geometryContent,
+                                            prevState.syncedChanges, readOnly));
       }
       nextState.content = geometryContent;
     }
@@ -161,6 +177,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (!this.state.board) {
       this.initializeContent();
     }
+
+    const { newElements } = this.state;
+    if (newElements && newElements.length) {
+      newElements.forEach(elt => this.handleCreateElement(elt));
+      this.setState({ newElements: undefined });
+    }
   }
 
   public componentWillUnmount() {
@@ -184,8 +206,37 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
+      this.renderMenuButton(),
       this.renderRotateHandle()
     ]);
+  }
+
+  private renderMenuButton() {
+    const { model, readOnly } = this.props;
+    const { board } = this.state;
+    const isSelectedTile = this.stores.ui.isSelectedTile(model);
+    if (!isSelectedTile || readOnly || !board) return;
+
+    const angleIcon = renderUnicodeCharAsIconElement("∡");
+    const selectedObjects = this.getContent().selectedObjects(board);
+    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+    const selectedPoint = selectedPoints && (selectedPoints.length === 1)
+                            ? selectedPoints[0] as JXG.Point : undefined;
+    const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
+    const hasVertexAngle = selectedPoint && !!getVertexAngle(selectedPoint);
+    const vertexAngleText = !hasVertexAngle ? "Show Angle Label" : "Hide Angle Label";
+    const enableLabelAngle = !readOnly && supportsVertexAngle;
+    return (
+      <Popover className="geometry-menu-button" key="geometry-menu-button"
+                hasBackdrop={true} position={Position.BOTTOM_RIGHT} >
+        <Button key="geometry-menu-button" icon="menu" minimal={true} />
+        <Menu className="geometry-menu">
+          <MenuItem icon={angleIcon} text={vertexAngleText}
+                    disabled={!enableLabelAngle}
+                    onClick={this.handleToggleVertexAngle}/>
+        </Menu>
+      </Popover>
+    );
   }
 
   private renderRotateHandle() {
@@ -232,6 +283,33 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "cmd-x": this.handleCut,
       "cmd-v": this.handlePaste
     });
+  }
+
+  private handleToggleVertexAngle = (evt: any) => {
+    const { board } = this.state;
+    const selectedObjects = board && this.getContent().selectedObjects(board);
+    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+    const selectedPoint = selectedPoints && selectedPoints[0] as JXG.Point;
+    if (board && selectedPoint) {
+      const vertexAngle = getVertexAngle(selectedPoint);
+      if (!vertexAngle) {
+        const anglePts = getPointsForVertexAngle(selectedPoint);
+        if (anglePts) {
+          const anglePtIds = anglePts.map(pt => pt.id);
+          this.applyChange(() => {
+            const angle = this.getContent().addVertexAngle(board, anglePtIds);
+            if (angle) {
+              this.handleCreateVertexAngle(angle);
+            }
+          });
+        }
+      }
+      else {
+        this.applyChange(() => {
+          this.getContent().removeObjects(board, vertexAngle.id);
+        });
+      }
+    }
   }
 
   private getOneSelectedPolygon() {
@@ -485,6 +563,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     else if (isPolygon(elt)) {
       this.handleCreatePolygon(elt as JXG.Polygon);
     }
+    else if (isVertexAngle(elt)) {
+      this.handleCreateVertexAngle(elt as JXG.Angle);
+    }
   }
 
   private applyChange(change: () => void) {
@@ -560,11 +641,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
     const { board } = this.state;
-    const content = this.getContent();
-    if (!board || !content) return;
+    if (!board) return;
 
     each(this.dragPts, (entry, id) => {
-      if (entry && content) {
+      if (entry) {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         // move the points not dragged by JSXGraph
@@ -576,6 +656,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
       }
     });
+
+    const affectedObjects = keys(this.dragPts).map(id => board.objects[id]);
+    updateVertexAnglesFromObjects(affectedObjects);
   }
 
   private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
@@ -896,6 +979,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     polygon.on("down", handlePointerDown);
     polygon.on("drag", handleDrag);
     polygon.on("up", handlePointerUp);
+  }
+
+  private handleCreateVertexAngle = (angle: JXG.Angle) => {
+    updateVertexAngle(angle);
   }
 }
 

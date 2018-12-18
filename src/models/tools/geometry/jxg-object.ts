@@ -1,5 +1,5 @@
 import { JXGChangeAgent } from "./jxg-changes";
-import { size } from "lodash";
+import { castArray, size } from "lodash";
 
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
@@ -9,8 +9,8 @@ export const objectChangeAgent: JXGChangeAgent = {
 
   update: (board, change) => {
     if (!change.targetID || !change.properties) { return; }
-    const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
-    const props = Array.isArray(change.properties) ? change.properties : [change.properties];
+    const ids = castArray(change.targetID);
+    const props = castArray(change.properties);
     ids.forEach((id, index) => {
       const obj = board.objects[id] as JXG.GeometryElement;
       const objProps = index < props.length ? props[index] : props[0];
