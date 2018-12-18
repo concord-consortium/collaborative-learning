@@ -1,14 +1,14 @@
 import mock from "xhr-mock";
-import { IStores, createStores } from "../models/stores";
+import { IStores, createStores } from "../models/stores/stores";
 import { Logger, LogEventName } from "./logger";
 import { ToolTileModel, ToolTileModelType } from "../models/tools/tool-tile";
 import { defaultTextContent } from "../models/tools/text/text-content";
-import { SectionDocument, DocumentModel, DocumentModelType } from "../models/document";
+import { SectionDocument, DocumentModel, DocumentModelType } from "../models/document/document";
 import { createSingleTileContent } from "../utilities/test-utils";
-import { DocumentContentModel } from "../models/document-content";
+import { DocumentContentModel } from "../models/document/document-content";
 import { getSnapshot } from "mobx-state-tree";
 import { InvestigationModel } from "../models/curriculum/investigation";
-import { WorkspaceModel, SectionWorkspace, WorkspaceModelType } from "../models/workspace";
+import { WorkspaceModel, SectionWorkspace, WorkspaceModelType } from "../models/stores/workspace";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,

@@ -1,0 +1,186 @@
+@import ../vars
+
+.document
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  color: #000
+  background-color: #F8FCFE
+  margin: $margin
+  border: $border-width solid $border-color
+  border-radius: $border-radius
+
+  .titlebar
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    height: $workspace-titlebar-height
+    background-color: $color1-3
+    display: flex
+    flex-direction: row
+    flex-wrap: nowrap
+    justify-content: flex-start
+    border-top-left-radius: $border-radius
+    border-top-right-radius: $border-radius
+
+    .title
+      flex-grow: 1
+      text-align: center
+      padding: $margin
+      font-weight: bold
+      white-space: nowrap
+      overflow: hidden
+      text-overflow: ellipsis
+
+    .actions
+      flex-grow: 0
+      padding: 1px 0
+      display: flex
+
+      .icon-download
+        transform: rotate(180deg)
+        transform-origin: 50% 50%
+
+      .mode
+        border-top-right-radius: $border-radius
+
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
+      .visibility.private
+        .icon
+          color: $color1-4
+        &:hover .icon
+          color: $color1-6
+        &:active .icon
+          color: $color1-7
+
+      .visibility.public
+        .icon
+          color: $color1-6
+        &:hover .icon
+          color: $color1-5
+        &:active .icon
+          color: $color1-4
+
+      .icon
+        background-color: $color1-3
+        color: $color1-7
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
+        cursor: pointer
+
+        &:hover
+          background-color: $color1-4
+
+        &:active
+          background-color: $color1-5
+
+  .canvas-area
+    position: absolute
+    top: $workspace-titlebar-height
+    bottom: $workspace-statusbar-height
+    left: 0
+    right: 0
+    border-top: $border-width solid $border-color
+
+  .statusbar
+    position: absolute
+    background: $color1-3
+    bottom: 0
+    left: 0
+    right: 0
+    height: $workspace-statusbar-height
+    border-bottom-left-radius: $border-radius
+    border-bottom-right-radius: $border-radius
+    border-top: $border-width solid $border-color
+    display: flex
+    flex-direction: row
+    flex-wrap: nowrap
+    justify-content: flex-start
+
+    .supports
+      flex-grow: 1
+
+      .supports-list
+        display: inline
+        margin: 0 $margin
+
+        svg
+          display: inline-block
+          padding: $half-padding
+          margin: $quarter-margin $quarter-margin 0 0
+          color: $color1-5
+          width: 25px
+          height: 25px
+          cursor: pointer
+
+          &.show
+            color: $color1-6
+            &:hover
+              color: $color1-7
+            // FIXME: Darker color needed for &:active
+            &:active
+              color: $color1-7
+
+          &.hide
+            color: $color1-4
+            &:hover
+              color: $color1-5
+            &:active
+              color: $color1-6
+
+      .visible-supports
+        position: absolute
+        bottom: $workspace-statusbar-height + $border-width
+        left: 0
+        right: 0
+
+        .supports-list
+          margin: 0
+
+          div
+            background-color: $color1-3
+            padding: $half-padding $padding
+
+    .actions
+      flex-grow: 0
+      padding: 1px 0
+
+      .mode #nextMode
+        display: none
+
+      .mode:hover 
+        #currMode
+          display: none
+        #nextMode
+          display: block
+
+      .icon
+        background-color: $color1-3
+        color: $color1-7
+        height: 30px
+        width: 30px
+        padding: $half-padding
+        margin-left: $half-margin
+        border-bottom-right-radius: $border-radius
+        cursor: pointer
+
+        &:hover
+          background-color: $color1-4
+
+        &:active
+          background-color: $color1-5
+
+

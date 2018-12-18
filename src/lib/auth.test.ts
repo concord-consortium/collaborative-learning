@@ -12,7 +12,7 @@ import { authenticate,
         createFakeUser,
         getFirebaseJWTParams} from "./auth";
 import * as nock from "nock";
-import { NUM_FAKE_STUDENTS } from "../components/demo-creator";
+import { NUM_FAKE_STUDENTS } from "../components/demo/demo-creator";
 import { QueryParams } from "../utilities/url-params";
 
 // tslint:disable-next-line:max-line-length

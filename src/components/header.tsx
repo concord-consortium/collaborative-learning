@@ -4,7 +4,7 @@ import { BaseComponent, IBaseProps } from "./base";
 import * as PackageJson from "../../package.json";
 
 import "./header.sass";
-import { GroupModelType, GroupUserModelType } from "../models/groups";
+import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;

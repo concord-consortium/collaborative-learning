@@ -1,5 +1,5 @@
 import * as ReactDOMServer from "react-dom/server";
-import { DocumentContentSnapshotType } from "../models/document-content";
+import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { each, isObject, isUndefined, unset } from "lodash";
 
 export const isUuid = (id: string) => {

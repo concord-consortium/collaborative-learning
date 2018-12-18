@@ -4,13 +4,13 @@ import * as React from "react";
 import { configure, mount } from "enzyme";
 
 import { FourUpComponent } from "./four-up";
-import { GroupsModel, GroupModel, GroupUserModel } from "../models/groups";
-import { DocumentModel, SectionDocument, DocumentModelType } from "../models/document";
-import { createStores } from "../models/stores";
-import { CanvasComponent } from "./canvas";
-import { UserModel } from "../models/user";
-import { WorkspaceModel, WorkspaceModelType, SectionWorkspace } from "../models/workspace";
-import { DocumentsModelType, DocumentsModel } from "../models/documents";
+import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
+import { DocumentModel, SectionDocument, DocumentModelType } from "../models/document/document";
+import { createStores } from "../models/stores/stores";
+import { CanvasComponent } from "./document/canvas";
+import { UserModel } from "../models/stores/user";
+import { WorkspaceModel, WorkspaceModelType, SectionWorkspace } from "../models/stores/workspace";
+import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
 configure({ adapter: new Adapter() });
 

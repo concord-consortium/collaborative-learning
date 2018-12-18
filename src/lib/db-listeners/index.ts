@@ -8,8 +8,8 @@ import { DBSectionDocumentsListener } from "./db-section-documents-listener";
 import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, SectionDocument } from "../../models/document";
-import { DocumentContentModel } from "../../models/document-content";
+import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentContentModel } from "../../models/document/document-content";
 import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
 
 export interface ModelListeners {

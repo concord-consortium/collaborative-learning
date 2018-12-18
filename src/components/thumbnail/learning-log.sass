@@ -1,0 +1,120 @@
+@import ../vars
+
+$list-item-height: 600px
+$list-item-width: 800px
+$list-item-scale: 0.08
+
+$log-list-height: 100px;
+
+$button-width: 60px;
+
+.learning-log
+  .workspaces
+    position: absolute
+    top: $margin
+    left: $half-margin
+    right: $half-margin
+    bottom: $log-list-height + $half-margin
+
+    .single-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+
+    .left-workspace
+      position: absolute
+      top: 0
+      left: 0
+      right: 50%
+      bottom: 0
+
+      .workspace
+        margin-right: $half-margin
+
+    .right-workspace
+      position: absolute
+      top: 0
+      left: 50%
+      right: 0
+      bottom: 0
+
+      .workspace
+        margin-left: $half-margin
+
+      .comparison-placeholder
+        position: absolute
+        top: 0
+        left: 0
+        right: 0
+        bottom: 0
+        color: #000
+        background-color: #F8FCFE
+        margin: $margin
+        border: $border-width solid $border-color
+        border-radius: $border-radius
+        display: flex
+        justify-content: center
+        align-items: center
+        text-align: center
+
+  .logs
+    position: absolute
+    right: $half-margin
+    left: $half-margin
+    height: $log-list-height
+    bottom: 0
+
+    button
+      padding: $half-padding
+      margin: $margin
+      width: $button-width
+
+    .list
+      position: absolute
+      top: 0
+      right: 0
+      left: $button-width + $double-margin
+      bottom: 0
+      overflow: auto
+      overflow-y: hidden
+
+      .list-item
+        position: relative
+        float: left
+        margin: 0 $half-margin
+        overflow: hidden
+        width: ($list-item-width * $list-item-scale) + $double-margin
+
+        .scaled-list-item-container
+          position: relative
+          border: 1px solid #aaa
+          width: $list-item-width * $list-item-scale
+          height: $list-item-height * $list-item-scale
+          margin: 0 $margin
+
+          .scaled-list-item
+            position: absolute
+            top: 0
+            left: 0
+            transform: scale($list-item-scale)
+            transform-origin: 0 0
+            height: $list-item-height
+            width: $list-item-width
+
+          .canvas
+
+        .info
+          margin-top: $half-margin
+          text-align: center
+          font-size: 0.8em
+
+          .title
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+
+          .created
+            font-style: italic
+            font-size: 0.8em

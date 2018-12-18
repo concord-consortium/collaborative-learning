@@ -1,5 +1,5 @@
 import * as firebase from "firebase/app";
-import { UserModelType } from "../models/user";
+import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
 
