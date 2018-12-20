@@ -39,6 +39,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
+    const {supports} = this.stores;
     const {activeTab} = this.state;
 
     return (
@@ -46,9 +47,13 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
-            <TeacherSupport />
-            <TeacherSupport content={"Hello world hello world."} />
-            <TeacherSupport content={"This is a test this is a test."} />
+            <TeacherSupport time={new Date().getTime()}/>
+            {
+              // Reverse the supports so the newest ones are first + displayed at the top
+              supports.teacherSupports.slice().reverse().map((support, i) => {
+                return <TeacherSupport content={support.text} time={support.authoredTime} key={i}/>;
+              })
+            }
             {this.renderTabContents()}
           </div>
         </div>

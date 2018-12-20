@@ -13,13 +13,14 @@ describe("supports model", () => {
   it("has default values", () => {
     const supports = SupportsModel.create({});
     expect(getSnapshot(supports)).toEqual({
-      supports: [],
+      curricularSupports: [],
+      teacherSupports: []
     });
   });
 
   it("uses override values", () => {
     const supports = SupportsModel.create({
-      supports: [
+      curricularSupports: [
         {text: "support #1", type: SupportItemType.unit, visible: true},
         {text: "support #2", type: SupportItemType.investigation},
         {text: "support #3", type: SupportItemType.problem, visible: true},
@@ -27,7 +28,7 @@ describe("supports model", () => {
       ]
     });
     expect(omitUndefined(getSnapshot(supports))).toEqual({
-      supports: [
+      curricularSupports: [
         {
           text: "support #1",
           type: "unit",
@@ -48,15 +49,16 @@ describe("supports model", () => {
           type: "section",
           visible: false,
         },
-      ]
+      ],
+      teacherSupports: []
     });
 
-    expect(supports.supports.filter((support) => support.visible).length).toEqual(2);
+    expect(supports.curricularSupports.filter((support) => support.visible).length).toEqual(2);
     supports.hideSupports();
-    expect(supports.supports.filter((support) => support.visible).length).toEqual(0);
-    supports.toggleSupport(supports.supports[0]);
-    expect(supports.supports.filter((support) => support.visible).length).toEqual(1);
-    expect(supports.supports[0].visible).toEqual(true);
+    expect(supports.curricularSupports.filter((support) => support.visible).length).toEqual(0);
+    supports.toggleSupport(supports.curricularSupports[0]);
+    expect(supports.curricularSupports.filter((support) => support.visible).length).toEqual(1);
+    expect(supports.curricularSupports[0].visible).toEqual(true);
   });
 
   it("can load supports from units", () => {
