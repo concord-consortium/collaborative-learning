@@ -8,14 +8,14 @@ export const isImage = (v: any) => v instanceof JXG.Image;
 
 export const imageChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
-    const parents = change.parents || [];
+    const parents = (change.parents || []).slice();
     const url = parents && parents[0] as string || "";
     const imageEntry = url && gImageMap.getCachedImage(url);
     const displayUrl = imageEntry && imageEntry.displayUrl || "";
     parents[0] = displayUrl;
     const props = assign({ id: uuid(), fixed: true }, change.properties);
     return parents && parents.length >= 3
-            ? board.create("image", change.parents, props)
+            ? board.create("image", parents, props)
             : undefined;
   },
 
