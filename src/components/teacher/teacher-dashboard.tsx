@@ -10,6 +10,7 @@ import { TeacherStudentTabComponent } from "./teacher-student-tab";
 import "./teacher-dashboard.sass";
 import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
+import { TeacherSupport } from "./teacher-support";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -44,21 +45,10 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
       <div className="teacher-dashboard">
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
-          <TabSetComponent>
-            {tabs.map((tab) => {
-              return (
-                <TabComponent
-                  id={this.getTabId(tab)}
-                  key={tab.id}
-                  active={tab === activeTab}
-                  onClick={this.handleTabClick(tab)}
-                >
-                  {tab.type}
-                </TabComponent>
-              );
-            })}
-          </TabSetComponent>
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
+            <TeacherSupport />
+            <TeacherSupport content={"Hello world hello world."} />
+            <TeacherSupport content={"This is a test this is a test."} />
             {this.renderTabContents()}
           </div>
         </div>
