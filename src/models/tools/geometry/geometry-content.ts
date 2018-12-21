@@ -337,10 +337,12 @@ export const GeometryContentModel = types
           switch (obj.elType) {
             case "angle":
               if (isVertexAngle(obj)) {
+                const va = obj as JXG.Angle;
+                // parents must be in correct order
+                const parents = [va.point2, va.point1, va.point3];
                 assign(change, {
                   target: "vertexAngle",
-                  parents: obj.parents.map(parent =>
-                                typeof parent === "string" ? newIds[parent] : newIds[parent.id])
+                  parents: parents.map(parent => newIds[parent.id])
                 });
               }
               break;
