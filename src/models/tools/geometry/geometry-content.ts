@@ -3,6 +3,7 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { isVertexAngle } from "./jxg-vertex-angle";
 import { assign, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 
@@ -263,6 +264,16 @@ export const GeometryContentModel = types
       return board.objectsList.filter(test);
     }
 
+    function isCopyableChild(child: JXG.GeometryElement) {
+      switch (child && child.elType) {
+        case "angle":
+          return isVertexAngle(child);
+        case "polygon":
+          return true;
+      }
+      return false;
+    }
+
     // returns the currently selected objects and any descendant objects
     // that should also be considered selected, i.e. all of whose
     // ancestors are selected.
@@ -274,7 +285,7 @@ export const GeometryContentModel = types
         const obj = board.objects[id];
         if (obj) {
           each(obj.childElements, child => {
-            if (child && (child.elType === "polygon")) {
+            if (child && isCopyableChild(child)) {
               children[child.id] = child;
             }
           });
@@ -324,6 +335,15 @@ export const GeometryContentModel = types
                   properties: { id: newIds[id], name: obj.name }
                 } as any;
           switch (obj.elType) {
+            case "angle":
+              if (isVertexAngle(obj)) {
+                assign(change, {
+                  target: "vertexAngle",
+                  parents: obj.parents.map(parent =>
+                                typeof parent === "string" ? newIds[parent] : newIds[parent.id])
+                });
+              }
+              break;
             case "point":
               [ , x, y] = (obj as JXG.Point).coords.usrCoords;
               assign(change, {
@@ -335,7 +355,7 @@ export const GeometryContentModel = types
               assign(change, {
                 target: "polygon",
                 parents: Array.from(keys(obj.ancestors))
-                          .map(parentId => newIds[parentId]),
+                          .map(parentId => newIds[parentId])
               });
               break;
           }

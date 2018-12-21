@@ -95,7 +95,7 @@ declare namespace JXG {
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
-    parents: GeometryElement[];
+    parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
     lastDragTime: Date;

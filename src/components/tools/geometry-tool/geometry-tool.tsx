@@ -451,7 +451,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                   change.parents[0] += delta;
                   change.parents[1] -= delta;
                 }
-                else if (change.target === "polygon") {
+                else if (["polygon", "vertexAngle"].indexOf(change.target) >= 0) {
                   // map ids of parent object references
                   change.parents = change.parents.map((parentId: string) => idMap[parentId]);
                 }
