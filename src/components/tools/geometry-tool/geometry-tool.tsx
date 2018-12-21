@@ -15,15 +15,15 @@ import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { JXGChange } from "../../../models/tools/geometry/jxg-changes";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "../tool-tile";
-import { ImageMapEntryType, gImageMap } from "../../models/image-map";
-import { getUrlFromImageContent } from "../../utilities/image-utils";
+import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { assign, castArray, each, keys, size as _size } from "lodash";
+import { assign, castArray, debounce, each, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
-const placeholderImage = require("../../assets/image_placeholder.png");
+const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
 
