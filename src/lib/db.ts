@@ -499,7 +499,7 @@ export class DB {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
       const clearPath = (path?: string) => {
-        this.firebase.ref(path).set(null).then(resolve).catch(reject);
+        this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
 
       if (this.stores.appMode !== "qa") {
