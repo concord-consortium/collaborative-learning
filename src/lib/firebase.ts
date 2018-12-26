@@ -57,7 +57,7 @@ export class Firebase {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      if ((appMode === "dev") || (appMode === "test")) {
+      if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
         parts.push(this.userId);
       }
     }
