@@ -765,6 +765,433 @@
           ]
         }
       ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "Solving Equations Symbolically",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "Mystery Pouches",
+          "subtitle": "Exploring Equality",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MMSA_3_1_coin_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_pouch_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_coin_and_pouch_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "The clue below indicates that there are $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation. MSA_3_1_eleven.png (x) * How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": " * How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "For each of the situations below, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.\n * What is the number of gold coins in each pouch? \n * How can you check your answer?\n\nWrite down your steps so that someone else could follow your steps to find the number of coins in a pouch."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                       "type": "Text",
+                      "text": "OR saved out separately:"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_1_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_3_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_4_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_5_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_6_350w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "1. In the second situation, Nicole thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. She visualized the following steps to help her find the number of coins in a pouch. "}
+                },
+                {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
+                    }
+                 },
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": " * What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?\n * Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.\n * Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
+                  }
+                },
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "2. Ahman forgot the code he made. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.\n * What might the pouches and coin picture look like?\n * How many dollars are in a pouch?"
+                  }
+                },
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. A local band donates $200 for the Walkathon. If a single pouch holds $20, one clue could be 9P + $20 = $200. Decide how much money will be in a single pouch, and then design a clue for a partner to figure out."
+                  }
+                }
+              ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
+                  }
+                }]
+              },
+              "supports": []
+            },
+            {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": ""
+                  }
+                }]
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "From Pouches to Variables",
+          "subtitle": "Writing and Solving Equations",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. \n\n.   The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n\nWhat do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation??\n  • divide the left-hand side of the original equation by 5??\n  • multiply the right-hand side of the original equation by 4?\n  \nThe picture below shows a situation from Problem 3.1."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_In_coins_pouches_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n.   2x + 4 = 12     or      2(x + 2) = 12      or      x + 2 + x + 2 = 12\n\nThe expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.\n\n In this Problem, you will revisit situations with pouches and coins, but you will use symbolic equations to represent your solution process."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Suppose x represents the number of coins in one pouch and 1 represents the value of one coin in the following situations. \nWrite an equation to represent each situation. \n\nAre there other possibilities for the equations that you could write? Explain."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                       "type": "Text",
+                      "text": "OR saved out separately:"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_3_350w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "A. Use your equations from the Initial Challenge to find the number of gold coins in each pouch. Record your steps for finding the coins in each pouch. Check your answers. \n\nB. \n\n1. A messenger has 6 pouches and 27 coins. There is a total of $105. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.\n\n2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. Will the solution for each equation be the same? Explain."}
+                },
+                {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
+                    }
+                 },
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "   "
+                  }
+                } 
+              ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "Describe a strategy for solving equations using what you know about equality."
+                  }
+                }]
+              },
+              "supports": []
+            },
+            {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": ""
+                  }
+                }]
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "Solving Linear Equations",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a pattern of change in the dependent variable. You can use this pattern of change to identify other linear relationships.\n\nSo far in this Investigation, all of the situations have involved positive whole numbers.\n * Does it make sense to think about negative numbers in a coin situation?\n * Does it make sense to think about fractions in a coin situation?\n * What are some situations where it makes sense to use fractions or negative numbers?"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "For each equation:\n* Find a solution.\n* Record each step you take to find a solution.\n* Then, check your answer.\n\n1.\n a. 5x + 10 = 20\nb. 5x – 10 = 20 \n c. 5x + 10 = -20\n d. 5x – 10 = -20\n e. 10-5x = 20\n f. 10 – 5x = -20\n\n2. \na. 1/4x + 6 = 12\n b. 3.5x = 130 + 10x\n c. 3/5 = -x + 1\n\n3.  \n a. if 3x – 7 = y, find y when x = -2/3\n b. if 3x – 7 = y, find x when y = -5\n\n4. \n a. 3(x + 1) = 21  \n b. 2+3(x + 1) = 6x\n c. -2(2x – 3) = -2"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "Forensic scientists can estimate a person’s height by measuring the length of certain bones, including the femur, the tibia, the humerus, and the radius. The table below gives the equations for the relationships between the length of each bone and the estimated height of males and females. These relationships were found by scientists after much study and data collection. In the table, F represents the length of the femur, T the length of the tibia, H the length of the humerus, R the length of the radius, and h the person’s height. All measurements are in centimeters. "}
+                },
+                {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_3_WI_bones_350w.png"
+                    }
+                 },
+                {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_3_WI_skeleton_350w.png"
+                    }
+                 },
+                {
+                    "content": {
+                      "type": "Text",
+                      "text": "Think of a question you could answer using this data. Explain how you would find the answer. \n\nDo any of these equations represent linear relationships?"
+                  }
+                } 
+              ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "Describe the strategies you can use to solve linear equations. "
+                  }
+                }]
+              },
+              "supports": []
+            },
+            {
+              "type": "extraWorkspace",
+              "content": {
+                "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": ""
+                  }
+                }]
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Reflection 2.4",
+          "ordinal": 4,
+          "title": "2.MR Mathematical Reflection",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Think about what you have learned about the following question:\n \n What do you know about linear expressions, equations, and relationships?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "supports": []
