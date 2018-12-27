@@ -1,610 +1,417 @@
 {
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
-  "lookingAhead": {
-    "tiles": []
-  },
-  "investigations": [
-    {
-      "description": "Investigation 1",
-      "ordinal": 1,
-      "title": "Investigation 1",
-      "introduction": {
-        "tiles": []
-      },
-      "problems": [
-        {
-          "description": "Problem 1.1",
-          "ordinal": 1,
-          "title": "Problem 1.1",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Problem 1.2",
-          "ordinal": 2,
-          "title": "Problem 1.2",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
+  "investigations": [{
+    "description": "Investigation 1",
+    "ordinal": 1,
+    "title": "Walking Rates",
+    "problems": [{
+        "description": "Problem 1.1",
+        "ordinal": 1,
+        "title": "Walk Marathons",
+        "subtitle": "Finding and Using Rates",
+        "sections": [{
+            "type": "introduction",
+            "content": {
+              "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and a stopwatch for her walking experiment."
                   }
-                ],
-                "supports": []
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_1_In_walkathon_350w.png"
+                  }
+                }
+              ]
+            },
+            "supports": []
+          },
+          {
+            "type": "initialChallenge",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Make a prediction about your walking rate.\nWhat is your walking rate in meters per second?"
+                }
+              }]
+            },
+            "supports": [{
+                "text": "What does meters per second mean?"
+              },
+              {
+                "text": "What are the variables? What is the relationship between the variables?"
+              },
+              {
+                "text": "How might meter sticks and a stopwatch help?"
               }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Problem 1.3",
-          "ordinal": 3,
-          "title": "Problem 1.3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              },
+            ]
+          },
+          {
+            "type": "whatIf",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Assume you continue to walk at this constant rate.\n 1. How long would it take you to walk 500 meters?\n 2. How far could you walk in 5 seconds, 10 seconds, 30 seconds? In 60 seconds? In 1 hour?\n 3. Write an equation that represents the distance d in meters that you could walk in t seconds. Compare your equation to your classmates’ equations. \n 4. What would a graph of your equation look like? "
+                }
+              }],
               "supports": []
             },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
+            "supports": []
+          },
+          {
+            "type": "nowWhatDoYouKnow",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Assume you continue to walk at this constant rate. Describe in words the distance you could walk in a given number of seconds."
+                }
+              }]
             },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ]
-        },
-        {
-          "description": "Reflection 1.4",
-          "ordinal": 4,
-          "title": "Reflection 1.4",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
+            "supports": [{
+              "text": "What information does the walking rate provide?"
+            }]
+          },
+          {
+            "type": "extraWorkspace",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": ""
+                }
+              }],
               "supports": []
             }
-          ]
-        }
-      ],
-      "supports": []
-    },
-    {
-      "description": "Investigation 2",
-      "ordinal": 2,
-      "title": "Investigation 2",
-      "introduction": {
+          }
+        ],
+        "supports": []
       },
-      "problems": [
-        {
-          "description": "Problem 2.1",
-          "ordinal": 1,
-          "title": "Problem 2.1",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                  "tiles": []
-              },
-              "supports": []
+      {
+        "description": "Problem 1.2",
+        "ordinal": 2,
+        "title": "Walking Rates and Linear Relationships",
+        "subtitle": "Tables, Graphs, and Equations",
+        "sections": [{
+            "type": "introduction",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Think about the effect a walking rate has on the relationship between time walked and distance walked. This will provide some important clues about how to identify linear relationships from tables, graphs, and equations."
+                }
+              }]
             },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
+            "supports": []
+          },
+          {
+            "type": "initialChallenge",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Here are the walking rates that Gilberto, Alana, and Leanne found in their experiment.\n.         Name          |      Walking Rate   \n        Alana       |  1 meter per second\n    Gilberto   |  2 meters per second\n  Leanne   |  2.5 meters per second \n What information about walking rates is represented in a table, graph, and equation?"
+                }
+              }]
             },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
+            "supports": [{
+                "text": "What are the two variables in the relationship?"
               },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
+              {
+                "text": "Have you considered a table for the first 10 seconds?"
               },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
+              {
+                "text": "Have you considered a graph for the first 10 seconds?"
+              },
+              {
+                "text": "Which axis represents time? Distance? Why?"
               }
+            ]
+          },
+          {
+            "type": "whatIf",
+            "content": {
+              "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "For each student:\n 1. If time t increases by 1 second, by how much does the distance d change? How is this change represented in a table? In a graph?\n 2. Yvonne claims that the relationships for Alana, Gilberto, and Leanne are linear and proportional? Is she correct?\n 3. Valentina and Omar have the same walking rate. Each made a graph to represent their data. How are their graphs similar? How are they different?"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_omar_rates_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_valentina_rates_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "text": "4. Three other friends made the following representations of their marathon data. Could any of these relationships be linear relationships? Explain."
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_george_rates_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_elizabeth_rates_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_billie_rates_350w.png"
+                  }
+                }
+              ],
+              "supports": []
+            },
+            "supports": []
+          },
+          {
+            "type": "nowWhatDoYouKnow",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "How can you predict if a relationship is linear from a verbal context, table, a graph, or an equation?"
+                }
+              }]
+            },
+            "supports": [{
+              "text": ""
+            }]
+          },
+          {
+            "type": "extraWorkspace",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": ""
+                }
+              }],
+              "supports": []
             }
-          ],
+          }
+        ],
+        "supports": []
+      },
+      {
+        "description": "Problem 1.3",
+        "ordinal": 3,
+        "title": "Raising Money",
+        "subtitle": "Using Relationships to Solve Equations",
+        "sections": [{
+            "type": "introduction",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon.\n The students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions:\n * What variables can affect the amount of money that is collected?\n * How can you use these variables to estimate the amount of money each student will collect?\n * Will the amount of money collected be the same for each walker?\n \n Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer d = rt, he or she walks. The class refers to these as pledge plans."
+                }
+              }]
+            },
+            "supports": []
+          },
+          {
+            "type": "initialChallenge",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Each student found sponsors who will pledge to donate money according to the following descriptions.\n.         Name          |      Pledge Plan   \n       Leanne       |  $10 regardless of how far she walks\n    Gilberto   |  $2 per kilometer (km)\n  Alana   |  $5 plus 50¢ per kilometer \n Who will raise the most money? Explain.\n Does the relationship between dollars and kilometers represent a linear relationship? Explain."
+                }
+              }]
+            },
+            "supports": [{
+                "text": "What are the variables for each plan?"
+              },
+              {
+                "text": "How might a table help? How might a graph help? Would an equation help?"
+              }
+            ]
+          },
+          {
+            "type": "whatIf",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "1. In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation?\n 2. Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer.\n 3. Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain.\n 4. On which graph does the point (12, 11) lie? What information does this point represent?\n 5. Yvonne claims that the relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional? Is she correct?"
+                }
+              }],
+              "supports": []
+            },
+            "supports": []
+          },
+          {
+            "type": "nowWhatDoYouKnow",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "1. How can you determine if a relationship is linear?\n 2. If a relationship is linear,\n * What is the pattern of change between the two variables?\n * Explain how you can tell if it is proportional."
+                }
+              }]
+            },
+            "supports": [{
+                "text": "If one variable changes by a constant amount, how does the other variable change?"
+              },
+              {
+                "text": "How is the constant rate of change represented in a context? Table? Graph? Equation?"
+              }
+            ]
+          },
+          {
+            "type": "extraWorkspace",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": ""
+                }
+              }],
+              "supports": []
+            }
+          }
+        ],
+        "supports": []
+      },
+      {
+        "description": "Problem 1.4",
+        "ordinal": 4,
+        "title": "Walkathon Money",
+        "subtitle": "Expressing Linear Relationships and Proportionality",
+        "sections": [{
+            "type": "introduction",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0,5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. \nIn this Problem you will continue to explore linear relationships in new contexts. \n What information does the y-intercept represent? In what way does it help you solve the Problem?"
+                }
+              }]
+            },
+            "supports": []
+          },
+          {
+            "type": "initialChallenge",
+            "content": {
+              "tiles": [{
+                  "content": {
+                    "type": "Text",
+                    "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week."
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_4_IC_money_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week.\n Ms. Chang’s class uses the money to provide books each week for the children’s ward at the hospital. To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week.\n Mr. Mamer’s class used the money to buy games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week."
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_4_IC_mamer_350w.png"
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "text": "What is the pattern of change for each relationship? Explain how you know."
+                  }
+                }
+              ]
+            },
+            "supports": []
+          },
+          {
+            "type": "whatIf",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "For each class:\n 1. How much money is in the account at the start? Explain.\n 2. How much money is withdrawn each week?\n 3. Write an equation that represents the relationship. Explain what information each number and variable represent.\n 4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? \n How do the graphs of the data compare?"
+                }
+              }],
+              "supports": []
+            },
+            "supports": []
+          },
+          {
+            "type": "nowWhatDoYouKnow",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Compare the patterns of change for the linear relationships in this Problem to those in previous Problems in this Investigation."
+                }
+              }]
+            },
+            "supports": []
+          },
+          {
+            "type": "extraWorkspace",
+            "content": {
+              "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": ""
+                }
+              }],
+              "supports": []
+            }
+          }
+        ],
+        "supports": []
+      },
+      {
+        "description": "Reflection 1.5",
+        "ordinal": 5,
+        "title": "1.MR Mathematical Reflection",
+        "subtitle": "",
+        "sections": [{
+          "type": "nowWhatDoYouKnow",
+          "content": {
+            "tiles": [{
+                "content": {
+                  "type": "Text",
+                  "text": "Think about what you have learned about the following question:\n \n What do you know about linear expressions, equations, and relationships?"
+                }
+              },
+              {
+                "content": {
+                  "type": "Text",
+                  "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                }
+              }
+            ]
+          },
           "supports": []
-        },
-        {
-          "description": "Problem 2.2",
-          "ordinal": 2,
-          "title": "Problem 2.2",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Problem 2.3",
-          "ordinal": 3,
-          "title": "Problem 2.3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Reflection 2.4",
-          "ordinal": 4,
-          "title": "Reflection 2.4",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            }
-          ]
-        }
-      ],
-      "supports": []
-    },
-    {
-      "description": "Investigation 3",
-      "ordinal": 3,
-      "title": "Investigation 3",
-      "problems": [
-        {
-          "description": "Problem 3.1",
-          "ordinal": 1,
-          "title": "Problem 3.1",
-          "subtitle": "",
-          "sections": [
-             {
-              "type": "introduction",
-              "content": {
-                 "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Problem 3.2",
-          "ordinal": 2,
-          "title": "Problem 3.2",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        },
-        {
-          "description": "Problem 3.3",
-          "ordinal": 3,
-          "title": "Problem 3.3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ]
-        },
-        {
-          "description": "Reflection 3.4",
-          "ordinal": 4,
-          "title": "Reflection 3.4",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            }
-          ]
-        }
-      ],
-      "supports": []
-    },
-     {
-      "description": "Investigation 4",
-      "ordinal": 4,
-      "title": "Investigation 4",
-      "problems": [
-        {
-          "description": "Problem 4.1",
-          "ordinal": 1,
-          "title": "Problem 4.1",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports" : []
-            }, {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ]
-        }, {
-          "description": "Problem 4.2",
-          "ordinal": 2,
-          "title": "Problem 4.2",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports" : []
-            }, {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        }, {
-          "description": "Problem 4.3",
-          "ordinal": 3,
-          "title": "Problem 4.3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              },
-              "supports" : []
-            }, {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
-            }
-          ]
-        }, {
-          "description": "Reflection 4.4",
-          "ordinal": 4,
-          "title": "Reflection 4.4",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              },
-              "supports": []
-            }
-          ]
-        }
-      ],
-      "supports": [
-      ]
-    }
-  ],
+        }]
+      }
+    ]
+  }],
   "supports": []
-}
