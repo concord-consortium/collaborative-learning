@@ -139,6 +139,7 @@
     "slate-plain-serializer": "^0.6.30",
     "slate-react": "^0.21.12",
     "superagent": "^3.8.3",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "whatwg-fetch": "^3.0.0"
   }
 }
