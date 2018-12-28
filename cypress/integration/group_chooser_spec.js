@@ -11,14 +11,13 @@ describe('Test student join a group', function(){
         student5='24',
         student6='25',
         fakeClass = '15',
-        fakeOffering = '3',
         problem = '2.2',
         group1='20',
         group2='21';
 
 
     function setup(student){
-        cy.visit(baseUrl+'?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&fakeOffering='+fakeOffering+'&problem='+problem);
+        cy.visit(baseUrl+'?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
     }
 
     it('Student 1 will join and will verify Join Group Dialog comes up with welcome message to correct student', function(){

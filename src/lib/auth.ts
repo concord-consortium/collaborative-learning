@@ -315,6 +315,8 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   // tslint:disable-next-line:max-line-length
   return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo, problemId?: string}>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
+    const unitCode = urlParams.unit || "";
+    const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
@@ -331,12 +333,13 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         appMode,
         classId: fakeClass,
         userType, userId,
-        problemOrdinal: urlParams.problem || DefaultProblemOrdinal
+        unitCode,
+        problemOrdinal
       }));
     }
 
     if (appMode !== "authed") {
-      return resolve(this.generateDevAuthentication(urlParams.problem || DefaultProblemOrdinal));
+      return resolve(this.generateDevAuthentication(unitCode, problemOrdinal));
     }
 
     if (!bearerToken) {
@@ -450,8 +453,8 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
   });
 };
 
-export const generateDevAuthentication = (problemOrdinal: string) => {
-  const offeringId = createOfferingIdFromProblem(problemOrdinal);
+export const generateDevAuthentication = (unitCode: string, problemOrdinal: string) => {
+  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   DEV_STUDENT.offeringId = offeringId;
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
@@ -459,11 +462,11 @@ export const generateDevAuthentication = (problemOrdinal: string) => {
   return {authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO};
 };
 
-const createOfferingIdFromProblem = (problemOrdinal: string) => {
+const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
   const [major, minor, ...rest] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
-  return `${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
+  return `${unitCode}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
 
 export const parseUrl = (url: string) => {
@@ -520,12 +523,13 @@ export interface CreateFakeAuthenticationOptions {
   classId: string;
   userType: UserType;
   userId: string;
+  unitCode: string;
   problemOrdinal: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, problemOrdinal} = options;
-  const offeringId = createOfferingIdFromProblem(problemOrdinal);
+  const {appMode, classId, userType, userId, unitCode, problemOrdinal} = options;
+  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,

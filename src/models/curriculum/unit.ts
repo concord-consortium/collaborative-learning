@@ -9,6 +9,7 @@ export const UnitModel = types
   .model("Unit", {
     title: types.string,
     subtitle: "",
+    code: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),

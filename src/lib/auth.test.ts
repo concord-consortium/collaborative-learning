@@ -322,6 +322,7 @@ describe("student authentication", () => {
       classId: "1",
       userType: "student",
       userId: "2",
+      unitCode: "",
       problemOrdinal: "3.1"
     });
     expect(demoInfo.authenticatedUser).toEqual({

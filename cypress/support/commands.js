@@ -46,7 +46,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
 
     for (i=0;i<students.length;i++) {
         cy.wait(2000);
-        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&fakeOffering='+qaOffering+'&problem='+problem);
+        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         leftNav.openLeftNavTab('Now What')
             leftNav.openToWorkspace();
         canvas.addTextTile();
