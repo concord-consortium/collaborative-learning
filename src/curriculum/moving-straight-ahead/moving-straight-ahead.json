@@ -17,7 +17,25 @@
             {
               "type": "introduction",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Investigation 1: Walking Rates\n\nIn Variables and Patterns, you read about a bicycle touring business. You used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. You looked at some linear relationships, like the relationship between cost and number of rental bikes represented in this graph: "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_In_walking_rates_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship.\n\nIn this Unit, consider these questions:\n* How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?\n* How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?\n* If I know the value of one variable, how can I find the value of the other variable? (What kinds of problems can I solve using linear relationships?)"
+                    }
+                  },{
                     "content": {
                       "type": "Text",
                       "text": "Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and a stopwatch for her walking experiment."
@@ -120,12 +138,35 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Here are the walking rates that Gilberto, Alana, and Leanne found in their experiment.\n.         Name          |      Walking Rate   \n        Alana       |  1 meter per second\n    Gilberto   |  2 meters per second\n  Leanne   |  2.5 meters per second \n What information about walking rates is represented in a table, graph, and equation?"
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Here are the walking rates that Gilberto, Alana, and Leanne found in their experiment."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        { "name": "Name",
+                          "type": "string",
+                          "values": ["Alana", "Gilberto", "Leanne"]
+                        },
+                        { "name": "Walking Rate",
+                          "type": "string",
+                          "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
+                        }
+                      ]        
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "What information about walking rates is represented in a table, graph, and equation?"
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
                 {
@@ -231,7 +272,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon.\n The students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions:\n * What variables can affect the amount of money that is collected?\n * How can you use these variables to estimate the amount of money each student will collect?\n * Will the amount of money collected be the same for each walker?\n \n Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer d = rt, he or she walks. The class refers to these as pledge plans."
+                    "text": "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon.\n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions:\n * What variables can affect the amount of money that is collected?\n * How can you use these variables to estimate the amount of money each student will collect?\n * Will the amount of money collected be the same for each walker?\n \n Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer d = rt, he or she walks. The class refers to these as pledge plans."
                   }
                 }]
               },
@@ -240,12 +281,37 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Each student found sponsors who will pledge to donate money according to the following descriptions.\n.         Name          |      Pledge Plan   \n       Leanne       |  $10 regardless of how far she walks\n    Gilberto   |  $2 per kilometer (km)\n  Alana   |  $5 plus 50¢ per kilometer \n Who will raise the most money? Explain.\n Does the relationship between dollars and kilometers represent a linear relationship? Explain."
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Each student found sponsors who will pledge to donate money according to the following descriptions."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        { 
+                          "name": "Name",
+                          "type": "string",
+                          "values": [" Leanne", "Gilberto ", "Alana"]
+                        },
+                         { 
+                          "name": "Pledge Plan",
+                          "type": "string",
+                          "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 plus 50¢ per kilometer"]
+                        }
+                      ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "text": "Who will raise the most money? Explain.\n Does the relationship between dollars and kilometers represent a linear relationship? Explain."
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
                 {
@@ -312,7 +378,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0,5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. \nIn this Problem you will continue to explore linear relationships in new contexts. \n What information does the y-intercept represent? In what way does it help you solve the Problem?"
+                    "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0,5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts. \n What information does the y-intercept represent? In what way does it help you solve the Problem?"
                   }
                 }]
               },
@@ -361,7 +427,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "For each class:\n 1. How much money is in the account at the start? Explain.\n 2. How much money is withdrawn each week?\n 3. Write an equation that represents the relationship. Explain what information each number and variable represent.\n 4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? \n How do the graphs of the data compare?"
+                    "text": "For each class:\n 1. How much money is in the account at the start? Explain.\n 2. How much money is withdrawn each week?\n 3. Write an equation that represents the relationship. Explain what information each number and variable represent.\n 4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? \n\nHow do the graphs of the data compare?"
                   }
                 }]
               },
@@ -436,7 +502,26 @@
             {
               "type": "introduction",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Investigation 2: Using Linear Relationships to Explore Equations, Tables, and Graphs\n\nIn the last Investigation, you examined linear relationships. For example, the distance, d, a person walks at a constant rate depends on the amount of time, t, the person walks. Also, the amount of money, A, a person raises from each sponsor depends on the distance, d, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_2_In_d=1t_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "You looked at tables and graphs to represent these relationships. These representations are useful in answering questions about linear relationships. For example, A = 5 + 0.5d\n\nIf you know something about distance d, how can you find the corresponding value of A ?\n\nIf you know something about A, how can you find the corresponding value of d?\n\nIn this Investigation, you will continue to solve problems involving walking rates and other linear relationships using tables, graphs and equations. "
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second.\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win."
@@ -596,8 +681,19 @@
                 },
                 {
                   "content": {
-                    "type": "Image",
-                    "url": "assets/curriculum/moving-straight-ahead/images/MSA_2_2_WI_tshirts_350w.png"
+                    "type": "Table",
+                     "columns": [
+                        { 
+                          "name": "n",
+                          "type": "number",
+                          "values": [0, 3, 5, 8, 10]
+                        },
+                        { 
+                          "name": "y",
+                          "type": "number",
+                          "values": [34, 41.5, 46.5, 54, 59]
+                        }
+                      ]
                   }
                 },
                 {
@@ -681,12 +777,6 @@
                     "content": {
                       "type": "Text",
                       "text": "Consider the following pledge plans. In each equation, y is the amount pledged in dollars by each sponsor and x is the distance walked in kilometers.\n\nPlan 1\ny = 5x - 3\n\nPlan 2\ny = - x + 6\n\nPlan 3\ny = 2"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_2_4_IC_pledge_plans_350w.png"
                     }
                   },
                   {
@@ -1434,12 +1524,12 @@
                         { 
                           "name": "x",
                           "type": "number",
-                          "cells": [-2, -1, 0, 1, 2]
+                          "values": [-2, -1, 0, 1, 2]
                         },
                         { 
                           "name": "y",
                           "type": "number",
-                          "cells": [6, 3, 0, -3, -6]
+                          "values": [6, 3, 0, -3, -6]
                         }
                       ]
                     }
@@ -1457,12 +1547,12 @@
                         { 
                           "name": "x",
                           "ordinal": 1,
-                          "cells": [-2, -1, 0, 1, 2]
+                          "values": [-2, -1, 0, 1, 2]
                         },
                         { 
                           "name": "y",
                           "type": "number",
-                          "cells": [-1, -0.5, 0, 0.5, 1]
+                          "values": [-1, -0.5, 0, 0.5, 1]
                         }
                       ]
                     }
@@ -1514,12 +1604,12 @@
                         { 
                           "name": "x",
                           "type": "number",
-                          "cells": [-6, -4, -2, 0, 2, 4]
+                          "values": [-6, -4, -2, 0, 2, 4]
                         },
                         { 
                           "name": "y",
                           "type": "number",
-                          "cells": [-10, -7, -4, -1, 2, 5]
+                          "values": [-10, -7, -4, -1, 2, 5]
                         }
                       ]
                     }
@@ -1527,7 +1617,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Table 1 \n\n* What is the constant rate of change and y-intercept associated with each representation?\n* Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality. \n\n2. The points (3, 5) and (-2, 10) lie on a line.\n\n* What is the rate of change of the line?\n* Find two more points that lie on this line. Explain your method.\n* Does this line represent a proportional relationship? Explain.\n\n3. What is the rate of change of a horizontal line? A vertical line? Explain your reasoning.\n\n4. John noticed that if the points (0,0) and (1, m) are on a line, then the line represents a proportional relationship, and m is the constant of proportionality. Is he correct? Explain."
+                      "text": "* What is the constant rate of change and y-intercept associated with each representation?\n* Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality. \n\n2. The points (3, 5) and (-2, 10) lie on a line.\n\n* What is the rate of change of the line?\n* Find two more points that lie on this line. Explain your method.\n* Does this line represent a proportional relationship? Explain.\n\n3. What is the rate of change of a horizontal line? A vertical line? Explain your reasoning.\n\n4. John noticed that if the points (0,0) and (1, m) are on a line, then the line represents a proportional relationship, and m is the constant of proportionality. Is he correct? Explain."
                   }
                 } 
               ]
