@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.2.0 - released December 28, 2018
+
+- Geometry: Labeled polygon angles
+- Internal: Image storage refactor
+- Internal: Rollbar support
+- Internal: Cypress integration tests
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 318,419 bytes | 391% |
+| index.js | 2,937,057 bytes | 28.3% |
+
 ## Version 0.1.3 - released December 7, 2018
 
 - Fix polygon selection bug in four-up view
