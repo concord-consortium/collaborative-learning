@@ -35,8 +35,8 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             //TODO: set up some canvases from learning log to Class Log for later testing
         });
         it('set up group and will go to a teacher view of the site', function() {
-            // cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&fakeOffering='+qaOffering+'&problem='+problem+'&qaGroup='+qaGroup10);
-            cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&fakeOffering='+qaOffering+'&problem='+problem);
+            // cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem+'&qaGroup='+qaGroup10);
+            cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
             cy.wait(3000)
         });
         it('will verify the groups tab is present', function(){

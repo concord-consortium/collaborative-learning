@@ -21,7 +21,7 @@ context('Test group functionalities', function(){
                 //
                 // for (i=0;i<studentArr.length;i++) {
                 //     cy.wait(5000);
-                //     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&fakeOffering='+qaOffering+'&problem=2.3');
+                //     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem=2.3');
                 //     leftNav.openToWorkspace('Now What');
                 //     cy.get('.single-workspace > .document > .toolbar > .tool.text').click({force: true});
                 //     cy.get('.canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .text-tool').last().type('This is to test the 4-up view of S'+studentArr[i]);
