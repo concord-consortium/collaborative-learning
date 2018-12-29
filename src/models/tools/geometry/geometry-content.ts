@@ -1,10 +1,12 @@
 import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { isVertexAngle } from "./jxg-vertex-angle";
 import { assign, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
+import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kGeometryToolID = "Geometry";
 
@@ -97,6 +99,9 @@ export const GeometryContentModel = types
       if (self.isSelected(id)) {
         self.metadata.deselect(id);
       }
+    },
+    selectedObjects(board: JXG.Board) {
+      return self.selectedIds.map(id => board.objects[id]);
     }
   }))
   .actions(self => ({
@@ -243,8 +248,31 @@ export const GeometryContentModel = types
       }
     }
 
+    function addVertexAngle(board: JXG.Board,
+                            parents: JXGParentType[],
+                            properties?: JXGProperties): JXG.Angle | undefined {
+      const change: JXGChange = {
+              operation: "create",
+              target: "vertexAngle",
+              parents,
+              properties: assign({ id: uuid(), radius: 1 }, properties)
+            };
+      const angle = _applyChange(board, change);
+      return angle ? angle as any as JXG.Angle : undefined;
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return board.objectsList.filter(test);
+    }
+
+    function isCopyableChild(child: JXG.GeometryElement) {
+      switch (child && child.elType) {
+        case "angle":
+          return isVertexAngle(child);
+        case "polygon":
+          return true;
+      }
+      return false;
     }
 
     // returns the currently selected objects and any descendant objects
@@ -258,7 +286,7 @@ export const GeometryContentModel = types
         const obj = board.objects[id];
         if (obj) {
           each(obj.childElements, child => {
-            if (child && (child.elType === "polygon")) {
+            if (child && isCopyableChild(child)) {
               children[child.id] = child;
             }
           });
@@ -308,6 +336,17 @@ export const GeometryContentModel = types
                   properties: { id: newIds[id], name: obj.name }
                 } as any;
           switch (obj.elType) {
+            case "angle":
+              if (isVertexAngle(obj)) {
+                const va = obj as JXG.Angle;
+                // parents must be in correct order
+                const parents = [va.point2, va.point1, va.point3];
+                assign(change, {
+                  target: "vertexAngle",
+                  parents: parents.map(parent => newIds[parent.id])
+                });
+              }
+              break;
             case "point":
               [ , x, y] = (obj as JXG.Point).coords.usrCoords;
               assign(change, {
@@ -319,7 +358,7 @@ export const GeometryContentModel = types
               assign(change, {
                 target: "polygon",
                 parents: Array.from(keys(obj.ancestors))
-                          .map(parentId => newIds[parentId]),
+                          .map(parentId => newIds[parentId])
               });
               break;
           }
@@ -372,7 +411,20 @@ export const GeometryContentModel = types
         get batchChangeCount() {
           return batchChanges.length;
         },
-        copySelection
+        copySelection,
+        getLastImageUrl(): string | undefined{
+          for (let i = self.changes.length - 1; i >= 0; --i) {
+            const jsonChange = self.changes[i];
+            const change: JXGChange = safeJsonParse(jsonChange);
+            if (change && (change.operation === "create") && (change.target === "image")) {
+              return change.parents && change.parents[0] as string;
+            }
+            if (change && (change.operation === "update") && change.properties &&
+                !Array.isArray(change.properties) && change.properties.url) {
+              return change.properties.url;
+            }
+          }
+        }
       },
       actions: {
         initializeBoard,
@@ -385,6 +437,7 @@ export const GeometryContentModel = types
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
+        addVertexAngle,
         findObjects,
         deleteSelection,
         applyChange: _applyChange,
@@ -398,6 +451,38 @@ export const GeometryContentModel = types
             self.changes.push.apply(self.changes, batchChanges);
             batchChanges = [];
           }
+        },
+        updateImageUrl(oldUrl: string, newUrl: string) {
+          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
+          // identify change entries to be modified
+          const updates: Array<{ index: number, change: string }> = [];
+          self.changes.forEach((changeJson, index) => {
+            const change: JXGChange = safeJsonParse(changeJson);
+            switch (change && change.operation) {
+              case "create":
+                if (change.parents) {
+                  const createUrl = change.parents[0];
+                  if ((change.target === "image") && (createUrl === oldUrl)) {
+                    change.parents[0] = newUrl;
+                    updates.push({ index, change: JSON.stringify(change) });
+                  }
+                }
+                break;
+              case "update":
+                const updateUrl = change.properties &&
+                                    !Array.isArray(change.properties) &&
+                                    change.properties.url;
+                if (updateUrl && (updateUrl === oldUrl)) {
+                  (change.properties as JXGProperties).url = newUrl;
+                  updates.push({ index, change: JSON.stringify(change) });
+                }
+                break;
+            }
+          });
+          // make the corresponding changes
+          updates.forEach(update => {
+            self.changes[update.index] = update.change;
+          });
         }
       }
     };

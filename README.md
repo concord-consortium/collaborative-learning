@@ -50,7 +50,7 @@ To deploy a production release:
 
 ### Testing
 
-Run `npm test` to run all tests.
+Run `npm test` to run all Jest tests.
 
 ### QA
 
@@ -59,6 +59,28 @@ Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA
 1. qaGroup - the group to automatically assign the fake user to after connecting to the database.
 2. qaClear - either "all", "class" or "offering".  When this parameter is present the QA database is cleared at the level requested based on the user parameters.
    This is useful to clear data between automated QA runs.  When complete the app will display `<span className="qa-clear">QA Cleared: OK</span>`.
+
+###To run Cypress integration tests:
+- `npm run test:local`
+- `npm run test:dev`
+- `npm run test:branch` (requires change in environments.json to add the branch name)
+- `npm run test:master`
+- `npm run test:production`
+
+## Additional notes about configuration
+
+You can also temporarily overwrite any configuration option using env variables with `CYPRESS_` prefix. E.g.:
+- `CYPRESS_baseUrl=https://collaborative-learning.concord.org/branch/fix-data-attributes npm run test:dev`
+
+## Writing tests, workflow and patterns
+
+1. Tests should not depend on other tests.
+2. Take a look at `cypress/support/commands.js`. This file implements LARA-specific helpers that will make test 
+implementation simpler. Existing commands at the moment:
+
+    - setupGroup
+    - upLoadFile
+    - clearQAData
 
 ## License
 

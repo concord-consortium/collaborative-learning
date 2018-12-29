@@ -4,6 +4,7 @@ import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
+import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -14,7 +15,8 @@ const agents: JXGChangeAgents = {
   image: imageChangeAgent,
   object: objectChangeAgent,
   point: pointChangeAgent,
-  polygon: polygonChangeAgent
+  polygon: polygonChangeAgent,
+  vertexangle: vertexAngleChangeAgent
 };
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {

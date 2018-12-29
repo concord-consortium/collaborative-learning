@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { DocumentContentModel } from "../document-content";
+import { DocumentContentModel } from "../document/document-content";
 import { ProblemModel } from "./problem";
 import { SupportModel } from "./support";
 

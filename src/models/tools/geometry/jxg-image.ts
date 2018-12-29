@@ -1,5 +1,6 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { gImageMap } from "../../image-map";
 import { assign } from "lodash";
 import * as uuid from "uuid/v4";
 
@@ -7,14 +8,17 @@ export const isImage = (v: any) => v instanceof JXG.Image;
 
 export const imageChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
-    const parents = change.parents;
+    const parents = (change.parents || []).slice();
+    const url = parents && parents[0] as string || "";
+    const imageEntry = url && gImageMap.getCachedImage(url);
+    const displayUrl = imageEntry && imageEntry.displayUrl || "";
+    parents[0] = displayUrl;
     const props = assign({ id: uuid(), fixed: true }, change.properties);
     return parents && parents.length >= 3
-            ? board.create("image", change.parents, props)
+            ? board.create("image", parents, props)
             : undefined;
   },
 
-  // update can be handled generically
   update: (board, change) => {
     if (!change.targetID || !change.properties) { return; }
     const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
@@ -25,14 +29,17 @@ export const imageChangeAgent: JXGChangeAgent = {
       const objProps = index < props.length ? props[index] : props[0];
       if (image && objProps) {
         const { url, size } = objProps;
-        if (url != null) {
-          image.url = url;
+        const imageEntry = gImageMap.getCachedImage(url);
+        const displayUrl = imageEntry && imageEntry.displayUrl || "";
+        if (displayUrl) {
+          image.url = displayUrl;
         }
         if (size != null) {
           image.setSize(size[0], size[1]);
         }
       }
     });
+    // other properties can be handled generically
     objectChangeAgent.update(board, change);
   },
 

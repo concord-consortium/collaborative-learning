@@ -2,12 +2,12 @@ import { observer, inject } from "mobx-react";
 import * as React from "react";
 
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
-         FourUpGridModelType } from "../models/four-up-grid";
-import { CanvasComponent } from "./canvas";
+         FourUpGridModelType } from "../models/view/four-up-grid";
+import { CanvasComponent } from "./document/canvas";
 import { BaseComponent, IBaseProps } from "./base";
-import { DocumentModelType } from "../models/document";
-import { WorkspaceModelType } from "../models/workspace";
-import { IToolApiInterface } from "./canvas-tools/tool-tile";
+import { DocumentModelType } from "../models/document/document";
+import { WorkspaceModelType } from "../models/stores/workspace";
+import { IToolApiInterface } from "./tools/tool-tile";
 
 import "./four-up.sass";
 

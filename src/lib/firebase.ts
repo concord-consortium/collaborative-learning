@@ -1,5 +1,5 @@
 import * as firebase from "firebase/app";
-import { UserModelType } from "../models/user";
+import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
 
@@ -57,7 +57,7 @@ export class Firebase {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      if ((appMode === "dev") || (appMode === "test")) {
+      if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
         parts.push(this.userId);
       }
     }
@@ -100,6 +100,10 @@ export class Firebase {
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
+  }
+
+  public getImagesPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/images`;
   }
 
   public getOfferingPath(user: UserModelType) {
@@ -174,10 +178,10 @@ export class Firebase {
   }
 
   //
-  // Firestore
+  // Firebase Storage
   //
 
-  public getPublicUrlFromStore(storePath: string, storeUrl?: string): Promise<any> {
+  public getPublicUrlFromStore(storePath?: string, storeUrl?: string): Promise<any> {
     const ref = storeUrl ? this.firebaseStorage().refFromURL(storeUrl) : this.firebaseStorage().ref(storePath);
     // Get the download URL - returns a url with an authentication token for the current session
     return ref.getDownloadURL().then((url) => {

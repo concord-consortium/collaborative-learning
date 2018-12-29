@@ -11,6 +11,18 @@ declare namespace JXG {
 
   const boards: { [id: string]: Board };
 
+  interface Angle extends Sector {
+    anglepoint: GeometryElement;
+    point: GeometryElement;
+    point1: GeometryElement;
+    point2: GeometryElement;
+    point3: GeometryElement;
+    pointsquare: GeometryElement;
+    radiuspoint: GeometryElement;
+
+    Value: () => number;
+  }
+
   class Board {
     id: string;
     attr: {
@@ -24,6 +36,10 @@ declare namespace JXG {
     containerObj: HTMLElement;
     cssTransMat: number[][];
     keepaspectratio: boolean;
+    origin: {
+      usrCoords: [number, number, number],
+      scrCoords: [number, number, number]
+    };
     showCopyright: boolean;
     showNavigation: boolean;
     showZoom: boolean;
@@ -66,13 +82,20 @@ declare namespace JXG {
     coords: JXG.Coords;
   }
 
+  class Curve extends GeometryElement {
+    updateDataArray: () => void;
+  }
+
+  type EventHandler = ((evt: any) => void) | ((obj: any, elt: JXG.GeometryElement) => void);
+
   class GeometryElement {
+    board: JXG.Board;
     id: string;
     elType: string;
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
-    parents: GeometryElement[];
+    parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
     lastDragTime: Date;
@@ -87,7 +110,7 @@ declare namespace JXG {
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
-    on: (event: string, handler: (evt: any) => void) => void;
+    on: (event: string, handler: EventHandler) => void;
   }
 
   const JSXGraph: {
@@ -103,6 +126,9 @@ declare namespace JXG {
   }
 
   const Math: {
+    Geometry: {
+      rad: (p1: JXG.Point, p2: JXG.Point, p3: JXG.Point) => number
+    },
     Statistics: {
       add: (arr1: number | number[], arr2: number | number[]) => number | number[];
       subtract: (arr1: number | number[], arr2: number | number[]) => number | number[];
@@ -114,6 +140,11 @@ declare namespace JXG {
 
   class Polygon extends GeometryElement {
     vertices: JXG.Point[];
+
+    findPoint: (point: JXG.Point) => number;
+  }
+
+  class Sector extends Curve {
   }
 
   const _ceil10: (value: number, exp: number) => number;

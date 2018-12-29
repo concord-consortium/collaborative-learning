@@ -1,5 +1,5 @@
 import { parse } from "query-string";
-import { AppMode } from "../models/stores";
+import { AppMode } from "../models/stores/stores";
 import { DBClearLevel } from "../lib/db";
 import { assign } from "lodash";
 
@@ -8,6 +8,8 @@ export const DefaultProblemOrdinal = "2.1";
 export interface QueryParams {
   // appMode is "authed", "test" or "dev" with the default of dev
   appMode?: AppMode;
+  // string, e.g. "s&s" for Stretching and Shrinking or "msa" for Moving Straight Ahead
+  unit?: string;
   // ordinal string, e.g. "2.1", "3.2", etc.
   problem?: string;
   // Used during migration testing to put the app into a "post-migration" mode.
@@ -62,6 +64,7 @@ const params = parse(location.search);
 
 export const DefaultUrlParams: QueryParams = {
   appMode: "dev",
+  unit: undefined,
   problem: undefined,
   token: undefined,
   domain: undefined,

@@ -1,5 +1,5 @@
 import { SnapshotIn, types } from "mobx-state-tree";
-import { DocumentContentModel } from "../document-content";
+import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
 import { SectionModelType, SectionType } from "./section";
 import { SupportModel } from "./support";

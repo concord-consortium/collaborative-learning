@@ -1,6 +1,6 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "object" | "image" | "point" | "polygon";
+export type JXGObjectType = "board" | "object" | "image" | "point" | "polygon" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 
@@ -8,6 +8,7 @@ export type JXGParentType = string | number | JXGCoordPair;
 
 export interface JXGProperties {
   position?: JXGCoordPair;
+  url?: string;
   [key: string]: any;
 }
 
