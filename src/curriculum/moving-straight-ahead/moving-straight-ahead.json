@@ -878,19 +878,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
+                      "text": "Solving Equations Symbolically\n\n Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph.\n\nYou will learn to use symbolic methods to solve a linear equation.\n\nIn the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance d and money earned A in the walkathon."
                     }
                   },
-                  {
+                     {
                     "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_coin_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_pouch_350w.png"
+                      "type": "Text",
+                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n* Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n* Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n* Using the equation:\n\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
                     }
                   },
                   {
@@ -902,13 +896,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The clue below indicates that there are $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation. MSA_3_1_eleven.png (x) * How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                      "text": "The clue below indicates that there are $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_eleven_350w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": " * How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                      "text": "* How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?\n* How much money was in each pouch?\n * How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
                     }
                   }
                 ]
@@ -923,18 +923,6 @@
                     "content": {
                       "type": "Text",
                       "text": "For each of the situations below, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.\n * What is the number of gold coins in each pouch? \n * How can you check your answer?\n\nWrite down your steps so that someone else could follow your steps to find the number of coins in a pouch."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "OR saved out separately:"
                     }
                   },
                   {
@@ -1053,7 +1041,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. \n\n.   The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n\nWhat do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation??\n  • divide the left-hand side of the original equation by 5??\n  • multiply the right-hand side of the original equation by 4?\n  \nThe picture below shows a situation from Problem 3.1."
+                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. \n\nThe equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n\nWhat do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation??\n  • divide the left-hand side of the original equation by 5??\n  • multiply the right-hand side of the original equation by 4?\n  \nThe picture below shows a situation from Problem 3.1."
                     }
                   },
                   {
@@ -1065,7 +1053,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n.   2x + 4 = 12     or      2(x + 2) = 12      or      x + 2 + x + 2 = 12\n\nThe expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.\n\n In this Problem, you will revisit situations with pouches and coins, but you will use symbolic equations to represent your solution process."
+                      "text": "Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n      2x + 4 = 12      or       2(x + 2) = 12       or       x + 2 + x + 2 = 12\n\nThe expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.\n\n In this Problem, you will revisit situations with pouches and coins, but you will use symbolic equations to represent your solution process."
                     }
                   }
                 ]
@@ -1297,7 +1285,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n      E = 825 + 3.25n\n\nThe income I for selling n cakes is given by the equation: \n\n      I = 8.20\nHow many cakes does Fabian need to sell in order to start making a profit?"
+                      "text": "At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n         E = 825 + 3.25n\n\nThe income I for selling n cakes is given by the equation: \n\n         I = 8.20\n\nHow many cakes does Fabian need to sell in order to start making a profit?"
                     }
                   }
                 ]
@@ -1406,6 +1394,19 @@
                 "tiles": [
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "Investigation 4: Connecting Rates and Ratios\n\nAll of the patterns of change you have explored in this Unit involved constant rates. For example, you worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, you found that the rate a affects the following things in a linear relationship represented by y = ax + b: \n* the steepness of the graph \n* the coefficient a of x in the equation y = ax + b represents the constant of proportionality in the equation y = ax, b = 0\n* how the y-values in the table change for each unit change in the x-values \n\nIn this Investigation, you will explore another way to express the constant rate. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_4_In_skiing_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+
                       "type": "Text",
                       "text": "Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. \n\nCarpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. \n\n* Twice the rise plus the run for each step should be between 24 and 26 inches.\n* The rise plus the run for each step should be between 17 and 19 inches.  \n\nThe steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the diagram below. "
                     }
@@ -1679,7 +1680,53 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Each letter provides criteria for a relationship. For each situation, decide if the relationship could be linear. \nFor those that are linear, is there exactly one or more than one? \nProvide reasons for your decisions. \n\nA: A graph that does not pass through the origin\n\nB: A graph that passes through exactly two quadrants\n\nC: A graph that passes through exactly three quadrants\n\nD: A tableMSA_4_3_In_tableD.png (x)\n\nE: A graph that contains the points (1, 4) and (-2, -3)\n\nF: A graph that contains the points (0,4) (2,6) and (3,8)\n\nG: A graph that contains the point (-1, 5)\n\nH: A tableMSA_4_3_In_tableH.png (x)\n\nI: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0oC or 32oF. Water boils at 100oC and 212oF.\n\nJ: An equation that relates amount of money A Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."                   
+                      "text": "Each letter provides criteria for a relationship. For each situation, decide if the relationship could be linear. \nFor those that are linear, is there exactly one or more than one? \nProvide reasons for your decisions. \n\nA: A graph that does not pass through the origin\n\nB: A graph that passes through exactly two quadrants\n\nC: A graph that passes through exactly three quadrants\n\nD: A table"                   
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [-4, -2, -1, 0]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [2, 2, 2, 2]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "E: A graph that contains the points (1, 4) and (-2, -3)\n\nF: A graph that contains the points (0,4) (2,6) and (3,8)\n\nG: A graph that contains the point (-1, 5)\n\nH: A table"                   
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [2, 3, 4, 5, 6]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [-11, -14, -17, -20, -23]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0oC or 32oF. Water boils at 100oC and 212oF.\n\nJ: An equation that relates amount of money A Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."                   
                     }
                   }
                 ]
