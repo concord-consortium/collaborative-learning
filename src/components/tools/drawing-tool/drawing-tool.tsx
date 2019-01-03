@@ -19,6 +19,8 @@ interface IState {
 ​
 export default class DrawingToolComponent extends BaseComponent<IProps, IState> {
 
+  public static tileHandlesSelection = true;
+
   public componentDidMount() {
     if (!this.props.readOnly) {
       (this.props.model.content as DrawingContentModelType).reset();
@@ -32,15 +34,10 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
     return (
       <div className={className}>
         <ToolbarView model={model} readOnly={!!readOnly}/>
-        <div style={{left: TOOLBAR_WIDTH}}
-            onMouseDown={this.handleMouseDown}>
+        <div style={{left: TOOLBAR_WIDTH}} >
           <DrawingLayerView {...this.props} />
         </div>
       </div>
     );
-  }
-
-  private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.setSelectedTile(this.props.model);
   }
 }

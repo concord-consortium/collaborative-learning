@@ -77,6 +77,7 @@ const kToolComponentMap: any = {
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
+  private domElement: HTMLDivElement | null;
   private hotKeys: HotKeys = new HotKeys();
 
   public componentDidMount() {
@@ -85,6 +86,14 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       this.hotKeys.register({
         "cmd-shift-c": this.handleCopyJson
       });
+    }
+    if (this.domElement) {
+      this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
+    }
+  }
+  public componentWillUnmount() {
+    if (this.domElement) {
+      this.domElement.removeEventListener("mousedown", this.handleMouseDown, true);
     }
   }
 
@@ -99,6 +108,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className={`tool-tile${selectedClass}`}
+          ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
           onKeyDown={this.handleKeyDown}
@@ -124,6 +134,15 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
+  }
+
+  private handleMouseDown = (e: Event) => {
+    const { model } = this.props;
+    const { ui } = this.stores;
+    const ToolComponent = kToolComponentMap[model.content.type];
+    if (ToolComponent && ToolComponent.tileHandlesSelection && !ui.isSelectedTile(model)) {
+      ui.setSelectedTile(model);
+    }
   }
 
   private handleCopyJson = () => {

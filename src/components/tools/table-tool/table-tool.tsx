@@ -26,6 +26,8 @@ interface IState {
 @observer
 export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
+  public static tileHandlesSelection = true;
+
   public static getDerivedStateFromProps = (props: IProps, state: IState) => {
     const { model: { content } } = props;
     if (content === state.prevContent) { return null; }
