@@ -1,8 +1,8 @@
 import * as React from "react";
 import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
-import TableHeaderMenu from "./table-header-menu";
-import { addAttributeToDataSet, addCanonicalCasesToDataSet, DataSet,
+import { IMenuItemFlags, TableHeaderMenu } from "./table-header-menu";
+import { addAttributeToDataSet, addCanonicalCasesToDataSet,
          ICase, ICaseCreation as IRowCreation, IDataSet } from "../../../models/data/data-set";
 import { IAttribute, IValueType } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
@@ -40,6 +40,10 @@ interface IPos {
 
 interface IProps {
   dataSet?: IDataSet;
+  changeCount: number;
+  readOnly?: boolean;
+  autoSizeColumns?: boolean;
+  itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
   onSampleData?: (name: string) => void;
   // strings: Strings;
@@ -126,6 +130,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     this.gridApi = gridReadyParams.api;
     this.gridColumnApi = gridReadyParams.columnApi;
 
+    if (this.gridColumnApi && this.props.autoSizeColumns) {
+      const allColumnIds: string[] = [];
+      this.gridColumnApi.getAllColumns().forEach(column => {
+        allColumnIds.push((column as any).colId);
+      });
+      this.gridColumnApi.autoSizeColumns(allColumnIds);
+    }
+
     const {tableComponentData: caseTableComponentData} = this.props;
     if (caseTableComponentData && this.gridApi) {
       this.gridApi.setSortModel(getSnapshot(caseTableComponentData.sortModel));
@@ -141,13 +153,15 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   public getRowNodeId = (data: { id: string }) => data.id;
 
   public getRowIndexColumnDef(): ColDef {
-    const { dataSet } = this.props;
+    const { dataSet, itemFlags, readOnly } = this.props;
     return ({
       headerName: "",
       headerComponentFramework: TableHeaderMenu,
       headerComponentParams: {
         api: this.gridApi,
         dataSet,
+        readOnly,
+        itemFlags,
         onNewAttribute: (name: string) => {
           dataSet && addAttributeToDataSet(dataSet, { name });
         },
@@ -197,6 +211,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public getAttributeColumnDef(attribute: IAttribute): ColDef {
+    const { readOnly } = this.props;
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
       cellClass: "cdp-row-data-cell",
@@ -204,7 +219,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       field: attribute.name,
       tooltipField: attribute.name,
       colId: attribute.id,
-      editable: true,
+      editable: !readOnly,
       width: defaultWidth,
       lockPosition: true,
       valueGetter: (params: ValueGetterParams) => {
@@ -293,7 +308,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         rows.push({ id: aCase.__id__ });
       }
     }
-    rows.push({id: LOCAL_ROW_ID});
+    if (!this.props.readOnly) {
+      rows.push({id: LOCAL_ROW_ID});
+    }
     return rows;
   }
 
@@ -592,10 +609,13 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public componentWillReceiveProps(nextProps: IProps) {
-    const { dataSet } = nextProps;
+    const { changeCount, dataSet } = nextProps;
     if (dataSet !== this.props.dataSet) {
       this.detachDataSet(this.props.dataSet);
       this.attachDataSet(dataSet);
+      this.updateGridState(dataSet);
+    }
+    else if (changeCount !== this.props.changeCount) {
       this.updateGridState(dataSet);
     }
   }
@@ -649,6 +669,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
     return null;
   }
+
   public render() {
     return (
       <div className="neo-codap-case-table ag-theme-fresh" ref={(el) => this.gridElement = el}>

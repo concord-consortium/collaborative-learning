@@ -6,9 +6,20 @@ import { GridApi } from "ag-grid-community";
 import { Icon, Menu, Popover, Position, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { listenForTableEvents } from "../../../models/tools/table/table-events";
 
+export interface IMenuItemFlags {
+  addAttribute?: boolean;
+  addCase?: boolean;
+  addRemoveDivider?: boolean;
+  renameAttribute?: boolean;
+  removeAttribute?: boolean;
+  removeCases?: boolean;
+}
+
 interface IProps {
   api: GridApi;
   dataSet?: IDataSet;
+  readOnly?: boolean;
+  itemFlags?: IMenuItemFlags;
   onNewAttribute: (name: string) => void;
   onRenameAttribute: (id: string, name: string) => void;
   onNewCase: () => void;
@@ -24,8 +35,7 @@ interface IState {
   renameAttributeName: string;
 }
 
-export default
-class TableHeaderMenu extends React.Component<IProps, IState> {
+export class TableHeaderMenu extends React.Component<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
@@ -58,6 +68,7 @@ class TableHeaderMenu extends React.Component<IProps, IState> {
   }
 
   public render() {
+    if (this.props.readOnly) return null;
     return (
       <div>
         <Popover
@@ -155,39 +166,58 @@ class TableHeaderMenu extends React.Component<IProps, IState> {
   }
 
   private renderMenu() {
+    const itemFlags = this.props.itemFlags || {};
+    const addColumn = itemFlags.addAttribute !== false
+                        ? <MenuItem
+                            icon="add-column-right"
+                            text={`New Column...`}
+                            onClick={this.openNewAttributeDialog}
+                          />
+                        : null;
+    const addRow = itemFlags.addCase !== false
+                      ? <MenuItem
+                          icon="add-row-bottom"
+                          text={`New Row...`}
+                          onClick={this.handleNewCase}
+                        />
+                      : null;
+    const addRemoveDivider = itemFlags.addRemoveDivider !== false
+                              ? <MenuDivider />
+                              : null;
+    const renameColumn = itemFlags.renameAttribute !== false
+                          ? <MenuItem
+                              icon="text-highlight"
+                              text={`Rename Column...`}
+                              disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
+                            >
+                              {this.renderAttributeSubMenuItems(this.handleRenameAttribute)}
+                            </MenuItem>
+                          : null;
+    const removeColumn = itemFlags.removeAttribute !== false
+                          ? <MenuItem
+                              icon="remove-column"
+                              text={`Remove Column...`}
+                              disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
+                            >
+                              {this.renderAttributeSubMenuItems(this.handleRemoveAttribute)}
+                            </MenuItem>
+                          : null;
+    const removeRows = itemFlags.removeCases !== false
+                          ? <MenuItem
+                              icon="remove-row-bottom"
+                              text={`Remove Rows`}
+                              onClick={this.handleRemoveCases}
+                              disabled={!this.getSelectedRowNodeCount()}
+                            />
+                          : null;
     return (
       <Menu>
-        <MenuItem
-          icon="add-column-right"
-          text={`New Column...`}
-          onClick={this.openNewAttributeDialog}
-        />
-        <MenuItem
-          icon="add-row-bottom"
-          text={`New Row...`}
-          onClick={this.handleNewCase}
-        />
-        <MenuDivider />
-        <MenuItem
-          icon="text-highlight"
-          text={`Rename Column...`}
-          disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
-        >
-          {this.renderAttributeSubMenuItems(this.handleRenameAttribute)}
-        </MenuItem>
-        <MenuItem
-          icon="remove-column"
-          text={`Remove Column...`}
-          disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
-        >
-          {this.renderAttributeSubMenuItems(this.handleRemoveAttribute)}
-        </MenuItem>
-        <MenuItem
-          icon="remove-row-bottom"
-          text={`Remove Rows`}
-          onClick={this.handleRemoveCases}
-          disabled={!this.getSelectedRowNodeCount()}
-        />
+        {addColumn}
+        {addRow}
+        {addRemoveDivider}
+        {renameColumn}
+        {removeColumn}
+        {removeRows}
       </Menu>
     );
   }
