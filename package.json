@@ -32,7 +32,7 @@
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
-    "build:webpack": "webpack --mode production --devtool false",
+    "build:webpack": "webpack --mode production",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:build": "tslint -c tslint-build.json 'src/**/*.{ts,tsx}'",
