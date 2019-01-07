@@ -47,8 +47,6 @@ export interface QueryParams {
   fakeClass?: string;
   // user id  in form (student|teacher):<id>
   fakeUser?: string;
-  // offering id for demo or qa
-  fakeOffering?: string;
 
   //
   // QA options
@@ -74,7 +72,6 @@ export const DefaultUrlParams: QueryParams = {
   reportType: undefined,
   fakeClass: undefined,
   fakeUser: undefined,
-  fakeOffering: undefined,
   qaGroup: undefined,
   qaClear: undefined,
   testMigration: undefined,

@@ -10,9 +10,10 @@ module.exports = (env, argv) => {
 
   return {
     context: __dirname, // to automatically find tsconfig.json
-    devtool: 'source-map',
+    // https://survivejs.com/webpack/building/source-maps/
+    devtool: devMode ? 'cheap-module-eval-source-map' : 'source-map',
     entry: ['whatwg-fetch', './src/index.tsx'],
-    mode: 'development',
+    mode: devMode ? 'development' : 'production',
     output: {
       filename: 'assets/index.[hash].js'
     },

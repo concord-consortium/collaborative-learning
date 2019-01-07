@@ -1,7 +1,7 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { wn_PnPoly } from "./soft-surfer-sunday";
-import { assign, values } from "lodash";
+import { assign, each, values } from "lodash";
 import * as uuid from "uuid/v4";
 
 export const isPolygon = (v: any) => v instanceof JXG.Polygon;
@@ -12,6 +12,18 @@ export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
               return { x: vx, y: vy };
             });
   return !!wn_PnPoly({ x, y }, v);
+}
+
+export function getPolygonEdges(polygon: JXG.Polygon) {
+  const edges: { [id: string]: JXG.GeometryElement } = {};
+  polygon.vertices.forEach(vertex => {
+    each(vertex.childElements, child => {
+      if (child.elType === "segment") {
+        edges[child.id] = child;
+      }
+    });
+  });
+  return values(edges);
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
