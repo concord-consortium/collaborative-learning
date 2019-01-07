@@ -21,13 +21,18 @@ const agents: JXGChangeAgents = {
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {
   let _board: JXG.Board | undefined;
-  return changes.map(change => {
-          const result = applyChange(_board || board, change);
-          if ((typeof board === "string") && isBoard(result)) {
-            _board = result as JXG.Board;
-          }
-          return result;
-        });
+  const results = changes.map(change => {
+                    const result = applyChange(_board || board, change);
+                    if ((typeof board === "string") && isBoard(result)) {
+                      _board = result as JXG.Board;
+                      _board.suspendUpdate();
+                    }
+                    return result;
+                  });
+  if (_board) {
+    _board.unsuspendUpdate();
+  }
+  return results;
 }
 
 export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
