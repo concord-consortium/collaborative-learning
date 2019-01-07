@@ -137,17 +137,21 @@ export const GeometryContentModel = types
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
-      let board;
+      let board: JXG.Board | undefined;
       applyChanges(domElementID, changes)
         .filter(result => result != null)
         .forEach(elt => {
           if (isBoard(elt)) {
             board = elt as JXG.Board;
+            board.suspendUpdate();
           }
           else if (elt && onCreate) {
             onCreate(elt as JXG.GeometryElement);
           }
         });
+      if (board) {
+        board.unsuspendUpdate();
+      }
       return board;
     }
 
