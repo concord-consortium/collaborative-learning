@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.2.1 - released January 6, 2018
+
+- Geometry: Fix polygon edge drag bug
+- Internal: Add support for multiple units
+- Internal: Enable source maps on production for debugging/profiling
+- Internal: Update development dependency to eliminate security warning
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 318,477 bytes | 0.0% |
+| index.js | 2,938,530 bytes | 0.1% |
+
 ## Version 0.2.0 - released December 28, 2018
 
 - Geometry: Labeled polygon angles

@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "jest": {
@@ -116,7 +116,7 @@
     "wait-on": "^3.2.0",
     "webpack": "^4.26.1",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10",
+    "webpack-dev-server": "^3.1.14",
     "xhr-mock": "^2.4.1"
   },
   "dependencies": {
