@@ -10,7 +10,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../../models/tools/geometry/jxg-point";
-import { isPolygon, getPointsForVertexAngle } from "../../../models/tools/geometry/jxg-polygon";
+import { isPolygon, getPointsForVertexAngle, getPolygonEdges } from "../../../models/tools/geometry/jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { JXGChange } from "../../../models/tools/geometry/jxg-changes";
@@ -20,7 +20,7 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { assign, castArray, debounce, each, keys, size as _size } from "lodash";
+import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -957,6 +957,87 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     point.on("up", handlePointerUp);
   }
 
+  private handleCreatePolygonEdge = (edge: JXG.Line) => {
+
+    function getVertices() {
+      return filter(edge.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
+    }
+
+    const isInVertex = (evt: any) => {
+      const { scale } = this.props;
+      const { board } = this.state;
+      if (!board) return false;
+      const coords = getEventCoords(board, evt, scale);
+      return find(getVertices(), vertex => vertex.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) != null;
+    };
+
+    const handlePointerDown = (evt: any) => {
+      const { readOnly } = this.props;
+      const { board, scale } = this.state;
+      if (!board || (edge !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
+
+      const content = this.getContent();
+      // deselect other elements unless appropriate modifier key is down
+      if (board && !hasSelectionModifier(evt)) {
+        content.deselectAll(board);
+      }
+
+      const vertices = getVertices();
+      const allSelected = vertices.every(vertex => content.isSelected(vertex.id));
+      if (!allSelected) {
+        vertices.forEach(vertex => content.selectElement(vertex.id));
+      }
+      // we can't prevent JSXGraph from dragging the edge, so don't deselect
+      // else if (hasSelectionModifier(evt)) {
+      //   vertices.forEach(vertex => content.deselectElement(vertex.id));
+      // }
+
+      if (!readOnly) {
+        // point handles vertex drags
+        this.isVertexDrag = isInVertex(evt);
+        if (!this.isVertexDrag) {
+          this.beginDragSelectedPoints(evt, edge);
+        }
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly || this.isVertexDrag) return;
+
+      const vertices = getVertices();
+      const vertex = vertices[0];
+      const dragEntry = this.dragPts[vertex.id];
+      if (dragEntry && dragEntry.initial) {
+        const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                    dragEntry.initial.usrCoords) as number[];
+        this.dragSelectedPoints(evt, edge, usrDiff);
+      }
+      this.setState({ disableRotate: true });
+    };
+
+    const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
+
+      const vertices = getVertices();
+      if (!this.props.readOnly && !this.isVertexDrag) {
+        const vertex = vertices[0];
+        const dragEntry = this.dragPts[vertex.id];
+        if (dragEntry && dragEntry.initial) {
+          const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                      dragEntry.initial.usrCoords) as number[];
+          this.endDragSelectedPoints(evt, edge, usrDiff);
+        }
+      }
+      // remove this polygon's vertices from the dragPts map
+      vertices.forEach(vertex => delete this.dragPts[vertex.id]);
+      this.isVertexDrag = false;
+    };
+
+    edge.on("down", handlePointerDown);
+    edge.on("drag", handleDrag);
+    edge.on("up", handlePointerUp);
+  }
+
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
 
     const isInVertex = (evt: any) => {
@@ -994,7 +1075,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
       let selectVertices = false;
-      let deselectVertices = false;
+      // let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
         if (board && !hasSelectionModifier(evt)) {
@@ -1003,20 +1084,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         selectVertices = true;
         this.lastSelectDown = evt;
       }
-      else if (!inVertex && allVerticesSelected) {
-        if (board && hasSelectionModifier(evt)) {
-          deselectVertices = true;
-        }
-      }
+      // we can't prevent JSXGraph from dragging the polygon, so don't deselect
+      // else if (!inVertex && allVerticesSelected) {
+      //   if (board && hasSelectionModifier(evt)) {
+      //     deselectVertices = true;
+      //   }
+      // }
       each(polygon.ancestors, point => {
         const pt = point as JXG.Point;
         if (board && !inVertex) {
           if (selectVertices) {
             geometryContent.selectElement(pt.id);
           }
-          else if (deselectVertices) {
-            geometryContent.deselectElement(pt.id);
-          }
+          // we can't prevent JSXGraph from dragging the polygon, so don't deselect
+          // else if (deselectVertices) {
+          //   geometryContent.deselectElement(pt.id);
+          // }
         }
       });
 
@@ -1058,6 +1141,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       polygon.vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
+
+    const edges = getPolygonEdges(polygon);
+    edges.forEach(edge => this.handleCreatePolygonEdge(edge));
 
     polygon.on("down", handlePointerDown);
     polygon.on("drag", handleDrag);

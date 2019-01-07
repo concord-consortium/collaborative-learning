@@ -125,6 +125,9 @@ declare namespace JXG {
     setSize: (width: number, height: number) => void;
   }
 
+  class Line extends GeometryElement {
+  }
+
   const Math: {
     Geometry: {
       rad: (p1: JXG.Point, p2: JXG.Point, p3: JXG.Point) => number
