@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.2.2 - released January 7, 2018
+
+- Geometry: Improve initialization performance
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 318,477 bytes | 0.0% |
+| index.js | 2,938,753 bytes | 0.0% |
+
 ## Version 0.2.1 - released January 6, 2018
 
 - Geometry: Fix polygon edge drag bug
