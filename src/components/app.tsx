@@ -31,6 +31,22 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         updateProblem(stores, problemId);
       }
 
+      if (typeof (window as any).Rollbar !== "undefined") {
+        const _Rollbar = (window as any).Rollbar;
+        if (_Rollbar.configure) {
+          const config = { payload: {
+                  class: authenticatedUser.classHash,
+                  offering: authenticatedUser.offeringId,
+                  person: { id: authenticatedUser.id },
+                  problemId: problemId || "",
+                  problem: stores.problem.title,
+                  role: authenticatedUser.type,
+                  unit: stores.unit.title
+                }};
+          _Rollbar.configure(config);
+        }
+      }
+
       if (appMode === "authed")  {
         const { rawFirebaseJWT } = authenticatedUser;
         if (rawFirebaseJWT) {
