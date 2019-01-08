@@ -1,10 +1,9 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
-import * as PackageJson from "../../package.json";
+import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./header.sass";
-import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;
@@ -36,7 +35,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderGroup(group: GroupModelType) {
-    const {user} = this.stores;
+    const {appVersion, user} = this.stores;
     const groupUsers = group.users.slice();
     const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
     // Put the main user first to match 4-up colors
@@ -45,7 +44,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className="group">
-        <div className="version">Version {PackageJson.version}</div>
+        <div className="version">Version {appVersion}</div>
         <div onClick={this.handleResetGroup} className="name" data-test="group-name">{`Group ${group.id}`}</div>
         <div className="members" data-test="group-members">
           <div className="row">

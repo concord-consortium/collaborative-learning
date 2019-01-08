@@ -13,6 +13,7 @@ import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
 import { setTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
+import * as PackageJson from "../package.json";
 import { setLivelynessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
@@ -32,6 +33,7 @@ function getCurriculumJson() {
 
 const host = window.location.host.split(":")[0];
 const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
+const appVersion = PackageJson.version;
 
 const user = UserModel.create();
 
@@ -40,7 +42,7 @@ const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
 const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
-const stores = createStores({ appMode, user, problem, showDemoCreator, unit });
+const stores = createStores({ appMode, appVersion, user, problem, showDemoCreator, unit });
 gImageMap.initialize(stores.db, user.id);
 
 Logger.initializeLogger(stores, investigation, problem);
