@@ -10,6 +10,7 @@ import { TeacherStudentTabComponent } from "./teacher-student-tab";
 import "./teacher-dashboard.sass";
 import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
+import { TeacherSupport } from "./teacher-support";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -38,27 +39,24 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
+    const {supports} = this.stores;
     const {activeTab} = this.state;
 
     return (
       <div className="teacher-dashboard">
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
-          <TabSetComponent>
-            {tabs.map((tab) => {
-              return (
-                <TabComponent
-                  id={this.getTabId(tab)}
-                  key={tab.id}
-                  active={tab === activeTab}
-                  onClick={this.handleTabClick(tab)}
-                >
-                  {tab.type}
-                </TabComponent>
-              );
-            })}
-          </TabSetComponent>
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
+            <TeacherSupport time={new Date().getTime()}/>
+            {
+              // Reverse the supports so the newest ones are first + displayed at the top
+              supports.teacherSupports.slice()
+                .filter(support => !support.deleted)
+                .reverse()
+                .map((support, i) => {
+                  return <TeacherSupport support={support} time={support.authoredTime} key={support.key}/>;
+                })
+            }
             {this.renderTabContents()}
           </div>
         </div>

@@ -2,6 +2,8 @@ import * as firebase from "firebase/app";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
+import { DBSupportSectionTarget } from "./db-types";
+import { SupportAudienceType } from "../models/stores/supports";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -137,6 +139,18 @@ export class Firebase {
 
   public getPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;
+  }
+
+  public getSupportsPath(
+    user: UserModelType,
+    audience?: SupportAudienceType,
+    sectionTarget?: DBSupportSectionTarget,
+    key?: string
+  ) {
+    const audienceSuffix = audience ? `/${audience}` : "";
+    const sectionTargetSuffix = sectionTarget ? `/${sectionTarget}` : "";
+    const keySuffix = key ? `/${key}` : "";
+    return `${this.getOfferingPath(user)}/supports${audienceSuffix}${sectionTargetSuffix}${keySuffix}`;
   }
 
   //

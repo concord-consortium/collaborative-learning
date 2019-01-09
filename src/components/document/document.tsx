@@ -245,7 +245,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
 
   private getSupportName(supportIndex: number) {
     // There are currently 4 (0-based) support icons defined in index.html
-    const safeIndex = Math.min(supportIndex, 3);
+    const safeIndex = supportIndex % 4;
     return `icon-support${safeIndex}`;
   }
 

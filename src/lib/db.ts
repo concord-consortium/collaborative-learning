@@ -17,7 +17,10 @@ import { DBOfferingGroup,
          DBGroupUserConnections,
          DBPublication,
          DBDocumentType,
-         DBImage
+         DBImage,
+         DBSectionType,
+         DBSupport,
+         DBSupportSectionTarget
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
@@ -32,6 +35,7 @@ import { DocumentContentSnapshotType } from "../models/document/document-content
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
+import { SupportAudienceType, TeacherSupportModelType, SupportItemType } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -644,4 +648,38 @@ export class DB {
             .then(response => response.blob())
             .then(blob => URL.createObjectURL(blob));
   }
+
+  public createSupport(content: string) {
+    const { user } = this.stores;
+    const classSupportsRef = this.firebase.ref(
+      this.firebase.getSupportsPath(user, SupportAudienceType.class, DBSectionType.all)
+    );
+    const supportRef = classSupportsRef.push();
+    const support: DBSupport = {
+      self: {
+        classHash: user.classHash,
+        offeringId: user.offeringId,
+        audience: SupportAudienceType.class,
+        sectionTarget: DBSectionType.all,
+        key: supportRef.key!
+      },
+      timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+      content,
+      deleted: false
+    };
+    supportRef.set(support);
+  }
+
+  public deleteSupport(support: TeacherSupportModelType) {
+    const { user } = this.stores;
+    const { audience, type, key } = support;
+    const dbSupportType: DBSupportSectionTarget = type === SupportItemType.section
+      ? support.sectionId!
+      : DBSectionType.all;
+    const updateRef = this.firebase.ref(this.firebase.getSupportsPath(user, audience, dbSupportType, key));
+    updateRef.update({
+      deleted: true
+    });
+  }
+
 }

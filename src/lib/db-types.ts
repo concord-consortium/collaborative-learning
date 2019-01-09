@@ -1,3 +1,6 @@
+import { SectionType } from "../models/curriculum/section";
+import { SupportAudienceType } from "../models/stores/supports";
+
 // NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
 
 export interface DBPortalUser {
@@ -198,4 +201,22 @@ export interface DBImage {
   originalSource: string; // web url or original filename
   createdAt: number;
   createdBy: string;
+}
+
+export enum DBSectionType {
+  all = "all"
+}
+export type DBSupportSectionTarget = SectionType | DBSectionType;
+
+export interface DBSupport {
+  self: {
+    classHash: string;
+    offeringId: string;
+    audience: SupportAudienceType;
+    sectionTarget: DBSupportSectionTarget;
+    key: string;
+  };
+  timestamp: number;
+  content: string;
+  deleted: boolean;
 }
