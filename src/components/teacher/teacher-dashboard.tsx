@@ -54,7 +54,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
                 .filter(support => !support.deleted)
                 .reverse()
                 .map((support, i) => {
-                  return <TeacherSupport support={support} time={support.authoredTime} key={i}/>;
+                  return <TeacherSupport support={support} time={support.authoredTime} key={support.key}/>;
                 })
             }
             {this.renderTabContents()}

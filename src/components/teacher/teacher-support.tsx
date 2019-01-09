@@ -74,7 +74,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
 
   private handleDelete = (support: TeacherSupportModelType) => () => {
     const { db } = this.stores;
-    db.hideSupport(support);
+    db.deleteSupport(support);
   }
 
 }

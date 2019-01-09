@@ -670,7 +670,7 @@ export class DB {
     supportRef.set(support);
   }
 
-  public hideSupport(support: TeacherSupportModelType) {
+  public deleteSupport(support: TeacherSupportModelType) {
     const { user } = this.stores;
     const { audience, type, key } = support;
     const dbSupportType: DBSupportSectionTarget = type === SupportItemType.section
