@@ -5,9 +5,10 @@ import { BaseComponent, IBaseProps } from "../base";
 import "./teacher-support.sass";
 import { niceDate } from "../../utilities/time";
 import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
+import { TeacherSupportModelType } from "../../models/stores/supports";
 
 interface IProps extends IBaseProps {
-  content?: string;
+  support?: TeacherSupportModelType;
   time: number;
 }
 
@@ -20,12 +21,12 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
   private inputElem: HTMLInputElement | null;
 
   public render() {
-    const { content } = this.props;
+    const { support } = this.props;
 
-    if (!content) {
+    if (!support) {
       return this.renderNewSupport();
     } else {
-      return this.renderExistingSupport();
+      return this.renderExistingSupport(support);
     }
   }
 
@@ -40,17 +41,18 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderExistingSupport() {
-    const { content, time } = this.props;
+  private renderExistingSupport(support: TeacherSupportModelType) {
+    const { time } = this.props;
+    const { text } = support;
 
     return (
       <div className="teacher-support">
-        <svg className={`icon icon-delete-tool`}>
+        <svg className={`icon icon-delete-tool`} onClick={this.handleDelete(support)}>
           <use xlinkHref={`#icon-delete-tool`} />
         </svg>
         <div className="date">{niceDate(time)}</div>
         <div className="content">
-          { content }
+          { text }
         </div>
       </div>
     );
@@ -68,6 +70,11 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     if (e.keyCode === ENTER) {
       this.handleSubmit();
     }
+  }
+
+  private handleDelete = (support: TeacherSupportModelType) => () => {
+    const { db } = this.stores;
+    db.hideSupport(support);
   }
 
 }

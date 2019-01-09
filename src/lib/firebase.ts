@@ -141,10 +141,16 @@ export class Firebase {
     return `${this.getOfferingPath(user)}/publications`;
   }
 
-  public getSupportsPath(user: UserModelType, audience?: SupportAudienceType, sectionTarget?: DBSupportSectionTarget) {
+  public getSupportsPath(
+    user: UserModelType,
+    audience?: SupportAudienceType,
+    sectionTarget?: DBSupportSectionTarget,
+    key?: string
+  ) {
     const audienceSuffix = audience ? `/${audience}` : "";
     const sectionTargetSuffix = sectionTarget ? `/${sectionTarget}` : "";
-    return `${this.getOfferingPath(user)}/supports${audienceSuffix}${sectionTargetSuffix}`;
+    const keySuffix = key ? `/${key}` : "";
+    return `${this.getOfferingPath(user)}/supports${audienceSuffix}${sectionTargetSuffix}${keySuffix}`;
   }
 
   //

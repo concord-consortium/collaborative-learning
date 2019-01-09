@@ -19,7 +19,8 @@ import { DBOfferingGroup,
          DBDocumentType,
          DBImage,
          DBSectionType,
-         DBSupport
+         DBSupport,
+         DBSupportSectionTarget
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
@@ -34,7 +35,7 @@ import { DocumentContentSnapshotType } from "../models/document/document-content
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { SupportAudienceType } from "../models/stores/supports";
+import { SupportAudienceType, TeacherSupportModelType, SupportItemType } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -664,8 +665,21 @@ export class DB {
       },
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
       content,
-      hidden: false
+      deleted: false
     };
     supportRef.set(support);
   }
+
+  public hideSupport(support: TeacherSupportModelType) {
+    const { user } = this.stores;
+    const { audience, type, key } = support;
+    const dbSupportType: DBSupportSectionTarget = type === SupportItemType.section
+      ? support.sectionId!
+      : DBSectionType.all;
+    const updateRef = this.firebase.ref(this.firebase.getSupportsPath(user, audience, dbSupportType, key));
+    updateRef.update({
+      deleted: true
+    });
+  }
+
 }

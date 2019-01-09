@@ -218,5 +218,5 @@ export interface DBSupport {
   };
   timestamp: number;
   content: string;
-  hidden: boolean;
+  deleted: boolean;
 }

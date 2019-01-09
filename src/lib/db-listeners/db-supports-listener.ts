@@ -3,6 +3,7 @@ import { SupportItemType,
          SupportAudienceType,
          TeacherSupportModel,
          TeacherSupportModelType } from "../../models/stores/supports";
+import { DBSupport } from "../db-types";
 
 export class DBSupportsListener {
   private db: DB;
@@ -34,12 +35,14 @@ export class DBSupportsListener {
       const teacherSupports: TeacherSupportModelType[] = [];
 
       Object.keys(dbSupports.all).forEach((key) => {
-        const dbSupport = dbSupports.all[key];
+        const dbSupport: DBSupport = dbSupports.all[key];
         teacherSupports.push(TeacherSupportModel.create({
+          key: dbSupport.self.key,
           text: dbSupport.content,
           type: SupportItemType.problem,
           audience: SupportAudienceType.class,
-          authoredTime: dbSupport.timestamp
+          authoredTime: dbSupport.timestamp,
+          deleted: dbSupport.deleted
         }));
       });
 

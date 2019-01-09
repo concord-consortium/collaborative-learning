@@ -27,7 +27,8 @@ describe("supports model", () => {
         {text: "support #4", type: SupportItemType.section},
       ],
       teacherSupports: [
-        {text: "support #5", type: SupportItemType.problem, audience: SupportAudienceType.class, authoredTime: 42}
+        {key: "1", text: "support #5", type: SupportItemType.problem,
+          audience: SupportAudienceType.class, authoredTime: 42}
       ]
     });
     expect(omitUndefined(getSnapshot(supports))).toEqual({
@@ -55,11 +56,13 @@ describe("supports model", () => {
       ],
       teacherSupports: [
         {
+          key: "1",
           text: "support #5",
           type: "problem",
           audience: "class",
           authoredTime: 42,
-          visible: false
+          visible: false,
+          deleted: false
         }
       ]
     });
@@ -221,12 +224,14 @@ describe("supports model", () => {
   it("sorts authored supports correctly", () => {
     const supports = SupportsModel.create({});
     const earlySupport = TeacherSupportModel.create({
+      key: "1",
       text: "foo",
       type: SupportItemType.problem,
       audience: SupportAudienceType.class,
       authoredTime: 100
     });
     const lateSupport = TeacherSupportModel.create({
+      key: "2",
       text: "bar",
       type: SupportItemType.problem,
       audience: SupportAudienceType.class,

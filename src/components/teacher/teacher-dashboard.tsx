@@ -50,9 +50,12 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
             <TeacherSupport time={new Date().getTime()}/>
             {
               // Reverse the supports so the newest ones are first + displayed at the top
-              supports.teacherSupports.slice().reverse().map((support, i) => {
-                return <TeacherSupport content={support.text} time={support.authoredTime} key={i}/>;
-              })
+              supports.teacherSupports.slice()
+                .filter(support => !support.deleted)
+                .reverse()
+                .map((support, i) => {
+                  return <TeacherSupport support={support} time={support.authoredTime} key={i}/>;
+                })
             }
             {this.renderTabContents()}
           </div>

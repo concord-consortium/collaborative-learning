@@ -5,6 +5,7 @@ import { SupportModelType } from "../curriculum/support";
 import { ProblemModelType } from "../curriculum/problem";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { Logger, LogEventName } from "../../lib/logger";
+import { SectionType } from "../curriculum/section";
 
 export enum SupportAudienceType {
   class = "class",
@@ -21,13 +22,15 @@ export enum SupportItemType {
 
 export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
+    key: types.identifier,
     text: types.string,
     type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
     visible: false,
-    sectionId: types.maybe(types.string),
+    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", values(SupportItemType) as SectionType[])),
     audience: types.enumeration<SupportAudienceType>("SupportAudienceType",
       values(SupportAudienceType) as SupportAudienceType[]),
-    authoredTime: types.number
+    authoredTime: types.number,
+    deleted: false
   })
   .actions((self) => {
     return {
@@ -70,7 +73,7 @@ export const SupportsModel = types
       });
 
       // TODO: Filter for class and relevant group/user supports
-      const teacherSupports = self.teacherSupports;
+      const teacherSupports = self.teacherSupports.filter(support => !support.deleted);
 
       return curricularSupports.concat(teacherSupports);
     },
