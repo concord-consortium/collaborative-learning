@@ -18,6 +18,7 @@ export const emptyJson: ValueJSON = {
                   nodes: [{
                     object: "text",
                     leaves: [{
+                      object: "leaf",
                       text: ""
                     }]
                   }]
@@ -33,6 +34,7 @@ const errorJson: ValueJSON = {
             nodes: [{
               object: "text",
               leaves: [{
+                object: "leaf",
                 text: "A slate error occurred"
               }]
             }]

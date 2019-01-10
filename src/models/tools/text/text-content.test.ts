@@ -56,6 +56,7 @@ describe("TextContentModel", () => {
                     nodes: [{
                       object: "text",
                       leaves: [{
+                        object: "leaf",
                         text: "foo"
                       }]
                     }]
