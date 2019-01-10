@@ -13,19 +13,41 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
 }
 
+interface IState {
+  componentHeight: number;
+}
+
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
+const kHeaderHeight = 55;
+const kTabHeight = 35;
 
 @inject("stores")
 @observer
-export class RightNavComponent extends BaseComponent<IProps, {}> {
+export class RightNavComponent extends BaseComponent<IProps, IState> {
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      componentHeight: 0,
+    };
+  }
+
+  public componentDidMount() {
+    this.handleSetHeight();
+    window.addEventListener("resize", this.handleSetHeight);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener("resize", this.handleSetHeight);
+  }
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
     const teacherTabs = ["Class Work", "Class Logs"];
     const studentTabs = ["My Work"].concat(teacherTabs);
     const tabs = this.props.isGhostUser ? teacherTabs : studentTabs;
-
+    const expandedStyle = {height: this.state.componentHeight};
     return (
       <div className="right-nav">
         <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
@@ -46,6 +68,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
           className={`expanded-area${rightNavExpanded ? " expanded" : ""}`}
           aria-labelledby={this.getTabId(activeRightNavTab)}
           aria-hidden={!rightNavExpanded}
+          style={expandedStyle}
         >
           {this.renderTabContents()}
         </div>
@@ -85,6 +108,16 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   private getTabId(tab: string) {
     return `rightNavTab${tab}`;
+  }
+
+  private handleSetHeight = () => {
+    const app = document.getElementById("app");
+    if (app) {
+      const appHeight = app.getBoundingClientRect().height;
+      this.setState({
+        componentHeight: appHeight - kHeaderHeight - (kTabHeight / 2)
+      });
+    }
   }
 
 }
