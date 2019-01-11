@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { GroupModelType } from "../../models/stores/groups";
 
 import "./teacher-group-tab.sass";
+import { TeacherSupports } from "./teacher-supports";
 
 interface IProps extends IBaseProps {}
 
@@ -58,6 +59,7 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
   private renderGroup(group: GroupModelType) {
     // TODO: add this to content when view learning logs story (#160072708) is worked on
     // <TeacherStudentTabComponent group={group} />
+    const { supports } = this.stores;
     return (
       <div className="selected-group">
         <div className="title">
@@ -68,7 +70,9 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
             <span onClick={this.handleGhostGroup(group)}>Join Group</span>
           </div>
         </div>
-        <div className="content" />
+        <div className="content">
+          <TeacherSupports supports={supports.teacherSupports.filter(support => !support.deleted)} />
+        </div>
       </div>
     );
   }
