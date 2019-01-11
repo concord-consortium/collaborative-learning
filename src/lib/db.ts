@@ -18,9 +18,7 @@ import { DBOfferingGroup,
          DBPublication,
          DBDocumentType,
          DBImage,
-         DBSectionType,
          DBSupport,
-         DBSupportSectionTarget
         } from "./db-types";
 import { DocumentModelType,
          DocumentModel,
@@ -35,7 +33,11 @@ import { DocumentContentSnapshotType } from "../models/document/document-content
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { SupportAudienceType, TeacherSupportModelType, SupportItemType } from "../models/stores/supports";
+import { SupportAudienceType,
+         TeacherSupportModelType,
+         SupportItemType,
+         TeacherSupportSectionTarget
+       } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -649,10 +651,10 @@ export class DB {
             .then(blob => URL.createObjectURL(blob));
   }
 
-  public createSupport(content: string) {
+  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
-      this.firebase.getSupportsPath(user, SupportAudienceType.class, DBSectionType.all)
+      this.firebase.getSupportsPath(user, SupportAudienceType.class, sectionTarget)
     );
     const supportRef = classSupportsRef.push();
     const support: DBSupport = {
@@ -660,7 +662,7 @@ export class DB {
         classHash: user.classHash,
         offeringId: user.offeringId,
         audience: SupportAudienceType.class,
-        sectionTarget: DBSectionType.all,
+        sectionTarget,
         key: supportRef.key!
       },
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
@@ -672,10 +674,8 @@ export class DB {
 
   public deleteSupport(support: TeacherSupportModelType) {
     const { user } = this.stores;
-    const { audience, type, key } = support;
-    const dbSupportType: DBSupportSectionTarget = type === SupportItemType.section
-      ? support.sectionId!
-      : DBSectionType.all;
+    const { audience, key } = support;
+    const dbSupportType: TeacherSupportSectionTarget = support.sectionTarget;
     const updateRef = this.firebase.ref(this.firebase.getSupportsPath(user, audience, dbSupportType, key));
     updateRef.update({
       deleted: true

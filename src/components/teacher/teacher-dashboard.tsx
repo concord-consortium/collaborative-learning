@@ -47,6 +47,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
+            { this.renderHeader() }
             <TeacherSupport time={new Date().getTime()}/>
             {
               // Reverse the supports so the newest ones are first + displayed at the top
@@ -62,6 +63,19 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
         </div>
         <BottomNavComponent />
         <RightNavComponent isGhostUser={true} />
+      </div>
+    );
+  }
+
+  private renderHeader() {
+    return (
+      <div className="dash-header">
+        <div className="title">Class Supports:</div>
+        <div className="header-contents">
+          <div className="date">Date</div>
+          <div className="section">Section</div>
+          <div className="content">Message</div>
+        </div>
       </div>
     );
   }

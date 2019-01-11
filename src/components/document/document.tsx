@@ -12,6 +12,7 @@ import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 
 import "./document.sass";
+import { SectionType } from "../../models/curriculum/section";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -309,9 +310,10 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private getSupportsWithIndices() {
-    return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
-      return {index, item: support};
-    });
+    return this.stores.supports.getAllForSection(this.props.document.sectionId! as SectionType)
+      .map((support, index) => {
+        return {index, item: support};
+      });
   }
 
   private isPrimary() {

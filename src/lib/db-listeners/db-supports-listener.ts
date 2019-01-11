@@ -4,6 +4,7 @@ import { SupportItemType,
          TeacherSupportModel,
          TeacherSupportModelType } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
+import { SectionType } from "../../models/curriculum/section";
 
 export class DBSupportsListener {
   private db: DB;
@@ -34,16 +35,20 @@ export class DBSupportsListener {
     if (dbSupports) {
       const teacherSupports: TeacherSupportModelType[] = [];
 
-      Object.keys(dbSupports.all).forEach((key) => {
-        const dbSupport: DBSupport = dbSupports.all[key];
-        teacherSupports.push(TeacherSupportModel.create({
-          key: dbSupport.self.key,
-          text: dbSupport.content,
-          type: SupportItemType.problem,
-          audience: SupportAudienceType.class,
-          authoredTime: dbSupport.timestamp,
-          deleted: dbSupport.deleted
-        }));
+      Object.keys(dbSupports).forEach(sectionTarget => {
+        const newSupports = dbSupports[sectionTarget];
+        Object.keys(newSupports).forEach((key) => {
+          const dbSupport: DBSupport = newSupports[key];
+          teacherSupports.push(TeacherSupportModel.create({
+            key: dbSupport.self.key,
+            text: dbSupport.content,
+            type: sectionTarget === "all" ? SupportItemType.problem : SupportItemType.section,
+            sectionId: sectionTarget === "all" ? undefined : sectionTarget as SectionType,
+            audience: SupportAudienceType.class,
+            authoredTime: dbSupport.timestamp,
+            deleted: dbSupport.deleted
+          }));
+        });
       });
 
       supports.setAuthoredSupports(teacherSupports);

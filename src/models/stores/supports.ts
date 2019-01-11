@@ -5,7 +5,7 @@ import { SupportModelType } from "../curriculum/support";
 import { ProblemModelType } from "../curriculum/problem";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { Logger, LogEventName } from "../../lib/logger";
-import { SectionType } from "../curriculum/section";
+import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../curriculum/section";
 
 export enum SupportAudienceType {
   class = "class",
@@ -20,13 +20,15 @@ export enum SupportItemType {
   section = "section",
 }
 
+export type TeacherSupportSectionTarget = SectionType | AllSectionType;
+
 export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
     key: types.identifier,
     text: types.string,
     type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
     visible: false,
-    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", values(SupportItemType) as SectionType[])),
+    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[])),
     audience: types.enumeration<SupportAudienceType>("SupportAudienceType",
       values(SupportAudienceType) as SupportAudienceType[]),
     authoredTime: types.number,
@@ -36,6 +38,27 @@ export const TeacherSupportModel = types
     return {
       setVisible(visible: boolean) {
         self.visible = visible;
+      }
+    };
+  })
+  .views((self) => {
+    return {
+      get sectionTarget(): TeacherSupportSectionTarget {
+        return self.type === SupportItemType.section
+          ? self.sectionId!
+          : "all";
+      },
+
+      get sectionTargetDisplay(): string {
+        return self.type === SupportItemType.section
+          ? sectionInfo[self.sectionId!].title
+          : allSectionInfo.title;
+      },
+
+      showForSection(section: SectionType) {
+        return !self.deleted
+          && (self.type === SupportItemType.problem
+          || self.type === SupportItemType.section && self.sectionId === section);
       }
     };
   });
@@ -67,13 +90,12 @@ export const SupportsModel = types
       return self.curricularSupports.concat(self.teacherSupports);
     },
 
-    getAllForSection(sectionId: string): SupportItemModelType[] {
+    getAllForSection(sectionId: SectionType): SupportItemModelType[] {
       const curricularSupports = self.curricularSupports.filter((support) => {
         return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
       });
 
-      // TODO: Filter for class and relevant group/user supports
-      const teacherSupports = self.teacherSupports.filter(support => !support.deleted);
+      const teacherSupports = self.teacherSupports.filter(support => support.showForSection(sectionId));
 
       return curricularSupports.concat(teacherSupports);
     },
