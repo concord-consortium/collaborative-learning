@@ -871,9 +871,17 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     };
 
+    // synchronize initial selection
+    const content = this.getContent();
+    content.findObjects(board, elt => isPoint(elt))
+      .forEach(pt => {
+        if (content.isSelected(pt.id)) {
+          setElementColor(board, pt.id, true);
+        }
+      });
+
     // synchronize selection changes
-    const _geometryContent = this.props.model.content as GeometryContentModelType;
-    this.disposeSelectionObserver = _geometryContent.metadata.selection.observe(change => {
+    this.disposeSelectionObserver = content.metadata.selection.observe(change => {
       if (this.state.board) {
         setElementColor(this.state.board, change.name, (change as any).newValue.value);
       }
