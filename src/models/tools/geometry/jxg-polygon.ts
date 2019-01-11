@@ -1,10 +1,13 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { isPoint } from "./jxg-point";
 import { wn_PnPoly } from "./soft-surfer-sunday";
-import { assign, each, values } from "lodash";
+import { assign, each, filter, find, values } from "lodash";
 import * as uuid from "uuid/v4";
 
 export const isPolygon = (v: any) => v instanceof JXG.Polygon;
+
+export const isVisibleEdge = (v: any) => (v.elType === "segment") && v.visProp.visible;
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -24,6 +27,20 @@ export function getPolygonEdges(polygon: JXG.Polygon) {
     });
   });
   return values(edges);
+}
+
+export function getAssociatedPolygon(elt: JXG.GeometryElement) {
+  if (isPolygon(elt)) return elt;
+  if (isPoint(elt)) {
+    return find(elt.childElements, child => isPolygon(child));
+  }
+  if (elt.elType === "segment") {
+    const vertices = filter(elt.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
+    for (const vertex of vertices) {
+      const polygon = find(vertex.childElements, child => isPolygon(child));
+      if (polygon) return polygon;
+    }
+  }
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
