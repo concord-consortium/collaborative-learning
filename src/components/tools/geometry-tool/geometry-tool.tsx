@@ -10,7 +10,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
 import { isPoint, isFreePoint, isVisiblePoint } from "../../../models/tools/geometry/jxg-point";
-import { isPolygon, getPointsForVertexAngle, getPolygonEdges } from "../../../models/tools/geometry/jxg-polygon";
+import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
+        } from "../../../models/tools/geometry/jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { JXGChange } from "../../../models/tools/geometry/jxg-changes";
@@ -514,10 +515,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         // the locations of points slightly so multiple pastes
         // don't appear exactly on top of each other.
         const idMap: { [id: string]: string } = {};
+        const newPointIds: string[] = [];
         if (this.lastPasteCount > 0) {
           changes = changes.map(jsonChange => {
             const change = safeJsonParse(jsonChange);
-            const delta = this.lastPasteCount * 0.4;
+            const delta = this.lastPasteCount * 0.8;
             switch (change && change.operation) {
               case "create":
                 // map ids of newly create object
@@ -533,6 +535,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                   // offset locations of points
                   change.parents[0] += delta;
                   change.parents[1] -= delta;
+                  newPointIds.push(change.properties.id);
                 }
                 else if (["polygon", "vertexAngle"].indexOf(change.target) >= 0) {
                   // map ids of parent object references
@@ -553,6 +556,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           });
         }
         this.applyBatchChanges(changes);
+        // select newly pasted points
+        if (newPointIds.length) {
+          content.deselectAll(board);
+          content.selectObjects(newPointIds);
+        }
       }
       return true;
     }
@@ -837,9 +845,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // clicks on visible points don't create new points
+      // clicks on visible points and edges don't create new points
       for (const elt of board.objectsList) {
-        if (isVisiblePoint(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+        if ((isVisiblePoint(elt) || isVisibleEdge(elt)) &&
+            elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
       }
@@ -862,9 +871,17 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     };
 
+    // synchronize initial selection
+    const content = this.getContent();
+    content.findObjects(board, elt => isPoint(elt))
+      .forEach(pt => {
+        if (content.isSelected(pt.id)) {
+          setElementColor(board, pt.id, true);
+        }
+      });
+
     // synchronize selection changes
-    const _geometryContent = this.props.model.content as GeometryContentModelType;
-    this.disposeSelectionObserver = _geometryContent.metadata.selection.observe(change => {
+    this.disposeSelectionObserver = content.metadata.selection.observe(change => {
       if (this.state.board) {
         setElementColor(this.state.board, change.name, (change as any).newValue.value);
       }
@@ -977,14 +994,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (!board || (edge !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
 
       const content = this.getContent();
-      // deselect other elements unless appropriate modifier key is down
-      if (board && !hasSelectionModifier(evt)) {
-        content.deselectAll(board);
-      }
-
       const vertices = getVertices();
       const allSelected = vertices.every(vertex => content.isSelected(vertex.id));
-      if (!allSelected) {
+      // deselect other elements unless appropriate modifier key is down
+      if (board && !allSelected) {
+        if (!hasSelectionModifier(evt)) {
+          content.deselectAll(board);
+        }
         vertices.forEach(vertex => content.selectElement(vertex.id));
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect

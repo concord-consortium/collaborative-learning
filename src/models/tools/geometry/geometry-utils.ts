@@ -1,3 +1,4 @@
+import { getAssociatedPolygon } from "./jxg-polygon";
 import { values } from "lodash";
 
 export function copyCoords(coords: JXG.Coords) {
@@ -24,9 +25,19 @@ export function isDragTargetOrAncestor(elt: JXG.GeometryElement, dragTarget: JXG
 
 }
 
-// This function is designed to replicate the logic in Board.initMoveObject().
-// When a click occurs on multiple overlapping objects, we want the one that
-// JSXGraph will choose to drag to be the one that gets selected.
+function isPreferredClickableObject(current: JXG.GeometryElement | undefined, proposed: JXG.GeometryElement) {
+  if (!current) return true;
+  // treat polygons as independent layers
+  const currentPolygon = getAssociatedPolygon(current);
+  const proposedPolygon = getAssociatedPolygon(proposed);
+  if (currentPolygon !== proposedPolygon) return true;
+  return (proposed.visProp.layer >= current.visProp.layer);
+}
+
+// Note: Our layering logic is different from JSXGraph's. When clicks occur on overlapping objects,
+// we may select one object, but JSXGraph may drag another. For now this is preferable to adopting
+// the JSXGraph layering model in which all points are above all segments which are above all
+// polygons. Fixing the drag behavior would require internal changes to JSXGraph.
 export function getClickableObjectUnderMouse(board: JXG.Board, evt: any, draggable: boolean, scale?: number) {
   const coords = getEventCoords(board, evt, scale);
   const [ , x, y] = coords.scrCoords;
@@ -38,11 +49,7 @@ export function getClickableObjectUnderMouse(board: JXG.Board, evt: any, draggab
     const isFixed = pEl && pEl.getAttribute("fixed"); // !Type.evaluate(pEl.visProp.fixed)
     const isDraggable = pEl.isDraggable && !isFixed;
     if (hasPoint && pEl.visPropCalc.visible && (!draggable || isDraggable)) {
-      if (!dragEl ||
-            (pEl.visProp.layer > dragEl.visProp.layer ||
-              (pEl.visProp.layer === dragEl.visProp.layer &&
-                pEl.lastDragTime.getTime() >= dragEl.lastDragTime.getTime()
-              ))) {
+      if (isPreferredClickableObject(dragEl, pEl)) {
         dragEl = pEl;
       }
     }
