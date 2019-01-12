@@ -1,7 +1,6 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import "./jxg";
-import { assign, each, cloneDeep } from "lodash";
-import * as uuid from "uuid/v4";
+import { assign, each } from "lodash";
 
 // matches curriculum images
 export const kGeometryDefaultPixelsPerUnit = 18.3;
@@ -11,23 +10,22 @@ export const isBoard = (v: any) => v instanceof JXG.Board;
 function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
   const elt = document.getElementById(domElementID);
   const eltBounds = elt && elt.getBoundingClientRect();
-  const props = cloneDeep(changeProps);
+  const { id, ...otherProps } = changeProps;
   if (eltBounds) {
     // adjust boundingBox to actual size of dom element
     const { boundingBox, unitX, unitY } = changeProps;
     const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
     const xMax = xMin + eltBounds.width / (unitX || kGeometryDefaultPixelsPerUnit);
     const yMax = yMin + eltBounds.height / (unitY || kGeometryDefaultPixelsPerUnit);
-    props.boundingBox = [xMin, yMax, xMax, yMin];
+    otherProps.boundingBox = [xMin, yMax, xMax, yMin];
   }
-  return assign(defaults, props, overrides);
+  return assign(defaults, otherProps, overrides);
 }
 
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
     const domElementID = boardDomId as string;
     const defaults = {
-            id: uuid(),
             keepaspectratio: true,
             showCopyright: false,
             showNavigation: false,

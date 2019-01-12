@@ -21,7 +21,6 @@ export function defaultGeometryContent(overrides?: JXGProperties) {
     operation: "create",
     target: "board",
     properties: assign({
-                  id: uuid(),
                   axis: true,
                   boundingBox: [kGeometryDefaultAxisMin, yAxisMax, xAxisMax, kGeometryDefaultAxisMin],
                   grid: {}  // defaults to 1-unit gridlines
