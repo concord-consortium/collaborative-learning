@@ -57,7 +57,6 @@ describe("GeometryContent", () => {
     });
     expect(content.nextViewId).toBe(1);
     expect(isBoard(board)).toBe(true);
-    expect(isUuid(board.id)).toBe(true);
 
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);

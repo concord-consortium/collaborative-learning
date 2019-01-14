@@ -250,8 +250,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (this.disposeSelectionObserver) {
       this.disposeSelectionObserver();
     }
-    if (this.state.board) {
-      JXG.JSXGraph.freeBoard(this.state.board);
+    const board = this.state.board;
+    if (board) {
+      // delay so any asynchronous JSXGraph actions have time to complete
+      setTimeout(() => {
+        JXG.JSXGraph.freeBoard(board);
+      }, 100);
     }
 
     this._isMounted = false;
