@@ -7,10 +7,10 @@ import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
 import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 
-import "./app.sass";
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
 import { updateProblem } from "../lib/misc";
+import "./app.sass";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -29,6 +29,23 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       }
       if (problemId) {
         updateProblem(stores, problemId);
+      }
+
+      if (typeof (window as any).Rollbar !== "undefined") {
+        const _Rollbar = (window as any).Rollbar;
+        if (_Rollbar.configure) {
+          const config = { payload: {
+                  class: authenticatedUser.classHash,
+                  offering: authenticatedUser.offeringId,
+                  person: { id: authenticatedUser.id },
+                  problemId: problemId || "",
+                  problem: stores.problem.title,
+                  role: authenticatedUser.type,
+                  unit: stores.unit.title,
+                  version: stores.appVersion
+                }};
+          _Rollbar.configure(config);
+        }
       }
 
       if (appMode === "authed")  {

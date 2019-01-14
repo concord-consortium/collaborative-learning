@@ -11,6 +11,7 @@ import { IDisposer } from "mobx-state-tree/dist/utils";
 import { DocumentModelType, SectionDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
+import { DBSupportsListener } from "./db-supports-listener";
 
 export interface ModelListeners {
   [key /* unique Key */: string]: {
@@ -45,6 +46,7 @@ export class DBListeners {
   private sectionDocumentsListener: DBSectionDocumentsListener;
   private learningLogsListener: DBLearningLogsListener;
   private publicationListener: DBPublicationsListener;
+  private supportsListener: DBSupportsListener;
 
   constructor(db: DB) {
     this.db = db;
@@ -53,6 +55,7 @@ export class DBListeners {
     this.sectionDocumentsListener = new DBSectionDocumentsListener(db);
     this.learningLogsListener = new DBLearningLogsListener(db);
     this.publicationListener = new DBPublicationsListener(db);
+    this.supportsListener = new DBSupportsListener(db);
   }
 
   public start() {
@@ -70,6 +73,9 @@ export class DBListeners {
         })
         .then(() => {
           return this.publicationListener.start();
+        })
+        .then(() => {
+          return this.supportsListener.start();
         })
         .then(() => {
           this.isListening = true;

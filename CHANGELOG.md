@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 0.3.0 - released January 11, 2018
+
+- Feature: Teacher-authored class-wide supports
+- Geometry: Fix overlapping polygon edge selection
+- Geometry: Fix selection when switching between views
+- Internal: add app version, user id, role, class, problem, etc. to Rollbar error reports
+- Internal: configure Travis to automatically register deploys with Rollbar
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 319,536 bytes | 0.3% |
+| index.js | 2,945,232 bytes | 0.2% |
+
 ## Version 0.2.2 - released January 7, 2018
 
 - Geometry: Improve initialization performance
