@@ -3,6 +3,7 @@ import { DataSet } from "../data/data-set";
 import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
 import { defaultGeometryContent, kGeometryDefaultHeight } from "../tools/geometry/geometry-content";
 import { defaultImageContent } from "../tools/image/image-content";
+import { defaultTableContent, kTableDefaultHeight } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
 import { ToolContentUnionType } from "../tools/tool-types";
 import { ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
@@ -146,12 +147,18 @@ export const DocumentContentModel = types
     addGeometryTile(addSidecarNotes?: boolean) {
       const result = self.addTileInNewRow(defaultGeometryContent(),
                                           { rowHeight: kGeometryDefaultHeight });
-      const { rowId } = result;
-      const row = self.rowMap.get(rowId);
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
-      self.tileMap.put(tile);
-      row!.insertTileInRow(tile, 1);
+      if (addSidecarNotes) {
+        const { rowId } = result;
+        const row = self.rowMap.get(rowId);
+        const tile = ToolTileModel.create({ content: defaultTextContent() });
+        self.tileMap.put(tile);
+        row!.insertTileInRow(tile, 1);
+      }
       return result;
+    },
+    addTableTile() {
+      return self.addTileInNewRow(defaultTableContent(),
+                                    { rowHeight: kTableDefaultHeight });
     },
     addTextTile(initialText?: string) {
       return self.addTileInNewRow(defaultTextContent(initialText));

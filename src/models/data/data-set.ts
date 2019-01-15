@@ -21,11 +21,8 @@ export const localId = () => {
 };
 
 export const CaseID = types.model("CaseID", {
-  __id__: types.identifier
+  __id__: types.optional(types.identifier, () => localId())
   // __index__: types.number
-}).preProcessSnapshot((snapshot) => {
-  const { __id__, ...others } = snapshot;
-  return { __id__: __id__ || localId(), ...others };
 });
 export type ICaseID = typeof CaseID.Type;
 
@@ -52,18 +49,16 @@ interface IEnvContext {
 }
 
 export const DataSet = types.model("DataSet", {
-  id: types.identifier,
+  id: types.optional(types.identifier, () => uuid()),
   sourceID: types.maybe(types.string),
   name: types.maybe(types.string),
   attributes: types.array(Attribute),
   cases: types.array(CaseID),
-}).preProcessSnapshot((snapshot) => {
-  if (!snapshot) { return snapshot; }
-  const { id, ...others } = snapshot;
-  return { id: id || localId(), ...others };
-}).volatile(self => ({
+})
+.volatile(self => ({
   transactionCount: 0
-})).extend(self => {
+}))
+.extend(self => {
   const attrIDMap: { [index: string]: IAttribute } = {},
         // map from attribute names to attribute IDs
         attrNameMap: { [index: string]: string } = {},
@@ -73,7 +68,7 @@ export const DataSet = types.model("DataSet", {
   let inFlightActions = 0;
 
   function derive(name?: string) {
-    return { id: localId(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
+    return { id: uuid(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
   }
 
   function attrIndexFromID(id: string) {
@@ -544,7 +539,6 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
-/*
       addActionListener(key: string, listener: (action: ISerializedActionCall) => void) {
         if (typeof listener === "function") {
           disposers[key] = onAction(self, (action) => listener(action), true);
@@ -562,6 +556,7 @@ export const DataSet = types.model("DataSet", {
           disposer();
         }
       },
+/*
       addMiddleware(key: string, handler: (call: {}, next: {}) => void) {
         disposers[key] = addMiddleware(self, handler);
       },

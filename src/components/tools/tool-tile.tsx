@@ -3,11 +3,13 @@ import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
+import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
+import TableToolComponent from "./table-tool/table-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
@@ -64,10 +66,11 @@ interface IProps {
 }
 
 const kToolComponentMap: any = {
+        [kDrawingToolID]: DrawingToolComponent,
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,
-        [kTextToolID]: TextToolComponent,
-        [kDrawingToolID]: DrawingToolComponent
+        [kTableToolID]: TableToolComponent,
+        [kTextToolID]: TextToolComponent
       };
 
 @inject("stores")

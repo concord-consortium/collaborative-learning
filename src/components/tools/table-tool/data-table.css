@@ -1,0 +1,55 @@
+.neo-codap-case-table {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* cf. https://github.com/ag-grid/ag-grid/issues/1864#issuecomment-410199641 */
+.ag-theme-fresh .ag-header-cell-label {
+  display: inline !important;
+}
+.ag-theme-fresh .ag-header-cell-label > span {
+  float: none !important;
+}
+.ag-theme-fresh .cdp-attr-column-header {
+  text-align: center;
+}
+
+.ag-theme-fresh .cdp-case-index-cell,
+.ag-theme-fresh .cdp-case-index-cell.ag-cell-data-changed {  /* .cdp-case-index-cell.ag-cell-data-changed is to prevent flashing during sort */
+  background-color: #EEE !important;
+}
+
+.ag-theme-fresh .ag-cell-no-focus {
+  border-bottom: 1px dotted silver;
+}
+
+.ag-cell-edit-input {
+  font-size: 14px;
+  padding-left: 8px;
+}
+
+.nc-table-menu-popover {
+  margin-left: 8px;
+}
+
+.nc-attribute-name-prompt {
+  padding: 1em;
+  font-size: 12pt;
+}
+
+.nc-attribute-name-input {
+  margin: 0 1em;
+  font-size: 12pt;
+}
+
+.nc-dialog-buttons {
+  margin: 2em 0 0 0;
+}
+
+.nc-dialog-button {
+  float: right;
+  margin: 0 1em 0 0;
+  font-size: 12pt;
+}
+
