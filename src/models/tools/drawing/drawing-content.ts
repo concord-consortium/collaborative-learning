@@ -7,7 +7,7 @@ export const kDrawingToolID = "Drawing";
 export const kDrawingDefaultHeight = 320;
 export const TOOLBAR_WIDTH = 48;
 
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse";
+export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
 
 export interface Color {
   name: string;
