@@ -22,6 +22,9 @@ interface IState {
 
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
+const kMyWorkTab = "My Work";
+const kClassWorkTab = "Class Work";
+const kClassLogsTab = "Class Logs";
 
 @inject("stores")
 @observer
@@ -62,8 +65,8 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const teacherTabs = ["Class Work", "Class Logs"];
-    const studentTabs = ["My Work"].concat(teacherTabs);
+    const teacherTabs = [kClassWorkTab, kClassLogsTab];
+    const studentTabs = [kMyWorkTab].concat(teacherTabs);
     const tabs = this.props.isGhostUser ? teacherTabs : studentTabs;
     return (
       <div className="right-nav">
@@ -98,22 +101,22 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="contents">
         { this.state.myWorkLoadAllowed
-          ? <div className={"container " + (activeRightNavTab === "My Work" ? "enabled" : "disabled")}>
+          ? <div className={"container " + (activeRightNavTab === kMyWorkTab ? "enabled" : "disabled")}>
               <MyWorkComponent scale={kRightNavItemScale}/>
             </div>
-          : this.renderLoadingText("My Work")
+          : this.renderLoadingText(kMyWorkTab)
         }
         { this.state.classWorkLoadAllowed
-          ? <div className={"container " + (activeRightNavTab === "Class Work" ? "enabled" : "disabled")}>
+          ? <div className={"container " + (activeRightNavTab === kClassWorkTab ? "enabled" : "disabled")}>
               <ClassWorkComponent scale={kRightNavItemScale}/>
           </div>
-          : this.renderLoadingText("Class Work")
+          : this.renderLoadingText(kClassWorkTab)
         }
         { this.state.classLogsLoadAllowed
-          ? <div className={"container " + (activeRightNavTab === "Class Logs" ? "enabled" : "disabled")}>
+          ? <div className={"container " + (activeRightNavTab === kClassLogsTab ? "enabled" : "disabled")}>
               <ClassLogsComponent scale={kRightNavItemScale}/>
             </div>
-          : this.renderLoadingText("Class Logs")
+          : this.renderLoadingText(kClassLogsTab)
         }
       </div>
     );
@@ -156,11 +159,11 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   private updateComponentLoadAllowedState = () => {
     const { ui } = this.stores;
-    if (ui.activeRightNavTab === "My Work") {
+    if (ui.activeRightNavTab === kMyWorkTab) {
       this.setState({myWorkLoadAllowed: true});
-    } else if (ui.activeRightNavTab === "Class Work") {
+    } else if (ui.activeRightNavTab === kClassWorkTab) {
       this.setState({classWorkLoadAllowed: true});
-    } else if (ui.activeRightNavTab === "Class Logs") {
+    } else if (ui.activeRightNavTab === kClassLogsTab) {
       this.setState({classLogsLoadAllowed: true});
     }
   }
