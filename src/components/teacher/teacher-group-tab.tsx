@@ -5,12 +5,13 @@ import { GroupModelType } from "../../models/stores/groups";
 
 import "./teacher-group-tab.sass";
 import { TeacherSupports } from "./teacher-supports";
-import { AudienceEnum, GroupAudienceModel } from "../../models/stores/supports";
+import { GroupAudienceModel } from "../../models/stores/supports";
+import { TeacherStudentTabComponent } from "./teacher-student-tab";
 
 interface IProps extends IBaseProps {}
 
 interface IState {
-  selectedGroup?: GroupModelType;
+  selectedGroupId?: string;
 }
 
 @inject("stores")
@@ -19,7 +20,9 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   public render() {
-    const { selectedGroup } = this.state;
+    const { groups } = this.stores;
+    const { selectedGroupId } = this.state;
+    const selectedGroup = groups.getGroupById(selectedGroupId);
     return (
       <div className="teacher-group-tab">
         {this.renderGroups()}
@@ -58,9 +61,8 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderGroup(group: GroupModelType) {
-    // TODO: add this to content when view learning logs story (#160072708) is worked on
-    // <TeacherStudentTabComponent group={group} />
     const { supports } = this.stores;
+    const { selectedGroupId } = this.state;
     return (
       <div className="selected-group">
         <div className="title">
@@ -79,13 +81,14 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
             })}
           />
         </div>
+        <TeacherStudentTabComponent groupId={selectedGroupId} />
       </div>
     );
   }
 
   private handleChooseGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
-      this.setState({selectedGroup: group});
+      this.setState({selectedGroupId: group.id});
     };
   }
 

@@ -79,12 +79,13 @@ export const TeacherSupportModel = types
           : allSectionInfo.title;
       },
 
-      showForUserProblem(section: SectionType, groupId?: string) {
+      showForUserProblem(section: SectionType, groupId?: string, userId?: string) {
         const isUndeleted = !self.deleted;
         const isForSection = self.type === SupportItemType.problem
           || self.type === SupportItemType.section && self.sectionId === section;
         const isForUser = self.audience.type === AudienceEnum.class
-          || self.audience.type === AudienceEnum.group && self.audience.identifier === groupId;
+          || self.audience.type === AudienceEnum.group && self.audience.identifier === groupId
+          || self.audience.type === AudienceEnum.user && self.audience.identifier === userId;
 
         return isUndeleted && isForSection && isForUser;
       }
@@ -130,12 +131,14 @@ export const SupportsModel = types
         .concat(self.userSupports);
     },
 
-    getSupportsForUserProblem(sectionId: SectionType, groupId?: string): SupportItemModelType[] {
+    getSupportsForUserProblem(sectionId: SectionType, groupId?: string, userId?: string): SupportItemModelType[] {
       const curricularSupports = self.curricularSupports.filter((support) => {
         return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
       });
 
-      const teacherSupports = self.teacherSupports.filter(support => support.showForUserProblem(sectionId, groupId));
+      const teacherSupports = self.teacherSupports.filter(support => {
+        return support.showForUserProblem(sectionId, groupId, userId);
+      });
 
       return curricularSupports.concat(teacherSupports);
     }

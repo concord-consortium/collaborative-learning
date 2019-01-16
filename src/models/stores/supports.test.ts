@@ -211,7 +211,7 @@ describe("supports model", () => {
     }), InvestigationModel.create(cloneDeep(investigation1)),
         ProblemModel.create(cloneDeep(problem1)));
 
-    expect(supports.getSupportsForUserProblem(SectionType.introduction, "groupId")).toEqual([
+    expect(supports.getSupportsForUserProblem(SectionType.introduction, "groupId", "userId")).toEqual([
       {
         sectionId: "introduction",
         text: "Investigation 1, Problem 1, section: introduction, support #1",

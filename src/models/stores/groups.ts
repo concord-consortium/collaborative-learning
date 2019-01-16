@@ -23,6 +23,13 @@ export const GroupModel = types
   .model("Group", {
     id: types.identifier,
     users: types.array(GroupUserModel)
+  })
+  .views((self) => {
+    return {
+      getUserById(id?: string) {
+        return self.users.find(user => user.id === id);
+      }
+    };
   });
 
 export const GroupsModel = types
@@ -73,6 +80,10 @@ export const GroupsModel = types
         return self.allGroups.find((group) => {
           return !!group.users.find((user) => user.id === uid);
         });
+      },
+
+      getGroupById(id?: string) {
+        return self.allGroups.find(group => group.id === id);
       }
     };
   });

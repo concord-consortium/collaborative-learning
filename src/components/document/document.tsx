@@ -316,7 +316,8 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const groupId = group && group.id;
     return this.stores.supports.getSupportsForUserProblem(
       this.props.document.sectionId! as SectionType,
-      groupId
+      groupId,
+      userId
     )
     .map((support, index) => {
       return {index, item: support};

@@ -6,7 +6,8 @@ import { SupportItemType,
          AudienceEnum,
          TeacherSupportSectionTarget,
          AudienceModelType,
-         GroupAudienceModel} from "../../models/stores/supports";
+         GroupAudienceModel,
+         UserAudienceModel} from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 
@@ -37,42 +38,36 @@ export class DBSupportsListener {
   private handleSupportsUpdate = (snapshot: firebase.database.DataSnapshot) => {
     const {supports} = this.db.stores;
     const dbSupports = snapshot.val();
-    let audienceType: AudienceEnum | undefined;
+    // The top-level key will be the audience for with an updated support
+    const audienceType: AudienceEnum = snapshot.ref.key as AudienceEnum;
     if (dbSupports) {
       const teacherSupports: TeacherSupportModelType[] = [];
 
-      const isClass = isNaN(parseInt(Object.keys(dbSupports)[0], 10));
-      if (isClass) {
+      if (audienceType === AudienceEnum.class) {
         Object.keys(dbSupports).forEach(sectionTarget => {
           const newSupports = dbSupports[sectionTarget];
           Object.keys(newSupports).forEach((key) => {
             const dbSupport: DBSupport = newSupports[key];
             const audience = ClassAudienceModel.create();
             teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
-            if (!audienceType) {
-              audienceType = dbSupport.self.audienceType;
-            }
           });
         });
       } else {
-        Object.keys(dbSupports).forEach(groupNumber => {
-          Object.keys(dbSupports[groupNumber]).forEach(sectionTarget => {
-            const newSupports = dbSupports[groupNumber][sectionTarget];
+        Object.keys(dbSupports).forEach(audienceId => {
+          Object.keys(dbSupports[audienceId]).forEach(sectionTarget => {
+            const newSupports = dbSupports[audienceId][sectionTarget];
             Object.keys(newSupports).forEach((key) => {
               const dbSupport: DBSupport = newSupports[key];
-              const audience = GroupAudienceModel.create({identifier: groupNumber});
+              const audience = audienceType === AudienceEnum.group
+                ? GroupAudienceModel.create({identifier: audienceId})
+                : UserAudienceModel.create({identifier: audienceId});
               teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
-              if (!audienceType) {
-                audienceType = dbSupport.self.audienceType;
-              }
             });
           });
         });
       }
 
-      if (audienceType) {
-        supports.setAuthoredSupports(teacherSupports, audienceType);
-      }
+      supports.setAuthoredSupports(teacherSupports, audienceType);
     }
   }
 
