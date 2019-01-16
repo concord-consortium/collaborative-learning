@@ -10,7 +10,7 @@ import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, 
   EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { assign, debounce, find } from "lodash";
+import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer } from "mobx";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
@@ -607,36 +607,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
   private disposeCurrentToolReaction: IReactionDisposer;
-  private debouncedUpdateImage = debounce((url: string) => {
-            gImageMap.getImage(url)
-              .then(image => {
-                if (!this._isMounted) return;
-                // update image in drawing
-                const imageObj = find(this.state.objects,
-                                      obj => !!obj && (obj.model.type === "image"));
-                if (imageObj) {
-                  const _imageObj = imageObj as ImageObject;
-                  _imageObj.model.url = image.displayUrl || placeholderImage;
-                }
-                // update react state
-                this.setState({
-                  isLoading: false,
-                  imageContentUrl: undefined,
-                  imageEntry: image
-                });
-                // update mst content if conversion occurred
-                if (image.contentUrl && (url !== image.contentUrl)) {
-                  this.getContent().updateImageUrl(url, image.contentUrl);
-                }
-              })
-              .catch(() => {
-                this.setState({
-                  isLoading: false,
-                  imageContentUrl: undefined,
-                  imageEntry: undefined
-                });
-              });
-          }, 100);
+  private fetchingImages: string[] = [];
 
   constructor(props: DrawingLayerViewProps) {
     super(props);
@@ -886,10 +857,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
-  public renderObjects(filter: (object: DrawingObject) => boolean) {
+  public renderObjects(_filter: (object: DrawingObject) => boolean) {
     return Object.keys(this.state.objects).map((id) => {
       const object = this.state.objects[id];
-      if (!object || !filter(object)) {
+      if (!object || !_filter(object)) {
         return null;
       }
       return object.render({
@@ -967,6 +938,47 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     );
   }
 
+  private updateLoadingImages = (url: string) => {
+    if (this.fetchingImages.indexOf(url) > -1) return;
+    this.fetchingImages.push(url);
+
+    gImageMap.getImage(url)
+      .then(image => {
+        if (!this._isMounted) return;
+        // update all images with this originalUrl that have not been updated
+        const imageObjs = filter(this.state.objects,
+          obj => {
+            if (!!obj && obj.model.type === "image") {
+              const _imgObj = obj as ImageObject;
+              return _imgObj.model.originalUrl === url &&
+              (!_imgObj.model.url || _imgObj.model.url === placeholderImage);
+            }
+            return false;
+          });
+
+        imageObjs.forEach(imgObj =>
+          (imgObj as ImageObject).model.url = image.displayUrl || placeholderImage);
+
+        // update react state
+        this.setState({
+          isLoading: false,
+          imageContentUrl: undefined,
+          imageEntry: image
+        });
+        // update mst content if conversion occurred
+        if (image.contentUrl && (url !== image.contentUrl)) {
+          this.getContent().updateImageUrl(url, image.contentUrl);
+        }
+      })
+      .catch(() => {
+        this.setState({
+          isLoading: false,
+          imageContentUrl: undefined,
+          imageEntry: undefined
+        });
+      });
+  }
+
   private getContent() {
     return this.props.model.content as DrawingContentModelType;
   }
@@ -1023,33 +1035,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     gImageMap.getImage(url)
       .then(imageEntry => {
         if (!this._isMounted || !imageEntry.contentUrl) return;
-        const prevImage = find(this.state.objects,
-                                obj => !!obj && (obj.model.type === "image"));
-        const contentUrl = imageEntry.contentUrl || url;
-        const width = imageEntry.width!;
-        const height = imageEntry.height!;
-        if (!prevImage) {
-          const image = new ImageObject({
-                              type: "image",
-                              url,
-                              x: 0, y: 0,
-                              width,
-                              height
-                            });
-          this.addNewDrawingObject(image.model);
-        }
-        else if (prevImage && prevImage.model.id) {
-          const pImage = prevImage as ImageObject;
-          if (url !== pImage.model.url) {
-            this.addUpdateDrawingObjects([prevImage.model.id], "url", contentUrl);
-          }
-          if (width !== pImage.model.width) {
-            this.addUpdateDrawingObjects([prevImage.model.id], "width", width);
-          }
-          if (height !== pImage.model.height) {
-            this.addUpdateDrawingObjects([prevImage.model.id], "height", height);
-          }
-        }
+        const image: ImageObject = new ImageObject({
+          type: "image",
+          url,
+          x: 0,
+          y: 0,
+          width: imageEntry.width!,
+          height: imageEntry.height!
+        });
+        this.addNewDrawingObject(image.model);
       });
   }
 
@@ -1092,12 +1086,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       case "image":
         const imageEntry = gImageMap.getCachedImage(data.url);
-        const contentUrl = imageEntry && imageEntry.contentUrl || data.url;
         const displayUrl = imageEntry && imageEntry.displayUrl || "";
-        if (contentUrl && (contentUrl !== data.url)) {
-          this.updateImageUrl(contentUrl);
-        }
         drawingObject = new ImageObject(assign({}, data, { url: displayUrl }));
+        if (!imageEntry) {
+          drawingObject.model.originalUrl = data.url;
+          this.updateImageUrl(data.url);
+        }
         break;
     }
     if (drawingObject && drawingObject.model.id) {
@@ -1120,7 +1114,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url);
+    this.updateLoadingImages(url);
   }
 
   private updateDrawingObjects(update: DrawingToolUpdate) {
