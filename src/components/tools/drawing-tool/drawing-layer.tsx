@@ -219,6 +219,8 @@ class ImageObject extends DrawingObject {
               y={y}
               width={width}
               height={height}
+              onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
+              onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
              />;
   }
 }
@@ -473,6 +475,32 @@ class EllipseDrawingTool extends DrawingTool {
   }
 }
 
+class StampDrawingTool extends DrawingTool {
+
+  constructor(drawingLayer: DrawingLayerView) {
+    super(drawingLayer);
+  }
+
+  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const start = this.drawingLayer.getWorkspacePoint(e);
+    if (!start) return;
+    const stamp = this.drawingLayer.getCurrentStamp();
+    if (stamp) {
+      const stampImage: ImageObject = new ImageObject({
+        type: "image",
+        url: stamp.url,
+        x: start.x - (stamp.width / 2),
+        y: start.y - (stamp.height / 2),
+        width: stamp.width,
+        height: stamp.height
+      });
+
+      this.drawingLayer.addNewDrawingObject(stampImage.model);
+    }
+  }
+}
+
 class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: DrawingLayerView) {
     super(drawingLayer);
@@ -627,7 +655,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       vector: new VectorDrawingTool(this),
       selection: new SelectionDrawingTool(this),
       rectangle: new RectangleDrawingTool(this),
-      ellipse: new EllipseDrawingTool(this)
+      ellipse: new EllipseDrawingTool(this),
+      stamp: new StampDrawingTool(this)
     };
     this.currentTool = this.tools.selection;
 
@@ -691,6 +720,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       case "ellipse":
         this.setCurrentTool((this.tools.ellipse as EllipseDrawingTool).setSettings(settings));
         break;
+      case "stamp":
+        this.setCurrentTool((this.tools.stamp as StampDrawingTool).setSettings(settings));
+        break;
     }
   }
 
@@ -733,6 +765,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (this.currentTool) {
       this.currentTool.setSettings(settings);
     }
+  }
+
+  public getCurrentStamp() {
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    return drawingContent.currentStamp;
   }
 
   public handleDelete() {
