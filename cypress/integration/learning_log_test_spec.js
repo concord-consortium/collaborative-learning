@@ -1,8 +1,8 @@
-import LearningLog from './elements/LearningLog';
-import BottomNav from './elements/BottomNav';
-import RightNav from './elements/RightNav';
-import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
+import LearningLog from '../support/elements/LearningLog';
+import BottomNav from '../support/elements/BottomNav';
+import RightNav from '../support/elements/RightNav';
+import LeftNav from '../support/elements/LeftNav';
+import Canvas from '../support/elements/Canvas';
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,

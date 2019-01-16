@@ -1,6 +1,6 @@
-import LeftNav from './elements/LeftNav'
-import Canvas from './elements/Canvas'
-import ImageToolTile from './elements/ImageToolTile'
+import LeftNav from '../support/elements/LeftNav'
+import Canvas from '../support/elements/Canvas'
+import ImageToolTile from '../support/elements/ImageToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
