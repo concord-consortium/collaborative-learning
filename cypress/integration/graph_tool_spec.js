@@ -1,10 +1,10 @@
-import LeftNav from './elements/LeftNav'
-import Canvas from './elements/Canvas'
-import GraphToolTile from './elements/GraphToolTile'
-import RightNav from './elements/RightNav'
-import BottomNav from './elements/BottomNav';
-import LearningLog from './elements/LearningLog';
-import ImageToolTile from './elements/ImageToolTile'
+import LeftNav from '../support/elements/LeftNav'
+import Canvas from '../support/elements/Canvas'
+import GraphToolTile from '../support/elements/GraphToolTile'
+import RightNav from '../support/elements/RightNav'
+import BottomNav from '../support/elements/BottomNav';
+import LearningLog from '../support/elements/LearningLog';
+import ImageToolTile from '../support/elements/ImageToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
