@@ -1,5 +1,12 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel, SupportItemType, AudienceEnum, TeacherSupportModel, ClassAudienceModel } from "./supports";
+import { SupportsModel,
+         SupportItemType,
+         AudienceEnum,
+         TeacherSupportModel,
+         ClassAudienceModel,
+         GroupAudienceModel,
+         UserAudienceModel,
+         TeacherSupportModelType} from "./supports";
 import { UnitModel } from "../curriculum/unit";
 import { SupportModel } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
@@ -257,5 +264,54 @@ describe("supports model", () => {
       groupSupports: [],
       userSupports: []
     });
+  });
+
+  it("Gets supports by audience and section type", () => {
+    const classSupportAll = {key: "1", text: "", type: SupportItemType.problem,
+      audience: ClassAudienceModel.create(), authoredTime: 42};
+    const classSupportIntro = {key: "2", text: "", type: SupportItemType.section, sectionId: SectionType.introduction,
+      audience: ClassAudienceModel.create(), authoredTime: 43};
+    const groupSupport = {key: "3", text: "", type: SupportItemType.problem,
+      audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
+    const userSupport = {key: "4", text: "", type: SupportItemType.section, sectionId: SectionType.didYouKnow,
+      audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
+
+    const supports = SupportsModel.create({
+      classSupports: [
+        classSupportAll,
+        classSupportIntro
+      ],
+      groupSupports: [
+        groupSupport
+      ],
+      userSupports: [
+        userSupport
+      ]
+    });
+
+    const generalClassSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group0", "user0");
+    expect(generalClassSupports.length).toEqual(1);
+    expect((generalClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+
+    const setionClassSupports = supports.getSupportsForUserProblem(SectionType.introduction, "group0", "user0");
+    expect(setionClassSupports.length).toEqual(2);
+    expect((setionClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((setionClassSupports[1] as TeacherSupportModelType).key).toEqual(classSupportIntro.key);
+
+    const groupSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group1", "user0");
+    expect(groupSupports.length).toEqual(2);
+    expect((groupSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((groupSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
+
+    const userSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group0", "user1");
+    expect(userSupports.length).toEqual(2);
+    expect((userSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((userSupports[1] as TeacherSupportModelType).key).toEqual(userSupport.key);
+
+    const multiSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group1", "user1");
+    expect(multiSupports.length).toEqual(3);
+    expect((multiSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((multiSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
+    expect((multiSupports[2] as TeacherSupportModelType).key).toEqual(userSupport.key);
   });
 });
