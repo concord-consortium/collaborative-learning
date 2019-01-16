@@ -14,9 +14,7 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
-  myWorkLoadAllowed: boolean;
-  classWorkLoadAllowed: boolean;
-  classLogsLoadAllowed: boolean;
+  tabLoadAllowed: { [tab: string]: boolean };
   navExpanding: boolean;
 }
 
@@ -35,9 +33,11 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      myWorkLoadAllowed: false,
-      classWorkLoadAllowed: false,
-      classLogsLoadAllowed: false,
+      tabLoadAllowed: {
+        kMyWorkTab: false,
+        kClassWorkTab: false,
+        kClassLogsTab: false
+      },
       navExpanding: false
     };
   }
@@ -100,19 +100,19 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     const {activeRightNavTab} = this.stores.ui;
     return (
       <div className="contents">
-        { this.state.myWorkLoadAllowed
+        { this.state.tabLoadAllowed[kMyWorkTab]
           ? <div className={"container " + (activeRightNavTab === kMyWorkTab ? "enabled" : "disabled")}>
               <MyWorkComponent scale={kRightNavItemScale}/>
             </div>
           : this.renderLoadingText(kMyWorkTab)
         }
-        { this.state.classWorkLoadAllowed
+        { this.state.tabLoadAllowed[kClassWorkTab]
           ? <div className={"container " + (activeRightNavTab === kClassWorkTab ? "enabled" : "disabled")}>
               <ClassWorkComponent scale={kRightNavItemScale}/>
           </div>
           : this.renderLoadingText(kClassWorkTab)
         }
-        { this.state.classLogsLoadAllowed
+        { this.state.tabLoadAllowed[kClassLogsTab]
           ? <div className={"container " + (activeRightNavTab === kClassLogsTab ? "enabled" : "disabled")}>
               <ClassLogsComponent scale={kRightNavItemScale}/>
             </div>
@@ -159,13 +159,15 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   private updateComponentLoadAllowedState = () => {
     const { ui } = this.stores;
+    const tabLoadAllowed = this.state.tabLoadAllowed;
     if (ui.activeRightNavTab === kMyWorkTab) {
-      this.setState({myWorkLoadAllowed: true});
+      tabLoadAllowed[kMyWorkTab] = true;
     } else if (ui.activeRightNavTab === kClassWorkTab) {
-      this.setState({classWorkLoadAllowed: true});
+      tabLoadAllowed[kClassWorkTab] = true;
     } else if (ui.activeRightNavTab === kClassLogsTab) {
-      this.setState({classLogsLoadAllowed: true});
+      tabLoadAllowed[kClassLogsTab] = true;
     }
+    this.setState({tabLoadAllowed});
   }
 
 }
