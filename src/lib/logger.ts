@@ -5,6 +5,7 @@ import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
+import { JXGChange } from "../models/tools/geometry/jxg-changes";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -42,7 +43,9 @@ export enum LogEventName {
   VIEW_HIDE_COMPARISON_PANEL,
   VIEW_SHOW_SUPPORT,
 
-  CREATE_LEARNING_LOG
+  CREATE_LEARNING_LOG,
+
+  GRAPH_TOOL_CHANGE
 
 }
 
@@ -104,6 +107,17 @@ export class Logger {
       section: document.sectionId
     };
     Logger.log(event, parameters);
+  }
+
+  public static logGraphChange(change: JXGChange) {
+    // flatten change.properties key
+    const parameters = {
+      ...change,
+      ...change.properties
+    };
+    delete parameters.properties;
+
+    Logger.log(LogEventName.GRAPH_TOOL_CHANGE, parameters);
   }
 
   private static _instance: Logger;

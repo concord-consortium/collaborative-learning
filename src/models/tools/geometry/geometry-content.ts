@@ -7,6 +7,7 @@ import { isVertexAngle } from "./jxg-vertex-angle";
 import { assign, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { Logger } from "../../../lib/logger";
 
 export const kGeometryToolID = "Geometry";
 
@@ -391,6 +392,9 @@ export const GeometryContentModel = types
       else {
         batchChanges.push(jsonChange);
       }
+
+      Logger.logGraphChange(change);
+
       return result;
     }
 
