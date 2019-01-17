@@ -160,14 +160,8 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private updateComponentLoadAllowedState = () => {
     const { ui } = this.stores;
     const tabLoadAllowed = this.state.tabLoadAllowed;
-    if (ui.activeRightNavTab === kMyWorkTab) {
-      tabLoadAllowed[kMyWorkTab] = true;
-    } else if (ui.activeRightNavTab === kClassWorkTab) {
-      tabLoadAllowed[kClassWorkTab] = true;
-    } else if (ui.activeRightNavTab === kClassLogsTab) {
-      tabLoadAllowed[kClassLogsTab] = true;
-    }
-    this.setState({tabLoadAllowed});
+    tabLoadAllowed[ui.activeRightNavTab] = true;
+    this.setState({ tabLoadAllowed });
   }
 
 }
