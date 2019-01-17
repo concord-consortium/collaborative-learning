@@ -2,6 +2,38 @@
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
   "code": "msa",
+  "defaultStamps": [
+    {
+      "url": "assets/tools/drawing-tool/stamps/coin.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "assets/tools/drawing-tool/stamps/pouch.png",
+      "width": 30,
+      "height": 37
+    },
+    {
+      "url": "assets/tools/drawing-tool/stamps/plus.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "assets/tools/drawing-tool/stamps/equals.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "assets/tools/drawing-tool/stamps/lparen.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "assets/tools/drawing-tool/stamps/rparen.png",
+      "width": 25,
+      "height": 25
+    }
+  ],
   "investigations": [
     {
       "description": "Investigation 1",
@@ -157,7 +189,7 @@
                           "type": "string",
                           "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
                         }
-                      ]        
+                      ]
                     }
                   },
                   {
@@ -292,12 +324,12 @@
                     "content": {
                       "type": "Table",
                       "columns": [
-                        { 
+                        {
                           "name": "Name",
                           "type": "string",
                           "values": [" Leanne", "Gilberto ", "Alana"]
                         },
-                         { 
+                         {
                           "name": "Pledge Plan",
                           "type": "string",
                           "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 plus 50¢ per kilometer"]
@@ -664,9 +696,9 @@
                   }
                 ]
               },
-              "supports": [ 
+              "supports": [
                 {"text": "How might a table help? How might a graph help?"},
-                {"text": "Can you use the equations to help answer the question?"}, 
+                {"text": "Can you use the equations to help answer the question?"},
                 {"text": "What would be the cost of one shirt from each plan? 10 shirts? 20 shirts?"}
               ]
             },
@@ -683,12 +715,12 @@
                   "content": {
                     "type": "Table",
                      "columns": [
-                        { 
+                        {
                           "name": "n",
                           "type": "number",
                           "values": [0, 3, 5, 8, 10]
                         },
-                        { 
+                        {
                           "name": "y",
                           "type": "number",
                           "values": [34, 41.5, 46.5, 54, 59]
@@ -1124,7 +1156,7 @@
                       "type": "Text",
                       "text": "   "
                     }
-                  } 
+                  }
                 ]
               },
               "supports": []
@@ -1215,7 +1247,7 @@
                       "type": "Text",
                       "text": "Think of a question you could answer using this data. Explain how you would find the answer. \n\nDo any of these equations represent linear relationships?"
                     }
-                  } 
+                  }
                 ]
               },
               "supports": []
@@ -1316,7 +1348,7 @@
                 }
               ]
               },
-              "supports": [ 
+              "supports": [
                 {"text": "What are his expenses and his income for the month?"},
                 {"text": "In the equations for I and E, what information do the y-intercepts give you?"},
                 {"text": "What do the coefficients of n represent?"}
@@ -1522,12 +1554,12 @@
                     "content": {
                       "type": "Table",
                       "columns": [
-                        { 
+                        {
                           "name": "x",
                           "type": "number",
                           "values": [-2, -1, 0, 1, 2]
                         },
-                        { 
+                        {
                           "name": "y",
                           "type": "number",
                           "values": [6, 3, 0, -3, -6]
@@ -1545,12 +1577,12 @@
                     "content": {
                       "type": "Table",
                       "columns": [
-                        { 
+                        {
                           "name": "x",
                           "ordinal": 1,
                           "values": [-2, -1, 0, 1, 2]
                         },
-                        { 
+                        {
                           "name": "y",
                           "type": "number",
                           "values": [-1, -0.5, 0, 0.5, 1]
@@ -1602,12 +1634,12 @@
                     "content": {
                       "type": "Table",
                       "columns": [
-                        { 
+                        {
                           "name": "x",
                           "type": "number",
                           "values": [-6, -4, -2, 0, 2, 4]
                         },
-                        { 
+                        {
                           "name": "y",
                           "type": "number",
                           "values": [-10, -7, -4, -1, 2, 5]
@@ -1620,7 +1652,7 @@
                       "type": "Text",
                       "text": "* What is the constant rate of change and y-intercept associated with each representation?\n* Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality. \n\n2. The points (3, 5) and (-2, 10) lie on a line.\n\n* What is the rate of change of the line?\n* Find two more points that lie on this line. Explain your method.\n* Does this line represent a proportional relationship? Explain.\n\n3. What is the rate of change of a horizontal line? A vertical line? Explain your reasoning.\n\n4. John noticed that if the points (0,0) and (1, m) are on a line, then the line represents a proportional relationship, and m is the constant of proportionality. Is he correct? Explain."
                   }
-                } 
+                }
               ]
               },
               "supports": [
@@ -1680,7 +1712,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Each letter provides criteria for a relationship. For each situation, decide if the relationship could be linear. \nFor those that are linear, is there exactly one or more than one? \nProvide reasons for your decisions. \n\nA: A graph that does not pass through the origin\n\nB: A graph that passes through exactly two quadrants\n\nC: A graph that passes through exactly three quadrants\n\nD: A table"                   
+                      "text": "Each letter provides criteria for a relationship. For each situation, decide if the relationship could be linear. \nFor those that are linear, is there exactly one or more than one? \nProvide reasons for your decisions. \n\nA: A graph that does not pass through the origin\n\nB: A graph that passes through exactly two quadrants\n\nC: A graph that passes through exactly three quadrants\n\nD: A table"
                     }
                   },
                   {
@@ -1703,7 +1735,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "E: A graph that contains the points (1, 4) and (-2, -3)\n\nF: A graph that contains the points (0,4) (2,6) and (3,8)\n\nG: A graph that contains the point (-1, 5)\n\nH: A table"                   
+                      "text": "E: A graph that contains the points (1, 4) and (-2, -3)\n\nF: A graph that contains the points (0,4) (2,6) and (3,8)\n\nG: A graph that contains the point (-1, 5)\n\nH: A table"
                     }
                   },
                   {
@@ -1726,7 +1758,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0oC or 32oF. Water boils at 100oC and 212oF.\n\nJ: An equation that relates amount of money A Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."                   
+                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0oC or 32oF. Water boils at 100oC and 212oF.\n\nJ: An equation that relates amount of money A Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."
                     }
                   }
                 ]
