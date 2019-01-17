@@ -113,8 +113,9 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logToolChange(change: ToolChangeEventType) {
+  public static logToolChange(change: ToolChangeEventType, toolId: string) {
     let parameters: {[k: string]: any} = {
+      toolId,
       ...change
     };
 

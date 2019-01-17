@@ -393,7 +393,7 @@ export const GeometryContentModel = types
         batchChanges.push(jsonChange);
       }
 
-      Logger.logToolChange(change);
+      Logger.logToolChange(change, self.metadata ? self.metadata.id : "");
 
       return result;
     }

@@ -128,7 +128,7 @@ export const DrawingContentModel = types
 
     function applyChange(change: DrawingToolChange) {
       self.changes.push(JSON.stringify(change));
-      Logger.logToolChange(change);
+      Logger.logToolChange(change, self.metadata ? self.metadata.id : "");
     }
 
     function deleteSelectedObjects() {
