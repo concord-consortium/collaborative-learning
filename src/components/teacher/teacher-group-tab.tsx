@@ -5,6 +5,7 @@ import { GroupModelType } from "../../models/stores/groups";
 
 import "./teacher-group-tab.sass";
 import { TeacherSupports } from "./teacher-supports";
+import { AudienceEnum, GroupAudienceModel } from "../../models/stores/supports";
 
 interface IProps extends IBaseProps {}
 
@@ -71,7 +72,12 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
           </div>
         </div>
         <div className="content">
-          <TeacherSupports supports={supports.teacherSupports.filter(support => !support.deleted)} />
+          <TeacherSupports
+            audience={GroupAudienceModel.create({identifier: group.id})}
+            supports={supports.groupSupports.filter(support => {
+              return !support.deleted && support.audience.identifier === group.id;
+            })}
+          />
         </div>
       </div>
     );

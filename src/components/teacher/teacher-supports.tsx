@@ -3,11 +3,12 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 
 import "./teacher-supports.sass";
-import { TeacherSupportModelType } from "../../models/stores/supports";
+import { TeacherSupportModelType, AudienceModelType, AudienceEnum, audienceInfo } from "../../models/stores/supports";
 import { TeacherSupport } from "./teacher-support";
 
 interface IProps extends IBaseProps {
   supports: TeacherSupportModelType[];
+  audience: AudienceModelType;
 }
 
 interface IState {}
@@ -17,18 +18,22 @@ interface IState {}
 export class TeacherSupports extends BaseComponent<IProps, IState> {
 
   public render() {
-    const { supports } = this.props;
+    const { supports, audience } = this.props;
 
     return (
       <div className="teacher-supports">
         { this.renderHeader() }
-        <TeacherSupport time={new Date().getTime()}/>
+        <TeacherSupport time={new Date().getTime()} audience={audience}/>
           {
             // Reverse the supports so the newest ones are first + displayed at the top
             supports.slice()
               .reverse()
               .map((support, i) => {
-                return <TeacherSupport support={support} time={support.authoredTime} key={support.key}/>;
+                return <TeacherSupport
+                  support={support}
+                  time={support.authoredTime}
+                  audience={audience}
+                  key={support.key}/>;
               })
           }
       </div>
@@ -36,9 +41,12 @@ export class TeacherSupports extends BaseComponent<IProps, IState> {
   }
 
   private renderHeader() {
+    const { audience } = this.props;
+    const audienceType = audience.type as AudienceEnum;
+    const audienceDisplay = audienceInfo[audienceType].display;
     return (
       <div className="dash-header">
-        <div className="header-title">Class Supports:</div>
+        <div className="header-title">{`${audienceDisplay} Supports:`}</div>
         <div className="header-contents">
           <div className="date">Date</div>
           <div className="section">Section</div>

@@ -1,8 +1,12 @@
 import { DB } from "../db";
 import { SupportItemType,
-         SupportAudienceType,
          TeacherSupportModel,
-         TeacherSupportModelType } from "../../models/stores/supports";
+         TeacherSupportModelType,
+         ClassAudienceModel,
+         AudienceEnum,
+         TeacherSupportSectionTarget,
+         AudienceModelType,
+         GroupAudienceModel} from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 
@@ -14,6 +18,7 @@ export class DBSupportsListener {
     this.db = db;
   }
 
+  // TODO: Create different listeners for support audiences
   public start() {
     this.supportsRef = this.db.firebase.ref(
       this.db.firebase.getSupportsPath(this.db.stores.user)
@@ -32,26 +37,54 @@ export class DBSupportsListener {
   private handleSupportsUpdate = (snapshot: firebase.database.DataSnapshot) => {
     const {supports} = this.db.stores;
     const dbSupports = snapshot.val();
+    let audienceType: AudienceEnum | undefined;
     if (dbSupports) {
       const teacherSupports: TeacherSupportModelType[] = [];
 
-      Object.keys(dbSupports).forEach(sectionTarget => {
-        const newSupports = dbSupports[sectionTarget];
-        Object.keys(newSupports).forEach((key) => {
-          const dbSupport: DBSupport = newSupports[key];
-          teacherSupports.push(TeacherSupportModel.create({
-            key: dbSupport.self.key,
-            text: dbSupport.content,
-            type: sectionTarget === "all" ? SupportItemType.problem : SupportItemType.section,
-            sectionId: sectionTarget === "all" ? undefined : sectionTarget as SectionType,
-            audience: SupportAudienceType.class,
-            authoredTime: dbSupport.timestamp,
-            deleted: dbSupport.deleted
-          }));
+      const isClass = isNaN(parseInt(Object.keys(dbSupports)[0], 10));
+      if (isClass) {
+        Object.keys(dbSupports).forEach(sectionTarget => {
+          const newSupports = dbSupports[sectionTarget];
+          Object.keys(newSupports).forEach((key) => {
+            const dbSupport: DBSupport = newSupports[key];
+            const audience = ClassAudienceModel.create();
+            teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
+            if (!audienceType) {
+              audienceType = dbSupport.self.audienceType;
+            }
+          });
         });
-      });
+      } else {
+        Object.keys(dbSupports).forEach(groupNumber => {
+          Object.keys(dbSupports[groupNumber]).forEach(sectionTarget => {
+            const newSupports = dbSupports[groupNumber][sectionTarget];
+            Object.keys(newSupports).forEach((key) => {
+              const dbSupport: DBSupport = newSupports[key];
+              const audience = GroupAudienceModel.create({identifier: groupNumber});
+              teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
+              if (!audienceType) {
+                audienceType = dbSupport.self.audienceType;
+              }
+            });
+          });
+        });
+      }
 
-      supports.setAuthoredSupports(teacherSupports);
+      if (audienceType) {
+        supports.setAuthoredSupports(teacherSupports, audienceType);
+      }
     }
+  }
+
+  private createSupportModel(sectionTarget: string, dbSupport: DBSupport, audience: AudienceModelType) {
+    return TeacherSupportModel.create({
+      key: dbSupport.self.key,
+      text: dbSupport.content,
+      type: sectionTarget === "all" ? SupportItemType.problem : SupportItemType.section,
+      sectionId: sectionTarget === "all" ? undefined : sectionTarget as SectionType,
+      audience,
+      authoredTime: dbSupport.timestamp,
+      deleted: dbSupport.deleted
+    });
   }
 }

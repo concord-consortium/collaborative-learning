@@ -7,11 +7,17 @@ import { InvestigationModelType } from "../curriculum/investigation";
 import { Logger, LogEventName } from "../../lib/logger";
 import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../curriculum/section";
 
-export enum SupportAudienceType {
+export enum AudienceEnum {
   class = "class",
   group = "group",
   user = "user"
 }
+
+export const audienceInfo = {
+  [AudienceEnum.class]: { display: "Class"},
+  [AudienceEnum.group]: { display: "Group"},
+  [AudienceEnum.user]: { display: "User"},
+};
 
 export enum SupportItemType {
   unit = "unit",
@@ -22,6 +28,25 @@ export enum SupportItemType {
 
 export type TeacherSupportSectionTarget = SectionType | AllSectionType;
 
+export const ClassAudienceModel = types
+  .model("ClassAudienceModel", {
+    type: AudienceEnum.class,
+    identifier: types.undefined
+  });
+export const GroupAudienceModel = types
+  .model("ClassAudienceModel", {
+    type: AudienceEnum.group,
+    identifier: types.string
+  });
+export const UserAudienceModel = types
+  .model("ClassAudienceModel", {
+    type: AudienceEnum.user,
+    identifier: types.string
+  });
+
+export const AudienceModel = types.union(ClassAudienceModel, GroupAudienceModel, UserAudienceModel);
+export type AudienceModelType = Instance<typeof AudienceModel>;
+
 export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
     key: types.identifier,
@@ -29,8 +54,7 @@ export const TeacherSupportModel = types
     type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
     visible: false,
     sectionId: types.maybe(types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[])),
-    audience: types.enumeration<SupportAudienceType>("SupportAudienceType",
-      values(SupportAudienceType) as SupportAudienceType[]),
+    audience: AudienceModel,
     authoredTime: types.number,
     deleted: false
   })
@@ -55,10 +79,14 @@ export const TeacherSupportModel = types
           : allSectionInfo.title;
       },
 
-      showForSection(section: SectionType) {
-        return !self.deleted
-          && (self.type === SupportItemType.problem
-          || self.type === SupportItemType.section && self.sectionId === section);
+      showForUserProblem(section: SectionType, groupId?: string) {
+        const isUndeleted = !self.deleted;
+        const isForSection = self.type === SupportItemType.problem
+          || self.type === SupportItemType.section && self.sectionId === section;
+        const isForUser = self.audience.type === AudienceEnum.class
+          || self.audience.type === AudienceEnum.group && self.audience.identifier === groupId;
+
+        return isUndeleted && isForSection && isForUser;
       }
     };
   });
@@ -83,22 +111,34 @@ export const SupportItemModel = types.union(TeacherSupportModel, CurricularSuppo
 export const SupportsModel = types
   .model("Supports", {
     curricularSupports: types.array(CurricularSupportModel),
-    teacherSupports: types.array(TeacherSupportModel)
+    classSupports: types.array(TeacherSupportModel),
+    groupSupports: types.array(TeacherSupportModel),
+    userSupports: types.array(TeacherSupportModel)
   })
   .views((self) => ({
+    get teacherSupports() {
+      return self.classSupports
+        .concat(self.groupSupports)
+        .concat(self.userSupports);
+    }
+  }))
+  .views((self) => ({
     get allSupports() {
-      return self.curricularSupports.concat(self.teacherSupports);
+      return self.curricularSupports
+        .concat(self.classSupports)
+        .concat(self.groupSupports)
+        .concat(self.userSupports);
     },
 
-    getAllForSection(sectionId: SectionType): SupportItemModelType[] {
+    getSupportsForUserProblem(sectionId: SectionType, groupId?: string): SupportItemModelType[] {
       const curricularSupports = self.curricularSupports.filter((support) => {
         return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
       });
 
-      const teacherSupports = self.teacherSupports.filter(support => support.showForSection(sectionId));
+      const teacherSupports = self.teacherSupports.filter(support => support.showForUserProblem(sectionId, groupId));
 
       return curricularSupports.concat(teacherSupports);
-    },
+    }
   }))
   .actions((self) => {
     return {
@@ -124,11 +164,16 @@ export const SupportsModel = types
         self.curricularSupports.replace(supports);
       },
 
-      setAuthoredSupports(supports: TeacherSupportModelType[]) {
-        self.teacherSupports.clear();
+      setAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
+        const currSupports = audienceType === AudienceEnum.class
+          ? self.classSupports
+          : audienceType === AudienceEnum.group
+            ? self.groupSupports
+            : self.userSupports;
+        currSupports.clear();
         supports
           .sort((supportA, supportB) => supportA.authoredTime - supportB.authoredTime)
-          .forEach(support => self.teacherSupports.push(support));
+          .forEach(support => currSupports.push(support));
       },
 
       hideSupports() {

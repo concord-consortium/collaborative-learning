@@ -33,10 +33,12 @@ import { DocumentContentSnapshotType } from "../models/document/document-content
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { SupportAudienceType,
+import { AudienceEnum,
          TeacherSupportModelType,
          SupportItemType,
-         TeacherSupportSectionTarget
+         TeacherSupportSectionTarget,
+         ClassAudienceModel,
+         AudienceModelType
        } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
@@ -651,17 +653,18 @@ export class DB {
             .then(blob => URL.createObjectURL(blob));
   }
 
-  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget) {
+  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
-      this.firebase.getSupportsPath(user, SupportAudienceType.class, sectionTarget)
+      this.firebase.getSupportsPath(user, audience, sectionTarget)
     );
     const supportRef = classSupportsRef.push();
     const support: DBSupport = {
       self: {
         classHash: user.classHash,
         offeringId: user.offeringId,
-        audience: SupportAudienceType.class,
+        audienceType: audience.type as AudienceEnum, // XXX: this cast should not be necessary
+        audienceId: audience.identifier || "",
         sectionTarget,
         key: supportRef.key!
       },

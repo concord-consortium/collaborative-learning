@@ -310,10 +310,17 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private getSupportsWithIndices() {
-    return this.stores.supports.getAllForSection(this.props.document.sectionId! as SectionType)
-      .map((support, index) => {
-        return {index, item: support};
-      });
+    const { groups, user } = this.stores;
+    const userId = user.id;
+    const group = groups.groupForUser(userId);
+    const groupId = group && group.id;
+    return this.stores.supports.getSupportsForUserProblem(
+      this.props.document.sectionId! as SectionType,
+      groupId
+    )
+    .map((support, index) => {
+      return {index, item: support};
+    });
   }
 
   private isPrimary() {

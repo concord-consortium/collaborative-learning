@@ -9,6 +9,7 @@ import "./teacher-dashboard.sass";
 import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
 import { TeacherSupports } from "./teacher-supports";
+import { ClassAudienceModel } from "../../models/stores/supports";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -45,7 +46,9 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
-            <TeacherSupports supports={supports.teacherSupports.filter(support => !support.deleted)}/>
+            <TeacherSupports
+              audience={ClassAudienceModel.create()}
+              supports={supports.classSupports.filter(support => !support.deleted)}/>
             {this.renderTabContents()}
           </div>
         </div>

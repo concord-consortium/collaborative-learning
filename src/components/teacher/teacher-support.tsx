@@ -5,12 +5,19 @@ import { BaseComponent, IBaseProps } from "../base";
 import "./teacher-support.sass";
 import { niceDate } from "../../utilities/time";
 import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
-import { TeacherSupportModelType, TeacherSupportSectionTarget } from "../../models/stores/supports";
+import {
+  TeacherSupportModelType,
+  TeacherSupportSectionTarget,
+  AudienceEnum,
+  AudienceModelType,
+  audienceInfo
+} from "../../models/stores/supports";
 import { values } from "lodash";
 import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../../models/curriculum/section";
 
 interface IProps extends IBaseProps {
   support?: TeacherSupportModelType;
+  audience: AudienceModelType;
   time: number;
 }
 
@@ -35,7 +42,9 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
 
   private renderNewSupport() {
     const { problem } = this.stores;
-    const { time } = this.props;
+    const { time, audience} = this.props;
+    const audienceType = audience.type as AudienceEnum;
+    const messageTarget = audienceInfo[audienceType].display;
     const sectionOptions = (problem.sections).map(section => {
       const sectionType = section.type;
       return <option key={sectionType} value={sectionType}>{sectionInfo[sectionType].title}</option>;
@@ -50,7 +59,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
           {sectionOptions}
         </select>
         <input className="content" onKeyUp={this.handleEnter} ref={(elem) => this.inputElem = elem}/>
-        <div className="send-button" onClick={this.handleSubmit}>Message Class</div>
+        <div className="send-button" onClick={this.handleSubmit}>{`Message ${messageTarget}`}</div>
       </div>
     );
   }
@@ -77,10 +86,11 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
 
   private handleSubmit = () => {
     const { db } = this.stores;
+    const { audience } = this.props;
     const content = this.inputElem && this.inputElem.value;
     const sectionTarget = this.sectionElem && this.sectionElem.value;
     if (this.inputElem && content && sectionTarget) {
-      db.createSupport(content, sectionTarget as TeacherSupportSectionTarget);
+      db.createSupport(content, sectionTarget as TeacherSupportSectionTarget, audience);
       this.inputElem.value = "";
     }
   }

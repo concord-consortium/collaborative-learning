@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel, SupportItemType, SupportAudienceType, TeacherSupportModel } from "./supports";
+import { SupportsModel, SupportItemType, AudienceEnum, TeacherSupportModel, ClassAudienceModel } from "./supports";
 import { UnitModel } from "../curriculum/unit";
 import { SupportModel } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
@@ -14,7 +14,9 @@ describe("supports model", () => {
     const supports = SupportsModel.create({});
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: []
+      classSupports: [],
+      userSupports: [],
+      groupSupports: []
     });
   });
 
@@ -26,9 +28,9 @@ describe("supports model", () => {
         {text: "support #3", type: SupportItemType.problem, visible: true},
         {text: "support #4", type: SupportItemType.section},
       ],
-      teacherSupports: [
+      classSupports: [
         {key: "1", text: "support #5", type: SupportItemType.problem,
-          audience: SupportAudienceType.class, authoredTime: 42}
+          audience: ClassAudienceModel.create(), authoredTime: 42}
       ]
     });
     expect(omitUndefined(getSnapshot(supports))).toEqual({
@@ -54,17 +56,21 @@ describe("supports model", () => {
           visible: false,
         },
       ],
-      teacherSupports: [
+      classSupports: [
         {
           key: "1",
           text: "support #5",
           type: "problem",
-          audience: "class",
+          audience: {
+            type: "class"
+          },
           authoredTime: 42,
           visible: false,
           deleted: false
         }
-      ]
+      ],
+      groupSupports: [],
+      userSupports: []
     });
 
     expect(supports.curricularSupports.filter((support) => support.visible).length).toEqual(2);
@@ -205,7 +211,7 @@ describe("supports model", () => {
     }), InvestigationModel.create(cloneDeep(investigation1)),
         ProblemModel.create(cloneDeep(problem1)));
 
-    expect(supports.getAllForSection(SectionType.introduction)).toEqual([
+    expect(supports.getSupportsForUserProblem(SectionType.introduction, "groupId")).toEqual([
       {
         sectionId: "introduction",
         text: "Investigation 1, Problem 1, section: introduction, support #1",
@@ -227,25 +233,29 @@ describe("supports model", () => {
       key: "1",
       text: "foo",
       type: SupportItemType.problem,
-      audience: SupportAudienceType.class,
+      audience: ClassAudienceModel.create(),
       authoredTime: 100
     });
     const lateSupport = TeacherSupportModel.create({
       key: "2",
       text: "bar",
       type: SupportItemType.problem,
-      audience: SupportAudienceType.class,
+      audience: ClassAudienceModel.create(),
       authoredTime: 200
     });
 
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: []
+      classSupports: [],
+      groupSupports: [],
+      userSupports: []
     });
-    supports.setAuthoredSupports([lateSupport, earlySupport]);
+    supports.setAuthoredSupports([lateSupport, earlySupport], AudienceEnum.class);
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: [earlySupport, lateSupport]
+      classSupports: [earlySupport, lateSupport],
+      groupSupports: [],
+      userSupports: []
     });
   });
 });
