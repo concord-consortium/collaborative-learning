@@ -3,7 +3,7 @@ import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
 import { IMenuItemFlags, TableHeaderMenu } from "./table-header-menu";
 import { addAttributeToDataSet, addCanonicalCasesToDataSet,
-         ICase, ICaseCreation as IRowCreation, IDataSet } from "../../../models/data/data-set";
+         ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { IAttribute, IValueType } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
@@ -45,6 +45,10 @@ interface IProps {
   autoSizeColumns?: boolean;
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
+  onSetAttributeName?: (colId: string, name: string) => void;
+  onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
+  onSetCanonicalCaseValues?: (aCase: ICase) => void;
+  onRemoveCases?: (ids: string[]) => void;
   onSampleData?: (name: string) => void;
   // strings: Strings;
 }
@@ -89,7 +93,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   private gridColumnDefs: ColDef[] = [];
   private gridRowData: Array<IGridRow | undefined> = [];
-  private localRow: IRowCreation = {};
+  private localRow: ICaseCreation = {};
   private checkForEnterAfterCellEditingStopped = false;
   private checkForEnterAfterLocalDataEntry = false;
 
@@ -105,7 +109,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private sortedRowNodes: RowNode[];
 
   // we don't need to refresh for changes the table already knows about
-  private localChanges: IRowCreation[] = [];
+  private localChanges: ICaseCreation[] = [];
 
   constructor(props: IProps) {
     super(props);
@@ -153,29 +157,50 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   public getRowNodeId = (data: { id: string }) => data.id;
 
   public getRowIndexColumnDef(): ColDef {
-    const { dataSet, itemFlags, readOnly } = this.props;
+    const { itemFlags, readOnly } = this.props;
     return ({
       headerName: "",
       headerComponentFramework: TableHeaderMenu,
       headerComponentParams: {
         api: this.gridApi,
-        dataSet,
+        dataSet: this.props.dataSet,
         readOnly,
         itemFlags,
         onNewAttribute: (name: string) => {
+          const { dataSet } = this.props;
           dataSet && addAttributeToDataSet(dataSet, { name });
         },
         onRenameAttribute: (id: string, name: string) => {
-          dataSet && dataSet.setAttributeName(id, name);
+          if (this.props.onSetAttributeName) {
+            this.props.onSetAttributeName(id, name);
+          }
+          else {
+            const { dataSet } = this.props;
+            dataSet && dataSet.setAttributeName(id, name);
+          }
         },
         onNewCase: () => {
-          dataSet && addCanonicalCasesToDataSet(dataSet, [{}]);
+          const newCases = [{}];
+          if (this.props.onAddCanonicalCases) {
+            this.props.onAddCanonicalCases(newCases);
+          }
+          else {
+            const { dataSet } = this.props;
+            dataSet && addCanonicalCasesToDataSet(dataSet, newCases);
+          }
         },
         onRemoveAttribute: (id: string) => {
+          const { dataSet } = this.props;
           dataSet && dataSet.removeAttribute(id);
         },
         onRemoveCases: (ids: string[]) => {
-          dataSet && dataSet.removeCases(ids);
+          if (this.props.onRemoveCases) {
+            this.props.onRemoveCases(ids);
+          }
+          else {
+            const { dataSet } = this.props;
+            dataSet && dataSet.removeCases(ids);
+          }
         }
       },
       headerClass: "cdp-column-header cdp-case-index-header",
@@ -193,7 +218,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         return this.sortedRowNodes.indexOf(params.node) + 1;
       },
       suppressMovable: true,
-      suppressResize: true,
+      resizable: false,
       suppressNavigable: true
     });
   }
@@ -204,9 +229,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
     // clear local case before adding so that the update caused by addCanonicalCasesToDataSet()
     // shows an empty row for the local case
-    const newCase: IRowCreation = cloneDeep(this.localRow);
+    const newCases: ICaseCreation[] = [cloneDeep(this.localRow)];
     this.localRow = {};
-    addCanonicalCasesToDataSet(dataSet, [newCase]);
+    if (this.props.onAddCanonicalCases) {
+      this.props.onAddCanonicalCases(newCases);
+    }
+    else {
+      addCanonicalCasesToDataSet(dataSet, newCases);
+    }
     this.updateGridState(this.props.dataSet);
   }
 
@@ -274,7 +304,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         if (caseValues[attrID] === params.oldValue) { return false; }
         // track in-flight changes
         this.localChanges.push(cloneDeep(caseValues));
-        dataSet.setCanonicalCaseValues([caseValues]);
+        if (this.props.onSetCanonicalCaseValues) {
+          this.props.onSetCanonicalCaseValues(caseValues);
+        }
+        else {
+          dataSet.setCanonicalCaseValues([caseValues]);
+        }
         return true;
       },
       // tslint:disable-next-line:no-any
@@ -315,7 +350,31 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public updateGridState(dataSet?: IDataSet) {
+    this.updateGridColState(dataSet);
+    this.updateGridRowState(dataSet);
+  }
+
+  public updateGridColState(dataSet?: IDataSet) {
     this.gridColumnDefs = dataSet ? this.getColumnDefs(dataSet) : [];
+    const columnApi = this.gridColumnApi;
+    if (!columnApi) return;
+
+    // recent versions of ag-grid require manual column header synchronization
+    // cf. https://github.com/ag-grid/ag-grid/issues/2771#issuecomment-441576761
+
+    this.gridColumnDefs.forEach(newColDef => {
+      const colDef = columnApi.getColumn(newColDef.colId).getColDef();
+      if (colDef.headerName !== newColDef.headerName) {
+        colDef.headerName = newColDef.headerName;
+      }
+    });
+    if (this.gridApi) {
+      this.gridApi.setColumnDefs(this.gridColumnDefs);
+      this.gridApi.refreshHeader();
+    }
+  }
+
+  public updateGridRowState(dataSet?: IDataSet) {
     this.gridRowData = this.getRowData(dataSet);
     if (this.gridApi) {
       this.gridApi.setRowData(this.gridRowData);
@@ -366,7 +425,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         const cases = action.args && action.args[0];
         if (!cases) { return true; }
         let ignoredChanges = 0;
-        cases.forEach((aCase: IRowCreation) => {
+        cases.forEach((aCase: ICaseCreation) => {
           const index = findIndex(this.localChanges, (change) => isEqual(assign({}, aCase, change), aCase));
           if (index >= 0) {
             // ignoring local change
@@ -675,7 +734,6 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       <div className="neo-codap-case-table ag-theme-fresh" ref={(el) => this.gridElement = el}>
         <AgGridReact
           columnDefs={this.gridColumnDefs}
-          enableColResize={true}
           getRowNodeId={this.getRowNodeId}
           debug={false}
           rowSelection={this.state.rowSelection}
@@ -690,7 +748,6 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           onCellEditingStarted={this.handleCellEditingStarted}
           onCellEditingStopped={this.handleCellEditingStopped}
           tabToNextCell={this.handleTabToNextCell}
-          enableSorting={true}
           postSort={this.handlePostSort}
           onSortChanged={this.handleSortChanged}
           onViewportChanged={this.handleSetAddAttributePos}
