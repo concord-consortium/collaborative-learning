@@ -1,6 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { Point, DrawingObjectDataType } from "./drawing-objects";
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { Logger } from "../../../lib/logger";
 
 export const kDrawingToolID = "Drawing";
 
@@ -127,6 +128,7 @@ export const DrawingContentModel = types
 
     function applyChange(change: DrawingToolChange) {
       self.changes.push(JSON.stringify(change));
+      Logger.logToolChange(change);
     }
 
     function deleteSelectedObjects() {

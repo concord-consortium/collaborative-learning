@@ -6,6 +6,7 @@ import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
+import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -45,9 +46,12 @@ export enum LogEventName {
 
   CREATE_LEARNING_LOG,
 
-  GRAPH_TOOL_CHANGE
+  GRAPH_TOOL_CHANGE,
+  DRAWING_TOOL_CHANGE
 
 }
+
+type ToolChangeEventType = JXGChange | DrawingToolChange;
 
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
@@ -109,15 +113,36 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logGraphChange(change: JXGChange) {
-    // flatten change.properties key
-    const parameters = {
-      ...change,
-      ...change.properties
+  public static logToolChange(change: ToolChangeEventType) {
+    let parameters: {[k: string]: any} = {
+      ...change
     };
-    delete parameters.properties;
 
-    Logger.log(LogEventName.GRAPH_TOOL_CHANGE, parameters);
+    // either flatten change.properties (for graphs) or change.data (for drawing tool),
+    // unless properties/data an array, in which case standardize on "properties" and clean up.
+    const properties = parameters.properties || parameters.data;
+    delete parameters.properties;
+    delete parameters.data;
+    if (!Array.isArray(properties)) {
+      parameters = {
+        ...parameters,
+        ...properties
+      };
+    } else {
+      // clean up MST array
+      parameters.properties = Array.from(properties);
+    }
+
+    // duck typing
+    const eventName = "operation" in change ? LogEventName.GRAPH_TOOL_CHANGE : LogEventName.DRAWING_TOOL_CHANGE;
+
+    // standardize on "operation"
+    if ("action" in parameters) {
+      parameters.operation = parameters.action;
+      delete parameters.action;
+    }
+
+    Logger.log(eventName, parameters);
   }
 
   private static _instance: Logger;
