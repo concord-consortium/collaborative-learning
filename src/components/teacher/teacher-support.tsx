@@ -58,8 +58,19 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
         <select className="section-dropdown" ref={(elem) => this.sectionElem = elem}>
           {sectionOptions}
         </select>
-        <input className="content" onKeyUp={this.handleEnter} ref={(elem) => this.inputElem = elem}/>
-        <div className="send-button" onClick={this.handleSubmit}>{`Message ${messageTarget}`}</div>
+        <input
+          className="content"
+          onKeyUp={this.handleEnter}
+          ref={(elem) => this.inputElem = elem}
+          data-test={`support-input-${audienceType}`}
+        />
+        <div
+          className="send-button"
+          onClick={this.handleSubmit}
+          data-test={`support-submit-${audienceType}`}
+        >
+          {`Message ${messageTarget}`}
+        </div>
       </div>
     );
   }
@@ -69,7 +80,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     const { text, sectionTargetDisplay } = support;
 
     return (
-      <div className="teacher-support">
+      <div className="teacher-support" data-test="teacher-support">
         <svg className={`icon icon-delete-tool`} onClick={this.handleDelete(support)}>
           <use xlinkHref={`#icon-delete-tool`} />
         </svg>

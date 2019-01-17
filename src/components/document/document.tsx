@@ -235,6 +235,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
               key={index}
               onClick={this.handleToggleSupport(item)}
               className={`icon ${this.getSupportName(index)} ${visibility}`}
+              data-test="support-icon"
             >
               <use xlinkHref={`#${this.getSupportName(index)}`} />
             </svg>
