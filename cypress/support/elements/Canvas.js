@@ -151,14 +151,6 @@ class Canvas{
         return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
     }
 
-    getGraphPointText(){
-        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool');
-    }
-
-    addPointToGraph(x,y){
-        this.getGraphTile().last().click(x,y, {force:true});
-    }
-
     addImageTile(){
         return cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
     }
@@ -168,7 +160,7 @@ class Canvas{
     }
 
     getDeleteTool(){
-        return cy.get('.single-workspace > .toolbar > .tool.delete').click({force: true});
+        return cy.get('.single-workspace > .toolbar > .tool.delete');
     }
 
     deleteTile(tile){
@@ -183,7 +175,7 @@ class Canvas{
                 this.getImageTile().last().click({force:true});
                 break;
         }
-        this.getDeleteTool();
+        this.getDeleteTool().click({force: true});
     }
 
     scrollToBottom(element){
