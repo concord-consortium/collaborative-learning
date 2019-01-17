@@ -13,19 +13,61 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
 }
 
+interface IState {
+  tabLoadAllowed: { [tab: string]: boolean };
+  navExpanding: boolean;
+}
+
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
+const kMyWorkTab = "My Work";
+const kClassWorkTab = "Class Work";
+const kClassLogsTab = "Class Logs";
 
 @inject("stores")
 @observer
-export class RightNavComponent extends BaseComponent<IProps, {}> {
+export class RightNavComponent extends BaseComponent<IProps, IState> {
+
+  private expandedAreaRef = React.createRef<HTMLDivElement>();
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      tabLoadAllowed: {
+        kMyWorkTab: false,
+        kClassWorkTab: false,
+        kClassLogsTab: false
+      },
+      navExpanding: false
+    };
+  }
+
+  public componentDidMount() {
+    const node = this.expandedAreaRef.current;
+    if (node) {
+      node.addEventListener("transitionend", this.transitionEnd);
+    }
+  }
+
+  public componentWillUnmount() {
+    const node = this.expandedAreaRef.current;
+    if (node) {
+      node.removeEventListener("transitionend", this.transitionEnd);
+    }
+  }
+
+  public transitionEnd = () => {
+    this.setState({
+      navExpanding: false,
+    });
+    this.updateComponentLoadAllowedState();
+  }
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const teacherTabs = ["Class Work", "Class Logs"];
-    const studentTabs = ["My Work"].concat(teacherTabs);
+    const teacherTabs = [kClassWorkTab, kClassLogsTab];
+    const studentTabs = [kMyWorkTab].concat(teacherTabs);
     const tabs = this.props.isGhostUser ? teacherTabs : studentTabs;
-
     return (
       <div className="right-nav">
         <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
@@ -46,6 +88,7 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
           className={`expanded-area${rightNavExpanded ? " expanded" : ""}`}
           aria-labelledby={this.getTabId(activeRightNavTab)}
           aria-hidden={!rightNavExpanded}
+          ref={this.expandedAreaRef}
         >
           {this.renderTabContents()}
         </div>
@@ -55,36 +98,76 @@ export class RightNavComponent extends BaseComponent<IProps, {}> {
 
   private renderTabContents() {
     const {activeRightNavTab} = this.stores.ui;
-    const tabComponents: { [tab: string]: any } = {
-      "My Work": MyWorkComponent,
-      "Class Work": ClassWorkComponent,
-      "Class Logs": ClassLogsComponent
-    };
-    const _TabComponent = tabComponents[activeRightNavTab];
-    if (_TabComponent) {
-      return (
-        <div className="contents">
-          <_TabComponent scale={kRightNavItemScale} />
-        </div>
-      );
-    }
+    return (
+      <div className="contents">
+        { this.state.tabLoadAllowed[kMyWorkTab]
+          ? <div className={"container " + (activeRightNavTab === kMyWorkTab ? "enabled" : "disabled")}>
+              <MyWorkComponent scale={kRightNavItemScale}/>
+            </div>
+          : this.renderLoadingText(kMyWorkTab)
+        }
+        { this.state.tabLoadAllowed[kClassWorkTab]
+          ? <div className={"container " + (activeRightNavTab === kClassWorkTab ? "enabled" : "disabled")}>
+              <ClassWorkComponent scale={kRightNavItemScale}/>
+          </div>
+          : this.renderLoadingText(kClassWorkTab)
+        }
+        { this.state.tabLoadAllowed[kClassLogsTab]
+          ? <div className={"container " + (activeRightNavTab === kClassLogsTab ? "enabled" : "disabled")}>
+              <ClassLogsComponent scale={kRightNavItemScale}/>
+            </div>
+          : this.renderLoadingText(kClassLogsTab)
+        }
+      </div>
+    );
+  }
+
+  private renderLoadingText(tab: string) {
+    const {activeRightNavTab} = this.stores.ui;
+    return (
+      <div>
+        { tab === activeRightNavTab
+          ? <div className="loading">loading...</div>
+          : null
+        }
+      </div>
+    );
   }
 
   private handleTabClick = (tab: string) => {
     const { ui } = this.stores;
+    const navDoneExpanding = ui.rightNavExpanded;
     return (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!navDoneExpanding) {
+        this.setState({navExpanding: true});
+      }
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
         this.stores.ui.toggleRightNav(true);
-      }
-      else {
+      } else {
         this.stores.ui.toggleRightNav();
+      }
+      if (navDoneExpanding) {
+        this.updateComponentLoadAllowedState();
       }
     };
   }
 
   private getTabId(tab: string) {
     return `rightNavTab${tab}`;
+  }
+
+  private updateComponentLoadAllowedState = () => {
+    const { ui } = this.stores;
+    const tabLoadAllowed = this.state.tabLoadAllowed;
+    if (ui.activeRightNavTab === kMyWorkTab) {
+      tabLoadAllowed[kMyWorkTab] = true;
+    } else if (ui.activeRightNavTab === kClassWorkTab) {
+      tabLoadAllowed[kClassWorkTab] = true;
+    } else if (ui.activeRightNavTab === kClassLogsTab) {
+      tabLoadAllowed[kClassLogsTab] = true;
+    }
+    this.setState({tabLoadAllowed});
   }
 
 }

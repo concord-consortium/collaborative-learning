@@ -18,7 +18,7 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
     const publications = documents.getLatestLogPublications();
 
     return (
-      <div className="class-work">
+      <div className="class-logs">
         <div className="list">
           {publications.map((publication) => {
             const user = this.stores.class.getStudentById(publication.uid);
