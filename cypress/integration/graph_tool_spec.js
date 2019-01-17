@@ -141,12 +141,12 @@ context('Test graph tool functionalities', function(){
                 .trigger('drop')
                 .trigger('mouseup');
         });
-        it('will drag a polygon to a new location', function(){
+        it('will drag a polygon to a new location', function(){ //TODO still not working
                 graphToolTile.getGraphPolygon()
                     .trigger('mousedown', {force:true})
-                    .trigger('dragstart',{force:true})
-                    // .trigger('drag',100,100,{force:true})
-                    .trigger('mousemove',100, 150, {force:true})
+                    .trigger('dragstart', {force:true})
+                    .trigger('drag',100,150,{force:true})
+                    // .trigger('mousemove', 100, 150, {force:true})
                     .trigger('dragend', 100, 150, {force:true})
                     .trigger('drop', 100, 150,{force:true})
                     .trigger('mouseup',{force:true});
