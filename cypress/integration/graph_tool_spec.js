@@ -112,6 +112,14 @@ context('Test graph tool functionalities', function(){
             graphToolTile.hideAngle();
             graphToolTile.selectGraphPoint(3.2,4);
             graphToolTile.hideAngle();
+
+            //Add the angles angle for the restore test later
+            graphToolTile.selectGraphPoint(13.2,5);
+            graphToolTile.showAngle();
+            graphToolTile.selectGraphPoint(7.4, 2.2);
+            graphToolTile.showAngle();
+            graphToolTile.selectGraphPoint(3.2,4);
+            graphToolTile.showAngle();
         });
         it('will select a polygon', function(){
             leftNav.openToWorkspace('Introduction');
@@ -136,10 +144,12 @@ context('Test graph tool functionalities', function(){
             graphToolTile.getRotateTool()
                 .trigger('mousedown')
                 .trigger('dragstart')
-                .trigger('mousemove',50, -50, {force:true})
+                .trigger('mousemove',28, -73, {force:true})
                 .trigger('dragend')
                 .trigger('drop')
                 .trigger('mouseup');
+            //TODO verify points are in new location
+
         });
         it('will drag a polygon to a new location', function(){ //TODO still not working
                 graphToolTile.getGraphPolygon()
@@ -152,9 +162,19 @@ context('Test graph tool functionalities', function(){
                     .trigger('mouseup',{force:true});
         });
         it('will copy and paste a polygon', function(){
-
+            //TODO
         });
+        it('will restore changes to a graph', function(){
+            leftNav.openToWorkspace('Now What');
+            leftNav.openToWorkspace('What if');
+            //TODO verify angles are showing
+            leftNav.openToWorkspace('Introduction');
+            //TODO verify polygon is present and rotated
+
+        })
     });
+
+
 
     describe('delete points and polygons', function(){
         it('will delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
