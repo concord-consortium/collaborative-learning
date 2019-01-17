@@ -43,6 +43,8 @@ const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
 const stores = createStores({ appMode, appVersion, user, problem, showDemoCreator, unit });
+stores.documents.setUnit(stores.unit);
+
 gImageMap.initialize(stores.db, user.id);
 
 Logger.initializeLogger(stores, investigation, problem);

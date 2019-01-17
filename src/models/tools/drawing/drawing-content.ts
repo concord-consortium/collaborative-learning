@@ -101,10 +101,10 @@ export const DrawingToolMetadataModel = types
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent() {
+export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
   return DrawingContentModel.create({
     type: kDrawingToolID,
-    stamps: [],
+    stamps: options ? options.stamps : [],
     changes: []
   });
 }
