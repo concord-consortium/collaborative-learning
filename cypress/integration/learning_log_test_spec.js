@@ -13,9 +13,8 @@ context('Test bottom tabs', function(){
         canvas = new Canvas,
         graphToolTile = new GraphToolTile;
 
-    describe('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
-
-        it('will verify correct tab opens to correct content', function(){
+    describe('Test learning log interaction with main canvas', function(){
+        it('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
             bottomNav.getBottomNavTabs().each(($tab,index,$list)=>{
                 let tabName = $tab.text();  //get the tab label
                 cy.wrap($tab).click({force:true}); //click on tab
@@ -29,7 +28,7 @@ context('Test bottom tabs', function(){
                 bottomNav.getBottomNavTabs().should('contain',tabName).click();//closes the bottom nav tab
             });
         });
-        it('will verify restore of already open canvas in workspace', function(){
+        it('will verify restore of already open canvas in main workspace after opening learning log', function(){
             //     //Open Introduction tab
             //     //Open Introduction canvas
                 let tab = 'Introduction';
@@ -51,7 +50,7 @@ context('Test bottom tabs', function(){
         })
     });
 
-    describe('Test create, save and restore a canvas',function(){
+    describe('Test create, save and restore a learning log canvas',function(){
        it('create a new learning log', function(){
            let title='pool';
             learningLog.createLearningLog(title);
