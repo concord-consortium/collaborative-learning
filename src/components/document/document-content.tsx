@@ -23,7 +23,7 @@ interface IDragResizeRow {
   deltaHeight: number;
 }
 
-interface IDropRowInfo {
+export interface IDropRowInfo {
   rowInsertIndex: number;
   rowDropIndex?: number;
   rowDropLocation?: string;
@@ -279,31 +279,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     if (!content) return;
     const dragTileId = e.dataTransfer.getData(kDragTileId);
-    const srcRowId = content.findRowContainingTile(dragTileId);
-    if (!srcRowId) return;
-    const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
     const dropRowInfo  = this.getDropRowInfo(e);
-    const { rowInsertIndex, rowDropIndex, rowDropLocation } = dropRowInfo;
-    if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-      content.moveTileToRow(dragTileId, rowDropIndex, 0);
-      return;
-    }
-    if ((rowDropIndex != null) && (rowDropLocation === "right")) {
-      content.moveTileToRow(dragTileId, rowDropIndex);
-      return;
-    }
-
-    if ((srcRowIndex >= 0)) {
-      // if only one tile in source row, move the entire row
-      if (content.numTilesInRow(srcRowId) === 1) {
-        if (rowInsertIndex !== srcRowIndex) {
-          content.moveRowToIndex(srcRowIndex, rowInsertIndex);
-        }
-      }
-      else {
-        content.moveTileToNewRow(dragTileId, rowInsertIndex);
-      }
-    }
+    content.moveTile(dragTileId, dropRowInfo);
   }
 
   private handleCopyTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
