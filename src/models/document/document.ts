@@ -57,18 +57,7 @@ export const DocumentModel = types
     },
 
     addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
-      switch (tool) {
-        case "text":
-          return self.content.addTextTile();
-        case "table":
-          return self.content.addTableTile();
-        case "geometry":
-          return self.content.addGeometryTile(addSidecarNotes);
-        case "image":
-          return self.content.addImageTile();
-        case "drawing":
-          return self.content.addDrawingTile();
-      }
+      return self.content.addTile(tool, addSidecarNotes);
     },
 
     deleteTile(tileId: string) {
