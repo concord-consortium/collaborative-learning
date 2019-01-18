@@ -1,13 +1,6 @@
 import { DB } from "../db";
-import { SupportItemType,
-         TeacherSupportModel,
-         TeacherSupportModelType,
-         ClassAudienceModel,
-         AudienceEnum,
-         TeacherSupportSectionTarget,
-         AudienceModelType,
-         GroupAudienceModel,
-         UserAudienceModel} from "../../models/stores/supports";
+import { SupportItemType, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
+  AudienceModelType, GroupAudienceModel, UserAudienceModel} from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 
@@ -53,6 +46,7 @@ export class DBSupportsListener {
           });
         });
       } else {
+        // Logic is the same as above, but group + user supports are first keyed by ID
         Object.keys(dbSupports).forEach(audienceId => {
           Object.keys(dbSupports[audienceId]).forEach(sectionTarget => {
             const newSupports = dbSupports[audienceId][sectionTarget];

@@ -4,42 +4,17 @@ import "firebase/database";
 import "firebase/storage";
 import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
-import { DBOfferingGroup,
-         DBOfferingGroupUser,
-         DBOfferingGroupMap,
-         DBOfferingUser,
-         DBDocumentMetadata,
-         DBDocument,
-         DBOfferingUserSectionDocument,
-         DBLearningLog,
-         DBLearningLogPublication,
-         DBPublicationDocumentMetadata,
-         DBGroupUserConnections,
-         DBPublication,
-         DBDocumentType,
-         DBImage,
-         DBSupport,
-        } from "./db-types";
-import { DocumentModelType,
-         DocumentModel,
-         DocumentType,
-         SectionDocument,
-         LearningLogDocument,
-         PublicationDocument,
-         LearningLogPublication
-        } from "../models/document/document";
+import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
+  DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport } from "./db-types";
+import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
+  LearningLogPublication } from "../models/document/document";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { AudienceEnum,
-         TeacherSupportModelType,
-         SupportItemType,
-         TeacherSupportSectionTarget,
-         ClassAudienceModel,
-         AudienceModelType
-       } from "../models/stores/supports";
+import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -663,7 +638,7 @@ export class DB {
       self: {
         classHash: user.classHash,
         offeringId: user.offeringId,
-        audienceType: audience.type as AudienceEnum, // XXX: this cast should not be necessary
+        audienceType: audience.type,
         audienceId: audience.identifier || "",
         sectionTarget,
         key: supportRef.key!

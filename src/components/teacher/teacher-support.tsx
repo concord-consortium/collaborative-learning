@@ -5,15 +5,9 @@ import { BaseComponent, IBaseProps } from "../base";
 import "./teacher-support.sass";
 import { niceDate } from "../../utilities/time";
 import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
-import {
-  TeacherSupportModelType,
-  TeacherSupportSectionTarget,
-  AudienceEnum,
-  AudienceModelType,
-  audienceInfo
-} from "../../models/stores/supports";
-import { values } from "lodash";
-import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../../models/curriculum/section";
+import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType,
+  audienceInfo } from "../../models/stores/supports";
+import { sectionInfo, allSectionInfo } from "../../models/curriculum/section";
 
 interface IProps extends IBaseProps {
   support?: TeacherSupportModelType;
@@ -42,8 +36,8 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
 
   private renderNewSupport() {
     const { problem } = this.stores;
-    const { time, audience} = this.props;
-    const audienceType = audience.type as AudienceEnum;
+    const { time, audience } = this.props;
+    const audienceType = audience.type;
     const messageTarget = audienceInfo[audienceType].display;
     const sectionOptions = (problem.sections).map(section => {
       const sectionType = section.type;

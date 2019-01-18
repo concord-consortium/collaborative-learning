@@ -30,17 +30,17 @@ export type TeacherSupportSectionTarget = SectionType | AllSectionType;
 
 export const ClassAudienceModel = types
   .model("ClassAudienceModel", {
-    type: AudienceEnum.class,
+    type: types.optional(types.literal(AudienceEnum.class), AudienceEnum.class),
     identifier: types.undefined
   });
 export const GroupAudienceModel = types
   .model("ClassAudienceModel", {
-    type: AudienceEnum.group,
+    type: types.optional(types.literal(AudienceEnum.group), AudienceEnum.group),
     identifier: types.string
   });
 export const UserAudienceModel = types
   .model("ClassAudienceModel", {
-    type: AudienceEnum.user,
+    type: types.optional(types.literal(AudienceEnum.user), AudienceEnum.user),
     identifier: types.string
   });
 

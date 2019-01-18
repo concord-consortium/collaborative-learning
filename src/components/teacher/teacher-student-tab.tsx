@@ -2,10 +2,10 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
-
-import "./teacher-student-tab.sass";
 import { TeacherSupports } from "./teacher-supports";
 import { UserAudienceModel } from "../../models/stores/supports";
+
+import "./teacher-student-tab.sass";
 
 interface IProps extends IBaseProps {
   groupId?: string;
@@ -27,7 +27,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { groups,  } = this.stores;
+    const { groups } = this.stores;
     const { selectedUserId } = this.state;
     const { groupId } = this.props;
     const group = groups.getGroupById(groupId);

@@ -10,9 +10,9 @@ import { DocumentModelType, SectionDocument } from "../../models/document/docume
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
+import { SectionType } from "../../models/curriculum/section";
 
 import "./document.sass";
-import { SectionType } from "../../models/curriculum/section";
 
 export type WorkspaceSide = "primary" | "comparison";
 

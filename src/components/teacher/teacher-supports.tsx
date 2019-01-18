@@ -1,10 +1,10 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
+import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../models/stores/supports";
+import { TeacherSupport } from "./teacher-support";
 
 import "./teacher-supports.sass";
-import { TeacherSupportModelType, AudienceModelType, AudienceEnum, audienceInfo } from "../../models/stores/supports";
-import { TeacherSupport } from "./teacher-support";
 
 interface IProps extends IBaseProps {
   supports: TeacherSupportModelType[];
@@ -42,7 +42,7 @@ export class TeacherSupports extends BaseComponent<IProps, IState> {
 
   private renderHeader() {
     const { audience } = this.props;
-    const audienceType = audience.type as AudienceEnum;
+    const audienceType = audience.type;
     const audienceDisplay = audienceInfo[audienceType].display;
     return (
       <div className="dash-header">

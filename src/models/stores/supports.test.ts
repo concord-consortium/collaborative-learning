@@ -1,12 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel,
-         SupportItemType,
-         AudienceEnum,
-         TeacherSupportModel,
-         ClassAudienceModel,
-         GroupAudienceModel,
-         UserAudienceModel,
-         TeacherSupportModelType} from "./supports";
+import { SupportsModel, SupportItemType, AudienceEnum, TeacherSupportModel, ClassAudienceModel, GroupAudienceModel,
+  UserAudienceModel, TeacherSupportModelType } from "./supports";
 import { UnitModel } from "../curriculum/unit";
 import { SupportModel } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
