@@ -53,7 +53,6 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         canvas.enterText('This is to test the 4-up view of S'+students[i]);
         canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+students[i]);
         canvas.addGraphTile();
-        canvas.addPointToGraph((30*i),(250/i));
         canvas.shareCanvas();//all students will share their canvas
         cy.wait(1000);
     }
