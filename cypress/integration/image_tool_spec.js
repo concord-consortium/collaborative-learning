@@ -73,30 +73,31 @@ context('Test image functionalities', function(){
             cy.wait(2000)
         })
     });
-    // describe('restore of images', function(){
-    //     it('will verify all three images that were added by URL in above test are in the tab when re-opened', function(){
-    //         const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg', 'https://codap.concord.org/~eireland/model_image.gif'];
+    describe('restore of images', function(){
+        it('will verify all three images that were added by URL in above test are in the tab when re-opened', function(){
+            const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg', 'https://codap.concord.org/~eireland/model_image.gif'];
 
-    //         leftNav.openToWorkspace('Extra Workspace');
-    //         imageToolTile.getImageToolImage().each(($images, index, $list)=>{
-    //             expect($list).to.have.length(3);
-    //             expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
-    //         });
-    //         // imageToolTile.getImageToolImage().first().should('have.css', 'background-image','url("'+imageFileURL1+'")');
-    //         // //have to figure out how to check the middle one
-    //         // imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL3+'")');
-    //     });
-    //     it('will verify all three images that were added by upload in above test are in the tab when re-opened', function(){
-    //         const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
+            leftNav.openToWorkspace('Extra Workspace');
+            cy.wait(5000);
+            imageToolTile.getImageToolImage().each(($images, index, $list)=>{
+                expect($list).to.have.length(3);
+                expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
+            });
 
-    //         leftNav.openToWorkspace('What if');
-    //         imageToolTile.getImageToolImage().each(($images, index, $list)=>{
-    //             expect($list).to.have.length(3);
-    //             expect($images).to.have.css('background-image').and.contains(imageFilePath[index]);
-    //         })
+        });
+        it('will verify all three images that were added by upload in above test are in the tab when re-opened', function(){
+            const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
 
-    //     })
-    // });
+            leftNav.openToWorkspace('What if');
+            cy.wait(5000)
+            imageToolTile.getImageToolImage().each(($images, index, $list)=>{
+                expect($list).to.have.length(3);
+                expect($images).to.have.css('background-image').and.contains('url("blob:https://collaborative-learning.concord.org');
+
+            })
+
+        })
+    });
 
     describe('transfer of image from left-nav to canvas', function() {
         it('verify cannot drag image when no canvas is present', function(){
