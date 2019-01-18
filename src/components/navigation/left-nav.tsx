@@ -11,9 +11,20 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
 }
 
+interface IState {
+  tabLoadAllowed: { [tab: number]: boolean };
+}
+
 @inject("stores")
 @observer
-export class LeftNavComponent extends BaseComponent<IProps, {}> {
+export class LeftNavComponent extends BaseComponent<IProps, IState> {
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      tabLoadAllowed: {}
+    };
+  }
 
   public render() {
     const { problem, ui } = this.stores;
@@ -43,7 +54,16 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
           aria-labelledby={this.getTabId(activeSectionIndex)}
           aria-hidden={ui.leftNavExpanded}
         >
-          <LeftNavPanelComponent section={activeSection} isGhostUser={this.props.isGhostUser} />
+          {sections.map((section, index) => {
+            return (
+              this.state.tabLoadAllowed[index]
+              ? <div className={"container " + (activeSectionIndex === index ? "enabled" : "disabled")} key={index}>
+                  <LeftNavPanelComponent section={section} isGhostUser={this.props.isGhostUser} key={index} />
+                </div>
+              : null
+            );
+          })}
+
         </div>
       </div>
     );
@@ -59,7 +79,14 @@ export class LeftNavComponent extends BaseComponent<IProps, {}> {
       else {
         this.stores.ui.toggleLeftNav();
       }
+      this.updateTabLoadAllowedState(sectionIndex);
     };
+  }
+
+  private updateTabLoadAllowedState = (sectionIndex: number) => {
+    const tabLoadAllowed = this.state.tabLoadAllowed;
+    tabLoadAllowed[sectionIndex] = true;
+    this.setState({ tabLoadAllowed });
   }
 
   private getTabId(sectionIndex: number) {
