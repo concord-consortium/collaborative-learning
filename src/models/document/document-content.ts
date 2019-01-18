@@ -310,19 +310,31 @@ export const DocumentContentModel = types
     }
   }))
   .actions((self) => ({
-    addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
+    addTile(tool: DocumentTool, addSidecarNotes?: boolean, insertRowInfo?: IDropRowInfo) {
+      let tileInfo;
       switch (tool) {
         case "text":
-          return self.addTextTile();
+          tileInfo = self.addTextTile();
+          break;
         case "table":
-          return self.addTableTile();
+          tileInfo = self.addTableTile();
+          break;
         case "geometry":
-          return self.addGeometryTile(addSidecarNotes);
+          tileInfo = self.addGeometryTile(addSidecarNotes);
+          break;
         case "image":
-          return self.addImageTile();
+          tileInfo = self.addImageTile();
+          break;
         case "drawing":
-          return self.addDrawingTile();
+          tileInfo = self.addDrawingTile();
+          break;
       }
+
+      if (tileInfo && insertRowInfo) {
+        self.moveTile(tileInfo.tileId, insertRowInfo);
+      }
+
+      return tileInfo;
     }
   }));
 
