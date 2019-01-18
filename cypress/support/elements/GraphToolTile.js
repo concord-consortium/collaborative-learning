@@ -18,8 +18,12 @@ class GraphToolTile{
         return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
     }
 
-    getGraphPointText(){
+    getGraphPointText(){ //This is the point coordinate text
         return cy.get('.geometry-tool.editable > .JXGinfobox');
+    }
+
+    getGraphPointLabel(){ //This is the letter label for a point
+        return cy.get('.geometry-tool.editable > .JXGtext');
     }
 
     getGraphPoint(){

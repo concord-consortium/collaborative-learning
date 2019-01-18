@@ -3,13 +3,15 @@ import BottomNav from '../support/elements/BottomNav';
 import RightNav from '../support/elements/RightNav';
 import LeftNav from '../support/elements/LeftNav';
 import Canvas from '../support/elements/Canvas';
+import GraphToolTile from '../support/elements/GraphToolTile';
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,
         bottomNav = new BottomNav,
         rightNav = new RightNav,
         leftNav = new LeftNav,
-        canvas = new Canvas;
+        canvas = new Canvas,
+        graphToolTile = new GraphToolTile;
 
     describe('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
 
@@ -41,7 +43,7 @@ context('Test bottom tabs', function(){
                 canvas.addGraphTile();
                 canvas.getGraphTile().last().click();
                 canvas.getGraphTile().last().click();
-                // canvas.getGraphPointText().last().should('contain', 'A' );
+                graphToolTile.getGraphPointLabel().last().should('contain', 'A' );
                 //Open learning log
                 learningLog.openLearningLogTab();
                 learningLog.closeLearningLogTab();
