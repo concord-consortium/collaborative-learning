@@ -5,6 +5,8 @@ import ImageToolTile from '../support/elements/ImageToolTile'
 const leftNav = new LeftNav;
 const canvas = new Canvas;
 const imageToolTile = new ImageToolTile;
+const baseUrl = `${Cypress.config("baseUrl")}`;
+
 
 context('Test image functionalities', function(){
     describe('upload image', function(){
@@ -92,7 +94,7 @@ context('Test image functionalities', function(){
             cy.wait(5000)
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);
-                expect($images).to.have.css('background-image').and.contains('url("blob:https://collaborative-learning.concord.org');
+                expect($images).to.have.css('background-image').and.contains('url("blob:'+baseUrl);
 
             })
 
