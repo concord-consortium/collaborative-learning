@@ -150,7 +150,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
     });
 
-    describe('Teacher can create Learning Logs', function(){
+    describe('Teacher can create and publish Learning Logs', function(){
         it('will verify learning log is accessible', function(){
 
         });
