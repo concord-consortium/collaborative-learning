@@ -50,7 +50,6 @@ interface IProps {
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
   onRemoveCases?: (ids: string[]) => void;
   onSampleData?: (name: string) => void;
-  // strings: Strings;
 }
 
 interface IState {
@@ -210,12 +209,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       pinned: "left",
       lockPosition: true,
       valueGetter: (params) => {
-        // if not yet sorted just return the row index
-        if (this.sortedRowNodes.length === 0) {
-          return params.node.rowIndex + 1;
-        }
-        // otherwise return the index after the last sort operation
-        return this.sortedRowNodes.indexOf(params.node) + 1;
+        return "";
+        // return params.node.rowIndex + 1; // caseIndex
       },
       suppressMovable: true,
       resizable: false,
@@ -251,6 +246,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       colId: attribute.id,
       editable: !readOnly,
       width: defaultWidth,
+      resizable: true,
       lockPosition: true,
       valueGetter: (params: ValueGetterParams) => {
         const { dataSet } = this.props;
@@ -659,7 +655,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
   }
 
-  public componentWillMount() {
+  public componentDidMount() {
     window.addEventListener("keyup", this.handleKeyUp);
   }
 
@@ -731,7 +727,10 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   public render() {
     return (
-      <div className="neo-codap-case-table ag-theme-fresh" ref={(el) => this.gridElement = el}>
+      <div className="neo-codap-case-table ag-theme-fresh"
+          ref={(el) => this.gridElement = el}
+          draggable={true}
+          onDragStart={this.handleDragStart}>
         <AgGridReact
           columnDefs={this.gridColumnDefs}
           getRowNodeId={this.getRowNodeId}
@@ -754,5 +753,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         />
       </div>
     );
+  }
+
+  private handleDragStart = (evt: React.DragEvent<HTMLDivElement>) => {
+    // ag-grid adds "ag-column-resizing" class to columns being actively resized
+    if (this.gridElement && this.gridElement.getElementsByClassName("ag-column-resizing").length) {
+      // if we're column resizing, prevent other drags above (e.g. tile drags)
+      evt.preventDefault();
+      evt.stopPropagation();
+    }
   }
 }

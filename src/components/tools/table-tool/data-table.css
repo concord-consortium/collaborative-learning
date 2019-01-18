@@ -7,6 +7,8 @@
 /* cf. https://github.com/ag-grid/ag-grid/issues/1864#issuecomment-410199641 */
 .ag-theme-fresh .ag-header-cell-label {
   display: inline !important;
+  /* required to center column labels properly */
+  min-width: 100% !important;
 }
 .ag-theme-fresh .ag-header-cell-label > span {
   float: none !important;

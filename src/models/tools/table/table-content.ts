@@ -1,7 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { IDataSet, ICaseCreation, ICase } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
-import { assign, castArray, each } from "lodash";
+import { castArray, each } from "lodash";
 
 export const kTableToolID = "Table";
 
@@ -41,6 +41,11 @@ export const TableContentModel = types
     }
     return snapshot;
   })
+  .views(self => ({
+    isUserResizable() {
+      return true;
+    }
+  }))
   .actions(self => ({
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));

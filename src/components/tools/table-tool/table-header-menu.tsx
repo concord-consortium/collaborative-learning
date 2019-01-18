@@ -84,15 +84,21 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
           onNewAttribute={this.props.onNewAttribute}
           onClose={this.closeNewAttributeDialog}
         />
-        <RenameColumnDialog
-          id={this.state.renameAttributeId}
-          isOpen={this.state.isRenameAttributeDialogOpen}
-          onRenameAttribute={this.handleRenameAttributeCallback}
-          onClose={this.closeRenameAttributeDialog}
-          name={this.state.renameAttributeName}
-        />
+        {this.renderRenameColumnDialog()}
       </div>
     );
+  }
+
+  private renderRenameColumnDialog() {
+    return this.state.isRenameAttributeDialogOpen
+            ? <RenameColumnDialog
+                id={this.state.renameAttributeId}
+                isOpen={this.state.isRenameAttributeDialogOpen}
+                onRenameAttribute={this.handleRenameAttributeCallback}
+                onClose={this.closeRenameAttributeDialog}
+                name={this.state.renameAttributeName}
+              />
+            : null;
   }
 
   private openNewAttributeDialog = () => {
