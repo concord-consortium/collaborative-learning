@@ -26,6 +26,7 @@ export interface NewRowOptions {
 export interface INewRowTile {
   rowId: string;
   tileId: string;
+  additionalTileIds?: string[];
 }
 
 export const DocumentContentModel = types
@@ -155,6 +156,7 @@ export const DocumentContentModel = types
         const tile = ToolTileModel.create({ content: defaultTextContent() });
         self.tileMap.put(tile);
         row!.insertTileInRow(tile, 1);
+        result.additionalTileIds = [ tile.id ];
       }
       return result;
     },
@@ -295,7 +297,6 @@ export const DocumentContentModel = types
         self.moveTileToRow(tileId, rowDropIndex);
         return;
       }
-
       if ((srcRowIndex >= 0)) {
         // if only one tile in source row, move the entire row
         if (self.numTilesInRow(srcRowId) === 1) {
@@ -331,7 +332,37 @@ export const DocumentContentModel = types
       }
 
       if (tileInfo && insertRowInfo) {
-        self.moveTile(tileInfo.tileId, insertRowInfo);
+        // Move newly-create tile(s) into requested row. If we have created more than one tile, e.g. the sidecar text
+        // for the graph tool, we need to insert the tiles one after the other. If we are inserting on the left, we
+        // have to reverse the order of insertion. If we are inserting into a new row, the first tile is inserted into a
+        // new row and then the sidecar tiles into that same row. This makes the logic rather verbose...
+        const { rowDropLocation } = insertRowInfo;
+
+        let tilesIdsToMove;
+        if (tileInfo.additionalTileIds) {
+          tilesIdsToMove = [tileInfo.tileId, ...tileInfo.additionalTileIds];
+          if (rowDropLocation && rowDropLocation === "left") {
+            tilesIdsToMove = tilesIdsToMove.reverse();
+          }
+        } else {
+          tilesIdsToMove = [tileInfo.tileId];
+        }
+
+        const moveSubsequentTilesRight = !rowDropLocation || rowDropLocation === "bottom" || rowDropLocation === "top";
+
+        tilesIdsToMove.forEach((id, i) => {
+          if (i > 0) {
+            if (moveSubsequentTilesRight) {
+              insertRowInfo.rowDropLocation = "right";
+              if (rowDropLocation === undefined) {
+                insertRowInfo.rowDropIndex = 0;
+              } else if (rowDropLocation === "bottom") {
+                insertRowInfo.rowDropIndex = (insertRowInfo.rowDropIndex || 0) + 1;
+              }
+            }
+          }
+          self.moveTile(id, insertRowInfo);
+        });
       }
 
       return tileInfo;
