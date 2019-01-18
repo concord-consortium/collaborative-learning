@@ -13,6 +13,7 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { IDropRowInfo } from "../../components/document/document-content";
+import { DocumentTool } from "./document";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -298,6 +299,20 @@ export const DocumentContentModel = types
         else {
           self.moveTileToNewRow(tileId, rowInsertIndex);
         }
+      }
+    }
+  }))
+  .actions((self) => ({
+    addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
+      switch (tool) {
+        case "geometry":
+          return self.addGeometryTile(addSidecarNotes);
+        case "text":
+          return self.addTextTile();
+        case "image":
+          return self.addImageTile();
+        case "drawing":
+          return self.addDrawingTile();
       }
     }
   }));
