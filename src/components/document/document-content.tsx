@@ -27,10 +27,6 @@ interface IDropRowInfo {
   rowInsertIndex: number;
   rowDropIndex?: number;
   rowDropLocation?: string;
-  dropOffsetLeft?: number;
-  dropOffsetTop?: number;
-  dropOffsetRight?: number;
-  dropOffsetBottom?: number;
   updateTimestamp?: number;
 }
 
@@ -242,21 +238,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           // below the last row - highlight bottom of last row
           ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
         dropInfo.rowDropIndex = i;
-        dropInfo.dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-        dropInfo.dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-        dropInfo.dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-        dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+
+        const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
+        const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
+        const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
+        const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
 
         const kSideDropThreshold = rowBounds.width * 0.25;
-        if ((dropInfo.dropOffsetLeft < kSideDropThreshold) &&
-            (dropInfo.dropOffsetLeft < dropInfo.dropOffsetRight!)) {
+        if ((dropOffsetLeft < kSideDropThreshold) &&
+            (dropOffsetLeft < dropOffsetRight!)) {
           dropInfo.rowDropLocation = "left";
         }
-        else if ((dropInfo.dropOffsetRight < kSideDropThreshold) &&
-                (dropInfo.dropOffsetRight <= dropInfo.dropOffsetLeft!)) {
+        else if ((dropOffsetRight < kSideDropThreshold) &&
+                (dropOffsetRight <= dropOffsetLeft!)) {
           dropInfo.rowDropLocation = "right";
         }
-        else if (dropInfo.dropOffsetTop < dropInfo.dropOffsetBottom) {
+        else if (dropOffsetTop < dropOffsetBottom) {
           dropInfo.rowDropLocation = "top";
         }
         else {
