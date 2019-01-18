@@ -12,6 +12,7 @@ import * as uuid from "uuid/v4";
 import { Logger, LogEventName } from "../../lib/logger";
 import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
+import { IDropRowInfo } from "../../components/document/document-content";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -268,6 +269,34 @@ export const DocumentContentModel = types
       else {
         if (!srcRow.isUserResizable) {
           srcRow.height = undefined;
+        }
+      }
+    }
+  }))
+  .actions((self) => ({
+    moveTile(tileId: string, rowInfo: IDropRowInfo) {
+      const srcRowId = self.findRowContainingTile(tileId);
+      if (!srcRowId) return;
+      const srcRowIndex = self.rowOrder.findIndex(rowId => rowId === srcRowId);
+      const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
+      if ((rowDropIndex != null) && (rowDropLocation === "left")) {
+        self.moveTileToRow(tileId, rowDropIndex, 0);
+        return;
+      }
+      if ((rowDropIndex != null) && (rowDropLocation === "right")) {
+        self.moveTileToRow(tileId, rowDropIndex);
+        return;
+      }
+
+      if ((srcRowIndex >= 0)) {
+        // if only one tile in source row, move the entire row
+        if (self.numTilesInRow(srcRowId) === 1) {
+          if (rowInsertIndex !== srcRowIndex) {
+            self.moveRowToIndex(srcRowIndex, rowInsertIndex);
+          }
+        }
+        else {
+          self.moveTileToNewRow(tileId, rowInsertIndex);
         }
       }
     }
