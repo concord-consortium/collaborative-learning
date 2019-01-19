@@ -1,9 +1,9 @@
-import Header from './elements/Header.js';
-import RightNav from './elements/RightNav';
-import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
-import Workspace from './elements/Workspace';
-import TeacherDashboard from './elements/TeacherDashboard';
+import Header from '../support/elements/Header.js';
+import RightNav from '../support/elements/RightNav';
+import LeftNav from '../support/elements/LeftNav';
+import Canvas from '../support/elements/Canvas';
+import Workspace from '../support/elements/Workspace';
+import TeacherDashboard from '../support/elements/TeacherDashboard';
 
 let qaClass = 10,
     qaOffering = 10,
@@ -150,7 +150,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
     });
 
-    describe('Teacher can create Learning Logs', function(){
+    describe('Teacher can create and publish Learning Logs', function(){
         it('will verify learning log is accessible', function(){
 
         });

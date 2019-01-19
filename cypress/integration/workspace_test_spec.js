@@ -1,9 +1,9 @@
-import Workspace from './elements/Workspace.js';
-import LeftNav from './elements/LeftNav';
-import BottomNav from './elements/BottomNav';
-import RightNav from './elements/RightNav';
-import Canvas from './elements/Canvas';
-import LearningLog from './elements/LearningLog';
+import Workspace from '../support/elements/Workspace.js';
+import LeftNav from '../support/elements/LeftNav';
+import BottomNav from '../support/elements/BottomNav';
+import RightNav from '../support/elements/RightNav';
+import Canvas from '../support/elements/Canvas';
+import LearningLog from '../support/elements/LearningLog';
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 const queryParam = `${Cypress.config("queryParams")}`

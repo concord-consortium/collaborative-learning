@@ -1,5 +1,5 @@
-import LeftNav from './elements/LeftNav'
-import Canvas from './elements/Canvas'
+import LeftNav from '../support/elements/LeftNav'
+import Canvas from '../support/elements/Canvas'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
@@ -15,25 +15,6 @@ context('Test group functionalities', function(){
         describe('set-up for 4-up view tests', function(){
             it('will enter text into the 1-up canvas', function(){
                 cy.setupGroup(studentArr, qaGroup)
-                // // Manually create students to go into Group
-                //
-                //     let i=0;
-                //
-                // for (i=0;i<studentArr.length;i++) {
-                //     cy.wait(5000);
-                //     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem=2.3');
-                //     leftNav.openToWorkspace('Now What');
-                //     cy.get('.single-workspace > .document > .toolbar > .tool.text').click({force: true});
-                //     cy.get('.canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .text-tool').last().type('This is to test the 4-up view of S'+studentArr[i]);
-                //     cy.get('.canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .text-tool').last().should('contain', '4-up').and('contain','S'+studentArr[i]);
-                //     cy.get('.single-workspace > .document > .titlebar > .actions > .icon-share').click();//all students will share their canvas
-                //     cy.wait(1000);
-                // }
-                // //verify Group num and there are 4 students in the group
-                // cy.get('.app > .group-view > .header > .group > .name').should('contain','Group '+qaGroup);
-                // cy.get('.app > .group-view > .header > .group > .members > .member').each(($member,index, $list)=>{
-                //     expect(['S15','S16','S17','S18']).to.include($member.text());
-                // });
             });
             it('verify 4-up view comes up correctly with students', function(){
                 canvas.openFourUpView();

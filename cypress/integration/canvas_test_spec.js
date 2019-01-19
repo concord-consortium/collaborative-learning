@@ -1,8 +1,8 @@
-import LeftNav from './elements/LeftNav'
-import Canvas from './elements/Canvas'
-import RightNav from './elements/RightNav'
-import BottomNav from './elements/BottomNav';
-import LearningLog from './elements/LearningLog';
+import LeftNav from '../support/elements/LeftNav'
+import Canvas from '../support/elements/Canvas'
+import RightNav from '../support/elements/RightNav'
+import BottomNav from '../support/elements/BottomNav';
+import LearningLog from '../support/elements/LearningLog';
 
 context('Test Canvas', function(){
     let leftNav = new LeftNav;
@@ -97,13 +97,8 @@ context('Test Canvas', function(){
             it('clicks the graph tool and enters three points', function(){
 
                 canvas.addGraphTile();
-                canvas.getGraphTile().last().click();
-                canvas.addPointToGraph(100,40);
-                canvas.getGraphPointText().last().should('contain', 'A' );
-                canvas.addPointToGraph(140,70);
-                canvas.getGraphPointText().last().should('contain', 'B' );
-                canvas.addPointToGraph(240,170);
-                canvas.getGraphPointText().last().should('contain', 'C' );
+                canvas.getGraphTile().should('exist')
+
             });
              it('will test image tool', ()=>{
                  canvas.addImageTile();
@@ -115,16 +110,12 @@ context('Test Canvas', function(){
                canvas.addTextTile();
                canvas.enterText('second text tool');
                canvas.addGraphTile();
-               canvas.getGraphTile();
-               canvas.addPointToGraph(40,35);
-               canvas.getGraphPointText().last().should('contain', 'A' );
+               canvas.getGraphTile().should('exist');
                canvas.addImageTile();
                canvas.addTextTile();
                canvas.enterText('third text tool');
                canvas.addGraphTile();
-               canvas.getGraphTile();
-               canvas.addPointToGraph(175,55);
-               canvas.getGraphPointText().last().should('contain', 'A' );
+               canvas.getGraphTile().should('exist');
                canvas.addImageTile();
                canvas.scrollToBottom(canvas.getSingleCanvasDocumentContent());
                canvas.scrollToTop(canvas.getSingleCanvasDocumentContent());
@@ -180,9 +171,6 @@ context('Test Canvas', function(){
                 //verify text element with Hello World in showing
                 canvas.getTextTile().first().should('contain', 'Hello World');
                 //Verify the graph has 4 points in it
-                canvas.getGraphPointText().each(($point, index, $list)=>{}).then(($list)=>{
-                    expect($list).to.have.length(6);
-                });
             });
         });
 
@@ -197,10 +185,7 @@ context('Test Canvas', function(){
                 //verify text element with Hello World in showing
                 canvas.getTextTile().first().should('contain', 'Hello World');
                 //Verify the graph has 4 points in it
-                canvas.getGraphTile().first();
-                canvas.getGraphPointText().each(($point, index, $list)=>{}).then(($list)=> {
-                    expect($list).to.have.length(6);
-                });
+                canvas.getGraphTile().first().should('exist');
             });
         });
 
