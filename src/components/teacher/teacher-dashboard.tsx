@@ -1,7 +1,5 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { TabComponent } from "../tab";
-import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { HeaderComponent } from "../header";
 import { TeacherGroupTabComponent } from "./teacher-group-tab";
@@ -10,7 +8,8 @@ import { TeacherStudentTabComponent } from "./teacher-student-tab";
 import "./teacher-dashboard.sass";
 import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
-import { TeacherSupport } from "./teacher-support";
+import { TeacherSupports } from "./teacher-supports";
+import { ClassAudienceModel } from "../../models/stores/supports";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -47,16 +46,9 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
         <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
-            <TeacherSupport time={new Date().getTime()}/>
-            {
-              // Reverse the supports so the newest ones are first + displayed at the top
-              supports.teacherSupports.slice()
-                .filter(support => !support.deleted)
-                .reverse()
-                .map((support, i) => {
-                  return <TeacherSupport support={support} time={support.authoredTime} key={support.key}/>;
-                })
-            }
+            <TeacherSupports
+              audience={ClassAudienceModel.create()}
+              supports={supports.classSupports.filter(support => !support.deleted)}/>
             {this.renderTabContents()}
           </div>
         </div>

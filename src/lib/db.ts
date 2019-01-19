@@ -4,38 +4,17 @@ import "firebase/database";
 import "firebase/storage";
 import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
-import { DBOfferingGroup,
-         DBOfferingGroupUser,
-         DBOfferingGroupMap,
-         DBOfferingUser,
-         DBDocumentMetadata,
-         DBDocument,
-         DBOfferingUserSectionDocument,
-         DBLearningLog,
-         DBLearningLogPublication,
-         DBPublicationDocumentMetadata,
-         DBGroupUserConnections,
-         DBPublication,
-         DBDocumentType,
-         DBImage,
-         DBSectionType,
-         DBSupport,
-         DBSupportSectionTarget
-        } from "./db-types";
-import { DocumentModelType,
-         DocumentModel,
-         DocumentType,
-         SectionDocument,
-         LearningLogDocument,
-         PublicationDocument,
-         LearningLogPublication
-        } from "../models/document/document";
+import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
+  DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport } from "./db-types";
+import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
+  LearningLogPublication } from "../models/document/document";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { SupportAudienceType, TeacherSupportModelType, SupportItemType } from "../models/stores/supports";
+import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -649,18 +628,19 @@ export class DB {
             .then(blob => URL.createObjectURL(blob));
   }
 
-  public createSupport(content: string) {
+  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
-      this.firebase.getSupportsPath(user, SupportAudienceType.class, DBSectionType.all)
+      this.firebase.getSupportsPath(user, audience, sectionTarget)
     );
     const supportRef = classSupportsRef.push();
     const support: DBSupport = {
       self: {
         classHash: user.classHash,
         offeringId: user.offeringId,
-        audience: SupportAudienceType.class,
-        sectionTarget: DBSectionType.all,
+        audienceType: audience.type,
+        audienceId: audience.identifier || "",
+        sectionTarget,
         key: supportRef.key!
       },
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
@@ -672,10 +652,8 @@ export class DB {
 
   public deleteSupport(support: TeacherSupportModelType) {
     const { user } = this.stores;
-    const { audience, type, key } = support;
-    const dbSupportType: DBSupportSectionTarget = type === SupportItemType.section
-      ? support.sectionId!
-      : DBSectionType.all;
+    const { audience, key } = support;
+    const dbSupportType: TeacherSupportSectionTarget = support.sectionTarget;
     const updateRef = this.firebase.ref(this.firebase.getSupportsPath(user, audience, dbSupportType, key));
     updateRef.update({
       deleted: true
