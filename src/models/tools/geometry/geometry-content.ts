@@ -191,6 +191,16 @@ export const GeometryContentModel = types
       self.changes.push(JSON.stringify(change));
     }
 
+    function popChange() {
+      // The first change is board creation and should not be popped
+      if (self.changes.length > 1) {
+        const change = self.changes.pop();
+        return change ? JSON.parse(change) : null;
+      } else {
+        return null;
+      }
+    }
+
     function addImage(board: JXG.Board,
                       url: string,
                       coords: JXGCoordPair,
@@ -453,6 +463,7 @@ export const GeometryContentModel = types
         resizeBoard,
         updateScale,
         addChange,
+        popChange,
         addImage,
         addPoint,
         removeObjects,

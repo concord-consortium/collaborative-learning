@@ -57,6 +57,7 @@ interface IState extends SizeMeProps {
   imageEntry?: ImageMapEntryType;
   syncedChanges: number;
   disableRotate: boolean;
+  redoStack: any;
 }
 
 interface JXGPtrEvent {
@@ -69,6 +70,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   const newElements: JXG.GeometryElement[] = [];
   const changedElements: JXG.GeometryElement[] = [];
   const syncedChanges = content.changes.length;
+  board.suspendUpdate();
   for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
@@ -89,6 +91,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
 
   // update vertex angles affected by changed points
   updateVertexAnglesFromObjects(changedElements);
+  board.unsuspendUpdate();
 
   return { newElements: newElements.length ? newElements : undefined, syncedChanges };
 }
@@ -140,9 +143,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           // signal update to be triggered in componentDidUpdate
           nextState.imageContentUrl = lastUrl;
         }
-        // synchronize remaining changes
-        assign(nextState, syncBoardChanges(prevState.board, geometryContent,
-                                            prevState.syncedChanges, readOnly));
+        // If the incoming list of changes is shorter, an undo has occurred.
+        // In this case, clear the board and replay it.
+        if (prevState.syncedChanges > geometryContent.changes.length) {
+          const board = prevState.board;
+          board.suspendUpdate();
+          for (let i = board.objectsList.length - 1; i > 17; i--) {
+            board.removeObject(board.objectsList[i]);
+          }
+          board.unsuspendUpdate();
+        }
+        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
+                                ? 1
+                                : prevState.syncedChanges;
+        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
+      } else {
+        nextState.redoStack = [];
       }
       nextState.content = geometryContent;
     }
@@ -151,7 +167,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public state: IState = {
           syncedChanges: 0,
-          disableRotate: false
+          disableRotate: false,
+          redoStack: []
         };
 
   private domElement: HTMLDivElement | null;
@@ -353,7 +370,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "delete": this.handleDelete,
       "cmd-c": this.handleCopy,
       "cmd-x": this.handleCut,
-      "cmd-v": this.handlePaste
+      "cmd-v": this.handlePaste,
+      "cmd-z": this.handleUndo,
+      "cmd-shift-z": this.handleRedo,
     });
   }
 
@@ -481,6 +500,31 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleDuplicate = () => {
     this.handleCopy();
     this.handlePaste();
+  }
+
+  private handleUndo = () => {
+    const content = this.getContent();
+    const { board } = this.state;
+    if (board) {
+      const change = content.popChange();
+      if (change) {
+        this.setState({
+          redoStack: this.state.redoStack.concat(change)
+        });
+      }
+    }
+
+    return true;
+  }
+
+  private handleRedo = () => {
+    const content = this.getContent();
+    const change = this.state.redoStack.pop();
+    if (change) {
+      content.addChange(change);
+    }
+
+    return true;
   }
 
   private handleCopy = () => {
