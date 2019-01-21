@@ -47,13 +47,31 @@ class LeftNav{
         }
     }
 
-    getOpenToWorkspaceButton(){
-        return cy.get('[data-test=open-document-button]');
+    getOpenToWorkspaceButton(index){
+        return cy.get('#leftNavContainer' + index).find('[data-test=open-document-button]');
     }
 
     openToWorkspace(title) {
+        let index = -1;
+        switch(title){
+            case 'Introduction':
+                index = 0;
+                break;
+            case 'Initial Challenge':
+                index = 1;
+                break;
+            case 'What if':
+                index = 2;
+                break;
+            case 'Now What':
+                index = 3;
+                break;
+            case 'Extra Workspace':
+                index = 4;
+                break;
+        }
         this.openLeftNavTab(title);
-        this.getOpenToWorkspaceButton().click({force:true});
+        this.getOpenToWorkspaceButton(index).click({force:true});
     }
 }
 export default LeftNav;

@@ -15,7 +15,7 @@ describe('Test Left tabs',function(){
          for (i = 0; i < $tab.length - 1; i++) {
              let title = $tab.text;
              cy.get('#leftNavTab' + i).click({force:true});
-                 leftNav.getOpenToWorkspaceButton().should('contain', titleArr[i]).click({force: true});
+                 leftNav.getOpenToWorkspaceButton(i).should('contain', titleArr[i]).click({force: true});
                      canvas.getCanvasTitle().should('contain', titleArr[i]);
          }
      })

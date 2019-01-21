@@ -57,7 +57,10 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
           {sections.map((section, index) => {
             return (
               this.state.tabLoadAllowed[index]
-              ? <div className={"container " + (activeSectionIndex === index ? "enabled" : "disabled")} key={index}>
+              ? <div
+                  id={this.getContainerId(index)}
+                  className={"container " + (activeSectionIndex === index ? "enabled" : "disabled")}
+                  key={index}>
                   <LeftNavPanelComponent section={section} isGhostUser={this.props.isGhostUser} key={index} />
                 </div>
               : null
@@ -91,5 +94,9 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
 
   private getTabId(sectionIndex: number) {
     return `leftNavTab${sectionIndex}`;
+  }
+
+  private getContainerId(sectionIndex: number) {
+    return `leftNavContainer${sectionIndex}`;
   }
 }

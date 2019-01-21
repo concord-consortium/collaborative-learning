@@ -18,7 +18,7 @@ class Workspace{
                 var i=0;
                 for (i=0;i<$tabList.length;i++){
                     cy.get('#leftNavTab'+i).click({force:true});
-                    this.leftnav.openToWorkspace();
+                    this.leftnav.getOpenToWorkspaceButton(i).click({force:true});
                     this.canvas.publishCanvas();
                 }
                 // cy.get('#leftNavTab'+i).click({force:true}); //Close the last tab--leaving clean up to individual tests for now
