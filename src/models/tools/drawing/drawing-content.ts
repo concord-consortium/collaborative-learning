@@ -104,7 +104,7 @@ export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataMo
 export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
   return DrawingContentModel.create({
     type: kDrawingToolID,
-    stamps: options ? options.stamps : [],
+    stamps: options && options.stamps || [],
     changes: []
   });
 }

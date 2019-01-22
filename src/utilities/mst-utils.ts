@@ -12,5 +12,5 @@ export function getParentWithTypeName(target: IAnyStateTreeNode, typeName: strin
       if (type.name === typeName) return parent;
       parent = getParent(parent);
   }
-  return;
+  return undefined;
 }
