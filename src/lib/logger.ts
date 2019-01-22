@@ -5,6 +5,8 @@ import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
+import { JXGChange } from "../models/tools/geometry/jxg-changes";
+import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -42,9 +44,14 @@ export enum LogEventName {
   VIEW_HIDE_COMPARISON_PANEL,
   VIEW_SHOW_SUPPORT,
 
-  CREATE_LEARNING_LOG
+  CREATE_LEARNING_LOG,
+
+  GRAPH_TOOL_CHANGE,
+  DRAWING_TOOL_CHANGE
 
 }
+
+type ToolChangeEventType = JXGChange | DrawingToolChange;
 
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
@@ -104,6 +111,16 @@ export class Logger {
       section: document.sectionId
     };
     Logger.log(event, parameters);
+  }
+
+  public static logToolChange(eventName: LogEventName, operation: string, change: ToolChangeEventType, toolId: string) {
+    const parameters: {[k: string]: any} = {
+      toolId,
+      operation,
+      ...change
+    };
+
+    Logger.log(eventName, parameters);
   }
 
   private static _instance: Logger;
