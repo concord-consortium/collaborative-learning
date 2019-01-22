@@ -40,6 +40,9 @@ export const DocumentContentModel = types
             ? migrateSnapshot(snapshot)
             : snapshot;
   })
+  .volatile(self => ({
+    visibleRows: [] as string[]
+  }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
     const contentId = uuid();
@@ -124,12 +127,18 @@ export const DocumentContentModel = types
     deleteRow(rowId: string) {
       self.rowOrder.remove(rowId);
       self.rowMap.delete(rowId);
+    },
+    setVisibleRows(rows: string[]) {
+      self.visibleRows = rows;
     }
   }))
   .actions(self => ({
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = ToolTileModel.create({ content });
-      const o = options || {};
+      const lastVisibleRowId = self.visibleRows.length ? self.visibleRows[self.visibleRows.length - 1]
+        : self.rowOrder[self.rowOrder.length - 1];
+      const indexOfLastVisible = self.rowOrder.indexOf(lastVisibleRowId);
+      const o = options || {rowIndex: indexOfLastVisible};
       const row = TileRowModel.create();
       row.insertTileInRow(tile);
       if (o.rowHeight) {

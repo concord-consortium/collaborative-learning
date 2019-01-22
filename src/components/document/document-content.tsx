@@ -8,6 +8,8 @@ import { kDragTileSource, kDragTileId, kDragTileContent,
         dragTileSrcDocId, kDragRowHeight } from "../tools/tool-tile";
 
 import "./document-content.sass";
+import { throttle } from "lodash";
+import ReactDOM, { findDOMNode } from "react-dom";
 
 interface IProps extends IBaseProps {
   context: string;
@@ -44,12 +46,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
+  private rowRefs: Array<TileRowComponent | null>;
   private mutationObserver: MutationObserver;
 
   public componentDidMount() {
-    if (this.domElement && (window as any).MutationObserver) {
-      this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
-      this.mutationObserver.observe(this.domElement, { childList: true });
+    if (this.domElement) {
+      this.domElement.addEventListener("scroll", throttle(this.updateVisibleRows, 100));
+      this.updateVisibleRows();
+
+      if ((window as any).MutationObserver) {
+        this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
+        this.mutationObserver.observe(this.domElement, { childList: true });
+      }
     }
   }
 
@@ -70,6 +78,35 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         {this.props.children}
       </div>
     );
+  }
+
+  private updateVisibleRows = () => {
+    const { content } = this.props;
+
+    if (!this.domElement || !content) return;
+
+    const contentBounds = this.domElement.getBoundingClientRect();
+    function isElementInViewport(el: Element) {
+      const rect = el.getBoundingClientRect();
+
+      return (
+          (rect.bottom > contentBounds.top &&
+          rect.bottom < contentBounds.bottom) ||
+          (rect.top > contentBounds.top &&
+            rect.top < contentBounds.bottom)
+      );
+    }
+
+    const visibleRowIds: string[] = [];
+    this.rowRefs.forEach((ref) => {
+      if (ref) {
+        const rowNode = findDOMNode(ref);
+        if (isElementInViewport(rowNode as Element)) {
+          visibleRowIds.push(ref.props.model.id);
+        }
+      }
+    });
+    content.setVisibleRows(visibleRowIds);
   }
 
   private getRowHeight(rowId: string) {
@@ -93,6 +130,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { rowMap, rowOrder, tileMap } = content;
     const { dropRowInfo } = this.state;
     let tabIndex = 1;
+    this.rowRefs = [];
     return rowOrder.map((rowId, index) => {
       const row = rowMap.get(rowId);
       const rowHeight = this.getRowHeight(rowId);
@@ -106,7 +144,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
                                   tabIndex={_tabIndex} height={rowHeight} tileMap={tileMap}
-                                  dropHighlight={dropHighlight} {...others} />
+                                  dropHighlight={dropHighlight}
+                                  ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
   }
