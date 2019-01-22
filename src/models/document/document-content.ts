@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { DataSet } from "../data/data-set";
-import { defaultDrawingContent, kDrawingDefaultHeight } from "../tools/drawing/drawing-content";
+import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
 import { defaultGeometryContent, kGeometryDefaultHeight } from "../tools/geometry/geometry-content";
 import { defaultImageContent } from "../tools/image/image-content";
 import { defaultTextContent } from "../tools/text/text-content";
@@ -10,6 +10,8 @@ import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOut
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName } from "../../lib/logger";
+import { DocumentsModelType } from "../stores/documents";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -158,7 +160,14 @@ export const DocumentContentModel = types
       return self.addTileInNewRow(defaultImageContent());
     },
     addDrawingTile() {
-      return self.addTileInNewRow(defaultDrawingContent(),
+      let defaultStamps: StampModelType[];
+      const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
+      if (documents && documents.unit) {
+        defaultStamps = getSnapshot(documents.unit.defaultStamps);
+      } else {
+        defaultStamps = [];
+      }
+      return self.addTileInNewRow(defaultDrawingContent({stamps: defaultStamps}),
                                   { rowHeight: kDrawingDefaultHeight });
     },
     copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
