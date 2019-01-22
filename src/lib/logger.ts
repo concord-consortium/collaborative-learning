@@ -113,9 +113,10 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logToolChange(change: ToolChangeEventType, toolId: string) {
+  public static logToolChange(eventName: LogEventName, operation: string, change: ToolChangeEventType, toolId: string) {
     let parameters: {[k: string]: any} = {
       toolId,
+      operation,
       ...change
     };
 
@@ -132,15 +133,6 @@ export class Logger {
     } else {
       // clean up MST array
       parameters.properties = Array.from(properties);
-    }
-
-    // duck typing
-    const eventName = "operation" in change ? LogEventName.GRAPH_TOOL_CHANGE : LogEventName.DRAWING_TOOL_CHANGE;
-
-    // standardize on "operation"
-    if ("action" in parameters) {
-      parameters.operation = parameters.action;
-      delete parameters.action;
     }
 
     Logger.log(eventName, parameters);
