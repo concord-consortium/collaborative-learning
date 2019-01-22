@@ -76,6 +76,9 @@ export interface DrawingToolChange {
   action: DrawingToolChangeAction;
   data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
 }
+interface DrawingToolChangeLoggedEvent extends DrawingToolChange {
+  properties?: string[];
+}
 
 export const StampModel = types.model("Stamp", {
   url: types.string,
@@ -129,7 +132,18 @@ export const DrawingContentModel = types
     function applyChange(change: DrawingToolChange) {
       self.changes.push(JSON.stringify(change));
 
-      const loggedChangeProps = {...change};
+      let loggedChangeProps = {...change} as DrawingToolChangeLoggedEvent;
+      delete loggedChangeProps.data;
+      if (!Array.isArray(change.data)) {
+        // flatten change.properties
+        loggedChangeProps = {
+          ...loggedChangeProps,
+          ...change.data
+        };
+      } else {
+        // or clean up MST array
+        loggedChangeProps.properties = Array.from(change.data as string[]);
+      }
       delete loggedChangeProps.action;
       Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, change.action,
         loggedChangeProps, self.metadata ? self.metadata.id : "");

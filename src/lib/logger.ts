@@ -114,26 +114,11 @@ export class Logger {
   }
 
   public static logToolChange(eventName: LogEventName, operation: string, change: ToolChangeEventType, toolId: string) {
-    let parameters: {[k: string]: any} = {
+    const parameters: {[k: string]: any} = {
       toolId,
       operation,
       ...change
     };
-
-    // either flatten change.properties (for graphs) or change.data (for drawing tool),
-    // unless properties/data an array, in which case standardize on "properties" and clean up.
-    const properties = parameters.properties || parameters.data;
-    delete parameters.properties;
-    delete parameters.data;
-    if (!Array.isArray(properties)) {
-      parameters = {
-        ...parameters,
-        ...properties
-      };
-    } else {
-      // clean up MST array
-      parameters.properties = Array.from(properties);
-    }
 
     Logger.log(eventName, parameters);
   }
