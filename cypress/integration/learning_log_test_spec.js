@@ -130,6 +130,7 @@ context('Test bottom tabs', function(){
             canvas.publishCanvas();
             learningLog.openLearningLogTab();//open learning log
             rightNav.openClassWorkTab();
+            rightNav.openClassWorkSections();
             rightNav.openClassWorkAreaCanvasItem(classWorkTitle);
             cy.get('.workspaces > .right-workspace > .document').should('be.visible'); //verify 2 up view is showing
             //Verify LL_Introduction is on the left and Introduction is on the right

@@ -57,6 +57,10 @@ class RightNav{
         this.getRightNavExpandedSpace().should('not.be.visible');
     }
 
+    openClassWorkSections(){
+        cy.get('[data-test=class-work-section]').click({force:true, multiple:true});
+    }
+
     getClassLogTab(){
         return cy.get('#rightNavTabClass\\ Logs.tab');
     }

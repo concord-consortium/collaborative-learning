@@ -37,7 +37,7 @@ context('Test Canvas', function(){
                canvas.getSouthEastCanvas().should('be.visible');
                canvas.getSouthEastCanvas().should('be.visible');
                // canvas.getSingleCanvas().should('not.be.visible');
-               
+
                //can get back to 1 up view from 4 up
                canvas.openOneUpViewFromFourUp();
                canvas.getSingleCanvas().should('be.visible');
@@ -279,6 +279,7 @@ context('Test Canvas', function(){
                 canvas.getRightSideToolPalette().should('not.exist');
                 //add a canvas from Class work to rightside workspace
                 rightNav.openClassWorkTab();
+                rightNav.openClassWorkSections();
                 rightNav.getAllClassWorkAreaCanvasItems().first().then(($el)=>{
                     let title = $el.text().split('Student')[0];
                     cy.wrap($el).click();
