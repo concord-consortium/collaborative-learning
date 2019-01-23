@@ -186,7 +186,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
                 });
-            }
+            };
         });
         it('will add a message to a group for all sections and verify message appears in all sections for a group', function(){
             let i=0;
@@ -203,7 +203,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
                 });
-            }
+            };
         });
         it('will add a message to a student for all sections and verify message appears in all sections for a student', function(){
             let i=0;
@@ -234,7 +234,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                     //verify that the same message appears in each section
-            }
+            };
             for (i=0;i<studentArr20.length-1;i++){
                 cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
                 leftNav.openToWorkspace(section);
@@ -242,7 +242,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                 //verify that the same message appears in each section
-            }
+            };
         });
         it('will add a message to a group for a specific section and verify message appears in the section for a group', function(){
             let i=0;
@@ -258,7 +258,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                     //verify that the same message appears in each section
-            }
+            };
         });
         it('will add a message to a student for a specific section and verify message appears in the section for a student', function(){
             let i=0;
@@ -289,7 +289,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                 //find the first/last message icon and click it.
                 //verify that the same message appears in each section
                 //verify first group does not have the message
-            }
+            };
         });
         it('will add a message to a different student for a specific section and verify message appears in the section for the correct student', function(){
             let i=0;
