@@ -148,8 +148,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (prevState.syncedChanges > geometryContent.changes.length) {
           const board = prevState.board;
           board.suspendUpdate();
-          for (let i = board.objectsList.length - 1; i > 17; i--) {
-            board.removeObject(board.objectsList[i]);
+          for (let i = board.objectsList.length - 1; i >= 0; i--) {
+            const obj = board.objectsList[i];
+            if (obj && obj.id.indexOf("ticks") > -1) {
+              // XXX: hack to stop removing objects once we hit board elements (ticks are ordered last)
+              break;
+            } else {
+              board.removeObject(obj);
+            }
           }
           board.unsuspendUpdate();
         }
