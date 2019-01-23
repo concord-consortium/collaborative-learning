@@ -94,7 +94,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSetCanonicalCaseValues = (caseValues: ICase) => {
-    this.getContent().setCanonicalCaseValues(caseValues);
+    this.getContent().setCanonicalCaseValues([caseValues]);
   }
 
   private handleRemoveCases = (ids: string[]) => {

@@ -17,16 +17,26 @@ export function defaultTableContent() {
                           } as any);
 }
 
+export interface IColumnProperties {
+  name: string;
+}
+
+export interface IRowProperties {
+  [key: string]: any;
+}
+
 export interface ITableProperties {
-  [prop: string]: any;
+  columns?: IColumnProperties[];
+  rows?: IRowProperties[];
+  beforeId?: string | string[];
+  name?: string;
 }
 
 export interface ITableChange {
   action: "create" | "update" | "delete";
   target: "rows" | "columns";
   ids?: string | string[];
-  props?: ITableProperties | ITableProperties[];
-  others?: ITableProperties;
+  props?: ITableProperties | IColumnProperties | IRowProperties[];
 }
 
 export const TableContentModel = types
@@ -36,8 +46,35 @@ export const TableContentModel = types
     changes: types.array(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    if (snapshot && (snapshot as any).columns) {
-      return { isImported: true, changes: convertImportToChanges(snapshot) };
+    const s = snapshot as any;
+    // handle import format
+    if (s && s.columns) {
+      return { isImported: true, changes: convertImportToChanges(s) };
+    }
+    // handle early change formats
+    if (s && s.changes && s.changes.length) {
+      const { changes, ...snapOthers } = s;
+      const parsedChanges = changes.map((change: string) => safeJsonParse(change));
+      const isConversionRequired = parsedChanges.some((c: any) => {
+              return c &&
+                    ((c.action === "create") && (c.target === "columns") && !c.props.columns) ||
+                    ((c.action === "create") && (c.target === "rows") && !c.props.rows);
+            });
+      if (!isConversionRequired) return snapshot;
+
+      const newChanges: ITableChange[] = parsedChanges.map((c: any) => {
+              if (c && (c.action === "create") && (c.target === "columns") && !c.props.columns) {
+                const { props, ...others } = c;
+                return { props: { columns: props }, ...others };
+              }
+              if (c && (c.action === "create") && (c.target === "rows") && !c.props.rows) {
+                const { props, ...others } = c;
+                return { props: { rows: props }, ...others };
+              }
+              return c;
+            });
+      const newStringChanges = newChanges.map(change => JSON.stringify(change));
+      return { changes: newStringChanges, ...snapOthers };
     }
     return snapshot;
   })
@@ -52,12 +89,19 @@ export const TableContentModel = types
     }
   }))
   .actions(self => ({
-    setAttributeName(attributeId: string, name: string) {
+    setAttributeName(id: string, name: string) {
       self.appendChange({
               action: "update",
               target: "columns",
-              ids: attributeId,
+              ids: id,
               props: { name }
+            });
+    },
+    removeAttributes(ids: string[]) {
+      self.appendChange({
+              action: "delete",
+              target: "columns",
+              ids
             });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
@@ -65,19 +109,26 @@ export const TableContentModel = types
             action: "create",
             target: "rows",
             ids: cases.map(aCase => aCase.__id__ || uniqueId()),
-            props: cases.map(aCase => {
-                    const { __id__, ...others } = aCase;
-                    return { ...others };
-                  }),
-            others: { beforeId: beforeID }
+            props: {
+              rows: cases.map(aCase => {
+                      const { __id__, ...others } = aCase;
+                      return { ...others };
+                    }),
+              beforeId: beforeID
+            }
           });
     },
-    setCanonicalCaseValues(caseValues: ICase) {
-      const { __id__, ...values } = caseValues;
+    setCanonicalCaseValues(caseValues: ICase[]) {
+      const ids: string[] = [];
+      const values = caseValues.map(aCase => {
+                      const { __id__, ...others } = aCase;
+                      ids.push(__id__);
+                      return others;
+                    });
       self.appendChange({
             action: "update",
             target: "rows",
-            ids: __id__,
+            ids,
             props: values
       });
     },
@@ -91,17 +142,18 @@ export const TableContentModel = types
   }))
   .actions(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange) {
+      const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
         case "columns":
-          const columns = change && change.props;
-          columns && columns.forEach((col: any) => {
-            const { id, ...others } = col;
-            dataSet.addAttributeWithID({ id: id || uniqueId(), ...others });
+          const columns = tableProps && tableProps.columns;
+          columns && columns.forEach((col: any, index: number) => {
+            const id = change.ids && change.ids[index] || uniqueId();
+            dataSet.addAttributeWithID({ id, ...col });
           });
           break;
         case "rows":
-          const rows = change && change.props &&
-                        change.props.map((row: any, index: number) => {
+          const rows = tableProps && tableProps.rows &&
+                        tableProps.rows.map((row: any, index: number) => {
                           const id = change.ids && change.ids[index] || uniqueId();
                           return { __id__: id, ...row };
                         });
@@ -176,14 +228,14 @@ export const TableContentModel = types
 export type TableContentModelType = Instance<typeof TableContentModel>;
 
 export function convertImportToChanges(snapshot: any) {
-  const columns = snapshot.columns as any[];
+  const columns = snapshot && snapshot.columns as any[];
   if (!columns) return [] as string[];
 
   // create columns
   const changes: ITableChange[] = [];
   const columnProps = columns.map((col: any) => ({ id: uniqueId(), name: col.name }));
   if (columnProps.length) {
-    changes.push({ action: "create", target: "columns", props: columnProps });
+    changes.push({ action: "create", target: "columns", props: { columns: columnProps } });
   }
 
   // create rows
@@ -203,7 +255,7 @@ export function convertImportToChanges(snapshot: any) {
     rows.push(row);
   }
   if (rows.length) {
-    changes.push({ action: "create", target: "rows", props: rows });
+    changes.push({ action: "create", target: "rows", props: { rows } });
   }
   return changes.map(change => JSON.stringify(change));
 }
