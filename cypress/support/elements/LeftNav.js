@@ -52,24 +52,8 @@ class LeftNav{
     }
 
     openToWorkspace(title) {
-        let index = -1;
-        switch(title){
-            case 'Introduction':
-                index = 0;
-                break;
-            case 'Initial Challenge':
-                index = 1;
-                break;
-            case 'What if':
-                index = 2;
-                break;
-            case 'Now What':
-                index = 3;
-                break;
-            case 'Extra Workspace':
-                index = 4;
-                break;
-        }
+        const workspaces = ['Introduction', 'Initial Challenge', 'What if', 'Now What', 'Extra Workspace'];
+        const index = workspaces.indexOf(title);
         this.openLeftNavTab(title);
         this.getOpenToWorkspaceButton(index).click({force:true});
     }
