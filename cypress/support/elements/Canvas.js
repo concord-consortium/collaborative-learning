@@ -159,6 +159,14 @@ class Canvas{
         return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
     }
 
+    addDrawTile(){
+        return cy.get('.single-workspace > .toolbar > .tool.drawing').click({force: true});
+    }
+
+    getDrawTile(){
+        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .drawing-tool');
+    }
+
     getDeleteTool(){
         return cy.get('.single-workspace > .toolbar > .tool.delete');
     }
