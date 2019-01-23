@@ -57,7 +57,7 @@ interface IState extends SizeMeProps {
   imageEntry?: ImageMapEntryType;
   syncedChanges: number;
   disableRotate: boolean;
-  redoStack: any;
+  redoStack: string[][];
 }
 
 interface JXGPtrEvent {
@@ -506,10 +506,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { board } = this.state;
     if (board) {
-      const change = content.popChange();
-      if (change) {
+      const changes = content.popChangeset();
+      if (changes) {
         this.setState({
-          redoStack: this.state.redoStack.concat(change)
+          redoStack: this.state.redoStack.concat([changes])
         });
       }
     }
@@ -519,9 +519,13 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private handleRedo = () => {
     const content = this.getContent();
-    const change = this.state.redoStack.pop();
-    if (change) {
-      content.addChange(change);
+    const { redoStack } = this.state;
+    const changeset = redoStack[redoStack.length - 1];
+    if (changeset) {
+      content.pushChangeset(changeset);
+      this.setState({
+        redoStack: redoStack.slice(0, redoStack.length - 1)
+      });
     }
 
     return true;
@@ -571,7 +575,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const idMap: { [id: string]: string } = {};
         const newPointIds: string[] = [];
         if (this.lastPasteCount > 0) {
-          changes = changes.map(jsonChange => {
+          changes = changes.map((jsonChange, index) => {
             const change = safeJsonParse(jsonChange);
             const delta = this.lastPasteCount * 0.8;
             switch (change && change.operation) {
@@ -605,6 +609,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                   change.targetID = idMap[change.targetID];
                 }
                 break;
+            }
+            if (index === 0) {
+              change.startBatch = true;
+            } else if (index === changes.length - 1) {
+              change.endBatch = true;
             }
             return JSON.stringify(change);
           });

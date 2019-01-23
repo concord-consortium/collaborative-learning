@@ -191,14 +191,34 @@ export const GeometryContentModel = types
       self.changes.push(JSON.stringify(change));
     }
 
-    function popChange() {
+    function popChangeset() {
       // The first change is board creation and should not be popped
       if (self.changes.length > 1) {
-        const change = self.changes.pop();
-        return change ? JSON.parse(change) : null;
+        const changes: string[] = [];
+        let changeStr = self.changes.pop();
+        if (changeStr) {
+          // earlier changes go earlier in the array to maintain order
+          changes.unshift(changeStr);
+
+          let change = safeJsonParse(changeStr);
+          if (change.endBatch) {
+            while (change && !change.startBatch) {
+              changeStr = self.changes.pop();
+              if (changeStr) {
+                changes.unshift(changeStr);
+              }
+              change = safeJsonParse(changeStr);
+            }
+          }
+        }
+        return changes;
       } else {
         return null;
       }
+    }
+
+    function pushChangeset(changes: string[]) {
+      changes.forEach(change => self.changes.push(change));
     }
 
     function addImage(board: JXG.Board,
@@ -463,7 +483,8 @@ export const GeometryContentModel = types
         resizeBoard,
         updateScale,
         addChange,
-        popChange,
+        popChangeset,
+        pushChangeset,
         addImage,
         addPoint,
         removeObjects,
