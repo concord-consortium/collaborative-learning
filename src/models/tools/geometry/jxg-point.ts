@@ -11,6 +11,10 @@ export const isFreePoint = (v: any) => isVisiblePoint(v) &&
                                         (size(v.childElements) <= 1) &&
                                         (size(v.descendants) <= 1);
 
+// For snap to grid
+const kPrevSnapUnit = 0.2;
+export const kSnapUnit = 0.1;
+
 export const kPointDefaults = {
               fillColor: "#CCCCCC",
               strokeColor: "#888888",
@@ -32,6 +36,12 @@ export const pointChangeAgent: JXGChangeAgent = {
                     // old geometry tiles created before the introduction of the uuid.
                     changeProps.id ? {} : { id: uuid() },
                     defaultProps, changeProps);
+    if (props.snapSizeX === kPrevSnapUnit) {
+      props.snapSizeX = kSnapUnit;
+    }
+    if (props.snapSizeY === kPrevSnapUnit) {
+      props.snapSizeY = kSnapUnit;
+    }
     return (board as JXG.Board).create("point", change.parents, props);
   },
 
