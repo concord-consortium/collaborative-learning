@@ -260,4 +260,38 @@ describe("GeometryContent", () => {
     expect(content.batchChangeCount).toBe(0);
     expect(content.isUserResizable).toBe(true);
   });
+
+  it("can pop a single change", () => {
+    const change1 = { operation: "create", target: "foo" } as any as JXGChange;
+    const change2 = { operation: "create", target: "bar" } as any as JXGChange;
+
+    const content = defaultGeometryContent();
+    const board = createDefaultBoard(content);
+    content.applyChange(board, change1);
+    content.applyChange(board, change2);
+    expect(content.changes.length).toBe(3);
+    const change = content.popChangeset();
+    expect(change && change.map(changeStr => JSON.parse(changeStr))).toEqual([change2]);
+    expect(content.changes.length).toBe(2);
+    expect(JSON.parse(content.changes[1])).toEqual(change1);
+  });
+
+  it("can pop a batch of change", () => {
+    const change1 = { operation: "create", target: "foo" } as any as JXGChange;
+    const change2 = { operation: "create", target: "bar", startBatch: true } as any as JXGChange;
+    const change3 = { operation: "create", target: "baz" } as any as JXGChange;
+    const change4 = { operation: "create", target: "qux", endBatch: true } as any as JXGChange;
+
+    const content = defaultGeometryContent();
+    const board = createDefaultBoard(content);
+    content.applyChange(board, change1);
+    content.applyChange(board, change2);
+    content.applyChange(board, change3);
+    content.applyChange(board, change4);
+    expect(content.changes.length).toBe(5);
+    const change = content.popChangeset();
+    expect(change && change.map(changeStr => JSON.parse(changeStr))).toEqual([change2, change3, change4]);
+    expect(content.changes.length).toBe(2);
+    expect(JSON.parse(content.changes[1])).toEqual(change1);
+  });
 });
