@@ -9,7 +9,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
-import { isPoint, isFreePoint, isVisiblePoint } from "../../../models/tools/geometry/jxg-point";
+import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
@@ -62,9 +62,6 @@ interface JXGPtrEvent {
   evt: any;
   coords: JXG.Coords;
 }
-
-// For snap to grid
-const kSnapUnit = 0.2;
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           prevSyncedChanges?: number, readOnly?: boolean) {
