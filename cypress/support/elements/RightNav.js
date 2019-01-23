@@ -44,7 +44,9 @@ class RightNav{
     }
 
     openClassWorkAreaCanvasItem(title){
-        cy.get('[data-test=class-work-list-items] > .info > div:contains("'+title+'")').parent().parent().click();
+        // this test, as well as the previous implementation, might have unexpected results if we have
+        // multiple items within a Class Work section
+        cy.get('[data-test=class-work-list-items] > .info').parent().click();
     }
 
     openClassWorkTab(){
