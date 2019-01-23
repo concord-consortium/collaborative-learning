@@ -39,23 +39,14 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
             cy.wait(3000)
         });
-        it('will verify if class name is correct', function(){
-            header.getClassName().should('contain',''+'Class '+qaClass);
-        });
-        it('will verify group members is correct', function(){
-            header.getGroupMembers().each(($member,index, $list)=> {
-                expect(['S'+studentArr10[0],'S'+studentArr10[1],'S'+studentArr10[2],'S'+studentArr10[3]]).to.include($member.text());
-            });
-        });
-        it('will verify teacher name is correct', function(){
-            header.getUserName().should('contain','Teacher '+teacher);
-        });
         it('will verify the groups tab is present', function(){
             teacherDashboard.getGroupList().should('be.visible');
         });
+
         it('will verify if group names are present and join one of the groups', function(){
             teacherDashboard.getGroupName().should('contain',qaGroup10);
             teacherDashboard.getGroupName().should('contain',qaGroup20);
+
             teacherDashboard.getGroupName().contains(qaGroup10).click();
             teacherDashboard.joinGroup();
 
@@ -348,7 +339,4 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
       // });
     })
 });
-
-// Add selectors for teacher support for groups and students and sections
-// Added test cases for teacher supports in various levels
 
