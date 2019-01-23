@@ -5,7 +5,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
 import { sectionInfo, SectionType } from "../../models/curriculum/section";
-import { each } from "lodash";
+import { values } from "lodash";
 
 interface IProps extends IBaseProps {
   scale: number;
@@ -40,10 +40,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     sections.forEach((section) => {
       publications.push(...documents.getLatestPublicationsForSection(section.id, this.stores.class));
     });
-    const sectionTypes: any = [];
-    each(SectionType, type => {
-      sectionTypes.push(type);
-    });
+    const sectionTypes: any = values(SectionType);
 
     return (
       <div className="class-work">
@@ -95,7 +92,6 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
                   </div>
                 </div>
                 <div className="info">
-                  <div>{problem.getSectionById(publication.sectionId!)!.title}</div>
                   <div>{user && user.fullName}</div>
                 </div>
               </div>
@@ -125,7 +121,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private handleSectionClicked = (sectionName: string) => {
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      const sectionShown = this.state.sectionShown;
+      const { sectionShown } = this.state;
       sectionShown[sectionName] = !sectionShown[sectionName];
       this.setState({ sectionShown });
     };
