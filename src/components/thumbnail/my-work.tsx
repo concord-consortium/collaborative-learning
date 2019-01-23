@@ -21,6 +21,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className="my-work">
+        <div className="header">My Work</div>
         <div className="list">
           {sections.map((document) => {
             const section = this.stores.problem.getSectionById(document.sectionId!);
