@@ -41,7 +41,8 @@ export const DocumentContentModel = types
             : snapshot;
   })
   .volatile(self => ({
-    visibleRows: [] as string[]
+    visibleRows: [] as string[],
+    highlightDropLocation: -1
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -76,6 +77,12 @@ export const DocumentContentModel = types
       numTilesInRow(rowId: string) {
         const row = self.rowMap.get(rowId);
         return row ? row.tiles.length : 0;
+      },
+      getLastVisibleRow() {
+        const lastVisibleRowId = self.visibleRows.length
+          ? self.visibleRows[self.visibleRows.length - 1]
+          : self.rowOrder[self.rowOrder.length - 1];
+        return  self.rowOrder.indexOf(lastVisibleRowId);
       },
       publish() {
         const snapshot = cloneDeep(getSnapshot(self));
@@ -135,10 +142,7 @@ export const DocumentContentModel = types
   .actions(self => ({
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = ToolTileModel.create({ content });
-      const lastVisibleRowId = self.visibleRows.length ? self.visibleRows[self.visibleRows.length - 1]
-        : self.rowOrder[self.rowOrder.length - 1];
-      const indexOfLastVisible = self.rowOrder.indexOf(lastVisibleRowId);
-      const o = options || {rowIndex: indexOfLastVisible};
+      const o = options || {rowIndex: self.getLastVisibleRow()};
       const row = TileRowModel.create();
       row.insertTileInRow(tile);
       if (o.rowHeight) {
@@ -152,6 +156,13 @@ export const DocumentContentModel = types
 
       return { rowId: row.id, tileId: tile.id };
     },
+    highlightLastVisibleRow(show: boolean) {
+      if (!show) {
+        self.highlightDropLocation = -1;
+      } else {
+        self.highlightDropLocation = self.getLastVisibleRow();
+      }
+    }
   }))
   .actions((self) => ({
     addGeometryTile(addSidecarNotes?: boolean) {

@@ -127,18 +127,21 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private renderRows() {
     const { content, ...others } = this.props;
     if (!content) { return null; }
-    const { rowMap, rowOrder, tileMap } = content;
+    const { rowMap, rowOrder, tileMap, highlightDropLocation } = content;
     const { dropRowInfo } = this.state;
     let tabIndex = 1;
     this.rowRefs = [];
     return rowOrder.map((rowId, index) => {
       const row = rowMap.get(rowId);
       const rowHeight = this.getRowHeight(rowId);
-      const dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
+      let dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
                             (dropRowInfo.rowDropIndex === index) &&
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
+      if (index === highlightDropLocation) {
+        dropHighlight = "top";
+      }
       const _tabIndex = tabIndex;
       tabIndex += row ? row.tiles.length : 0;
       return row
