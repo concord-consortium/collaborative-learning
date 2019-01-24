@@ -4,6 +4,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IToolApiMap } from "./tools/tool-tile";
+import { Icon } from "@blueprintjs/core";
 
 import "./toolbar.sass";
 
@@ -39,6 +40,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
           <svg className={`icon icon-text-tool`}>
             <use xlinkHref={`#icon-text-tool`} />
           </svg>
+        </div>
+        <div className="tool table" title="Table" onClick={handleClickTool("table")}>
+          <Icon icon="th" iconSize={20} color="white" />
         </div>
         <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}>
           <svg className={`icon icon-geometry-tool`}>

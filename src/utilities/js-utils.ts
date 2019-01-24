@@ -1,3 +1,5 @@
+// import nanoid from "nanoid";
+const nanoid = require("nanoid");
 
 /*
  * safeJsonParse()
@@ -13,4 +15,15 @@ export function safeJsonParse(json?: string) {
     // swallow errors
   }
   return parsed;
+}
+
+/*
+ * uniqueId()
+ *
+ * returns a unique id string
+ */
+export function uniqueId() {
+  // cf. https://zelark.github.io/nano-id-cc/
+  const idLength = 16;
+  return nanoid(idLength);
 }

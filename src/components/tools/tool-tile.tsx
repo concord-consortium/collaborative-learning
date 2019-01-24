@@ -3,11 +3,13 @@ import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
+import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
+import TableToolComponent from "./table-tool/table-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
@@ -64,16 +66,18 @@ interface IProps {
 }
 
 const kToolComponentMap: any = {
+        [kDrawingToolID]: DrawingToolComponent,
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,
-        [kTextToolID]: TextToolComponent,
-        [kDrawingToolID]: DrawingToolComponent
+        [kTableToolID]: TableToolComponent,
+        [kTextToolID]: TextToolComponent
       };
 
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
+  private domElement: HTMLDivElement | null;
   private hotKeys: HotKeys = new HotKeys();
 
   public componentDidMount() {
@@ -82,6 +86,14 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       this.hotKeys.register({
         "cmd-shift-c": this.handleCopyJson
       });
+    }
+    if (this.domElement) {
+      this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
+    }
+  }
+  public componentWillUnmount() {
+    if (this.domElement) {
+      this.domElement.removeEventListener("mousedown", this.handleMouseDown, true);
     }
   }
 
@@ -96,6 +108,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
     return (
       <div className={`tool-tile${selectedClass}`}
+          ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
           onKeyDown={this.handleKeyDown}
@@ -121,6 +134,15 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
+  }
+
+  private handleMouseDown = (e: Event) => {
+    const { model } = this.props;
+    const { ui } = this.stores;
+    const ToolComponent = kToolComponentMap[model.content.type];
+    if (ToolComponent && ToolComponent.tileHandlesSelection && !ui.isSelectedTile(model)) {
+      ui.setSelectedTile(model);
+    }
   }
 
   private handleCopyJson = () => {

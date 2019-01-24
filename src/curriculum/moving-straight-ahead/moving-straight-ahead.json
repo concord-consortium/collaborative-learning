@@ -190,6 +190,9 @@
                           "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -335,6 +338,9 @@
                           "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 plus 50¢ per kilometer"]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                    {
@@ -726,6 +732,9 @@
                           "values": [34, 41.5, 46.5, 54, 59]
                         }
                       ]
+                  },
+                  "layout": {
+                    "height": 160
                   }
                 },
                 {
@@ -1565,6 +1574,9 @@
                           "values": [6, 3, 0, -3, -6]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -1588,6 +1600,9 @@
                           "values": [-1, -0.5, 0, 0.5, 1]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -1645,6 +1660,9 @@
                           "values": [-10, -7, -4, -1, 2, 5]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -1730,6 +1748,9 @@
                           "values": [2, 2, 2, 2]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -1753,6 +1774,9 @@
                           "values": [-11, -14, -17, -20, -23]
                         }
                       ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
