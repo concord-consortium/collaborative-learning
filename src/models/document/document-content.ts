@@ -142,7 +142,10 @@ export const DocumentContentModel = types
   .actions(self => ({
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = ToolTileModel.create({ content });
-      const o = options || {rowIndex: self.getLastVisibleRow()};
+      const o = options || {};
+      if (o.rowIndex === undefined) {
+        o.rowIndex = self.getLastVisibleRow();
+      }
       const row = TileRowModel.create();
       row.insertTileInRow(tile);
       if (o.rowHeight) {

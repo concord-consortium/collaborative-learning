@@ -188,6 +188,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           else if (newRowInContent.top < visibleContent.top) {
             this.domElement.scrollTop += newRowInContent.top - kScrollTopMargin - visibleContent.top;
           }
+          this.updateVisibleRows();
         }
       }
     }
