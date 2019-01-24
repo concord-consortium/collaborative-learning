@@ -20,7 +20,7 @@ context('Test Canvas', function(){
        describe('test header elements', function(){
            it('verifies header title appears correctly', function(){
                 leftNav.openLeftNavTab('Introduction');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Introduction');
                 canvas.getCanvasTitle().should('contain','Introduction');
            });
 
@@ -37,7 +37,7 @@ context('Test Canvas', function(){
                canvas.getSouthEastCanvas().should('be.visible');
                canvas.getSouthEastCanvas().should('be.visible');
                // canvas.getSingleCanvas().should('not.be.visible');
-               
+
                //can get back to 1 up view from 4 up
                canvas.openOneUpViewFromFourUp();
                canvas.getSingleCanvas().should('be.visible');
@@ -140,7 +140,7 @@ context('Test Canvas', function(){
                 // let canvas2='Introduction';
                 // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
                 // leftNav.openLeftNavTab('Initial Challenge');
-                // leftNav.openToWorkspace();
+                // leftNav.openToWorkspace('Initial Challenge');
                 // canvas.getCanvasTitle().should('contain',canvas1);
                 // rightNav.openMyWorkTab();
                 // rightNav.openMyWorkAreaCanvasItem(canvas1);
@@ -159,7 +159,7 @@ context('Test Canvas', function(){
                 // });
                 //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
                 cy.get('#leftNavTab1').click();
-                cy.get('.left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
+                cy.get('#leftNavContainer1 > .left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
                 cy.get('.single-workspace > .document > .titlebar > .title').should('contain','Initial');
                 cy.get('#rightNavTabMy\\ Work').click({force:true});
                 cy.get('.list > .list-item[title*="Initial"]').click();
@@ -177,10 +177,10 @@ context('Test Canvas', function(){
         describe('verify that if user opens same canvas from on left-nav tab, saved canvas opens', function() {
             it('will restore from left nav', ()=>{
                 leftNav.openLeftNavTab('What if');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('What if');
                 canvas.getCanvasTitle().should('contain', 'What if');
                 leftNav.openLeftNavTab('Introduction');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Introduction');
                 canvas.getCanvasTitle().should('contain','Introduction');
                 //verify text element with Hello World in showing
                 canvas.getTextTile().first().should('contain', 'Hello World');
@@ -194,13 +194,13 @@ context('Test Canvas', function(){
             it('verify canvas stays in 4up view when changing canvases', ()=>{
                 //Open a canvas
                 leftNav.openLeftNavTab('Initial Challenge');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Initial Challenge');
                 canvas.getCanvasTitle().should('contain','Initial');
                 //switch to 4-up view
                 canvas.openFourUpView();
                 //open another canvas
                 leftNav.openLeftNavTab('What if');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('What if');
                 canvas.getCanvasTitle().should('contain','What if');
                 canvas.getFourUpView().should('be.visible');
                 //Re-open Initial Challenge canvas from My Work

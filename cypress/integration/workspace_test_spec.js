@@ -72,7 +72,7 @@ context('Test the overall workspace', function(){
             cy.wait(1000);
 
             leftNav.openLeftNavTab(tab1);
-            leftNav.openToWorkspace();
+            leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle()
                 .then(($titleLoc)=>{
@@ -87,7 +87,7 @@ context('Test the overall workspace', function(){
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem2);
             cy.wait(1000);
             leftNav.openLeftNavTab(tab1);
-            leftNav.openToWorkspace();
+            leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle().should('contain',tab1);
             canvas.getTextTile().should('not.exist');
@@ -97,7 +97,7 @@ context('Test the overall workspace', function(){
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.wait(1000);
             leftNav.openLeftNavTab(tab1);
-            leftNav.openToWorkspace();
+            leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle().should('contain',tab1);
             canvas.getTextTile().last().should('contain', 'Problem '+problem1);

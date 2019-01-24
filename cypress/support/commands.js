@@ -48,7 +48,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.wait(2000);
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         leftNav.openLeftNavTab('Now What')
-            leftNav.openToWorkspace();
+            leftNav.openToWorkspace('Now What');
         canvas.addTextTile();
         canvas.enterText('This is to test the 4-up view of S'+students[i]);
         canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+students[i]);
