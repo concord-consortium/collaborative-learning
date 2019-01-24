@@ -148,19 +148,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (prevState.syncedChanges > geometryContent.changes.length) {
           const board = prevState.board;
           board.suspendUpdate();
-          for (let i = board.objectsList.length - 1; i >= 0; i--) {
-            const obj = board.objectsList[i];
-            if (obj && obj.id.indexOf("ticks") > -1) {
-              // XXX: hack to stop removing objects once we hit board elements (ticks are ordered last)
-              break;
-            } else {
-              board.removeObject(obj);
-            }
+          // Board initialization creates 2 objects: the info box and the grid.
+          // These won't be recreated if the board already exists so we don't delete them.
+          const kDefaultBoardObjects = 2;
+          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
+            board.removeObject(board.objectsList[i]);
           }
           board.unsuspendUpdate();
         }
         const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
-                                ? 1
+                                ? 0
                                 : prevState.syncedChanges;
         assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
       } else {
@@ -512,10 +509,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { board } = this.state;
     if (board) {
-      const changes = content.popChangeset();
-      if (changes) {
+      const changeset = content.popChangeset();
+      if (changeset) {
+        board.showInfobox(false);
         this.setState({
-          redoStack: this.state.redoStack.concat([changes])
+          redoStack: this.state.redoStack.concat([changeset])
         });
       }
     }
@@ -525,13 +523,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private handleRedo = () => {
     const content = this.getContent();
-    const { redoStack } = this.state;
-    const changeset = redoStack[redoStack.length - 1];
-    if (changeset) {
-      content.pushChangeset(changeset);
-      this.setState({
-        redoStack: redoStack.slice(0, redoStack.length - 1)
-      });
+    const { redoStack, board } = this.state;
+    if (board) {
+      const changeset = redoStack[redoStack.length - 1];
+      if (changeset) {
+        board.showInfobox(false);
+        content.pushChangeset(changeset);
+        this.setState({
+          redoStack: redoStack.slice(0, redoStack.length - 1)
+        });
+      }
     }
 
     return true;
