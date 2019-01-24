@@ -252,7 +252,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       // delay so any asynchronous JSXGraph actions have time to complete
       setTimeout(() => {
         JXG.JSXGraph.freeBoard(board);
-      }, 100);
+      });
     }
 
     this._isMounted = false;
