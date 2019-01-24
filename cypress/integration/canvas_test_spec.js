@@ -279,6 +279,7 @@ context('Test Canvas', function(){
                 canvas.getRightSideToolPalette().should('not.exist');
                 //add a canvas from Class work to rightside workspace
                 rightNav.openClassWorkTab();
+                rightNav.openClassWorkSections();
                 rightNav.getAllClassWorkAreaCanvasItems().first().then(($el)=>{
                     let title = $el.text().split('Student')[0];
                     cy.wrap($el).click();

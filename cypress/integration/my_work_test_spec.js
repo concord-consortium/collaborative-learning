@@ -47,6 +47,7 @@ describe('Test right nav tabs', function(){
 
         it('will open correct canvas from Class Work list', function(){ //this assumes there are published work
             rightNav.openClassWorkTab();
+            rightNav.openClassWorkSections();
             rightNav.getClassWorkAreaCanvasItem().each(($item,index,$list)=>{
                 let title= $item.text().replace(/[^\x00-\x7F]/g, "")//.split('Group'),
                    // group = title[1];

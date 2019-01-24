@@ -1,7 +1,7 @@
 @import ../vars
 
-$list-item-height: 600px
-$list-item-width: 800px
+$list-item-height: 660px
+$list-item-width: 880px
 $list-item-scale: 0.11
 
 .right-nav
@@ -63,6 +63,11 @@ $list-item-scale: 0.11
       position: relative
       width: 100%
       height: 100%
+      border-radius: $border-radius 0 0 $border-radius
+      padding: 13px
+      background-color: $color5-5
+      overflow: auto
+      overflow-x: hidden
 
       .disabled
         display: none
@@ -70,36 +75,95 @@ $list-item-scale: 0.11
       .loading
         padding: 10px
 
+      ::-webkit-scrollbar
+        width: 7px
+      ::-webkit-scrollbar-track
+        background: #f1f1f1
+      ::-webkit-scrollbar-thumb
+        background: $color3
+        border-radius: $border-radius
+      ::-webkit-scrollbar-thumb:hover
+        background: #a3a3a3
+
       button
         padding: $half-padding
         margin: $margin
         width: ($right-nav-expanded-width - $right-nav-contracted-width) - 20px
 
-      .list
-        position: absolute
-        top: $margin
-        right: 0
-        left: 15px
-        bottom: $margin
+      .container
+        height: 100%
+        border-radius: $border-radius 0 0 $border-radius
+        background-color: $color4-10
+        font-weight: 700
         overflow: auto
         overflow-x: hidden
 
-        .list-item
+        .my-work, .class-logs, .class-work
+          background-color: $color4-7
+
+        .header
           position: relative
-          float: left
+          background-color: $color4-11
+          width: 100%
+          height: 40px
+          align-items: center
+          justify-content: center
+          color: $font-5-color
+
+        .section
+          border-style: solid
+          border-width: 2px 2px 0 2px
+          border-color: $color4-10
+
+          .section-header
+            display: flex
+            flex-direction: row
+            padding: 6px
+            background-color: $color4
+            color: $font-2-color
+            &.shown
+              background-color: $color4-8
+            &:hover
+              background-color: $color4-9
+
+            .icon
+              height: 9px
+              width: 9px
+              fill: $font-2-color
+              margin: 4px 6px 0 0
+
+            .title
+              width: 100%
+              font-size: 12px
+              text-align: left
+
+      .list
+        top: 0
+        right: 0
+        bottom: $margin
+        overflow: auto
+        overflow-x: hidden
+        border-style: solid
+        border-width: 0 2px 2px 2px
+        border-color: $color4-8
+
+        &.hidden
+          display: none
+
+        .list-item
+          display: flex
+          flex-direction: column
+          align-items: center
+          background-color: $color4-7
           margin: $half-margin 0 $margin 0
           overflow: hidden
 
           .scaled-list-item-container
-            position: relative
             border: 1px solid #aaa
             width: $list-item-width * $list-item-scale
             height: $list-item-height * $list-item-scale
 
             .scaled-list-item
-              position: absolute
-              top: 0
-              left: 0
               transform: scale($list-item-scale)
               transform-origin: 0 0
               height: $list-item-height
@@ -110,7 +174,7 @@ $list-item-scale: 0.11
           .info
             margin-top: $half-margin
             text-align: center
-            font-size: 0.6em
+            font-size: 10px
 
 
 

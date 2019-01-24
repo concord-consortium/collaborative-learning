@@ -4,14 +4,34 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
+import { sectionInfo, SectionType } from "../../models/curriculum/section";
+import { values } from "lodash";
 
 interface IProps extends IBaseProps {
   scale: number;
 }
 
+interface IState {
+  sectionShown: { [section: string]: boolean };
+}
+
 @inject("stores")
 @observer
-export class ClassWorkComponent extends BaseComponent<IProps, {}> {
+export class ClassWorkComponent extends BaseComponent<IProps, IState> {
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      sectionShown: {
+        introduction: false,
+        initialChallenge: false,
+        whatIf: false,
+        nowWhatDoYouKnow: false,
+        didYouKnow: false,
+        extraWorkspace: false,
+      }
+    };
+  }
 
   public render() {
     const { documents, problem } = this.stores;
@@ -20,13 +40,41 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
     sections.forEach((section) => {
       publications.push(...documents.getLatestPublicationsForSection(section.id, this.stores.class));
     });
+    const sectionTypes: any = values(SectionType);
 
     return (
       <div className="class-work">
-        <div className="list">
+        <div className="header">Class Work</div>
+        {sectionTypes.map((section: any, index: number) => {
+          return (
+            this.renderSection(section, publications, index)
+          );
+        })}
+      </div>
+    );
+  }
+
+  private renderSection = (sectionType: SectionType, publications: DocumentModelType[], index: number) => {
+    const { problem } = this.stores;
+    if (publications.some(publication => publication.sectionId === sectionType)) {
+      const icon: string = this.state.sectionShown[sectionType] ? "#icon-down-arrow" : "#icon-right-arrow";
+      return (
+        <div className={"section " + sectionType} key={index}>
+          <div
+            className={"section-header " + (this.state.sectionShown[sectionType] ? "shown" : "hidden")}
+            data-test="class-work-section"
+            onClick={this.handleSectionClicked(sectionType)}
+          >
+            <svg className="icon">
+              <use xlinkHref={icon}/>
+            </svg>
+            <div className="title">{sectionInfo[sectionType].title}</div>
+          </div>
+          <div className={"list " + (this.state.sectionShown[sectionType] ? "shown" : "hidden")}>
           {publications.map((publication) => {
             const user = this.stores.class.getStudentById(publication.uid);
             return (
+              publication.sectionId === sectionType ?
               <div
                 className="list-item"
                 data-test="class-work-list-items"
@@ -44,27 +92,38 @@ export class ClassWorkComponent extends BaseComponent<IProps, {}> {
                   </div>
                 </div>
                 <div className="info">
-                  <div>{problem.getSectionById(publication.sectionId!)!.title}</div>
                   <div>{user && user.fullName}</div>
                 </div>
               </div>
+              : null
             );
           })}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      return null;
+    }
   }
 
   private handlePublicationClicked = (publication: DocumentModelType) => {
     const {ui} = this.stores;
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      this.stores.ui.rightNavDocumentSelected(publication);
+      ui.rightNavDocumentSelected(publication);
     };
   }
 
   private handlePublicationDragStart = (document: DocumentModelType) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
       e.dataTransfer.setData(DocumentDragKey, document.key);
+    };
+  }
+
+  private handleSectionClicked = (sectionName: string) => {
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+      const { sectionShown } = this.state;
+      sectionShown[sectionName] = !sectionShown[sectionName];
+      this.setState({ sectionShown });
     };
   }
 }
