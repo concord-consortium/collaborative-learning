@@ -66,6 +66,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     this.mutationObserver.disconnect();
   }
 
+  public componentDidUpdate() {
+    // recalculate after render
+    requestAnimationFrame(() => {
+      this.updateVisibleRows();
+    });
+  }
+
   public render() {
     return (
       <div className="document-content"
@@ -184,7 +191,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
             this.domElement.scrollTop += newRowInContent.top - kScrollTopMargin - visibleContent.top;
           }
         }
-        this.updateVisibleRows();
       }
     }
   }
