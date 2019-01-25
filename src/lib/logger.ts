@@ -47,8 +47,10 @@ export enum LogEventName {
   CREATE_LEARNING_LOG,
 
   GRAPH_TOOL_CHANGE,
-  DRAWING_TOOL_CHANGE
+  DRAWING_TOOL_CHANGE,
 
+  TILE_UNDO,
+  TILE_REDO,
 }
 
 type ToolChangeEventType = JXGChange | DrawingToolChange;

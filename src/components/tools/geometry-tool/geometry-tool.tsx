@@ -25,6 +25,7 @@ import { assign, castArray, debounce, each, filter, find, keys, size as _size } 
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
+import { Logger, LogEventName } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -509,6 +510,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { board } = this.state;
     if (board) {
+      Logger.logTileEvent(LogEventName.TILE_UNDO, this.props.model);
       const changeset = content.popChangeset();
       if (changeset) {
         board.showInfobox(false);
@@ -525,6 +527,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { redoStack, board } = this.state;
     if (board) {
+      Logger.logTileEvent(LogEventName.TILE_REDO, this.props.model);
       const changeset = redoStack[redoStack.length - 1];
       if (changeset) {
         board.showInfobox(false);
