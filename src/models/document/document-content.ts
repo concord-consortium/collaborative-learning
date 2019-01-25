@@ -79,6 +79,13 @@ export const DocumentContentModel = types
         const row = self.rowMap.get(rowId);
         return row ? row.tiles.length : 0;
       },
+      getLastVisibleRow() {
+        // returns last visible row or last row
+        const lastVisibleRowId = self.visibleRows.length
+          ? self.visibleRows[self.visibleRows.length - 1]
+          : self.rowOrder[self.rowOrder.length - 1];
+        return  self.rowOrder.indexOf(lastVisibleRowId);
+      },
       publish() {
         const snapshot = cloneDeep(getSnapshot(self));
         const idMap: { [id: string]: string } = {};
@@ -138,6 +145,10 @@ export const DocumentContentModel = types
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = ToolTileModel.create({ content });
       const o = options || {};
+      if (o.rowIndex === undefined) {
+        // by default, insert new tiles after last visible on screen
+        o.rowIndex = self.getLastVisibleRow() + 1;
+      }
       const row = TileRowModel.create();
       row.insertTileInRow(tile);
       if (o.rowHeight) {
