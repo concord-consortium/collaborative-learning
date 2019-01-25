@@ -563,6 +563,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { clipboard } = this.stores;
       let changes: string[] = clipboard.getTileContent(content.type);
       if (changes && changes.length) {
+        // Mark the first and last changes to create a batch
+        changes[0] = JSON.stringify({...safeJsonParse(changes[0]), startBatch: true});
+        changes[changes.length - 1] = JSON.stringify({...safeJsonParse(changes[changes.length - 1]), endBatch: true});
+
         const pasteId = clipboard.getTileContentId(content.type);
         const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
         // track the number of times the same content has been pasted
@@ -582,7 +586,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const idMap: { [id: string]: string } = {};
         const newPointIds: string[] = [];
         if (this.lastPasteCount > 0) {
-          changes = changes.map((jsonChange, index) => {
+          changes = changes.map((jsonChange) => {
             const change = safeJsonParse(jsonChange);
             const delta = this.lastPasteCount * 0.8;
             switch (change && change.operation) {
@@ -616,11 +620,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                   change.targetID = idMap[change.targetID];
                 }
                 break;
-            }
-            if (index === 0) {
-              change.startBatch = true;
-            } else if (index === changes.length - 1) {
-              change.endBatch = true;
             }
             return JSON.stringify(change);
           });
