@@ -42,6 +42,9 @@ export const DocumentContentModel = types
             ? migrateSnapshot(snapshot)
             : snapshot;
   })
+  .volatile(self => ({
+    visibleRows: [] as string[]
+  }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
     const contentId = uuid();
@@ -126,6 +129,9 @@ export const DocumentContentModel = types
     deleteRow(rowId: string) {
       self.rowOrder.remove(rowId);
       self.rowMap.delete(rowId);
+    },
+    setVisibleRows(rows: string[]) {
+      self.visibleRows = rows;
     }
   }))
   .actions(self => ({
