@@ -27,6 +27,7 @@ import * as uuid from "uuid/v4";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
+import { isVisibleLine } from "../../../models/tools/geometry/jxg-line";
 
 interface SizeMeProps {
   size?: {
@@ -298,6 +299,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           <MenuItem icon={angleIcon} text={vertexAngleText}
                     disabled={!enableLabelAngle}
                     onClick={this.handleToggleVertexAngle}/>
+          <MenuItem icon={angleIcon} text={"Create Line"}
+                    disabled={false}
+                    onClick={this.handleCreateLine}/>
         </Menu>
       </Popover>
     );
@@ -394,6 +398,20 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           this.getContent().removeObjects(board, vertexAngle.id);
         });
       }
+    }
+  }
+
+  private handleCreateLine = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
+      this.applyChange(() => {
+          const line = content.addLine(board, [[0, 0], [5, 5]], props);
+          // if (line) {
+          //   console.log(line);
+          // }
+      });
     }
   }
 
@@ -848,7 +866,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       // clicks on visible points and edges don't create new points
       for (const elt of board.objectsList) {
-        if ((isVisiblePoint(elt) || isVisibleEdge(elt)) &&
+        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleLine(elt)) &&
             elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }

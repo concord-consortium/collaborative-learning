@@ -217,6 +217,17 @@ export const GeometryContentModel = types
       return point ? point as JXG.Point : undefined;
     }
 
+    function addLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "line",
+        parents,
+        properties: {...properties, id: uuid(), firstArrow: true, lastArrow: true }
+      };
+      const line = _applyChange(board, change);
+      return line ? line as JXG.Line : undefined;
+    }
+
     function removeObjects(board: JXG.Board, id: string | string[]) {
       const change: JXGChange = {
         operation: "delete",
@@ -455,6 +466,7 @@ export const GeometryContentModel = types
         addChange,
         addImage,
         addPoint,
+        addLine,
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
