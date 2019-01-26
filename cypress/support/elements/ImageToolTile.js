@@ -1,4 +1,7 @@
 class ImageTool{
+    getImageTile(){
+        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
+    }
     getImageToolControl(){
         return cy.get('.image-tool.editable > .image-tool-controls')
     }

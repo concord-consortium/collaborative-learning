@@ -71,7 +71,7 @@ context('Test group functionalities', function(){
         });
 
         describe('test sharing and unsharing canvases', function(){
-            it('will share canvas and verify canvas is visible in groupmates 4-up view', function(){
+            it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
                 cy.log('need to write this test');
             });
             it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){

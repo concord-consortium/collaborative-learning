@@ -78,7 +78,6 @@ class TeacherDashboard {
                 this.getStudentSupportsSectionDropdownOptions().select(section);
                 break;
         }
-        // this.getStudentSupportsSectionDropdownOptions().contains(section).click();
     }
 }
 export default TeacherDashboard;
