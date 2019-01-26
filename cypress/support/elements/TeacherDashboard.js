@@ -66,16 +66,18 @@ class TeacherDashboard {
     selectSection(level, section){
         switch (level) {
             case 'class':
-                this.getStudentSupportsSectionDropdown().click();
+                this.getClassSupportsSectionDropdown().click();
+                this.getClassSupportsSectionDropdownOptions().select(section);
                 break;
             case 'group':
                 this.getGroupSupportsSectionDropdown().click();
+                this.getGroupSupportsSectionDropdownOptions().select(section);
                 break;
             case 'student':
                 this.getStudentSupportsSectionDropdown().click();
+                this.getStudentSupportsSectionDropdownOptions().select(section);
                 break;
         }
-        cy.select()
         // this.getStudentSupportsSectionDropdownOptions().contains(section).click();
     }
 }
