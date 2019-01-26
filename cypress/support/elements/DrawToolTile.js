@@ -1,4 +1,7 @@
 class DrawTool{
+    getDrawTile(){
+        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .drawing-tool');
+    }
     getDrawToolMenu(){
         return cy.get('.drawing-tool-button[title="Settings"')
     };

@@ -34,28 +34,14 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
             //TODO: set up some canvases from learning log to Class Log for later testing
         });
-        it('set up group and will go to a teacher view of the site', function() {
+        it('will go to a teacher view of the setup class', function() {
             // cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem+'&qaGroup='+qaGroup10);
             cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
             cy.wait(3000)
         });
-        it('will verify the groups tab is present', function(){
-            teacherDashboard.getGroupList().should('be.visible');
-        });
-
-        it('will verify if group names are present and join one of the groups', function(){
-            teacherDashboard.getGroupName().should('contain',qaGroup10);
-            teacherDashboard.getGroupName().should('contain',qaGroup20);
-
-            teacherDashboard.getGroupName().contains(qaGroup10).click();
-            teacherDashboard.joinGroup();
-
-            header.getGroupName().should('contain','Group '+qaGroup10);
-        });
         it('will verify if class name is correct', function(){
             header.getClassName().should('contain',''+'Class '+qaClass);
         });
-
         it('will verify group members is correct', function(){
             header.getGroupMembers().each(($member,index, $list)=> {
                 expect(['S'+studentArr10[0],'S'+studentArr10[1],'S'+studentArr10[2],'S'+studentArr10[3]]).to.include($member.text());
@@ -63,6 +49,17 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         });
         it('will verify teacher name is correct', function(){
             header.getUserName().should('contain','Teacher '+teacher);
+        });
+        it('will verify the groups tab is present', function(){
+            teacherDashboard.getGroupList().should('be.visible');
+        });
+        it('will verify if group names are present and join one of the groups', function(){
+            teacherDashboard.getGroupName().should('contain',qaGroup10);
+            teacherDashboard.getGroupName().should('contain',qaGroup20);
+            teacherDashboard.getGroupName().contains(qaGroup10).click();
+            teacherDashboard.joinGroup();
+
+            header.getGroupName().should('contain','Group '+qaGroup10);
         });
         it('will verify teacher can switch groups', function(){
             workspace.leaveGroup();
@@ -72,7 +69,6 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
             teacherDashboard.joinGroup();
             header.getGroupName().should('contain','Group '+qaGroup20);
-
         })
     });
 
@@ -160,28 +156,16 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         it('will publish the learning log and verify that it is in the class log', function(){
 
         });
-    })
-    describe('Teacher add support messages', function(){
-        it('will add a message to whole class for specific problem', function(){
+    });
 
-        });
-        it('will add a message to a group for a specific problem', function(){
-
-        });
-
-    })
-
-    describe('Teacher can create supports', function(){
+    describe('Teacher can add support messages', function(){
         beforeEach(function(){
             cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
             cy.wait(3000);
-        })
+        });
 
       const supportText = "sample support";
-      // it('will load the teacher page', function(){
-        // cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
-        // cy.wait(3000);
-      // });
+
         it('will add a message to whole class for all sections and verify message appears in all sections for whole class', function(){
             let i=0;
             teacherDashboard.sendSupportMessage('class','This message is for whole class in all sections');
@@ -189,14 +173,18 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             for (i=0;i<studentArr10.length-1;i++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
                 leftNav.getLeftNavTabs().each(($tab,index,$list,student)=> {
-                    cy.wrap($tab).click();
-                    leftNav.getOpenToWorkspaceButton().click();
+                    cy.wrap($tab).click({force:true});
+                    leftNav.getOpenToWorkspaceButton(index).click();
                     cy.wait(2000);
-
+                    if (index<1) {
+                        cy.get('[data-test=support-icon]').last().click();
+                    }
+                    cy.get('[data-test=supports-list').contains('whole class in all sections')
+                    // })
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
                 });
-            };
+            }
             for (i=0;i<studentArr20.length-1;i++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
                 leftNav.getLeftNavTabs().each(($tab,index,$list)=> {
@@ -207,7 +195,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
                 });
-            };
+            }
         });
         it('will add a message to a group for all sections and verify message appears in all sections for a group', function(){
             let i=0;
@@ -224,7 +212,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
                 });
-            };
+            }
         });
         it('will add a message to a student for all sections and verify message appears in all sections for a student', function(){
             let i=0;
@@ -255,7 +243,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                     //verify that the same message appears in each section
-            };
+            }
             for (i=0;i<studentArr20.length-1;i++){
                 cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
                 leftNav.openToWorkspace(section);
@@ -263,7 +251,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                 //verify that the same message appears in each section
-            };
+            }
         });
         it('will add a message to a group for a specific section and verify message appears in the section for a group', function(){
             let i=0;
@@ -279,7 +267,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
                 //find the first/last message icon and click it.
                     //verify that the same message appears in each section
-            };
+            }
         });
         it('will add a message to a student for a specific section and verify message appears in the section for a student', function(){
             let i=0;
@@ -310,7 +298,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                 //find the first/last message icon and click it.
                 //verify that the same message appears in each section
                 //verify first group does not have the message
-            };
+            }
         });
         it('will add a message to a different student for a specific section and verify message appears in the section for the correct student', function(){
             let i=0;
@@ -323,6 +311,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[1]+'&problem='+problem);
             leftNav.openToWorkspace(section);
             cy.wait(2000);
+
             //find the first/last message icon and click it.
             //verify that the same message appears in each section
             //verify other student didn't get message
@@ -346,17 +335,17 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         it('will delete a message to a student for a specific section and verify message disappears in the section for a student', function(){
 
         });
-
-      it('will load the student document', function(){
-        cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+student+'&problem='+problem+'&qaGroup='+qaGroup10);
-        cy.wait(3000);
-
-        leftNav.openToWorkspace('Introduction');
-        cy.wait(2000);
-
-        cy.get('[data-test=support-icon]').click();
-        cy.contains(supportText);
-      });
+      //
+      // it('will load the student document', function(){
+      //   cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+student+'&problem='+problem+'&qaGroup='+qaGroup10);
+      //   cy.wait(3000);
+      //
+      //   leftNav.openToWorkspace('Introduction');
+      //   cy.wait(2000);
+      //
+      //   cy.get('[data-test=support-icon]').click();
+      //   cy.contains(supportText);
+      // });
     })
 });
 

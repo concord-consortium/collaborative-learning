@@ -147,25 +147,25 @@ class Canvas{
         return cy.get('.single-workspace > .toolbar > .tool.geometry').click({force: true});
     }
 
-    getGraphTile(){
-        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
-    }
+    // getGraphTile(){
+    //     return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
+    // }
 
     addImageTile(){
         return cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
     }
 
-    getImageTile(){
-        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
-    }
+    // getImageTile(){
+    //     return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
+    // }
 
     addDrawTile(){
         return cy.get('.single-workspace > .toolbar > .tool.drawing').click({force: true});
     }
 
-    getDrawTile(){
-        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .drawing-tool');
-    }
+    // getDrawTile(){
+    //     return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .drawing-tool');
+    // }
 
     getDeleteTool(){
         return cy.get('.single-workspace > .toolbar > .tool.delete');
@@ -182,6 +182,12 @@ class Canvas{
             case 'image':
                 this.getImageTile().last().click({force:true});
                 break;
+            case 'draw':
+                this.getDrawTile().last().click({force:true});
+                break;
+            // case 'table':
+            //     this.getTableTile().last().click({force:true});
+            //     break;
         }
         this.getDeleteTool().click({force: true});
     }
