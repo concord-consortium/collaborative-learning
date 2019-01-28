@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
-import { IToolApiMap } from "./tools/tool-tile";
+import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
 import { Icon } from "@blueprintjs/core";
 
 import "./toolbar.sass";
@@ -29,6 +29,11 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         }
       };
     };
+    const handleDragTool = (tool: DocumentTool) => {
+      return (e: React.DragEvent<HTMLDivElement>) => {
+        this.handleDragNewToolTile(tool, e);
+      };
+    };
     return (
       <div className="toolbar">
         <div className="tool select" title="Select" onClick={handleClickTool("select")}>
@@ -36,25 +41,50 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
             <use xlinkHref={`#icon-select-tool`} />
           </svg>
         </div>
-        <div className="tool text" title="Text" onClick={handleClickTool("text")}>
+        <div className="tool text" title="Text"
+            onClick={handleClickTool("text")}
+            onDragStart={handleDragTool("text")}
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-text-tool`}>
             <use xlinkHref={`#icon-text-tool`} />
           </svg>
         </div>
-        <div className="tool table" title="Table" onClick={handleClickTool("table")}>
+        <div className="tool table" title="Table"
+            onClick={handleClickTool("table")}
+            onDragStart={handleDragTool("table")}
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <Icon icon="th" iconSize={20} color="white" />
         </div>
-        <div className="tool geometry" title="Geometry" onClick={handleClickTool("geometry")}>
+        <div className="tool geometry" title="Geometry"
+            onClick={handleClickTool("geometry")}
+            onDragStart={handleDragTool("geometry")}
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-geometry-tool`}>
             <use xlinkHref={`#icon-geometry-tool`} />
           </svg>
         </div>
-        <div className="tool image" title="Image" onClick={handleClickTool("image")}>
+        <div className="tool image" title="Image"
+            onClick={handleClickTool("image")}
+            onDragStart={handleDragTool("image")}
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
         <svg className={`icon icon-image-tool`}>
             <use xlinkHref={`#icon-image-tool`} />
           </svg>
         </div>
-        <div className="tool drawing" title="Drawing" onClick={handleClickTool("drawing")}>
+        <div className="tool drawing" title="Drawing"
+            onClick={handleClickTool("drawing")}
+            onDragStart={handleDragTool("drawing")}
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-drawing-tool`}>
             <use xlinkHref={`#icon-drawing-tool`} />
           </svg>
@@ -66,6 +96,16 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
+  }
+
+  private showDropRowHighlight = () => {
+    const { document } = this.props;
+    document.content.highlightLastVisibleRow(true);
+  }
+
+  private removeDropRowHighlight = () => {
+    const { document } = this.props;
+    document.content.highlightLastVisibleRow(false);
   }
 
   private handleAddToolTile(tool: DocumentTool) {
@@ -90,5 +130,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         document.deleteTile(selectedTileId);
       }
     }
+  }
+
+  private handleDragNewToolTile(tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) {
+    e.dataTransfer.setData(kDragTileCreate, tool);
   }
 }
