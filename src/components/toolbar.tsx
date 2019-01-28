@@ -44,7 +44,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         <div className="tool text" title="Text"
             onClick={handleClickTool("text")}
             onDragStart={handleDragTool("text")}
-            draggable={true}>
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-text-tool`}>
             <use xlinkHref={`#icon-text-tool`} />
           </svg>
@@ -52,13 +54,17 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         <div className="tool table" title="Table"
             onClick={handleClickTool("table")}
             onDragStart={handleDragTool("table")}
-            draggable={true}>
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <Icon icon="th" iconSize={20} color="white" />
         </div>
         <div className="tool geometry" title="Geometry"
             onClick={handleClickTool("geometry")}
             onDragStart={handleDragTool("geometry")}
-            draggable={true}>
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-geometry-tool`}>
             <use xlinkHref={`#icon-geometry-tool`} />
           </svg>
@@ -66,7 +72,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         <div className="tool image" title="Image"
             onClick={handleClickTool("image")}
             onDragStart={handleDragTool("image")}
-            draggable={true}>
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
         <svg className={`icon icon-image-tool`}>
             <use xlinkHref={`#icon-image-tool`} />
           </svg>
@@ -74,7 +82,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         <div className="tool drawing" title="Drawing"
             onClick={handleClickTool("drawing")}
             onDragStart={handleDragTool("drawing")}
-            draggable={true}>
+            draggable={true}
+            onMouseEnter={this.showDropRowHighlight}
+            onMouseLeave={this.removeDropRowHighlight}>
           <svg className={`icon icon-drawing-tool`}>
             <use xlinkHref={`#icon-drawing-tool`} />
           </svg>
@@ -86,6 +96,16 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
+  }
+
+  private showDropRowHighlight = () => {
+    const { document } = this.props;
+    document.content.highlightLastVisibleRow(true);
+  }
+
+  private removeDropRowHighlight = () => {
+    const { document } = this.props;
+    document.content.highlightLastVisibleRow(false);
   }
 
   private handleAddToolTile(tool: DocumentTool) {

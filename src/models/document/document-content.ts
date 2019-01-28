@@ -43,7 +43,8 @@ export const DocumentContentModel = types
             : snapshot;
   })
   .volatile(self => ({
-    visibleRows: [] as string[]
+    visibleRows: [] as string[],
+    highlightPendingDropLocation: -1
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -162,6 +163,13 @@ export const DocumentContentModel = types
 
       return { rowId: row.id, tileId: tile.id };
     },
+    highlightLastVisibleRow(show: boolean) {
+      if (!show) {
+        self.highlightPendingDropLocation = -1;
+      } else {
+        self.highlightPendingDropLocation = self.getLastVisibleRow();
+      }
+    }
   }))
   .actions((self) => ({
     addGeometryTile(addSidecarNotes?: boolean) {
