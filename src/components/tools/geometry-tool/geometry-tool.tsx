@@ -4,7 +4,8 @@ import { renderUnicodeCharAsIconElement } from "../../utilities/blueprint";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, setElementColor, GeometryMetadataModelType
+        } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -25,7 +26,7 @@ import { assign, castArray, debounce, each, filter, find, keys, size as _size } 
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
-import { Logger, LogEventName } from "../../../lib/logger";
+import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -510,12 +511,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { board } = this.state;
     if (board) {
-      Logger.logTileEvent(LogEventName.TILE_UNDO, this.props.model);
       const changeset = content.popChangeset();
       if (changeset) {
         board.showInfobox(false);
         this.setState({
           redoStack: this.state.redoStack.concat([changeset])
+        });
+
+        // Reverse the changes so they're logged in the order they're undone
+        [...changeset].reverse().forEach(changeString => {
+          const change = safeJsonParse(changeString);
+          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+            content.metadata ? content.metadata.id : "",
+            LogEventMethod.UNDO);
         });
       }
     }
@@ -527,13 +535,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     const { redoStack, board } = this.state;
     if (board) {
-      Logger.logTileEvent(LogEventName.TILE_REDO, this.props.model);
       const changeset = redoStack[redoStack.length - 1];
       if (changeset) {
         board.showInfobox(false);
         content.pushChangeset(changeset);
         this.setState({
           redoStack: redoStack.slice(0, redoStack.length - 1)
+        });
+
+        changeset.forEach(changeString => {
+          const change = safeJsonParse(changeString);
+          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+            content.metadata ? content.metadata.id : "",
+            LogEventMethod.REDO);
         });
       }
     }
