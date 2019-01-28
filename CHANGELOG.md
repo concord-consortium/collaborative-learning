@@ -1,5 +1,34 @@
 # Changelog
 
+## Version 0.4.0 - released January 28, 2019
+
+- Teacher: group- and user-specific supports by section
+- Document workspace
+  - Highlight new tile location on toolbar hover
+  - Drag from toolbar to place new tiles
+  - Class Work and Class Logs tabs
+    - Class Work tab contents grouped by section
+    - fix scrolling bug
+    - performance improvements
+- Table: initial tool implementation
+- Drawing
+  - add stamp tool with curriculum-defined stamps
+  - add stamps for Moving Straight Ahead curriculum
+  - user actions are logged
+- Geometry
+  - points snap to 0.1 grid (was 0.2)
+  - add graph axis labels
+  - user actions are logged
+  - improve layered selection
+  - fix "updateText()" Rollbar error
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 468,424 bytes | 47% |
+| index.js | 3,856,819 bytes | 31% |
+
 ## Version 0.3.0 - released January 11, 2018
 
 - Feature: Teacher-authored class-wide supports
