@@ -19,6 +19,11 @@ export const audienceInfo = {
   [AudienceEnum.user]: { display: "User"},
 };
 
+export enum SupportType {
+  teacher = "teacher",
+  curricular = "curricular"
+}
+
 export enum SupportItemType {
   unit = "unit",
   investigation = "investigation",
@@ -49,6 +54,7 @@ export type AudienceModelType = Instance<typeof AudienceModel>;
 
 export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
+    supportType: types.optional(types.literal(SupportType.teacher), SupportType.teacher),
     key: types.identifier,
     text: types.string,
     type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
@@ -94,6 +100,7 @@ export const TeacherSupportModel = types
 
 export const CurricularSupportModel = types
   .model("CurricularSupportModel", {
+    supportType: types.optional(types.literal(SupportType.curricular), SupportType.curricular),
     text: types.string,
     type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
     visible: false,
@@ -125,14 +132,14 @@ export const SupportsModel = types
   }))
   .views((self) => ({
     get allSupports() {
-      return self.curricularSupports
+      return (self.curricularSupports as SupportItemModelType[])
         .concat(self.classSupports)
         .concat(self.groupSupports)
         .concat(self.userSupports);
     },
 
     getSupportsForUserProblem(sectionId: SectionType, groupId?: string, userId?: string): SupportItemModelType[] {
-      const curricularSupports = self.curricularSupports.filter((support) => {
+      const curricularSupports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
         return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
       });
 
@@ -180,12 +187,12 @@ export const SupportsModel = types
       },
 
       hideSupports() {
-        self.allSupports.forEach((supportItem) => supportItem.setVisible(false));
+        self.allSupports.forEach((supportItem: SupportItemModelType) => supportItem.setVisible(false));
       },
 
       toggleSupport(support: SupportItemModelType) {
         const visible = !support.visible;
-        self.allSupports.forEach((supportItem) => {
+        self.allSupports.forEach((supportItem: SupportItemModelType) => {
           supportItem.setVisible((support === supportItem) && visible);
         });
         if (visible) {
