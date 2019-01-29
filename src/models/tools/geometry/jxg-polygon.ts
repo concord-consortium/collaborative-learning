@@ -18,11 +18,11 @@ export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
 }
 
 export function getPolygonEdges(polygon: JXG.Polygon) {
-  const edges: { [id: string]: JXG.GeometryElement } = {};
+  const edges: { [id: string]: JXG.Line } = {};
   polygon.vertices.forEach(vertex => {
     each(vertex.childElements, child => {
       if (child.elType === "segment") {
-        edges[child.id] = child;
+        edges[child.id] = child as JXG.Line;
       }
     });
   });

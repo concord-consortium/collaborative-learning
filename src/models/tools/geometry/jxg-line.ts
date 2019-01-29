@@ -2,36 +2,41 @@ import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import * as uuid from "uuid/v4";
 
-export const isVisibleLine = (v: any) => (v.elType === "line") && v.visProp.visible;
+export const isMovableLine = (v: any) => (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
+
+export const isVisibleMovableLine = (v: any) => isMovableLine && v.visProp.visible;
+
+export const kMovableLineType = "movableLine";
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;
 export const kSnapUnit = 0.1;
 
+const gray = "#CCCCCC";
 const blue = "#009CDC";
 const darkBlue = "#000099";
 
-export const kLineDefaults = {
-              fillColor: "#CCCCCC",
-              strokeColor: "#009CDC",
-              selectedFillColor: "#000099",
-              selectedStrokeColor: "#000099"
+export const kMovableLineDefaults = {
+              fillColor: gray,
+              strokeColor: blue,
+              selectedFillColor: darkBlue,
+              selectedStrokeColor: darkBlue
             };
 
 const sharedProps = {
-        fillColor: kLineDefaults.fillColor,
-        strokeColor: blue,
+        fillColor: kMovableLineDefaults.fillColor,
+        strokeColor: kMovableLineDefaults.strokeColor,
+        clientType: kMovableLineType,
+        strokeWidth: 3,
       };
 
 const lineSpecificProps = {
   highlightStrokeOpacity: .5,
-  strokeWidth: 5,
-  highlightStrokeColor: blue,
+  highlightStrokeColor: kMovableLineDefaults.strokeColor,
 };
 
 const pointSpecificProps = {
   highlightStrokeColor: darkBlue,
-  strokeWidth: 3
 };
 
 export const lineChangeAgent: JXGChangeAgent = {
@@ -40,17 +45,32 @@ export const lineChangeAgent: JXGChangeAgent = {
     const props = {...sharedProps, ...changeProps};
     const lineProps = {...props, ...lineSpecificProps};
     const pointProps = {...props, ...pointSpecificProps};
+    const id = changeProps.id;
 
     if (change.parents && change.parents.length === 2) {
-      const interceptPoint = (board as JXG.Board).create("point", change.parents[0], {...pointProps, id: uuid()});
-      const slopePoint = (board as JXG.Board).create("point", change.parents[1], {...pointProps, id: uuid()});
+      const interceptPoint = (board as JXG.Board).create(
+        "point",
+        change.parents[0],
+        {
+          ...pointProps,
+          id: `${id}-point1`
+        }
+      );
+      const slopePoint = (board as JXG.Board).create(
+        "point",
+        change.parents[1],
+        {
+          ...pointProps,
+          id: `${id}-point2`
+        }
+      );
 
       return (board as JXG.Board).create(
         "line",
         [interceptPoint, slopePoint],
         {
           ...lineProps,
-          id: uuid(),
+          id,
           name: "y = mx + b",
           withLabel: true,
           label: {

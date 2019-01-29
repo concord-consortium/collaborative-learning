@@ -2,12 +2,13 @@ import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
-import { assign, each, keys, size as _size } from "lodash";
+import { assign, each, keys, values, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
+import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-line";
 
 export const kGeometryToolID = "Geometry";
 
@@ -59,9 +60,12 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
   if (element) {
+    const colorDefaults = element.getAttribute("clientType") === kMovableLineType
+      ? kMovableLineDefaults
+      : kPointDefaults;
     element.setAttribute({
-              fillColor: selected ? kPointDefaults.selectedFillColor : kPointDefaults.fillColor,
-              strokeColor: selected ? kPointDefaults.selectedStrokeColor : kPointDefaults.strokeColor
+              fillColor: selected ? colorDefaults.selectedFillColor : colorDefaults.fillColor,
+              strokeColor: selected ? colorDefaults.selectedStrokeColor : colorDefaults.strokeColor
             });
   }
 }
@@ -390,7 +394,27 @@ export const GeometryContentModel = types
       if (selectedIds.length) {
         self.deselectAll(board);
         board.showInfobox(false);
-        removeObjects(board, selectedIds);
+        const idsToDelete = selectedIds.reduce((ids, id) => {
+          const obj = board.objects[id];
+          if (obj) {
+            if (isPoint(obj) && obj.getAttribute("clientType") === kMovableLineType) {
+              // Don't delete movable line control points on their own, only delete as part of line deletion
+              return ids;
+            } else if (isMovableLine(obj) && obj.getAttribute("clientType") === kMovableLineType) {
+              // We manually delete a line's control points when it is deleted since they should not exist on
+              // their own, and are parents of the line (rather than children) so they're not deleted automatically
+              const line = obj as JXG.Line;
+              ids.push(line.id);
+              ids.push(line.point1.id);
+              ids.push(line.point2.id);
+            } else {
+              // Other objects can be deleted normally
+              ids.push(id);
+            }
+          }
+          return ids;
+        }, [] as string[]);
+        removeObjects(board, idsToDelete);
       }
     }
 
