@@ -78,5 +78,14 @@ class TeacherDashboard {
         cy.select()
         // this.getStudentSupportsSectionDropdownOptions().contains(section).click();
     }
+    deleteClassSupportMessage () {
+        cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').click();
+    }
+    deleteGroupSupportMessage () {
+        cy.get ('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').click();
+    }
+    deleteStudentSupportMessage () {
+        cy.get ('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').click();
+    }
 }
 export default TeacherDashboard;
