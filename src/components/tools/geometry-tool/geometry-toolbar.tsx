@@ -129,7 +129,8 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
     const buttonClass = classNames("button",
                                     toolClass,
                                     { selected: params.selected },
-                                    { disabled: params.disabled }
+                                    { disabled: params.disabled },
+                                    { enabled: !params.disabled }
                                   );
     if (!params.hidden) {
       return (
