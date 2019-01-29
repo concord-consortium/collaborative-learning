@@ -287,22 +287,25 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const selectedPoint = selectedPoints && (selectedPoints.length === 1)
                             ? selectedPoints[0] as JXG.Point : undefined;
     const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
-    const hasVertexAngle: boolean = !!selectedPoint && !!getVertexAngle(selectedPoint);
-    const enableVertexAngle: boolean = !readOnly && !!supportsVertexAngle;
-    const enableDelete: boolean = !readOnly && board && content.hasSelection();
-    const enableDuplicate: boolean = !readOnly && board && !!this.getOneSelectedPolygon();
+    const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
+    const enableVertexAngle = !readOnly && !!supportsVertexAngle;
+    const enableDelete = !readOnly && board && content.hasSelection();
+    const enableDuplicate = !readOnly && board && !!this.getOneSelectedPolygon();
+    const disableVertexAngle = readOnly || !supportsVertexAngle;
+    const disableDelete = readOnly || !board || !content.hasSelection();
+    const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
 
     return (
       <GeometryToolbarView
         key="geometry-toolbar-view"
         model={this.props.model}
         onAngleLabelClick={this.handleToggleVertexAngle}
-        angleLabelDisabled={!enableVertexAngle}
-        angleLabelSelected={hasVertexAngle}
+        isAngleLabelDisabled={disableVertexAngle}
+        isAngleLabelSelected={hasVertexAngle}
         onDeleteClick={this.handleDelete}
-        deleteDisabled={!enableDelete}
+        isDeleteDisabled={disableDelete}
         onDuplicateClick={this.handleDuplicate}
-        duplicateDisabled={!enableDuplicate}
+        isDuplicateDisabled={disableDuplicate}
       />
     );
   }

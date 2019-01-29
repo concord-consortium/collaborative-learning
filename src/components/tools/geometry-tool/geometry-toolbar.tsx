@@ -1,22 +1,30 @@
 // tslint:disable:jsx-no-lambda
 import * as React from "react";
-import { BaseComponent } from "../../base";
-import { IBaseProps } from "../../base";
+import { BaseComponent, IBaseProps } from "../../base";
 import { observer, inject } from "mobx-react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+
+const classNames = require("classnames");
 
 interface IProps extends IBaseProps {
   model: ToolTileModelType;
   onAngleLabelClick: () => void;
-  angleLabelDisabled: boolean;
-  angleLabelSelected: boolean;
+  isAngleLabelDisabled: boolean;
+  isAngleLabelSelected: boolean;
   onDeleteClick: () => void;
-  deleteDisabled: boolean;
+  isDeleteDisabled: boolean;
   onDuplicateClick: () => void;
-  duplicateDisabled: boolean;
+  isDuplicateDisabled: boolean;
 }
 interface IState {
   showSettings: boolean;
+}
+
+interface IRenderToolButtonParams {
+  onClick?: () => void;
+  selected: boolean;
+  disabled: boolean;
+  hidden: boolean;
 }
 
 @inject("stores")
@@ -33,26 +41,56 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
       <div className="geometry-toolbar" data-test="geometry-toolbar" onMouseDown={this.handleMouseDown}>
         <div className="toolbar-buttons">
           {this.renderToolHeader(false)}
-          {this.renderToolButton("Select", "selection", null,
-                                  false, false, true)}
-          {this.renderToolButton("Point", "point", null,
-                                  false, false, true)}
-          {this.renderToolButton("Polygon", "polygon", null,
-                                  false, false, true)}
-          {this.renderToolButton("Duplicate", "duplicate", this.props.onDuplicateClick,
-                                  false, this.props.duplicateDisabled, false)}
-          {this.renderToolButton("Line Label", "line-label", null,
-                                  false, false, true)}
-          {this.renderToolButton("Angle Label", "angle-label", this.props.onAngleLabelClick,
-                                  this.props.angleLabelSelected, this.props.angleLabelDisabled, false)}
-          {this.renderToolButton("Movable Line", "movable-line", null,
-                                  false, false, true)}
-          {this.renderToolButton("Draw", "draw", null,
-                                  false, false, true)}
-          {this.renderToolButton("Text", "text", null,
-                                  false, false, true)}
-          {this.renderToolButton("Delete", "delete", this.props.onDeleteClick,
-                                  false, this.props.deleteDisabled, false)}
+          {this.renderToolButton("Select", "selection",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Point", "point",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Polygon", "polygon",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Duplicate", "duplicate",
+                                  { onClick: this.props.onDuplicateClick,
+                                    selected: false,
+                                    disabled: this.props.isDuplicateDisabled,
+                                    hidden: false })}
+          {this.renderToolButton("Line Label", "line-label",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Angle Label", "angle-label",
+                                  { onClick: this.props.onAngleLabelClick,
+                                    selected: this.props.isAngleLabelSelected,
+                                    disabled: this.props.isAngleLabelDisabled,
+                                    hidden: false })}
+          {this.renderToolButton("Movable Line", "movable-line",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Draw", "draw",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Text", "text",
+                                  { onClick: undefined,
+                                    selected: false,
+                                    disabled: false,
+                                    hidden: true })}
+          {this.renderToolButton("Delete", "delete",
+                                  { onClick: this.props.onDeleteClick,
+                                    selected: false,
+                                    disabled: this.props.isDeleteDisabled,
+                                    hidden: false })}
         </div>
         { this.state.showSettings
           ? <div className="settings">
@@ -87,16 +125,17 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderToolButton = (toolName: string, toolClass: string, handleClick: any,
-                              selected: boolean, disabled: boolean, hidden: boolean) => {
-    let buttonClass = "button " + toolClass + " ";
-    buttonClass += selected ? "selected " : "";
-    buttonClass += disabled ? "disabled " : "enabled ";
-    if (!hidden) {
+  private renderToolButton = (toolName: string, toolClass: string, params: IRenderToolButtonParams) => {
+    const buttonClass = classNames("button",
+                                    toolClass,
+                                    { selected: params.selected },
+                                    { disabled: params.disabled }
+                                  );
+    if (!params.hidden) {
       return (
         <div className={buttonClass}
              title={toolName}
-             onClick={handleClick}
+             onClick={params.onClick}
         >
           <svg className="toolbar-icon">
             <use xlinkHref={"#icon-geometry-" + toolClass}/>
