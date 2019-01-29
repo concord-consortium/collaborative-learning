@@ -218,7 +218,7 @@ export const GeometryContentModel = types
     }
 
     function pushChangeset(changes: string[]) {
-      changes.forEach(change => self.changes.push(change));
+      self.changes.push(...changes);
     }
 
     function addImage(board: JXG.Board,
