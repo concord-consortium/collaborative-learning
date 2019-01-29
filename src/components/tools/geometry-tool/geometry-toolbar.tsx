@@ -3,8 +3,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../../base";
 import { observer, inject } from "mobx-react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-
-const classNames = require("classnames");
+import * as classNames from "classnames";
 
 interface IProps extends IBaseProps {
   model: ToolTileModelType;
