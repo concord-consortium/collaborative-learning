@@ -177,7 +177,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     leftNav.getOpenToWorkspaceButton(index).click();
                     cy.wait(2000);
                     if (index<1) {
-                        cy.get('[data-test=support-icon]').last().click();
+                        cy.get('[data-test=support-icon class]').last().click();
                     }
                     cy.get('[data-test=supports-list').contains('whole class in all sections')
                     // })
@@ -189,8 +189,13 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
                 leftNav.getLeftNavTabs().each(($tab,index,$list)=> {
                     cy.wrap($tab).click();
-                    leftNav.getOpenToWorkspaceButton().click();
+                    leftNav.getOpenToWorkspaceButton(index).click();
                     cy.wait(2000);
+                    if (index<1) {
+                        cy.get('[data-test=support-icon]').last().click();
+                    }
+                    cy.get('[data-test=supports-list').contains('whole class in all sections')
+
 
                     //find the first/last message icon and click it.
                     //verify that the same message appears in each section
