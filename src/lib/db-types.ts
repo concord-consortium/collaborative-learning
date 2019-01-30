@@ -1,5 +1,5 @@
 import { SectionType } from "../models/curriculum/section";
-import { SupportAudienceType } from "../models/stores/supports";
+import { AudienceEnum, TeacherSupportSectionTarget } from "../models/stores/supports";
 
 // NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
 
@@ -203,17 +203,13 @@ export interface DBImage {
   createdBy: string;
 }
 
-export enum DBSectionType {
-  all = "all"
-}
-export type DBSupportSectionTarget = SectionType | DBSectionType;
-
 export interface DBSupport {
   self: {
     classHash: string;
     offeringId: string;
-    audience: SupportAudienceType;
-    sectionTarget: DBSupportSectionTarget;
+    audienceType: AudienceEnum;
+    audienceId: string;
+    sectionTarget: TeacherSupportSectionTarget;
     key: string;
   };
   timestamp: number;

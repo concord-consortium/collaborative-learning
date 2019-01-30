@@ -1,8 +1,8 @@
-import LeftNav from './elements/LeftNav'
-import Canvas from './elements/Canvas'
-import RightNav from './elements/RightNav'
-import BottomNav from './elements/BottomNav';
-import LearningLog from './elements/LearningLog';
+import LeftNav from '../support/elements/LeftNav'
+import Canvas from '../support/elements/Canvas'
+import RightNav from '../support/elements/RightNav'
+import BottomNav from '../support/elements/BottomNav';
+import LearningLog from '../support/elements/LearningLog';
 
 context('Test Canvas', function(){
     let leftNav = new LeftNav;
@@ -20,7 +20,7 @@ context('Test Canvas', function(){
        describe('test header elements', function(){
            it('verifies header title appears correctly', function(){
                 leftNav.openLeftNavTab('Introduction');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Introduction');
                 canvas.getCanvasTitle().should('contain','Introduction');
            });
 
@@ -37,7 +37,7 @@ context('Test Canvas', function(){
                canvas.getSouthEastCanvas().should('be.visible');
                canvas.getSouthEastCanvas().should('be.visible');
                // canvas.getSingleCanvas().should('not.be.visible');
-               
+
                //can get back to 1 up view from 4 up
                canvas.openOneUpViewFromFourUp();
                canvas.getSingleCanvas().should('be.visible');
@@ -97,13 +97,8 @@ context('Test Canvas', function(){
             it('clicks the graph tool and enters three points', function(){
 
                 canvas.addGraphTile();
-                canvas.getGraphTile().last().click();
-                canvas.addPointToGraph(100,40);
-                canvas.getGraphPointText().last().should('contain', 'A' );
-                canvas.addPointToGraph(140,70);
-                canvas.getGraphPointText().last().should('contain', 'B' );
-                canvas.addPointToGraph(240,170);
-                canvas.getGraphPointText().last().should('contain', 'C' );
+                canvas.getGraphTile().should('exist')
+
             });
              it('will test image tool', ()=>{
                  canvas.addImageTile();
@@ -115,16 +110,12 @@ context('Test Canvas', function(){
                canvas.addTextTile();
                canvas.enterText('second text tool');
                canvas.addGraphTile();
-               canvas.getGraphTile();
-               canvas.addPointToGraph(40,35);
-               canvas.getGraphPointText().last().should('contain', 'A' );
+               canvas.getGraphTile().should('exist');
                canvas.addImageTile();
                canvas.addTextTile();
                canvas.enterText('third text tool');
                canvas.addGraphTile();
-               canvas.getGraphTile();
-               canvas.addPointToGraph(175,55);
-               canvas.getGraphPointText().last().should('contain', 'A' );
+               canvas.getGraphTile().should('exist');
                canvas.addImageTile();
                canvas.scrollToBottom(canvas.getSingleCanvasDocumentContent());
                canvas.scrollToTop(canvas.getSingleCanvasDocumentContent());
@@ -149,7 +140,7 @@ context('Test Canvas', function(){
                 // let canvas2='Introduction';
                 // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
                 // leftNav.openLeftNavTab('Initial Challenge');
-                // leftNav.openToWorkspace();
+                // leftNav.openToWorkspace('Initial Challenge');
                 // canvas.getCanvasTitle().should('contain',canvas1);
                 // rightNav.openMyWorkTab();
                 // rightNav.openMyWorkAreaCanvasItem(canvas1);
@@ -168,7 +159,7 @@ context('Test Canvas', function(){
                 // });
                 //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
                 cy.get('#leftNavTab1').click();
-                cy.get('.left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
+                cy.get('#leftNavContainer1 > .left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
                 cy.get('.single-workspace > .document > .titlebar > .title').should('contain','Initial');
                 cy.get('#rightNavTabMy\\ Work').click({force:true});
                 cy.get('.list > .list-item[title*="Initial"]').click();
@@ -180,27 +171,21 @@ context('Test Canvas', function(){
                 //verify text element with Hello World in showing
                 canvas.getTextTile().first().should('contain', 'Hello World');
                 //Verify the graph has 4 points in it
-                canvas.getGraphPointText().each(($point, index, $list)=>{}).then(($list)=>{
-                    expect($list).to.have.length(6);
-                });
             });
         });
 
         describe('verify that if user opens same canvas from on left-nav tab, saved canvas opens', function() {
             it('will restore from left nav', ()=>{
                 leftNav.openLeftNavTab('What if');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('What if');
                 canvas.getCanvasTitle().should('contain', 'What if');
                 leftNav.openLeftNavTab('Introduction');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Introduction');
                 canvas.getCanvasTitle().should('contain','Introduction');
                 //verify text element with Hello World in showing
                 canvas.getTextTile().first().should('contain', 'Hello World');
                 //Verify the graph has 4 points in it
-                canvas.getGraphTile().first();
-                canvas.getGraphPointText().each(($point, index, $list)=>{}).then(($list)=> {
-                    expect($list).to.have.length(6);
-                });
+                canvas.getGraphTile().first().should('exist');
             });
         });
 
@@ -209,13 +194,13 @@ context('Test Canvas', function(){
             it('verify canvas stays in 4up view when changing canvases', ()=>{
                 //Open a canvas
                 leftNav.openLeftNavTab('Initial Challenge');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('Initial Challenge');
                 canvas.getCanvasTitle().should('contain','Initial');
                 //switch to 4-up view
                 canvas.openFourUpView();
                 //open another canvas
                 leftNav.openLeftNavTab('What if');
-                leftNav.openToWorkspace();
+                leftNav.openToWorkspace('What if');
                 canvas.getCanvasTitle().should('contain','What if');
                 canvas.getFourUpView().should('be.visible');
                 //Re-open Initial Challenge canvas from My Work
@@ -294,6 +279,7 @@ context('Test Canvas', function(){
                 canvas.getRightSideToolPalette().should('not.exist');
                 //add a canvas from Class work to rightside workspace
                 rightNav.openClassWorkTab();
+                rightNav.openClassWorkSections();
                 rightNav.getAllClassWorkAreaCanvasItems().first().then(($el)=>{
                     let title = $el.text().split('Student')[0];
                     cy.wrap($el).click();

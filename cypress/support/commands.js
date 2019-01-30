@@ -23,10 +23,10 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import Header from '../integration/elements/Header.js';
-import RightNav from '../integration/elements/RightNav';
-import LeftNav from '../integration/elements/LeftNav';
-import Canvas from '../integration/elements/Canvas';
+import Header from './elements/Header.js';
+import RightNav from './elements/RightNav';
+import LeftNav from './elements/LeftNav';
+import Canvas from './elements/Canvas';
 
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
@@ -48,12 +48,11 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.wait(2000);
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         leftNav.openLeftNavTab('Now What')
-            leftNav.openToWorkspace();
+            leftNav.openToWorkspace('Now What');
         canvas.addTextTile();
         canvas.enterText('This is to test the 4-up view of S'+students[i]);
         canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+students[i]);
         canvas.addGraphTile();
-        canvas.addPointToGraph((30*i),(250/i));
         canvas.shareCanvas();//all students will share their canvas
         cy.wait(1000);
     }

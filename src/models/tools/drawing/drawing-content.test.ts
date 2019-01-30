@@ -2,8 +2,8 @@ import { DrawingContentModel, kDrawingToolID, DrawingToolMetadataModel } from ".
 
 describe("DrawingContentModel", () => {
 
-  function createDrawingContent() {
-    const model = DrawingContentModel.create();
+  function createDrawingContent(options?: any) {
+    const model = DrawingContentModel.create(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
     model.doPostCreate(metadata);
     return model;
@@ -53,5 +53,28 @@ describe("DrawingContentModel", () => {
     const change1 = JSON.parse(model.changes[1]);
     expect(change1.data.update.prop).toEqual("strokeWidth");
     expect(change1.data.update.newValue).toEqual(2);
+  });
+
+  it("can change the current stamp", () => {
+    const model = createDrawingContent({
+      stamps: [ {
+          url: "a.png",
+          width: 10,
+          height: 10
+        },
+        {
+          url: "b.png",
+          width: 10,
+          height: 10
+        }
+      ]
+    });
+
+    expect(model.currentStamp).toBeDefined();
+    expect(model.currentStamp!.url).toBe("a.png");
+
+    model.setSelectedStamp(1);
+
+    expect(model.currentStamp!.url).toBe("b.png");
   });
 });

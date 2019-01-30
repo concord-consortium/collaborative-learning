@@ -1,10 +1,12 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, DocumentType, SectionDocument } from "../document/document";
 import { ClassModelType } from "./class";
+import { UnitModel, UnitModelType } from "../curriculum/unit";
 
 export const DocumentsModel = types
   .model("Documents", {
     all: types.array(DocumentModel),
+    unit: types.maybe(UnitModel)
   })
   .views((self) => {
     const getDocument = (documentKey: string) => {
@@ -114,11 +116,16 @@ export const DocumentsModel = types
       return parentDocument || null;
     };
 
+    const setUnit = (unit: UnitModelType) => {
+      self.unit = unit;
+    };
+
     return {
       add,
       remove,
       update,
-      findDocumentOfTile
+      findDocumentOfTile,
+      setUnit
     };
   });
 

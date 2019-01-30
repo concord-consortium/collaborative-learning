@@ -21,14 +21,22 @@
   input
     height: 30px
 
-  .content
+  .content, .section-target, .section-dropdown
     font-family: inherit
     font-size: inherit
-    flex-grow: 1
     margin-left: 10px
     color: black
     display: flex
     align-items: center
+
+  .content
+    flex-grow: 1
+  
+  .section-target
+    text-align: center
+
+  .section-target, .section-dropdown
+    min-width: $section-width
   
   .send-button
     display: flex
@@ -49,4 +57,5 @@
 
   .date
     color: black
-    margin-left: 24px
+    margin-left: $date-margin
+    min-width: $date-width

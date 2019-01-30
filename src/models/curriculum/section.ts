@@ -22,6 +22,11 @@ export const sectionInfo = {
   [SectionType.extraWorkspace]: { title: "Extra Workspace", abbrev: "Ex" }
 };
 
+export type AllSectionType = "all";
+export const allSectionInfo = {
+  title: "All"
+};
+
 export const SectionModel = types
   .model("Section", {
     type: types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[]),

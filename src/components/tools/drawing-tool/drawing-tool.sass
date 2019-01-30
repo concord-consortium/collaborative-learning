@@ -27,7 +27,6 @@
       cursor: pointer
       &.selected
         background-color: #ccc
-        color: #fff
       img
         max-width: 24px
         max-height: 24px
@@ -47,7 +46,7 @@
     width: 100px
     left: 0
     /* set in code */
-    bottom: 0
+    bottom: 4px
     background-color: #bbb
     cursor: pointer
     font-size: 14px
@@ -72,8 +71,26 @@
       background-color: #fff
       width: 80px
 
-.drawing-tool.read-only .drawing-tool-toolbar .drawing-tool-button
-  cursor: default
+    &.stamps
+      width: 60px
+      img
+        display: block
+        width: 40px
+        margin: 3px 10px
+        padding: 5px
+        &.selected
+          background: #666
+        &:hover:not(.selected)
+          background: #999
+
+.drawing-tool.read-only .drawing-tool-toolbar
+  .drawing-tool-button
+    cursor: default
+  .drawing-tool-buttons .flyout-top-button .flyout-toggle:hover
+    background-color: unset
+    color: unset
+
+
 
 @font-face
   font-family: 'icomoon'

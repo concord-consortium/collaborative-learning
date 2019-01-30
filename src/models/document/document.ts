@@ -12,7 +12,8 @@ export const DocumentTypeEnum = types.enumeration("type",
   [SectionDocument, LearningLogDocument, PublicationDocument, LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
-export const DocumentToolEnum = types.enumeration("tool", ["delete", "geometry", "select", "text", "image", "drawing"]);
+export const DocumentToolEnum = types.enumeration("tool",
+                                  ["delete", "drawing", "geometry", "image", "select", "table", "text"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types
@@ -56,16 +57,7 @@ export const DocumentModel = types
     },
 
     addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
-      switch (tool) {
-        case "geometry":
-          return self.content.addGeometryTile(addSidecarNotes);
-        case "text":
-          return self.content.addTextTile();
-        case "image":
-          return self.content.addImageTile();
-        case "drawing":
-          return self.content.addDrawingTile();
-      }
+      return self.content.addTile(tool, addSidecarNotes);
     },
 
     deleteTile(tileId: string) {

@@ -1,5 +1,5 @@
-import LeftNav from './elements/LeftNav.js'
-import Canvas from './elements/Canvas.js'
+import LeftNav from '../support/elements/LeftNav.js'
+import Canvas from '../support/elements/Canvas.js'
 
 describe('Test Left tabs',function(){
     let leftNav = new LeftNav(),
@@ -15,7 +15,7 @@ describe('Test Left tabs',function(){
          for (i = 0; i < $tab.length - 1; i++) {
              let title = $tab.text;
              cy.get('#leftNavTab' + i).click({force:true});
-                 leftNav.getOpenToWorkspaceButton().should('contain', titleArr[i]).click({force: true});
+                 leftNav.getOpenToWorkspaceButton(i).should('contain', titleArr[i]).click({force: true});
                      canvas.getCanvasTitle().should('contain', titleArr[i]);
          }
      })

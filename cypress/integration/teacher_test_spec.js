@@ -1,9 +1,9 @@
-import Header from './elements/Header.js';
-import RightNav from './elements/RightNav';
-import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
-import Workspace from './elements/Workspace';
-import TeacherDashboard from './elements/TeacherDashboard';
+import Header from '../support/elements/Header.js';
+import RightNav from '../support/elements/RightNav';
+import LeftNav from '../support/elements/LeftNav';
+import Canvas from '../support/elements/Canvas';
+import Workspace from '../support/elements/Workspace';
+import TeacherDashboard from '../support/elements/TeacherDashboard';
 
 let qaClass = 10,
     qaOffering = 10,
@@ -13,7 +13,7 @@ let qaClass = 10,
     studentArr20=[25,26,27,28],
     qaGroup20 = 20;
 
-
+let student = 15;
 let teacher = 10;
 
 let header = new Header,
@@ -150,7 +150,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
     });
 
-    describe('Teacher can create Learning Logs', function(){
+    describe('Teacher can create and publish Learning Logs', function(){
         it('will verify learning log is accessible', function(){
 
         });
@@ -162,8 +162,28 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         });
     })
 
+    describe('Teacher can create supports', function(){
+      const supportText = "sample support";
+      it('will load the teacher page', function(){
+        cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
+        cy.wait(3000);
+      });
+      it('will create a support', function(){
+        cy.get('[data-test=support-input-class]').type(supportText);
+        cy.get('[data-test=support-submit-class]').click();
+        
+        cy.get('[data-test=teacher-support]').should('be.visible');
+      });
+      it('will load the student document', function(){
+        cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+student+'&problem='+problem+'&qaGroup='+qaGroup10);
+        cy.wait(3000);
 
+        leftNav.openToWorkspace('Introduction');
+        cy.wait(2000);
 
-
+        cy.get('[data-test=support-icon]').click();
+        cy.contains(supportText);
+      });
+    })
 });
 

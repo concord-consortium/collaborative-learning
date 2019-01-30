@@ -2,15 +2,17 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { TeacherSupports } from "./teacher-supports";
+import { UserAudienceModel } from "../../models/stores/supports";
 
 import "./teacher-student-tab.sass";
 
 interface IProps extends IBaseProps {
-  group?: GroupModelType;
+  groupId?: string;
 }
 
 interface IState {
-  selectedUser?: GroupUserModelType;
+  selectedUserId?: string;
 }
 
 @inject("stores")
@@ -19,20 +21,22 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   public componentWillReceiveProps(nextProps: IProps) {
-    if (nextProps.group !== this.props.group) {
-      this.setState({selectedUser: undefined});
+    if (nextProps.groupId !== this.props.groupId) {
+      this.setState({selectedUserId: undefined});
     }
   }
 
   public render() {
-    const { group } = this.props;
-    const { selectedUser } = this.state;
+    const { groups } = this.stores;
+    const { selectedUserId } = this.state;
+    const { groupId } = this.props;
+    const group = groups.getGroupById(groupId);
     // TODO: if no group prop then get list of all users in class
     const users = group ? group.users : [];
     return (
       <div className="teacher-student-tab">
         {this.renderUsers(users)}
-        {selectedUser ? this.renderUser(selectedUser) : null}
+        {selectedUserId ? this.renderUser(selectedUserId) : null}
       </div>
     );
   }
@@ -57,14 +61,18 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
       <div className="user-list">
         {userElements.length > 0
           ? userElements
-          : (this.props.group
+          : (this.props.groupId
               ? "No students found."
               : "TDB: Student List (same as group student list but shows all students)")}
       </div>
     );
   }
 
-  private renderUser(user: GroupUserModelType) {
+  private renderUser(userId: string) {
+    const { supports, groups } = this.stores;
+    const { selectedUserId } = this.state;
+    const { groupId } = this.props;
+    const user = groups.getGroupById(groupId)!.getUserById(selectedUserId)!;
     return (
       <div className="selected-group">
         <div className="title">
@@ -73,8 +81,12 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
           </div>
         </div>
         <div className="content">
-          TDB: Show student section documents and learning log thumbnails
-          with each thumbnail linked to show it in a canvas under the list.
+          <TeacherSupports
+            audience={UserAudienceModel.create({identifier: user.id})}
+            supports={supports.userSupports.filter(support => {
+              return !support.deleted && support.audience.identifier === user.id;
+            })}
+          />
         </div>
       </div>
     );
@@ -82,7 +94,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
 
   private handleChooseUser = (user: GroupUserModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
-      this.setState({selectedUser: user});
+      this.setState({selectedUserId: user.id});
     };
   }
 }

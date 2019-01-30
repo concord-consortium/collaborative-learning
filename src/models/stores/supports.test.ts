@@ -1,5 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel, SupportItemType, SupportAudienceType, TeacherSupportModel } from "./supports";
+import { SupportsModel, SupportItemType, AudienceEnum, TeacherSupportModel, ClassAudienceModel, GroupAudienceModel,
+  UserAudienceModel, TeacherSupportModelType } from "./supports";
 import { UnitModel } from "../curriculum/unit";
 import { SupportModel } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
@@ -14,7 +15,9 @@ describe("supports model", () => {
     const supports = SupportsModel.create({});
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: []
+      classSupports: [],
+      userSupports: [],
+      groupSupports: []
     });
   });
 
@@ -26,9 +29,9 @@ describe("supports model", () => {
         {text: "support #3", type: SupportItemType.problem, visible: true},
         {text: "support #4", type: SupportItemType.section},
       ],
-      teacherSupports: [
+      classSupports: [
         {key: "1", text: "support #5", type: SupportItemType.problem,
-          audience: SupportAudienceType.class, authoredTime: 42}
+          audience: ClassAudienceModel.create(), authoredTime: 42}
       ]
     });
     expect(omitUndefined(getSnapshot(supports))).toEqual({
@@ -54,17 +57,21 @@ describe("supports model", () => {
           visible: false,
         },
       ],
-      teacherSupports: [
+      classSupports: [
         {
           key: "1",
           text: "support #5",
           type: "problem",
-          audience: "class",
+          audience: {
+            type: "class"
+          },
           authoredTime: 42,
           visible: false,
           deleted: false
         }
-      ]
+      ],
+      groupSupports: [],
+      userSupports: []
     });
 
     expect(supports.curricularSupports.filter((support) => support.visible).length).toEqual(2);
@@ -205,7 +212,7 @@ describe("supports model", () => {
     }), InvestigationModel.create(cloneDeep(investigation1)),
         ProblemModel.create(cloneDeep(problem1)));
 
-    expect(supports.getAllForSection(SectionType.introduction)).toEqual([
+    expect(supports.getSupportsForUserProblem(SectionType.introduction, "groupId", "userId")).toEqual([
       {
         sectionId: "introduction",
         text: "Investigation 1, Problem 1, section: introduction, support #1",
@@ -227,25 +234,78 @@ describe("supports model", () => {
       key: "1",
       text: "foo",
       type: SupportItemType.problem,
-      audience: SupportAudienceType.class,
+      audience: ClassAudienceModel.create(),
       authoredTime: 100
     });
     const lateSupport = TeacherSupportModel.create({
       key: "2",
       text: "bar",
       type: SupportItemType.problem,
-      audience: SupportAudienceType.class,
+      audience: ClassAudienceModel.create(),
       authoredTime: 200
     });
 
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: []
+      classSupports: [],
+      groupSupports: [],
+      userSupports: []
     });
-    supports.setAuthoredSupports([lateSupport, earlySupport]);
+    supports.setAuthoredSupports([lateSupport, earlySupport], AudienceEnum.class);
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
-      teacherSupports: [earlySupport, lateSupport]
+      classSupports: [earlySupport, lateSupport],
+      groupSupports: [],
+      userSupports: []
     });
+  });
+
+  it("Gets supports by audience and section type", () => {
+    const classSupportAll = {key: "1", text: "", type: SupportItemType.problem,
+      audience: ClassAudienceModel.create(), authoredTime: 42};
+    const classSupportIntro = {key: "2", text: "", type: SupportItemType.section, sectionId: SectionType.introduction,
+      audience: ClassAudienceModel.create(), authoredTime: 43};
+    const groupSupport = {key: "3", text: "", type: SupportItemType.problem,
+      audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
+    const userSupport = {key: "4", text: "", type: SupportItemType.section, sectionId: SectionType.didYouKnow,
+      audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
+
+    const supports = SupportsModel.create({
+      classSupports: [
+        classSupportAll,
+        classSupportIntro
+      ],
+      groupSupports: [
+        groupSupport
+      ],
+      userSupports: [
+        userSupport
+      ]
+    });
+
+    const generalClassSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group0", "user0");
+    expect(generalClassSupports.length).toEqual(1);
+    expect((generalClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+
+    const setionClassSupports = supports.getSupportsForUserProblem(SectionType.introduction, "group0", "user0");
+    expect(setionClassSupports.length).toEqual(2);
+    expect((setionClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((setionClassSupports[1] as TeacherSupportModelType).key).toEqual(classSupportIntro.key);
+
+    const groupSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group1", "user0");
+    expect(groupSupports.length).toEqual(2);
+    expect((groupSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((groupSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
+
+    const userSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group0", "user1");
+    expect(userSupports.length).toEqual(2);
+    expect((userSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((userSupports[1] as TeacherSupportModelType).key).toEqual(userSupport.key);
+
+    const multiSupports = supports.getSupportsForUserProblem(SectionType.didYouKnow, "group1", "user1");
+    expect(multiSupports.length).toEqual(3);
+    expect((multiSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((multiSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
+    expect((multiSupports[2] as TeacherSupportModelType).key).toEqual(userSupport.key);
   });
 });

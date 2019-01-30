@@ -1,7 +1,7 @@
 // tslint:disable:jsx-no-lambda
 import * as React from "react";
 import { DrawingContentModelType, Color, ToolbarModalButton, TOOLBAR_WIDTH,
-  colors, computeStrokeDashArray } from "../../../models/tools/drawing/drawing-content";
+  colors, computeStrokeDashArray, StampModelType } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { observer } from "mobx-react";
 
@@ -26,6 +26,7 @@ export interface ToolbarViewProps {
 
 export interface ToolbarViewState {
   showSettings: boolean;
+  showStampSelection: boolean;
 }
 
 @observer
@@ -33,13 +34,14 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
   constructor(props: ToolbarViewProps){
     super(props);
     this.state = {
-      showSettings: false
+      showSettings: false,
+      showStampSelection: false
     };
   }
 
   public render() {
     const drawingContent = this.props.model.content as DrawingContentModelType;
-    const {stroke} = drawingContent;
+    const {stroke, stamps, currentStamp} = drawingContent;
     const deleteButtonClass = "drawing-tool-button" + (drawingContent.hasSelectedObjects ? "" : " disabled");
     return (
       <div className="drawing-tool-toolbar" style={{width: TOOLBAR_WIDTH}}>
@@ -68,18 +70,37 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
               onClick={this.handleEllipseToolButton}>
             {this.renderSVGIcon("ellipse")}
           </div>
+          {
+            currentStamp &&
+            <div
+                className={"flyout-top-button " + this.modalButtonClass("stamp")}
+                style={{height: 30}} title="Coin Stamp"
+              onClick={this.handleStampToolButton}>
+              <img src={currentStamp.url} />
+              {
+                stamps.length > 1 &&
+                <div className="flyout-toggle" onClick={this.handleStampListButton}>
+                  ▶
+                </div>
+              }
+          </div>
+          }
           <div className={deleteButtonClass} title="Delete" onClick={this.handleDeleteButton}>
             <span className="drawing-tool-icon drawing-tool-icon-bin" />
           </div>
         </div>
         {this.state.showSettings ? this.renderSettings() : null}
+        {this.state.showStampSelection ? this.renderStampSelection() : null}
       </div>
     );
   }
 
   private handleSettingsButton = () => {
     if (this.props.readOnly) return;
-    this.setState({showSettings: !this.state.showSettings});
+    this.setState({
+      showSettings: !this.state.showSettings,
+      showStampSelection: false
+    });
   }
   private handleLineDrawingToolButton = () => {
     if (this.props.readOnly) return;
@@ -105,6 +126,28 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
     if (this.props.readOnly) return;
     const drawingContent = this.props.model.content as DrawingContentModelType;
     drawingContent.setSelectedButton("ellipse");
+  }
+  private handleStampToolButton = () => {
+    if (this.props.readOnly) return;
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    drawingContent.setSelectedButton("stamp");
+  }
+  private handleStampListButton = () => {
+    if (this.props.readOnly) return;
+    this.setState({
+      showSettings: false,
+      showStampSelection: !this.state.showStampSelection
+    });
+  }
+  private handleSelectStamp = (stampIndex: number) => () => {
+    if (this.props.readOnly) return;
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    drawingContent.setSelectedStamp(stampIndex);
+    drawingContent.setSelectedButton("stamp");
+    this.setState({
+      showSettings: false,
+      showStampSelection: false
+    });
   }
   private handleDeleteButton = () => {
     if (this.props.readOnly) return;
@@ -178,6 +221,26 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
             </select>
           </div>
         </form>
+      </div>
+    );
+  }
+
+  private renderStampSelection() {
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    const {stamps, currentStamp} = drawingContent;
+
+    return (
+      <div className="settings stamps" style={{left: TOOLBAR_WIDTH}}>
+        <div className="title"><span className="icon icon-menu" /> Stamps</div>
+        <div>
+          {
+            stamps.map((stamp, i) => {
+              const className = (currentStamp && stamp.url === currentStamp.url) ? "selected" : "";
+              return <img key={stamp.url} src={stamp.url} className={className}
+                onClick={this.handleSelectStamp(i)} />;
+            })
+          }
+        </div>
       </div>
     );
   }

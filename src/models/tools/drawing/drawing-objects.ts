@@ -61,6 +61,7 @@ export interface ImageDrawingObjectData {
   type: "image";
   id?: string;
   url: string;
+  originalUrl?: string;
   x: number;
   y: number;
   width: number;

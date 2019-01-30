@@ -1,19 +1,20 @@
-import LearningLog from './elements/LearningLog';
-import BottomNav from './elements/BottomNav';
-import RightNav from './elements/RightNav';
-import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
+import LearningLog from '../support/elements/LearningLog';
+import BottomNav from '../support/elements/BottomNav';
+import RightNav from '../support/elements/RightNav';
+import LeftNav from '../support/elements/LeftNav';
+import Canvas from '../support/elements/Canvas';
+import GraphToolTile from '../support/elements/GraphToolTile';
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,
         bottomNav = new BottomNav,
         rightNav = new RightNav,
         leftNav = new LeftNav,
-        canvas = new Canvas;
+        canvas = new Canvas,
+        graphToolTile = new GraphToolTile;
 
-    describe('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
-
-        it('will verify correct tab opens to correct content', function(){
+    describe('Test learning log interaction with main canvas', function(){
+        it('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
             bottomNav.getBottomNavTabs().each(($tab,index,$list)=>{
                 let tabName = $tab.text();  //get the tab label
                 cy.wrap($tab).click({force:true}); //click on tab
@@ -27,7 +28,7 @@ context('Test bottom tabs', function(){
                 bottomNav.getBottomNavTabs().should('contain',tabName).click();//closes the bottom nav tab
             });
         });
-        it('will verify restore of already open canvas in workspace', function(){
+        it('will verify restore of already open canvas in main workspace after opening learning log', function(){
             //     //Open Introduction tab
             //     //Open Introduction canvas
                 let tab = 'Introduction';
@@ -41,7 +42,7 @@ context('Test bottom tabs', function(){
                 canvas.addGraphTile();
                 canvas.getGraphTile().last().click();
                 canvas.getGraphTile().last().click();
-                canvas.getGraphPointText().last().should('contain', 'A' );
+                graphToolTile.getGraphPointLabel().last().should('contain', 'A' );
                 //Open learning log
                 learningLog.openLearningLogTab();
                 learningLog.closeLearningLogTab();
@@ -49,7 +50,7 @@ context('Test bottom tabs', function(){
         })
     });
 
-    describe('Test create, save and restore a canvas',function(){
+    describe('Test create, save and restore a learning log canvas',function(){
        it('create a new learning log', function(){
            let title='pool';
             learningLog.createLearningLog(title);
@@ -129,6 +130,7 @@ context('Test bottom tabs', function(){
             canvas.publishCanvas();
             learningLog.openLearningLogTab();//open learning log
             rightNav.openClassWorkTab();
+            rightNav.openClassWorkSections();
             rightNav.openClassWorkAreaCanvasItem(classWorkTitle);
             cy.get('.workspaces > .right-workspace > .document').should('be.visible'); //verify 2 up view is showing
             //Verify LL_Introduction is on the left and Introduction is on the right

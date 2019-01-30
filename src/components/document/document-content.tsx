@@ -1,11 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { findDOMNode } from "react-dom";
+import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { DocumentTool } from "../../models/document/document";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
-        dragTileSrcDocId, kDragRowHeight } from "../tools/tool-tile";
+        dragTileSrcDocId, kDragRowHeight, kDragTileCreate } from "../tools/tool-tile";
 
 import "./document-content.sass";
 
@@ -23,14 +26,10 @@ interface IDragResizeRow {
   deltaHeight: number;
 }
 
-interface IDropRowInfo {
+export interface IDropRowInfo {
   rowInsertIndex: number;
   rowDropIndex?: number;
   rowDropLocation?: string;
-  dropOffsetLeft?: number;
-  dropOffsetTop?: number;
-  dropOffsetRight?: number;
-  dropOffsetBottom?: number;
   updateTimestamp?: number;
 }
 
@@ -48,17 +47,30 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
+  private rowRefs: Array<TileRowComponent | null>;
   private mutationObserver: MutationObserver;
 
   public componentDidMount() {
-    if (this.domElement && (window as any).MutationObserver) {
-      this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
-      this.mutationObserver.observe(this.domElement, { childList: true });
+    if (this.domElement) {
+      this.domElement.addEventListener("scroll", throttle(this.updateVisibleRows, 100));
+      this.updateVisibleRows();
+
+      if ((window as any).MutationObserver) {
+        this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
+        this.mutationObserver.observe(this.domElement, { childList: true });
+      }
     }
   }
 
   public componentWillUnmount() {
     this.mutationObserver.disconnect();
+  }
+
+  public componentDidUpdate() {
+    // recalculate after render
+    requestAnimationFrame(() => {
+      this.updateVisibleRows();
+    });
   }
 
   public render() {
@@ -74,6 +86,32 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         {this.props.children}
       </div>
     );
+  }
+
+  // updates the list of all row we can see the bottom of
+  private updateVisibleRows = () => {
+    const { content } = this.props;
+
+    if (!this.domElement || !content) return;
+
+    const contentBounds = this.domElement.getBoundingClientRect();
+    function isElementInViewport(el: Element) {
+      const rect = el.getBoundingClientRect();
+
+      return (rect.bottom > contentBounds.top &&
+              rect.bottom < contentBounds.bottom);
+    }
+
+    const visibleRowIds: string[] = [];
+    this.rowRefs.forEach((ref) => {
+      if (ref) {
+        const rowNode = findDOMNode(ref);
+        if (isElementInViewport(rowNode as Element)) {
+          visibleRowIds.push(ref.props.model.id);
+        }
+      }
+    });
+    content.setVisibleRows(visibleRowIds);
   }
 
   private getRowHeight(rowId: string) {
@@ -94,23 +132,28 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private renderRows() {
     const { content, ...others } = this.props;
     if (!content) { return null; }
-    const { rowMap, rowOrder, tileMap } = content;
+    const { rowMap, rowOrder, tileMap, highlightPendingDropLocation } = content;
     const { dropRowInfo } = this.state;
     let tabIndex = 1;
+    this.rowRefs = [];
     return rowOrder.map((rowId, index) => {
       const row = rowMap.get(rowId);
       const rowHeight = this.getRowHeight(rowId);
-      const dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
+      let dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
                             (dropRowInfo.rowDropIndex === index) &&
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
+      if (!dropHighlight && index === highlightPendingDropLocation) {
+        dropHighlight = "bottom";
+      }
       const _tabIndex = tabIndex;
       tabIndex += row ? row.tiles.length : 0;
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
                                   tabIndex={_tabIndex} height={rowHeight} tileMap={tileMap}
-                                  dropHighlight={dropHighlight} {...others} />
+                                  dropHighlight={dropHighlight}
+                                  ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
   }
@@ -180,7 +223,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content || readOnly) return;
 
     const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
-    if (this.hasDragType(e.dataTransfer, kDragTileContent)) {
+    const hasContent = this.hasDragType(e.dataTransfer, kDragTileContent) ;
+    const newTileCreation = this.hasDragType(e.dataTransfer, kDragTileCreate);
+    if (hasContent || newTileCreation) {
       // Throttle calculation rate slightly to reduce load while dragging
       const lastUpdate = dropRowInfo && dropRowInfo.updateTimestamp ? dropRowInfo.updateTimestamp : 0;
       const now = new Date().getTime();
@@ -242,21 +287,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           // below the last row - highlight bottom of last row
           ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
         dropInfo.rowDropIndex = i;
-        dropInfo.dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-        dropInfo.dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-        dropInfo.dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-        dropInfo.dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+
+        const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
+        const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
+        const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
+        const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
 
         const kSideDropThreshold = rowBounds.width * 0.25;
-        if ((dropInfo.dropOffsetLeft < kSideDropThreshold) &&
-            (dropInfo.dropOffsetLeft < dropInfo.dropOffsetRight!)) {
+        if ((dropOffsetLeft < kSideDropThreshold) &&
+            (dropOffsetLeft < dropOffsetRight)) {
           dropInfo.rowDropLocation = "left";
         }
-        else if ((dropInfo.dropOffsetRight < kSideDropThreshold) &&
-                (dropInfo.dropOffsetRight <= dropInfo.dropOffsetLeft!)) {
+        else if ((dropOffsetRight < kSideDropThreshold) &&
+                (dropOffsetRight <= dropOffsetLeft)) {
           dropInfo.rowDropLocation = "right";
         }
-        else if (dropInfo.dropOffsetTop < dropInfo.dropOffsetBottom) {
+        else if (dropOffsetTop < dropOffsetBottom) {
           dropInfo.rowDropLocation = "top";
         }
         else {
@@ -282,31 +328,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     if (!content) return;
     const dragTileId = e.dataTransfer.getData(kDragTileId);
-    const srcRowId = content.findRowContainingTile(dragTileId);
-    if (!srcRowId) return;
-    const srcRowIndex = content.rowOrder.findIndex(rowId => rowId === srcRowId);
     const dropRowInfo  = this.getDropRowInfo(e);
-    const { rowInsertIndex, rowDropIndex, rowDropLocation } = dropRowInfo;
-    if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-      content.moveTileToRow(dragTileId, rowDropIndex, 0);
-      return;
-    }
-    if ((rowDropIndex != null) && (rowDropLocation === "right")) {
-      content.moveTileToRow(dragTileId, rowDropIndex);
-      return;
-    }
-
-    if ((srcRowIndex >= 0)) {
-      // if only one tile in source row, move the entire row
-      if (content.numTilesInRow(srcRowId) === 1) {
-        if (rowInsertIndex !== srcRowIndex) {
-          content.moveRowToIndex(srcRowIndex, rowInsertIndex);
-        }
-      }
-      else {
-        content.moveTileToNewRow(dragTileId, rowInsertIndex);
-      }
-    }
+    content.moveTile(dragTileId, dropRowInfo);
   }
 
   private handleCopyTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -322,11 +345,28 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     content.copyTileIntoRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
   }
 
+  private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
+    const { content } = this.props;
+    const { ui } = this.stores;
+
+    const createTileType = e.dataTransfer.getData(kDragTileCreate) as DocumentTool;
+    if (!content || !createTileType) return;
+
+    const insertRowInfo = this.getDropRowInfo(e);
+
+    const rowTile = content.addTile(createTileType, createTileType === "geometry", insertRowInfo);
+
+    if (rowTile && rowTile.tileId) {
+      ui.setSelectedTileId(rowTile.tileId);
+    }
+  }
+
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);
+    const dragCreateTileType = e.dataTransfer.getData(kDragTileCreate);
 
     if (!content || readOnly) return;
 
@@ -345,6 +385,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // handle drop - copy contents to new row
     else if (dragTileContent) {
       this.handleCopyTileDrop(e);
+    }
+
+    // handle drop to create new tile
+    else if (dragCreateTileType) {
+      this.handleInsertNewTile(e);
     }
 
     if (this.state.dropRowInfo) {

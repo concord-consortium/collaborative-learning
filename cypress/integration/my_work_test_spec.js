@@ -1,6 +1,6 @@
-import Workspace from './elements/Workspace'
-import RightNav from './elements/RightNav'
-import Canvas from './elements/Canvas'
+import Workspace from '../support/elements/Workspace'
+import RightNav from '../support/elements/RightNav'
+import Canvas from '../support/elements/Canvas'
 
 describe('Test right nav tabs', function(){
 
@@ -47,6 +47,7 @@ describe('Test right nav tabs', function(){
 
         it('will open correct canvas from Class Work list', function(){ //this assumes there are published work
             rightNav.openClassWorkTab();
+            rightNav.openClassWorkSections();
             rightNav.getClassWorkAreaCanvasItem().each(($item,index,$list)=>{
                 let title= $item.text().replace(/[^\x00-\x7F]/g, "")//.split('Group'),
                    // group = title[1];

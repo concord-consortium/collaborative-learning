@@ -10,6 +10,7 @@ import { DocumentModelType, SectionDocument } from "../../models/document/docume
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
+import { SectionType } from "../../models/curriculum/section";
 
 import "./document.sass";
 
@@ -234,6 +235,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
               key={index}
               onClick={this.handleToggleSupport(item)}
               className={`icon ${this.getSupportName(index)} ${visibility}`}
+              data-test="support-icon"
             >
               <use xlinkHref={`#${this.getSupportName(index)}`} />
             </svg>
@@ -309,7 +311,16 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
   }
 
   private getSupportsWithIndices() {
-    return this.stores.supports.getAllForSection(this.props.document.sectionId!).map((support, index) => {
+    const { groups, user } = this.stores;
+    const userId = user.id;
+    const group = groups.groupForUser(userId);
+    const groupId = group && group.id;
+    return this.stores.supports.getSupportsForUserProblem(
+      this.props.document.sectionId! as SectionType,
+      groupId,
+      userId
+    )
+    .map((support, index) => {
       return {index, item: support};
     });
   }

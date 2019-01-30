@@ -1,13 +1,14 @@
 import { types, Instance } from "mobx-state-tree";
 import { Point, DrawingObjectDataType } from "./drawing-objects";
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kDrawingToolID = "Drawing";
 
 export const kDrawingDefaultHeight = 320;
 export const TOOLBAR_WIDTH = 48;
 
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse";
+export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
 
 export interface Color {
   name: string;
@@ -75,6 +76,16 @@ export interface DrawingToolChange {
   action: DrawingToolChangeAction;
   data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
 }
+interface DrawingToolChangeLoggedEvent extends DrawingToolChange {
+  properties?: string[];
+}
+
+export const StampModel = types.model("Stamp", {
+  url: types.string,
+  width: types.number,
+  height: types.number
+});
+export type StampModelType = Instance<typeof StampModel>;
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -94,9 +105,10 @@ export const DrawingToolMetadataModel = types
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent() {
+export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
   return DrawingContentModel.create({
     type: kDrawingToolID,
+    stamps: options && options.stamps || [],
     changes: []
   });
 }
@@ -108,7 +120,9 @@ export const DrawingContentModel = types
     stroke: DefaultToolbarSettings.stroke,
     fill: DefaultToolbarSettings.fill,
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
-    strokeWidth: DefaultToolbarSettings.strokeWidth
+    strokeWidth: DefaultToolbarSettings.strokeWidth,
+    stamps: types.array(StampModel),
+    currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
     metadata: undefined as any as DrawingToolMetadataModelType
@@ -117,6 +131,22 @@ export const DrawingContentModel = types
 
     function applyChange(change: DrawingToolChange) {
       self.changes.push(JSON.stringify(change));
+
+      let loggedChangeProps = {...change} as DrawingToolChangeLoggedEvent;
+      delete loggedChangeProps.data;
+      if (!Array.isArray(change.data)) {
+        // flatten change.properties
+        loggedChangeProps = {
+          ...loggedChangeProps,
+          ...change.data
+        };
+      } else {
+        // or clean up MST array
+        loggedChangeProps.properties = Array.from(change.data as string[]);
+      }
+      delete loggedChangeProps.action;
+      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, change.action,
+        loggedChangeProps, self.metadata ? self.metadata.id : "");
     }
 
     function deleteSelectedObjects() {
@@ -156,6 +186,14 @@ export const DrawingContentModel = types
         },
         get hasSelectedObjects() {
           return self.metadata.selection.length > 0;
+        },
+        get currentStamp() {
+          // is type.maybe to avoid need for migration
+          const currentStampIndex = self.currentStampIndex || 0;
+          if (currentStampIndex < self.stamps.length) {
+            return self.stamps[currentStampIndex];
+          }
+          return null;
         }
       },
       actions: {
@@ -186,6 +224,10 @@ export const DrawingContentModel = types
 
         setSelection(ids: string[]) {
           self.metadata.setSelection(ids);
+        },
+
+        setSelectedStamp(stampIdex: number) {
+          self.currentStampIndex = stampIdex;
         },
 
         applyChange,
