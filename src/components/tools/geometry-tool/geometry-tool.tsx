@@ -4,7 +4,8 @@ import { renderUnicodeCharAsIconElement } from "../../utilities/blueprint";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, setElementColor, GeometryMetadataModelType
+        } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -25,6 +26,7 @@ import { assign, castArray, debounce, each, filter, find, keys, size as _size } 
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
+import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -57,6 +59,7 @@ interface IState extends SizeMeProps {
   imageEntry?: ImageMapEntryType;
   syncedChanges: number;
   disableRotate: boolean;
+  redoStack: string[][];
 }
 
 interface JXGPtrEvent {
@@ -69,6 +72,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   const newElements: JXG.GeometryElement[] = [];
   const changedElements: JXG.GeometryElement[] = [];
   const syncedChanges = content.changes.length;
+  board.suspendUpdate();
   for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
@@ -89,6 +93,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
 
   // update vertex angles affected by changed points
   updateVertexAnglesFromObjects(changedElements);
+  board.unsuspendUpdate();
 
   return { newElements: newElements.length ? newElements : undefined, syncedChanges };
 }
@@ -140,9 +145,25 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           // signal update to be triggered in componentDidUpdate
           nextState.imageContentUrl = lastUrl;
         }
-        // synchronize remaining changes
-        assign(nextState, syncBoardChanges(prevState.board, geometryContent,
-                                            prevState.syncedChanges, readOnly));
+        // If the incoming list of changes is shorter, an undo has occurred.
+        // In this case, clear the board and replay it.
+        if (prevState.syncedChanges > geometryContent.changes.length) {
+          const board = prevState.board;
+          board.suspendUpdate();
+          // Board initialization creates 2 objects: the info box and the grid.
+          // These won't be recreated if the board already exists so we don't delete them.
+          const kDefaultBoardObjects = 2;
+          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
+            board.removeObject(board.objectsList[i]);
+          }
+          board.unsuspendUpdate();
+        }
+        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
+                                ? 0
+                                : prevState.syncedChanges;
+        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
+      } else {
+        nextState.redoStack = [];
       }
       nextState.content = geometryContent;
     }
@@ -151,7 +172,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   public state: IState = {
           syncedChanges: 0,
-          disableRotate: false
+          disableRotate: false,
+          redoStack: []
         };
 
   private domElement: HTMLDivElement | null;
@@ -353,7 +375,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       "delete": this.handleDelete,
       "cmd-c": this.handleCopy,
       "cmd-x": this.handleCut,
-      "cmd-v": this.handlePaste
+      "cmd-v": this.handlePaste,
+      "cmd-z": this.handleUndo,
+      "cmd-shift-z": this.handleRedo,
     });
   }
 
@@ -483,6 +507,54 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.handlePaste();
   }
 
+  private handleUndo = () => {
+    const content = this.getContent();
+    const { board } = this.state;
+    if (board) {
+      const changeset = content.popChangeset();
+      if (changeset) {
+        board.showInfobox(false);
+        this.setState({
+          redoStack: this.state.redoStack.concat([changeset])
+        });
+
+        // Reverse the changes so they're logged in the order they're undone
+        [...changeset].reverse().forEach(changeString => {
+          const change = safeJsonParse(changeString);
+          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+            content.metadata ? content.metadata.id : "",
+            LogEventMethod.UNDO);
+        });
+      }
+    }
+
+    return true;
+  }
+
+  private handleRedo = () => {
+    const content = this.getContent();
+    const { redoStack, board } = this.state;
+    if (board) {
+      const changeset = redoStack[redoStack.length - 1];
+      if (changeset) {
+        board.showInfobox(false);
+        content.pushChangeset(changeset);
+        this.setState({
+          redoStack: redoStack.slice(0, redoStack.length - 1)
+        });
+
+        changeset.forEach(changeString => {
+          const change = safeJsonParse(changeString);
+          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+            content.metadata ? content.metadata.id : "",
+            LogEventMethod.REDO);
+        });
+      }
+    }
+
+    return true;
+  }
+
   private handleCopy = () => {
     const content = this.getContent();
     const { board } = this.state;
@@ -508,6 +580,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const { clipboard } = this.stores;
       let changes: string[] = clipboard.getTileContent(content.type);
       if (changes && changes.length) {
+        // Mark the first and last changes to create a batch
+        changes[0] = JSON.stringify({...safeJsonParse(changes[0]), startBatch: true});
+        changes[changes.length - 1] = JSON.stringify({...safeJsonParse(changes[changes.length - 1]), endBatch: true});
+
         const pasteId = clipboard.getTileContentId(content.type);
         const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
         // track the number of times the same content has been pasted
@@ -527,7 +603,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         const idMap: { [id: string]: string } = {};
         const newPointIds: string[] = [];
         if (this.lastPasteCount > 0) {
-          changes = changes.map(jsonChange => {
+          changes = changes.map((jsonChange) => {
             const change = safeJsonParse(jsonChange);
             const delta = this.lastPasteCount * 0.8;
             switch (change && change.operation) {

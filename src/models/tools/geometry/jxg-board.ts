@@ -34,7 +34,7 @@ export const boardChangeAgent: JXGChangeAgent = {
     // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
     const overrides = { axis: false, grid: true };
     const props = combineProperties(domElementID, defaults, change.properties, overrides);
-    const board = JXG.JSXGraph.initBoard(domElementID, props);
+    const board = isBoard(boardDomId) ? boardDomId as JXG.Board : JXG.JSXGraph.initBoard(domElementID, props);
     const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
                                 name: "x",
                                 withLabel: true,
