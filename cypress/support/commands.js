@@ -62,6 +62,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         expect(['S'+students[0],'S'+students[1],'S'+students[2],'S'+students[3]]).to.include($member.text());
     });
 });
+
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     // cy.fixture(filename).as("image");
 
