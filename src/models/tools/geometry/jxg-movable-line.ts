@@ -61,6 +61,13 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           id: `${id}-point2`
         }
       );
+      const overrides = {
+        name() {
+          return this.getSlope && this.getRise
+            ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
+            : "";
+        }
+      };
 
       return (board as JXG.Board).create(
         "line",
@@ -68,12 +75,13 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         {
           ...lineProps,
           id,
-          name: "y = mx + b",
           withLabel: true,
           label: {
             position: "top",
-            anchorY: "bottom"
-          }
+            anchorY: "bottom",
+            fontSize: 15
+          },
+          ...overrides
         });
     }
   },
