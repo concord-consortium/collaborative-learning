@@ -24,6 +24,7 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
 import * as uuid from "uuid/v4";
+import { GeometryToolbarView } from "./geometry-toolbar";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -262,6 +263,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     return ([
+      this.renderToolbar(),
       <div id={this.state.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -270,36 +272,38 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
-      this.renderMenuButton(),
       this.renderRotateHandle()
     ]);
   }
 
-  private renderMenuButton() {
-    const { model, readOnly } = this.props;
+  private renderToolbar() {
     const { board } = this.state;
-    const isSelectedTile = this.stores.ui.isSelectedTile(model);
-    if (!isSelectedTile || readOnly || !board) return;
+    if (!board) return;
+    const { readOnly } = this.props;
+    const content = this.getContent();
 
-    const angleIcon = renderUnicodeCharAsIconElement("∡");
     const selectedObjects = this.getContent().selectedObjects(board);
     const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
     const selectedPoint = selectedPoints && (selectedPoints.length === 1)
                             ? selectedPoints[0] as JXG.Point : undefined;
     const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
-    const hasVertexAngle = selectedPoint && !!getVertexAngle(selectedPoint);
-    const vertexAngleText = !hasVertexAngle ? "Show Angle Label" : "Hide Angle Label";
-    const enableLabelAngle = !readOnly && supportsVertexAngle;
+    const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
+    const disableVertexAngle = readOnly || !supportsVertexAngle;
+    const disableDelete = readOnly || !board || !content.hasSelection();
+    const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
+
     return (
-      <Popover className="geometry-menu-button" key="geometry-menu-button"
-                hasBackdrop={true} position={Position.BOTTOM_RIGHT} >
-        <Button key="geometry-menu-button" icon="menu" minimal={true} />
-        <Menu className="geometry-menu">
-          <MenuItem icon={angleIcon} text={vertexAngleText}
-                    disabled={!enableLabelAngle}
-                    onClick={this.handleToggleVertexAngle}/>
-        </Menu>
-      </Popover>
+      <GeometryToolbarView
+        key="geometry-toolbar-view"
+        model={this.props.model}
+        onAngleLabelClick={this.handleToggleVertexAngle}
+        isAngleLabelDisabled={disableVertexAngle}
+        isAngleLabelSelected={hasVertexAngle}
+        onDeleteClick={this.handleDelete}
+        isDeleteDisabled={disableDelete}
+        onDuplicateClick={this.handleDuplicate}
+        isDuplicateDisabled={disableDuplicate}
+      />
     );
   }
 
@@ -370,7 +374,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
-  private handleToggleVertexAngle = (evt: any) => {
+  private handleToggleVertexAngle = () => {
     const { board } = this.state;
     const selectedObjects = board && this.getContent().selectedObjects(board);
     const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
@@ -472,6 +476,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       content.deleteSelection(board);
       return true;
     }
+  }
+
+  private handleDuplicate = () => {
+    this.handleCopy();
+    this.handlePaste();
   }
 
   private handleCopy = () => {

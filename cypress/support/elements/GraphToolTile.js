@@ -67,12 +67,10 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button')
     }
     showAngle(){
-        this.getGraphToolMenuIcon().click();
-        cy.get('.bp3-text-overflow-ellipsis').contains('Show Angle').click();
+        cy.get('.button.angle-label.enabled').click();
     }
     hideAngle(){
-        this.getGraphToolMenuIcon().click();
-        cy.get('.bp3-text-overflow-ellipsis').contains('Hide Angle').click();
+        cy.get('.button.angle-label.enabled').click();
     }
 }
 export default GraphToolTile;
