@@ -131,6 +131,9 @@ declare namespace JXG {
   class Line extends GeometryElement {
     point1: JXG.Point;
     point2: JXG.Point;
+
+    getSlope: () => number;
+    getRise: () => number;
   }
 
   const Math: {
@@ -144,6 +147,8 @@ declare namespace JXG {
   };
 
   class Point extends CoordsElement {
+    X: () => number;
+    Y: () => number;
   }
 
   class Polygon extends GeometryElement {

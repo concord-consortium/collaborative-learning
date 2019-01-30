@@ -207,7 +207,7 @@ export const GeometryContentModel = types
         properties: assign({ id: uuid() }, properties)
       };
       const image = _applyChange(board, change);
-      return image ? image as JXG.Image : undefined;
+      return image ? image as any as JXG.Image : undefined;
     }
 
     function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties): JXG.Point | undefined {

@@ -6,7 +6,38 @@ export const isMovableLine = (v: any) => (v.elType === "line") && (v.getAttribut
 
 export const isVisibleMovableLine = (v: any) => isMovableLine && v.visProp.visible;
 
+export const clampControlPoint = (x: number, y: number, slope: number, intercept: number, board: JXG.Board) => {
+  let newX = x;
+  let newY = y;
+  const boundingBox = board.attr.boundingbox;
+  if (newX < boundingBox[0]) {
+    newX = boundingBox[0];
+    newY = solveForY(slope, intercept, newX);
+  }
+  if (newX > boundingBox[2]) {
+    newX = boundingBox[2];
+    newY = solveForY(slope, intercept, newX);
+  }
+  if (newY > boundingBox[1]) {
+    newY = boundingBox[1];
+    newX = solveForX(slope, intercept, newY);
+  }
+  if (newY < boundingBox[3]) {
+    newY = boundingBox[3];
+    newX = solveForX(slope, intercept, newY);
+  }
+  return [newX, newY];
+};
+
 export const kMovableLineType = "movableLine";
+
+const solveForY = (slope: number, intercept: number, x: number) => {
+  return slope * x + intercept;
+};
+
+const solveForX = (slope: number, intercept: number, y: number) => {
+  return (y - intercept) / slope;
+};
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;
@@ -64,6 +95,13 @@ export const lineChangeAgent: JXGChangeAgent = {
           id: `${id}-point2`
         }
       );
+      const overrides = {
+        name() {
+          return this.getSlope && this.getRise
+            ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
+            : "";
+        }
+      };
 
       return (board as JXG.Board).create(
         "line",
@@ -71,12 +109,12 @@ export const lineChangeAgent: JXGChangeAgent = {
         {
           ...lineProps,
           id,
-          name: "y = mx + b",
           withLabel: true,
           label: {
             position: "top",
             anchorY: "bottom"
-          }
+          },
+          ...overrides
         });
     }
   },

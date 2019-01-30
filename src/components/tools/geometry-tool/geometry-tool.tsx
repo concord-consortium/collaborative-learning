@@ -23,7 +23,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
-import { isVisibleMovableLine, isMovableLine, kMovableLineType } from "../../../models/tools/geometry/jxg-line";
+import { isVisibleMovableLine, isMovableLine, clampControlPoint } from "../../../models/tools/geometry/jxg-line";
 import * as uuid from "uuid/v4";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
@@ -1030,7 +1030,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
         vertices.forEach(vertex => content.selectElement(vertex.id));
 
-        if (line.getAttribute("clientType") === kMovableLineType) {
+        if (isMovableLine(line)) {
           content.selectElement(line.id);
         }
       }
@@ -1049,6 +1049,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     };
 
     const handleDrag = (evt: any) => {
+      const { board } = this.state;
       if (this.props.readOnly || this.isVertexDrag) return;
 
       const vertices = getVertices();
@@ -1060,6 +1061,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         this.dragSelectedPoints(evt, line, usrDiff);
       }
       this.setState({ disableRotate: true });
+
+      if (isMovableLine(line) && board) {
+        const point1 = line.point1;
+        point1.setPosition(
+          JXG.COORDS_BY_USER,
+          clampControlPoint(point1.X(), point1.Y(), line.getSlope(), line.getRise(), board)
+        );
+        const point2 = line.point2;
+        point2.setPosition(
+          JXG.COORDS_BY_USER,
+          clampControlPoint(point2.X(), point2.Y(), line.getSlope(), line.getRise(), board)
+        );
+      }
     };
 
     const handlePointerUp = (evt: any) => {
