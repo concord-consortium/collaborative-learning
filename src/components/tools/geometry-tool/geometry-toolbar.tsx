@@ -1,4 +1,3 @@
-// tslint:disable:jsx-no-lambda
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../../base";
 import { observer, inject } from "mobx-react";

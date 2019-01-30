@@ -288,9 +288,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
                             ? selectedPoints[0] as JXG.Point : undefined;
     const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
     const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
-    const enableVertexAngle = !readOnly && !!supportsVertexAngle;
-    const enableDelete = !readOnly && board && content.hasSelection();
-    const enableDuplicate = !readOnly && board && !!this.getOneSelectedPolygon();
     const disableVertexAngle = readOnly || !supportsVertexAngle;
     const disableDelete = readOnly || !board || !content.hasSelection();
     const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
