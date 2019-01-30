@@ -2,12 +2,13 @@ import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
-import { assign, each, keys, size as _size } from "lodash";
+import { assign, each, keys, values, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
+import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-movable-line";
 
 export const kGeometryToolID = "Geometry";
 
@@ -254,6 +255,17 @@ export const GeometryContentModel = types
       return point ? point as JXG.Point : undefined;
     }
 
+    function addMovableLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "movableLine",
+        parents,
+        properties: {...properties, id: uuid() }
+      };
+      const line = _applyChange(board, change);
+      return line ? line as JXG.Line : undefined;
+    }
+
     function removeObjects(board: JXG.Board, id: string | string[]) {
       const change: JXGChange = {
         operation: "delete",
@@ -416,7 +428,27 @@ export const GeometryContentModel = types
       if (selectedIds.length) {
         self.deselectAll(board);
         board.showInfobox(false);
-        removeObjects(board, selectedIds);
+        const idsToDelete = selectedIds.reduce((ids, id) => {
+          const obj = board.objects[id];
+          if (obj) {
+            if (isPoint(obj) && obj.getAttribute("clientType") === kMovableLineType) {
+              // Don't delete movable line control points on their own, only delete as part of line deletion
+              return ids;
+            } else if (isMovableLine(obj)) {
+              // We manually delete a line's control points when it is deleted since they should not exist on
+              // their own, and are parents of the line (rather than children) so they're not deleted automatically
+              const line = obj as JXG.Line;
+              ids.push(line.id);
+              ids.push(line.point1.id);
+              ids.push(line.point2.id);
+            } else {
+              // Other objects can be deleted normally
+              ids.push(id);
+            }
+          }
+          return ids;
+        }, [] as string[]);
+        removeObjects(board, idsToDelete);
       }
     }
 
@@ -494,6 +526,7 @@ export const GeometryContentModel = types
         pushChangeset,
         addImage,
         addPoint,
+        addMovableLine,
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,

@@ -5,6 +5,7 @@ import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { movableLineChangeAgent } from "./jxg-movable-line";
 import { castArray } from "lodash";
 
 interface JXGChangeAgents {
@@ -17,7 +18,8 @@ const agents: JXGChangeAgents = {
   object: objectChangeAgent,
   point: pointChangeAgent,
   polygon: polygonChangeAgent,
-  vertexangle: vertexAngleChangeAgent
+  vertexangle: vertexAngleChangeAgent,
+  movableline: movableLineChangeAgent,
 };
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {

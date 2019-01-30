@@ -13,6 +13,7 @@ interface IProps extends IBaseProps {
   isDeleteDisabled: boolean;
   onDuplicateClick: () => void;
   isDuplicateDisabled: boolean;
+  onMovableLineClick: () => void;
 }
 interface IState {
   showSettings: boolean;
@@ -70,10 +71,10 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
                                     disabled: this.props.isAngleLabelDisabled,
                                     hidden: false })}
           {this.renderToolButton("Movable Line", "movable-line",
-                                  { onClick: undefined,
+                                  { onClick: this.props.onMovableLineClick,
                                     selected: false,
                                     disabled: false,
-                                    hidden: true })}
+                                    hidden: false })}
           {this.renderToolButton("Draw", "draw",
                                   { onClick: undefined,
                                     selected: false,

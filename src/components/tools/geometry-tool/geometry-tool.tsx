@@ -24,6 +24,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
+import { isVisibleMovableLine, isMovableLine, kMovableLineType } from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
@@ -329,6 +330,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         isDeleteDisabled={disableDelete}
         onDuplicateClick={this.handleDuplicate}
         isDuplicateDisabled={disableDuplicate}
+        onMovableLineClick={this.handleCreateMovableLine}
       />
     );
   }
@@ -426,6 +428,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           this.getContent().removeObjects(board, vertexAngle.id);
         });
       }
+    }
+  }
+
+  private handleCreateMovableLine = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
+      this.applyChange(() => {
+          const line = content.addMovableLine(board, [[0, 0], [5, 5]], props);
+          if (line) {
+            this.handleCreatePoint(line.point1);
+            this.handleCreatePoint(line.point2);
+            this.handleCreateLine(line);
+          }
+      });
     }
   }
 
@@ -747,6 +765,12 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     else if (isVertexAngle(elt)) {
       this.handleCreateVertexAngle(elt as JXG.Angle);
     }
+    else if (isMovableLine(elt)) {
+      const line = elt as JXG.Line;
+      this.handleCreateLine(line);
+      this.handleCreatePoint(line.point1);
+      this.handleCreatePoint(line.point2);
+    }
   }
 
   private applyChange(change: () => void) {
@@ -937,7 +961,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
       // clicks on visible points and edges don't create new points
       for (const elt of board.objectsList) {
-        if ((isVisiblePoint(elt) || isVisibleEdge(elt)) &&
+        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt)) &&
             elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
@@ -1064,10 +1088,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     point.on("up", handlePointerUp);
   }
 
-  private handleCreatePolygonEdge = (edge: JXG.Line) => {
+  private handleCreateLine = (line: JXG.Line) => {
 
     function getVertices() {
-      return filter(edge.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
+      return filter(line.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
     }
 
     const isInVertex = (evt: any) => {
@@ -1081,7 +1105,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const handlePointerDown = (evt: any) => {
       const { readOnly } = this.props;
       const { board, scale } = this.state;
-      if (!board || (edge !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
+      if (!board || (line !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
 
       const content = this.getContent();
       const vertices = getVertices();
@@ -1092,6 +1116,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           content.deselectAll(board);
         }
         vertices.forEach(vertex => content.selectElement(vertex.id));
+
+        if (line.getAttribute("clientType") === kMovableLineType) {
+          content.selectElement(line.id);
+        }
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect
       // else if (hasSelectionModifier(evt)) {
@@ -1102,7 +1130,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         // point handles vertex drags
         this.isVertexDrag = isInVertex(evt);
         if (!this.isVertexDrag) {
-          this.beginDragSelectedPoints(evt, edge);
+          this.beginDragSelectedPoints(evt, line);
         }
       }
     };
@@ -1116,7 +1144,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       if (dragEntry && dragEntry.initial) {
         const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                     dragEntry.initial.usrCoords) as number[];
-        this.dragSelectedPoints(evt, edge, usrDiff);
+        this.dragSelectedPoints(evt, line, usrDiff);
       }
       this.setState({ disableRotate: true });
     };
@@ -1131,7 +1159,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         if (dragEntry && dragEntry.initial) {
           const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                       dragEntry.initial.usrCoords) as number[];
-          this.endDragSelectedPoints(evt, edge, usrDiff);
+          this.endDragSelectedPoints(evt, line, usrDiff);
         }
       }
       // remove this polygon's vertices from the dragPts map
@@ -1139,9 +1167,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       this.isVertexDrag = false;
     };
 
-    edge.on("down", handlePointerDown);
-    edge.on("drag", handleDrag);
-    edge.on("up", handlePointerUp);
+    line.on("down", handlePointerDown);
+    line.on("drag", handleDrag);
+    line.on("up", handlePointerUp);
   }
 
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
@@ -1249,7 +1277,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     };
 
     const edges = getPolygonEdges(polygon);
-    edges.forEach(edge => this.handleCreatePolygonEdge(edge));
+    edges.forEach(edge => this.handleCreateLine(edge));
 
     polygon.on("down", handlePointerDown);
     polygon.on("drag", handleDrag);

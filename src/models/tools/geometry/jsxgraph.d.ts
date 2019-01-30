@@ -129,6 +129,8 @@ declare namespace JXG {
   }
 
   class Line extends GeometryElement {
+    point1: JXG.Point;
+    point2: JXG.Point;
   }
 
   const Math: {
