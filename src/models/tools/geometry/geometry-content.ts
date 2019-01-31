@@ -59,9 +59,11 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
   if (element) {
+    const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
+    const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     element.setAttribute({
-              fillColor: selected ? kPointDefaults.selectedFillColor : kPointDefaults.fillColor,
-              strokeColor: selected ? kPointDefaults.selectedStrokeColor : kPointDefaults.strokeColor
+              fillColor: selected ? kPointDefaults.selectedFillColor : fillColor,
+              strokeColor: selected ? kPointDefaults.selectedStrokeColor : strokeColor
             });
   }
 }
@@ -144,6 +146,11 @@ export const GeometryContentModel = types
           if (isBoard(elt)) {
             board = elt as JXG.Board;
             board.suspendUpdate();
+          }
+          else if (Array.isArray(elt)) {
+            if (onCreate) {
+              elt.forEach(el => onCreate(el as JXG.GeometryElement));
+            }
           }
           else if (elt && onCreate) {
             onCreate(elt as JXG.GeometryElement);

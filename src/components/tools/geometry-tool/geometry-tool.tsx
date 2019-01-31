@@ -80,6 +80,10 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
       if (result instanceof JXG.GeometryElement) {
         newElements.push(result);
       }
+      else if (Array.isArray(result)) {
+        const elts = result as JXG.GeometryElement[];
+        newElements.push(...elts);
+      }
       if (change.operation === "update") {
         const ids = castArray(change.targetID);
         const targets = ids.map(id => board.objects[id]);
