@@ -18,6 +18,7 @@ import { setLivelynessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
+import "./components/utilities/blueprint";
 import "./index.sass";
 
 function getCurriculumJson() {
