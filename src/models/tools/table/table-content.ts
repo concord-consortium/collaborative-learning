@@ -3,6 +3,7 @@ import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
 import { GeometryContentModelType } from "../geometry/geometry-content";
+import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kTableToolID = "Table";
@@ -142,6 +143,33 @@ export const TableContentModel = types
       return content && content as GeometryContentModelType;
     }
   }))
+  .views(self => ({
+    canUndo() {
+      return false;
+      // const hasUndoableChanges = self.changes.length > 1;
+      // if (!hasUndoableChanges) return false;
+      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      // const lastChangeParsed: ITableChange = lastChange && safeJsonParse(lastChange);
+      // const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      // if (!lastChangeLinks) return true;
+      // const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
+      // const linkedTile = linkedTiles && linkedTiles[0];
+      // const tableContent = linkedTile ? self.getGeometryContent(linkedTile) : undefined;
+      // return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
+    },
+    canUndoLinkedChange(change: JXGChange) {
+      return false;
+      // const hasUndoableChanges = self.changes.length > 1;
+      // if (!hasUndoableChanges) return false;
+      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      // const lastChangeParsed = lastChange && safeJsonParse(lastChange);
+      // const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      // if (!lastChangeLinks) return false;
+      // const tableActionLinkId = lastChangeLinks && lastChangeLinks.id;
+      // const geometryActionLinkId = change.links && change.links.id;
+      // return tableActionLinkId && geometryActionLinkId && (tableActionLinkId === geometryActionLinkId);
+    }
+  }))
   .actions(self => ({
     doPostCreate(metadata: TableMetadataModelType) {
       self.metadata = metadata;
@@ -199,7 +227,8 @@ export const TableContentModel = types
             action: "update",
             target: "rows",
             ids,
-            props: values as ITableProperties
+            props: values as ITableProperties,
+            links
       });
     },
     removeCases(ids: string[], links?: ILinkProperties) {

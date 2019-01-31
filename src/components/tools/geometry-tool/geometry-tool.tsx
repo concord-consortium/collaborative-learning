@@ -536,7 +536,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleUndo = () => {
     const content = this.getContent();
     const { board } = this.state;
-    if (board) {
+    if (board && content.canUndo()) {
       const changeset = content.popChangeset();
       if (changeset) {
         board.showInfobox(false);

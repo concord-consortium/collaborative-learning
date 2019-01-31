@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { ILinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
+import { ILinkProperties, ITableChange, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
@@ -129,6 +129,29 @@ export const GeometryContentModel = types
                     const elt = board.objects[id];
                     return elt && !elt.getAttribute("fixed");
                   });
+    },
+    canUndo() {
+      const hasUndoableChanges = self.changes.length > 1;
+      if (!hasUndoableChanges) return false;
+      const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      const lastChangeParsed: JXGChange = lastChange && safeJsonParse(lastChange);
+      const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      if (!lastChangeLinks) return true;
+      const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
+      const linkedTile = linkedTiles && linkedTiles[0];
+      const tableContent = linkedTile ? self.getTableContent(linkedTile) : undefined;
+      return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
+    },
+    canUndoLinkedChange(change: ITableChange) {
+      const hasUndoableChanges = self.changes.length > 1;
+      if (!hasUndoableChanges) return false;
+      const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      const lastChangeParsed = lastChange && safeJsonParse(lastChange);
+      const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      if (!lastChangeLinks) return false;
+      const geometryActionLinkId = lastChangeLinks && lastChangeLinks.id;
+      const tableActionLinkId = change.links && change.links.id;
+      return geometryActionLinkId && tableActionLinkId && (geometryActionLinkId === tableActionLinkId);
     }
   }))
   .actions(self => ({
