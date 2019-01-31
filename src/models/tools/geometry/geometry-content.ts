@@ -2,12 +2,13 @@ import { types, Instance } from "mobx-state-tree";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
-import { assign, each, keys, size as _size } from "lodash";
+import { assign, each, keys, values, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
+import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-movable-line";
 
 export const kGeometryToolID = "Geometry";
 
@@ -61,9 +62,11 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   if (element) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
+    const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
+    const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
     element.setAttribute({
-              fillColor: selected ? kPointDefaults.selectedFillColor : fillColor,
-              strokeColor: selected ? kPointDefaults.selectedStrokeColor : strokeColor
+              fillColor: selected ? selectedFillColor : fillColor,
+              strokeColor: selected ? selectedStrokeColor : strokeColor
             });
   }
 }
@@ -252,6 +255,17 @@ export const GeometryContentModel = types
       };
       const point = _applyChange(board, change);
       return point ? point as JXG.Point : undefined;
+    }
+
+    function addMovableLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "movableLine",
+        parents,
+        properties: {id: uuid(), ...properties}
+      };
+      const elems = _applyChange(board, change);
+      return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
     function removeObjects(board: JXG.Board, id: string | string[]) {
@@ -494,6 +508,7 @@ export const GeometryContentModel = types
         pushChangeset,
         addImage,
         addPoint,
+        addMovableLine,
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,

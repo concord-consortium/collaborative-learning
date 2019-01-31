@@ -1,6 +1,6 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "object" | "image" | "point" | "polygon" | "vertexAngle";
+export type JXGObjectType = "board" | "object" | "image" | "movableLine" | "point" | "polygon" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 
@@ -20,7 +20,7 @@ export interface JXGChange {
   properties?: JXGProperties | JXGProperties[];
 }
 
-export type JXGElement = JXG.Board | JXG.Point;
+export type JXGElement = JXG.Board | JXG.Point | JXG.Line;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
