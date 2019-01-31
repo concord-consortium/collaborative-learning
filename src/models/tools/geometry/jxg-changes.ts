@@ -21,7 +21,7 @@ export interface JXGChange {
 }
 
 export type JXGElement = JXG.Board | JXG.Point;
-export type JXGChangeResult = JXGElement | undefined;
+export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
 // for all other changes it should be the board

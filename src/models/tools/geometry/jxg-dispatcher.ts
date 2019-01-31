@@ -5,6 +5,7 @@ import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { castArray } from "lodash";
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -42,11 +43,16 @@ export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChan
     applyUpdateObjects(board as JXG.Board, change);
     return;
   }
+  if ((change.operation === "delete") && (target === "object")) {
+    // special case for delete/object, where we dispatch by object type
+    applyDeleteObjects(board as JXG.Board, change);
+    return;
+  }
   return dispatchChange(board, change);
 }
 
 function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
-  const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
+  const ids = castArray(change.targetID);
   ids.forEach((id, index) => {
     const obj = id && board.objects[id];
     const target = obj ? obj.elType as JXGObjectType : "object";
@@ -59,6 +65,21 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
                             targetID: id,
                             parents: change.parents,
                             properties: props
+                          });
+  });
+}
+
+function applyDeleteObjects(board: JXG.Board, change: JXGChange) {
+  const ids = castArray(change.targetID);
+  ids.forEach(id => {
+    const obj = id && board.objects[id];
+    const target = obj
+            ? obj.getAttribute("clientType") || obj.elType as JXGObjectType
+            : "object";
+    return dispatchChange(board, {
+                            operation: "delete",
+                            target,
+                            targetID: id
                           });
   });
 }
