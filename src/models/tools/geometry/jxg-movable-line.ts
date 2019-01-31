@@ -1,5 +1,6 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { castArray } from "lodash";
 
 export const isMovableLine = (v: any) => {
   return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
@@ -25,6 +26,10 @@ const sharedProps = {
         strokeColor: kMovableLineDefaults.strokeColor,
         clientType: kMovableLineType,
         strokeWidth: 3,
+        clientFillColor: kMovableLineDefaults.fillColor,
+        clientStrokeColor: kMovableLineDefaults.strokeColor,
+        clientSelectedFillColor: kMovableLineDefaults.selectedFillColor,
+        clientSelectedStrokeColor: kMovableLineDefaults.selectedStrokeColor,
       };
 
 const lineSpecificProps = {
@@ -74,7 +79,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         }
       };
 
-      return (board as JXG.Board).create(
+      const line = (board as JXG.Board).create(
         "line",
         [interceptPoint, slopePoint],
         {
@@ -88,12 +93,26 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           },
           ...overrides
         });
+
+      return [line, interceptPoint, slopePoint];
     }
   },
 
   // update can be handled generically
   update: objectChangeAgent.update,
 
-  // delete can be handled generically
-  delete: objectChangeAgent.delete
+  delete: (board, change) => {
+    if (!change.targetID) return;
+    const ids = castArray(change.targetID);
+    ids.forEach((id) => {
+      const obj = board.objects[id] as JXG.GeometryElement;
+      if (isMovableLine(obj)) {
+        const line = obj as JXG.Line;
+        board.removeObject(line);
+        board.removeObject(line.point1);
+        board.removeObject(line.point2);
+      }
+    });
+    board.update();
+  }
 };

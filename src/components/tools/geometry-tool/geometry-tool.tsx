@@ -435,8 +435,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (board) {
       const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
       this.applyChange(() => {
-          const line = content.addMovableLine(board, [[0, 0], [5, 5]], props);
-          this.handleCreateElement(line);
+          const elems = content.addMovableLine(board, [[0, 0], [5, 5]], props);
+          if (elems) {
+            elems.forEach(elem => this.handleCreateElement(elem));
+          }
       });
     }
   }
@@ -760,10 +762,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       this.handleCreateVertexAngle(elt as JXG.Angle);
     }
     else if (isMovableLine(elt)) {
-      const line = elt as JXG.Line;
-      this.handleCreateLine(line);
-      this.handleCreatePoint(line.point1);
-      this.handleCreatePoint(line.point2);
+      this.handleCreateLine(elt as JXG.Line);
     }
   }
 

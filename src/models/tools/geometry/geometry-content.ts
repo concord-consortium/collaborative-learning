@@ -62,9 +62,11 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   if (element) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
+    const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
+    const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
     element.setAttribute({
-              fillColor: selected ? kPointDefaults.selectedFillColor : fillColor,
-              strokeColor: selected ? kPointDefaults.selectedStrokeColor : strokeColor
+              fillColor: selected ? selectedFillColor : fillColor,
+              strokeColor: selected ? selectedStrokeColor : strokeColor
             });
   }
 }
@@ -262,8 +264,8 @@ export const GeometryContentModel = types
         parents,
         properties: {id: uuid(), ...properties}
       };
-      const line = _applyChange(board, change);
-      return line ? line as JXG.Line : undefined;
+      const elems = _applyChange(board, change);
+      return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
     function removeObjects(board: JXG.Board, id: string | string[]) {
@@ -428,27 +430,7 @@ export const GeometryContentModel = types
       if (selectedIds.length) {
         self.deselectAll(board);
         board.showInfobox(false);
-        const idsToDelete = selectedIds.reduce((ids, id) => {
-          const obj = board.objects[id];
-          if (obj) {
-            if (isPoint(obj) && obj.getAttribute("clientType") === kMovableLineType) {
-              // Don't delete movable line control points on their own, only delete as part of line deletion
-              return ids;
-            } else if (isMovableLine(obj)) {
-              // We manually delete a line's control points when it is deleted since they should not exist on
-              // their own, and are parents of the line (rather than children) so they're not deleted automatically
-              const line = obj as JXG.Line;
-              ids.push(line.id);
-              ids.push(line.point1.id);
-              ids.push(line.point2.id);
-            } else {
-              // Other objects can be deleted normally
-              ids.push(id);
-            }
-          }
-          return ids;
-        }, [] as string[]);
-        removeObjects(board, idsToDelete);
+        removeObjects(board, selectedIds);
       }
     }
 
