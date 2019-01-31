@@ -1,5 +1,5 @@
 import { GroupsModel, GroupModel, GroupUserModel } from "./groups";
-import { ClassModel, ClassStudentModel } from "./class";
+import { ClassModel, ClassUserModel } from "./class";
 import { DBOfferingGroupMap } from "../../lib/db-types";
 
 describe("Groups model", () => {
@@ -96,7 +96,7 @@ describe("Groups model", () => {
       name: "test",
       classHash: "test",
       students: [
-        ClassStudentModel.create({
+        ClassUserModel.create({
           id: "1",
           firstName: "Test",
           lastName: "User",

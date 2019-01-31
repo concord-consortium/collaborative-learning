@@ -1,6 +1,6 @@
 import { DocumentModel, DocumentModelType, SectionDocument, DocumentType} from "../document/document";
 import { DocumentsModelType, DocumentsModel } from "./documents";
-import { ClassModelType, ClassModel, ClassStudentModel } from "./class";
+import { ClassModelType, ClassModel, ClassUserModel } from "./class";
 
 describe("documents model", () => {
   let documents: DocumentsModelType;
@@ -49,21 +49,21 @@ describe("documents model", () => {
     let clazz: ClassModelType;
 
     beforeEach(() => {
-      student1 = ClassStudentModel.create({
+      student1 = ClassUserModel.create({
         id: "1",
         firstName: "aaa",
         lastName: "aaa",
         fullName: "aaa aaa",
         initials: "AA"
       });
-      student2 = ClassStudentModel.create({
+      student2 = ClassUserModel.create({
         id: "2",
         firstName: "zzz",
         lastName: "aaa",
         fullName: "zzz aaa",
         initials: "ZA"
       });
-      student3 = ClassStudentModel.create({
+      student3 = ClassUserModel.create({
         id: "3",
         firstName: "zzz",
         lastName: "zzz",

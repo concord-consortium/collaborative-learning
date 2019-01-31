@@ -1,4 +1,4 @@
-import { ClassModel, ClassStudentModel } from "./class";
+import { ClassModel, ClassUserModel } from "./class";
 import { ClassInfo } from "../../lib/auth";
 
 describe("Class model", () => {
@@ -12,7 +12,7 @@ describe("Class model", () => {
   });
 
   it("uses override values", () => {
-    const student = ClassStudentModel.create({
+    const student = ClassUserModel.create({
       id: "1",
       firstName: "First",
       lastName: "Student",

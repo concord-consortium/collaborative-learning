@@ -22,7 +22,7 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
         <div className="header">Class Logs</div>
         <div className="list">
           {publications.map((publication) => {
-            const user = this.stores.class.getStudentById(publication.uid);
+            const user = this.stores.class.getUserById(publication.uid);
             return (
               <div
                 className="list-item"
