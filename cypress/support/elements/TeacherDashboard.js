@@ -64,6 +64,7 @@ class TeacherDashboard {
         this.getGroupName().contains(group).click();
     }
     selectSection(level, section){
+        cy.log('in selectSection');
         switch (level) {
             case 'class':
                 this.getStudentSupportsSectionDropdown().click();
