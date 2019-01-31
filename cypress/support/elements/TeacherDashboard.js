@@ -64,20 +64,19 @@ class TeacherDashboard {
         this.getGroupName().contains(group).click();
     }
     selectSection(level, section){
-        cy.log('in selectSection');
+        const sectionValue = {"All":"all", "Introduction":"introduction", "Initial Challenge":"initialChallenge", "What if...?":"whatIf", "Now What":"nowWhat", "Extra Workspace":"extraWorkspace"};
+        cy.log('in selectSection. level: '+level+' section: '+section);
         switch (level) {
             case 'class':
-                this.getStudentSupportsSectionDropdown().click();
+                this.getClassSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
                 break;
             case 'group':
-                this.getGroupSupportsSectionDropdown().click();
+                this.getGroupSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
                 break;
-            case 'student':
-                this.getStudentSupportsSectionDropdown().click();
+            case 'user':
+                this.getStudentSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
                 break;
         }
-        cy.select()
-        // this.getStudentSupportsSectionDropdownOptions().contains(section).click();
     }
     deleteClassSupportMessage () {
         cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').click();
