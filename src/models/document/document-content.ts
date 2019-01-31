@@ -1,5 +1,4 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
-import { DataSet } from "../data/data-set";
 import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
 import { defaultGeometryContent, kGeometryDefaultHeight } from "../tools/geometry/geometry-content";
 import { defaultImageContent } from "../tools/image/image-content";
@@ -34,8 +33,6 @@ export const DocumentContentModel = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
-    // data shared between tools
-    shared: types.maybe(DataSet)
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -66,6 +63,10 @@ export const DocumentContentModel = types
       },
       getTile(tileId: string) {
         return self.tileMap.get(tileId);
+      },
+      getTileContent(tileId: string) {
+        const tile = self.tileMap.get(tileId);
+        return tile && tile.content;
       },
       getRow(rowId: string) {
         return self.rowMap.get(rowId);
@@ -235,6 +236,8 @@ export const DocumentContentModel = types
       self.rowMap.forEach(row => {
         // remove from row
         if (row.hasTile(tileId)) {
+          const tile = self.getTile(tileId);
+          tile && tile.willRemoveFromDocument();
           row.removeTileFromRow(tileId);
         }
         // track empty rows

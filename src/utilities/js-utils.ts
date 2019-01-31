@@ -22,7 +22,7 @@ export function safeJsonParse(json?: string) {
  *
  * returns a unique id string
  */
-export function uniqueId() {
+export function uniqueId(): string {
   // cf. https://zelark.github.io/nano-id-cc/
   const idLength = 16;
   return nanoid(idLength);
