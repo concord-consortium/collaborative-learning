@@ -165,12 +165,12 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         });
 
       const supportText = "sample support";
-
+        debugger
         it('will add a message to whole class for all sections and verify message appears in all sections for whole class', function(){
             let i=0, j=0;
             teacherDashboard.sendSupportMessage('class','This message is for whole class in all sections');
             //verify that message appears in both groups in all sections
-            for (i=0;j<studentArr10.length-2;i++){
+            for (i=0; i<studentArr10.length-2; i++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
                 cy.wait(3000);
                 leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
@@ -184,7 +184,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                 })
             }
 
-            for (j=0;j<studentArr20.length-2;j++){
+            for (j=0; j<studentArr20.length-2; j++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[j]+'&problem='+problem);
                 cy.wait(3000);
                 leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
@@ -200,12 +200,12 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         });
 
         it('will add a message to a group for all sections and verify message appears in all sections for a group and not the other', function(){
-            let i=0, j=0;
+            let i=0;
             teacherDashboard.selectGroup(qaGroup10);
             teacherDashboard.sendSupportMessage('group','This message is for group 10 in all sections');
             //verify that message appears in specified groups in all sections
-            for (j=0;j<studentArr10.length-2;j++){
-                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[j]+'&problem='+problem);
+            for (i=0; i<studentArr10.length-2; i++){
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
                 cy.wait(3000);
                 leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
                     cy.wrap($tab).click({force:true});
