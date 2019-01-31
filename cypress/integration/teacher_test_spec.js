@@ -170,8 +170,8 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             let i=0, j=0;
             teacherDashboard.sendSupportMessage('class','This message is for whole class in all sections');
             //verify that message appears in both groups in all sections
-            for (j=0;j<studentArr10.length-2;j++){
-                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[j]+'&problem='+problem);
+            for (i=0;j<studentArr10.length-2;i++){
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
                 cy.wait(3000);
                 leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
                     cy.wrap($tab).click({force:true});
@@ -197,42 +197,41 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     cy.get('[data-test="supports-list"]').contains('whole class in all sections')
                 })
             }
-
-            // for (i=0;i<studentArr20.length-1;i++){
-            //     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
-            //     leftNav.getLeftNavTabs().each(($tab,index,$list)=> {
-            //         cy.wrap($tab).click();
-            //         leftNav.getOpenToWorkspaceButton(index).click();
-            //         cy.wait(2000);
-            //         if (index<1) {
-            //             cy.get('[data-test=support-icon]').last().click();
-            //         }
-            //         cy.get('[data-test=supports-list').contains('whole class in all sections')
-            //
-            //
-            //         //find the first/last message icon and click it.
-            //         //verify that the same message appears in each section
-            //     });
-            // }
         });
-      //   it('will add a message to a group for all sections and verify message appears in all sections for a group', function(){
-      //       let i=0;
-      //       teacherDashboard.selectGroup(qaGroup10);
-      //       teacherDashboard.sendSupportMessage('group','This message is for whole group in all sections');
-      //       //verify that message appears in both groups in all sections
-      //       for (i=0;i<studentArr10.length-1;i++){
-      //           cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem)
-      //           leftNav.getLeftNavTabs().each(($tab,index,$list)=> {
-      //               cy.wrap($tab).click();
-      //               leftNav.getOpenToWorkspaceButton().click();
-      //               cy.wait(2000);
-      //
-      //               //find the first/last message icon and click it.
-      //               //verify that the same message appears in each section
-      //           });
-      //       }
-      //   });
-      //   it('will add a message to a student for all sections and verify message appears in all sections for a student', function(){
+
+        it('will add a message to a group for all sections and verify message appears in all sections for a group and not the other', function(){
+            let i=0, j=0;
+            teacherDashboard.selectGroup(qaGroup10);
+            teacherDashboard.sendSupportMessage('group','This message is for group 10 in all sections');
+            //verify that message appears in specified groups in all sections
+            for (j=0;j<studentArr10.length-2;j++){
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[j]+'&problem='+problem);
+                cy.wait(3000);
+                leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
+                    cy.wrap($tab).click({force:true});
+                    leftNav.getOpenToWorkspaceButton(index).click({force: true});
+                    cy.wait(3000);
+                    if (index<1) {
+                        cy.get('[data-test="support-icon group"]').last().click();
+                    }
+                    cy.get('[data-test="supports-list"]').contains('group 10 in all sections')
+                })
+            }
+
+            //verify message is not in the other group
+            cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[0]+'&problem='+problem);
+            cy.wait(3000);
+            leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
+                cy.wrap($tab).click({force:true});
+                leftNav.getOpenToWorkspaceButton(index).click({force: true});
+                cy.wait(3000);
+                if (index<1) {
+                    cy.get('[data-test="support-icon group"]').should('not.exist');
+                }
+            })
+        });
+        
+      //   it('will add a message to a student for all sections and verify message appears in all sections for a student and not another', function(){
       //       let i=0;
       //       teacherDashboard.selectGroup(qaGroup10);
       //       teacherDashboard.selectStudent(studentArr10[0]);
