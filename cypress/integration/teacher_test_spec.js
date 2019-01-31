@@ -170,8 +170,8 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             let i=0, j=0;
             teacherDashboard.sendSupportMessage('class','This message is for whole class in all sections');
             //verify that message appears in both groups in all sections
-            for (j=0;j<studentArr10.length-2;j++){
-                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[j]+'&problem='+problem);
+            for (i=0; i<studentArr10.length-2; i++){
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
                 cy.wait(3000);
                 leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
                     cy.wrap($tab).click({force:true});
@@ -183,12 +183,14 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                     cy.get('[data-test="supports-list"]').contains('whole class in all sections')
                 })
             }
-            for (i=0;i<studentArr20.length-1;i++){
-                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[i]+'&problem='+problem);
-                leftNav.getLeftNavTabs().each(($tab,index,$list)=> {
-                    cy.wrap($tab).click();
-                    leftNav.getOpenToWorkspaceButton(index).click();
-                    cy.wait(2000);
+
+            for (j=0; j<studentArr20.length-2; j++){
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[j]+'&problem='+problem);
+                cy.wait(3000);
+                leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
+                    cy.wrap($tab).click({force:true});
+                    leftNav.getOpenToWorkspaceButton(index).click({force: true});
+                    cy.wait(3000);
                     if (index<1) {
                         cy.get('[data-test="support-icon class"]').last().click();
                     }
