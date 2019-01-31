@@ -168,7 +168,10 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
 
         it('will add a message to whole class for all sections and verify message appears in all sections for whole class', function(){
             let i=0, j=0;
-            teacherDashboard.sendSupportMessage('class','This message is for whole class in all sections');
+            let section = "Extra Workspace";
+            cy.log('sectionValue[section]: ' + sectionValue[section])
+            teacherDashboard.selectSection(sectionValue[section]);
+            teacherDashboard.sendSupportMessage('class','This message is for whole class in '+section);
             //verify that message appears in both groups in all sections
             for (i=0; i<studentArr10.length-2; i++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup10+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[i]+'&problem='+problem);
