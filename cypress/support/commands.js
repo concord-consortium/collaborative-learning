@@ -57,10 +57,10 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.wait(1000);
     }
     //verify Group num and there are 4 students in the group
-    header.getGroupName().should('contain','Group '+group);
-    header.getGroupMembers().each(($member,index, $list)=>{
-        expect(['S'+students[0],'S'+students[1],'S'+students[2],'S'+students[3]]).to.include($member.text());
-    });
+    // header.getGroupName().should('contain','Group '+group);
+    // header.getGroupMembers().each(($member,index, $list)=>{
+    //     expect(['S'+students[0],'S'+students[1],'S'+students[2],'S'+students[3]]).to.include($member.text());
+    // });
 });
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
