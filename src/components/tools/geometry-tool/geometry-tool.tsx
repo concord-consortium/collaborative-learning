@@ -317,7 +317,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
     const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
     const disableVertexAngle = readOnly || !supportsVertexAngle;
-    const disableDelete = readOnly || !board || !content.hasSelection();
+    const disableDelete = readOnly || !board || !content.hasSelection() ||
+                            !content.getDeletableSelectedIds(board).length;
     const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
 
     return (

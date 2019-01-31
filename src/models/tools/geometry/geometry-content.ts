@@ -122,6 +122,15 @@ export const GeometryContentModel = types
       return content && content as TableContentModelType;
     }
   }))
+  .views(self => ({
+    getDeletableSelectedIds(board: JXG.Board) {
+      return self.selectedIds
+                  .filter(id => {
+                    const elt = board.objects[id];
+                    return elt && !elt.getAttribute("fixed");
+                  });
+    }
+  }))
   .actions(self => ({
     selectElement(id: string) {
       if (!self.isSelected(id)) {
@@ -540,11 +549,7 @@ export const GeometryContentModel = types
     }
 
     function deleteSelection(board: JXG.Board) {
-      const selectedIds = self.selectedIds
-                              .filter(id => {
-                                const elt = board.objects[id];
-                                return elt && !elt.getAttribute("fixed");
-                              });
+      const selectedIds = self.getDeletableSelectedIds(board);
       self.deselectAll(board);
       board.showInfobox(false);
       if (selectedIds.length) {
