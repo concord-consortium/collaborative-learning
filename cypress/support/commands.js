@@ -41,7 +41,6 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         leftNav = new LeftNav,
         canvas = new Canvas;
     let i=0;
-    let memberSlots = { 1:'nw', 2:'ne', 3:'se', 4:'sw'};
 
     for (i=0;i<students.length;i++) {
         cy.wait(2000);
