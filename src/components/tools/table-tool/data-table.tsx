@@ -42,7 +42,9 @@ interface IProps {
   dataSet?: IDataSet;
   changeCount: number;
   readOnly?: boolean;
+  indexValueGetter?: (params: ValueGetterParams) => string;
   autoSizeColumns?: boolean;
+  defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
   onSetAttributeName?: (colId: string, name: string) => void;
@@ -57,7 +59,7 @@ interface IState {
   addAttributeButtonPos: IPos|null;
 }
 
-const LOCAL_ROW_ID = "__local__";
+export const LOCAL_ROW_ID = "__local__";
 const LOCAL_ROW_STYLE = {backgroundColor: "#cfc"};
 
 interface IRowStyleParams {
@@ -157,6 +159,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   public getRowIndexColumnDef(): ColDef {
     const { itemFlags, readOnly } = this.props;
+
+    function defaultIndexValueGetter(params: ValueGetterParams) {
+      // default just returns a row/case index
+      return params.node.rowIndex + 1;
+    }
+
     return ({
       headerName: "",
       headerComponentFramework: TableHeaderMenu,
@@ -208,10 +216,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       width: 50,
       pinned: "left",
       lockPosition: true,
-      valueGetter: (params) => {
-        return "";
-        // return params.node.rowIndex + 1; // caseIndex
-      },
+      valueGetter: this.props.indexValueGetter || defaultIndexValueGetter,
       suppressMovable: true,
       resizable: false,
       suppressNavigable: true
@@ -273,7 +278,10 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
                 distance: 1,
                 speed: 2
               };
-        const places = colPlaces[colName];
+        let places = colPlaces[colName];
+        if ((places == null) && (this.props.defaultPrecision != null)) {
+          places = this.props.defaultPrecision;
+        }
         return (places != null) && (typeof params.value === "number")
                   ? params.value.toFixed(places)
                   : params.value;

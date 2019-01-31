@@ -2,8 +2,9 @@ import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { GeometryContentModelType, setElementColor, GeometryMetadataModelType
-        } from "../../../models/tools/geometry/geometry-content";
+import { DocumentContentModelType } from "../../../models/document/document-content";
+import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
+import { ITransferCase, kLabelAttrName } from "../../../models/tools/table/table-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -13,11 +14,13 @@ import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
-import { JXGChange } from "../../../models/tools/geometry/jxg-changes";
-import { extractDragTileType, kDragTileContent, IToolApiInterface } from "../tool-tile";
+import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { extractDragTileType, IToolApiInterface, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
+import { DataSet, ICase } from "../../../models/data/data-set";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
-import { safeJsonParse } from "../../../utilities/js-utils";
+import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
@@ -351,6 +354,10 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     return this.props.model.content as GeometryContentModelType;
   }
 
+  private getTableContent(tableId: string) {
+    return this.getContent().getTableContent(tableId);
+  }
+
   private initializeContent() {
     const { model: { content } } = this.props;
     if ((content.type !== "Geometry") || !this.state.elementId) { return; }
@@ -674,12 +681,21 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.hotKeys.dispatch(e);
   }
 
-  private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+  private isTileInSameDocument(e: React.DragEvent<HTMLDivElement>) {
+    const documentContent = getParentWithTypeName(this.props.model, "DocumentContent") as DocumentContentModelType;
+    const documentContentId = documentContent && documentContent.contentId;
+    const srcDocId = dragTileSrcDocId(documentContentId);
+    return e.dataTransfer.types.findIndex(t => t === srcDocId) >= 0;
+  }
+
+  private isAcceptableTileDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension
     const kImgDropMarginPct = 0.1;
-    if (!readOnly && (toolType === "image")) {
+    if (!readOnly &&
+        ((toolType === "image") ||
+        ((toolType === "table") && this.isTileInSameDocument(e)))) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
       const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
@@ -687,14 +703,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           (e.clientX < eltBounds.right - kImgDropMarginX) &&
           (e.clientY > eltBounds.top + kImgDropMarginY) &&
           (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
-        return true;
+        return toolType;
       }
     }
-    return false;
+    return undefined;
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const isAcceptableDrag = this.isAcceptableImageDrag(e);
+    const isAcceptableDrag = this.isAcceptableTileDrag(e);
     this.props.onSetCanAcceptDrop(isAcceptableDrag ? this.props.model.id : undefined);
     if (isAcceptableDrag) {
       e.dataTransfer.dropEffect = "copy";
@@ -707,11 +723,27 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (this.isAcceptableImageDrag(e)) {
+    const tileType = this.isAcceptableTileDrag(e);
+    if (tileType) {
       const dragContent = e.dataTransfer.getData(kDragTileContent);
       const parsedContent = safeJsonParse(dragContent);
       const { board } = this.state;
       if (parsedContent && board) {
+        if (tileType === "image") {
+          this.handleImageTileDrop(e, parsedContent);
+        }
+        else if (tileType === "table") {
+          this.handleTableTileDrop(e, parsedContent);
+        }
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }
+
+  private handleImageTileDrop(e: React.DragEvent<HTMLDivElement>, parsedContent: any) {
+    const { board } = this.state;
+    if (parsedContent && board) {
         const { model: { content } } = this.props;
         const geometryContent = content as GeometryContentModelType;
         const droppedContent = parsedContent.content;
@@ -742,9 +774,37 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
               this.updateImageUrl(contentUrl);
             });
         }
-        e.preventDefault();
-        e.stopPropagation();
-      }
+    }
+  }
+
+  private getGeometryActionLinks(tableId: string): ILinkProperties {
+    return { id: uniqueId(), tileIds: [tableId] };
+  }
+
+  private getTableActionLinks(links: ILinkProperties): ILinkProperties {
+    return { id: links.id, tileIds: [this.props.model.id] };
+  }
+
+  private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>, parsedContent: any) {
+    const { board } = this.state;
+    const dragTileId = e.dataTransfer.getData(kDragTileId);
+    if (this.getContent().isLinkedToTable(dragTileId)) return;
+
+    const tableContent = this.getTableContent(dragTileId);
+    if (tableContent && parsedContent && board) {
+      const dataSet = tableContent.getSharedData();
+      const geomActionLinks = this.getGeometryActionLinks(dragTileId);
+      this.applyChange(() => {
+        const pts = this.getContent().addLinkedTable(board, dragTileId, dataSet, geomActionLinks);
+        pts.forEach(pt => {
+          this.handleCreatePoint(pt);
+        });
+      });
+      setTimeout(() => {
+        const _tableContent = this.getTableContent(dragTileId);
+        const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+        _tableContent && _tableContent.addLinkedGeometry(this.props.model.id, tableActionLinks);
+      });
     }
   }
 

@@ -1,14 +1,17 @@
 import { types, Instance } from "mobx-state-tree";
+import { ILinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
 import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
-import { assign, each, keys, values, size as _size } from "lodash";
+import { IDataSet } from "../../data/data-set";
+import { assign, castArray, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-movable-line";
+import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kGeometryToolID = "Geometry";
 
@@ -37,7 +40,8 @@ export function defaultGeometryContent(overrides?: JXGProperties) {
 export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
-    selection: types.map(types.boolean)
+    selection: types.map(types.boolean),
+    linkedTables: types.array(types.string)
   })
   .views(self => ({
     isSelected(id: string) {
@@ -53,6 +57,20 @@ export const GeometryMetadataModel = types
     },
     deselect(id: string) {
       self.selection.set(id, false);
+    },
+    addLinkedTable(tableId: string) {
+      if (self.linkedTables.indexOf(tableId) < 0) {
+        self.linkedTables.push(tableId);
+      }
+    },
+    removeLinkedTable(tableId: string) {
+      const index = self.linkedTables.indexOf(tableId);
+      if (index >= 0) {
+        self.linkedTables.splice(index, 1);
+      }
+    },
+    clearLinkedTables() {
+      self.linkedTables.clear();
     }
   }));
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
@@ -92,6 +110,16 @@ export const GeometryContentModel = types
         isSelected && selected.push(id);
       });
       return selected;
+    },
+    get isLinked() {
+      return self.metadata.linkedTables.length > 0;
+    },
+    isLinkedToTable(tableId: string) {
+      return self.metadata.linkedTables.indexOf(tableId) >= 0;
+    },
+    getTableContent(tileId: string) {
+      const content = getTileContentById(self, tileId);
+      return content && content as TableContentModelType;
     }
   }))
   .actions(self => ({
@@ -112,6 +140,13 @@ export const GeometryContentModel = types
   .actions(self => ({
     doPostCreate(metadata: GeometryMetadataModelType) {
       self.metadata = metadata;
+    },
+    willRemoveFromDocument() {
+      self.metadata.linkedTables.forEach(tableId => {
+        const tableContent = self.getTableContent(tableId);
+        tableContent && tableContent.removeLinkedGeometry(self.metadata.id);
+      });
+      self.metadata.clearLinkedTables();
     },
     selectObjects(ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
@@ -137,13 +172,29 @@ export const GeometryContentModel = types
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
+    function onChangeApplied(change: JXGChange) {
+      const op = change.operation.toLowerCase();
+      const target = change.target.toLowerCase();
+      if (target === "tablelink") {
+        const tableId = change.parents && change.parents[0] as string;
+        if (tableId) {
+          if (op === "create") {
+            self.metadata.addLinkedTable(tableId);
+          }
+          else if (op === "delete") {
+            self.metadata.removeLinkedTable(tableId);
+          }
+        }
+      }
+    }
+
     // views
 
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
       let board: JXG.Board | undefined;
-      applyChanges(domElementID, changes)
+      applyChanges(domElementID, changes, onChangeApplied)
         .filter(result => result != null)
         .forEach(elt => {
           if (isBoard(elt)) {
@@ -246,7 +297,9 @@ export const GeometryContentModel = types
       return image ? image as JXG.Image : undefined;
     }
 
-    function addPoint(board: JXG.Board, parents: any, properties?: JXGProperties): JXG.Point | undefined {
+    function addPoint(board: JXG.Board | undefined,
+                      parents: JXGCoordPair,
+                      properties?: JXGProperties): JXG.Point | undefined {
       const change: JXGChange = {
         operation: "create",
         target: "point",
@@ -255,6 +308,22 @@ export const GeometryContentModel = types
       };
       const point = _applyChange(board, change);
       return point ? point as JXG.Point : undefined;
+    }
+
+    function addPoints(board: JXG.Board | undefined,
+                       parents: JXGCoordPair[],
+                       properties?: JXGProperties | JXGProperties[],
+                       links?: ILinkProperties): JXG.Point[] {
+      const props = castArray(properties);
+      const change: JXGChange = {
+        operation: "create",
+        target: links ? "linkedPoint" : "point",
+        parents,
+        properties: parents.map((p, i) => ({ id: uuid(), ...(props && props[i] || props[0]) })),
+        links
+      };
+      const points = _applyChange(board, change);
+      return points ? points as JXG.Point[] : [];
     }
 
     function addMovableLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
@@ -268,21 +337,26 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function removeObjects(board: JXG.Board, id: string | string[]) {
+    function removeObjects(board: JXG.Board | undefined, id: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
         target: "object",
-        targetID: id
+        targetID: id,
+        links
       };
       return _applyChange(board, change);
     }
 
-    function updateObjects(board: JXG.Board, ids: string | string[], properties: JXGProperties | JXGProperties[]) {
+    function updateObjects(board: JXG.Board | undefined,
+                           ids: string | string[],
+                           properties: JXGProperties | JXGProperties[],
+                           links?: ILinkProperties) {
       const change: JXGChange = {
               operation: "update",
               target: "object",
               targetID: ids,
-              properties
+              properties,
+              links
             };
       return _applyChange(board, change);
     }
@@ -314,6 +388,46 @@ export const GeometryContentModel = types
             };
       const angle = _applyChange(board, change);
       return angle ? angle as any as JXG.Angle : undefined;
+    }
+
+    function addLinkedTable(board: JXG.Board, tableId: string, dataSet: IDataSet, links: ILinkProperties) {
+      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
+      const yAttr = dataSet.attributes.length >= 2 ? dataSet.attributes[1] : undefined;
+      const labelAttr = dataSet.attrFromName(kLabelAttrName);
+      const caseCount = dataSet.cases.length;
+      const ids: string[] = [];
+      const points: Array<{ label?: string, coords: JXGCoordPair }> = [];
+      for (let i = 0; i < caseCount; ++i) {
+        const id = dataSet.cases[i].__id__;
+        const label = labelAttr ? String(dataSet.getValue(id, labelAttr.id)) : undefined;
+        const x = xAttr ? Number(dataSet.getValue(id, xAttr.id)) : undefined;
+        const y = yAttr ? Number(dataSet.getValue(id, yAttr.id)) : undefined;
+        if (id && (x != null) && isFinite(x) && (y != null) && isFinite(y)) {
+          ids.push(id);
+          points.push({ label, coords: [x, y] });
+        }
+      }
+      self.metadata.addLinkedTable(tableId);
+      const change: JXGChange = {
+              operation: "create",
+              target: "tableLink",
+              parents: [tableId],
+              properties: { ids, points },
+              links
+            };
+      const pts = _applyChange(board, change);
+      return (pts || []) as JXG.Point[];
+    }
+
+    function removeLinkedTable(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
+      self.metadata.removeLinkedTable(tableId);
+      const change: JXGChange = {
+              operation: "delete",
+              target: "tableLink",
+              parents: [tableId],
+              links
+            };
+      return _applyChange(board, change);
     }
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
@@ -426,16 +540,20 @@ export const GeometryContentModel = types
     }
 
     function deleteSelection(board: JXG.Board) {
-      const selectedIds = self.selectedIds;
+      const selectedIds = self.selectedIds
+                              .filter(id => {
+                                const elt = board.objects[id];
+                                return elt && !elt.getAttribute("fixed");
+                              });
+      self.deselectAll(board);
+      board.showInfobox(false);
       if (selectedIds.length) {
-        self.deselectAll(board);
-        board.showInfobox(false);
         removeObjects(board, selectedIds);
       }
     }
 
-    function _applyChange(board: JXG.Board, change: JXGChange) {
-      const result = syncChange(board, change);
+    function _applyChange(board: JXG.Board | undefined, change: JXGChange) {
+      const result = board && syncChange(board, change);
       const jsonChange = JSON.stringify(change);
       if (suspendCount <= 0) {
         self.changes.push(jsonChange);
@@ -508,11 +626,14 @@ export const GeometryContentModel = types
         pushChangeset,
         addImage,
         addPoint,
+        addPoints,
         addMovableLine,
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,
+        addLinkedTable,
+        removeLinkedTable,
         findObjects,
         deleteSelection,
         applyChange: _applyChange,
