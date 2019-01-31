@@ -1,6 +1,4 @@
 import * as React from "react";
-import { Button, Menu, MenuItem, Popover, Position } from "@blueprintjs/core";
-import { renderUnicodeCharAsIconElement } from "../../utilities/blueprint";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -24,7 +22,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
 import { SizeMe } from "react-sizeme";
-import { isVisibleMovableLine, isMovableLine, kMovableLineType } from "../../../models/tools/geometry/jxg-movable-line";
+import { isVisibleMovableLine, isMovableLine } from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
@@ -438,11 +436,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
       this.applyChange(() => {
           const line = content.addMovableLine(board, [[0, 0], [5, 5]], props);
-          if (line) {
-            this.handleCreatePoint(line.point1);
-            this.handleCreatePoint(line.point2);
-            this.handleCreateLine(line);
-          }
+          this.handleCreateElement(line);
       });
     }
   }
@@ -752,7 +746,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCreateElement = (elt: JXG.GeometryElement) => {
+  private handleCreateElement = (elt?: JXG.GeometryElement) => {
     if (this.props.readOnly && (elt != null)) {
       elt.setAttribute({ fixed: true });
     }
@@ -1117,7 +1111,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         }
         vertices.forEach(vertex => content.selectElement(vertex.id));
 
-        if (line.getAttribute("clientType") === kMovableLineType) {
+        if (isMovableLine(line)) {
           content.selectElement(line.id);
         }
       }

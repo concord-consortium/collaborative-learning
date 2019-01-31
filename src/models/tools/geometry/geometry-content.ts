@@ -260,7 +260,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "movableLine",
         parents,
-        properties: {...properties, id: uuid() }
+        properties: {id: uuid(), ...properties}
       };
       const line = _applyChange(board, change);
       return line ? line as JXG.Line : undefined;

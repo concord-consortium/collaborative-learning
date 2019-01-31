@@ -1,7 +1,9 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 
-export const isMovableLine = (v: any) => (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
+export const isMovableLine = (v: any) => {
+  return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
+};
 
 export const isVisibleMovableLine = (v: any) => isMovableLine && v.visProp.visible;
 
@@ -34,6 +36,7 @@ const lineSpecificProps = {
 
 const pointSpecificProps = {
   highlightStrokeColor: darkBlue,
+  name: "",
 };
 
 export const movableLineChangeAgent: JXGChangeAgent = {
@@ -63,8 +66,10 @@ export const movableLineChangeAgent: JXGChangeAgent = {
       );
       const overrides = {
         name() {
-          return this.getSlope && this.getRise
-            ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
+          return this.getSlope && this.getRise && this.getSlope() !== Infinity
+            ? this.getRise() >= 0
+              ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
+              : `y = ${JXG.toFixed(this.getSlope(), 1)}x \u2212 ${JXG.toFixed(this.getRise() * -1, 1)}`
             : "";
         }
       };

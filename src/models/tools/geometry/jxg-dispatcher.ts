@@ -16,10 +16,10 @@ const agents: JXGChangeAgents = {
   board: boardChangeAgent,
   image: imageChangeAgent,
   object: objectChangeAgent,
+  movableline: movableLineChangeAgent,
   point: pointChangeAgent,
   polygon: polygonChangeAgent,
   vertexangle: vertexAngleChangeAgent,
-  movableline: movableLineChangeAgent,
 };
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {
