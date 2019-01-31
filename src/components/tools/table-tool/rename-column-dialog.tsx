@@ -34,6 +34,7 @@ class RenameColumnDialog extends React.Component<IProps, IState> {
         <input
           className="nc-attribute-name-input pt-input"
           type="text"
+          maxLength={20}
           placeholder={`Column name`}
           value={this.state.name}
           onChange={this.handleNameChange}
