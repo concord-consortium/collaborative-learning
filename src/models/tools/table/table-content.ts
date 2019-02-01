@@ -273,8 +273,9 @@ export const TableContentModel = types
                           const id = change.ids && change.ids[index] || uniqueId();
                           return { __id__: id, ...row };
                         });
+          const beforeId = tableProps && tableProps.beforeId;
           if (rows && rows.length) {
-            dataSet.addCanonicalCasesWithIDs(rows);
+            dataSet.addCanonicalCasesWithIDs(rows, beforeId);
           }
           break;
         case "geometryLink":

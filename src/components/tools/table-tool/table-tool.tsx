@@ -151,8 +151,10 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   private handleAddCanonicalCases = (newCases: ICaseCreation[], beforeID?: string | string[]) => {
     const cases = newCases.map(aCase => ({ __id__: uniqueId(), ...cloneDeep(aCase) }));
+    const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
+    const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
     const tableActionLinks = this.getTableActionLinks();
-    this.getContent().addCanonicalCases(cases, beforeID, tableActionLinks);
+    this.getContent().addCanonicalCases(cases, firstSelectedRowId, tableActionLinks);
     setTimeout(() => {
       const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
       const props = cases.map(aCase => ({ id: aCase.__id__ }));
