@@ -51,7 +51,7 @@ export const GroupsModel = types
             // self may be undefined if the database was deleted while a tab remains open
             // causing the disconnectedAt timestamp to be set at the groupUser level
             if (groupUser.self) {
-              const student = clazz.getStudentById(groupUser.self.uid);
+              const student = clazz.getUserById(groupUser.self.uid);
               users.push(GroupUserModel.create({
                 id: groupUserId,
                 name: student ? student.fullName : "Unknown",
