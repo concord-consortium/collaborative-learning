@@ -105,8 +105,8 @@ context('Test Canvas', function(){
                canvas.addTextTile();
                canvas.enterText('second text tool');
                canvas.addGraphTile();
-               canvas.getGraphTile().should('exist');
-               canvas.addImageTile();
+                graphToolTile.getGraphTile().should('exist');
+                canvas.addImageTile();
                canvas.addTextTile();
                canvas.enterText('third text tool');
                canvas.addGraphTile();
@@ -145,7 +145,7 @@ context('Test Canvas', function(){
                 rightNav.openMyWorkTab();
                 rightNav.openMyWorkAreaCanvasItem(canvas1);
                 canvas.getCanvasTitle().should('contain', canvas1);
-                rightNav.closeMyWorkTab();
+                // rightNav.closeMyWorkTab();
                 rightNav.openMyWorkTab();
                 rightNav.openMyWorkAreaCanvasItem(canvas2);
                 canvas.getCanvasTitle().should('contain', canvas2);
@@ -154,7 +154,7 @@ context('Test Canvas', function(){
                 canvas.getTextTile().first().should('contain', 'Hello World');
                 //verify other tool tiles exist
                 graphToolTile.getGraphTile().first().should('exist');
-                canvas.getDrawTile().should('exist');
+                drawToolTile.getDrawTile().should('exist');
                 imageToolTile.getImageTile().should('exist');
                 //canvas.getTableTile().should('exist');
 

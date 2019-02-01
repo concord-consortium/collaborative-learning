@@ -1,4 +1,4 @@
-class ImageTool{
+class ImageToolTile{
     getImageTile(){
         return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
     }
@@ -16,4 +16,4 @@ class ImageTool{
     }
 }
 
-export default ImageTool;
+export default ImageToolTile;
