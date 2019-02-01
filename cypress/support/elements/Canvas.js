@@ -1,3 +1,11 @@
+import GraphToolTile from './GraphToolTile'
+import ImageToolTile from './ImageToolTile'
+import DrawToolTile from './DrawToolTile'
+
+let graphToolTile = new GraphToolTile,
+    imageToolTile = new ImageToolTile,
+    drawToolTile = new DrawToolTile;
+
 class Canvas{
 
     canvas(){
@@ -177,13 +185,13 @@ class Canvas{
                 this.getTextTile().last().click({force:true});
                 break;
             case 'graph':
-                this.getGraphTile().last().click({force:true});
+                graphToolTile.getGraphTile().last().click({force:true});
                 break;
             case 'image':
-                this.getImageTile().last().click({force:true});
+                imageToolTile.getImageTile().last().click({force:true});
                 break;
             case 'draw':
-                this.getDrawTile().last().click({force:true});
+                drawToolTile.getDrawTile().last().click({force:true});
                 break;
             // case 'table':
             //     this.getTableTile().last().click({force:true});

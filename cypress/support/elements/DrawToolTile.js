@@ -1,4 +1,4 @@
-class DrawTool{
+class DrawToolTile{
     getDrawTile(){
         return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .drawing-tool');
     }
@@ -25,4 +25,4 @@ class DrawTool{
     }
 }
 
-export default DrawTool;
+export default DrawToolTile;
