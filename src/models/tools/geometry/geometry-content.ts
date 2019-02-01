@@ -10,7 +10,6 @@ import { assign, castArray, each, keys, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-movable-line";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kGeometryToolID = "Geometry";
@@ -58,12 +57,12 @@ export const GeometryMetadataModel = types
     deselect(id: string) {
       self.selection.set(id, false);
     },
-    addLinkedTable(tableId: string) {
+    addTableLink(tableId: string) {
       if (self.linkedTables.indexOf(tableId) < 0) {
         self.linkedTables.push(tableId);
       }
     },
-    removeLinkedTable(tableId: string) {
+    removeTableLink(tableId: string) {
       const index = self.linkedTables.indexOf(tableId);
       if (index >= 0) {
         self.linkedTables.splice(index, 1);
@@ -176,7 +175,7 @@ export const GeometryContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(tableId => {
         const tableContent = self.getTableContent(tableId);
-        tableContent && tableContent.removeLinkedGeometry(self.metadata.id);
+        tableContent && tableContent.removeGeometryLink(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
     },
@@ -208,13 +207,14 @@ export const GeometryContentModel = types
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
-        const tableId = change.parents && change.parents[0] as string;
+        const tableId = (change.targetID as string) ||
+                          (change.parents && change.parents[0] as string);
         if (tableId) {
           if (op === "create") {
-            self.metadata.addLinkedTable(tableId);
+            self.metadata.addTableLink(tableId);
           }
           else if (op === "delete") {
-            self.metadata.removeLinkedTable(tableId);
+            self.metadata.removeTableLink(tableId);
           }
         }
       }
@@ -439,11 +439,11 @@ export const GeometryContentModel = types
           points.push({ label, coords: [x, y] });
         }
       }
-      self.metadata.addLinkedTable(tableId);
+      self.metadata.addTableLink(tableId);
       const change: JXGChange = {
               operation: "create",
               target: "tableLink",
-              parents: [tableId],
+              targetID: tableId,
               properties: { ids, points },
               links
             };
@@ -452,11 +452,11 @@ export const GeometryContentModel = types
     }
 
     function removeLinkedTable(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
-      self.metadata.removeLinkedTable(tableId);
+      self.metadata.removeTableLink(tableId);
       const change: JXGChange = {
               operation: "delete",
               target: "tableLink",
-              parents: [tableId],
+              targetID: tableId,
               links
             };
       return _applyChange(board, change);

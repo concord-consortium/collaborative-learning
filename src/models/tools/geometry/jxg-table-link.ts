@@ -49,7 +49,6 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
 
   update: pointChangeAgent.update,
 
-  // delete can be handled generically
   delete: (board, change) => {
     pointChangeAgent.delete(board, change);
 
@@ -79,7 +78,8 @@ export const tableLinkChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     if (board) {
-      const tableId = change.parents && change.parents[0];
+      // during development id was initially stored in parents
+      const tableId = change.targetID || (change.parents && change.parents[0]);
       const pts = board.objectsList.filter(elt => {
                     return isPoint(elt) && tableId && (elt.getAttribute("linkedTableId") === tableId);
                   });

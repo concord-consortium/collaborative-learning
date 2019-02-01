@@ -68,7 +68,9 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
   const ids = castArray(change.targetID);
   ids.forEach((id, index) => {
     const obj = id && board.objects[id];
-    const target = obj ? obj.elType as JXGObjectType : "object";
+    const target = obj
+            ? obj.getAttribute("clientType") || obj.elType as JXGObjectType
+            : "object";
     const props = Array.isArray(change.properties)
                     ? change.properties[index]
                     : change.properties;

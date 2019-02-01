@@ -4,7 +4,6 @@ import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
-import { ITransferCase, kLabelAttrName } from "../../../models/tools/table/table-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -16,7 +15,6 @@ import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
 import { extractDragTileType, IToolApiInterface, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
-import { DataSet, ICase } from "../../../models/data/data-set";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
@@ -682,7 +680,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.hotKeys.dispatch(e);
   }
 
-  private isTileInSameDocument(e: React.DragEvent<HTMLDivElement>) {
+  private isDragTileInSameDocument(e: React.DragEvent<HTMLDivElement>) {
     const documentContent = getParentWithTypeName(this.props.model, "DocumentContent") as DocumentContentModelType;
     const documentContentId = documentContent && documentContent.contentId;
     const srcDocId = dragTileSrcDocId(documentContentId);
@@ -696,7 +694,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const kImgDropMarginPct = 0.1;
     if (!readOnly &&
         ((toolType === "image") ||
-        ((toolType === "table") && this.isTileInSameDocument(e)))) {
+        ((toolType === "table") && this.isDragTileInSameDocument(e)))) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
       const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
@@ -804,7 +802,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       setTimeout(() => {
         const _tableContent = this.getTableContent(dragTileId);
         const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-        _tableContent && _tableContent.addLinkedGeometry(this.props.model.id, tableActionLinks);
+        _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
       });
     }
   }

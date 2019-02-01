@@ -239,7 +239,7 @@ export const TableContentModel = types
             links
           });
     },
-    addLinkedGeometry(geometryId: string, links: ILinkProperties) {
+    addGeometryLink(geometryId: string, links: ILinkProperties) {
       self.appendChange({
             action: "create",
             target: "geometryLink",
@@ -247,7 +247,7 @@ export const TableContentModel = types
             links
       });
     },
-    removeLinkedGeometry(geometryId: string, links?: ILinkProperties) {
+    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "geometryLink",
@@ -303,10 +303,6 @@ export const TableContentModel = types
           rowProps && rowProps.forEach((row: any, rowIndex) => {
             dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
           });
-          break;
-        case "geometryLink":
-          const geometryId = change.ids && change.ids as string;
-          geometryId && self.metadata.removeLinkedGeometry(geometryId);
           break;
       }
     },
