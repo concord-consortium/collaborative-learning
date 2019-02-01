@@ -33,10 +33,8 @@ Cypress.Commands.add("setupGroup", (students, group) => {
 
     let qaClass = 10,
         qaOffering = 10,
-        // qaGroup = 10,
         problem = 2.3;
     let teacher = 10;
-    // let group = ['33','44','55','66'];
 
     let header = new Header,
         rightNav = new RightNav,
@@ -47,20 +45,12 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     for (i=0;i<students.length;i++) {
         cy.wait(2000);
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        leftNav.openLeftNavTab('Now What')
-            leftNav.openToWorkspace('Now What');
-        canvas.addTextTile();
-        canvas.enterText('This is to test the 4-up view of S'+students[i]);
-        canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+students[i]);
-        canvas.addGraphTile();
-        canvas.shareCanvas();//all students will share their canvas
-        cy.wait(1000);
     }
     //verify Group num and there are 4 students in the group
-    // header.getGroupName().should('contain','Group '+group);
-    // header.getGroupMembers().each(($member,index, $list)=>{
-    //     expect(['S'+students[0],'S'+students[1],'S'+students[2],'S'+students[3]]).to.include($member.text());
-    // });
+    header.getGroupName().should('contain','Group '+group);
+    for (i=0; i<students.length; i++) {
+        header.getGroupMembers().find('div.member').should('contain','S'+students[i])
+    }
 });
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
