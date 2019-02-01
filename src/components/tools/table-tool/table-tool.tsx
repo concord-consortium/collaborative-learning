@@ -3,6 +3,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { IMenuItemFlags } from "./table-header-menu";
+import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ILinkProperties, IRowLabel, ITableLinkProperties, TableContentModelType
@@ -58,6 +59,9 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
                   syncedChanges: 0
                 };
 
+  private gridApi?: GridApi;
+  private gridColumnApi?: ColumnApi;
+
   public render() {
     const { readOnly } = this.props;
     const itemFlags: IMenuItemFlags = {
@@ -78,6 +82,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
         defaultPrecision={1}
         itemFlags={itemFlags}
         readOnly={readOnly}
+        onGridReady={this.handleGridReady}
         onSetAttributeName={this.handleSetAttributeName}
         onAddCanonicalCases={this.handleAddCanonicalCases}
         onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
@@ -88,6 +93,11 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   private getContent() {
     return this.props.model.content as TableContentModelType;
+  }
+
+  private handleGridReady = (gridReadyParams: GridReadyEvent) => {
+    this.gridApi = gridReadyParams.api || undefined;
+    this.gridColumnApi = gridReadyParams.columnApi || undefined;
   }
 
   private indexValueGetter = (params: ValueGetterParams) => {

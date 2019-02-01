@@ -48,6 +48,7 @@ interface IProps {
   defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
+  onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
@@ -153,6 +154,10 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           this.gridApi.setSortModel(snapshot.sortModel);
         }
       });
+    }
+
+    if (this.props.onGridReady) {
+      this.props.onGridReady(gridReadyParams);
     }
   }
 
