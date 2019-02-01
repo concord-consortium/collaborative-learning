@@ -148,7 +148,7 @@ class Canvas{
     }
 
     getGraphTile(){
-        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
+        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-tool .geometry-content');
     }
 
     addImageTile(){
