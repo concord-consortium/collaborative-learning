@@ -51,7 +51,7 @@ function keyCodeToString(keyCode: number) {
 }
 
 export interface IHotKeyMap {
-  [keys: string]: (e: React.KeyboardEvent, keys: string) => boolean | undefined;
+  [keys: string]: (e: React.KeyboardEvent, keys: string) => boolean | void;
 }
 
 export class HotKeys {
