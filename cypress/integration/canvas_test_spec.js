@@ -176,8 +176,8 @@ context('Test Canvas', function(){
 
         describe('verify that if user opens same canvas from on left-nav tab, saved canvas opens', function() {
             it('will restore from left nav', ()=>{
-                leftNav.openLeftNavTab('What if');
-                leftNav.openToWorkspace('What if');
+                // leftNav.openLeftNavTab('What if');
+                leftNav.openToWorkspace('What if...?');
                 canvas.getCanvasTitle().should('contain', 'What if');
                 leftNav.openLeftNavTab('Introduction');
                 leftNav.openToWorkspace('Introduction');
@@ -197,7 +197,7 @@ context('Test Canvas', function(){
                 //switch to 4-up view
                 canvas.openFourUpView();
                 //open another canvas
-                leftNav.openToWorkspace('What if');
+                leftNav.openToWorkspace('What if...?');
                 canvas.getCanvasTitle().should('contain','What if');
                 // canvas.getFourUpView().should('be.visible'); TODO: need to verify that when switching canvases, it stays in 4up view
                 //Re-open Initial Challenge canvas from My Work
@@ -258,7 +258,7 @@ context('Test Canvas', function(){
 
             it('verify canvas side by side in right side 2 up view', function(){
                 //open the 2up view
-                let tab = 'What if';
+                let tab = 'What if...?';
                 leftNav.openToWorkspace(tab);
                 canvas.getCanvasTitle().should('contain',tab);
                 canvas.openTwoUpView();
@@ -325,7 +325,7 @@ context('Test Canvas', function(){
                 //open 4 up view
                 canvas.openFourUpView();
                 //open another section
-                leftNav.openToWorkspace('What if');
+                leftNav.openToWorkspace('What if...?');
                 canvas.getCanvasTitle().should('contain','What if');
                 //open 2 up view
                 canvas.openTwoUpView();
