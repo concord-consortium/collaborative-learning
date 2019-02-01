@@ -4,9 +4,12 @@ import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
+import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
 import { castArray } from "lodash";
+
+type OnChangeApplied = (change: JXGChange) => void;
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -15,17 +18,20 @@ interface JXGChangeAgents {
 const agents: JXGChangeAgents = {
   board: boardChangeAgent,
   image: imageChangeAgent,
+  linkedpoint: linkedPointChangeAgent,
   object: objectChangeAgent,
   movableline: movableLineChangeAgent,
   point: pointChangeAgent,
   polygon: polygonChangeAgent,
-  vertexangle: vertexAngleChangeAgent,
+  tablelink: tableLinkChangeAgent,
+  vertexangle: vertexAngleChangeAgent
 };
 
-export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXGChangeResult[] {
+export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
+                             onChangeApplied?: OnChangeApplied): JXGChangeResult[] {
   let _board: JXG.Board | undefined;
   const results = changes.map(change => {
-                    const result = applyChange(_board || board, change);
+                    const result = applyChange(_board || board, change, onChangeApplied);
                     if ((typeof board === "string") && isBoard(result)) {
                       _board = result as JXG.Board;
                       _board.suspendUpdate();
@@ -38,7 +44,8 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[]): JXG
   return results;
 }
 
-export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
+export function applyChange(board: JXG.Board|string, change: JXGChange,
+                            onChangeApplied?: OnChangeApplied): JXGChangeResult {
   const target = change.target.toLowerCase();
   if ((change.operation === "update") && (target === "object")) {
     // special case for update/object, where we dispatch by object type
@@ -50,7 +57,11 @@ export function applyChange(board: JXG.Board|string, change: JXGChange): JXGChan
     applyDeleteObjects(board as JXG.Board, change);
     return;
   }
-  return dispatchChange(board, change);
+  const result = dispatchChange(board, change);
+  if (onChangeApplied) {
+    onChangeApplied(change);
+  }
+  return result;
 }
 
 function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
@@ -66,7 +77,8 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
                             target,
                             targetID: id,
                             parents: change.parents,
-                            properties: props
+                            properties: props,
+                            links: change.links
                           });
   });
 }
@@ -81,7 +93,8 @@ function applyDeleteObjects(board: JXG.Board, change: JXGChange) {
     return dispatchChange(board, {
                             operation: "delete",
                             target,
-                            targetID: id
+                            targetID: id,
+                            links: change.links
                           });
   });
 }

@@ -1,6 +1,7 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "object" | "image" | "movableLine" | "point" | "polygon" | "vertexAngle";
+export type JXGObjectType = "board" | "image" | "linkedPoint" | "movableLine" | "object" |
+                              "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 
@@ -12,15 +13,21 @@ export interface JXGProperties {
   [key: string]: any;
 }
 
+export interface ILinkProperties {
+  id: string;
+  tileIds: string[];
+}
+
 export interface JXGChange {
   operation: JXGOperation;
   target: JXGObjectType;
   targetID?: string | string[];
   parents?: JXGParentType[];
   properties?: JXGProperties | JXGProperties[];
+  links?: ILinkProperties;
 }
 
-export type JXGElement = JXG.Board | JXG.Point | JXG.Line;
+export type JXGElement = JXG.Board | JXG.Line | JXG.Point;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
