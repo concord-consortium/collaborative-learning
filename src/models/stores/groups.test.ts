@@ -1,5 +1,5 @@
 import { GroupsModel, GroupModel, GroupUserModel } from "./groups";
-import { ClassModel, ClassStudentModel } from "./class";
+import { ClassModel, ClassUserModel } from "./class";
 import { DBOfferingGroupMap } from "../../lib/db-types";
 
 describe("Groups model", () => {
@@ -92,19 +92,21 @@ describe("Groups model", () => {
         }
       }
     };
+    const user = ClassUserModel.create({
+      type: "student",
+      id: "1",
+      firstName: "Test",
+      lastName: "User",
+      fullName: "Test User",
+      initials: "TU"
+    });
     const clazz = ClassModel.create({
       name: "test",
       classHash: "test",
-      students: [
-        ClassStudentModel.create({
-          id: "1",
-          firstName: "Test",
-          lastName: "User",
-          fullName: "Test User",
-          initials: "TU"
-        }),
+      users: {
+        1: user
         // don't add student 2 so we can test missing students
-      ]
+      }
     });
 
     groups.updateFromDB("1", dbGroupsWithoutUsers, clazz);
