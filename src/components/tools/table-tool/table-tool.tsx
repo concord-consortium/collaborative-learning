@@ -7,7 +7,7 @@ import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/da
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ILinkProperties, IRowLabel, ITableLinkProperties, TableContentModelType
         } from "../../../models/tools/table/table-content";
-import { ValueGetterParams } from "ag-grid-community";
+import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { uniqueId } from "../../../utilities/js-utils";
 import { cloneDeep } from "lodash";
@@ -74,6 +74,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
         changeCount={this.state.syncedChanges}
         autoSizeColumns={this.getContent().isImported}
         indexValueGetter={this.indexValueGetter}
+        attrValueFormatter={this.attrValueFormatter}
         defaultPrecision={1}
         itemFlags={itemFlags}
         readOnly={readOnly}
@@ -94,6 +95,14 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return content.isLinked && (params.data.id !== LOCAL_ROW_ID)
             ? content.getRowLabel(params.node.rowIndex)
             : "";
+  }
+
+  private attrValueFormatter = (params: ValueFormatterParams) => {
+    if ((params.value == null) || (params.value === "")) return params.value;
+    const num = Number(params.value);
+    return isFinite(num)
+            ? num.toFixed(1).replace(".0", "")
+            : params.value;
   }
 
   private getGeometryContent(geometryId: string) {
