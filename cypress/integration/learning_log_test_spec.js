@@ -40,8 +40,8 @@ context('Test bottom tabs', function(){
                 canvas.getTextTile().last().should('contain', 'LL_'+tab);
             //     //Add a graph tool and a shape
                 canvas.addGraphTile();
-                canvas.getGraphTile().last().click();
-                canvas.getGraphTile().last().click();
+                graphToolTile.getGraphTile().last().click();
+                graphToolTile.getGraphTile().last().click();
                 graphToolTile.getGraphPointLabel().last().should('contain', 'A' );
                 //Open learning log
                 learningLog.openLearningLogTab();

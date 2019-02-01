@@ -44,6 +44,8 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(13.2,5);
             graphToolTile.addPointToGraph(13.2,5);
             graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPolygon().should('exist');
             cy.wait(2000)
         });
     });
@@ -133,6 +135,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(5,10);
             graphToolTile.addPointToGraph(5,10);
             graphToolTile.addPointToGraph(5,10);
+            graphToolTile.getGraphPoint().last().click({force:true});
             graphToolTile.getGraphPoint().last().click({force:true});
             cy.wait(2000);
             // graphToolTile.getGraphPointID();
