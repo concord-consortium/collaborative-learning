@@ -133,6 +133,11 @@ declare namespace JXG {
     point2: JXG.Point;
   }
 
+  class Text extends GeometryElement {
+    plaintext: string;
+    setText: (content: string) => void;
+  }
+
   const Math: {
     Geometry: {
       rad: (p1: JXG.Point, p2: JXG.Point, p3: JXG.Point) => number

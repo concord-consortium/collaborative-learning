@@ -26,6 +26,7 @@ import { isVisibleMovableLine, isMovableLine } from "../../../models/tools/geome
 import * as uuid from "uuid/v4";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import AnnotationDialog from "./annotation-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -59,6 +60,7 @@ interface IState extends SizeMeProps {
   syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
+  selectedAnnotation?: JXG.Text;
 }
 
 interface JXGPtrEvent {
@@ -176,7 +178,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   public state: IState = {
           syncedChanges: 0,
           disableRotate: false,
-          redoStack: []
+          redoStack: [],
         };
 
   private domElement: HTMLDivElement | null;
@@ -288,6 +290,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-tool ${editableClass}`;
     return ([
+      this.renderAnnotationEditor(),
       this.renderToolbar(),
       <div id={this.state.elementId} key="jsxgraph"
           className={classes}
@@ -299,6 +302,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
           onDrop={this.handleDrop} />,
       this.renderRotateHandle()
     ]);
+  }
+
+  private renderAnnotationEditor() {
+    const annotation = this.state.selectedAnnotation;
+    if (annotation) {
+      return (
+        <AnnotationDialog
+          key="editor"
+          id={annotation.id}
+          isOpen={this.state.selectedAnnotation != null}
+          onRenameAttribute={this.handleUpdateAnnotation}
+          onClose={this.closeAnnotationDialog}
+          name={annotation.plaintext}
+        />
+      );
+    }
   }
 
   private renderToolbar() {
@@ -316,7 +335,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const disableVertexAngle = readOnly || !supportsVertexAngle;
     const disableDelete = readOnly || !board || !content.hasSelection();
     const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
-    const disableAnnotation = selectedPoint == null;
+    const disableAnnotation = this.getAnnotationAnchor() == null;
 
     return (
       <GeometryToolbarView
@@ -331,7 +350,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         isDuplicateDisabled={disableDuplicate}
         onMovableLineClick={this.handleCreateMovableLine}
         onAnnotationClick={this.handleCreateAnnotation}
-        isAnnotationDisabled={disableAnnotation}
+        isAnnotationDisabled={(disableAnnotation)}
       />
     );
   }
@@ -405,9 +424,16 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
+  private closeAnnotationDialog = () => {
+    this.setState({ selectedAnnotation: undefined });
+  }
+
   private handleToggleVertexAngle = () => {
     const { board } = this.state;
-    const selectedPoint = this.getSelectedPoint();
+    const content = this.getContent();
+    const selectedObjects = board && content.selectedObjects(board);
+    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+    const selectedPoint = selectedPoints && selectedPoints[0] as JXG.Point;
     if (board && selectedPoint) {
       const vertexAngle = getVertexAngle(selectedPoint);
       if (!vertexAngle) {
@@ -447,21 +473,42 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   private handleCreateAnnotation = () => {
     const { board } = this.state;
     const content = this.getContent();
-    const selectedPoint = this.getSelectedPoint();
-    if (board && selectedPoint) {
+    const annotationAnchor = this.getAnnotationAnchor();
+    if (board && annotationAnchor) {
       this.applyChange(() => {
-          const elems = content.addAnnotation(board, selectedPoint.id);
+          const annotation = content.addAnnotation(board, annotationAnchor.id);
+          this.setState({selectedAnnotation: annotation});
       });
     }
   }
 
-  private getSelectedPoint = () => {
+  private handleUpdateAnnotation = (id: string, name: string) => {
+    const { selectedAnnotation } = this.state;
+    if (selectedAnnotation) {
+      // XXX: HACK this needs to be done through the change list
+      selectedAnnotation.setText(name);
+    }
+    this.setState({ selectedAnnotation: undefined });
+  }
+
+  private getAnnotationAnchor = () => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
       const selectedObjects = content.selectedObjects(board);
-      const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
-      return selectedPoints && selectedPoints[0] as JXG.Point;
+      if (selectedObjects.length === 1 && isPoint(selectedObjects[0])) {
+        return selectedObjects[0];
+      }
+
+      const selectedPolygon = selectedObjects.find(isPolygon);
+      if (selectedPolygon) {
+        return selectedPolygon;
+      }
+
+      const selectedLine = selectedObjects.find(isMovableLine);
+      if (selectedLine) {
+        return selectedLine;
+      }
     }
   }
 
@@ -1223,14 +1270,14 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
-      let selectVertices = false;
+      let selectPolygon = false;
       // let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
         if (board && !hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        selectVertices = true;
+        selectPolygon = true;
         this.lastSelectDown = evt;
       }
       // we can't prevent JSXGraph from dragging the polygon, so don't deselect
@@ -1239,18 +1286,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       //     deselectVertices = true;
       //   }
       // }
-      each(polygon.ancestors, point => {
-        const pt = point as JXG.Point;
-        if (board && !inVertex) {
-          if (selectVertices) {
+      if (selectPolygon) {
+        geometryContent.selectElement(polygon.id);
+        each(polygon.ancestors, point => {
+          const pt = point as JXG.Point;
+          if (board && !inVertex) {
             geometryContent.selectElement(pt.id);
+            // we can't prevent JSXGraph from dragging the polygon, so don't deselect
+            // else if (deselectVertices) {
+            //   geometryContent.deselectElement(pt.id);
+            // }
           }
-          // we can't prevent JSXGraph from dragging the polygon, so don't deselect
-          // else if (deselectVertices) {
-          //   geometryContent.deselectElement(pt.id);
-          // }
-        }
-      });
+        });
+      }
 
       if (!readOnly) {
         // point handles vertex drags

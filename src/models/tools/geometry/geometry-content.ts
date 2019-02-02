@@ -9,6 +9,7 @@ import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { kMovableLineType, kMovableLineDefaults, isMovableLine } from "./jxg-movable-line";
+import { isPolygon } from "./jxg-polygon";
 
 export const kGeometryToolID = "Geometry";
 
@@ -59,7 +60,7 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
-  if (element) {
+  if (element && !isPolygon(element)) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
@@ -274,8 +275,8 @@ export const GeometryContentModel = types
         target: "annotation",
         properties: {id: uuid(), anchor: anchorId }
       };
-      const elems = _applyChange(board, change);
-      return elems ? elems as JXG.GeometryElement[] : undefined;
+      const annotation = _applyChange(board, change);
+      return annotation ? annotation as JXG.Text : undefined;
     }
 
     function removeObjects(board: JXG.Board, id: string | string[]) {

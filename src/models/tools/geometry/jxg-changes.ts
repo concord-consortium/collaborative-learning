@@ -21,7 +21,7 @@ export interface JXGChange {
   properties?: JXGProperties | JXGProperties[];
 }
 
-export type JXGElement = JXG.Board | JXG.Point | JXG.Line;
+export type JXGElement = JXG.Board | JXG.Point | JXG.Line | JXG.Text;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
