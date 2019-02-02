@@ -316,6 +316,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const disableVertexAngle = readOnly || !supportsVertexAngle;
     const disableDelete = readOnly || !board || !content.hasSelection();
     const disableDuplicate = readOnly || !board || !this.getOneSelectedPolygon();
+    const disableAnnotation = selectedPoint == null;
 
     return (
       <GeometryToolbarView
@@ -329,6 +330,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
         onDuplicateClick={this.handleDuplicate}
         isDuplicateDisabled={disableDuplicate}
         onMovableLineClick={this.handleCreateMovableLine}
+        onAnnotationClick={this.handleCreateAnnotation}
+        isAnnotationDisabled={disableAnnotation}
       />
     );
   }
@@ -404,9 +407,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private handleToggleVertexAngle = () => {
     const { board } = this.state;
-    const selectedObjects = board && this.getContent().selectedObjects(board);
-    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
-    const selectedPoint = selectedPoints && selectedPoints[0] as JXG.Point;
+    const selectedPoint = this.getSelectedPoint();
     if (board && selectedPoint) {
       const vertexAngle = getVertexAngle(selectedPoint);
       if (!vertexAngle) {
@@ -440,6 +441,27 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
             elems.forEach(elem => this.handleCreateElement(elem));
           }
       });
+    }
+  }
+
+  private handleCreateAnnotation = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    const selectedPoint = this.getSelectedPoint();
+    if (board && selectedPoint) {
+      this.applyChange(() => {
+          const elems = content.addAnnotation(board, selectedPoint.id);
+      });
+    }
+  }
+
+  private getSelectedPoint = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const selectedObjects = content.selectedObjects(board);
+      const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+      return selectedPoints && selectedPoints[0] as JXG.Point;
     }
   }
 

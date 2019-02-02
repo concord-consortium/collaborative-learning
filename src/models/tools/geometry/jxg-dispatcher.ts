@@ -7,12 +7,14 @@ import { polygonChangeAgent } from "./jxg-polygon";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
 import { castArray } from "lodash";
+import { annotationChangeAgent } from "./jxg-annotation";
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
 }
 
 const agents: JXGChangeAgents = {
+  annotation: annotationChangeAgent,
   board: boardChangeAgent,
   image: imageChangeAgent,
   object: objectChangeAgent,

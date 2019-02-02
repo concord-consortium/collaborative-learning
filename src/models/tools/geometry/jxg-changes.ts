@@ -1,6 +1,7 @@
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "object" | "image" | "movableLine" | "point" | "polygon" | "vertexAngle";
+export type JXGObjectType = "annotation" | "board" | "object" | "image"
+  | "movableLine" | "point" | "polygon" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 
