@@ -69,12 +69,15 @@ class TeacherDashboard {
         switch (level) {
             case 'class':
                 this.getClassSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
+                cy.log('selected class');
                 break;
             case 'group':
                 this.getGroupSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
+                cy.log('selected group');
                 break;
             case 'user':
                 this.getStudentSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
+                cy.log('selected student');
                 break;
         }
     }

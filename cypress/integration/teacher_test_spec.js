@@ -215,16 +215,16 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             }
 
             //verify message is not in the other group
-            cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[0]+'&problem='+problem);
-            cy.wait(3000);
-            leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
-                cy.wrap($tab).click({force:true});
-                leftNav.getOpenToWorkspaceButton(index).click({force: true});
-                cy.wait(3000);
-                if (index<1) {
-                    cy.get('[data-test="support-icon group"]').should('not.exist');
-                }
-            })
+            // cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[0]+'&problem='+problem);
+            // cy.wait(3000);
+            // leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
+            //     cy.wrap($tab).click({force:true});
+            //     leftNav.getOpenToWorkspaceButton(index).click({force: true});
+            //     cy.wait(3000);
+            //     if (index<1) {
+            //         cy.get('[data-test="support-icon group"]').should('not.exist');
+            //     }
+            // })
         });
 
         it('will add a message to a student for all sections and verify message appears in all sections for a student and not another', function(){
@@ -245,15 +245,15 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             })
 
             //verify that message does not appear  for another student in all sections
-            cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[2]+'&problem='+problem);
-            leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
-                cy.wrap($tab).click({force:true});
-                leftNav.getOpenToWorkspaceButton(index).click({force: true});
-                cy.wait(3000);
-                if (index<1) {
-                    cy.get('[data-test="support-icon user"]').should('not.exist');
-                }
-            })
+            // cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[2]+'&problem='+problem);
+            // leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
+            //     cy.wrap($tab).click({force:true});
+            //     leftNav.getOpenToWorkspaceButton(index).click({force: true});
+            //     cy.wait(3000);
+            //     if (index<1) {
+            //         cy.get('[data-test="support-icon user"]').should('not.exist');
+            //     }
+            // })
         });
 
         it('will add a message to whole class for specific section and verify message appears in the section for whole class', function(){
@@ -271,9 +271,9 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
                 cy.get('[data-test="supports-list"]').contains('whole class in '+section) 
             }
             //verify message does not appear in non-specified section
-            leftNav.openToWorkspace('Introduction');
-            cy.wait(3000);
-            cy.get('[data-test="support-icon class"]').should('not.exist'); 
+            // leftNav.openToWorkspace('Introduction');
+            // cy.wait(3000);
+            // cy.get('[data-test="support-icon class"]').should('not.exist');
 
             for (j=0; j<studentArr20.length-2; j++){
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup20+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[j]+'&problem='+problem);
