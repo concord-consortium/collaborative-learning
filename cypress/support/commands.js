@@ -48,7 +48,6 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     }
     //verify Group num and there are 4 students in the group
     header.getGroupName().should('contain','Group '+group);
-    // header.getGroupMembers().find('div.member').should('have.attr', 'title').and('be.eq', students.length)
     for (i=0; i<students.length; i++) {
         header.getGroupMembers().find('div.member').should('contain','S'+students[i])
     }
