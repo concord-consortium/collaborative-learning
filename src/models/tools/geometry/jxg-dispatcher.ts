@@ -9,7 +9,7 @@ import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
 import { castArray } from "lodash";
 
-type OnChangeApplied = (change: JXGChange) => void;
+type OnChangeApplied = (board: JXG.Board | undefined, change: JXGChange) => void;
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -59,7 +59,10 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   }
   const result = dispatchChange(board, change);
   if (onChangeApplied) {
-    onChangeApplied(change);
+    const _board = isBoard(result)
+                    ? result as JXG.Board
+                    : isBoard(board) ? board as JXG.Board : undefined;
+    onChangeApplied(_board, change);
   }
   return result;
 }

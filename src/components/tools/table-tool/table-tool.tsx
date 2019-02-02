@@ -136,20 +136,28 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private getGeometryActionLinks(links: ILinkProperties, addLabelMap = false): ITableLinkProperties {
-    const { dataSet } = this.state;
-    let   labels: IRowLabel[] | undefined;
-    const content = this.getContent();
-    if (addLabelMap && dataSet && content) {
-      labels = dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: content.getRowLabel(i) }));
-    }
-    return { id: links.id, tileIds: [this.props.model.id], labels };
+    return this.getContent().getClientLinks(links.id, this.state.dataSet, addLabelMap);
+  }
+
+  private getGeometryActionLinksWithLabels(links: ILinkProperties) {
+    return this.getGeometryActionLinks(links, true);
   }
 
   private handleSetAttributeName = (attributeId: string, name: string) => {
+    const tableActionLinks = this.getTableActionLinks();
     this.getContent().setAttributeName(attributeId, name);
+    setTimeout(() => {
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
+        }
+      });
+    });
   }
 
-  private handleAddCanonicalCases = (newCases: ICaseCreation[], beforeID?: string | string[]) => {
+  private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
     const cases = newCases.map(aCase => ({ __id__: uniqueId(), ...cloneDeep(aCase) }));
     const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
     const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
@@ -158,7 +166,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     setTimeout(() => {
       const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
       const props = cases.map(aCase => ({ id: aCase.__id__ }));
-      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks, true);
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
       this.getContent().metadata.linkedGeometries.forEach(id => {
         const geometryContent = this.getGeometryContent(id);
         if (geometryContent) {
@@ -189,7 +197,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().removeCases(ids, tableActionLinks);
     setTimeout(() => {
-      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks, true);
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
       this.getContent().metadata.linkedGeometries.forEach(id => {
         const geometryContent = this.getGeometryContent(id);
         if (geometryContent) {

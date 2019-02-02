@@ -776,10 +776,6 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     }
   }
 
-  private getGeometryActionLinks(tableId: string): ILinkProperties {
-    return { id: uniqueId(), tileIds: [tableId] };
-  }
-
   private getTableActionLinks(links: ILinkProperties): ILinkProperties {
     return { id: links.id, tileIds: [this.props.model.id] };
   }
@@ -792,9 +788,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const tableContent = this.getTableContent(dragTileId);
     if (tableContent && parsedContent && board) {
       const dataSet = tableContent.getSharedData();
-      const geomActionLinks = this.getGeometryActionLinks(dragTileId);
+      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
-        const pts = this.getContent().addLinkedTable(board, dragTileId, dataSet, geomActionLinks);
+        const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
         pts.forEach(pt => {
           this.handleCreatePoint(pt);
         });

@@ -1,9 +1,9 @@
 import { types, Instance } from "mobx-state-tree";
-import { ILinkProperties, ITableChange, kLabelAttrName, TableContentModelType } from "../table/table-content";
+import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
-import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin } from "./jxg-board";
-import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
+import { ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
+import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
+import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, size as _size } from "lodash";
@@ -34,13 +34,25 @@ export function defaultGeometryContent(overrides?: JXGProperties) {
   return GeometryContentModel.create({ changes: [changeJson] });
 }
 
+export interface IAxisLabels {
+  x: string | undefined;
+  y: string | undefined;
+}
+
+const LinkedTableEntryModel = types
+  .model("LinkedTableEntryModel", {
+    id: types.string,
+    x: types.maybe(types.string),
+    y: types.maybe(types.string)
+  });
+
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
 export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
     selection: types.map(types.boolean),
-    linkedTables: types.array(types.string)
+    linkedTables: types.array(LinkedTableEntryModel)
   })
   .views(self => ({
     isSelected(id: string) {
@@ -48,6 +60,21 @@ export const GeometryMetadataModel = types
     },
     hasSelection() {
       return Array.from(self.selection.values()).some(isSelected => isSelected);
+    },
+    isLinkedToTable(tableId: string) {
+      return self.linkedTables.findIndex(entry => entry.id === tableId) >= 0;
+    },
+    get xAxisLabel() {
+      const links = self.linkedTables
+                        .map(entry => entry.x)
+                        .filter(name => name && name !== "x");
+      return links.length ? `x (${links.join(", ")})` : "x";
+    },
+    get yAxisLabel() {
+      const links = self.linkedTables
+                        .map(entry => entry.y)
+                        .filter(name => name && name !== "y");
+      return links.length ? `y (${links.join(", ")})` : "y";
     }
   }))
   .actions(self => ({
@@ -57,15 +84,22 @@ export const GeometryMetadataModel = types
     deselect(id: string) {
       self.selection.set(id, false);
     },
-    addTableLink(tableId: string) {
-      if (self.linkedTables.indexOf(tableId) < 0) {
-        self.linkedTables.push(tableId);
+    addTableLink(tableId: string, axes: IAxisLabels) {
+      if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
+        self.linkedTables.push({ id: tableId, ...axes });
       }
     },
     removeTableLink(tableId: string) {
-      const index = self.linkedTables.indexOf(tableId);
+      const index = self.linkedTables.findIndex(entry => entry.id === tableId);
       if (index >= 0) {
         self.linkedTables.splice(index, 1);
+      }
+    },
+    setTableLinkNames(tableId: string, x: string | undefined, y: string | undefined) {
+      const found = self.linkedTables.find(entry => entry.id === tableId);
+      if (found) {
+        if (x != null) found.x = x;
+        if (y != null) found.y = y;
       }
     },
     clearLinkedTables() {
@@ -114,7 +148,13 @@ export const GeometryContentModel = types
       return self.metadata.linkedTables.length > 0;
     },
     isLinkedToTable(tableId: string) {
-      return self.metadata.linkedTables.indexOf(tableId) >= 0;
+      return self.metadata.isLinkedToTable(tableId);
+    },
+    get xAxisLabel() {
+      return self.metadata.xAxisLabel;
+    },
+    get yAxisLabel() {
+      return self.metadata.yAxisLabel;
     },
     getTableContent(tileId: string) {
       const content = getTileContentById(self, tileId);
@@ -173,7 +213,7 @@ export const GeometryContentModel = types
       self.metadata = metadata;
     },
     willRemoveFromDocument() {
-      self.metadata.linkedTables.forEach(tableId => {
+      self.metadata.linkedTables.forEach(({ id: tableId }) => {
         const tableContent = self.getTableContent(tableId);
         tableContent && tableContent.removeGeometryLink(self.metadata.id);
       });
@@ -203,19 +243,33 @@ export const GeometryContentModel = types
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
-    function onChangeApplied(change: JXGChange) {
+    function onChangeApplied(board: JXG.Board | undefined, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
         const tableId = (change.targetID as string) ||
                           (change.parents && change.parents[0] as string);
         if (tableId) {
+          const links = change.links as ITableLinkProperties;
+          const labels = links && links.labels;
+          const xEntry = labels && labels.find(entry => entry.id === "xAxis");
+          const yEntry = labels && labels.find(entry => entry.id === "yAxis");
           if (op === "create") {
-            self.metadata.addTableLink(tableId);
+            const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
+            self.metadata.addTableLink(tableId, axes);
           }
           else if (op === "delete") {
             self.metadata.removeTableLink(tableId);
           }
+          else if (op === "update") {
+            if (xEntry || yEntry) {
+              self.metadata.setTableLinkNames(tableId, xEntry && xEntry.label, yEntry && yEntry.label);
+            }
+          }
+        }
+
+        if (board) {
+          syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
         }
       }
     }
@@ -422,9 +476,13 @@ export const GeometryContentModel = types
       return angle ? angle as any as JXG.Angle : undefined;
     }
 
-    function addLinkedTable(board: JXG.Board, tableId: string, dataSet: IDataSet, links: ILinkProperties) {
+    function addTableLink(board: JXG.Board, tableId: string, dataSet: IDataSet, links: ILinkProperties) {
       const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
       const yAttr = dataSet.attributes.length >= 2 ? dataSet.attributes[1] : undefined;
+      const axes = {
+                    x: xAttr ? xAttr.name : undefined,
+                    y: yAttr ? yAttr.name : undefined
+                  };
       const labelAttr = dataSet.attrFromName(kLabelAttrName);
       const caseCount = dataSet.cases.length;
       const ids: string[] = [];
@@ -439,7 +497,7 @@ export const GeometryContentModel = types
           points.push({ label, coords: [x, y] });
         }
       }
-      self.metadata.addTableLink(tableId);
+      self.metadata.addTableLink(tableId, axes);
       const change: JXGChange = {
               operation: "create",
               target: "tableLink",
@@ -451,12 +509,23 @@ export const GeometryContentModel = types
       return (pts || []) as JXG.Point[];
     }
 
-    function removeLinkedTable(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
+    function removeTableLink(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
       self.metadata.removeTableLink(tableId);
       const change: JXGChange = {
               operation: "delete",
               target: "tableLink",
               targetID: tableId,
+              links
+            };
+      return _applyChange(board, change);
+    }
+
+    function updateAxisLabels(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
+      const change: JXGChange = {
+              operation: "update",
+              target: "tableLink",
+              targetID: tableId,
+              properties: { axisLabels: true },
               links
             };
       return _applyChange(board, change);
@@ -611,7 +680,7 @@ export const GeometryContentModel = types
 
     function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
-        return applyChange(board, change);
+        return applyChange(board, change, onChangeApplied);
       }
     }
 
@@ -660,8 +729,9 @@ export const GeometryContentModel = types
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,
-        addLinkedTable,
-        removeLinkedTable,
+        addTableLink,
+        removeTableLink,
+        updateAxisLabels,
         findObjects,
         deleteSelection,
         applyChange: _applyChange,

@@ -138,12 +138,28 @@ export const TableContentModel = types
     get isLinked() {
       return self.metadata.linkedGeometries.length > 0;
     },
-    getGeometryContent(tileId: string) {
-      const content = getTileContentById(self, tileId);
-      return content && content as GeometryContentModelType;
+    getRowLabel(index: number) {
+      return `p${index + 1}`;
     }
   }))
   .views(self => ({
+    getGeometryContent(tileId: string) {
+      const content = getTileContentById(self, tileId);
+      return content && content as GeometryContentModelType;
+    },
+    getClientLinks(linkId: string, dataSet: IDataSet, addLabelMap: boolean): ITableLinkProperties {
+      let labels: IRowLabel[] = [];
+      if (addLabelMap && dataSet) {
+        labels = dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: self.getRowLabel(i) }));
+      }
+      ["xAxis", "yAxis"].forEach((axis, index) => {
+        const attr = dataSet.attributes.length > index ? dataSet.attributes[index] : undefined;
+        if (attr) {
+          labels.unshift({ id: axis, label: attr.name });
+        }
+      });
+      return { id: linkId, tileIds: [self.metadata.id], labels };
+    },
     canUndo() {
       return false;
       // const hasUndoableChanges = self.changes.length > 1;
@@ -177,7 +193,7 @@ export const TableContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedGeometries.forEach(geometryId => {
         const geometryContent = self.getGeometryContent(geometryId);
-        geometryContent && geometryContent.removeLinkedTable(undefined, self.metadata.id);
+        geometryContent && geometryContent.removeTableLink(undefined, self.metadata.id);
       });
       self.metadata.clearLinkedGeometries();
     },
@@ -347,11 +363,6 @@ export const TableContentModel = types
           self.applyChange(dataSet, change);
         }
       }
-    }
-  }))
-  .views(self => ({
-    getRowLabel(index: number) {
-      return `p${index + 1}`;
     }
   }))
   .views(self => ({
