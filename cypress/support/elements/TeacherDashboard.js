@@ -35,6 +35,9 @@ class TeacherDashboard {
     getClassSupportsMessageInput(){
         return cy.get('[data-test=support-input-class]')
     }
+    getClassSupportsMessage(){
+        return cy.get('.tab-contents > .teacher-supports > .teacher-support > div.content')
+    }
     getGroupSupportsSectionDropdown(){
         return cy.get('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown')
     }
@@ -44,6 +47,9 @@ class TeacherDashboard {
     getGroupSupportsMessageInput(){
         return cy.get('[data-test=support-input-group]')
     }
+    getGroupSupportsMessage(){
+        return cy.get('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > div.content')
+    }
     getStudentSupportsSectionDropdown(){
         return cy.get('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown')
     }
@@ -52,6 +58,9 @@ class TeacherDashboard {
     }
     getStudentSupportsMessageInput(){
         return cy.get('[data-test=support-input-student]')
+    }
+    getStudentSupportsMessage(){
+        return cy.get('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > div.content')
     }
     sendSupportMessage(level,text){
         cy.get('[data-test=support-input-'+level+']').type(text);
@@ -82,13 +91,13 @@ class TeacherDashboard {
         }
     }
     deleteClassSupportMessage () {
-        cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').click();
+        cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
     }
     deleteGroupSupportMessage () {
-        cy.get ('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').click();
+        cy.get ('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
     }
     deleteStudentSupportMessage () {
-        cy.get ('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').click();
+        cy.get ('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
     }
 }
 export default TeacherDashboard;

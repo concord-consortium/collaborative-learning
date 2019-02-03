@@ -60,7 +60,7 @@ context('Test group functionalities', function(){
             //     //     .trigger('drag',243, 175, {force:true})
             //     //     .trigger('dragend',{force:true});
 
-            });
+            // });
             it('will verify editing own canvas is still possible in 4-up view', function(){
                 canvas.addTextTile();
                 canvas.getTextTile().last().type('Hello World!');
