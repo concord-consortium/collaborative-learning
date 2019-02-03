@@ -42,9 +42,13 @@ interface IProps {
   dataSet?: IDataSet;
   changeCount: number;
   readOnly?: boolean;
+  indexValueGetter?: (params: ValueGetterParams) => string;
+  attrValueFormatter?: (params: ValueFormatterParams) => string;
   autoSizeColumns?: boolean;
+  defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
+  onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
@@ -57,7 +61,7 @@ interface IState {
   addAttributeButtonPos: IPos|null;
 }
 
-const LOCAL_ROW_ID = "__local__";
+export const LOCAL_ROW_ID = "__local__";
 const LOCAL_ROW_STYLE = {backgroundColor: "#cfc"};
 
 interface IRowStyleParams {
@@ -151,12 +155,22 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         }
       });
     }
+
+    if (this.props.onGridReady) {
+      this.props.onGridReady(gridReadyParams);
+    }
   }
 
   public getRowNodeId = (data: { id: string }) => data.id;
 
   public getRowIndexColumnDef(): ColDef {
     const { itemFlags, readOnly } = this.props;
+
+    function defaultIndexValueGetter(params: ValueGetterParams) {
+      // default just returns a row/case index
+      return params.node.rowIndex + 1;
+    }
+
     return ({
       headerName: "",
       headerComponentFramework: TableHeaderMenu,
@@ -208,10 +222,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       width: 50,
       pinned: "left",
       lockPosition: true,
-      valueGetter: (params) => {
-        return "";
-        // return params.node.rowIndex + 1; // caseIndex
-      },
+      valueGetter: this.props.indexValueGetter || defaultIndexValueGetter,
       suppressMovable: true,
       resizable: false,
       suppressNavigable: true
@@ -237,6 +248,23 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   public getAttributeColumnDef(attribute: IAttribute): ColDef {
     const { readOnly } = this.props;
+
+    function defaultAttrValueFormatter(params: ValueFormatterParams) {
+      const colName = params.colDef.field || params.colDef.headerName || "";
+      const colPlaces: { [key: string]: number } = {
+              day: 0,
+              distance: 1,
+              speed: 2
+            };
+      let places = colPlaces[colName];
+      if ((places == null) && (this.props.defaultPrecision != null)) {
+        places = this.props.defaultPrecision;
+      }
+      return (places != null) && (typeof params.value === "number")
+                ? params.value.toFixed(places)
+                : params.value;
+    }
+
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
       cellClass: "cdp-row-data-cell",
@@ -266,18 +294,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         });
         return value;
       },
-      valueFormatter: (params: ValueFormatterParams) => {
-        const colName = params.colDef.field || params.colDef.headerName || "";
-        const colPlaces: { [key: string]: number } = {
-                day: 0,
-                distance: 1,
-                speed: 2
-              };
-        const places = colPlaces[colName];
-        return (places != null) && (typeof params.value === "number")
-                  ? params.value.toFixed(places)
-                  : params.value;
-      },
+      valueFormatter: this.props.attrValueFormatter || defaultAttrValueFormatter,
       valueSetter: (params: ValueSetterParams) => {
         const { dataSet } = this.props;
         if (!dataSet || (params.newValue === params.oldValue)) { return false; }

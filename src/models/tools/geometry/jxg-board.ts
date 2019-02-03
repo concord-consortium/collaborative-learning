@@ -1,11 +1,29 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import "./jxg";
-import { assign, each } from "lodash";
+import { assign, each, find } from "lodash";
 
 // matches curriculum images
 export const kGeometryDefaultPixelsPerUnit = 18.3;
 export const kGeometryDefaultAxisMin = -1;
 export const isBoard = (v: any) => v instanceof JXG.Board;
+export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
+export const getAxisType = (v: any) => {
+  // stdform encodes orientation of axes
+  const [ , stdFormY, stdFormX] = v.stdform;
+  if (stdFormX) return "x";
+  if (stdFormY) return "y";
+};
+export function getAxis(board: JXG.Board, type: "x" | "y") {
+  return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
+}
+
+export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel: string) {
+  const xAxis = getAxis(board, "x");
+  const yAxis = getAxis(board, "y");
+  if (xAxis) xAxis.name = xAxisLabel;
+  if (yAxis) yAxis.name = yAxisLabel;
+  if (xAxis || yAxis) board.update();
+}
 
 function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
   const elt = document.getElementById(domElementID);

@@ -1,6 +1,6 @@
-import { JXGChangeAgent } from "./jxg-changes";
+import { JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { assign, size } from "lodash";
+import { castArray, size } from "lodash";
 import * as uuid from "uuid/v4";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
@@ -27,22 +27,34 @@ const defaultProps = {
         strokeColor: kPointDefaults.strokeColor
       };
 
+export function createPoint(board: JXG.Board, parents: JXGCoordPair, changeProps: any) {
+  // If id is not provided we generate one, but this will prevent
+  // model-level synchronization. This should only occur for very
+  // old geometry tiles created before the introduction of the uuid.
+  const props = { id: uuid(), ...defaultProps, ...changeProps };
+  if (props.snapSizeX === kPrevSnapUnit) {
+    props.snapSizeX = kSnapUnit;
+  }
+  if (props.snapSizeY === kPrevSnapUnit) {
+    props.snapSizeY = kSnapUnit;
+  }
+  return board.create("point", parents, props);
+}
+
 export const pointChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
-    const changeProps: any = change.properties || {};
-    const props = assign(
-                    // If id is not provided we generate one, but this will prevent
-                    // model-level synchronization. This should only occur for very
-                    // old geometry tiles created before the introduction of the uuid.
-                    changeProps.id ? {} : { id: uuid() },
-                    defaultProps, changeProps);
-    if (props.snapSizeX === kPrevSnapUnit) {
-      props.snapSizeX = kSnapUnit;
+    const parents: any = change.parents;
+    if (Array.isArray(parents && parents[0])) {
+      const changeProps = change.properties && castArray(change.properties);
+      const points = (parents as JXGCoordPair[]).map((coords, i) => {
+        const props = changeProps && (changeProps[i] || changeProps[0]);
+        return createPoint(board as JXG.Board, coords, props);
+      });
+      return points;
     }
-    if (props.snapSizeY === kPrevSnapUnit) {
-      props.snapSizeY = kSnapUnit;
+    else {
+      return createPoint(board as JXG.Board, change.parents as JXGCoordPair, change.properties);
     }
-    return (board as JXG.Board).create("point", change.parents, props);
   },
 
   // update can be handled generically
