@@ -2,7 +2,6 @@ import { defaultTableContent, kTableToolID, TableContentModel, convertImportToCh
 import { DataSet } from "../../data/data-set";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { values } from "lodash";
-import { getSnapshot } from "mobx-state-tree";
 
 describe("TableContent", () => {
 
@@ -11,13 +10,13 @@ describe("TableContent", () => {
     expect(emptyTable.type).toBe(kTableToolID);
     expect(emptyTable.isImported).toBe(false);
     expect(emptyTable.changes.length).toBe(0);
-    expect(emptyTable.isUserResizable()).toBe(true);
+    expect(emptyTable.isUserResizable).toBe(true);
 
     const defaultTable = TableContentModel.create(defaultTableContent());
     expect(defaultTable.type).toBe(kTableToolID);
     expect(defaultTable.isImported).toBe(true);
     expect(defaultTable.changes.length).toBe(1);
-    expect(emptyTable.isUserResizable()).toBe(true);
+    expect(emptyTable.isUserResizable).toBe(true);
   });
 
   it("can import authored data", () => {

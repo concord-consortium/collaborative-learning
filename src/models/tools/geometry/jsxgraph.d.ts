@@ -102,6 +102,8 @@ declare namespace JXG {
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
     lastDragTime: Date;
+    stdform: [number, number, number, number, number, number, number, number];
+    transformations: any[];
     visProp: { [prop: string]: any };
     visPropCalc: { [prop: string]: any };
     fixed: boolean;

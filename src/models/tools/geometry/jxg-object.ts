@@ -1,6 +1,13 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { castArray, size } from "lodash";
 
+// Inexplicably, we occasionally encounter JSXGraph objects with null
+// transformations which cause JSXGraph to crash. Until we figure out
+// the root cause of this phenomenon, this utility eliminates the nulls.
+function validateTransformations(elt: JXG.GeometryElement) {
+  elt.transformations = (elt.transformations || []).filter(t => t != null);
+}
+
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     // can't create generic objects
@@ -17,6 +24,7 @@ export const objectChangeAgent: JXGChangeAgent = {
       if (obj && objProps) {
         const { position, ...others } = objProps;
         if (position != null) {
+          validateTransformations(obj);
           obj.setPosition(JXG.COORDS_BY_USER, position);
         }
         if (size(others)) {

@@ -33,6 +33,10 @@ export const ToolTileModel = types
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
       }
+    },
+    willRemoveFromDocument() {
+      const willRemoveFromDocument = (self.content as any).willRemoveFromDocument;
+      return willRemoveFromDocument && willRemoveFromDocument();
     }
   }));
 

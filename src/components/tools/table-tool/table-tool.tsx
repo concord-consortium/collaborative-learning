@@ -1,11 +1,15 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
-import DataTableComponent from "./data-table";
+import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { IMenuItemFlags } from "./table-header-menu";
+import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
+import { ILinkProperties, IRowLabel, ITableLinkProperties, TableContentModelType
+        } from "../../../models/tools/table/table-content";
+import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
+import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { uniqueId } from "../../../utilities/js-utils";
 import { cloneDeep } from "lodash";
 
@@ -55,6 +59,9 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
                   syncedChanges: 0
                 };
 
+  private gridApi?: GridApi;
+  private gridColumnApi?: ColumnApi;
+
   public render() {
     const { readOnly } = this.props;
     const itemFlags: IMenuItemFlags = {
@@ -70,8 +77,12 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
         dataSet={this.state.dataSet}
         changeCount={this.state.syncedChanges}
         autoSizeColumns={this.getContent().isImported}
+        indexValueGetter={this.indexValueGetter}
+        attrValueFormatter={this.attrValueFormatter}
+        defaultPrecision={1}
         itemFlags={itemFlags}
         readOnly={readOnly}
+        onGridReady={this.handleGridReady}
         onSetAttributeName={this.handleSetAttributeName}
         onAddCanonicalCases={this.handleAddCanonicalCases}
         onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
@@ -84,20 +95,115 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as TableContentModelType;
   }
 
-  private handleSetAttributeName = (attributeId: string, name: string) => {
-    this.getContent().setAttributeName(attributeId, name);
+  private handleGridReady = (gridReadyParams: GridReadyEvent) => {
+    this.gridApi = gridReadyParams.api || undefined;
+    this.gridColumnApi = gridReadyParams.columnApi || undefined;
   }
 
-  private handleAddCanonicalCases = (newCases: ICaseCreation[], beforeID?: string | string[]) => {
+  private indexValueGetter = (params: ValueGetterParams) => {
+    const content = this.getContent();
+    return content.isLinked && (params.data.id !== LOCAL_ROW_ID)
+            ? content.getRowLabel(params.node.rowIndex)
+            : "";
+  }
+
+  private attrValueFormatter = (params: ValueFormatterParams) => {
+    if ((params.value == null) || (params.value === "")) return params.value;
+    const num = Number(params.value);
+    return isFinite(num)
+            ? num.toFixed(1).replace(".0", "")
+            : params.value;
+  }
+
+  private getGeometryContent(geometryId: string) {
+    return this.getContent().getGeometryContent(geometryId);
+  }
+
+  private getPositionOfPoint(caseId: string): JXGCoordPair {
+    const { dataSet } = this.state;
+    const attrCount = dataSet.attributes.length;
+    const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
+    const yAttr = attrCount > 1 ? dataSet.attributes[1] : undefined;
+    const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : 0;
+    const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : 0;
+    return [x, y];
+  }
+
+  private getTableActionLinks(): ILinkProperties {
+    const actionId = uniqueId();
+    const linkedGeometries = this.getContent().metadata.linkedGeometries;
+    return { id: actionId, tileIds: [...linkedGeometries] };
+  }
+
+  private getGeometryActionLinks(links: ILinkProperties, addLabelMap = false): ITableLinkProperties {
+    return this.getContent().getClientLinks(links.id, this.state.dataSet, addLabelMap);
+  }
+
+  private getGeometryActionLinksWithLabels(links: ILinkProperties) {
+    return this.getGeometryActionLinks(links, true);
+  }
+
+  private handleSetAttributeName = (attributeId: string, name: string) => {
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().setAttributeName(attributeId, name);
+    setTimeout(() => {
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
+        }
+      });
+    });
+  }
+
+  private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
     const cases = newCases.map(aCase => ({ __id__: uniqueId(), ...cloneDeep(aCase) }));
-    this.getContent().addCanonicalCases(cases, beforeID);
+    const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
+    const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().addCanonicalCases(cases, firstSelectedRowId, tableActionLinks);
+    setTimeout(() => {
+      const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
+      const props = cases.map(aCase => ({ id: aCase.__id__ }));
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.addPoints(undefined, parents, props, geomActionLinks);
+        }
+      });
+    });
   }
 
   private handleSetCanonicalCaseValues = (caseValues: ICase) => {
-    this.getContent().setCanonicalCaseValues([caseValues]);
+    const caseId = caseValues.__id__;
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().setCanonicalCaseValues([caseValues], tableActionLinks);
+    setTimeout(() => {
+      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const newPosition = this.getPositionOfPoint(caseId);
+        const position = newPosition as JXGCoordPair;
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.updateObjects(undefined, caseId, { position }, geomActionLinks);
+        }
+      });
+    });
   }
 
   private handleRemoveCases = (ids: string[]) => {
-    this.getContent().removeCases(ids);
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().removeCases(ids, tableActionLinks);
+    setTimeout(() => {
+      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.removeObjects(undefined, ids, geomActionLinks);
+        }
+      });
+    });
   }
 }
