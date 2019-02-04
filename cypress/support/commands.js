@@ -40,16 +40,16 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         rightNav = new RightNav,
         leftNav = new LeftNav,
         canvas = new Canvas;
-    let i=0;
+    let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
-        cy.wait(2000);
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        cy.wait(2000);
     }
     //verify Group num and there are 4 students in the group
     header.getGroupName().should('contain','Group '+group);
-    for (i=0; i<students.length; i++) {
-        header.getGroupMembers().find('div.member').should('contain','S'+students[i])
+    for (j=0; j<students.length; j++) {
+        header.getGroupMembers().find('div.member').should('contain','S'+students[j])
     }
 });
 
