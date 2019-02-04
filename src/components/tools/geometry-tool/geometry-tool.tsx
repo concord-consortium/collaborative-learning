@@ -28,6 +28,7 @@ import { GeometryToolbarView } from "./geometry-toolbar";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import AnnotationDialog from "./annotation-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
+import { isAnnotation } from "../../../models/tools/geometry/jxg-annotation";
 
 import "./geometry-tool.sass";
 
@@ -477,16 +478,19 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     if (board && annotationAnchor) {
       this.applyChange(() => {
           const annotation = content.addAnnotation(board, annotationAnchor.id);
-          this.setState({selectedAnnotation: annotation});
+          if (annotation) {
+            this.handleCreateText(annotation);
+            this.setState({selectedAnnotation: annotation});
+          }
       });
     }
   }
 
-  private handleUpdateAnnotation = (id: string, name: string) => {
-    const { selectedAnnotation } = this.state;
-    if (selectedAnnotation) {
-      // XXX: HACK this needs to be done through the change list
-      selectedAnnotation.setText(name);
+  private handleUpdateAnnotation = (annotationId: string, text: string) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      content.updateAnnotation(board, annotationId, text);
     }
     this.setState({ selectedAnnotation: undefined });
   }
@@ -832,6 +836,9 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     }
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
+    }
+    else if (isAnnotation(elt)) {
+      this.handleCreateText(elt as JXG.Text);
     }
   }
 
@@ -1349,6 +1356,23 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
 
   private handleCreateVertexAngle = (angle: JXG.Angle) => {
     updateVertexAngle(angle);
+  }
+
+  private handleCreateText = (text: JXG.Text) => {
+
+    const handleClick = (evt: any) => {
+      if (isAnnotation(text)) {
+        const coords = copyCoords(text.coords);
+        if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+          this.setState({selectedAnnotation: text});
+          this.lastPointDown = undefined;
+        } else {
+          this.lastPointDown = { evt, coords };
+        }
+      }
+    };
+
+    text.on("down", handleClick);
   }
 }
 

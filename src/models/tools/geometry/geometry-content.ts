@@ -279,6 +279,17 @@ export const GeometryContentModel = types
       return annotation ? annotation as JXG.Text : undefined;
     }
 
+    function updateAnnotation(board: JXG.Board, annotationId: string, newText: string) {
+      const change: JXGChange = {
+        operation: "update",
+        target: "annotation",
+        targetID: annotationId,
+        properties: { text: newText }
+      };
+      const annotation = _applyChange(board, change);
+      return annotation ? annotation as JXG.Text : undefined;
+    }
+
     function removeObjects(board: JXG.Board, id: string | string[]) {
       const change: JXGChange = {
         operation: "delete",
@@ -529,6 +540,7 @@ export const GeometryContentModel = types
         applyChange: _applyChange,
         syncChange,
         addAnnotation,
+        updateAnnotation,
 
         suspendSync() {
           ++suspendCount;

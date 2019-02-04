@@ -34,7 +34,7 @@ class AnnotationDialog extends React.Component<IProps, IState> {
         <input
           className="nc-attribute-name-input pt-input"
           type="text"
-          maxLength={50}
+          maxLength={500}
           placeholder={`Text`}
           value={this.state.name}
           onChange={this.handleNameChange}

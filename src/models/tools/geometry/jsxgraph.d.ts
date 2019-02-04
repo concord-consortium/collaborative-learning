@@ -133,7 +133,7 @@ declare namespace JXG {
     point2: JXG.Point;
   }
 
-  class Text extends GeometryElement {
+  class Text extends CoordsElement {
     plaintext: string;
     setText: (content: string) => void;
   }
