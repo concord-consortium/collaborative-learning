@@ -71,7 +71,6 @@ context('Test the overall workspace', function(){
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.wait(1000);
 
-            leftNav.openLeftNavTab(tab1);
             leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle()
@@ -86,7 +85,6 @@ context('Test the overall workspace', function(){
 
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem2);
             cy.wait(1000);
-            leftNav.openLeftNavTab(tab1);
             leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle().should('contain',tab1);
@@ -96,7 +94,6 @@ context('Test the overall workspace', function(){
             //Shows student as disconnected and will not load the introduction canvas
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.wait(1000);
-            leftNav.openLeftNavTab(tab1);
             leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle().should('contain',tab1);

@@ -1,3 +1,11 @@
+import GraphToolTile from './GraphToolTile'
+import ImageToolTile from './ImageToolTile'
+import DrawToolTile from './DrawToolTile'
+
+let graphToolTile = new GraphToolTile,
+    imageToolTile = new ImageToolTile,
+    drawToolTile = new DrawToolTile;
+
 class Canvas{
 
     canvas(){
@@ -144,19 +152,15 @@ class Canvas{
     }
 
     addGraphTile(){
-        return cy.get('.single-workspace > .toolbar > .tool.geometry').click({force: true});
+        cy.get('.single-workspace > .toolbar > .tool.geometry').click({force: true});
     }
-
-    getGraphTile(){
-        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-tool .geometry-content');
-    }
-
+    
     addImageTile(){
-        return cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
+        cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
     }
 
-    getImageTile(){
-        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
+    addDrawTile(){
+        cy.get('.single-workspace > .toolbar > .tool.drawing').click({force:true});
     }
 
     getDeleteTool(){
@@ -169,11 +173,17 @@ class Canvas{
                 this.getTextTile().last().click({force:true});
                 break;
             case 'graph':
-                this.getGraphTile().last().click({force:true});
+                graphToolTile.getGraphTile().last().click({force:true});
                 break;
             case 'image':
-                this.getImageTile().last().click({force:true});
+                imageToolTile.getImageTile().last().click({force:true});
                 break;
+            case 'draw':
+                drawToolTile.getDrawTile().last().click({force:true});
+                break;
+            // case 'table':
+            //     this.getTableTile().last().click({force:true});
+            //     break;
         }
         this.getDeleteTool().click({force: true});
     }

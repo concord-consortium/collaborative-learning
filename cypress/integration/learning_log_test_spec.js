@@ -40,8 +40,8 @@ context('Test bottom tabs', function(){
                 canvas.getTextTile().last().should('contain', 'LL_'+tab);
             //     //Add a graph tool and a shape
                 canvas.addGraphTile();
-                canvas.getGraphTile().last().click();
-                canvas.getGraphTile().last().click();
+                graphToolTile.getGraphTile().last().click();
+                graphToolTile.getGraphTile().last().click();
                 graphToolTile.getGraphPointLabel().last().should('contain', 'A' );
                 //Open learning log
                 learningLog.openLearningLogTab();
@@ -124,7 +124,7 @@ context('Test bottom tabs', function(){
             learningLog.closeLearningLogTab(); //close learning log
         });
         it('open Class Work canvas in learning log 2up view', function(){
-            let tab = 'What if';
+            let tab = 'What if...?';
             leftNav.openToWorkspace(tab);
             canvas.getCanvasTitle().should('contain',tab);
             canvas.publishCanvas();
@@ -172,7 +172,7 @@ context('Test bottom tabs', function(){
             //close learning log
             learningLog.closeLearningLogTab();
             //open a single canvas
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             //open class log tab and verify canvas is there with correct title
             rightNav.openClassLogTab();
             //click on canvas thumbnail, verify it opens in righthand side 2 up view in the main canvas
