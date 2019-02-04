@@ -3,7 +3,7 @@ import { boardChangeAgent, isBoard } from "./jxg-board";
 import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
-import { polygonChangeAgent } from "./jxg-polygon";
+import { polygonChangeAgent, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -46,22 +46,22 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
 
 export function applyChange(board: JXG.Board|string, change: JXGChange,
                             onChangeApplied?: OnChangeApplied): JXGChangeResult {
+  let _board = board as JXG.Board;
   const target = change.target.toLowerCase();
+  // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
-    // special case for update/object, where we dispatch by object type
-    applyUpdateObjects(board as JXG.Board, change);
+    applyUpdateObjects(_board, change);
     return;
   }
+  // special case for delete/object, where we dispatch by object type
   if ((change.operation === "delete") && (target === "object")) {
-    // special case for delete/object, where we dispatch by object type
-    applyDeleteObjects(board as JXG.Board, change);
+    removePointsToBeDeletedFromPolygons(_board, castArray(change.targetID));
+    applyDeleteObjects(_board, change);
     return;
   }
   const result = dispatchChange(board, change);
   if (onChangeApplied) {
-    const _board = isBoard(result)
-                    ? result as JXG.Board
-                    : isBoard(board) ? board as JXG.Board : undefined;
+    if (isBoard(result)) _board = result as JXG.Board;
     onChangeApplied(_board, change);
   }
   return result;
