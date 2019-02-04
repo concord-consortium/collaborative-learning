@@ -26,13 +26,11 @@
 import Header from './elements/Header.js';
 import RightNav from './elements/RightNav';
 import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
-
+import Canvas from './elements/Canvas'
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
 
     let qaClass = 10,
-        qaOffering = 10,
         problem = 2.3;
     let teacher = 10;
 
@@ -44,7 +42,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
 
     for (i=0;i<students.length;i++) {
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        cy.wait(2000);
+        cy.wait(3000);
     }
     //verify Group num and there are 4 students in the group
     header.getGroupName().should('contain','Group '+group);
