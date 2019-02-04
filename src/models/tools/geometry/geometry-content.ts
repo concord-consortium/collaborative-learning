@@ -577,6 +577,43 @@ export const GeometryContentModel = types
       return selectedIds;
     }
 
+    function getOneSelectedPolygon(board: JXG.Board) {
+      // all vertices of polygon must be selected to show rotate handle
+      const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
+      const polygons = board.objectsList
+                            .filter(el => el.elType === "polygon")
+                            .filter(polygon => {
+                              const selected = { any: false, all: true };
+                              each(polygon.ancestors, vertex => {
+                                if (self.metadata.isSelected(vertex.id)) {
+                                  selected.any = true;
+                                }
+                                else {
+                                  selected.all = false;
+                                }
+                              });
+                              polygonSelection[polygon.id] = selected;
+                              return selected.any;
+                            });
+      const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
+      const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
+                                ? polygons[0] as JXG.Polygon : undefined;
+      // must not have any selected points other than the polygon vertices
+      if (selectedPolygon) {
+        type IEntry = [string, boolean];
+        const selectionEntries = Array.from(self.metadata.selection.entries()) as IEntry[];
+        const selectedPts = selectionEntries
+                              .filter(entry => {
+                                const id = entry[0];
+                                const obj = board.objects[id];
+                                const isSelected = entry[1];
+                                return obj && (obj.elType === "point") && isSelected;
+                              });
+        return _size(selectedPolygon.ancestors) === selectedPts.length
+                  ? selectedPolygon : undefined;
+      }
+    }
+
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
@@ -733,6 +770,7 @@ export const GeometryContentModel = types
         removeTableLink,
         updateAxisLabels,
         findObjects,
+        getOneSelectedPolygon,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,

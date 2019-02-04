@@ -47,11 +47,11 @@ class LearningLog {
     }
 
     getLLGraphTile(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-size-me> .geometry-tool');
+        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-tool .geometry-content');
     }
 
     getLLGraphPointText(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool > .JXGtext');
+        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row> .tool-tile > .geometry-tool .geometry-content > .JXGtext');
     }
 
     getLLImageTool(){
@@ -110,7 +110,7 @@ class LearningLog {
 
     addLLPointToGraph(x,y){
         this.getLLGraphTile().last();
-        cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-size-me > .geometry-tool').last().click(x,y, {force:true});
+        cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-tool .geometry-content').last().click(x,y, {force:true});
     }
 
     getSingleCanvas(){
