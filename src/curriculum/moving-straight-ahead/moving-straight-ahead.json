@@ -43,7 +43,7 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "Walk Marathons",
+          "title": "1.1 Walk Marathons",
           "subtitle": "Finding and Using Rates",
           "sections": [
             {
@@ -65,7 +65,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship.\n\nIn this Unit, consider these questions:\n* How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?\n* How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?\n* If I know the value of one variable, how can I find the value of the other variable? (What kinds of problems can I solve using linear relationships?)"
+                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship.\n\nIn this Unit, consider these questions:\n\n  \u00b7 How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?\n\n  \u00b7 How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?\n\n  \u00b7 If I know the value of one variable, how can I find the value of the other variable? (What kinds of problems can I solve using linear relationships?)"
                     }
                   },{
                     "content": {
@@ -150,7 +150,7 @@
         {
           "description": "Problem 1.2",
           "ordinal": 2,
-          "title": "Walking Rates and Linear Relationships",
+          "title": "1.2 Walking Rates and Linear Relationships",
           "subtitle": "Tables, Graphs, and Equations",
           "sections": [
             {
@@ -299,7 +299,7 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "Raising Money",
+          "title": "1.3 Raising Money",
           "subtitle": "Using Relationships to Solve Equations",
           "sections": [{
               "type": "introduction",
@@ -307,7 +307,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon.\n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions:\n * What variables can affect the amount of money that is collected?\n * How can you use these variables to estimate the amount of money each student will collect?\n * Will the amount of money collected be the same for each walker?\n \n Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer d = rt, he or she walks. The class refers to these as pledge plans."
+                    "text": "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon.\n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions:\n\n  \u00b7 What variables can affect the amount of money that is collected?\n\n  \u00b7 How can you use these variables to estimate the amount of money each student will collect?\n * Will the amount of money collected be the same for each walker?\n\n Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer d = rt, he or she walks. The class refers to these as pledge plans."
                   }
                 }]
               },
@@ -408,7 +408,7 @@
         {
           "description": "Problem 1.4",
           "ordinal": 4,
-          "title": "Walkathon Money",
+          "title": "1.4 Walkathon Money",
           "subtitle": "Expressing Linear Relationships and Proportionality",
           "sections": [{
               "type": "introduction",
@@ -500,7 +500,7 @@
         {
           "description": "Reflection 1.5",
           "ordinal": 5,
-          "title": "1.MR Mathematical Reflection",
+          "title": "1.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -534,7 +534,7 @@
         {
           "description": "Problem 2.1",
           "ordinal": 1,
-          "title": "Henri and Emile’s Race",
+          "title": "2.1 Henri and Emile’s Race",
           "subtitle": "Strategies to Find a Solution",
           "sections": [
             {
@@ -602,7 +602,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. In Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. \n * How can a table or graph be used to find the length of the race? \n * How does the walking rate of each brother show up in the table and graph?\n * After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?\n * What information does the y-intercept of each graph represent in terms of the race?\n * Is the point (26, 70) on the graph or table of one of the brothers? Explain.\n * When will Emile overtake Henri? \n\n2. Amit wrote equations to represent the relationships between time and distance. He claims:\n * You can tell the walking rate and y-intercept from the equation. Is he correct? Explain.\n * You can determine which of the two lines will be steeper from the equation? Is he correct? Explain."
+                    "text": "1. In Ms. Chang’s class some students used tables and graphs to find the length of the race and other information about the race. \n\n  \u00b7 How can a table or graph be used to find the length of the race?\n\n  \u00b7 How does the walking rate of each brother show up in the table and graph?\n * After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?\n\n  \u00b7 What information does the y-intercept of each graph represent in terms of the race?\n\n  \u00b7 Is the point (26, 70) on the graph or table of one of the brothers? Explain.\n\n  \u00b7 When will Emile overtake Henri? \n\n2. Amit wrote equations to represent the relationships between time and distance. He claims:\n\n  \u00b7 You can tell the walking rate and y-intercept from the equation. Is he correct? Explain.\n\n  \u00b7 You can determine which of the two lines will be steeper from the equation? Is he correct? Explain."
                   }
                 }]
               },
@@ -637,7 +637,7 @@
         {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "Comparing Cost Relationships",
+          "title": "2.2 Comparing Cost Relationships",
           "subtitle": "Finding Solutions to Equations",
           "sections": [
             {
@@ -697,7 +697,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: \n\n                 CMighty = 49 + n\n\n                 CNo-Shrink = 4.5n\n\nThe number of T-shirts is n. CMighty is the cost in dollars for Mighty Tee. CNo-Shrink is the cost in dollars for No-Shrink Tee. \n\nWhich company should they choose? Explain why."
+                      "text": "Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: \n\n                 C_Mighty = 49 + n\n\n                 C_No-Shrink = 4.5n\n\nThe number of T-shirts is n. C_Mighty is the cost in dollars for Mighty Tee. C_No-Shrink is the cost in dollars for No-Shrink Tee. \n\nWhich company should they choose? Explain why."
                     }
                   }
                 ]
@@ -714,7 +714,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. Some students in Ms. Chang’s class used graphs to decide which company to use. Others used tables.\n  * Explain how a graph or a table could be helpful. \n. * What if the class only had $120 to spend, how would this affect your answer?\n\n2. Explain how you could use a table, graph, or equation to: \n  * Find the costs of 20 T-shirts?\n  * Find the number of T-shirts you can buy for $135? \n  * Find the number of T-shirts when CMighty < CNo-Shrink?\n  \n3. The following table represents the costs from another company, The Big T."
+                    "text": "1. Some students in Ms. Chang’s class used graphs to decide which company to use. Others used tables.\n\n  \u00b7 Explain how a graph or a table could be helpful.\n\n  \u00b7 What if the class only had $120 to spend, how would this affect your answer?\n\n2. Explain how you could use a table, graph, or equation to: \n  * Find the costs of 20 T-shirts?\n\n  \u00b7 Find the number of T-shirts you can buy for $135? \n\n  \u00b7 Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost?"
                   }
                 },
                 {
@@ -782,7 +782,7 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "Connecting Tables, Graphs, and Equations to Solutions",
+          "title": "2.3 Connecting Tables, Graphs, and Equations to Solutions",
           "subtitle":"",
           "sections": [
             {
@@ -803,7 +803,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Kilometers Walked\n\n  * Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n  * Write a question you could answer by locating this point. \n  * How can you use the equation for Alana’s pledge plan to check the answer to the question you made up? \n  * How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question? \n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."
+                      "text": "Kilometers Walked\n\n  \u00b7 Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n\n  \u00b7 Write a question you could answer by locating this point. \n\n  \u00b7 How can you use the equation for Alana’s pledge plan to check the answer to the question you made up?\n\n  \u00b7 How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question? \n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."
                     }
                   }
                 ]
@@ -875,7 +875,7 @@
         {
           "description": "Reflection 2.4",
           "ordinal": 4,
-          "title": "2.MR Mathematical Reflection",
+          "title": "2.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -909,7 +909,7 @@
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "Mystery Pouches",
+          "title": "3.1 Mystery Pouches",
           "subtitle": "Exploring Equality",
           "sections": [
             {
@@ -1072,7 +1072,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "From Pouches to Variables",
+          "title": "3.2 From Pouches to Variables",
           "subtitle": "Writing and Solving Equations",
           "sections": [
             {
@@ -1199,7 +1199,7 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "Solving Linear Equations",
+          "title": "3.3 Solving Linear Equations",
           "subtitle": "",
           "sections": [
             {
@@ -1290,7 +1290,7 @@
         {
           "description": "Problem 3.4",
           "ordinal": 4,
-          "title": "Finding the Point of Intersection",
+          "title": "3.4 Finding the Point of Intersection",
           "subtitle": "Solving More Equations",
           "sections": [
             {
@@ -1392,7 +1392,7 @@
         {
           "description": "Reflection 3.5",
           "ordinal": 5,
-          "title": "3.MR Mathematical Reflection",
+          "title": "3.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -1426,7 +1426,7 @@
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "Climbing Stairs",
+          "title": "4.1 Climbing Stairs",
           "subtitle": "Using the Ratio of Rise and Run",
           "sections": [
             {
@@ -1522,7 +1522,7 @@
         {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "The Constant of Proportionality",
+          "title": "4.2 The Constant of Proportionality",
           "subtitle": "",
           "sections": [
             {
@@ -1706,7 +1706,7 @@
         {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "Design Under Constraints",
+          "title": "4.3 Design Under Constraints",
           "subtitle": "Revisiting Rates and Proportionality in Linear Situations",
           "sections": [
             {
@@ -1840,7 +1840,7 @@
         {
           "description": "Reflection 4.4",
           "ordinal": 4,
-          "title": "4.MR Mathematical Reflection",
+          "title": "4.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
