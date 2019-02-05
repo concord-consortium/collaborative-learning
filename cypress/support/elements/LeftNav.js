@@ -1,6 +1,6 @@
 class LeftNav{
     getLeftNavTabs(){
-        return cy.get('.left-nav > .tabs > .tab');
+        return cy.get('.left-nav .tab');
     }
 
     getLeftNavExpandedSpace(){

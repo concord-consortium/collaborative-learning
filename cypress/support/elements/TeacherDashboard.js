@@ -9,7 +9,7 @@ class TeacherDashboard {
         return cy.get('.teacher-group-tab > .group-list')
     }
     getGroupName(){
-        return cy.get('.teacher-dashboard > .tabbed-area > .tab-contents > .contents > .teacher-group-tab > .group-list > .group > .group-title');
+        return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-title');
     }
     getStudentList(){
         return cy.get('.teacher-student-tab > .user-list')
@@ -21,7 +21,7 @@ class TeacherDashboard {
         cy.get('.teacher-group-tab > .selected-group > .title > .actions > span').should('contain','Join Group').click();
     }
     getGroupMembers(){
-        return cy.get('.teacher-dashboard > .tabbed-area > .tab-contents > .contents > .teacher-group-tab > .group-list > .group > .group-users');
+        return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-users');
     }
     getUserName(){
         return cy.get('.header > .user > .name')
@@ -39,28 +39,28 @@ class TeacherDashboard {
         return cy.get('.tab-contents > .teacher-supports > .teacher-support > div.content')
     }
     getGroupSupportsSectionDropdown(){
-        return cy.get('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown')
+        return cy.get('.teacher-group-tab > .selected-group .teacher-support > .section-dropdown')
     }
     getGroupSupportsSectionDropdownOptions(){
-        return cy.get('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown > .option')
+        return cy.get('.teacher-group-tab > .selected-group .teacher-support > .section-dropdown > .option')
     }
     getGroupSupportsMessageInput(){
         return cy.get('[data-test=support-input-group]')
     }
     getGroupSupportsMessage(){
-        return cy.get('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > div.content')
+        return cy.get('.teacher-group-tab > .selected-group .teacher-support > div.content')
     }
     getStudentSupportsSectionDropdown(){
-        return cy.get('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown')
+        return cy.get('.teacher-student-tab > .selected-group .teacher-support > .section-dropdown')
     }
     getStudentSupportsSectionDropdownOptions(){
-        return cy.get('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .section-dropdown > .option')
+        return cy.get('.teacher-student-tab > .selected-group .teacher-support > .section-dropdown > .option')
     }
     getStudentSupportsMessageInput(){
         return cy.get('[data-test=support-input-student]')
     }
     getStudentSupportsMessage(){
-        return cy.get('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > div.content')
+        return cy.get('.teacher-student-tab > .selected-group .teacher-support > div.content')
     }
     sendSupportMessage(level,text){
         cy.get('[data-test=support-input-'+level+']').type(text);
@@ -94,10 +94,10 @@ class TeacherDashboard {
         cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
     }
     deleteGroupSupportMessage () {
-        cy.get ('.teacher-group-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
+        cy.get ('.teacher-group-tab > .selected-group .teacher-support > .icon-delete-tool').last().click();
     }
     deleteStudentSupportMessage () {
-        cy.get ('.teacher-student-tab > .selected-group > .content > .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
+        cy.get ('.teacher-student-tab > .selected-group .teacher-support > .icon-delete-tool').last().click();
     }
 }
 export default TeacherDashboard;
