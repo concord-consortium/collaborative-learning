@@ -491,7 +491,11 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateAnnotation(board, annotationId, text);
+      if (text) {
+        content.updateAnnotation(board, annotationId, text);
+      } else {
+        content.removeObjects(board, annotationId);
+      }
     }
     this.setState({ selectedAnnotation: undefined });
   }

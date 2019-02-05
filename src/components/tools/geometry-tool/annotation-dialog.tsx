@@ -35,7 +35,6 @@ class AnnotationDialog extends React.Component<IProps, IState> {
           className="nc-attribute-name-input pt-input"
           type="text"
           maxLength={500}
-          placeholder={`Text`}
           value={this.state.name}
           onChange={this.handleNameChange}
           onKeyDown={this.handleKeyDown}
@@ -47,7 +46,6 @@ class AnnotationDialog extends React.Component<IProps, IState> {
             className="nc-dialog-button pt-intent-primary"
             text="OK"
             onClick={this.handleRenameAttribute}
-            disabled={!this.state.name}
           />
           <Button className="nc-dialog-button" text="Cancel"  onClick={this.props.onClose}/>
         </div>
