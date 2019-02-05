@@ -924,14 +924,25 @@ function preprocessImportFormat(snapshot: any) {
   function addPolygon(polygonSpec: IPolygonImportSpec) {
     const { parents: parentSpecs, properties: _properties } = polygonSpec;
     const id = uniqueId();
-    const ptsWithVertexAngles: string[] = [];
+    const vertices: Array<{ id: string, angleLabel?: boolean }> = [];
     const parents = parentSpecs.map(spec => {
                       const ptId = addPoint(spec);
-                      if (spec.angleLabel) ptsWithVertexAngles.push(ptId);
+                      vertices.push({ id: ptId, angleLabel: spec.angleLabel });
                       return ptId;
                     });
     const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "polygon", parents, properties });
+    const lastIndex = vertices.length - 1;
+    vertices.forEach((pt, i) => {
+      let angleParents;
+      if (pt.angleLabel) {
+        const prev = i === 0 ? vertices[lastIndex].id : vertices[i - 1].id;
+        const self = vertices[i].id;
+        const next = i === lastIndex ? vertices[0].id : vertices[i + 1].id;
+        angleParents = [prev, self, next];
+      }
+      changes.push({ operation: "create", target: "vertexAngle", parents: angleParents });
+    });
     return id;
   }
 
