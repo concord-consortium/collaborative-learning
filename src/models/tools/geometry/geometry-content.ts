@@ -279,12 +279,12 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function updateAnnotation(board: JXG.Board, annotationId: string, newText: string) {
+    function updateAnnotation(board: JXG.Board, annotationId: string, properties: JXGProperties) {
       const change: JXGChange = {
         operation: "update",
         target: "annotation",
         targetID: annotationId,
-        properties: { text: newText }
+        properties
       };
       const annotation = _applyChange(board, change);
       return annotation ? annotation as JXG.Text : undefined;

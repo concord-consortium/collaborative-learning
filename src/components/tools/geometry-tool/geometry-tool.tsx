@@ -492,7 +492,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (board) {
       if (text) {
-        content.updateAnnotation(board, annotationId, text);
+        content.updateAnnotation(board, annotationId, { text });
       } else {
         content.removeObjects(board, annotationId);
       }
@@ -974,6 +974,22 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     }
   }
 
+  private endDragAnnotation(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+
+    // only create a change object if there's actually a change
+    if (usrDiff[1] || usrDiff[2]) {
+      const id = dragTarget.id;
+      const dragStart = this.dragPts[id].initial;
+      if (dragStart) {
+        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
+        this.applyChange(() => content.updateAnnotation(board, id, { position: newUsrCoords }));
+      }
+    }
+  }
+
   private handleCreateBoard = (board: JXG.Board) => {
 
     const handlePointerDown = (evt: any) => {
@@ -1377,7 +1393,35 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     };
 
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly) return;
+
+      const id = text.id;
+      let dragEntry = this.dragPts[id];
+      if (!dragEntry) {
+        dragEntry = this.dragPts[id] = { initial: copyCoords(text.coords) };
+      }
+      dragEntry.final = copyCoords(text.coords);
+    };
+
+    const handlePointerUp = (evt: any) => {
+      const id = text.id;
+      const dragEntry = this.dragPts[id];
+      if (!dragEntry) { return; }
+
+      if (!this.props.readOnly) {
+        dragEntry.final = copyCoords(text.coords);
+        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
+                                                     dragEntry.initial.usrCoords) as number[];
+        this.endDragAnnotation(evt, text, usrDiff);
+      }
+
+      delete this.dragPts[id];
+    };
+
     text.on("down", handleDown);
+    text.on("drag", handleDrag);
+    text.on("up", handlePointerUp);
   }
 }
 

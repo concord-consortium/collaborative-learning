@@ -17,6 +17,16 @@ export const getAnchor = (annotation: JXG.Text) => {
     : ancestors.find(elem => isMovableLine(elem) || isPolygon(elem));
 };
 
+const setAnnotationVisible = (annotation: JXG.Text, visible: boolean) => {
+  if (!isAnnotation) return;
+  const annotationPoint = values(annotation.childElements)[0];
+  if (annotationPoint) {
+    const annotationLine = values(annotationPoint.childElements)[0];
+    annotationLine.setAttribute({ visible });
+    annotation.setAttribute({ visible });
+  }
+};
+
 const sharedProps = {
   strokeWidth: 1,
   clientType: "annotation",
@@ -50,10 +60,22 @@ export const annotationChangeAgent: JXGChangeAgent = {
     if (isBoard(board)) {
       const _board = board as JXG.Board;
 
+      const id = changeProps.id;
       const annotation = _board.create("text", [0, -1, "annotation"], annotationProps);
-      const annotationPoint = _board.create("point", [1, 0], { ...pointProps, anchor: annotation.id });
-      const anchorPoint = _board.create("point", [0, 0], { ...pointProps, anchor: annotationProps.anchor });
-      const line = _board.create("line", [anchorPoint, annotationPoint], lineProps);
+      const annotationPoint = _board.create(
+        "point",
+        [1, 0],
+        { ...pointProps, anchor: annotation.id, id: `${id}-annotationPoint` }
+      );
+      const anchorPoint = _board.create(
+        "point",
+        [0, 0],
+        { ...pointProps, anchor: annotationProps.anchor, id: `${id}-anchorPoint` }
+      );
+      const line = _board.create(
+        "line",
+        [anchorPoint, annotationPoint],
+        { ...lineProps, id: `${id}-labelLine`});
       return [annotation, annotationPoint, anchorPoint, line];
     }
   },
@@ -61,11 +83,21 @@ export const annotationChangeAgent: JXGChangeAgent = {
   update: (board, change) => {
     if (!change.targetID || !change.properties) { return; }
     const id = change.targetID as string;
-    const props = change.properties as JXGProperties;
     const obj = board.objects[id] as JXG.Text;
-    const text = props.text;
-    if (obj && text) {
-      obj.setText(text);
+    if (obj) {
+      const props = change.properties as JXGProperties;
+      const { text, position } = props;
+      if (text) {
+        obj.setText(text);
+        board.update();
+      }
+      if (position) {
+        setAnnotationVisible(obj, false);
+        setTimeout(() => {
+          obj.setPosition(JXG.COORDS_BY_USER, position);
+          setAnnotationVisible(obj, true);
+        });
+      }
     }
   },
 
