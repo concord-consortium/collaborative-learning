@@ -10,9 +10,10 @@ import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
-import { safeJsonParse } from "../../../utilities/js-utils";
+import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
 
@@ -20,7 +21,7 @@ export const kGeometryDefaultHeight = 320;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
-export function defaultGeometryContent(overrides?: JXGProperties) {
+function defaultGeometryBoardChange(overrides?: JXGProperties) {
   const xAxisMax = 30;
   const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - kGeometryDefaultAxisMin;
   const change: JXGChange = {
@@ -32,6 +33,11 @@ export function defaultGeometryContent(overrides?: JXGProperties) {
                   grid: {}  // defaults to 1-unit gridlines
                 }, overrides)
   };
+  return change;
+}
+
+export function defaultGeometryContent(overrides?: JXGProperties) {
+  const change = defaultGeometryBoardChange(overrides);
   const changeJson = JSON.stringify(change);
   return GeometryContentModel.create({ changes: [changeJson] });
 }
@@ -132,6 +138,7 @@ export const GeometryContentModel = types
   .volatile(self => ({
     metadata: undefined as any as GeometryMetadataModelType
   }))
+  .preProcessSnapshot(snapshot => preprocessImportFormat(snapshot))
   .views(self => ({
     isSelected(id: string) {
       return self.metadata.isSelected(id);
@@ -845,3 +852,127 @@ export const GeometryContentModel = types
   });
 
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
+
+interface IPointImportSpec {
+  type: "point";
+  parents: [number, number];
+  properties?: any;
+}
+
+interface IVertexImportSpec extends IPointImportSpec {
+  angleLabel?: boolean;
+}
+
+interface IPolygonImportSpec {
+  type: "polygon";
+  parents: IVertexImportSpec[];
+  properties?: any;
+}
+
+interface IImageImportSpec {
+  type: "image";
+  parents: {
+    url: string;
+    coords: JXGCoordPair;
+    size: JXGCoordPair;
+  };
+  properties?: any;
+}
+
+interface IMovableLineSpec {
+  type: "movableLine";
+  parents: [JXGCoordPair, JXGCoordPair];
+  properties?: any;
+}
+
+type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineSpec;
+
+function preprocessImportFormat(snapshot: any) {
+  // const boardSpec = snapshot.board;
+  const objectSpecs = snapshot.objects as IObjectImportSpec[];
+  if (!objectSpecs) return snapshot;
+
+  const changes: JXGChange[] = [];
+  changes.push(defaultGeometryBoardChange());
+
+  // map import names to internal names
+  const kPropsMap: { [p: string]: string } = {
+    fillColor: "clientFillColor",
+    strokeColor: "clientStrokeColor",
+    selectedFillColor: "clientSelectedFillColor",
+    selectedStrokeColor: "clientSelectedStrokeColor"
+  };
+  // specify import properties to be removed
+  const kOmitProps = ["selectedFillColor", "selectedStrokeColor"];
+
+  function transformProperties(id: string, properties: any) {
+    const transformed = { id, ...omit(properties, kOmitProps) };
+    each(kPropsMap, (to, from) => {
+      if (properties && properties[from] != null) transformed[to] = properties[from];
+    });
+    return transformed;
+  }
+
+  function addPoint(pointSpec: IPointImportSpec) {
+    const { type, properties: _properties, ...others } = pointSpec;
+    const id = uniqueId();
+    const properties = transformProperties(id, _properties);
+    changes.push({ operation: "create", target: "point", properties, ...others });
+    return id;
+  }
+
+  function addPolygon(polygonSpec: IPolygonImportSpec) {
+    const { parents: parentSpecs, properties: _properties } = polygonSpec;
+    const id = uniqueId();
+    const ptsWithVertexAngles: string[] = [];
+    const parents = parentSpecs.map(spec => {
+                      const ptId = addPoint(spec);
+                      if (spec.angleLabel) ptsWithVertexAngles.push(ptId);
+                      return ptId;
+                    });
+    const properties = { id, ..._properties };
+    changes.push({ operation: "create", target: "polygon", parents, properties });
+    return id;
+  }
+
+  function addImage(imageSpec: IImageImportSpec) {
+    const { type, parents: _parents, properties: _properties, ...others } = imageSpec;
+    const { url, coords, size: pxSize } = _parents;
+    const size = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit) as JXGCoordPair;
+    const parents = [url, coords, size];
+    const id = uniqueId();
+    const properties = { id, ..._properties };
+    gImageMap.getImage(url);  // register with image map
+    changes.push({ operation: "create", target: "image", parents, properties, ...others });
+    return id;
+  }
+
+  function addMovableLine(movableLineSpec: IMovableLineSpec) {
+    const { type, parents, properties: _properties, ...others } = movableLineSpec;
+    const id = uniqueId();
+    const properties = transformProperties(id, _properties);
+    changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
+    return id;
+  }
+
+  objectSpecs.forEach(spec => {
+    switch (spec.type) {
+      case "point":
+        addPoint(spec);
+        break;
+      case "polygon":
+        addPolygon(spec);
+        break;
+      case "image":
+        addImage(spec);
+        break;
+      case "movableLine":
+        addMovableLine(spec);
+        break;
+    }
+  });
+
+  return {
+    changes: changes.map(change => JSON.stringify(change))
+  };
+}
