@@ -98,6 +98,7 @@ declare namespace JXG {
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
+    descendants: { [id: string]: GeometryElement };
     parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
@@ -135,6 +136,7 @@ declare namespace JXG {
 
   class Text extends CoordsElement {
     plaintext: string;
+    size: [number, number]; // [width, height]
     setText: (content: string) => void;
   }
 

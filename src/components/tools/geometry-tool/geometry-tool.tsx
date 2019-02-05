@@ -13,7 +13,7 @@ import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
-import { JXGChange } from "../../../models/tools/geometry/jxg-changes";
+import { JXGChange, JXGProperties } from "../../../models/tools/geometry/jxg-changes";
 import { extractDragTileType, kDragTileContent, IToolApiInterface } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
@@ -28,7 +28,7 @@ import { GeometryToolbarView } from "./geometry-toolbar";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import AnnotationDialog from "./annotation-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
-import { isAnnotation } from "../../../models/tools/geometry/jxg-annotation";
+import { isAnnotation, getAnchor } from "../../../models/tools/geometry/jxg-annotation";
 
 import "./geometry-tool.sass";
 
@@ -477,7 +477,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
     const annotationAnchor = this.getAnnotationAnchor();
     if (board && annotationAnchor) {
       this.applyChange(() => {
-          const annotation = content.addAnnotation(board, annotationAnchor.id);
+          const elems = content.addAnnotation(board, annotationAnchor.id);
+          const annotation = elems && elems.find(elem => isAnnotation(elem)) as JXG.Text;
           if (annotation) {
             this.handleCreateText(annotation);
             this.setState({selectedAnnotation: annotation});
@@ -1359,8 +1360,8 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
   }
 
   private handleCreateText = (text: JXG.Text) => {
-
-    const handleClick = (evt: any) => {
+    const handleDown = (evt: any) => {
+      // removeLines();
       if (isAnnotation(text)) {
         const coords = copyCoords(text.coords);
         if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
@@ -1372,7 +1373,7 @@ class GeometryToolComponentImpl extends BaseComponent<IProps, IState> {
       }
     };
 
-    text.on("down", handleClick);
+    text.on("down", handleDown);
   }
 }
 

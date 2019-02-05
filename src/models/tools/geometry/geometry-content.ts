@@ -275,8 +275,8 @@ export const GeometryContentModel = types
         target: "annotation",
         properties: {id: uuid(), anchor: anchorId }
       };
-      const annotation = _applyChange(board, change);
-      return annotation ? annotation as JXG.Text : undefined;
+      const elems = _applyChange(board, change);
+      return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
     function updateAnnotation(board: JXG.Board, annotationId: string, newText: string) {

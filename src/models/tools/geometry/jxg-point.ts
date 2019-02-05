@@ -1,15 +1,20 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { assign, size } from "lodash";
+import { assign, size, values } from "lodash";
 import * as uuid from "uuid/v4";
+import { isAnnotation } from "./jxg-annotation";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 
 export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
 
-export const isFreePoint = (v: any) => isVisiblePoint(v) &&
-                                        (size(v.childElements) <= 1) &&
-                                        (size(v.descendants) <= 1);
+export const isFreePoint = (v: any) => {
+  if (isPoint(v)) {
+    const point = v as JXG.Point;
+    return values(point.childElements).filter(el => !isAnnotation(el)).length <= 1 &&
+           values(point.descendants).filter(el => !isAnnotation(el)).length <= 1;
+  }
+};
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;
