@@ -7,6 +7,7 @@ import { IGeometryProps, IToolButtonHandlers, SizeMeProps } from "./geometry-sha
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
 import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
+import * as classNames from "classnames";
 
 import "./geometry-tool.sass";
 
@@ -31,7 +32,7 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
   public render() {
     return (
       <div className="geometry-tool">
-        {this.renderToolbar()}
+        {!this.props.readOnly ? this.renderToolbar() : null}
         {this.renderContent()}
       </div>
     );
@@ -75,7 +76,7 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
 
   private renderContent() {
     return (
-      <div className="geometry-wrapper">
+      <div className={classNames("geometry-wrapper", { "read-only": this.props.readOnly })}>
         <SizeMe monitorHeight={true}>
           {({ size }: SizeMeProps) => {
             return (
