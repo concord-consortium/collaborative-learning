@@ -1,7 +1,6 @@
 @import ../../vars
 
-.geometry-size-me
-  display: flex
+$toolbar-width: 44px
 
 .geometry-tool
   position: relative
@@ -9,15 +8,103 @@
   height: 100%
   min-height: 52px
 
-.geometry-menu-button
-  position: absolute
-  top: -4px
-  right: 20px
-  opacity: 0.6
+  .geometry-toolbar
+    position: absolute
+    width: $toolbar-width
+    height: 100%
+    border: solid 2px white
+    border-radius: 0 $half-border-radius 0 0
+    background-color: $color3-4
 
-  button
-    // TODO: deal with keyboard highlighting for accessibility
-    outline: none
+    .toolbar-buttons
+      display: flex
+      flex-direction: column
+      justify-content: center
+      align-items: center
+
+      .toolbar-header
+        display: flex
+        justify-content: left
+        align-items: center
+        height: 21px
+        width: 100%
+        margin-bottom: $quarter-margin
+        border-radius: 0 $half-border-radius 0 0
+
+        .graph-tile
+          width: 50%
+          border: solid 2px white
+          border-width: 0 2px 2px 0
+          border-radius: 0 0 6px 0
+          background-color: $color3
+
+        .settings-button
+          &:hover
+            background-color: $color3-6
+            cursor: pointer
+          &:active
+            background-color: $color3-7
+
+        .header-icon
+          width: 19px
+          height: 19px
+          fill: white
+
+      .button
+        width: 36px
+        height: 34px
+        margin: 2px
+        border: solid 1px $color3-4
+        &:hover
+          background-color: $color3-5
+          cursor: pointer
+        &:active
+          background-color: $color3-4
+          cursor: pointer
+        &.selected
+          background-color: $color3
+        &.selected.toolbar-icon
+          fill: $color3-1
+        &.disabled
+          opacity: .25
+          pointer-events: none
+
+        .toolbar-icon
+          fill: $font-3-color
+          width: 36px
+          height: 34px
+
+    .settings
+      z-index: 999
+      position: absolute
+      top: 0px
+      left: 48px
+      width: 100px
+      height: 100%
+      border-radius: 0 $border-radius 0 0
+      background-color: rgba(223, 223, 223, 0.5)
+
+      .settings-header
+        height: 19px
+        width: 100%
+        font-size: 12px
+        line-height: 19px
+        border-radius: 0 $border-radius 0 0
+        color: $color3-1
+        background-color: $color3
+
+  .geometry-wrapper
+    position: absolute
+    height: 100%
+    left: $toolbar-width - 1
+    right: 0
+
+    .geometry-size-me
+      height: 100%
+
+      .geometry-content
+        height: 100%
+        outline: none
 
 .rotate-polygon-icon
   background-image: url("../../../assets/rotate.png")
@@ -29,88 +116,3 @@
 
   &.enabled
     display: block
-
-.geometry-toolbar
-  width: 44px
-  border: solid 2px white
-  border-radius: 0 $half-border-radius 0 0
-  background-color: $color3-4
-
-  .toolbar-buttons
-    display: flex
-    flex-direction: column
-    justify-content: center
-    align-items: center
-
-    .toolbar-header
-      display: flex
-      justify-content: left
-      align-items: center
-      height: 21px
-      width: 100%
-      margin-bottom: $quarter-margin
-      border-radius: 0 $half-border-radius 0 0
-
-      .graph-tile
-        width: 50%
-        border: solid 2px white
-        border-width: 0 2px 2px 0
-        border-radius: 0 0 6px 0
-        background-color: $color3
-
-      .settings-button
-        &:hover
-          background-color: $color3-6
-          cursor: pointer
-        &:active
-          background-color: $color3-7
-
-      .header-icon
-        width: 19px
-        height: 19px
-        fill: white
-
-    .button
-      width: 36px
-      height: 34px
-      margin: 2px
-      border: solid 1px $color3-4
-      &:hover
-        background-color: $color3-5
-        cursor: pointer
-      &:active
-        background-color: $color3-4
-        cursor: pointer
-      &.selected
-        background-color: $color3
-      &.selected.toolbar-icon
-        fill: $color3-1
-      &.disabled
-        opacity: .25
-        pointer-events: none
-
-      .toolbar-icon
-        fill: $font-3-color
-        width: 36px
-        height: 34px
-
-  .settings
-    z-index: 999
-    position: absolute
-    top: 0px
-    left: 48px
-    width: 100px
-    height: 100%
-    border-radius: 0 $border-radius 0 0
-    background-color: rgba(223, 223, 223, 0.5)
-
-    .settings-header
-      height: 19px
-      width: 100%
-      font-size: 12px
-      line-height: 19px
-      border-radius: 0 $border-radius 0 0
-      color: $color3-1
-      background-color: $color3
-
-

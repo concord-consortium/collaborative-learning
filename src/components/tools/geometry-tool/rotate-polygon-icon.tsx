@@ -9,6 +9,7 @@ interface IProps {
 }
 
 interface IState {
+  polygonId?: string;
   deltaAngle?: number;
   iconAnchor?: JXG.Coords;
 }
@@ -20,7 +21,10 @@ const kUpdateThreshold = 50;
 export class RotatePolygonIcon extends React.Component<IProps, IState> {
 
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    return !nextProps.polygon ? { iconAnchor: undefined } : {};
+    // reset if polygon changes
+    return (!nextProps.polygon || (nextProps.polygon.id !== prevState.polygonId))
+            ? { polygonId: nextProps.polygon ? nextProps.polygon.id : undefined, iconAnchor: undefined }
+            : {};
   }
 
   public state: IState = {};
