@@ -43,7 +43,7 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "1.1 Walk Marathons",
+          "title": "MSA 1.1 Walk Marathons",
           "subtitle": "Finding and Using Rates",
           "sections": [
             {
@@ -70,7 +70,7 @@
                   },{
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and a stopwatch for her walking experiment."
+                      "text": "Introduction Problem 1.1\n\nMs. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and a stopwatch for her walking experiment."
                     }
                   },
                   {
@@ -150,7 +150,7 @@
         {
           "description": "Problem 1.2",
           "ordinal": 2,
-          "title": "1.2 Walking Rates and Linear Relationships",
+          "title": "MSA 1.2 Walking Rates and Linear Relationships",
           "subtitle": "Tables, Graphs, and Equations",
           "sections": [
             {
@@ -362,7 +362,7 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "1.3 Raising Money",
+          "title": "MSA 1.3 Raising Money",
           "subtitle": "Using Relationships to Solve Equations",
           "sections": [{
               "type": "introduction",
@@ -471,7 +471,7 @@
         {
           "description": "Problem 1.4",
           "ordinal": 4,
-          "title": "1.4 Walkathon Money",
+          "title": "MSA 1.4 Walkathon Money",
           "subtitle": "Expressing Linear Relationships and Proportionality",
           "sections": [{
               "type": "introduction",
@@ -479,7 +479,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0,5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts. \n What information does the y-intercept represent? In what way does it help you solve the Problem?"
+                    "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0,5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts.\n\nWhat information does the y-intercept represent? \n\nIn what way does it help you solve the Problem?"
                   }
                 }]
               },
@@ -491,7 +491,7 @@
                 "tiles": [{
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week."
+                      "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week.\n\nMs. Chang’s class uses the money to provide books each week for the children’s ward at the hospital. To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week."
                     }
                   },
                   {
@@ -503,7 +503,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week.\n\nMs. Chang’s class uses the money to provide books each week for the children’s ward at the hospital. To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week.\n\nMr. Mamer’s class used the money to buy games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week."
+                      "text": "Mr. Mamer’s class used the money to buy games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week."
                     }
                   },
                   {
@@ -609,7 +609,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "For each class:\n 1. How much money is in the account at the start? Explain.\n 2. How much money is withdrawn each week?\n 3. Write an equation that represents the relationship. Explain what information each number and variable represent.\n 4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? \n\nHow do the graphs of the data compare?"
+                    "text": "For each class:\n 1. How much money is in the account at the start? Explain.\n 2. How much money is withdrawn each week?\n 3. Write an equation that represents the relationship. Explain what information each number and variable represent.\n 4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? \n 5.How do the graphs of the data compare?"
                   }
                 }]
               },
@@ -644,7 +644,7 @@
         {
           "description": "Reflection 1.5",
           "ordinal": 5,
-          "title": "1.MR Mathematical Reflections",
+          "title": "MSA 1.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -660,7 +660,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
                     }
                   }
                 ]
@@ -678,7 +678,7 @@
         {
           "description": "Problem 2.1",
           "ordinal": 1,
-          "title": "2.1 Henri and Emile’s Race",
+          "title": "MSA 2.1 Henri and Emile’s Race",
           "subtitle": "Strategies to Find a Solution",
           "sections": [
             {
@@ -706,7 +706,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second.\n\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win."
+                      "text": "Introduction: Problem 2.1\n\nIn Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second.\n\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win."
                     }
                   }
                 ]
@@ -746,7 +746,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. In Ms. Chang’s class some students used tables and graphs to find the length of the race and other information about the race. \n\n  • How can a table or graph be used to find the length of the race?\n\n  • How does the walking rate of each brother show up in the table and graph?\n\n  • After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?\n\n  • What information does the y-intercept of each graph represent in terms of the race?\n\n  • Is the point (26, 70) on the graph or table of one of the brothers? Explain.\n\n  • When will Emile overtake Henri? \n\n2. Amit wrote equations to represent the relationships between time and distance. He claims:\n\n  • You can tell the walking rate and y-intercept from the equation. Is he correct? Explain.\n\n  • You can determine which of the two lines will be steeper from the equation? Is he correct? Explain."
+                    "text": "1. In Ms. Chang’s class some students used tables and graphs to find the length of the race and other information about the race. \n\n  • How can a table or graph be used to find the length of the race?\n\n  • How does the walking rate of each brother show up in the table and graph?\n\n  • After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?\n\n  • What information does the y-intercept of each graph represent in terms of the race?\n\n  • Is the point (26, 70) on the graph or table of one of the brothers? Explain.\n\n  • When will Emile overtake Henri? \n\n2. Amit wrote equations to represent the relationships between time and distance. He claims:\n\n  • You can tell the walking rate and y-intercept from the equation. Is he correct? Explain.\n\n  • You can determine which of the two lines will be steeper from the equation? Is he correct? Explain. "
                   }
                 }]
               },
@@ -781,7 +781,7 @@
         {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "2.2 Comparing Cost Relationships",
+          "title": "MSA 2.2 Comparing Cost Relationships",
           "subtitle": "Finding Solutions to Equations",
           "sections": [
             {
@@ -915,7 +915,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. Some students in Ms. Chang’s class used graphs to decide which company to use. Others used tables.\n\n  • Explain how a graph or a table could be helpful.\n\n  • What if the class only had $120 to spend, how would this affect your answer?\n\n2. Explain how you could use a table, graph, or equation to: \n\n  • Find the costs of 20 T-shirts?\n\n  • Find the number of T-shirts you can buy for $135? \n\n  • Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost?"
+                    "text": "1. Some students in Ms. Chang’s class used graphs to decide which company to use. Others used tables.\n\n  • Explain how a graph or a table could be helpful.\n\n  • What if the class only had $120 to spend, how would this affect your answer?\n\n2. Explain how you could use a table, graph, or equation to: \n\n  • Find the costs of 20 T-shirts?\n\n  • Find the number of T-shirts you can buy for $135? \n\n  • Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost?\n\nT-shirt costs"
                   }
                 },
                 {
@@ -928,7 +928,7 @@
                           "values": [0, 3, 5, 8, 10]
                         },
                         {
-                          "name": "y",
+                          "name": "C",
                           "type": "number",
                           "values": [34, 41.5, 46.5, 54, 59]
                         }
@@ -983,7 +983,7 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "2.3 Connecting Tables, Graphs, and Equations to Solutions",
+          "title": "MSA 2.3 Connecting Tables, Graphs, and Equations to Solutions",
           "subtitle":"",
           "sections": [
             {
@@ -1047,7 +1047,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "What information does the equation give about the pledge plan? Does the plan make sense? How might a table or graph of the equation help answer questions about the pledge plans."
+                      "text": "What information does the equation give about the pledge plan? Does the plan make sense? \n\nHow might a table or graph of the equation help answer questions about the pledge plans."
                     }
                   }
                 ]
@@ -1064,7 +1064,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point. \n\n2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you? \n\n3. All of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n   (-7, 13)   (1.2, ?)    (?, -4)\n\n  • Find the missing coordinate. Explain how you found it.\n\n  • Write a question you could answer by finding the missing coordinate.\n\n4. For the relationship y = 5x - 3 \n   a. find the value of y when x = 7?\n   b. find the value of x when y = 23? \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."
+                    "text": "1. Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point. \n\n2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you? \n\n3. All of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n\n   (-7, 13)    (1.2, ?)    (?, -4)\n\n • Find the missing coordinate. Explain how you found it.\n  • Write a question you could answer by finding the missing coordinate.\n\n4. For the relationship y = 5x - 3 \n   a. find the value of y when x = 7?\n   b. find the value of x when y = 23? \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."
                   }
                 }]
               },
@@ -1099,7 +1099,7 @@
         {
           "description": "Reflection 2.4",
           "ordinal": 4,
-          "title": "2.MR Mathematical Reflections",
+          "title": "MSA 2.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -1115,7 +1115,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
                     }
                   }
                 ]
@@ -1133,7 +1133,7 @@
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "3.1 Mystery Pouches",
+          "title": "MSA 3.1 Mystery Pouches",
           "subtitle": "Exploring Equality",
           "sections": [
             {
@@ -1143,13 +1143,62 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Solving Equations Symbolically\n\n Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph.\n\nYou will learn to use symbolic methods to solve a linear equation.\n\nIn the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance d and money earned A in the walkathon."
+                      "text": "Investigation 3: Solving Equations Symbolically\n\n Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph.\n\nYou will learn to use symbolic methods to solve a linear equation.\n\nIn the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance d and money earned A in the walkathon."
                     }
                   },
-                     {
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "d",
+                          "type": "number",
+                          "values": [0, 1, 2, 3, 4, 20, 25, 30]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 200
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [0, 0],
+                          "axisMax": [50, 50]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [3, 6.5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [30, 20]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
-                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n• Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n• Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n• Using the equation:\n\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
+                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n• Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n• Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n• Using the equation:\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
                     }
                   },
                   {
@@ -1173,7 +1222,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• How much money was in each pouch?\n• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?\n• How much money was in each pouch?\n• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                      "text": "• How much money was in each pouch?\n• How much money did the winner receive?\nThe class made up several other clues… Can you find out how many coins are in each pouch?\n• How much money was in each pouch?\n• How much money did the winner receive?\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
                     }
                   }
                 ]
@@ -1296,7 +1345,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "3.2 From Pouches to Variables",
+          "title": "MSA 3.2 From Pouches to Variables",
           "subtitle": "Writing and Solving Equations",
           "sections": [
             {
@@ -1318,7 +1367,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n      2x + 4 = 12      or       2(x + 2) = 12       or       x + 2 + x + 2 = 12\n\nThe expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.\n\n In this Problem, you will revisit situations with pouches and coins, but you will use symbolic equations to represent your solution process."
+                      "text": "Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n      2x + 4 = 12      or       2(x + 2) = 12       or       x + 2 + x + 2 = 12\n\nThe expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.\n\nIn this Problem, you will revisit situations with pouches and coins, but you will use symbolic equations to represent your solution process."
                     }
                   }
                 ]
@@ -1411,7 +1460,7 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "3.3 Solving Linear Equations",
+          "title": "MSA 3.3 Solving Linear Equations",
           "subtitle": "",
           "sections": [
             {
@@ -1502,7 +1551,7 @@
         {
           "description": "Problem 3.4",
           "ordinal": 4,
-          "title": "3.4 Finding the Point of Intersection",
+          "title": "MSA 3.4 Finding the Point of Intersection",
           "subtitle": "Solving More Equations",
           "sections": [
             {
@@ -1604,7 +1653,7 @@
         {
           "description": "Reflection 3.5",
           "ordinal": 5,
-          "title": "3.MR Mathematical Reflections",
+          "title": "MSA 3.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -1620,7 +1669,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
                     }
                   }
                 ]
@@ -1638,7 +1687,7 @@
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "4.1 Climbing Stairs",
+          "title": "MSA 4.1 Climbing Stairs",
           "subtitle": "Using the Ratio of Rise and Run",
           "sections": [
             {
@@ -1734,7 +1783,7 @@
         {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "4.2 The Constant of Proportionality",
+          "title": "MSA 4.2 The Constant of Proportionality",
           "subtitle": "",
           "sections": [
             {
@@ -1918,7 +1967,7 @@
         {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "4.3 Design Under Constraints",
+          "title": "MSA 4.3 Design Under Constraints",
           "subtitle": "Revisiting Rates and Proportionality in Linear Situations",
           "sections": [
             {
@@ -2052,7 +2101,7 @@
         {
           "description": "Reflection 4.4",
           "ordinal": 4,
-          "title": "4.MR Mathematical Reflections",
+          "title": "MSA 4.MR Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
@@ -2068,7 +2117,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
                     }
                   }
                 ]
