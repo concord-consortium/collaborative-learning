@@ -154,7 +154,7 @@ class Canvas{
     addGraphTile(){
         cy.get('.single-workspace > .toolbar > .tool.geometry').click({force: true});
     }
-    
+
     addImageTile(){
         cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
     }
