@@ -17,15 +17,10 @@ export const getAnchor = (annotation: JXG.Text) => {
     : ancestors.find(elem => isMovableLine(elem) || isPolygon(elem));
 };
 
-export const kAnnotationDefaults = {
-              fillColor: "#CCCCCC",
-              strokeColor: "#888888",
-              selectedFillColor: "#FF0000",
-              selectedStrokeColor: "#FF0000"
-            };
-
 const sharedProps = {
-  clientType: "annotation"
+  strokeWidth: 1,
+  clientType: "annotation",
+  highlight: false,
 };
 
 const pointProps = {
@@ -36,6 +31,7 @@ const pointProps = {
 
 const lineProps = {
   ...sharedProps,
+  strokeColor: "black",
   straightFirst: false,
   straightLast: false
 };
@@ -43,18 +39,20 @@ const lineProps = {
 export const annotationChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
-    const allProps = {
-      ...changeProps,
+    const annotationProps = {
+      ...sharedProps,
       cssClass: "annotation",
       highlightCssClass: "annotation",
-      clientType: "annotation"
+      strokeColor: "white",
+      fontSize: 13,
+      ...changeProps,
     };
     if (isBoard(board)) {
       const _board = board as JXG.Board;
 
-      const annotation = _board.create("text", [0, -1, "annotation"], allProps);
-      const annotationPoint = _board.create("point", [0, 0], { ...pointProps, anchor: annotation.id });
-      const anchorPoint = _board.create("point", [0, 0], { ...pointProps, anchor: allProps.anchor });
+      const annotation = _board.create("text", [0, -1, "annotation"], annotationProps);
+      const annotationPoint = _board.create("point", [1, 0], { ...pointProps, anchor: annotation.id });
+      const anchorPoint = _board.create("point", [0, 0], { ...pointProps, anchor: annotationProps.anchor });
       const line = _board.create("line", [anchorPoint, annotationPoint], lineProps);
       return [annotation, annotationPoint, anchorPoint, line];
     }
