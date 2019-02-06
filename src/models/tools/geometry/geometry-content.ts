@@ -1,13 +1,14 @@
 import { types, Instance } from "mobx-state-tree";
 import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
+import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
+        } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
-import { assign, castArray, each, keys, size as _size } from "lodash";
+import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -620,42 +621,13 @@ export const GeometryContentModel = types
       selectedIds.forEach(id => { properties[id] = {}; });
 
       self.changes.forEach(chg => {
-        const change: JXGChange = safeJsonParse(chg);
-        switch (change.operation) {
-          case "create":
-            if (Array.isArray(change.properties)) {
-              change.properties.forEach(props => {
-                const id = props && props.id;
-                if (id && properties[id]) {
-                  assign(properties[id], props);
-                }
-              });
-            }
-            else {
-              const id = change.properties && change.properties.id;
-              if (id && properties[id]) {
-                assign(properties[id], change.properties);
-              }
-            }
-            break;
-          case "update":
-            if (Array.isArray(change.targetID)) {
-              const props = castArray(change.properties);
-              change.targetID.forEach((id, index) => {
-                const _props = props[index] || props[0];
-                if (id && properties[id]) {
-                  assign(properties[id], _props);
-                }
-              });
-            }
-            else {
-              const id = change.targetID;
-              if (id && properties[id]) {
-                assign(properties[id], change.properties);
-              }
-            }
-            break;
-        }
+        const parsedChange: JXGChange = safeJsonParse(chg);
+        forEachNormalizedChange(parsedChange, change => {
+          const id = change.targetID as string;
+          if (id && properties[id]) {
+            assign(properties[id], omit(change.properties, ["position"]));
+          }
+        });
       });
       return properties;
     }
