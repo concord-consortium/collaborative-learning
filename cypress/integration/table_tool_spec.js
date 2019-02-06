@@ -78,21 +78,43 @@ context('Table Tool Tile',function(){
         // })
    });
    describe('publish table', function(){
-        canvas.publishCanvas()
-        // need to verify that it is in the Class Work right nav
+       it('will publish canvas', function(){
+           canvas.publishCanvas()
+           // need to verify that it is in the Class Work right nav
+       });
    });
    describe('table in learning logs', function(){
-
+       it('will add a table in a learning log canvas', function(){
+            learningLog.createLearningLog('table LL');
+            learningLog.getLLTableTool().click();
+            learningLog.getLLTableTile().should('be.visible');
+       });
+       it('will publish learning log to Class Logs', function(){
+            learningLog.publishLearningLog();
+            //verify Class log has 'table LL' and thumbnail has table
+       });
    });
    describe('save and restores table from different areas', function(){
        it('will restore from My Work tab', function(){
-
+            leftNav.openToWorkspace('Now What');
+            // rightNav.openMyWorkTab();
+           rightNav.getMyWorkTab().click();
+            // cy.wait(3000);
+            rightNav.getRightNavExpandedSpace().should('be.visible');
+           // cy.wait(3000);
+           rightNav.getAllMyWorkAreaCanvasItems().then(($items)=>{
+               cy.log($items);
+               cy.wrap($items[0]).click();
+           })
+           // rightNav.openMyWorkAreaCanvasItem('Introduction');
+           //  tableToolTile.getTableToolTile().should('be.visible');
        });
        it('will restore from Class Work tab', function(){
-
+           leftNav.openToWorkspace('Now What');
+            //verify can open published canvas to rightside workspace 2up view
        });
        it('will restore from Class Logs tab', function(){
-
+            //open class logs tab and open 'table LL' to rightside workspace 2up view
        });
    })
 
