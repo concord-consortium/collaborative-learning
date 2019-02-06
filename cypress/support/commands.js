@@ -23,10 +23,10 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import Header from './elements/Header.js';
+import Header from './elements/Header';
 import RightNav from './elements/RightNav';
 import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas'
+import Canvas from './elements/Canvas';
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
 
