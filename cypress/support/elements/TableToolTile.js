@@ -5,6 +5,11 @@ class TableToolTile{
     getTableToolTile(){
         return cy.get(this.tableToolTile());
     }
+
+    getRemoveRowMenuItem(){
+        return cy.get('[data-test=remove-row-menu-item]')
+    }
+
     openTableMenu(){
         cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-header').click();
     }
