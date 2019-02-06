@@ -615,9 +615,55 @@ export const GeometryContentModel = types
       }
     }
 
+    function gatherObjectProperties(selectedIds: string[]) {
+      const properties: { [id: string]: any } = {};
+      selectedIds.forEach(id => { properties[id] = {}; });
+
+      self.changes.forEach(chg => {
+        const change: JXGChange = safeJsonParse(chg);
+        switch (change.operation) {
+          case "create":
+            if (Array.isArray(change.properties)) {
+              change.properties.forEach(props => {
+                const id = props && props.id;
+                if (id && properties[id]) {
+                  assign(properties[id], props);
+                }
+              });
+            }
+            else {
+              const id = change.properties && change.properties.id;
+              if (id && properties[id]) {
+                assign(properties[id], change.properties);
+              }
+            }
+            break;
+          case "update":
+            if (Array.isArray(change.targetID)) {
+              const props = castArray(change.properties);
+              change.targetID.forEach((id, index) => {
+                const _props = props[index] || props[0];
+                if (id && properties[id]) {
+                  assign(properties[id], _props);
+                }
+              });
+            }
+            else {
+              const id = change.targetID;
+              if (id && properties[id]) {
+                assign(properties[id], change.properties);
+              }
+            }
+            break;
+        }
+      });
+      return properties;
+    }
+
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
+      const properties = gatherObjectProperties(selectedIds);
 
       // sort into creation order
       const idToIndexMap: { [id: string]: number } = {};
@@ -636,12 +682,13 @@ export const GeometryContentModel = types
       const changes: string[] = [];
       selectedIds.forEach(id => {
         const obj = board.objects[id];
+        const props = properties[id];
         if (obj) {
           let x: number;
           let y: number;
           const change: JXGChange = {
                   operation: "create",
-                  properties: { id: newIds[id], name: obj.name }
+                  properties: { ...props, id: newIds[id], name: obj.name }
                 } as any;
           switch (obj.elType) {
             case "angle":

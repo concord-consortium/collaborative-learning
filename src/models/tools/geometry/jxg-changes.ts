@@ -8,6 +8,7 @@ export type JXGCoordPair = [number, number];
 export type JXGParentType = string | number | JXGCoordPair;
 
 export interface JXGProperties {
+  id?: string;
   position?: JXGCoordPair;
   url?: string;
   [key: string]: any;
