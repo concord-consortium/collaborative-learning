@@ -21,15 +21,20 @@ export const kGeometryDefaultHeight = 320;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
-function defaultGeometryBoardChange(overrides?: JXGProperties) {
+function getBoardBounds(axisMin?: JXGCoordPair) {
+  const [xAxisMin, yAxisMin] = axisMin || [kGeometryDefaultAxisMin, kGeometryDefaultAxisMin];
   const xAxisMax = 30;
-  const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - kGeometryDefaultAxisMin;
+  const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - yAxisMin;
+  return [xAxisMin, yAxisMax, xAxisMax, yAxisMin];
+}
+
+function defaultGeometryBoardChange(overrides?: JXGProperties) {
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: assign({
                   axis: true,
-                  boundingBox: [kGeometryDefaultAxisMin, yAxisMax, xAxisMax, kGeometryDefaultAxisMin],
+                  boundingBox: getBoardBounds(),
                   grid: {}  // defaults to 1-unit gridlines
                 }, overrides)
   };
@@ -853,6 +858,14 @@ export const GeometryContentModel = types
 
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
+interface IBoardImportProps {
+  axisMin?: JXGCoordPair;
+  [prop: string]: any;
+}
+interface IBoardImportSpec {
+  properties?: IBoardImportProps;
+}
+
 interface IPointImportSpec {
   type: "point";
   parents: [number, number];
@@ -888,12 +901,19 @@ interface IMovableLineSpec {
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineSpec;
 
 function preprocessImportFormat(snapshot: any) {
-  // const boardSpec = snapshot.board;
+  const boardSpecs = snapshot.board as IBoardImportSpec;
   const objectSpecs = snapshot.objects as IObjectImportSpec[];
   if (!objectSpecs) return snapshot;
 
+  function addBoard(boardSpec: IBoardImportSpec) {
+    const { properties } = boardSpec || {} as IBoardImportSpec;
+    const { axisMin, ...others } = properties || {} as IBoardImportProps;
+    const boundingBox = getBoardBounds(axisMin);
+    changes.push(defaultGeometryBoardChange({ boundingBox, ...others }));
+  }
+
   const changes: JXGChange[] = [];
-  changes.push(defaultGeometryBoardChange());
+  addBoard(boardSpecs);
 
   // map import names to internal names
   const kPropsMap: { [p: string]: string } = {

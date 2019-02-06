@@ -854,7 +854,7 @@
                       "height": 160
                     },
                     "content": {
-                      "type":"Geometry",
+                      "type": "Geometry",
                       "objects": [
                         {
                           "type": "polygon",
