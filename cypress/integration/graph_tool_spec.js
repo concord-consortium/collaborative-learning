@@ -34,7 +34,7 @@ context('Test graph tool functionalities', function(){
             cy.wait(2000)
         });
         it('will add a polygon to a graph', function(){
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','What if');
             canvas.addGraphTile();
@@ -44,6 +44,8 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(13.2,5);
             graphToolTile.addPointToGraph(13.2,5);
             graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPolygon().should('exist');
             cy.wait(2000)
         });
     });
@@ -56,7 +58,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.getGraphPointText().last().should('have.text', '0,0');
         });
         it('will verify restore of polygon', function(){
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','What if');
             graphToolTile.getGraphPolygon().each(($point, index, $list)=>{
@@ -134,6 +136,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(5,10);
             graphToolTile.addPointToGraph(5,10);
             graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPoint().last().click({force:true});
             cy.wait(2000);
             // graphToolTile.getGraphPointID();
             graphToolTile.getGraphPolygon().click({force:true});
@@ -166,7 +169,7 @@ context('Test graph tool functionalities', function(){
         });
         it('will restore changes to a graph', function(){
             leftNav.openToWorkspace('Now What');
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             //TODO verify angles are showing
             leftNav.openToWorkspace('Introduction');
             //TODO verify polygon is present and rotated

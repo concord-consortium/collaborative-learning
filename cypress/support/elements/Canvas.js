@@ -1,3 +1,11 @@
+import GraphToolTile from './GraphToolTile'
+import ImageToolTile from './ImageToolTile'
+import DrawToolTile from './DrawToolTile'
+
+let graphToolTile = new GraphToolTile,
+    imageToolTile = new ImageToolTile,
+    drawToolTile = new DrawToolTile;
+
 class Canvas{
 
     canvas(){
@@ -18,11 +26,11 @@ class Canvas{
     }
 
     getDialogOKButton(){
-        return cy.get('[data-test=dialog-buttons] > #okButton');
+        return cy.get('[data-test=dialog-buttons] #okButton');
     }
 
     getDialogCancelButton(){
-        return cy.get('[data-test=dialog-buttons] > #cancelButton');
+        return cy.get('[data-test=dialog-buttons] #cancelButton');
     }
 
     publishCanvas(){
@@ -36,7 +44,7 @@ class Canvas{
     }
 
     getFourUpViewToggle(){
-        return cy.get('[data-test=document-titlebar-actions] > .action > .icon-up1');
+        return cy.get('[data-test=document-titlebar-actions] .icon-up1');
     }
 
     openFourUpView(){
@@ -45,7 +53,7 @@ class Canvas{
     }
 
     getFourToOneUpViewToggle(){
-        return cy.get('[data-test=document-titlebar-actions] > .action > .icon-up4');
+        return cy.get('[data-test=document-titlebar-actions] .icon-up4');
     }
 
     openOneUpViewFromFourUp(){
@@ -59,36 +67,36 @@ class Canvas{
     }
 
     getSingleCanvasDocumentContent(){
-        return cy.get('[data-test=canvas]:first > .document-content')
+        return cy.get('[data-test=canvas]:first .document-content')
     }
 
     getFourUpView(){
-        return cy.get('.canvas-area > .four-up');
+        return cy.get('.canvas-area .four-up');
     }
 
     getLeftSideFourUpView(){
-        return cy.get('.left-workspace > .document > .canvas-area > .four-up')
+        return cy.get('.left-workspace .canvas-area .four-up')
     }
 
     getNorthEastCanvas(){
-        return cy.get('.canvas-area > .four-up >.canvas-container.north-east');
+        return cy.get('.canvas-area .four-up .canvas-container.north-east');
     }
     getNorthWestCanvas(){
-        return cy.get('.canvas-area > .four-up >.canvas-container.north-west');
+        return cy.get('.canvas-area .four-up .canvas-container.north-west');
     }
     getSouthEastCanvas(){
-        return cy.get('.canvas-area > .four-up >.canvas-container.south-east');
+        return cy.get('.canvas-area .four-up .canvas-container.south-east');
     }
     getSouthWestCanvas(){
-        return cy.get('.canvas-area > .four-up >.canvas-container.south-west');
+        return cy.get('.canvas-area .four-up .canvas-container.south-west');
     }
 
     getCenterSeparator(){
-        return cy.get('.canvas-area > .four-up > .center');
+        return cy.get('.canvas-area .four-up .center');
     }
 
     getShareButton(){
-        return cy.get('[data-test=document-titlebar-actions] >.visibility.private > .icon-share');
+        return cy.get('[data-test=document-titlebar-actions] .visibility.private .icon-share');
     }
 
     shareCanvas(){
@@ -96,7 +104,7 @@ class Canvas{
     }
 
     getUnshareButton(){
-        return cy.get('[data-test=document-titlebar-actions] >.visibility.public >.icon-share');
+        return cy.get('[data-test=document-titlebar-actions] .visibility.public .icon-share');
     }
 
     unshareCanvas(){
@@ -124,7 +132,7 @@ class Canvas{
     }
 
     getTextTile(){
-        return cy.get('.canvas > .document-content > .tile-row > .tool-tile > .text-tool.editable');
+        return cy.get('.canvas .text-tool.editable');
     }
 
     enterText(text){
@@ -144,23 +152,19 @@ class Canvas{
     }
 
     addGraphTile(){
-        return cy.get('.single-workspace > .toolbar > .tool.geometry').click({force: true});
-    }
-
-    getGraphTile(){
-        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-tool .geometry-content');
+        cy.get('.single-workspace .tool.geometry').click({force: true});
     }
 
     addImageTile(){
-        return cy.get('.single-workspace > .toolbar > .tool.image').click({force: true});
+        cy.get('.single-workspace .tool.image').click({force: true});
     }
 
-    getImageTile(){
-        return cy.get('.canvas > .document-content > .tile-row> .tool-tile > .image-tool');
+    addDrawTile(){
+        cy.get('.single-workspace .tool.drawing').click({force:true});
     }
 
     getDeleteTool(){
-        return cy.get('.single-workspace > .toolbar > .tool.delete');
+        return cy.get('.single-workspace .tool.delete');
     }
 
     deleteTile(tile){
@@ -169,11 +173,17 @@ class Canvas{
                 this.getTextTile().last().click({force:true});
                 break;
             case 'graph':
-                this.getGraphTile().last().click({force:true});
+                graphToolTile.getGraphTile().last().click({force:true});
                 break;
             case 'image':
-                this.getImageTile().last().click({force:true});
+                imageToolTile.getImageTile().last().click({force:true});
                 break;
+            case 'draw':
+                drawToolTile.getDrawTile().last().click({force:true});
+                break;
+            // case 'table':
+            //     this.getTableTile().last().click({force:true});
+            //     break;
         }
         this.getDeleteTool().click({force: true});
     }
@@ -189,25 +199,25 @@ class Canvas{
     }
 
     getSupportList(){
-        return cy.get('.statusbar > .supports > .supports-list');
+        return cy.get('.statusbar .supports-list');
     }
 
     getSupportTitle(){
-        return cy.get('.visible-supports > .supports-list > div')
+        return cy.get('.visible-supports .supports-list > div')
     }
 
     getTwoUpViewToggle(){
-        return cy.get('.single-workspace > .document > .statusbar > .actions > .action > .icon-up1');
+        return cy.get('.single-workspace .statusbar .action > .icon-up1');
     }
     getTwoToOneUpViewToggle(){// from 2up view
-        return cy.get('.left-workspace > .document > .statusbar > .actions > .action > .icon-up2');
+        return cy.get('.left-workspace .statusbar .action > .icon-up2');
     }
 
     getRightSideWorkspace(){
         return cy.get('.right-workspace')
     }
     getLeftSideWorkspace(){
-        return cy.get('.left-workspace > .document > .canvas-area');
+        return cy.get('.left-workspace .canvas-area');
     }
      openTwoUpView(){
         this.getTwoUpViewToggle().click({force:true});
@@ -222,12 +232,12 @@ class Canvas{
 
      getRightSideWorkspaceTitle(){
         // return cy.get('.right-workspace > .document > .titlebar > .title')
-         return cy.get('.right-workspace > .document > .titlebar > [data-test=document-title]')
+         return cy.get('.right-workspace [data-test=document-title]')
      }
 
      getLeftSideWorkspaceTitle(){
         // return cy.get('.left-workspace > .document > .titlebar > .title')
-         return cy.get('.left-workspace > .document > .titlebar > [data-test=document-title]')
+         return cy.get('.left-workspace [data-test=document-title]')
      }
 }
 

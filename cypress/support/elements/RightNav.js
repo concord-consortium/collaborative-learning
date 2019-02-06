@@ -1,6 +1,6 @@
 class RightNav{
     getRightNavTabs(){
-        return cy.get('.right-nav > .tabs > .tab');
+        return cy.get('.right-nav .tab');
     }
     getMyWorkTab(){
         return cy.get('#rightNavTabMy\\ Work.tab');

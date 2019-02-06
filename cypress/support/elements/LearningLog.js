@@ -39,7 +39,7 @@ class LearningLog {
     }
 
     getLLTextTile(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .text-tool')
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .text-tool')
     }
 
     getLLGraphTool(){
@@ -47,11 +47,11 @@ class LearningLog {
     }
 
     getLLGraphTile(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-tool .geometry-content');
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .geometry-tool .geometry-content');
     }
 
     getLLGraphPointText(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row> .tool-tile > .geometry-tool .geometry-content > .JXGtext');
+        return cy.get('[data-test=learning-log-single-workspace] .canvas  .geometry-tool .geometry-content > .JXGtext');
     }
 
     getLLImageTool(){
@@ -110,7 +110,7 @@ class LearningLog {
 
     addLLPointToGraph(x,y){
         this.getLLGraphTile().last();
-        cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-tool .geometry-content').last().click(x,y, {force:true});
+        cy.get('[data-test=learning-log-single-workspace] .canvas .geometry-tool .geometry-content').last().click(x,y, {force:true});
     }
 
     getSingleCanvas(){
@@ -118,17 +118,17 @@ class LearningLog {
     }
 
     getTwoUpViewToggle(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .statusbar > .actions > .action > .icon-up2');
+        return cy.get('[data-test=learning-log-single-workspace] .action > .icon-up2');
     }
     getTwoToOneUpViewToggle(){// from 2up view
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .statusbar > .actions > .action > .icon-up2');
+        return cy.get('[data-test=learning-log-left-workspace] .action > .icon-up2');
     }
 
     getRightSideWorkspace(){
         return cy.get('[data-test=learning-log-right-workspace]')
     }
     getLeftSideWorkspace(){
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .canvas-area > .canvas');
+        return cy.get('[data-test=learning-log-left-workspace] .canvas');
     }
 
     getLeftSideToolPalette(){
@@ -152,11 +152,11 @@ class LearningLog {
     }
 
     getRightSideWorkspaceTitle(){
-        return cy.get('[data-test=learning-log-right-workspace] > .document > .titlebar > .title')
+        return cy.get('[data-test=learning-log-right-workspace] .title')
     }
 
     getLeftSideWorkspaceTitle(){
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .titlebar > .title')
+        return cy.get('[data-test=learning-log-left-workspace] .title')
     }
 
     getLLPublishIcon(){

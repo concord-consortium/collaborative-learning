@@ -1,7 +1,7 @@
 class BottomNav{
 
     getBottomNavTabs(){
-        return cy.get('.bottom-nav > .tabs > .tab');
+        return cy.get('.bottom-nav .tab');
     }
 
     getBottomNavExpandedSpace(){

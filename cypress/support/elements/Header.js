@@ -3,11 +3,11 @@ class Header{
         return cy.get('[data-test=user-class]');
     }
     getGroupName(){
-        // return cy.get('[data-test=group-name]');
-        return cy.get('.header .group .name');
+        return cy.get('[data-test=group-name]');
+        // return cy.get('.header .group .name');
     }
     getGroupMembers(){
-        return cy.get('[data-test=group-members] > .row > .member')
+        return cy.get('[data-test=group-members]')
     }
     getUserName(){
         return cy.get('[data-test=user-name]')
