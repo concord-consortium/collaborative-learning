@@ -221,22 +221,85 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                     "content": {
                       "type": "Text",
-                      "text": "For each student:\n 1. If time t increases by 1 second, by how much does the distance d change? How is this change represented in a table? In a graph?\n 2. Yvonne claims that the relationships for Alana, Gilberto, and Leanne are linear and proportional? Is she correct?\n 3. Valentina and Omar have the same walking rate. Each made a graph to represent their data. How are their graphs similar? How are they different?"
+                      "text": "For each student:\n 1. If time t increases by 1 second, by how much does the distance d change? How is this change represented in a table? In a graph?\n 2. Yvonne claims that the relationships for Alana, Gilberto, and Leanne are linear and proportional? Is she correct?\n 3. Valentina and Omar have the same walking rate. Each made a graph to represent their data. How are their graphs similar? How are they different? \n\nOmar's graph"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 250
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [5, 11.25]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [10, 22.5]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [15, 33.75]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [20, 45]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [25, 56.25]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [30, 67.5]
+                        }
+                      ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_omar_rates_350w.png"
+                      "type": "Text",
+                      "text": "Valentina's graph"
                     }
                   },
                   {
+                    "layout": {
+                      "height": 250
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_2_WI_valentina_rates_350w.png"
+                      "type":"Geometry",
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1, 2.25]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 4.5]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 6.75]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 9]
+                        }
+                      ]
                     }
                   },
                   {
