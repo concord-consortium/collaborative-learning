@@ -151,6 +151,9 @@ class Canvas{
         this.getTextTile().last().should('not.contain', 'delete');
     }
 
+    addTableTile(){
+        cy.get('.single-workspace .tool.table').click({force:true});
+    }
     addGraphTile(){
         cy.get('.single-workspace .tool.geometry').click({force: true});
     }
