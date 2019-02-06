@@ -164,6 +164,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       return (
         <MenuItem
           text={attr.name}
+          data-test={`attr-menu-item`}
           key={attr.id}
           onClick={handleClick}
         />
@@ -184,6 +185,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                       ? <MenuItem
                           icon="add-row-bottom"
                           text={`New Row...`}
+                          data-test={`new-row-menu-item`}
                           onClick={this.handleNewCase}
                         />
                       : null;
@@ -194,6 +196,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                           ? <MenuItem
                               icon="text-highlight"
                               text={`Rename Column...`}
+                              data-test={`rename-column-menu-item`}
                               disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
                             >
                               {this.renderAttributeSubMenuItems(this.handleRenameAttribute)}
@@ -203,6 +206,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                           ? <MenuItem
                               icon="remove-column"
                               text={`Remove Column...`}
+                              data-test={`remove-column-menu-item`}
                               disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
                             >
                               {this.renderAttributeSubMenuItems(this.handleRemoveAttribute)}
@@ -212,6 +216,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                           ? <MenuItem
                               icon="remove-row-bottom"
                               text={`Remove Rows`}
+                              data-test={`remove-row-menu-item`}
                               onClick={this.handleRemoveCases}
                               disabled={!this.getSelectedRowNodeCount()}
                             />

@@ -16,14 +16,32 @@ context('Table Tool Tile',function(){
       });
       it('will add a row to the table', function(){
           tableToolTile.addNewRow();
-          tableToolTile.getTableRows().should('have.length',2);
-      })
+          tableToolTile.getTableRow().should('have.length',2);
+      });
       it('will change column x name', function(){
-
+          let header = 'pluto';
+          tableToolTile.renameColumn('x', header);
+          tableToolTile.getColumnHeaderText().first().should('contain',header);
       });
       it('will change column y name', function(){
-
+          let header = 'mars';
+          tableToolTile.renameColumn('y', header);
+          tableToolTile.getColumnHeaderText().eq(1).should('contain',header);
       });
+      it('will cancel a change in column name', function(){
+          tableToolTile.getColumnHeaderText().first()
+              .then(($header)=>{
+                  const text=$header.text();
+                  tableToolTile.openRenameColumnDialog(text);
+                  tableToolTile.getRenameColumnDialogButton('Cancel').click();
+                  cy.log(text);
+                  tableToolTile.getColumnHeaderText().first().should('contain',text);
+              });
+      });
+      it('will remove a row', function(){
+          tableToolTile.removeRows("0");
+          tableToolTile.getTableRow().should('have.length',1);
+      })
    });
 
    describe('edit table entries', function(){
