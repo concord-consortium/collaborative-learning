@@ -746,14 +746,8 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [5, 12.5]
-                            }
+                            [0, 0],
+                            [5, 12.5]
                           ]
                         }
                       ]
@@ -781,14 +775,8 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 45]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [5, 50]
-                            }
+                            [0, 45],
+                            [5, 50]
                           ]
                         }
                       ]
@@ -924,14 +912,8 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [14, 12]
-                            }
+                            [0, 5],
+                            [14, 12]
                           ]
                         }
                       ]
