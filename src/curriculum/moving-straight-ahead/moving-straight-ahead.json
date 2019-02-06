@@ -659,7 +659,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The point at which a graph crosses the y-axis is called the y-intercept. The coordinates of the y-intercept for the graph shown above are (0, b). To save time, we sometimes refer to the number b, rather than the coordinates of the point (0, b), as the y-intercept. \n\nA coefficient is the number that multiplies a variable in an equation. The a in y = ax + b is the coefficient of x, so ax means a times x.\n\nThe equation of distance dEmile that Emile walks after t seconds is  dEmile  = 2.5t."
+                      "text": "The point at which a graph crosses the y-axis is called the y-intercept. The coordinates of the y-intercept for the graph shown above are (0, b). To save time, we sometimes refer to the number b, rather than the coordinates of the point (0, b), as the y-intercept. \n\nA coefficient is the number that multiplies a variable in an equation. The a in y = ax + b is the coefficient of x, so ax means a times x.\n\nThe equation of distance d_Emile that Emile walks after t seconds is d_Emile  = 2.5t."
                     }
                   },
                   {
@@ -669,9 +669,37 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -5]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [5, 12.5]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
-                      "text": "The equation of distance d\u2095\u2091\u2099\u1d63\u1d62 that Henri walks after t seconds is dHenri = 45 + t."
+                      "text": "The equation of distance d_Henri that Henri walks after t seconds is d_Henri = 45 + t."
                     }
                   },
                   {
@@ -681,9 +709,32 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 45]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [5, 50]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
-                      "text": "A solution of an equation is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks dHenri = 45 + t?, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0. The point (0,45)  lies on the graph of the equation.\n\nIn the graphs for Emile and Henri:\n * What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n * What would d be if (10, d) are the coordinates of a point on the graph? Explain. "
+                      "text": "A solution of an equation is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks d_Henri = 45 + t, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0. The point (0,45)  lies on the graph of the equation.\n\nIn the graphs for Emile and Henri:\n * What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n * What would d be if (10, d) are the coordinates of a point on the graph? Explain. "
                     }
                   }
                 ]
@@ -798,6 +849,29 @@
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_2_4_In_alanas_plan_350w.png"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [14, 12]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
@@ -949,7 +1023,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• How much money was in each pouch?• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?• How much money was in each pouch?• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                      "text": "• How much money was in each pouch?\n• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?\n• How much money was in each pouch?\n• How much money did the winner receive?\n\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
                     }
                   }
                 ]
@@ -1114,18 +1188,6 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "OR saved out separately:"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
                     }
                   },
@@ -1152,7 +1214,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A. Use your equations from the Initial Challenge to find the number of gold coins in each pouch. Record your steps for finding the coins in each pouch. Check your answers. \n\nB. \n  1. A messenger has 6 pouches and 27 coins. There is a total of $105. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.\n\n. 2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. Will the solution for each equation be the same? Explain."}
+                      "text": "A. Use your equations from the Initial Challenge to find the number of gold coins in each pouch. Record your steps for finding the coins in each pouch. Check your answers. \n\nB. \n  1. A messenger has 6 pouches and 27 coins. There is a total of $105. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.\n\n 2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. Will the solution for each equation be the same? Explain."}
                   },
                   {
                     "content": {
