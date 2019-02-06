@@ -97,9 +97,7 @@ context('Table Tool Tile',function(){
    });
    describe('publish table', function(){
        it('will publish canvas', function(){
-           canvas.publishCanvas();
-           // rightNav.openClassWorkTab();
-           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
+           canvas.publishCanvas()
            // need to verify that it is in the Class Work right nav
        });
    });
