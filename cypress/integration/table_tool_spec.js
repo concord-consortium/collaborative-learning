@@ -1,11 +1,16 @@
 import Canvas from '../support/elements/Canvas'
 import LeftNav from '../support/elements/LeftNav'
 import TableToolTile from '../support/elements/TableToolTile'
+import RightNav from '../support/elements/RightNav'
+import LearningLog from '../support/elements/LearningLog'
 
 
 let canvas = new Canvas,
     leftNav = new LeftNav,
-    tableToolTile = new TableToolTile;
+    tableToolTile = new TableToolTile,
+    rightNav = new RightNav,
+    learningLog = new LearningLog;
+
 
 context('Table Tool Tile',function(){
    describe('test menu functions of table', function(){
@@ -39,30 +44,42 @@ context('Table Tool Tile',function(){
               });
       });
       it('will remove a row', function(){
-          tableToolTile.removeRows("0");
-          tableToolTile.getTableRow().should('have.length',1);
+          tableToolTile.addNewRow();
+          tableToolTile.removeRows("1");
+          tableToolTile.getTableRow().should('have.length',2);
       })
-   });
-
-   describe('edit table entries', function(){
-       it('will add content to table', function(){
-           //also verify that new row is added when row "enter" key is sent to the last row
-       })
    });
 
     describe('table in different views', function(){
         it('will open 4-up view', function(){
-
+            canvas.openFourUpView();
+            let nwCanvas= canvas.northWestCanvas();
+            let table = tableToolTile.tableToolTile();
+            cy.get(nwCanvas + ' ' + table).should('be.visible');
         });
         it('will open in 2-up view', function(){
-
+            canvas.openTwoUpView();
+            let nwCanvas= canvas.northWestCanvas();
+            let table = tableToolTile.tableToolTile();
+            cy.get(nwCanvas + ' ' + table).should('be.visible');
         });
+        it('will reset to original', function(){
+            canvas.openOneUpViewFromTwoUp();
+            canvas.openOneUpViewFromFourUp();
+            let singleCanvas = canvas.singleCanvas();
+            let table = tableToolTile.tableToolTile();
+            cy.get(singleCanvas + ' ' + table).should('be.visible');
+        })
     });
    describe('share table', function(){
-
+        // No quick way to verify table comes up in shared view without group setup
+        // it('will share the canvas',function(){
+        //     canvas.shareCanvas();
+        // })
    });
    describe('publish table', function(){
-
+        canvas.publishCanvas()
+        // need to verify that it is in the Class Work right nav
    });
    describe('table in learning logs', function(){
 
@@ -78,4 +95,10 @@ context('Table Tool Tile',function(){
 
        });
    })
+
+    describe('edit table entries', function(){
+        it('will add content to table', function(){
+            //also verify that new row is added when row "enter" key is sent to the last row
+        })
+    });
 });
