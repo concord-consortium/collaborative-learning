@@ -60,10 +60,12 @@ class Canvas{
         this.getFourToOneUpViewToggle().click();
         this.getSingleCanvas().should('be.visible');
     }
-
+    singleCanvas(){
+        return '[data-test=canvas]:first'
+    }
     getSingleCanvas(){
         // return cy.get('.canvas-area > .canvas');
-        return cy.get('[data-test=canvas]:first');
+        return cy.get(this.singleCanvas());
     }
 
     getSingleCanvasDocumentContent(){
@@ -77,12 +79,15 @@ class Canvas{
     getLeftSideFourUpView(){
         return cy.get('.left-workspace .canvas-area .four-up')
     }
+    northWestCanvas(){
+        return '.canvas-area .four-up .canvas-container.north-west'
+    }
 
     getNorthEastCanvas(){
         return cy.get('.canvas-area .four-up .canvas-container.north-east');
     }
     getNorthWestCanvas(){
-        return cy.get('.canvas-area .four-up .canvas-container.north-west');
+        return cy.get(this.northWestCanvas());
     }
     getSouthEastCanvas(){
         return cy.get('.canvas-area .four-up .canvas-container.south-east');
