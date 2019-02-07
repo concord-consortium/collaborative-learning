@@ -16,6 +16,7 @@ import { getTileContentById } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../image-map";
 import { isPolygon } from "./jxg-polygon";
 import { isMovableLine } from "./jxg-movable-line";
+import { isAnnotation } from "./jxg-annotation";
 
 export const kGeometryToolID = "Geometry";
 
@@ -132,7 +133,10 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
     const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
     element.setAttribute({
               fillColor: selected ? selectedFillColor : fillColor,
-              strokeColor: selected ? selectedStrokeColor : strokeColor
+              strokeColor: selected ? selectedStrokeColor : strokeColor,
+              cssClass: selected
+                ? element.getAttribute("clientSelectedCssClass")
+                : element.getAttribute("clientCssClass")
             });
   }
 }
@@ -614,6 +618,11 @@ export const GeometryContentModel = types
       return selectedIds;
     }
 
+    function getOneSelectedAnnotation(board: JXG.Board) {
+      const annotations = self.selectedObjects(board).filter(el => isAnnotation(el));
+      return annotations.length === 1 ? annotations[0] as JXG.Text : undefined;
+    }
+
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
       const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
@@ -847,6 +856,7 @@ export const GeometryContentModel = types
         updateAxisLabels,
         findObjects,
         getOneSelectedPolygon,
+        getOneSelectedAnnotation,
         getAnnotationAnchor,
         deleteSelection,
         applyChange: _applyChange,

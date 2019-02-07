@@ -443,16 +443,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateAnnotation = () => {
     const { board } = this.state;
     const content = this.getContent();
-    const annotationAnchor = board && content.getAnnotationAnchor(board);
-    if (board && annotationAnchor) {
-      this.applyChange(() => {
-          const elems = content.addAnnotation(board, annotationAnchor.id);
-          const annotation = elems && elems.find(elem => isAnnotation(elem)) as JXG.Text;
-          if (annotation) {
-            this.handleCreateText(annotation);
-            this.setState({selectedAnnotation: annotation});
-          }
-      });
+    if (board) {
+      const annotationAnchor = content.getAnnotationAnchor(board);
+      const activeAnnotation = content.getOneSelectedAnnotation(board);
+      if (annotationAnchor) {
+        this.applyChange(() => {
+            const elems = content.addAnnotation(board, annotationAnchor.id);
+            const annotation = elems && elems.find(elem => isAnnotation(elem)) as JXG.Text;
+            if (annotation) {
+              this.handleCreateText(annotation);
+              this.setState({selectedAnnotation: annotation});
+            }
+        });
+      } else if (activeAnnotation) {
+        this.setState({ selectedAnnotation: activeAnnotation });
+      }
     }
   }
 
@@ -1338,6 +1343,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateText = (text: JXG.Text) => {
     const handleDown = (evt: any) => {
+      const content = this.getContent();
+      const { board } = this.state;
       if (isAnnotation(text)) {
         const coords = copyCoords(text.coords);
         if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
@@ -1345,6 +1352,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.lastPointDown = undefined;
         } else {
           this.lastPointDown = { evt, coords };
+        }
+
+        if (board) {
+          if (!hasSelectionModifier(evt)) {
+            content.deselectAll(board);
+          }
+
+          content.selectElement(text.id);
         }
       }
     };

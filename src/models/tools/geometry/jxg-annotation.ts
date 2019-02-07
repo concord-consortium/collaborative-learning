@@ -21,6 +21,10 @@ const sharedProps = {
   strokeWidth: 1,
   clientType: "annotation",
   highlight: false,
+  strokeColor: "white",
+  clientStrokeColor: "white",
+  clientSelectedStrokeColor: "white",
+  fillColor: "red",
 };
 
 const pointProps = {
@@ -55,7 +59,8 @@ export const annotationChangeAgent: JXGChangeAgent = {
     const annotationProps = {
       ...sharedProps,
       cssClass: "annotation",
-      highlightCssClass: "annotation",
+      clientCssClass: "annotation",
+      clientSelectedCssClass: "annotation selected",
       strokeColor: "white",
       fontSize: 13,
       ...changeProps,
