@@ -14,27 +14,15 @@ let canvas = new Canvas,
 
 context('Table Tool Tile',function(){
    describe('test menu functions of table', function(){
-       // it('will open right tabs', function(){
-       //     rightNav.getRightNavTabs().each(($rightTab,rightIndex,$rightList)=>{ //click on right nav tabs
-       //         cy.wrap($rightTab).click({force:true});
-       //         cy.wait(1000);
-       //         rightNav.getRightNavExpandedSpace().should('be.visible');
-       //         cy.wrap($rightTab).click() //close right nav tab
-       //     });
-       // });
       it('will add a table to canvas', function(){
           leftNav.openToWorkspace('Introduction');
           canvas.addTableTile();
           tableToolTile.getTableToolTile().should('be.visible');
       });
-      // it('will verify remove row menu item is disabled when no new rows have been added', function(){
-      //   tableToolTile.openTableMenu();
-      //   tableToolTile.getRemoveRowMenuItem().should('be.disabled');
+      // it('will add a row to the table', function(){
+      //     tableToolTile.addNewRow();
+      //     tableToolTile.getTableRow().should('have.length',2);
       // });
-      it('will add a row to the table', function(){
-          tableToolTile.addNewRow();
-          tableToolTile.getTableRow().should('have.length',2);
-      });
       it('will change column x name', function(){
           let header = 'pluto';
           tableToolTile.renameColumn('x', header);
@@ -55,11 +43,11 @@ context('Table Tool Tile',function(){
                   tableToolTile.getColumnHeaderText().first().should('contain',text);
               });
       });
-      it('will remove a row', function(){
-          tableToolTile.addNewRow();
-          tableToolTile.removeRows("1");
-          tableToolTile.getTableRow().should('have.length',2);
-      });
+      // it('will remove a row', function(){
+      //     tableToolTile.addNewRow();
+      //     tableToolTile.removeRows("1");
+      //     tableToolTile.getTableRow().should('have.length',2);
+      // });
       // it('will verify remove row menu item is disabled when no rows can be removed', function(){
       //     tableToolTile.openTableMenu();
       //     tableToolTile.getRemoveRowMenuItem().should('be.disabled');
