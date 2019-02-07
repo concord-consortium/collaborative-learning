@@ -3,7 +3,7 @@ import { boardChangeAgent, isBoard } from "./jxg-board";
 import { imageChangeAgent } from "./jxg-image";
 import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
-import { polygonChangeAgent, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { polygonChangeAgent } from "./jxg-polygon";
 import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -55,7 +55,6 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   }
   // special case for delete/object, where we dispatch by object type
   if ((change.operation === "delete") && (target === "object")) {
-    removePointsToBeDeletedFromPolygons(_board, castArray(change.targetID));
     applyDeleteObjects(_board, change);
     return;
   }

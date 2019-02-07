@@ -96,7 +96,11 @@ export function removePointsToBeDeletedFromPolygons(board: JXG.Board, ids: strin
     const vertexCount = polygon.vertices.length - 1;
     const deleteCount = vertexIds.length;
     if (vertexCount - deleteCount >= 2) {
-      polygon.removePoints(...(vertexIds.map(id => board.objects[id] as JXG.Point)));
+      vertexIds.forEach(id => {
+        const pt = board.objects[id] as JXG.Point;
+        // removing multiple points at one time sometimes gives unexpected results
+        polygon.removePoints(pt);
+      });
     }
   });
 }
