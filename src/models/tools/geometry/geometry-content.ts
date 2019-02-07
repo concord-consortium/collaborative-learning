@@ -4,8 +4,8 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -14,6 +14,8 @@ import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../image-map";
+import { isPolygon } from "./jxg-polygon";
+import { isMovableLine } from "./jxg-movable-line";
 
 export const kGeometryToolID = "Geometry";
 
@@ -123,7 +125,7 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
-  if (element) {
+  if (element && !isPolygon(element)) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
@@ -437,6 +439,27 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
+    function addAnnotation(board: JXG.Board, anchorId: string) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "annotation",
+        properties: {id: uuid(), anchor: anchorId }
+      };
+      const elems = _applyChange(board, change);
+      return elems ? elems as JXG.GeometryElement[] : undefined;
+    }
+
+    function updateAnnotation(board: JXG.Board, annotationId: string, properties: JXGProperties) {
+      const change: JXGChange = {
+        operation: "update",
+        target: "annotation",
+        targetID: annotationId,
+        properties
+      };
+      const annotation = _applyChange(undefined, change);
+      return annotation ? annotation as JXG.Text : undefined;
+    }
+
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
@@ -644,6 +667,23 @@ export const GeometryContentModel = types
       return properties;
     }
 
+    function getAnnotationAnchor(board: JXG.Board) {
+      const selectedObjects = self.selectedObjects(board);
+      if (selectedObjects.length === 1 && isPoint(selectedObjects[0])) {
+        return selectedObjects[0];
+      }
+
+      const selectedPolygon = selectedObjects.find(isPolygon);
+      if (selectedPolygon) {
+        return selectedPolygon;
+      }
+
+      const selectedLine = selectedObjects.find(isMovableLine);
+      if (selectedLine) {
+        return selectedLine;
+      }
+    }
+
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
@@ -807,9 +847,12 @@ export const GeometryContentModel = types
         updateAxisLabels,
         findObjects,
         getOneSelectedPolygon,
+        getAnnotationAnchor,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,
+        addAnnotation,
+        updateAnnotation,
 
         suspendSync() {
           ++suspendCount;

@@ -98,6 +98,7 @@ declare namespace JXG {
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
+    descendants: { [id: string]: GeometryElement };
     parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
@@ -133,6 +134,12 @@ declare namespace JXG {
   class Line extends GeometryElement {
     point1: JXG.Point;
     point2: JXG.Point;
+  }
+
+  class Text extends CoordsElement {
+    plaintext: string;
+    size: [number, number]; // [width, height]
+    setText: (content: string) => void;
   }
 
   const Math: {

@@ -1,16 +1,21 @@
 import { JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
-import { castArray, size } from "lodash";
+import { values, castArray } from "lodash";
 import * as uuid from "uuid/v4";
+import { isAnnotationType } from "./jxg-annotation";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 
 export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
 
-export const isFreePoint = (v: any) => isVisiblePoint(v) &&
-                                        (size(v.childElements) <= 1) &&
-                                        (size(v.descendants) <= 1);
+export const isFreePoint = (v: any) => {
+  if (isVisiblePoint(v)) {
+    const point = v as JXG.Point;
+    return values(point.childElements).filter(el => !isAnnotationType(el)).length <= 1 &&
+           values(point.descendants).filter(el => !isAnnotationType(el)).length <= 1;
+  }
+};
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;

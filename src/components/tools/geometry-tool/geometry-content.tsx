@@ -28,6 +28,8 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
+import AnnotationDialog from "./annotation-dialog";
+import { isAnnotation } from "../../../models/tools/geometry/jxg-annotation";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -46,6 +48,7 @@ interface IState extends SizeMeProps {
   syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
+  selectedAnnotation?: JXG.Text;
 }
 
 interface JXGPtrEvent {
@@ -223,7 +226,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleDuplicate: this.handleDuplicate,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleDelete: this.handleDelete
+        handleDelete: this.handleDelete,
+        handleCreateAnnotation: this.handleCreateAnnotation
       };
       this.props.onSetToolButtonHandlers(handlers);
     }
@@ -289,6 +293,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-content ${editableClass}`;
     return ([
+      this.renderAnnotationEditor(),
       <div id={this.state.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -299,6 +304,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDrop={this.handleDrop} />,
       this.renderRotateHandle()
     ]);
+  }
+
+  private renderAnnotationEditor() {
+    const annotation = this.state.selectedAnnotation;
+    if (annotation) {
+      return (
+        <AnnotationDialog
+          key="editor"
+          id={annotation.id}
+          isOpen={this.state.selectedAnnotation != null}
+          onAccept={this.handleUpdateAnnotation}
+          onClose={this.closeAnnotationDialog}
+          content={annotation.plaintext}
+        />
+      );
+    }
   }
 
   private renderRotateHandle() {
@@ -413,6 +434,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
       });
     }
+  }
+
+  private closeAnnotationDialog = () => {
+    this.setState({ selectedAnnotation: undefined });
+  }
+
+  private handleCreateAnnotation = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    const annotationAnchor = board && content.getAnnotationAnchor(board);
+    if (board && annotationAnchor) {
+      this.applyChange(() => {
+          const elems = content.addAnnotation(board, annotationAnchor.id);
+          const annotation = elems && elems.find(elem => isAnnotation(elem)) as JXG.Text;
+          if (annotation) {
+            this.handleCreateText(annotation);
+            this.setState({selectedAnnotation: annotation});
+          }
+      });
+    }
+  }
+
+  private handleUpdateAnnotation = (annotationId: string, text: string) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      if (text) {
+        content.updateAnnotation(board, annotationId, { text });
+      } else {
+        content.removeObjects(board, annotationId);
+      }
+    }
+    this.setState({ selectedAnnotation: undefined });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -745,6 +799,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
+    } else if (isAnnotation(elt)) {
+      this.handleCreateText(elt as JXG.Text);
     }
   }
 
@@ -872,6 +928,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
 
       this.applyChange(() => content.updateObjects(board, ids, props));
+    }
+  }
+
+  private endDragAnnotation(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+
+     // only create a change object if there's actually a change
+    if (usrDiff[1] || usrDiff[2]) {
+      const id = dragTarget.id;
+      const dragStart = this.dragPts[id].initial;
+      if (dragStart) {
+        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
+        this.applyChange(() => content.updateAnnotation(board, id, { position: newUsrCoords }));
+      }
     }
   }
 
@@ -1187,14 +1259,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
-      let selectVertices = false;
+      let selectPolygon = false;
       // let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
         if (board && !hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        selectVertices = true;
+        selectPolygon = true;
         this.lastSelectDown = evt;
       }
       // we can't prevent JSXGraph from dragging the polygon, so don't deselect
@@ -1203,18 +1275,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       //     deselectVertices = true;
       //   }
       // }
-      each(polygon.ancestors, point => {
-        const pt = point as JXG.Point;
-        if (board && !inVertex) {
-          if (selectVertices) {
+      if (selectPolygon) {
+        geometryContent.selectElement(polygon.id);
+        each(polygon.ancestors, point => {
+          const pt = point as JXG.Point;
+          if (board && !inVertex) {
             geometryContent.selectElement(pt.id);
           }
-          // we can't prevent JSXGraph from dragging the polygon, so don't deselect
-          // else if (deselectVertices) {
-          //   geometryContent.deselectElement(pt.id);
-          // }
-        }
-      });
+        });
+      }
 
       if (!readOnly) {
         // point handles vertex drags
@@ -1265,5 +1334,49 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateVertexAngle = (angle: JXG.Angle) => {
     updateVertexAngle(angle);
+  }
+
+  private handleCreateText = (text: JXG.Text) => {
+    const handleDown = (evt: any) => {
+      if (isAnnotation(text)) {
+        const coords = copyCoords(text.coords);
+        if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+          this.setState({selectedAnnotation: text});
+          this.lastPointDown = undefined;
+        } else {
+          this.lastPointDown = { evt, coords };
+        }
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly) return;
+
+      const id = text.id;
+      let dragEntry = this.dragPts[id];
+      if (!dragEntry) {
+        dragEntry = this.dragPts[id] = { initial: copyCoords(text.coords) };
+      }
+      dragEntry.final = copyCoords(text.coords);
+    };
+
+    const handlePointerUp = (evt: any) => {
+      const id = text.id;
+      const dragEntry = this.dragPts[id];
+      if (!dragEntry) { return; }
+
+      if (!this.props.readOnly) {
+        dragEntry.final = copyCoords(text.coords);
+        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
+                                                     dragEntry.initial.usrCoords) as number[];
+        this.endDragAnnotation(evt, text, usrDiff);
+      }
+
+      delete this.dragPts[id];
+    };
+
+    text.on("down", handleDown);
+    text.on("drag", handleDrag);
+    text.on("up", handlePointerUp);
   }
 }

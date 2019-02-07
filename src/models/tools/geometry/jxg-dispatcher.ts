@@ -8,6 +8,7 @@ import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { movableLineChangeAgent } from "./jxg-movable-line";
 import { castArray } from "lodash";
+import { annotationChangeAgent } from "./jxg-annotation";
 
 type OnChangeApplied = (board: JXG.Board | undefined, change: JXGChange) => void;
 
@@ -16,6 +17,7 @@ interface JXGChangeAgents {
 }
 
 const agents: JXGChangeAgents = {
+  annotation: annotationChangeAgent,
   board: boardChangeAgent,
   image: imageChangeAgent,
   linkedpoint: linkedPointChangeAgent,

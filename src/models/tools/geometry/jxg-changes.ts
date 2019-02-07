@@ -1,7 +1,7 @@
 import { castArray } from "lodash";
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "image" | "linkedPoint" | "movableLine" | "object" |
+export type JXGObjectType = "annotation" | "board" | "image" | "linkedPoint" | "movableLine" | "object" |
                               "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
@@ -38,7 +38,7 @@ export interface JXGNormalizedChange {
   links?: ILinkProperties;
 }
 
-export type JXGElement = JXG.Board | JXG.Line | JXG.Point;
+export type JXGElement = JXG.Board | JXG.Line | JXG.Point | JXG.Text;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
