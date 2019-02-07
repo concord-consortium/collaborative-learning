@@ -915,28 +915,10 @@ function preprocessImportFormat(snapshot: any) {
   const changes: JXGChange[] = [];
   addBoard(boardSpecs);
 
-  // map import names to internal names
-  const kPropsMap: { [p: string]: string } = {
-    fillColor: "clientFillColor",
-    strokeColor: "clientStrokeColor",
-    selectedFillColor: "clientSelectedFillColor",
-    selectedStrokeColor: "clientSelectedStrokeColor"
-  };
-  // specify import properties to be removed
-  const kOmitProps = ["selectedFillColor", "selectedStrokeColor"];
-
-  function transformProperties(id: string, properties: any) {
-    const transformed = { id, ...omit(properties, kOmitProps) };
-    each(kPropsMap, (to, from) => {
-      if (properties && properties[from] != null) transformed[to] = properties[from];
-    });
-    return transformed;
-  }
-
   function addPoint(pointSpec: IPointImportSpec) {
     const { type, properties: _properties, ...others } = pointSpec;
     const id = uniqueId();
-    const properties = transformProperties(id, _properties);
+    const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "point", properties, ...others });
     return id;
   }
@@ -981,7 +963,7 @@ function preprocessImportFormat(snapshot: any) {
   function addMovableLine(movableLineSpec: IMovableLineSpec) {
     const { type, parents, properties: _properties, ...others } = movableLineSpec;
     const id = uniqueId();
-    const properties = transformProperties(id, _properties);
+    const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
     return id;
   }

@@ -1,5 +1,6 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { syncClientColors } from "./jxg-point";
 import { castArray } from "lodash";
 
 export const isMovableLine = (v: any) => {
@@ -26,8 +27,6 @@ const sharedProps = {
         strokeColor: kMovableLineDefaults.strokeColor,
         clientType: kMovableLineType,
         strokeWidth: 3,
-        clientFillColor: kMovableLineDefaults.fillColor,
-        clientStrokeColor: kMovableLineDefaults.strokeColor,
         clientSelectedFillColor: kMovableLineDefaults.selectedFillColor,
         clientSelectedStrokeColor: kMovableLineDefaults.selectedStrokeColor,
       };
@@ -47,7 +46,7 @@ const pointSpecificProps = {
 export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
-    const props = {...sharedProps, ...changeProps};
+    const props = syncClientColors({...sharedProps, ...changeProps });
     const lineProps = {...props, ...lineSpecificProps};
     const pointProps = {...props, ...pointSpecificProps};
     const id = changeProps.id;
