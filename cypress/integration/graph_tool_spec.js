@@ -185,34 +185,31 @@ context('Test graph tool functionalities', function(){
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','Initial Challenge');
             canvas.addGraphTile();
+
+            let basePointCount = 4; // number of points in a newly created geometry tool
+
             graphToolTile.addPointToGraph(5,5);
             graphToolTile.addPointToGraph(10,5);
             graphToolTile.addPointToGraph(10,10);
             graphToolTile.addPointToGraph(10,10);
             graphToolTile.addPointToGraph(10,10); //to create the polygon
 
-            graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-                expect($list).to.have.length(7);
-            });
+            graphToolTile.getGraphPoint().should('have.length', basePointCount + 3)
             graphToolTile.getGraphPoint().last().click({force:true});
             canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-                expect($list).to.have.length(6);
-            });
-            graphToolTile.getGraphPolygon().should('not.exist');
+            graphToolTile.getGraphPoint().should('have.length', basePointCount + 2)
+            graphToolTile.getGraphPolygon().should('exist');
 
             graphToolTile.selectGraphPoint(10,5);
             // graphToolTile.getGraphPoint().last().click();
             canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-                expect($list).to.have.length(5);
-            });
+            graphToolTile.getGraphPoint().should('have.length', basePointCount + 1)
+            graphToolTile.getGraphPolygon().should('not.exist');
             graphToolTile.selectGraphPoint(5,5);
             canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-                expect($list).to.have.length(4);
-            });
+            graphToolTile.getGraphPoint().should('have.length', basePointCount)
         })
+
         // it('will delete points with keyboard', function(){ //current cypress behavior does not allow for "typing" into non-text field
         //     leftNav.openToWorkspace('Initial Challenge');
         //     cy.wait(2000);

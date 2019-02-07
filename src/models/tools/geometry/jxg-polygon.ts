@@ -74,6 +74,37 @@ export function getPointsForVertexAngle(vertex: JXG.Point) {
           : [p2, p1, p0];
 }
 
+export function removePointsToBeDeletedFromPolygons(board: JXG.Board, ids: string[]) {
+  // identify points that are vertices of polygons
+  const polygonVertexMap: { [id: string]: string[] } = {};
+  ids.forEach(id => {
+    const elt = board.objects[id];
+    if (isPoint(elt)) {
+      each(elt.childElements, child => {
+        if (isPolygon(child)) {
+          if (!polygonVertexMap[child.id]) {
+            polygonVertexMap[child.id] = [];
+          }
+          polygonVertexMap[child.id].push(elt.id);
+        }
+      });
+    }
+  });
+  // remove points from polygons if possible
+  each(polygonVertexMap, (vertexIds, polygonId) => {
+    const polygon = board.objects[polygonId] as JXG.Polygon;
+    const vertexCount = polygon.vertices.length - 1;
+    const deleteCount = vertexIds.length;
+    if (vertexCount - deleteCount >= 2) {
+      vertexIds.forEach(id => {
+        const pt = board.objects[id] as JXG.Point;
+        // removing multiple points at one time sometimes gives unexpected results
+        polygon.removePoints(pt);
+      });
+    }
+  });
+}
+
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
     const parents = (change.parents || [])

@@ -4,6 +4,7 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
+import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, size as _size } from "lodash";
@@ -423,11 +424,11 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function removeObjects(board: JXG.Board | undefined, id: string | string[], links?: ILinkProperties) {
+    function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
         target: "object",
-        targetID: id,
+        targetID: ids,
         links
       };
       return _applyChange(board, change);
@@ -679,6 +680,10 @@ export const GeometryContentModel = types
 
     function deleteSelection(board: JXG.Board) {
       const selectedIds = self.getDeletableSelectedIds(board);
+
+      // remove points from polygons if possible
+      removePointsToBeDeletedFromPolygons(board, selectedIds);
+
       self.deselectAll(board);
       board.showInfobox(false);
       if (selectedIds.length) {

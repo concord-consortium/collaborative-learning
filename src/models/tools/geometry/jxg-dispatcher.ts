@@ -46,22 +46,21 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
 
 export function applyChange(board: JXG.Board|string, change: JXGChange,
                             onChangeApplied?: OnChangeApplied): JXGChangeResult {
+  let _board = board as JXG.Board;
   const target = change.target.toLowerCase();
+  // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
-    // special case for update/object, where we dispatch by object type
-    applyUpdateObjects(board as JXG.Board, change);
+    applyUpdateObjects(_board, change);
     return;
   }
+  // special case for delete/object, where we dispatch by object type
   if ((change.operation === "delete") && (target === "object")) {
-    // special case for delete/object, where we dispatch by object type
-    applyDeleteObjects(board as JXG.Board, change);
+    applyDeleteObjects(_board, change);
     return;
   }
   const result = dispatchChange(board, change);
   if (onChangeApplied) {
-    const _board = isBoard(result)
-                    ? result as JXG.Board
-                    : isBoard(board) ? board as JXG.Board : undefined;
+    if (isBoard(result)) _board = result as JXG.Board;
     onChangeApplied(_board, change);
   }
   return result;
