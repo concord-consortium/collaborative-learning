@@ -409,7 +409,7 @@
                    {
                     "content": {
                       "type": "Text",
-                      "text": "Who will raise the most money? Explain.\n Does the relationship between dollars and kilometers represent a linear relationship? Explain."
+                      "text": "Who will raise the most money? Explain.\n\nDoes the relationship between dollars and kilometers represent a linear relationship? Explain."
                     }
                   }
                 ]
@@ -441,7 +441,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. How can you determine if a relationship is linear?\n\n 2. If a relationship is linear,\n\n  • What is the pattern of change between the two variables?\n\n  • Explain how you can tell if it is proportional."
+                    "text": "1. How can you determine if a relationship is linear?\n\n2. If a relationship is linear,\n\n  • What is the pattern of change between the two variables?\n\n  • Explain how you can tell if it is proportional."
                   }
                 }]
               },
@@ -510,6 +510,87 @@
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_1_4_IC_mamer_350w.png"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -5]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [
+                            [0, 100]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [1, 90]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [2, 80]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [3, 70]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [4, 60]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [5, 50]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [6, 40]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [7, 30]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [8, 20]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [9, 10]
+                          ]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [
+                            [10, 0]
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
@@ -746,8 +827,17 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            [0, 0],
-                            [5, 12.5]
+                            {
+                              "type": "point",
+                              "parents": [0, 0],
+                              "properties": {
+                                "name": "y-intercept"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [5, 12.5]
+                            }
                           ]
                         }
                       ]
@@ -775,8 +865,17 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            [0, 45],
-                            [5, 50]
+                            {
+                              "type": "point",
+                              "parents": [0, 45],
+                              "properties": {
+                                "name": "y-intercept"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [5, 50]
+                            }
                           ]
                         }
                       ]
@@ -785,7 +884,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A solution of an equation is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks d_Henri = 45 + t, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0. The point (0,45)  lies on the graph of the equation.\n\nIn the graphs for Emile and Henri:\n * What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n * What would d be if (10, d) are the coordinates of a point on the graph? Explain. "
+                      "text": "A solution of an equation is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks d_Henri = 45 + t, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0. The point (0,45)  lies on the graph of the equation.\n\nIn the graphs for Emile and Henri:\n  • What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n  • What would d be if (10, d) are the coordinates of a point on the graph? Explain. "
                     }
                   }
                 ]
@@ -1044,7 +1143,7 @@
                      {
                     "content": {
                       "type": "Text",
-                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n* Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n* Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n* Using the equation:\n\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
+                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n• Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n• Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n• Using the equation:\n\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
                     }
                   },
                   {
@@ -1316,7 +1415,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a pattern of change in the dependent variable. You can use this pattern of change to identify other linear relationships.\n\nSo far in this Investigation, all of the situations have involved positive whole numbers.\n * Does it make sense to think about negative numbers in a coin situation?\n * Does it make sense to think about fractions in a coin situation?\n * What are some situations where it makes sense to use fractions or negative numbers?"
+                      "text": "In previous Problems, you noticed that, as the independent variable changes by a constant amount, there is a pattern of change in the dependent variable. You can use this pattern of change to identify other linear relationships.\n\nSo far in this Investigation, all of the situations have involved positive whole numbers.\n • Does it make sense to think about negative numbers in a coin situation?\n • Does it make sense to think about fractions in a coin situation?\n • What are some situations where it makes sense to use fractions or negative numbers?"
                     }
                   }
                 ]
@@ -1459,7 +1558,7 @@
                  {
                   "content": {
                     "type": "Text",
-                    "text": "  • Explain how Kevin could use his graph to determine Fabian’s profit.\n  • Kevin highlighted the vertical distance 330 between the two graphs. What does the -330 represent on the graph? What does it represent in the real world?\n* What are coordinates of the point of intersection of the two lines? What information does this point represent?\n  • Adia claims she can find the coordinates of the point of intersection by solving the equation, 8.20n = 825 + 3.25n. Is this possible? Explain.\n\n2. Fabian uses the equation P = 4.95n – 825 to predict the profit.\n  • Does this equation make sense? Explain.\n  • How many cakes does Fabian need to make to keep his expenses less than $2,400 a month? Where is this located on the graph?\n  • How many cakes does he need to sell if he wants his income to be greater than $2,400 a month? Where is this located on the graph?"
+                    "text": "  • Explain how Kevin could use his graph to determine Fabian’s profit.\n  • Kevin highlighted the vertical distance 330 between the two graphs. What does the -330 represent on the graph? What does it represent in the real world?\n• What are coordinates of the point of intersection of the two lines? What information does this point represent?\n  • Adia claims she can find the coordinates of the point of intersection by solving the equation, 8.20n = 825 + 3.25n. Is this possible? Explain.\n\n2. Fabian uses the equation P = 4.95n – 825 to predict the profit.\n  • Does this equation make sense? Explain.\n  • How many cakes does Fabian need to make to keep his expenses less than $2,400 a month? Where is this located on the graph?\n  • How many cakes does he need to sell if he wants his income to be greater than $2,400 a month? Where is this located on the graph?"
                   }
                 }
               ]
