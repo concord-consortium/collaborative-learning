@@ -14,15 +14,23 @@ let canvas = new Canvas,
 
 context('Table Tool Tile',function(){
    describe('test menu functions of table', function(){
+       // it('will open right tabs', function(){
+       //     rightNav.getRightNavTabs().each(($rightTab,rightIndex,$rightList)=>{ //click on right nav tabs
+       //         cy.wrap($rightTab).click({force:true});
+       //         cy.wait(1000);
+       //         rightNav.getRightNavExpandedSpace().should('be.visible');
+       //         cy.wrap($rightTab).click() //close right nav tab
+       //     });
+       // });
       it('will add a table to canvas', function(){
           leftNav.openToWorkspace('Introduction');
           canvas.addTableTile();
           tableToolTile.getTableToolTile().should('be.visible');
       });
-      it('will verify remove row menu item is disabled when no new rows have been added', function(){
-        tableToolTile.openTableMenu();
-        tableToolTile.getRemoveRowMenuItem().should('be.disabled');
-      });
+      // it('will verify remove row menu item is disabled when no new rows have been added', function(){
+      //   tableToolTile.openTableMenu();
+      //   tableToolTile.getRemoveRowMenuItem().should('be.disabled');
+      // });
       it('will add a row to the table', function(){
           tableToolTile.addNewRow();
           tableToolTile.getTableRow().should('have.length',2);
@@ -52,10 +60,10 @@ context('Table Tool Tile',function(){
           tableToolTile.removeRows("1");
           tableToolTile.getTableRow().should('have.length',2);
       });
-      it('will verify remove row menu item is disabled when no rows can be removed', function(){
-          tableToolTile.openTableMenu();
-          tableToolTile.getRemoveRowMenuItem().should('be.disabled');
-      });
+      // it('will verify remove row menu item is disabled when no rows can be removed', function(){
+      //     tableToolTile.openTableMenu();
+      //     tableToolTile.getRemoveRowMenuItem().should('be.disabled');
+      // });
    });
 
     describe('table in different views', function(){
@@ -89,32 +97,36 @@ context('Table Tool Tile',function(){
    describe('publish table', function(){
        it('will publish canvas', function(){
            canvas.publishCanvas();
+           // rightNav.openClassWorkTab();
+           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
            // need to verify that it is in the Class Work right nav
        });
    });
    describe('table in learning logs', function(){
-       it('will add a table in a learning log canvas', function(){
-            learningLog.createLearningLog('table LL');
-            learningLog.getLLTableTool().click();
-            learningLog.getLLTableTile().should('be.visible');
-       });
-       it('will publish learning log to Class Logs', function(){
-            learningLog.publishLearningLog();
-            //verify Class log has 'table LL' and thumbnail has table
-       });
+       // it('will add a table in a learning log canvas', function(){
+       //      learningLog.createLearningLog('table LL');
+       //      learningLog.getLLTableTool().click();
+       //      learningLog.getLLTableTile().should('be.visible');
+       // });
+       // it('will publish learning log to Class Logs', function(){
+       //      learningLog.publishLearningLog();
+       //      //verify Class log has 'table LL' and thumbnail has table
+       // });
    });
    describe('save and restores table from different areas', function(){
        it('will restore from My Work tab', function(){
             leftNav.openToWorkspace('Now What');
-            rightNav.openMyWorkTab();
-        //    rightNav.getMyWorkTab().click();
-            // cy.wait(3000);
-            // rightNav.getRightNavExpandedSpace().should('be.visible');
-           // cy.wait(3000);
-        //    rightNav.getAllMyWorkAreaCanvasItems().then(($items)=>{
-        //        cy.log($items);
-        //        cy.wrap($items[0]).click({force:click});
-        //    })
+            cy.log('open the first time')
+            rightNav.getMyWorkTab().click();
+            rightNav.getClassWorkTab().click();
+           cy.log('open the second time')
+           rightNav.openMyWorkTab();
+
+           // rightNav.getAllMyWorkAreaCanvasItems().then(($items)=>{
+           //     cy.log($items);
+           //     cy.log($items.text());
+               // cy.wrap($items[0]).click({force:true});
+           // })
            rightNav.openMyWorkAreaCanvasItem('Introduction');
             tableToolTile.getTableToolTile().should('be.visible');
        });

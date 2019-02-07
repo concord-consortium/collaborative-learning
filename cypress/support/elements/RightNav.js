@@ -6,7 +6,7 @@ class RightNav{
         return cy.get('#rightNavTabMy\\ Work.tab');
     }
     getRightNavExpandedSpace(){
-        return cy.get('.right-nav > .expanded-area.expanded');
+        return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
     }
 
     getAllMyWorkAreaCanvasItems(){
@@ -14,14 +14,15 @@ class RightNav{
     }
 
     openMyWorkAreaCanvasItem(title){
-        cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
+        cy.get('[data-test=my-work-list-items][title*="'+title+'"] .scaled-list-item').click();
         // cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
         // cy.get('.my-work > .list > .list-item[title*="'+title+'"]').click();
     }
 
     openMyWorkTab(){
         this.getMyWorkTab().click({force:true});
-        this.getRightNavExpandedSpace().should('be.visible');
+        this.getRightNavExpandedSpace();
+        // this.getRightNavExpandedSpace().should('be.visible');
     }
 
     closeMyWorkTab(){
