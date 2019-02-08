@@ -28,11 +28,24 @@ const defaultProps = {
         strokeColor: kPointDefaults.strokeColor
       };
 
+// fillColor/strokeColor are ephemeral properties that change with selection;
+// we store the desired colors in clientFillColor/clientStrokeColor for persistence.
+export function syncClientColors(props: any) {
+  const { selectedFillColor, selectedStrokeColor, ...p } = props || {} as any;
+  if (p.fillColor) p.clientFillColor = p.fillColor;
+  if (p.strokeColor) p.clientStrokeColor = p.strokeColor;
+  if (selectedFillColor) p.clientSelectedFillColor = selectedFillColor;
+  if (selectedStrokeColor) p.clientSelectedStrokeColor = selectedStrokeColor;
+  return p;
+}
+
 export function createPoint(board: JXG.Board, parents: JXGCoordPair, changeProps: any) {
   // If id is not provided we generate one, but this will prevent
   // model-level synchronization. This should only occur for very
   // old geometry tiles created before the introduction of the uuid.
-  const props = { id: uuid(), ...defaultProps, ...changeProps };
+  const props = { id: uuid(), ...defaultProps, ...syncClientColors(changeProps) };
+
+  // default snap size has changed over time
   if (props.snapSizeX === kPrevSnapUnit) {
     props.snapSizeX = kSnapUnit;
   }

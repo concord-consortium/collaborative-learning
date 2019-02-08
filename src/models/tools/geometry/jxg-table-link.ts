@@ -11,7 +11,6 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
           clientType: "linkedPoint",
           fixed: true,
           fillColor: linkedPointColor,
-          clientFillColor: linkedPointColor,
           linkedTableId: tableId
         };
   const _props = { ...props, ...linkedProps };

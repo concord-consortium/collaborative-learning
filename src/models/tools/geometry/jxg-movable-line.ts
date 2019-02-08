@@ -1,6 +1,8 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { syncClientColors } from "./jxg-point";
 import { castArray } from "lodash";
+import { uniqueId } from "../../../utilities/js-utils";
 
 export const isMovableLine = (v: any) => {
   return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
@@ -26,8 +28,6 @@ const sharedProps = {
         strokeColor: kMovableLineDefaults.strokeColor,
         clientType: kMovableLineType,
         strokeWidth: 3,
-        clientFillColor: kMovableLineDefaults.fillColor,
-        clientStrokeColor: kMovableLineDefaults.strokeColor,
         clientSelectedFillColor: kMovableLineDefaults.selectedFillColor,
         clientSelectedStrokeColor: kMovableLineDefaults.selectedStrokeColor,
       };
@@ -46,27 +46,29 @@ const pointSpecificProps = {
 
 export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
-    const changeProps: any = change.properties || {};
-    const props = {...sharedProps, ...changeProps};
-    const lineProps = {...props, ...lineSpecificProps};
+    const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
+    const lineId = id || uniqueId();
+    const props = syncClientColors({...sharedProps, ...shared });
+    const lineProps = {...props, ...lineSpecificProps, ...line };
     const pointProps = {...props, ...pointSpecificProps};
-    const id = changeProps.id;
 
     if (change.parents && change.parents.length === 2) {
       const interceptPoint = (board as JXG.Board).create(
         "point",
         change.parents[0],
         {
+          id: `${lineId}-point1`,
           ...pointProps,
-          id: `${id}-point1`
+          ...pt1
         }
       );
       const slopePoint = (board as JXG.Board).create(
         "point",
         change.parents[1],
         {
+          id: `${lineId}-point2`,
           ...pointProps,
-          id: `${id}-point2`
+          ...pt2
         }
       );
       const overrides = {
@@ -79,22 +81,23 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         }
       };
 
-      const line = (board as JXG.Board).create(
+      const movableLine = (board as JXG.Board).create(
         "line",
         [interceptPoint, slopePoint],
         {
           ...lineProps,
-          id,
+          lineId,
           withLabel: true,
           label: {
             position: "top",
             anchorY: "bottom",
             fontSize: 15
           },
+          ...line,
           ...overrides
         });
 
-      return [line, interceptPoint, slopePoint];
+      return [movableLine, interceptPoint, slopePoint];
     }
   },
 
