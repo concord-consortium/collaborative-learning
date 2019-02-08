@@ -143,11 +143,11 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     e.preventDefault();
 
     const { board, polygon } = this.props;
-    if (!board || !polygon) return;
-
-    const dragAngle = this.computeAngle(this.polygonCenter, e);
-    const deltaAngle = dragAngle - this.initialDragAngle;
-    this.rotateVertices(polygon, deltaAngle, true);
+    if (board && polygon) {
+      const dragAngle = this.computeAngle(this.polygonCenter, e);
+      const deltaAngle = dragAngle - this.initialDragAngle;
+      this.rotateVertices(polygon, deltaAngle, true);
+    }
 
     this.initialVertexCoords = {};
 
