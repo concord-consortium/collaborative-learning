@@ -42,18 +42,6 @@ const lineProps = {
   straightLast: false
 };
 
-function setPositionOverride(method: number, coords: number[]) {
-  this.setPositionDirectly(method, coords);
-  if (this.relativeCoords) {
-    // For elements with relative coordinates (i.e. anchored elements), the coordinates are not changed until
-    // a redraw occurs. If redraws are suspended, sequential translation deltas are calculated from the wrong point
-    // unless the coordinates are manually set here. See JXG.CoordsElement#setPositionDirectly for more detail.
-    this.coords.setCoordinates(method, coords);
-  }
-  return this;
-}
-JXG.Text.prototype.setPosition = setPositionOverride;
-
 function getCentroid(anchor: JXG.GeometryElement) {
   if (isPoint(anchor)) {
     const coords = (anchor as JXG.Point).coords.usrCoords;
@@ -131,7 +119,14 @@ export const commentChangeAgent: JXGChangeAgent = {
         board.update();
       }
       if (position) {
-        obj.setPosition(JXG.COORDS_BY_USER, position);
+        // Element coordinates are not updated until a redraw occurs. So if redraws are suspended, and a comment or its
+        // anchor has moved, the transform will be calculated from a stale position. We unsuspend updates to force a
+        // refresh on coordinate positions.
+        if (board.isSuspendedUpdate) {
+          board.unsuspendUpdate();
+          obj.setPosition(JXG.COORDS_BY_USER, position);
+          board.suspendUpdate();
+        }
         board.update();
       }
     }
