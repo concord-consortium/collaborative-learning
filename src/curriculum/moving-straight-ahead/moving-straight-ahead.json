@@ -1011,8 +1011,14 @@
                         {
                           "type": "movableLine",
                           "parents": [
-                            [0, 5],
-                            [14, 12]
+                            {
+                              "type": "point",
+                              "parents": [0, 5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [14, 12]
+                            }
                           ]
                         }
                       ]
