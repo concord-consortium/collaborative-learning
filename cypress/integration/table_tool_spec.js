@@ -11,13 +11,22 @@ let canvas = new Canvas,
     rightNav = new RightNav,
     learningLog = new LearningLog;
 
-
 context('Table Tool Tile',function(){
    describe('test menu functions of table', function(){
       it('will add a table to canvas', function(){
           leftNav.openToWorkspace('Introduction');
           canvas.addTableTile();
           tableToolTile.getTableToolTile().should('be.visible');
+      });
+      it('will verify there are only two columns x & y', function(){
+
+           tableToolTile.getColumnHeaderText().then(($headers)=>{
+                expect(($headers.length)).to.be.eq(2);
+           });
+          tableToolTile.getColumnHeaderText().each(($header,index, $header_list)=>{
+              let headerText=['x','y'];
+                  expect($header.text()).to.be.eq(headerText[index]);
+          });
       });
       it('will add a row to the table', function(){
           tableToolTile.addNewRow();
@@ -43,43 +52,54 @@ context('Table Tool Tile',function(){
                   tableToolTile.getColumnHeaderText().first().should('contain',text);
               });
       });
+       it('will verify remove row menu item is disabled when no rows is selected', function(){
+           tableToolTile.openTableMenu();
+           tableToolTile.getRemoveRowMenuItem().should('have.class', 'bp3-disabled');
+       });
       it('will remove a row', function(){
-          tableToolTile.addNewRow();
-          tableToolTile.removeRows("1");
-          tableToolTile.getTableRow().should('have.length',2);
-      })
+          tableToolTile.removeRows("0");
+          tableToolTile.getTableRow().should('have.length',1);
+      });
    });
-
     describe('table in different views', function(){
-        it('will open 4-up view', function(){
-            canvas.openFourUpView();
-            let nwCanvas= canvas.northWestCanvas();
-            let table = tableToolTile.tableToolTile();
-            cy.get(nwCanvas + ' ' + table).should('be.visible');
-        });
+        //4-up view is tested in group_test_spec
         it('will open in 2-up view', function(){
             canvas.openTwoUpView();
             let nwCanvas= canvas.northWestCanvas();
             let table = tableToolTile.tableToolTile();
             cy.get(nwCanvas + ' ' + table).should('be.visible');
+            //TODO verify rightside workspace is open
         });
         it('will reset to original', function(){
             canvas.openOneUpViewFromTwoUp();
-            canvas.openOneUpViewFromFourUp();
             let singleCanvas = canvas.singleCanvas();
             let table = tableToolTile.tableToolTile();
             cy.get(singleCanvas + ' ' + table).should('be.visible');
         })
     });
+    describe('edit table entries', function(){
+        it('will add content to table', function(){
+            tableToolTile.getTableCell().first().type('0');
+            tableToolTile.getTableCell().last().type('5{enter}');
+            tableToolTile.getTableCell().first().should('contain','0');
+            tableToolTile.getTableCell().eq(1).should('contain', '5');
+            tableToolTile.getTableRow().should('have.length',2);
+            //also verify that new row is added when row "enter" key is sent to the last row
+            tableToolTile.getTableCell().first().type('{enter}');
+            tableToolTile.getTableRow().should('have.length',3);
+        });
+    });
    describe('share table', function(){
         // No quick way to verify table comes up in shared view without group setup
-        // it('will share the canvas',function(){
-        //     canvas.shareCanvas();
-        // })
+        it('will share the canvas',function(){
+            canvas.shareCanvas();
+        })
    });
    describe('publish table', function(){
        it('will publish canvas', function(){
-           canvas.publishCanvas()
+           canvas.publishCanvas();
+           // rightNav.openClassWorkTab();
+           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
            // need to verify that it is in the Class Work right nav
        });
    });
@@ -97,22 +117,16 @@ context('Table Tool Tile',function(){
    describe('save and restores table from different areas', function(){
        it('will restore from My Work tab', function(){
             leftNav.openToWorkspace('Now What');
-            cy.log('open the first time')
+            cy.log('open the first time');
             rightNav.getMyWorkTab().click();
-            rightNav.getClassWorkTab().click();
-           cy.log('open the second time')
+            rightNav.getClassWorkTab().click(); //Need to 'tickle' the right nav to make sure content is loaded
+           cy.log('open the second time');
            rightNav.openMyWorkTab();
-
-           // rightNav.getAllMyWorkAreaCanvasItems().then(($items)=>{
-           //     cy.log($items);
-           //     cy.log($items.text());
-               // cy.wrap($items[0]).click({force:true});
-           // })
            rightNav.openMyWorkAreaCanvasItem('Introduction');
             tableToolTile.getTableToolTile().should('be.visible');
        });
        it('will restore from Class Work tab', function(){
-           leftNav.openToWorkspace('Now What');
+           rightNav.openClassWorkAreaCanvasItem('Now What');
             //verify can open published canvas to rightside workspace 2up view
        });
        it('will restore from Class Logs tab', function(){
@@ -120,9 +134,5 @@ context('Table Tool Tile',function(){
        });
    })
 
-    describe('edit table entries', function(){
-        it('will add content to table', function(){
-            //also verify that new row is added when row "enter" key is sent to the last row
-        })
-    });
+
 });

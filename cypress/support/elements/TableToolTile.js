@@ -24,7 +24,7 @@ class TableToolTile{
         this.renameColumnDialog(title);
     }
     removeRows(i){
-        cy.get('[row-index='+i+']').first().click();
+        cy.get('[row-index='+i+']').first().click({force:true});
         this.openTableMenu();
         cy.get('[data-test=remove-row-menu-item]').click()
     }
@@ -47,6 +47,9 @@ class TableToolTile{
     }
     getColumnHeaderText(){
         return cy.get('.ag-header-cell-text');
+    }
+    getTableCell(){
+        return cy.get('.cdp-row-data-cell');
     }
 }
 export default TableToolTile;
