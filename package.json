@@ -135,7 +135,7 @@
     "lodash": "^4.17.11",
     "mobx": "^5.8.0",
     "mobx-react": "^5.4.3",
-    "mobx-state-tree": "^3.7.1",
+    "mobx-state-tree": "^3.10.2",
     "nanoid": "^2.0.0",
     "query-string": "^6.2.0",
     "react": "^16.7.0",

@@ -5,7 +5,7 @@ import { defaultImageContent } from "../tools/image/image-content";
 import { defaultTableContent, kTableDefaultHeight } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
@@ -145,7 +145,7 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
-      const tile = ToolTileModel.create({ content });
+      const tile = createToolTileModelFromContent(content);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -179,7 +179,7 @@ export const DocumentContentModel = types
       if (addSidecarNotes) {
         const { rowId } = result;
         const row = self.rowMap.get(rowId);
-        const tile = ToolTileModel.create({ content: defaultTextContent() });
+        const tile = createToolTileModelFromContent(defaultTextContent());
         self.tileMap.put(tile);
         row!.insertTileInRow(tile, 1);
         result.additionalTileIds = [ tile.id ];

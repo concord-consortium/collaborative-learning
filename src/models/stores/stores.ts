@@ -57,13 +57,11 @@ export function createStores(params?: ICreateStores): IStores {
     ui: params && params.ui || UIModel.create({
       sectionWorkspace: {
         type: SectionWorkspace,
-        mode: "1-up",
-        visibility: "private",
+        mode: "1-up"
       },
       learningLogWorkspace: {
         type: LearningLogWorkspace,
-        mode: "1-up",
-        visibility: "private",
+        mode: "1-up"
       },
     }),
     groups: params && params.groups || GroupsModel.create({}),
