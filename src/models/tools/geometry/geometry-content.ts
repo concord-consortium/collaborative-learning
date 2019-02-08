@@ -892,13 +892,13 @@ interface IImageImportSpec {
   properties?: any;
 }
 
-interface IMovableLineSpec {
+interface IMovableLineImportSpec {
   type: "movableLine";
-  parents: [JXGCoordPair, JXGCoordPair];
+  parents: [IPointImportSpec, IPointImportSpec];
   properties?: any;
 }
 
-type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineSpec;
+type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
 
 function preprocessImportFormat(snapshot: any) {
   const boardSpecs = snapshot.board as IBoardImportSpec;
@@ -960,10 +960,12 @@ function preprocessImportFormat(snapshot: any) {
     return id;
   }
 
-  function addMovableLine(movableLineSpec: IMovableLineSpec) {
-    const { type, parents, properties: _properties, ...others } = movableLineSpec;
+  function addMovableLine(movableLineSpec: IMovableLineImportSpec) {
+    const { type, parents: _parents, properties: _properties, ...others } = movableLineSpec;
     const id = uniqueId();
-    const properties = { id, ..._properties };
+    const [pt1Spec, pt2Spec] = _parents;
+    const parents = _parents.map(ptSpec => ptSpec.parents);
+    const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
     return id;
   }
