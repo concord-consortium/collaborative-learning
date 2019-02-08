@@ -4,6 +4,7 @@ import { values } from "lodash";
 import { isMovableLine } from "./jxg-movable-line";
 import { isPolygon } from "./jxg-polygon";
 import { isBoard } from "./jxg-board";
+import { isPoint } from "./jxg-point";
 
 export const isAnnotationType = (v: any) => v && v.getAttribute("clientType") === "annotation";
 
@@ -53,6 +54,30 @@ function setPositionOverride(method: number, coords: number[]) {
 }
 JXG.Text.prototype.setPosition = setPositionOverride;
 
+function getCentroid(anchor: JXG.GeometryElement) {
+  if (isPoint(anchor)) {
+    const coords = (anchor as JXG.Point).coords.usrCoords;
+    return [coords[1], coords[2]];
+  }
+  if (isMovableLine(anchor) || isPolygon(anchor)) {
+    const points = values(anchor.ancestors) as JXG.Point[];
+    const center = [0.0, 0.0];
+    points.forEach((point) => {
+      center[0] += point.coords.usrCoords[1];
+      center[1] += point.coords.usrCoords[2];
+    });
+    const len = points.length;
+    if (len) {
+      center[0] /= len;
+      center[1] /= len;
+    } else {
+      center[0] = NaN;
+      center[1] = NaN;
+    }
+    return center;
+  }
+}
+
 export const annotationChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
@@ -67,6 +92,13 @@ export const annotationChangeAgent: JXGChangeAgent = {
     };
     if (isBoard(board)) {
       const _board = board as JXG.Board;
+      const centroidCoordinateGetter = (index: number) => () => {
+        const anchor = _board.objects[annotationProps.anchor];
+        const centroid = getCentroid(anchor);
+        if (centroid) {
+          return centroid[index];
+        }
+      };
 
       const id = changeProps.id;
       const annotation = _board.create("text", [0, -1, "annotation"], annotationProps);
@@ -77,8 +109,8 @@ export const annotationChangeAgent: JXGChangeAgent = {
       );
       const anchorPoint = _board.create(
         "point",
-        [0, 0],
-        { ...pointProps, anchor: annotationProps.anchor, id: `${id}-anchorPoint` }
+        [centroidCoordinateGetter(0), centroidCoordinateGetter(1)],
+        { ...pointProps, id: `${id}-anchorPoint` }
       );
       const line = _board.create(
         "line",
