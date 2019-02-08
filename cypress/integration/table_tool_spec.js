@@ -28,6 +28,16 @@ context('Table Tool Tile',function(){
                   expect($header.text()).to.be.eq(headerText[index]);
           });
       });
+      it('will verify there are only two columns x & y', function(){
+
+           tableToolTile.getColumnHeaderText().then(($headers)=>{
+                expect(($headers.length)).to.be.eq(2);
+           });
+          tableToolTile.getColumnHeaderText().each(($header,index, $header_list)=>{
+              let headerText=['x','y'];
+                  expect($header.text()).to.be.eq(headerText[index]);
+          });
+      });
       it('will add a row to the table', function(){
           tableToolTile.addNewRow();
           tableToolTile.getTableRow().should('have.length',2);
@@ -97,7 +107,9 @@ context('Table Tool Tile',function(){
    });
    describe('publish table', function(){
        it('will publish canvas', function(){
-           canvas.publishCanvas()
+           canvas.publishCanvas();
+           // rightNav.openClassWorkTab();
+           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
            // need to verify that it is in the Class Work right nav
        });
    });
