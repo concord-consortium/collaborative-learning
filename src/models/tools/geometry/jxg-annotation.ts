@@ -101,7 +101,7 @@ export const annotationChangeAgent: JXGChangeAgent = {
       };
 
       const id = changeProps.id;
-      const annotation = _board.create("text", [0, -1, "annotation"], annotationProps);
+      const annotation = _board.create("text", [0, -1, ""], annotationProps);
       const annotationPoint = _board.create(
         "point",
         [1, 0],
@@ -127,7 +127,7 @@ export const annotationChangeAgent: JXGChangeAgent = {
     if (obj) {
       const props = change.properties as JXGProperties;
       const { text, position } = props;
-      if (text) {
+      if (text != null) {
         obj.setText(text);
         board.update();
       }

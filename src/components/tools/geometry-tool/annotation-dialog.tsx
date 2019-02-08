@@ -21,13 +21,13 @@ class AnnotationDialog extends React.Component<IProps, IState> {
           };
 
   public render() {
-    const prompt = "Annotation text";
+    const prompt = "Comment";
     return (
       <Dialog
         icon="text-highlight"
         isOpen={this.props.isOpen}
         onClose={this.props.onClose}
-        title={`Update Annotation`}
+        title={`Edit Comment`}
         canOutsideClickClose={false}
       >
         <div className="nc-attribute-name-prompt">{prompt}:</div>
@@ -35,6 +35,7 @@ class AnnotationDialog extends React.Component<IProps, IState> {
           className="nc-attribute-name-input pt-input"
           type="text"
           maxLength={500}
+          placeholder={"Type comment here"}
           value={this.state.content}
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}

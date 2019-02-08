@@ -440,6 +440,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedAnnotation: undefined });
   }
 
+  // TODO: Create annotations after the dialog is complete + prevent empty comments
   private handleCreateAnnotation = () => {
     const { board } = this.state;
     const content = this.getContent();
@@ -461,15 +462,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleUpdateAnnotation = (annotationId: string, text: string) => {
+  private handleUpdateAnnotation = (annotationId: string, text: string = "") => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      if (text) {
-        content.updateAnnotation(board, annotationId, { text });
-      } else {
-        content.removeObjects(board, annotationId);
-      }
+      content.updateAnnotation(board, annotationId, { text });
     }
     this.setState({ selectedAnnotation: undefined });
   }

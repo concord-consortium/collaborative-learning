@@ -82,7 +82,7 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
                                     selected: false,
                                     disabled: false,
                                     hidden: true })}
-          {this.renderToolButton("Label", "label",
+          {this.renderToolButton("Comment", "comment",
                                   { onClick: this.props.onAnnotationClick,
                                     selected: false,
                                     disabled: this.props.isAnnotationDisabled,
