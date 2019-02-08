@@ -27,6 +27,9 @@ context('Test group functionalities', function(){
                     canvas.enterText('This is to test the 4-up view of S'+studentArr[i]);
                     canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
                     canvas.addGraphTile();
+                    canvas.addTableTile();
+                    canvas.addDrawTile();
+                    canvas.addImageTile();
                     canvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);
                 }
