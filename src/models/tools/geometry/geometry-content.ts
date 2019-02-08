@@ -1,13 +1,14 @@
 import { types, Instance } from "mobx-state-tree";
 import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType } from "./jxg-changes";
+import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
+        } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
 import { isFreePoint, kPointDefaults } from "./jxg-point";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
-import { assign, castArray, each, keys, size as _size } from "lodash";
+import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -615,9 +616,26 @@ export const GeometryContentModel = types
       }
     }
 
+    function gatherObjectProperties(selectedIds: string[]) {
+      const properties: { [id: string]: any } = {};
+      selectedIds.forEach(id => { properties[id] = {}; });
+
+      self.changes.forEach(chg => {
+        const parsedChange: JXGChange = safeJsonParse(chg);
+        forEachNormalizedChange(parsedChange, change => {
+          const id = change.targetID as string;
+          if (id && properties[id]) {
+            assign(properties[id], omit(change.properties, ["position"]));
+          }
+        });
+      });
+      return properties;
+    }
+
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
+      const properties = gatherObjectProperties(selectedIds);
 
       // sort into creation order
       const idToIndexMap: { [id: string]: number } = {};
@@ -636,12 +654,13 @@ export const GeometryContentModel = types
       const changes: string[] = [];
       selectedIds.forEach(id => {
         const obj = board.objects[id];
+        const props = properties[id];
         if (obj) {
           let x: number;
           let y: number;
           const change: JXGChange = {
                   operation: "create",
-                  properties: { id: newIds[id], name: obj.name }
+                  properties: { ...props, id: newIds[id], name: obj.name }
                 } as any;
           switch (obj.elType) {
             case "angle":

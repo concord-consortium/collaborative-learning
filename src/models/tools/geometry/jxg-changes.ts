@@ -1,3 +1,4 @@
+import { castArray } from "lodash";
 
 export type JXGOperation = "create" | "update" | "delete";
 export type JXGObjectType = "board" | "image" | "linkedPoint" | "movableLine" | "object" |
@@ -8,6 +9,7 @@ export type JXGCoordPair = [number, number];
 export type JXGParentType = string | number | JXGCoordPair;
 
 export interface JXGProperties {
+  id?: string;
   position?: JXGCoordPair;
   url?: string;
   [key: string]: any;
@@ -27,6 +29,15 @@ export interface JXGChange {
   links?: ILinkProperties;
 }
 
+export interface JXGNormalizedChange {
+  operation: JXGOperation;
+  target: JXGObjectType;
+  targetID?: string;
+  parents?: JXGParentType;
+  properties?: JXGProperties;
+  links?: ILinkProperties;
+}
+
 export type JXGElement = JXG.Board | JXG.Line | JXG.Point;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
@@ -40,4 +51,45 @@ export interface JXGChangeAgent {
   create: JXGCreateHandler;
   update: JXGUpdateHandler;
   delete: JXGDeleteHandler;
+}
+
+export type NormalizedChangeFn = (change: JXGNormalizedChange) => void;
+
+export function forEachNormalizedChange(change: JXGChange, fn: NormalizedChangeFn) {
+  const { operation, targetID, parents, properties, ...others } = change;
+  const isArrayParents = parents && Array.isArray(parents);
+  // multiple points can be created with an array of JXGCoordPair
+  const isArrayArrayParents = parents && isArrayParents && Array.isArray(parents[0]);
+  const isCreatePointsArray = (operation === "create") && (change.target === "point") && isArrayArrayParents;
+  const isArrayProps = Array.isArray(properties);
+  const isArrayCreate = isArrayParents && (isCreatePointsArray || isArrayProps);
+
+  switch (operation) {
+    case "create":
+      if (isArrayCreate) {
+        const cPropsArray = properties && castArray(properties);
+        parents && parents.forEach((parent, index) => {
+          const cProps = cPropsArray && (cPropsArray[index] || cPropsArray[0]);
+          fn({ operation, targetID: cProps.id, parents: parent, properties: cProps, ...others });
+        });
+      }
+      else {
+        const props = properties && properties as JXGProperties;
+        const chg: JXGChange = { ...change, targetID: props && props.id };
+        fn(chg as JXGNormalizedChange);
+      }
+      break;
+    case "update":
+      if (Array.isArray(targetID)) {
+        const cPropsArray = properties && castArray(properties);
+        targetID.forEach((id, index) => {
+          const cProps = cPropsArray && (cPropsArray[index] || cPropsArray[0]);
+          fn({ operation, targetID: id, properties: cProps, ...others });
+        });
+      }
+      else {
+        fn(change as JXGNormalizedChange);
+      }
+      break;
+  }
 }
