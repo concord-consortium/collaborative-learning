@@ -28,8 +28,8 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
-import AnnotationDialog from "./annotation-dialog";
-import { isAnnotation } from "../../../models/tools/geometry/jxg-annotation";
+import CommentDialog from "./comment-dialog";
+import { isComment } from "../../../models/tools/geometry/jxg-comment";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -48,7 +48,7 @@ interface IState extends SizeMeProps {
   syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
-  selectedAnnotation?: JXG.Text;
+  selectedComment?: JXG.Text;
 }
 
 interface JXGPtrEvent {
@@ -227,7 +227,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleDelete: this.handleDelete,
-        handleCreateAnnotation: this.handleCreateAnnotation
+        handleCreateComment: this.handleCreateComment
       };
       this.props.onSetToolButtonHandlers(handlers);
     }
@@ -293,7 +293,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-content ${editableClass}`;
     return ([
-      this.renderAnnotationEditor(),
+      this.renderCommentEditor(),
       <div id={this.state.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -306,17 +306,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     ]);
   }
 
-  private renderAnnotationEditor() {
-    const annotation = this.state.selectedAnnotation;
-    if (annotation) {
+  private renderCommentEditor() {
+    const comment = this.state.selectedComment;
+    if (comment) {
       return (
-        <AnnotationDialog
+        <CommentDialog
           key="editor"
-          id={annotation.id}
-          isOpen={this.state.selectedAnnotation != null}
-          onAccept={this.handleUpdateAnnotation}
-          onClose={this.closeAnnotationDialog}
-          content={annotation.plaintext}
+          id={comment.id}
+          isOpen={this.state.selectedComment != null}
+          onAccept={this.handleUpdateComment}
+          onClose={this.closeCommentDialog}
+          content={comment.plaintext}
         />
       );
     }
@@ -436,39 +436,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private closeAnnotationDialog = () => {
-    this.setState({ selectedAnnotation: undefined });
+  private closeCommentDialog = () => {
+    this.setState({ selectedComment: undefined });
   }
 
-  // TODO: Create annotations after the dialog is complete + prevent empty comments
-  private handleCreateAnnotation = () => {
+  // TODO: Create comments after the dialog is complete + prevent empty comments
+  private handleCreateComment = () => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      const annotationAnchor = content.getAnnotationAnchor(board);
-      const activeAnnotation = content.getOneSelectedAnnotation(board);
-      if (annotationAnchor) {
+      const commentAnchor = content.getCommentAnchor(board);
+      const activeComment = content.getOneSelectedComment(board);
+      if (commentAnchor) {
         this.applyChange(() => {
-            const elems = content.addAnnotation(board, annotationAnchor.id);
-            const annotation = elems && elems.find(elem => isAnnotation(elem)) as JXG.Text;
-            if (annotation) {
-              this.handleCreateText(annotation);
-              this.setState({selectedAnnotation: annotation});
+            const elems = content.addComment(board, commentAnchor.id);
+            const comment = elems && elems.find(elem => isComment(elem)) as JXG.Text;
+            if (comment) {
+              this.handleCreateText(comment);
+              this.setState({selectedComment: comment});
             }
         });
-      } else if (activeAnnotation) {
-        this.setState({ selectedAnnotation: activeAnnotation });
+      } else if (activeComment) {
+        this.setState({ selectedComment: activeComment });
       }
     }
   }
 
-  private handleUpdateAnnotation = (annotationId: string, text: string = "") => {
+  private handleUpdateComment = (commentId: string, text: string = "") => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateAnnotation(board, annotationId, { text });
+      content.updateComment(board, commentId, { text });
     }
-    this.setState({ selectedAnnotation: undefined });
+    this.setState({ selectedComment: undefined });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -801,7 +801,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
-    } else if (isAnnotation(elt)) {
+    } else if (isComment(elt)) {
       this.handleCreateText(elt as JXG.Text);
     }
   }
@@ -933,7 +933,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private endDragAnnotation(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
@@ -944,7 +944,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const dragStart = this.dragPts[id].initial;
       if (dragStart) {
         const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
-        this.applyChange(() => content.updateAnnotation(board, id, { position: newUsrCoords }));
+        this.applyChange(() => content.updateComment(board, id, { position: newUsrCoords }));
       }
     }
   }
@@ -1342,10 +1342,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const handleDown = (evt: any) => {
       const content = this.getContent();
       const { board } = this.state;
-      if (isAnnotation(text)) {
+      if (isComment(text)) {
         const coords = copyCoords(text.coords);
         if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
-          this.setState({selectedAnnotation: text});
+          this.setState({selectedComment: text});
           this.lastPointDown = undefined;
         } else {
           this.lastPointDown = { evt, coords };
@@ -1381,7 +1381,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         dragEntry.final = copyCoords(text.coords);
         const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                      dragEntry.initial.usrCoords) as number[];
-        this.endDragAnnotation(evt, text, usrDiff);
+        this.endDragComment(evt, text, usrDiff);
       }
 
       delete this.dragPts[id];

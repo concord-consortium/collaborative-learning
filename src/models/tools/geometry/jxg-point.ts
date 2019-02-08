@@ -3,7 +3,7 @@ import { objectChangeAgent } from "./jxg-object";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { values, castArray } from "lodash";
 import * as uuid from "uuid/v4";
-import { isAnnotationType } from "./jxg-annotation";
+import { isCommentType } from "./jxg-comment";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 
@@ -12,8 +12,8 @@ export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
 export const isFreePoint = (v: any) => {
   if (isVisiblePoint(v)) {
     const point = v as JXG.Point;
-    return values(point.childElements).filter(el => !isAnnotationType(el)).length <= 1 &&
-           values(point.descendants).filter(el => !isAnnotationType(el)).length <= 1;
+    return values(point.childElements).filter(el => !isCommentType(el)).length <= 1 &&
+           values(point.descendants).filter(el => !isCommentType(el)).length <= 1;
   }
 };
 

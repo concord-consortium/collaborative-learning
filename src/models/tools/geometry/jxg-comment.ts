@@ -6,13 +6,13 @@ import { isPolygon } from "./jxg-polygon";
 import { isBoard } from "./jxg-board";
 import { isPoint } from "./jxg-point";
 
-export const isAnnotationType = (v: any) => v && v.getAttribute("clientType") === "annotation";
+export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
 
-export const isAnnotation = (v: any) => isAnnotationType(v) && (v instanceof JXG.Text) && (v.elType === "text");
+export const isComment = (v: any) => isCommentType(v) && (v instanceof JXG.Text) && (v.elType === "text");
 
-export const getAnchor = (annotation: JXG.Text) => {
-  if (!isAnnotation) return;
-  const ancestors = values(annotation.ancestors);
+export const getAnchor = (comment: JXG.Text) => {
+  if (!isComment) return;
+  const ancestors = values(comment.ancestors);
   return ancestors.length === 1
     ? ancestors[0]
     : ancestors.find(elem => isMovableLine(elem) || isPolygon(elem));
@@ -20,7 +20,7 @@ export const getAnchor = (annotation: JXG.Text) => {
 
 const sharedProps = {
   strokeWidth: 1,
-  clientType: "annotation",
+  clientType: "comment",
   highlight: false,
   strokeColor: "white",
   clientStrokeColor: "white",
@@ -78,14 +78,14 @@ function getCentroid(anchor: JXG.GeometryElement) {
   }
 }
 
-export const annotationChangeAgent: JXGChangeAgent = {
+export const commentChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
-    const annotationProps = {
+    const commentProps = {
       ...sharedProps,
-      cssClass: "annotation",
-      clientCssClass: "annotation",
-      clientSelectedCssClass: "annotation selected",
+      cssClass: "comment",
+      clientCssClass: "comment",
+      clientSelectedCssClass: "comment selected",
       strokeColor: "white",
       fontSize: 13,
       ...changeProps,
@@ -93,7 +93,7 @@ export const annotationChangeAgent: JXGChangeAgent = {
     if (isBoard(board)) {
       const _board = board as JXG.Board;
       const centroidCoordinateGetter = (index: number) => () => {
-        const anchor = _board.objects[annotationProps.anchor];
+        const anchor = _board.objects[commentProps.anchor];
         const centroid = getCentroid(anchor);
         if (centroid) {
           return centroid[index];
@@ -101,11 +101,11 @@ export const annotationChangeAgent: JXGChangeAgent = {
       };
 
       const id = changeProps.id;
-      const annotation = _board.create("text", [0, -1, ""], annotationProps);
-      const annotationPoint = _board.create(
+      const comment = _board.create("text", [0, -1, ""], commentProps);
+      const commentPoint = _board.create(
         "point",
         [1, 0],
-        { ...pointProps, anchor: annotation.id, id: `${id}-annotationPoint` }
+        { ...pointProps, anchor: comment.id, id: `${id}-commentPoint` }
       );
       const anchorPoint = _board.create(
         "point",
@@ -114,9 +114,9 @@ export const annotationChangeAgent: JXGChangeAgent = {
       );
       const line = _board.create(
         "line",
-        [anchorPoint, annotationPoint],
+        [anchorPoint, commentPoint],
         { ...lineProps, id: `${id}-labelLine`});
-      return [annotation, annotationPoint, anchorPoint, line];
+      return [comment, commentPoint, anchorPoint, line];
     }
   },
 

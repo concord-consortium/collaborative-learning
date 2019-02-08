@@ -16,7 +16,7 @@ import { getTileContentById } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../image-map";
 import { isPolygon } from "./jxg-polygon";
 import { isMovableLine } from "./jxg-movable-line";
-import { isAnnotation } from "./jxg-annotation";
+import { isComment } from "./jxg-comment";
 
 export const kGeometryToolID = "Geometry";
 
@@ -443,25 +443,25 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function addAnnotation(board: JXG.Board, anchorId: string) {
+    function addComment(board: JXG.Board, anchorId: string) {
       const change: JXGChange = {
         operation: "create",
-        target: "annotation",
+        target: "comment",
         properties: {id: uuid(), anchor: anchorId }
       };
       const elems = _applyChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function updateAnnotation(board: JXG.Board, annotationId: string, properties: JXGProperties) {
+    function updateComment(board: JXG.Board, commentId: string, properties: JXGProperties) {
       const change: JXGChange = {
         operation: "update",
-        target: "annotation",
-        targetID: annotationId,
+        target: "comment",
+        targetID: commentId,
         properties
       };
-      const annotation = _applyChange(undefined, change);
-      return annotation ? annotation as JXG.Text : undefined;
+      const comment = _applyChange(undefined, change);
+      return comment ? comment as JXG.Text : undefined;
     }
 
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
@@ -618,9 +618,9 @@ export const GeometryContentModel = types
       return selectedIds;
     }
 
-    function getOneSelectedAnnotation(board: JXG.Board) {
-      const annotations = self.selectedObjects(board).filter(el => isAnnotation(el));
-      return annotations.length === 1 ? annotations[0] as JXG.Text : undefined;
+    function getOneSelectedComment(board: JXG.Board) {
+      const comments = self.selectedObjects(board).filter(el => isComment(el));
+      return comments.length === 1 ? comments[0] as JXG.Text : undefined;
     }
 
     function getOneSelectedPolygon(board: JXG.Board) {
@@ -676,7 +676,7 @@ export const GeometryContentModel = types
       return properties;
     }
 
-    function getAnnotationAnchor(board: JXG.Board) {
+    function getCommentAnchor(board: JXG.Board) {
       const selectedObjects = self.selectedObjects(board);
       if (selectedObjects.length === 1 && isPoint(selectedObjects[0])) {
         return selectedObjects[0];
@@ -856,13 +856,13 @@ export const GeometryContentModel = types
         updateAxisLabels,
         findObjects,
         getOneSelectedPolygon,
-        getOneSelectedAnnotation,
-        getAnnotationAnchor,
+        getOneSelectedComment,
+        getCommentAnchor,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,
-        addAnnotation,
-        updateAnnotation,
+        addComment,
+        updateComment,
 
         suspendSync() {
           ++suspendCount;

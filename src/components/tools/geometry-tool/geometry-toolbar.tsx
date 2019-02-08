@@ -14,8 +14,8 @@ interface IProps extends IBaseProps {
   onDuplicateClick: () => void;
   isDuplicateDisabled: boolean;
   onMovableLineClick: () => void;
-  onAnnotationClick: () => void;
-  isAnnotationDisabled: boolean;
+  onCommentClick: () => void;
+  isCommentDisabled: boolean;
 }
 interface IState {
   showSettings: boolean;
@@ -83,9 +83,9 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
                                     disabled: false,
                                     hidden: true })}
           {this.renderToolButton("Comment", "comment",
-                                  { onClick: this.props.onAnnotationClick,
+                                  { onClick: this.props.onCommentClick,
                                     selected: false,
-                                    disabled: this.props.isAnnotationDisabled,
+                                    disabled: this.props.isCommentDisabled,
                                     hidden: false })}
           {this.renderToolButton("Delete", "delete",
                                   { onClick: this.props.onDeleteClick,

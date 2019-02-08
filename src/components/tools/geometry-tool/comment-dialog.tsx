@@ -14,7 +14,7 @@ interface IState {
 }
 
 export default
-class AnnotationDialog extends React.Component<IProps, IState> {
+class CommentDialog extends React.Component<IProps, IState> {
 
   public state = {
             content: this.props.content || ""

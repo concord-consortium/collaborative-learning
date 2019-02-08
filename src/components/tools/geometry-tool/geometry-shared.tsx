@@ -13,7 +13,7 @@ export interface IToolButtonHandlers {
   handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
   handleDelete: () => void;
-  handleCreateAnnotation: () => void;
+  handleCreateComment: () => void;
 }
 
 export interface IGeometryProps extends SizeMeProps {
