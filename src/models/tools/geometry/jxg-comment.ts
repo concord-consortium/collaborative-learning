@@ -58,8 +58,7 @@ function getCentroid(anchor: JXG.GeometryElement) {
   if (isPoint(anchor)) {
     const coords = (anchor as JXG.Point).coords.usrCoords;
     return [coords[1], coords[2]];
-  }
-  if (isMovableLine(anchor) || isPolygon(anchor)) {
+  } else if (anchor) {
     const points = values(anchor.ancestors) as JXG.Point[];
     const center = [0.0, 0.0];
     points.forEach((point) => {

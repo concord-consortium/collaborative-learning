@@ -14,7 +14,7 @@ import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../image-map";
-import { isPolygon } from "./jxg-polygon";
+import { isPolygon, isVisibleEdge } from "./jxg-polygon";
 import { isMovableLine } from "./jxg-movable-line";
 import { isComment } from "./jxg-comment";
 
@@ -126,7 +126,7 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = board.objects[id];
-  if (element && !isPolygon(element)) {
+  if (element) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
@@ -690,6 +690,13 @@ export const GeometryContentModel = types
       const selectedLine = selectedObjects.find(isMovableLine);
       if (selectedLine) {
         return selectedLine;
+      }
+
+      const selectedSegment = selectedObjects.find(isVisibleEdge) as JXG.Line;
+      if (selectedSegment) {
+        // XXX: Polygon edges have randomly generated IDs which are not consistent and so they cannot be put in changes
+        // We avoid using edge IDs by commenting on the parent polygon instead
+        return selectedSegment.parentPolygon;
       }
     }
 

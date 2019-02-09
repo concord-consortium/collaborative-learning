@@ -117,6 +117,7 @@ declare namespace JXG {
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
     on: (event: string, handler: EventHandler) => void;
+    _set: (key: string, value: string) => void;
   }
 
   const JSXGraph: {
@@ -134,6 +135,7 @@ declare namespace JXG {
   class Line extends GeometryElement {
     point1: JXG.Point;
     point2: JXG.Point;
+    parentPolygon?: JXG.Polygon;
   }
 
   class Text extends CoordsElement {

@@ -1170,9 +1170,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
         vertices.forEach(vertex => content.selectElement(vertex.id));
 
-        if (isMovableLine(line)) {
-          content.selectElement(line.id);
-        }
+        content.selectElement(line.id);
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect
       // else if (hasSelectionModifier(evt)) {
