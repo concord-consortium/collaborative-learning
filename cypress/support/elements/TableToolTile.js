@@ -2,7 +2,7 @@ class TableToolTile{
     tableToolTile(){
         return '.neo-codap-case-table'
     }
-    getTableToolTile(){
+    getTableTile(){
         return cy.get(this.tableToolTile());
     }
 
