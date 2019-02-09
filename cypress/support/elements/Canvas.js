@@ -134,7 +134,7 @@ class Canvas{
         return cy.get('.right-workspace > .toolbar');
     }
     getSelectTool(){
-        return cy.get('.single-workspace .tool.select[title=Select]');
+        return cy.get('.single-workspace .tool.select');
     }
 
     addTextTile(){
@@ -163,8 +163,7 @@ class Canvas{
     deleteTile(tile){
         switch(tile) {
             case 'text':
-                textToolTile.getTextTile().first()
-                    .invoke('attr', 'class', 'selected');
+                textToolTile.getTextTile().last().click({force:true});
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({force:true});

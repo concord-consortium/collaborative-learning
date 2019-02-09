@@ -1,6 +1,6 @@
 class TextToolTile {
     getTextTile(){
-        return cy.get('.canvas-area .text-tool');
+        return cy.get('.canvas .text-tool.editable');
     }
 
     enterText(text){
