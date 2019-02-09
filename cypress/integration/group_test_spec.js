@@ -82,6 +82,9 @@ context('Test group functionalities', function(){
                 canvas.openOneUpViewFromFourUp(); //clean up
 
             });
+            it('will try to delete elements from other canvases in 4 up view', function(){
+                //TODO
+            })
 
         //     //TODO: have to figure out drag and drop
         //     it('will copy text from one canvas to own canvas', function(){

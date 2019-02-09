@@ -16,7 +16,7 @@ context('Table Tool Tile',function(){
       it('will add a table to canvas', function(){
           leftNav.openToWorkspace('Introduction');
           canvas.addTableTile();
-          tableToolTile.getTableToolTile().should('be.visible');
+          tableToolTile.getTableTile().should('be.visible');
       });
       it('will verify there are only two columns x & y', function(){
 
@@ -65,10 +65,10 @@ context('Table Tool Tile',function(){
         //4-up view is tested in group_test_spec
         it('will open in 2-up view', function(){
             canvas.openTwoUpView();
-            let nwCanvas= canvas.northWestCanvas();
-            let table = tableToolTile.tableToolTile();
-            cy.get(nwCanvas + ' ' + table).should('be.visible');
-            //TODO verify rightside workspace is open
+            canvas.getLeftSideWorkspace().should('be.visible');
+            canvas.getLeftSideWorkspaceTitle().should('contain', 'Introduction')
+            tableToolTile.getTableTile().should('be.visible');
+            canvas.getRightSideWorkspace().should('be.visible');
         });
         it('will reset to original', function(){
             canvas.openOneUpViewFromTwoUp();
@@ -123,7 +123,7 @@ context('Table Tool Tile',function(){
            cy.log('open the second time');
            rightNav.openMyWorkTab();
            rightNav.openMyWorkAreaCanvasItem('Introduction');
-            tableToolTile.getTableToolTile().should('be.visible');
+            tableToolTile.getTableTile().should('be.visible');
        });
        it('will restore from Class Work tab', function(){
            rightNav.openClassWorkAreaCanvasItem('Now What');
