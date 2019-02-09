@@ -363,16 +363,17 @@ context('Test Canvas', function(){
         it('will delete elements from canvas', function(){
             // //Delete elements in the canvas
             leftNav.openToWorkspace('Introduction');
-            canvas.deleteTile('text');
             canvas.deleteTile('graph');
             canvas.deleteTile('image');
             canvas.deleteTile('draw');
             canvas.deleteTile('table');
-            // textToolTile.getTextTile().should('not.exist');
-            // graphToolTile.getGraphTile().first().should('not.exist');
-            // drawToolTile.getDrawTile().should('not.exist');
-            // imageToolTile.getImageTile().should('not.exist');
-            // tableToolTile.getTableTile().should('not.exist');
+            canvas.deleteTile('text');
+            canvas.deleteTile('text');
+            textToolTile.getTextTile().should('not.exist');
+            graphToolTile.getGraphTile().should('not.exist');
+            drawToolTile.getDrawTile().should('not.exist');
+            imageToolTile.getImageTile().should('not.exist');
+            tableToolTile.getTableTile().should('not.exist');
         });
 
 
