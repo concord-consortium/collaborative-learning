@@ -111,28 +111,6 @@ context('Table Tool Tile',function(){
        });
        it('will publish learning log to Class Logs', function(){
             learningLog.publishLearningLog();
-            //verify Class log has 'table LL' and thumbnail has table
        });
    });
-   describe('save and restores table from different areas', function(){
-       it('will restore from My Work tab', function(){
-            leftNav.openToWorkspace('Now What');
-            cy.log('open the first time');
-            rightNav.getMyWorkTab().click();
-            rightNav.getClassWorkTab().click(); //Need to 'tickle' the right nav to make sure content is loaded
-           cy.log('open the second time');
-           rightNav.openMyWorkTab();
-           rightNav.openMyWorkAreaCanvasItem('Introduction');
-            tableToolTile.getTableTile().should('be.visible');
-       });
-       it('will restore from Class Work tab', function(){
-           rightNav.openClassWorkAreaCanvasItem('Now What');
-            //verify can open published canvas to rightside workspace 2up view
-       });
-       it('will restore from Class Logs tab', function(){
-            //open class logs tab and open 'table LL' to rightside workspace 2up view
-       });
-   })
-
-
 });
