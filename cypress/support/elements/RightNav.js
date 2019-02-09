@@ -45,8 +45,7 @@ class RightNav{
     }
 
     openClassWorkAreaCanvasItem(title){
-        // this test, as well as the previous implementation, might have unexpected results if we have
-        // multiple items within a Class Work section
+        cy.get('[data-test=class-work-section] .title').contains(title).click();
         cy.get('[data-test=class-work-list-items] > .info').parent().click();
     }
 
