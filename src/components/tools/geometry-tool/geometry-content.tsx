@@ -8,6 +8,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import CommentDialog from "./comment-dialog";
+import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
@@ -28,8 +30,6 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
-import CommentDialog from "./comment-dialog";
-import { isComment } from "../../../models/tools/geometry/jxg-comment";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -226,8 +226,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleDuplicate: this.handleDuplicate,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleDelete: this.handleDelete,
-        handleCreateComment: this.handleCreateComment
+        handleCreateComment: this.handleCreateComment,
+        handleDelete: this.handleDelete
       };
       this.props.onSetToolButtonHandlers(handlers);
     }
@@ -801,7 +801,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
-    } else if (isComment(elt)) {
+    }
+    else if (isComment(elt)) {
       this.handleCreateText(elt as JXG.Text);
     }
   }
@@ -1337,7 +1338,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleCreateText = (text: JXG.Text) => {
-    const handleDown = (evt: any) => {
+    const handlePointerDown = (evt: any) => {
       const content = this.getContent();
       const { board } = this.state;
       if (isComment(text)) {
@@ -1385,7 +1386,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       delete this.dragPts[id];
     };
 
-    text.on("down", handleDown);
+    text.on("down", handlePointerDown);
     text.on("drag", handleDrag);
     text.on("up", handlePointerUp);
   }

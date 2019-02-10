@@ -1,10 +1,11 @@
 import { JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { objectChangeAgent } from "./jxg-object";
-import { values } from "lodash";
-import { isMovableLine } from "./jxg-movable-line";
-import { isPolygon } from "./jxg-polygon";
 import { isBoard } from "./jxg-board";
+import { isMovableLine } from "./jxg-movable-line";
+import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
+import { isPolygon } from "./jxg-polygon";
+import { values } from "lodash";
+import { uniqueId } from "../../../utilities/js-utils";
 
 export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
 
@@ -69,6 +70,7 @@ export const commentChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const changeProps: any = change.properties || {};
     const commentProps = {
+      id: uniqueId(),
       ...sharedProps,
       cssClass: "comment",
       clientCssClass: "comment",
@@ -87,7 +89,7 @@ export const commentChangeAgent: JXGChangeAgent = {
         }
       };
 
-      const id = changeProps.id;
+      const id = commentProps.id;
       const comment = _board.create("text", [0, -1, ""], commentProps);
       const commentPoint = _board.create(
         "point",
@@ -129,6 +131,8 @@ export const commentChangeAgent: JXGChangeAgent = {
         }
         board.update();
       }
+      // other properties can be handled generically
+      objectChangeAgent.update(board, change);
     }
   },
 

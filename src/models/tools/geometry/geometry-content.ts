@@ -4,8 +4,10 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
-import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isComment } from "./jxg-comment";
+import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
+import { isPolygon, isVisibleEdge, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -14,9 +16,6 @@ import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../image-map";
-import { isPolygon, isVisibleEdge } from "./jxg-polygon";
-import { isMovableLine } from "./jxg-movable-line";
-import { isComment } from "./jxg-comment";
 
 export const kGeometryToolID = "Geometry";
 
@@ -131,12 +130,14 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
     const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
+    const clientCssClass = selected
+                            ? element.getAttribute("clientSelectedCssClass")
+                            : element.getAttribute("clientCssClass");
+    const cssClass = clientCssClass ? { cssClass: clientCssClass } : undefined;
     element.setAttribute({
               fillColor: selected ? selectedFillColor : fillColor,
               strokeColor: selected ? selectedStrokeColor : strokeColor,
-              cssClass: selected
-                ? element.getAttribute("clientSelectedCssClass")
-                : element.getAttribute("clientCssClass")
+              ...cssClass
             });
   }
 }

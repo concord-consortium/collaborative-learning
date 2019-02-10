@@ -1,9 +1,9 @@
 import { JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
+import { isCommentType } from "./jxg-comment";
 import { objectChangeAgent } from "./jxg-object";
 import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
-import { values, castArray } from "lodash";
+import { castArray, values } from "lodash";
 import * as uuid from "uuid/v4";
-import { isCommentType } from "./jxg-comment";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 

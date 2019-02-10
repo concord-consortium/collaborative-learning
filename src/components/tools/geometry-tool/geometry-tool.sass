@@ -8,18 +8,6 @@ $toolbar-width: 44px
   height: 100%
   min-height: 52px
 
-  .geometry-wrapper .comment
-    min-width: 30px
-    max-width: 250px
-    background-color: #009CDC
-    border: 1px black solid
-    border-radius: 5px
-    padding: 3px
-    cursor: pointer
-
-    &.selected
-      background-color: red
-
   .geometry-toolbar
     position: absolute
     width: $toolbar-width
@@ -120,6 +108,18 @@ $toolbar-width: 44px
       .geometry-content
         height: 100%
         outline: none
+
+        .comment
+          min-width: 30px
+          max-width: 250px
+          background-color: #009CDC
+          border: 1px black solid
+          border-radius: 5px
+          padding: 3px
+          cursor: pointer
+
+          &.selected
+            background-color: red
 
 .rotate-polygon-icon
   background-image: url("../../../assets/rotate.png")

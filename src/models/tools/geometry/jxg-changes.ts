@@ -1,7 +1,7 @@
 import { castArray } from "lodash";
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "comment" | "board" | "image" | "linkedPoint" | "movableLine" | "object" |
+export type JXGObjectType = "board" |"comment" |  "image" | "linkedPoint" | "movableLine" | "object" |
                               "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
