@@ -86,7 +86,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         [interceptPoint, slopePoint],
         {
           ...lineProps,
-          lineId,
+          id: lineId,
           withLabel: true,
           label: {
             position: "top",
