@@ -159,6 +159,7 @@ declare namespace JXG {
 
   class Polygon extends GeometryElement {
     vertices: JXG.Point[];
+    borders: JXG.Line[];
 
     findPoint: (point: JXG.Point) => number;
     removePoints: (...points: JXG.Point[]) => void;

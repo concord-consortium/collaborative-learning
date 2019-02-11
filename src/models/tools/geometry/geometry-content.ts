@@ -695,9 +695,12 @@ export const GeometryContentModel = types
 
       const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
       if (selectedSegments.length === 1) {
-        // XXX: Polygon edges have randomly generated IDs which are not consistent and so they cannot be put in changes
-        // We avoid using edge IDs by commenting on the parent polygon instead
-        return selectedSegments[0].parentPolygon;
+        // Labeling polygon edges is not supported due to unpredictable IDs. However, if the polygon has only two sides,
+        // then labeling an edge is equivalent to labeling the whole polygon.
+        const parentPoly = selectedSegments[0].parentPolygon;
+        if (parentPoly && parentPoly.borders.length === 2) {
+          return parentPoly;
+        }
       }
     }
 
