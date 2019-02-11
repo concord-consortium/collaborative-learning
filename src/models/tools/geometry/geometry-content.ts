@@ -683,21 +683,21 @@ export const GeometryContentModel = types
         return selectedObjects[0];
       }
 
-      const selectedPolygon = selectedObjects.find(isPolygon);
-      if (selectedPolygon) {
-        return selectedPolygon;
+      const selectedPolygons = selectedObjects.filter(isPolygon);
+      if (selectedPolygons.length === 1) {
+        return selectedPolygons[0];
       }
 
-      const selectedLine = selectedObjects.find(isMovableLine);
-      if (selectedLine) {
-        return selectedLine;
+      const selectedLines = selectedObjects.filter(isMovableLine);
+      if (selectedLines.length === 1) {
+        return selectedLines[0];
       }
 
-      const selectedSegment = selectedObjects.find(isVisibleEdge) as JXG.Line;
-      if (selectedSegment) {
+      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      if (selectedSegments.length === 1) {
         // XXX: Polygon edges have randomly generated IDs which are not consistent and so they cannot be put in changes
         // We avoid using edge IDs by commenting on the parent polygon instead
-        return selectedSegment.parentPolygon;
+        return selectedSegments[0].parentPolygon;
       }
     }
 

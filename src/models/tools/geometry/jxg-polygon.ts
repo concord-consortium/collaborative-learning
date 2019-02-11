@@ -7,7 +7,7 @@ import * as uuid from "uuid/v4";
 
 export const isPolygon = (v: any) => v instanceof JXG.Polygon;
 
-export const isVisibleEdge = (v: any) => (v.elType === "segment") && v.visProp.visible;
+export const isVisibleEdge = (v: any) => v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {

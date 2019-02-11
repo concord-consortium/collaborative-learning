@@ -48,7 +48,7 @@ class CommentDialog extends React.Component<IProps, IState> {
             text="OK"
             onClick={this.handleAccept}
           />
-          <Button className="nc-dialog-button" text="Cancel"  onClick={this.props.onClose}/>
+          <Button className="nc-dialog-button" text="Cancel"  onClick={this.handleCancel}/>
         </div>
       </Dialog>
     );
@@ -64,9 +64,17 @@ class CommentDialog extends React.Component<IProps, IState> {
     }
   }
 
+  private handleCancel = () => {
+    if (this.props.onClose) {
+      this.props.onClose();
+    }
+  }
+
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.keyCode === 13) {
       this.handleAccept();
+    } else if (evt.keyCode === 27) {
+      this.handleCancel();
     }
   }
 

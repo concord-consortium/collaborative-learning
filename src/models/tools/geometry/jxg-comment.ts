@@ -3,21 +3,13 @@ import { isBoard } from "./jxg-board";
 import { isMovableLine } from "./jxg-movable-line";
 import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
-import { isPolygon } from "./jxg-polygon";
+import { isPolygon, isVisibleEdge } from "./jxg-polygon";
 import { values } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
 
 export const isComment = (v: any) => isCommentType(v) && (v instanceof JXG.Text) && (v.elType === "text");
-
-export const getAnchor = (comment: JXG.Text) => {
-  if (!isComment) return;
-  const ancestors = values(comment.ancestors);
-  return ancestors.length === 1
-    ? ancestors[0]
-    : ancestors.find(elem => isMovableLine(elem) || isPolygon(elem));
-};
 
 const sharedProps = {
   strokeWidth: 1,
@@ -47,7 +39,7 @@ function getCentroid(anchor: JXG.GeometryElement) {
   if (isPoint(anchor)) {
     const coords = (anchor as JXG.Point).coords.usrCoords;
     return [coords[1], coords[2]];
-  } else if (anchor) {
+  } else if (isPolygon(anchor) || isMovableLine(anchor) || isVisibleEdge(anchor)) {
     const points = values(anchor.ancestors) as JXG.Point[];
     const center = [0.0, 0.0];
     points.forEach((point) => {
@@ -58,11 +50,10 @@ function getCentroid(anchor: JXG.GeometryElement) {
     if (len) {
       center[0] /= len;
       center[1] /= len;
+      return center;
     } else {
-      center[0] = NaN;
-      center[1] = NaN;
+      return undefined;
     }
-    return center;
   }
 }
 
