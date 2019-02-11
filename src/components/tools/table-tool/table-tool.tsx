@@ -12,7 +12,7 @@ import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
-import { cloneDeep, each } from "lodash";
+import { cloneDeep, each, sortedIndexOf } from "lodash";
 
 import "./table-tool.sass";
 
@@ -160,7 +160,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   private handleCopy = () => {
     const { dataSet } = this.state;
     if (this.gridApi && dataSet) {
-      const rowIds = this.gridApi.getSelectedNodes().map(row => row.id);
+      const sortedRowIds = this.gridApi.getSelectedNodes().map(row => row.id).sort();
+      const rowIds = dataSet.cases.map(aCase => aCase.__id__).filter(id => sortedIndexOf(sortedRowIds, id) >= 0);
       if (rowIds && rowIds.length) {
         const { clipboard } = this.stores;
         const clipData = {
