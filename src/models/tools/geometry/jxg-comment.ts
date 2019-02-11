@@ -124,12 +124,11 @@ export const commentChangeAgent: JXGChangeAgent = {
         // Element coordinates are not updated until a redraw occurs. So if redraws are suspended, and a comment or its
         // anchor has moved, the transform will be calculated from a stale position. We unsuspend updates to force a
         // refresh on coordinate positions.
-        if (board.isSuspendedUpdate) {
-          board.unsuspendUpdate();
-          obj.setPosition(JXG.COORDS_BY_USER, position);
-          board.suspendUpdate();
-        }
+        const wasSuspended = board.isSuspendedUpdate;
+        if (wasSuspended) board.unsuspendUpdate();
+        obj.setPosition(JXG.COORDS_BY_USER, position);
         board.update();
+        if (wasSuspended) board.suspendUpdate();
       }
       // other properties can be handled generically
       objectChangeAgent.update(board, change);
