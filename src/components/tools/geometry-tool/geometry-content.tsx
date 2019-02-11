@@ -8,6 +8,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import CommentDialog from "./comment-dialog";
+import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
@@ -46,6 +48,7 @@ interface IState extends SizeMeProps {
   syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
+  selectedComment?: JXG.Text;
 }
 
 interface JXGPtrEvent {
@@ -223,6 +226,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleDuplicate: this.handleDuplicate,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
+        handleCreateComment: this.handleCreateComment,
         handleDelete: this.handleDelete
       };
       this.props.onSetToolButtonHandlers(handlers);
@@ -289,6 +293,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const classes = `geometry-content ${editableClass}`;
     return ([
+      this.renderCommentEditor(),
       <div id={this.state.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -299,6 +304,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDrop={this.handleDrop} />,
       this.renderRotateHandle()
     ]);
+  }
+
+  private renderCommentEditor() {
+    const comment = this.state.selectedComment;
+    if (comment) {
+      return (
+        <CommentDialog
+          key="editor"
+          id={comment.id}
+          isOpen={this.state.selectedComment != null}
+          onAccept={this.handleUpdateComment}
+          onClose={this.closeCommentDialog}
+          content={comment.plaintext}
+        />
+      );
+    }
   }
 
   private renderRotateHandle() {
@@ -413,6 +434,41 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
       });
     }
+  }
+
+  private closeCommentDialog = () => {
+    this.setState({ selectedComment: undefined });
+  }
+
+  // TODO: Create comments after the dialog is complete + prevent empty comments
+  private handleCreateComment = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const commentAnchor = content.getCommentAnchor(board);
+      const activeComment = content.getOneSelectedComment(board);
+      if (commentAnchor) {
+        this.applyChange(() => {
+            const elems = content.addComment(board, commentAnchor.id);
+            const comment = elems && elems.find(elem => isComment(elem)) as JXG.Text;
+            if (comment) {
+              this.handleCreateText(comment);
+              this.setState({selectedComment: comment});
+            }
+        });
+      } else if (activeComment) {
+        this.setState({ selectedComment: activeComment });
+      }
+    }
+  }
+
+  private handleUpdateComment = (commentId: string, text: string = "") => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      content.updateComment(board, commentId, { text });
+    }
+    this.setState({ selectedComment: undefined });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -746,6 +802,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
     }
+    else if (isComment(elt)) {
+      this.handleCreateText(elt as JXG.Text);
+    }
   }
 
   private applyChange(change: () => void) {
@@ -872,6 +931,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
 
       this.applyChange(() => content.updateObjects(board, ids, props));
+    }
+  }
+
+  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+
+     // only create a change object if there's actually a change
+    if (usrDiff[1] || usrDiff[2]) {
+      const id = dragTarget.id;
+      const dragStart = this.dragPts[id].initial;
+      if (dragStart) {
+        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
+        this.applyChange(() => content.updateComment(board, id, { position: newUsrCoords }));
+      }
     }
   }
 
@@ -1096,9 +1171,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
         vertices.forEach(vertex => content.selectElement(vertex.id));
 
-        if (isMovableLine(line)) {
-          content.selectElement(line.id);
-        }
+        content.selectElement(line.id);
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect
       // else if (hasSelectionModifier(evt)) {
@@ -1187,14 +1260,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
-      let selectVertices = false;
+      let selectPolygon = false;
       // let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
         if (board && !hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        selectVertices = true;
+        selectPolygon = true;
         this.lastSelectDown = evt;
       }
       // we can't prevent JSXGraph from dragging the polygon, so don't deselect
@@ -1203,18 +1276,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       //     deselectVertices = true;
       //   }
       // }
-      each(polygon.ancestors, point => {
-        const pt = point as JXG.Point;
-        if (board && !inVertex) {
-          if (selectVertices) {
+      if (selectPolygon) {
+        geometryContent.selectElement(polygon.id);
+        each(polygon.ancestors, point => {
+          const pt = point as JXG.Point;
+          if (board && !inVertex) {
             geometryContent.selectElement(pt.id);
           }
-          // we can't prevent JSXGraph from dragging the polygon, so don't deselect
-          // else if (deselectVertices) {
-          //   geometryContent.deselectElement(pt.id);
-          // }
-        }
-      });
+        });
+      }
 
       if (!readOnly) {
         // point handles vertex drags
@@ -1265,5 +1335,59 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateVertexAngle = (angle: JXG.Angle) => {
     updateVertexAngle(angle);
+  }
+
+  private handleCreateText = (text: JXG.Text) => {
+    const handlePointerDown = (evt: any) => {
+      const content = this.getContent();
+      const { board } = this.state;
+      if (isComment(text)) {
+        const coords = copyCoords(text.coords);
+        if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+          this.setState({selectedComment: text});
+          this.lastPointDown = undefined;
+        } else {
+          this.lastPointDown = { evt, coords };
+        }
+
+        if (board) {
+          if (!hasSelectionModifier(evt)) {
+            content.deselectAll(board);
+          }
+
+          content.selectElement(text.id);
+        }
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly) return;
+
+      const id = text.id;
+      let dragEntry = this.dragPts[id];
+      if (!dragEntry) {
+        dragEntry = this.dragPts[id] = { initial: copyCoords(text.coords) };
+      }
+      dragEntry.final = copyCoords(text.coords);
+    };
+
+    const handlePointerUp = (evt: any) => {
+      const id = text.id;
+      const dragEntry = this.dragPts[id];
+      if (!dragEntry) { return; }
+
+      if (!this.props.readOnly) {
+        dragEntry.final = copyCoords(text.coords);
+        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
+                                                     dragEntry.initial.usrCoords) as number[];
+        this.endDragComment(evt, text, usrDiff);
+      }
+
+      delete this.dragPts[id];
+    };
+
+    text.on("down", handlePointerDown);
+    text.on("drag", handleDrag);
+    text.on("up", handlePointerUp);
   }
 }

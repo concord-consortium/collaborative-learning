@@ -98,6 +98,7 @@ declare namespace JXG {
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
+    descendants: { [id: string]: GeometryElement };
     parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
@@ -116,6 +117,7 @@ declare namespace JXG {
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
     on: (event: string, handler: EventHandler) => void;
+    _set: (key: string, value: string) => void;
   }
 
   const JSXGraph: {
@@ -133,6 +135,13 @@ declare namespace JXG {
   class Line extends GeometryElement {
     point1: JXG.Point;
     point2: JXG.Point;
+    parentPolygon?: JXG.Polygon;
+  }
+
+  class Text extends CoordsElement {
+    plaintext: string;
+    size: [number, number]; // [width, height]
+    setText: (content: string) => void;
   }
 
   const Math: {
@@ -150,6 +159,7 @@ declare namespace JXG {
 
   class Polygon extends GeometryElement {
     vertices: JXG.Point[];
+    borders: JXG.Line[];
 
     findPoint: (point: JXG.Point) => number;
     removePoints: (...points: JXG.Point[]) => void;

@@ -12,6 +12,7 @@ export interface IToolButtonHandlers {
   handleDuplicate: () => void;
   handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
+  handleCreateComment: () => void;
   handleDelete: () => void;
 }
 

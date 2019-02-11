@@ -7,7 +7,7 @@ import * as uuid from "uuid/v4";
 
 export const isPolygon = (v: any) => v instanceof JXG.Polygon;
 
-export const isVisibleEdge = (v: any) => (v.elType === "segment") && v.visProp.visible;
+export const isVisibleEdge = (v: any) => v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -110,8 +110,22 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const parents = (change.parents || [])
                       .map(id => board.objects[id as string])
                       .filter(pt => pt != null);
-    const props = assign({ id: uuid(), hasInnerPoints: true }, change.properties);
-    return parents.length ? board.create("polygon", parents, props) : undefined;
+    const props = assign({
+      id: uuid(),
+      hasInnerPoints: true,
+      clientFillColor: "#00FF00",
+      clientSelectedFillColor: "#00FF00"
+    }, change.properties);
+    const poly = parents.length ? board.create("polygon", parents, props) : undefined;
+    if (poly) {
+      const segments = getPolygonEdges(poly);
+      segments.forEach(seg => {
+        seg.setAttribute({strokeColor: "#0000FF"});
+        seg._set("clientStrokeColor", "#0000FF");
+        seg._set("clientSelectedStrokeColor", "#0000FF");
+      });
+    }
+    return poly;
   },
 
   // update can be handled generically

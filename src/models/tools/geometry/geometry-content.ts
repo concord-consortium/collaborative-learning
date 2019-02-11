@@ -4,8 +4,10 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
-import { isFreePoint, kPointDefaults } from "./jxg-point";
-import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isComment } from "./jxg-comment";
+import { isMovableLine } from "./jxg-movable-line";
+import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
+import { isPolygon, isVisibleEdge, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -128,9 +130,14 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
     const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
     const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
+    const clientCssClass = selected
+                            ? element.getAttribute("clientSelectedCssClass")
+                            : element.getAttribute("clientCssClass");
+    const cssClass = clientCssClass ? { cssClass: clientCssClass } : undefined;
     element.setAttribute({
               fillColor: selected ? selectedFillColor : fillColor,
-              strokeColor: selected ? selectedStrokeColor : strokeColor
+              strokeColor: selected ? selectedStrokeColor : strokeColor,
+              ...cssClass
             });
   }
 }
@@ -437,6 +444,27 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
+    function addComment(board: JXG.Board, anchorId: string) {
+      const change: JXGChange = {
+        operation: "create",
+        target: "comment",
+        properties: {id: uuid(), anchor: anchorId }
+      };
+      const elems = _applyChange(board, change);
+      return elems ? elems as JXG.GeometryElement[] : undefined;
+    }
+
+    function updateComment(board: JXG.Board, commentId: string, properties: JXGProperties) {
+      const change: JXGChange = {
+        operation: "update",
+        target: "comment",
+        targetID: commentId,
+        properties
+      };
+      const comment = _applyChange(undefined, change);
+      return comment ? comment as JXG.Text : undefined;
+    }
+
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
@@ -591,6 +619,11 @@ export const GeometryContentModel = types
       return selectedIds;
     }
 
+    function getOneSelectedComment(board: JXG.Board) {
+      const comments = self.selectedObjects(board).filter(el => isComment(el));
+      return comments.length === 1 ? comments[0] as JXG.Text : undefined;
+    }
+
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
       const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
@@ -642,6 +675,33 @@ export const GeometryContentModel = types
         });
       });
       return properties;
+    }
+
+    function getCommentAnchor(board: JXG.Board) {
+      const selectedObjects = self.selectedObjects(board);
+      if (selectedObjects.length === 1 && isPoint(selectedObjects[0])) {
+        return selectedObjects[0];
+      }
+
+      const selectedPolygons = selectedObjects.filter(isPolygon);
+      if (selectedPolygons.length === 1) {
+        return selectedPolygons[0];
+      }
+
+      const selectedLines = selectedObjects.filter(isMovableLine);
+      if (selectedLines.length === 1) {
+        return selectedLines[0];
+      }
+
+      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      if (selectedSegments.length === 1) {
+        // Labeling polygon edges is not supported due to unpredictable IDs. However, if the polygon has only two sides,
+        // then labeling an edge is equivalent to labeling the whole polygon.
+        const parentPoly = selectedSegments[0].parentPolygon;
+        if (parentPoly && parentPoly.borders.length === 2) {
+          return parentPoly;
+        }
+      }
     }
 
     function copySelection(board: JXG.Board) {
@@ -807,9 +867,13 @@ export const GeometryContentModel = types
         updateAxisLabels,
         findObjects,
         getOneSelectedPolygon,
+        getOneSelectedComment,
+        getCommentAnchor,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,
+        addComment,
+        updateComment,
 
         suspendSync() {
           ++suspendCount;
