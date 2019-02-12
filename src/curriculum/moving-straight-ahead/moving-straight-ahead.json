@@ -1675,7 +1675,7 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [E{
+                "tiles": [{
                   "content": {
                     "type": "Text",
                     "text": "How can you solve equations of the form c = ax+ b graphically or symbolically? \nHow can you solve equations like ax + b = dx + e graphically or symbolically? "
