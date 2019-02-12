@@ -1236,7 +1236,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "For each of the situations below, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.\n\n  • What is the number of gold coins in each pouch? \n\n  • How can you check your answer?\n\nWrite down your steps so that someone else could follow your steps to find the number of coins in a pouch."
+                      "text": "For each of the situations below, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.\n\n  • What is the number of gold coins in each pouch? \n\n  • How can you check your answer?\n\nWrite down your steps so that someone else could follow your steps to find the number of coins in a pouch.\n\n1."
                     }
                   },
                   {
@@ -1247,8 +1247,20 @@
                   },
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "\n2."
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "\n3."
                     }
                   },
                   {
@@ -1259,14 +1271,32 @@
                   },
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "\n4."
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_4_350w.png"
                     }
                   },
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "\n5."
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_5_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "\n6."
                     }
                   },
                   {
@@ -1355,7 +1385,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. \n\nThe equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n\nWhat do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation??\n  • divide the left-hand side of the original equation by 5??\n  • multiply the right-hand side of the original equation by 4?\n  \nThe picture below shows a situation from Problem 3.1."
+                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. \n\nThe equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n\nWhat do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation?\n  • divide the left-hand side of the original equation by 5?\n  • multiply the right-hand side of the original equation by 4?\n  \nThe picture below shows a situation from Problem 3.1."
                     }
                   },
                   {
@@ -1386,14 +1416,32 @@
                   },
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "\n1."
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
                     }
                   },
                   {
                     "content": {
+                      "type": "Text",
+                      "text": "\n2."
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "\n2."
                     }
                   },
                   {
@@ -1561,7 +1609,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In Problem 2.3, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. Cn represents the costs of the No-Shrink Tee. Cm represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two t-shirt plans are equal."
+                      "text": "In Problem 2.3, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. Cn represents the costs of the No-Shrink Tee. Cm represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two T-shirt plans are equal."
                     }
                   },
                   {
@@ -1573,7 +1621,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• What information do the coordinates of the point of intersection of the two lines give you about this situation?\n  • Show how you could use the two equations to find the coordinates of the point of intersection of the two lines. That is, for what number of T-shirts n is Cm = Cn or    49+n = 4.5n?\n\nBusinesses are usually interested in making a profit. But to make a profit they have to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. After a company determines their expenses, they decide on a selling price. The money a company gets from selling an item is called the revenue or income. The difference between the income and expenses is the profit. The following is a situation where expenses, income, and profit occur. "
+                      "text": "• What information do the coordinates of the point of intersection of the two lines give you about this situation?\n  • Show how you could use the two equations to find the coordinates of the point of intersection of the two lines. That is, for what number of T-shirts n is C_m = C_n or    49+n = 4.5n?\n\nBusinesses are usually interested in making a profit. But to make a profit they have to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. After a company determines their expenses, they decide on a selling price. The money a company gets from selling an item is called the revenue or income. The difference between the income and expenses is the profit. The following is a situation where expenses, income, and profit occur. "
                     }
                   }
                 ]
@@ -1627,7 +1675,7 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
+                "tiles": [E{
                   "content": {
                     "type": "Text",
                     "text": "How can you solve equations of the form c = ax+ b graphically or symbolically? \nHow can you solve equations like ax + b = dx + e graphically or symbolically? "
@@ -1710,7 +1758,7 @@
                     "content": {
 
                       "type": "Text",
-                      "text": "Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. \n\nCarpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. \n\n  • Twice the rise plus the run for each step should be between 24 and 26 inches.\n  • The rise plus the run for each step should be between 17 and 19 inches.  \n\nThe steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the diagram below. "
+                      "text": "Introduction: Problem 4.1\n\nClimbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. \n\nCarpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. \n\n  • Twice the rise plus the run for each step should be between 24 and 26 inches.\n  • The rise plus the run for each step should be between 17 and 19 inches.  \n\nThe steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the diagram below. "
                     }
                   },
                   {
@@ -2043,7 +2091,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0oC or 32oF. Water boils at 100oC and 212oF.\n\nJ: An equation that relates amount of money Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."
+                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0\u2103 or 32\u2109. Water boils at 100\u2103 and 212\u2109.\n\nJ: An equation that relates amount of money Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."
                     }
                   }
                 ]
