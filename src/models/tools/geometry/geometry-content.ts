@@ -206,7 +206,7 @@ export const GeometryContentModel = types
       return self.selectedIds
                   .filter(id => {
                     const elt = board.objects[id];
-                    return elt && !elt.getAttribute("fixed");
+                    return elt && !elt.getAttribute("fixed") && !elt.getAttribute("clientUndeletable");
                   });
     },
     canUndo() {

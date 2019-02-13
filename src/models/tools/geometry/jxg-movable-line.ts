@@ -59,7 +59,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         {
           id: `${lineId}-point1`,
           ...pointProps,
-          ...pt1
+          ...pt1,
+          clientUndeletable: true
         }
       );
       const slopePoint = (board as JXG.Board).create(
@@ -68,7 +69,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         {
           id: `${lineId}-point2`,
           ...pointProps,
-          ...pt2
+          ...pt2,
+          clientUndeletable: true
         }
       );
       const overrides = {
