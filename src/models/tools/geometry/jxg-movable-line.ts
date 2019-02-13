@@ -10,6 +10,10 @@ export const isMovableLine = (v: any) => {
 
 export const isVisibleMovableLine = (v: any) => isMovableLine(v) && v.visProp.visible;
 
+export const isMovableLineControlPoint = (v: any) => {
+  return v instanceof JXG.Point && v.getAttribute("clientType") === kMovableLineType;
+};
+
 export const kMovableLineType = "movableLine";
 
 const gray = "#CCCCCC";
