@@ -1,7 +1,7 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
-import { castArray, each, find } from "lodash";
+import { castArray, each, find, uniqWith, isEqual } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { GeometryContentModelType } from "./geometry-content";
 
@@ -26,6 +26,41 @@ export const handleControlPointClick = (point: JXG.Point, content: GeometryConte
       }
     });
   }
+};
+
+export const isMovableLineEquation = (v: any) => {
+  return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
+};
+
+// Returns the two points where the given line intersects the given board, sorted from left to right
+export const getBoundingBoxIntersections = (slope: number, intercept: number, board: JXG.Board) => {
+  const boundingBox = board.attr.boundingbox;
+  const leftX = boundingBox[0];
+  const topY = boundingBox[1];
+  const rightX = boundingBox[2];
+  const bottomY = boundingBox[3];
+  const topIntersection = [solveForX(slope, intercept, topY), topY];
+  const rightIntersection = [rightX, solveForY(slope, intercept, rightX)];
+  const bottomIntersection = [solveForX(slope, intercept, bottomY), bottomY];
+  const leftIntersection = [leftX, solveForY(slope, intercept, leftX)];
+  // There will be duplicate intersection points if the line intersects a corner
+  const uniqueIntersections = uniqWith(
+    [topIntersection, rightIntersection, bottomIntersection, leftIntersection],
+    isEqual
+  );
+  return uniqueIntersections
+    .filter(pt => {
+      return pt[0] >= leftX && pt[0] <= rightX && pt[1] >= bottomY && pt[1] <= topY;
+    })
+    .sort((a, b) => a[0] - b[0]) as number[][];
+};
+
+export const solveForY = (slope: number, intercept: number, x: number) => {
+  return slope * x + intercept;
+};
+
+export const solveForX = (slope: number, intercept: number, y: number) => {
+  return (y - intercept) / slope;
 };
 
 export const kMovableLineType = "movableLine";
@@ -111,13 +146,16 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           label: {
             position: "top",
             anchorY: "bottom",
-            fontSize: 15
+            fontSize: 15,
+            offset: [25, 0],
+            clientType: kMovableLineType
           },
           ...line,
           ...overrides
         });
+      const label = movableLine && movableLine.label;
 
-      return [movableLine, interceptPoint, slopePoint];
+      return [movableLine, interceptPoint, slopePoint, label];
     }
   },
 

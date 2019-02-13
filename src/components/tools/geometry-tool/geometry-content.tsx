@@ -25,11 +25,11 @@ import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
-import { isVisibleMovableLine, isMovableLine,
-         isMovableLineControlPoint,
-         handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
+import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineEquation,
+  handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import LineDialog from "./line-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -51,6 +51,7 @@ interface IState extends SizeMeProps {
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
+  selectedLine?: JXG.Line;
   showInvalidTableDataAlert?: boolean;
 }
 
@@ -302,6 +303,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const classes = `geometry-content ${editableClass}`;
     return ([
       this.renderCommentEditor(),
+      this.renderLineEditor(),
       <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -326,6 +328,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateComment}
           onClose={this.closeCommentDialog}
           content={comment.plaintext}
+        />
+      );
+    }
+  }
+
+  private renderLineEditor() {
+    const line = this.state.selectedLine;
+    if (line) {
+      return (
+        <LineDialog
+          key="editor"
+          isOpen={line != null}
+          onAccept={this.handleUpdateLine}
+          onClose={this.closeLineDialog}
+          line={line}
         />
       );
     }
@@ -473,6 +490,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedComment: undefined });
   }
 
+  private closeLineDialog = () => {
+    this.setState({ selectedLine: undefined });
+  }
+
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -502,6 +523,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       content.updateComment(board, commentId, { text });
     }
     this.setState({ selectedComment: undefined });
+  }
+
+  private handleUpdateLine = (line: JXG.Line, point1: [number, number], point2: [number, number]) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    const ids = [line.point1.id, line.point2.id];
+    const props = [{position: point1}, {position: point2}];
+    this.applyChange(() => content.updateObjects(board, ids, props));
+    this.setState({ selectedLine: undefined });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -839,7 +869,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
     }
-    else if (isComment(elt)) {
+    else if (isComment(elt) || isMovableLineEquation(elt)) {
       this.handleCreateText(elt as JXG.Text);
     }
   }
@@ -1398,6 +1428,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
 
           content.selectElement(text.id);
+        }
+      } else if (isMovableLineEquation(text)) {
+        if (board) {
+          const parentLine = values(text.ancestors)[0] as JXG.Line;
+          if (parentLine) {
+            this.setState({selectedLine: parentLine});
+          }
         }
       }
     };

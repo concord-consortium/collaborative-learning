@@ -55,6 +55,7 @@ declare namespace JXG {
     objectsList: GeometryElement[];
 
     create: (elementType: string, parents?: any, attributes?: any) => any;
+    hasPoint: (x: number, y: number) => boolean;
     removeObject: (object: GeometryElement) => JXG.Board;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
@@ -138,6 +139,8 @@ declare namespace JXG {
     point1: JXG.Point;
     point2: JXG.Point;
     parentPolygon?: JXG.Polygon;
+    getRise: () => number;
+    getSlope: () => number;
   }
 
   class Text extends CoordsElement {

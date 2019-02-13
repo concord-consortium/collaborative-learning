@@ -59,3 +59,9 @@
   font-size: 12pt;
 }
 
+.nc-dialog-error {
+  padding: 1em 1em 0 1em;
+  font-size: 12pt;
+  color: red;
+}
+
