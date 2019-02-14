@@ -18,6 +18,7 @@ const imageToolTile = new ImageToolTile;
 
 context('Tests for graph and table integration', function(){
     it('setup 1', function(){
+    it('setup 1 - connect table to graph before adding points', function(){
         leftNav.openToWorkspace('Extra Workspace');
         canvas.addTableTile();
         canvas.addGraphTile();
