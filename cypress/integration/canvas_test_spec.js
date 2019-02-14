@@ -336,28 +336,26 @@ context('Test Canvas', function(){
         });
     });
 
-    // context('Dragging elements from different locations to canvas', function(){
-    //    describe('Drag element from left nav', function(){
-    //        it('will drag an image from left nav to canvas',()=>{
-    //            leftNav.openToWorkspace('Extra Workspace');
-    //            cy.wait(1000);
-    //            leftNav.openLeftNavTab('Introduction');
-    //            leftNav.getLeftNavExpandedSpace().find('.image-tool').first()
-    //                .trigger('mousedown')
-    //                .trigger('dragstart');
-    //            // canvas.canvas()
-    //            cy.get('.app')
-    //                .trigger('mousemove', {pageX:725, pageY:450, force:true})
-    //                .trigger('mouseup', {force:true});
-    //
-    //            cy.get('.document-content').first().should('exist')
-    //                .trigger('drag', 450, 350, {force:true})
-    //                .trigger('drop', {force:true});
-    //
-    //            leftNav.closeLeftNavTab('Introduction')
-    //        })
-    //    });
-    // });
+    context('Dragging elements from different locations to canvas', function(){
+       describe('Drag element from left nav', function(){
+           const dataTransfer = new DataTransfer;
+
+           it('will drag an image from left nav to canvas',()=>{
+               leftNav.openToWorkspace('Extra Workspace');
+               cy.wait(1000);
+               leftNav.openLeftNavTab('Introduction');
+               leftNav.getLeftNavExpandedSpace().find('.image-tool').first()
+                   .trigger('dragstart', {dataTransfer});
+               // cy.get('.single-workspace .canvas .drop-feedback').first()
+               cy.get('.single-workspace .canvas .document-content').first()
+                   .trigger('drop', {force: true, dataTransfer});
+               leftNav.getLeftNavExpandedSpace().find('.image-tool').first()
+                   .trigger('dragend');
+               leftNav.closeLeftNavTab('Introduction');
+               imageToolTile.getImageTile().first().should('exist');
+           })
+       });
+    });
 
     context('delete elements from canvas', function(){
         it('will delete elements from canvas', function(){
