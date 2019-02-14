@@ -55,7 +55,7 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
     const supportsVertexAngle = selectedPoint && canSupportVertexAngle(selectedPoint);
     const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
     const disableVertexAngle = readOnly || !supportsVertexAngle;
-    const disableDelete = readOnly || !board || !content.hasSelection();
+    const disableDelete = readOnly || !board || !content.getDeletableSelectedIds(board).length;
     const disableDuplicate = readOnly || !board || !content.getOneSelectedPolygon(board);
     const disableComment = !content.getCommentAnchor(board) &&
                             !content.getOneSelectedComment(board);
