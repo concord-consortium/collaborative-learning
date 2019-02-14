@@ -16,6 +16,7 @@ interface IProps extends IBaseProps {
   onMovableLineClick: () => void;
   onCommentClick: () => void;
   isCommentDisabled: boolean;
+  onSettingsClick: () => void;
 }
 interface IState {
   showSettings: boolean;
@@ -91,6 +92,11 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
                                   { onClick: this.props.onDeleteClick,
                                     selected: false,
                                     disabled: this.props.isDeleteDisabled,
+                                    hidden: false })}
+          {this.renderToolButton("Settings", "settings",
+                                  { onClick: this.props.onSettingsClick,
+                                    selected: false,
+                                    disabled: false,
                                     hidden: false })}
         </div>
         { this.state.showSettings

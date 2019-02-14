@@ -14,6 +14,7 @@ export interface IToolButtonHandlers {
   handleCreateMovableLine: () => void;
   handleCreateComment: () => void;
   handleDelete: () => void;
+  handleOpenSettings: () => void;
 }
 
 export interface IGeometryProps extends SizeMeProps {

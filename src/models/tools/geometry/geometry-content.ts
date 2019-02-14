@@ -357,12 +357,26 @@ export const GeometryContentModel = types
       const scaledHeight = height / (scale || 1);
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
-      const [xMin, , , yMin] = board.attr.boundingbox;
+      const [xMin, , , yMin] = board.getBoundingBox();
       const newXMax = scaledWidth / unitX + xMin;
       const newYMax = scaledHeight / unitY + yMin;
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
       board.update();
+    }
+
+    function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
+      const width = board.canvasWidth;
+      const height = board.canvasHeight;
+      const unitX = width / (xMax - xMin);
+      const unitY = height / (yMax - yMin);
+      const change: JXGChange = {
+        operation: "update",
+        target: "board",
+        targetID: board.id,
+        properties: { boardScale: {xMin, yMin, unitX, unitY} }
+      };
+      _applyChange(undefined, change);
     }
 
     function updateScale(board: JXG.Board, scale: number) {
@@ -880,6 +894,7 @@ export const GeometryContentModel = types
       actions: {
         initializeBoard,
         destroyBoard,
+        rescaleBoard,
         resizeBoard,
         updateScale,
         addChange,

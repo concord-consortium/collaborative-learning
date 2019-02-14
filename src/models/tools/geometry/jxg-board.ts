@@ -111,23 +111,26 @@ export const boardChangeAgent: JXGChangeAgent = {
   },
 
   update: (board: JXG.Board, change: JXGChange) => {
-    if (!change.targetID || !change.properties) { return; }
-    const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
-    const props = Array.isArray(change.properties) ? change.properties : [change.properties];
-    ids.forEach((id, index) => {
-      const brd = JXG.boards[id];
-      const brdProps = index < props.length ? props[index] : props[0];
-      if (brd && brdProps) {
-        each(brdProps, (value, prop) => {
-          switch (prop) {
-            case "boundingBox":
-              brd.setBoundingBox(value);
-              break;
-          }
-        });
-        brd.update();
+    if (!change.properties) { return; }
+    const props = change.properties as JXGProperties;
+    if (board) {
+      const boardScale = props.boardScale;
+      if (boardScale) {
+        const width = board.canvasWidth;
+        const height = board.canvasHeight;
+        const unitX = boardScale.unitX as number;
+        const unitY = boardScale.unitY as number;
+        const xMin = boardScale.xMin as number;
+        const yMin = boardScale.yMin as number;
+        if (isFinite(xMin) && isFinite(yMin) && isFinite(unitX) && isFinite(unitY)) {
+          const xUnits = width / unitX;
+          const yUnits = height / unitY;
+          const bbox = [xMin, yMin + yUnits, xMin + xUnits, yMin] as [number, number, number, number];
+          board.setBoundingBox(bbox);
+        }
       }
-    });
+      board.update();
+    }
   },
 
   delete: (board: JXG.Board, change: JXGChange) => {

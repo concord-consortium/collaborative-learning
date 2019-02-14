@@ -74,6 +74,7 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
         onMovableLineClick={handlers.handleCreateMovableLine}
         onCommentClick={handlers.handleCreateComment}
         isCommentDisabled={disableComment}
+        onSettingsClick={handlers.handleOpenSettings}
       />
     );
   }

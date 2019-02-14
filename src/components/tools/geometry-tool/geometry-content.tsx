@@ -29,6 +29,7 @@ import { isVisibleMovableLine, isMovableLine,
          handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import SettingsDialog from "./settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -50,6 +51,7 @@ interface IState extends SizeMeProps {
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
+  settingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -165,7 +167,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {
           syncedChanges: 0,
           disableRotate: false,
-          redoStack: []
+          redoStack: [],
+          settingsOpen: false,
         };
 
   private elementId: string;
@@ -233,7 +236,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleDelete: this.handleDelete
+        handleDelete: this.handleDelete,
+        handleOpenSettings: this.handleOpenSettings
       };
       onSetToolButtonHandlers(handlers);
     }
@@ -300,6 +304,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const classes = `geometry-content ${editableClass}`;
     return ([
       this.renderCommentEditor(),
+      this.renderSettingsEditor(),
       <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -323,6 +328,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateComment}
           onClose={this.closeCommentDialog}
           content={comment.plaintext}
+        />
+      );
+    }
+  }
+
+  private renderSettingsEditor() {
+    const { board, settingsOpen } = this.state;
+    if (board) {
+      return (
+        <SettingsDialog
+          key="editor"
+          board={board}
+          isOpen={settingsOpen}
+          onAccept={this.handleUpdateSettings}
+          onClose={this.closeSettings}
         />
       );
     }
@@ -446,6 +466,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedComment: undefined });
   }
 
+  private closeSettings = () => {
+    this.setState({ settingsOpen: false });
+  }
+
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -468,6 +492,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleOpenSettings = () => {
+    this.setState({ settingsOpen: true });
+  }
+
   private handleUpdateComment = (commentId: string, text: string = "") => {
     const { board } = this.state;
     const content = this.getContent();
@@ -475,6 +503,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       content.updateComment(board, commentId, { text });
     }
     this.setState({ selectedComment: undefined });
+  }
+
+  private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+    }
+    this.setState({ settingsOpen: false });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {

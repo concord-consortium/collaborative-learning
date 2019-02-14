@@ -63,6 +63,7 @@ declare namespace JXG {
 
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => JXG.Board;
+    getBoundingBox: () => [number, number, number, number];
     setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => JXG.Board;
     showInfobox: (value: boolean) => JXG.Board;
     update: (drag?: JXG.GeometryElement) => JXG.Board;
