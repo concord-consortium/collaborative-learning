@@ -8,7 +8,7 @@ export const isMovableLine = (v: any) => {
   return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
 };
 
-export const isVisibleMovableLine = (v: any) => isMovableLine && v.visProp.visible;
+export const isVisibleMovableLine = (v: any) => isMovableLine(v) && v.visProp.visible;
 
 export const kMovableLineType = "movableLine";
 
