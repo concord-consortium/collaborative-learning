@@ -234,6 +234,12 @@
                     },
                     "content": {
                       "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -10],
+                          "axisRange": [62, 155]
+                        }
+                      },
                       "objects": [
                         {
                           "type": "point",
@@ -278,6 +284,12 @@
                     },
                     "content": {
                       "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -1],
+                          "axisRange": [11, 16]
+                        }
+                      },
                       "objects": [
                         {
                           "type": "point",
@@ -520,7 +532,8 @@
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5]
+                          "axisMin": [-1, -10],
+                          "axisRange": [11, 140]
                         }
                       },
                       "objects": [
@@ -820,7 +833,8 @@
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5]
+                          "axisMin": [-20, -40],
+                          "axisRange": [56, 130]
                         }
                       },
                       "objects": [
@@ -861,6 +875,12 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-20, -40],
+                          "axisRange": [56, 130]
+                        }
+                      },
                       "objects": [
                         {
                           "type": "movableLine",
@@ -1007,6 +1027,12 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -2],
+                          "axisRange": [20, 22]
+                        }
+                      },
                       "objects": [
                         {
                           "type": "movableLine",
@@ -1168,14 +1194,14 @@
                   },
                   {
                     "layout": {
-                      "height": 300
+                      "height": 320
                     },
                     "content": {
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [0, 0],
-                          "axisMax": [50, 50]
+                          "axisMin": [-4, -4],
+                          "axisRange": [55, 60]
                         }
                       },
                       "objects": [
