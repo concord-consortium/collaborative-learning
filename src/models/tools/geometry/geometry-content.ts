@@ -591,14 +591,17 @@ export const GeometryContentModel = types
     // that should also be considered selected, i.e. all of whose
     // ancestors are selected.
     function getSelectedIdsAndChildren(board: JXG.Board) {
-      const selectedIds = self.selectedIds;
+      // list of selected ids in order of creation
+      const selectedIds = board.objectsList
+                               .map(obj => obj.id)
+                               .filter(id => self.isSelected(id));
       const children: { [id: string]: JXG.GeometryElement } = {};
       // identify children (e.g. polygons) that may be selected as well
       selectedIds.forEach(id => {
         const obj = board.objects[id];
         if (obj) {
           each(obj.childElements, child => {
-            if (child && isCopyableChild(child)) {
+            if (child && !self.isSelected(child.id) && isCopyableChild(child)) {
               children[child.id] = child;
             }
           });
