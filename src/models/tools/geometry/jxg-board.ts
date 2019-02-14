@@ -1,9 +1,10 @@
-import { JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import "./jxg";
+import { goodTickValue } from "../../../utilities/graph-utils";
 import { assign, each, find } from "lodash";
 
-// matches curriculum images
-export const kGeometryDefaultPixelsPerUnit = 18.3;
+export const kGeometryProtoSize = 480;
+export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
 export const kGeometryDefaultAxisMin = -1;
 export const isBoard = (v: any) => v instanceof JXG.Board;
 export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
@@ -23,6 +24,14 @@ export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel:
   if (xAxis) xAxis.name = xAxisLabel;
   if (yAxis) yAxis.name = yAxisLabel;
   if (xAxis || yAxis) board.update();
+}
+
+export function getTickValues(pixPerUnit: number) {
+  // we use the range over a prototypical size (e.g. 480px) to determine tick values
+  const protoRange = kGeometryProtoSize / pixPerUnit;
+  const [majorTickDistance, minorTicks] = goodTickValue(protoRange);
+  const minorTickDistance = majorTickDistance / (minorTicks + 1);
+  return [majorTickDistance, minorTicks, minorTickDistance];
 }
 
 function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
@@ -49,8 +58,14 @@ export const boardChangeAgent: JXGChangeAgent = {
             showNavigation: false,
             minimizeReflow: "none"
           };
+    const changeProps = change.properties && change.properties as JXGProperties;
+    const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
+    const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
+    const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
+    const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
     // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-    const overrides = { axis: false, grid: true };
+    const overrides = { axis: false, keepaspectratio: unitX === unitY,
+                        grid: { gridX: xMinorTickDistance, gridY: yMinorTickDistance } };
     const props = combineProperties(domElementID, defaults, change.properties, overrides);
     const board = isBoard(boardDomId) ? boardDomId as JXG.Board : JXG.JSXGraph.initBoard(domElementID, props);
     const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
@@ -59,12 +74,12 @@ export const boardChangeAgent: JXGChangeAgent = {
                                 label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]}
                   });
     xAxis.removeAllTicks();
-    board.create("ticks", [xAxis, 5], {
+    board.create("ticks", [xAxis, xMajorTickDistance], {
                   strokeColor: "#bbb",
                   majorHeight: -1,
                   drawLabels: true,
-                  label: { offset: [-8, -10] },
-                  minorTicks: 4,
+                  label: { anchorX: "middle", offset: [-8, -10] },
+                  minorTicks: xMinorTicks,
                   drawZero: true
                 });
     const yAxis = board.create("axis", [ [0, 0], [0, 1] ], {
@@ -73,12 +88,12 @@ export const boardChangeAgent: JXGChangeAgent = {
                                 label: {fontSize: 13, position: "rt", offset: [15, 0]}
                   });
     yAxis.removeAllTicks();
-    board.create("ticks", [yAxis, 5], {
+    board.create("ticks", [yAxis, yMajorTickDistance], {
                   strokeColor: "#bbb",
                   majorHeight: -1,
                   drawLabels: true,
-                  label: { offset: [-16, -1] },
-                  minorTicks: 4,
+                  label: { anchorX: "right", offset: [-4, -1] },
+                  minorTicks: yMinorTicks,
                   drawZero: false
                 });
     return board;
