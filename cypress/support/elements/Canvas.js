@@ -1,10 +1,12 @@
 import GraphToolTile from './GraphToolTile'
 import ImageToolTile from './ImageToolTile'
 import DrawToolTile from './DrawToolTile'
+// import TableToolTile from './TableToolTile'
 
 let graphToolTile = new GraphToolTile,
     imageToolTile = new ImageToolTile,
     drawToolTile = new DrawToolTile;
+    // tableToolTile = new TableToolTile;
 
 class Canvas{
 
@@ -182,7 +184,7 @@ class Canvas{
                 drawToolTile.getDrawTile().last().click({force:true});
                 break;
             // case 'table':
-            //     this.getTableTile().last().click({force:true});
+            //     tableToolTile.getTableTile().last().click({force:true});
             //     break;
         }
         this.getDeleteTool().click({force: true});
