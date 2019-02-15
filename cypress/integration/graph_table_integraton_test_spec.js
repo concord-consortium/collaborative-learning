@@ -42,22 +42,18 @@ context('Tests for graph and table integration', function(){
     it('will change the name of the axis in the table', function(){
 
     });
-    // it('will add a')
+    it('will add a polygon directly onto the graph', function(){
+
+    });
+    it('will add and angle to a point created from a table', function(){
+
+    });
+    
     it('will delete a point in the table', function(){
 
     });
+    it('will add an image to a graph that is connected to a table', function(){
 
-    it('will add an image to the canvas', function() {
-        const dataTransfer = new DataTransfer;
-
-        leftNav.openLeftNavTab('Introduction');
-        cy.get('#leftNavContainer0 .image-tool-image').first()
-            .trigger('dragstart', {dataTransfer});
-        cy.get('.single-workspace .canvas .drop-feedback').first()
-            .trigger('drop', {force: true, dataTransfer});
-        cy.get('#leftNavContainer0 .image-tool-image').first()
-            .trigger('dragend');
-        leftNav.closeLeftNavTab('Introduction')
-        imageToolTile.getImageTile().first().should('exist');
     });
+    it('will delete the connected table')
 });
