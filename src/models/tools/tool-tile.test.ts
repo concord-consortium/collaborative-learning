@@ -33,12 +33,11 @@ describe("ToolTileModel", () => {
   it("returns UnknownToolModel for unrecognized snapshots", () => {
     const type = "foo";
     const content: any = { type, bar: "baz" };
-    const contentStr = JSON.stringify({ bar: "baz" });
+    const contentStr = JSON.stringify(content);
     let toolTile = ToolTileModel.create({ content });
     expect(toolTile.content.type).toBe(kUnknownToolID);
     const toolContent: UnknownContentModelType = toolTile.content as any;
-    expect(toolContent.originalType).toBe(content.type);
-    expect(toolContent.originalContent).toBe(contentStr);
+    expect(toolContent.original).toBe(contentStr);
 
     toolTile = ToolTileModel.create(getSnapshot(toolTile));
     expect(toolTile.content.type).toBe(kUnknownToolID);

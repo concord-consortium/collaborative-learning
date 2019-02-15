@@ -4,17 +4,15 @@ export const kUnknownToolID = "Unknown";
 
 export const UnknownContentModel = types
   .model("UnknownTool", {
-    type: types.literal(kUnknownToolID),
-    originalType: types.string,
-    originalContent: types.maybe(types.string)
+    type: types.optional(types.literal(kUnknownToolID), kUnknownToolID),
+    original: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    const { type, ...others }: { type: string } = snapshot;
+    const type = snapshot && snapshot.type;
     return type && (type !== kUnknownToolID)
             ? {
               type: kUnknownToolID,
-              originalType: type,
-              originalContent: others && JSON.stringify(others)
+              original: JSON.stringify(snapshot)
             }
             : snapshot;
   });

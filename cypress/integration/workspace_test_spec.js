@@ -93,7 +93,7 @@ context('Test the overall workspace', function(){
 
             //Shows student as disconnected and will not load the introduction canvas
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
-            cy.wait(1000);
+            cy.wait(2000);
             leftNav.openToWorkspace(tab1);
             cy.wait(1000);
             canvas.getCanvasTitle().should('contain',tab1);

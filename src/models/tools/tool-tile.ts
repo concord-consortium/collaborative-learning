@@ -1,9 +1,14 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { ToolContentUnion, findMetadata } from "./tool-types";
+import { findMetadata, ToolContentUnion, ToolContentUnionType } from "./tool-types";
 import * as uuid from "uuid/v4";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
+
+export function createToolTileModelFromContent(content: ToolContentUnionType) {
+  // cast required as of MST ~3.8 -- seems unnecessary
+  return ToolTileModel.create({ content } as any);
+}
 
 export const ToolTileModel = types
   .model("ToolTile", {
