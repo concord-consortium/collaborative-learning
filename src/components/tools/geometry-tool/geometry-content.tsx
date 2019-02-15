@@ -1091,7 +1091,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
           // If a line is selected and a control point is pressed, deselect the line so the line slope can be changed
           if (isMovableLineControlPoint(point)) {
-            const line = values(point.descendants).find(el => isMovableLine(el));
+            const line = find(point.descendants, el => isMovableLine(el));
             if (line) {
               geometryContent.deselectElement(line.id);
               each(line.ancestors, (parentPoint, parentId) => {
