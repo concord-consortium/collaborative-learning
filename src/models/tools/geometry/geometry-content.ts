@@ -7,7 +7,7 @@ import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAx
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
-import { isPolygon, isVisibleEdge, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -203,11 +203,11 @@ export const GeometryContentModel = types
   }))
   .views(self => ({
     getDeletableSelectedIds(board: JXG.Board) {
-      return self.selectedIds
-                  .filter(id => {
-                    const elt = board.objects[id];
-                    return elt && !elt.getAttribute("fixed") && !elt.getAttribute("clientUndeletable");
-                  });
+      // returns the ids in creation order
+      return board.objectsList
+                  .filter(obj => self.isSelected(obj.id) &&
+                          !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
+                  .map(obj => obj.id);
     },
     canUndo() {
       const hasUndoableChanges = self.changes.length > 1;
@@ -795,8 +795,8 @@ export const GeometryContentModel = types
     function deleteSelection(board: JXG.Board) {
       const selectedIds = self.getDeletableSelectedIds(board);
 
-      // remove points from polygons if possible
-      removePointsToBeDeletedFromPolygons(board, selectedIds);
+      // remove points from polygons; identify additional objects to delete
+      selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
 
       self.deselectAll(board);
       board.showInfobox(false);

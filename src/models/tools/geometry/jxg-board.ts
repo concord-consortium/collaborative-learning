@@ -34,6 +34,17 @@ export function getTickValues(pixPerUnit: number) {
   return [majorTickDistance, minorTicks, minorTickDistance];
 }
 
+export const kReverse = true;
+export function sortByCreation(board: JXG.Board, ids: string[], reverse: boolean = false) {
+  const indices: { [id: string]: number } = {};
+  board.objectsList.forEach((obj, index) => {
+    indices[obj.id] = index;
+  });
+  ids.sort(reverse
+            ? (a, b) => indices[b] - indices[a]
+            : (a, b) => indices[a] - indices[b]);
+}
+
 function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
   const elt = document.getElementById(domElementID);
   const eltBounds = elt && elt.getBoundingClientRect();

@@ -2,7 +2,7 @@ import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
 import { getPointsForVertexAngle } from "./jxg-polygon";
-import { assign, each, values } from "lodash";
+import { assign, castArray, each, values } from "lodash";
 import * as uuid from "uuid/v4";
 
 export const isVertexAngle = (v: any) =>
@@ -19,7 +19,7 @@ export const canSupportVertexAngle = (vertex: JXG.Point): boolean => {
 export const getVertexAngle = (vertex: JXG.Point): JXG.Angle | undefined => {
   let vertexAngle: JXG.Angle | undefined;
   each(vertex.childElements, child => {
-    if ((child.elType === "angle") && (child.getAttribute("clientType") === "vertexAngle")) {
+    if (isVertexAngle(child)) {
       const childAngle = child as JXG.Angle;
       if (childAngle.point1.id === vertex.id) {
         vertexAngle = childAngle;
@@ -83,6 +83,25 @@ export const vertexAngleChangeAgent: JXGChangeAgent = {
   // update can be handled generically
   update: objectChangeAgent.update,
 
-  // delete can be handled generically
-  delete: objectChangeAgent.delete
+  delete: (board: JXG.Board, change: JXGChange) => {
+    const ids = castArray(change.targetID);
+
+    // Identify dots used to define the angle, which would otherwise
+    // get orphaned when deleting the angle.
+    const dotIds: string[] = [];
+    ids.forEach(id => {
+      const obj = board.objects[id];
+      if (isVertexAngle(obj)) {
+        const angle = obj as JXG.Angle;
+        if (angle.dot && isPoint(angle.dot)) {
+          dotIds.push(angle.dot.id);
+        }
+      }
+    });
+
+    // add the dot IDs to the list of objects to delete
+    const { targetID, ...others } = change;
+    const _change = { targetID: [...ids, ...dotIds], ...others };
+    objectChangeAgent.delete(board, _change);
+  }
 };
