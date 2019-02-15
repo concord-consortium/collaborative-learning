@@ -80,12 +80,12 @@ class LineDialog extends React.Component<IProps, IState> {
     const { line } = this.props;
     const slope = parseFloat(this.state.slope);
     const intercept = parseFloat(this.state.intercept);
-    if (isNaN(slope) || isNaN(intercept)) {
-      return "Please enter a valid integer or decimal for slope and intercept.";
+    if (!isFinite(slope) || !isFinite(intercept)) {
+      return "Please enter a valid number for slope and intercept.";
     }
     const intersections = getBoundingBoxIntersections(slope, intercept, line.board);
     if (intersections.length < 2) {
-      return "Line would fall offscreen; please edit the slope or intercept.";
+      return "Line would not be visible; please edit the slope or intercept.";
     }
   }
 
@@ -93,7 +93,7 @@ class LineDialog extends React.Component<IProps, IState> {
     const { line } = this.props;
     const slope = parseFloat(this.state.slope);
     const intercept = parseFloat(this.state.intercept);
-    if (!isNaN(slope) && !isNaN(intercept)) {
+    if (isFinite(slope) && isFinite(intercept)) {
       const board = line.board;
       const intersections = getBoundingBoxIntersections(slope, intercept, board);
       if (!intersections.length) return undefined;
