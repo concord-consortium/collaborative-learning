@@ -19,14 +19,31 @@ import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
 
+const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
-function getBoardBounds(axisMin?: JXGCoordPair) {
+function getAxisUnits(protoRange: JXGCoordPair | undefined) {
+  const pRange = protoRange && castArray(protoRange);
+  if (!pRange || !pRange.length) return [kGeometryDefaultPixelsPerUnit, kGeometryDefaultPixelsPerUnit];
+  // a single value is treated as the y-range
+  if (pRange.length === 1) {
+    const [yProtoRange] = pRange;
+    const yUnit = kGeometryDefaultHeight / yProtoRange;
+    return [yUnit, yUnit];
+  }
+  else {
+    const [xProtoRange, yProtoRange] = pRange as JXGCoordPair;
+    return [kGeometryDefaultWidth / xProtoRange, kGeometryDefaultHeight / yProtoRange];
+  }
+}
+
+function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
   const [xAxisMin, yAxisMin] = axisMin || [kGeometryDefaultAxisMin, kGeometryDefaultAxisMin];
-  const xAxisMax = 30;
-  const yAxisMax = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit - yAxisMin;
+  const [xPixelsPerUnit, yPixelsPerUnit] = getAxisUnits(protoRange);
+  const xAxisMax = xAxisMin + kGeometryDefaultWidth / xPixelsPerUnit;
+  const yAxisMax = yAxisMin + kGeometryDefaultHeight / yPixelsPerUnit;
   return [xAxisMin, yAxisMax, xAxisMax, yAxisMin];
 }
 
@@ -34,11 +51,13 @@ function defaultGeometryBoardChange(overrides?: JXGProperties) {
   const change: JXGChange = {
     operation: "create",
     target: "board",
-    properties: assign({
+    properties: {
                   axis: true,
                   boundingBox: getBoardBounds(),
-                  grid: {}  // defaults to 1-unit gridlines
-                }, overrides)
+                  unitX: kGeometryDefaultPixelsPerUnit,
+                  unitY: kGeometryDefaultPixelsPerUnit,
+                  ...overrides
+                }
   };
   return change;
 }
@@ -330,12 +349,13 @@ export const GeometryContentModel = types
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
       const scaledWidth = width / (scale || 1);
       const scaledHeight = height / (scale || 1);
-      const unitXY = kGeometryDefaultPixelsPerUnit;
+      const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
+      const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       const [xMin, , , yMin] = board.attr.boundingbox;
-      const newXMax = scaledWidth / unitXY + xMin;
-      const newYMax = scaledHeight / unitXY + yMin;
+      const newXMax = scaledWidth / unitX + xMin;
+      const newYMax = scaledHeight / unitY + yMin;
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
-      board.setBoundingBox([xMin, newYMax, newXMax, yMin], true);
+      board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
       board.update();
     }
 
@@ -927,6 +947,7 @@ export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
 interface IBoardImportProps {
   axisMin?: JXGCoordPair;
+  axisRange?: JXGCoordPair;
   [prop: string]: any;
 }
 interface IBoardImportSpec {
@@ -974,9 +995,10 @@ function preprocessImportFormat(snapshot: any) {
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
-    const { axisMin, ...others } = properties || {} as IBoardImportProps;
-    const boundingBox = getBoardBounds(axisMin);
-    changes.push(defaultGeometryBoardChange({ boundingBox, ...others }));
+    const { axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
+    const boundingBox = getBoardBounds(axisMin, axisRange);
+    const [unitX, unitY] = getAxisUnits(axisRange);
+    changes.push(defaultGeometryBoardChange({ unitX, unitY, boundingBox, ...others }));
   }
 
   const changes: JXGChange[] = [];
