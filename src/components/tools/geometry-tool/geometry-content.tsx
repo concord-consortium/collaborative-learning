@@ -23,8 +23,10 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
-import { isVisibleMovableLine, isMovableLine } from "../../../models/tools/geometry/jxg-movable-line";
+import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
+import { isVisibleMovableLine, isMovableLine,
+         isMovableLineControlPoint,
+         handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -1086,6 +1088,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (geometryContent.isSelected(id)) {
           if (hasSelectionModifier(evt)) {
             geometryContent.deselectElement(id);
+          }
+
+          if (isMovableLineControlPoint(point)) {
+            handleControlPointClick(point, geometryContent);
           }
         }
         // click on unselected element
