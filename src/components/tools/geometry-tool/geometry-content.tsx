@@ -872,7 +872,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       content.metadata.selection.forEach((isSelected, id) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
-        if (pt && isSelected) {
+        if (pt && isSelected && !pt.getAttribute("fixed")) {
           this.dragPts[id] = {
             initial: copyCoords(pt.coords),
             snapToGrid: pt.getAttribute("snapToGrid")
@@ -1071,6 +1071,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
+      const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
@@ -1083,7 +1084,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       }
       else {
-        this.dragPts = { [id]: { initial: coords } };
+        this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
         this.lastPointDown = { evt, coords };
 
         // click on selected element - deselect if appropriate modifier key is down
@@ -1105,7 +1106,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           geometryContent.selectElement(id);
         }
 
-        if (!this.props.readOnly) {
+        if (isPointDraggable) {
           this.beginDragSelectedPoints(evt, point);
         }
 
@@ -1114,7 +1115,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handleDrag = (evt: any) => {
-      if (this.props.readOnly) return;
+      if (this.props.readOnly || point.getAttribute("fixed")) return;
 
       const id = point.id;
       let dragEntry = this.dragPts[id];
