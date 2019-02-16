@@ -161,6 +161,11 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   }
 }
 
+function isUndoableChange(change: JXGChange) {
+  if ((change.operation === "delete") && (change.target === "tableLink")) return false;
+  return true;
+}
+
 export const GeometryContentModel = types
   .model("GeometryContent", {
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
@@ -214,6 +219,7 @@ export const GeometryContentModel = types
       if (!hasUndoableChanges) return false;
       const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
       const lastChangeParsed: JXGChange = lastChange && safeJsonParse(lastChange);
+      if (!isUndoableChange(lastChangeParsed)) return false;
       const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
       if (!lastChangeLinks) return true;
       const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
