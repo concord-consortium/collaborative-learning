@@ -19,6 +19,15 @@ interface IState {
 export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
   private groupSelect: HTMLSelectElement|null;
+  private _isMounted: boolean;
+
+  public componentDidMount() {
+    this._isMounted = true;
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
+  }
 
   public render() {
     const {db, user, groups} = this.stores;
@@ -99,8 +108,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private selectGroup = (groupId: string) => {
     this.stores.db.joinGroup(groupId)
-      .then(() => this.setState({error: undefined}))
-      .catch((err) => this.setState({error: err.toString()}));
+      .then(() => { if (this._isMounted) this.setState({error: undefined}); })
+      .catch((err) => { if (this._isMounted) this.setState({error: err.toString()}); });
   }
 
   private handleChooseExistingGroup = (group: GroupModelType) => {
