@@ -76,7 +76,7 @@ export class HeaderComponent extends BaseComponent<IProps, {}> {
         className={`${className} ${direction}`}
         title={title}
       >
-        {user.initials}
+        <div className="initials">{user.initials}</div>
       </div>
     );
   }
