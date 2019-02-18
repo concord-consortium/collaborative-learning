@@ -102,7 +102,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   private indexValueGetter = (params: ValueGetterParams) => {
     const content = this.getContent();
-    return content.isLinked && (params.data.id !== LOCAL_ROW_ID)
+    return content && content.isLinked && (params.data.id !== LOCAL_ROW_ID)
             ? content.getRowLabel(params.node.rowIndex)
             : "";
   }
@@ -124,9 +124,14 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const attrCount = dataSet.attributes.length;
     const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
     const yAttr = attrCount > 1 ? dataSet.attributes[1] : undefined;
-    const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : 0;
-    const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : 0;
-    return [x, y];
+    // convert non-numeric values to 0
+    const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : 0;
+    const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : 0;
+    const xNum = xValue == null ? 0 : Number(xValue);
+    const yNum = yValue == null ? 0 : Number(yValue);
+    const xFinite = isFinite(xNum) ? xNum : 0;
+    const yFinite = isFinite(yNum) ? yNum : 0;
+    return [xFinite, yFinite];
   }
 
   private getTableActionLinks(): ILinkProperties {
