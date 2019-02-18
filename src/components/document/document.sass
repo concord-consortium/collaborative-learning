@@ -41,9 +41,10 @@
       padding: 1px 0
       display: flex
 
-      .icon-download
+      .action.icon.icon-download
         transform: rotate(180deg)
         transform-origin: 50% 50%
+        padding-bottom: 2px
 
       .mode
         border-top-right-radius: $border-radius
@@ -74,11 +75,13 @@
           color: $color1-4
 
       .icon
+        box-sizing: content-box
         background-color: $color1-3
         color: $color1-7
-        height: 30px
-        width: 30px
+        width: 36px
+        height: 34px
         padding: $half-padding
+        padding-top: 2px
         margin-left: $half-margin
         cursor: pointer
 
@@ -120,11 +123,12 @@
 
         svg
           display: inline-block
+          box-sizing: content-box
           padding: $half-padding
-          margin: $quarter-margin $quarter-margin 0 0
+          margin: 1px $quarter-margin 0 0
           color: $color1-5
-          width: 25px
-          height: 25px
+          width: 24px
+          height: 24px
           cursor: pointer
 
           &.show
@@ -169,11 +173,12 @@
           display: block
 
       .icon
+        box-sizing: content-box
         background-color: $color1-3
         color: $color1-7
-        height: 30px
-        width: 30px
-        padding: $half-padding
+        width: 36px
+        height: 34px
+        padding: 0 $half-padding
         margin-left: $half-margin
         border-bottom-right-radius: $border-radius
         cursor: pointer
