@@ -87,6 +87,8 @@ context('Tests for graph and table integration', function(){
 
         });
         it('will delete the connected table', function(){
+    });
+    it('will add an image to a graph that is connected to a table', function(){
 
         })
     })
