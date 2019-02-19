@@ -328,11 +328,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board, disableRotate } = this.state;
     const selectedPolygon = board && !disableRotate && !this.props.readOnly
                               ? this.getContent().getOneSelectedPolygon(board) : undefined;
+    const rotatablePolygon = selectedPolygon && selectedPolygon.vertices.every(pt => !pt.getAttribute("fixed"))
+                              ? selectedPolygon : undefined;
     return (
       <RotatePolygonIcon
         key="rotate-polygon-icon"
         board={board}
-        polygon={selectedPolygon}
+        polygon={rotatablePolygon}
         scale={this.props.scale}
         onRotate={this.handleRotatePolygon} />
     );

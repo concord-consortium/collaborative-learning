@@ -19,6 +19,7 @@ declare namespace JXG {
     point3: GeometryElement;
     pointsquare: GeometryElement;
     radiuspoint: GeometryElement;
+    dot?: GeometryElement;
 
     Value: () => number;
   }

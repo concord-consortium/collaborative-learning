@@ -1,6 +1,7 @@
 import { JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
+import { isVertexAngle } from "./jxg-vertex-angle";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 import { assign, each, filter, find, values } from "lodash";
 import * as uuid from "uuid/v4";
@@ -74,8 +75,12 @@ export function getPointsForVertexAngle(vertex: JXG.Point) {
           : [p2, p1, p0];
 }
 
-export function removePointsToBeDeletedFromPolygons(board: JXG.Board, ids: string[]) {
-  // identify points that are vertices of polygons
+export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
+  const polygonsToDelete: { [id: string]: JXG.Polygon } = {};
+  const anglesToDelete: { [id: string]: JXG.GeometryElement } = {};
+  const moreIdsToDelete: string[] = [];
+
+  // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
   const polygonVertexMap: { [id: string]: string[] } = {};
   ids.forEach(id => {
     const elt = board.objects[id];
@@ -89,12 +94,20 @@ export function removePointsToBeDeletedFromPolygons(board: JXG.Board, ids: strin
         }
       });
     }
+    else if (isPolygon(elt)) {
+      polygonsToDelete[id] = elt as JXG.Polygon;
+    }
+    else if (isVertexAngle(elt)) {
+      anglesToDelete[id] = elt;
+    }
   });
-  // remove points from polygons if possible
+
+  // Consider each polygon with vertices to be deleted
   each(polygonVertexMap, (vertexIds, polygonId) => {
     const polygon = board.objects[polygonId] as JXG.Polygon;
     const vertexCount = polygon.vertices.length - 1;
     const deleteCount = vertexIds.length;
+    // remove points from polygons if possible
     if (vertexCount - deleteCount >= 2) {
       vertexIds.forEach(id => {
         const pt = board.objects[id] as JXG.Point;
@@ -102,7 +115,31 @@ export function removePointsToBeDeletedFromPolygons(board: JXG.Board, ids: strin
         polygon.removePoints(pt);
       });
     }
+    // otherwise, the polygon should be deleted as well
+    else {
+      if (!polygonsToDelete[polygon.id]) {
+        polygonsToDelete[polygon.id] = polygon;
+        moreIdsToDelete.push(polygon.id);
+      }
+    }
   });
+
+  // identify angle labels to delete
+  each(polygonsToDelete, polygon => {
+    polygon.vertices.forEach(vertex => {
+      each(vertex.childElements, child => {
+        if (isVertexAngle(child)) {
+          if (!anglesToDelete[child.id]) {
+            anglesToDelete[child.id] = child;
+            moreIdsToDelete.push(child.id);
+          }
+        }
+      });
+    });
+  });
+
+  // return ids of additional objects to delete
+  return moreIdsToDelete;
 }
 
 export const polygonChangeAgent: JXGChangeAgent = {

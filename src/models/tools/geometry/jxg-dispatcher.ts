@@ -1,5 +1,5 @@
 import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType } from "./jxg-changes";
-import { boardChangeAgent, isBoard } from "./jxg-board";
+import { boardChangeAgent, isBoard, kReverse, sortByCreation } from "./jxg-board";
 import { commentChangeAgent } from "./jxg-comment";
 import { imageChangeAgent } from "./jxg-image";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -8,6 +8,7 @@ import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
 import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray } from "lodash";
 
 type OnChangeApplied = (board: JXG.Board | undefined, change: JXGChange) => void;
@@ -78,30 +79,33 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
     const props = Array.isArray(change.properties)
                     ? change.properties[index]
                     : change.properties;
-    return dispatchChange(board, {
-                            operation: "update",
-                            target,
-                            targetID: id,
-                            parents: change.parents,
-                            properties: props,
-                            links: change.links
-                          });
+    dispatchChange(board, {
+                    operation: "update",
+                    target,
+                    targetID: id,
+                    parents: change.parents,
+                    properties: props,
+                    links: change.links
+                  });
   });
 }
 
 function applyDeleteObjects(board: JXG.Board, change: JXGChange) {
-  const ids = castArray(change.targetID);
+  const ids = castArrayCopy(change.targetID);
+  sortByCreation(board, ids, kReverse);
   ids.forEach(id => {
     const obj = id && board.objects[id];
     const target = obj
             ? obj.getAttribute("clientType") || obj.elType as JXGObjectType
             : "object";
-    return dispatchChange(board, {
-                            operation: "delete",
-                            target,
-                            targetID: id,
-                            links: change.links
-                          });
+    if (obj) {
+      dispatchChange(board, {
+                      operation: "delete",
+                      target,
+                      targetID: id,
+                      links: change.links
+                    });
+    }
   });
 }
 

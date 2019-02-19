@@ -1,4 +1,6 @@
+import { sortByCreation, kReverse } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
+import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
 
 // Inexplicably, we occasionally encounter JSXGraph objects with null
@@ -37,7 +39,9 @@ export const objectChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     if (!change.targetID) { return; }
-    const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
+    const ids = castArrayCopy(change.targetID);
+    sortByCreation(board, ids, kReverse);
+    // remove objects in reverse order of creation
     ids.forEach((id) => {
       const obj = board.objects[id] as JXG.GeometryElement;
       if (obj) {
