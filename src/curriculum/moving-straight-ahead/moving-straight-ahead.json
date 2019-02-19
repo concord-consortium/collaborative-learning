@@ -533,7 +533,7 @@
                       "board": {
                         "properties": {
                           "axisMin": [-1, -10],
-                          "axisRange": [11, 140]
+                          "axisRange": [55, 590]
                         }
                       },
                       "objects": [
@@ -1090,7 +1090,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "1. Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point. \n\n2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you? \n\n3. All of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n\n   (-7, 13)    (1.2, ?)    (?, -4)\n\n • Find the missing coordinate. Explain how you found it.\n  • Write a question you could answer by finding the missing coordinate.\n\n4. For the relationship y = 5x - 3 \n   a. find the value of y when x = 7?\n   b. find the value of x when y = 23? \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."
+                    "text": "1. Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point. \n\n2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you? \n\n3. All of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n\n   (-7, 13)    (1.2, ?)    (?, -4)\n\n • Find the missing coordinate. Explain how you found it.\n • Write a question you could answer by finding the missing coordinate.\n\n4. For the relationship y = 5x - 3 \n   a. find the value of y when x = 7?\n   b. find the value of x when y = 23? \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."
                   }
                 }]
               },
@@ -1182,14 +1182,20 @@
                           "values": [0, 1, 2, 3, 4, 20, 25, 30]
                         },
                         {
-                          "name": "y",
+                          "name": "A",
                           "type": "number",
                           "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 200
+                      "height": 240
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_graph_350w.png"
                     }
                   },
                   {
@@ -1467,7 +1473,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "\n2."
+                      "text": "\n3."
                     }
                   },
                   {
@@ -1488,18 +1494,6 @@
                     "content": {
                       "type": "Text",
                       "text": "A. Use your equations from the Initial Challenge to find the number of gold coins in each pouch. Record your steps for finding the coins in each pouch. Check your answers. \n\nB. \n  1. A messenger has 6 pouches and 27 coins. There is a total of $105. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.\n\n 2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. Will the solution for each equation be the same? Explain."}
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
-                      }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "   "
-                    }
                   }
                 ]
               },
@@ -1661,7 +1655,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n         E = 825 + 3.25n\n\nThe income I for selling n cakes is given by the equation: \n\n         I = 8.20\n\nHow many cakes does Fabian need to sell in order to start making a profit?"
+                      "text": "At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n         E = 825 + 3.25n\n\nThe income I for selling n cakes is given by the equation: \n\n         I = 8.20 n\n\nHow many cakes does Fabian need to sell in order to start making a profit?"
                     }
                   }
                 ]
@@ -1916,8 +1910,37 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_4_2_In_negslope_350w.png"
+                      "type": "Text",
+                      "text": "Line with Negative Slope"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 200
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -5],
+                          "axisRange": [6, 6]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [1, 4]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [4,2]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
@@ -1942,10 +1965,39 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/moving-straight-ahead/images/MSA_4_2_In_posslope_350w.png"
+                      "type": "Text",
+                      "text": "Line with Positive Slope"
                     }
-                  }
+                  },
+                  {
+                    "layout": {
+                      "height": 200
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -5],
+                          "axisRange": [6, 6]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [2, 2]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [5, 4]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
                 ]
               },
               "supports": []
