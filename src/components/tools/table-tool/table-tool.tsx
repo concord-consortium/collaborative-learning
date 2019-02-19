@@ -6,7 +6,7 @@ import { IMenuItemFlags } from "./table-header-menu";
 import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { ILinkProperties, IRowLabel, ITableLinkProperties, TableContentModelType
+import { canonicalizeValue, ILinkProperties, ITableLinkProperties, TableContentModelType
         } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
@@ -127,11 +127,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     // convert non-numeric values to 0
     const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : 0;
     const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : 0;
-    const xNum = xValue == null ? 0 : Number(xValue);
-    const yNum = yValue == null ? 0 : Number(yValue);
-    const xFinite = isFinite(xNum) ? xNum : 0;
-    const yFinite = isFinite(yNum) ? yNum : 0;
-    return [xFinite, yFinite];
+    return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
   }
 
   private getTableActionLinks(): ILinkProperties {
