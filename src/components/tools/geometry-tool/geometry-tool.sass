@@ -32,6 +32,7 @@ $toolbar-width: 44px
         border-radius: 0 $half-border-radius 0 0
 
         .graph-tile
+          box-sizing: content-box
           width: 50%
           border: solid 2px white
           border-width: 0 2px 2px 0
@@ -51,6 +52,7 @@ $toolbar-width: 44px
           fill: white
 
       .button
+        box-sizing: content-box
         width: 36px
         height: 34px
         margin: 2px
@@ -96,7 +98,7 @@ $toolbar-width: 44px
   .geometry-wrapper
     position: absolute
     height: 100%
-    left: $toolbar-width - 1
+    left: $toolbar-width
     right: 0
 
     &.read-only

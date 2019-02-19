@@ -12,7 +12,7 @@
 
   .tool
     width: $workspace-toolbar-width
-    height: $workspace-toolbar-width
+    height: $workspace-toolbar-width - 2px
     background-color: $color3
     display: flex
     justify-content: center
@@ -22,9 +22,12 @@
     font-weight: bold
     margin-bottom: -$border-width
     border: $border-width solid $border-color
+    border-right-width: 0
     cursor: pointer
 
     .icon
+      width: 36px
+      height: 34px
       color: $color3-1
       pointer-events: none
 

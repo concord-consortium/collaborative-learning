@@ -75,7 +75,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <svg key="download" className={`icon icon-download`}
+                            ? <svg key="download" className={`action icon icon-download`}
                                     onClick={this.handleDownloadTileJson}>
                                 <use xlinkHref={`#icon-publish`} />
                               </svg>
@@ -89,7 +89,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`icon icon-publish`} data-test="publish-icon"
+              <svg key="publish" className={`action icon icon-publish`} data-test="publish-icon"
                    onClick={this.handlePublishWorkspace}>
                 <use xlinkHref={`#icon-publish`} />
               </svg>,
