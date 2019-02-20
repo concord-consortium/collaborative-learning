@@ -6,8 +6,9 @@ import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXG
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
-import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
+import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
 import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
+import { isLinkedPoint } from "./jxg-table-link";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -756,8 +757,11 @@ export const GeometryContentModel = types
         const obj = board.objects[id];
         const props = properties[id];
         if (obj) {
-          let x: number;
-          let y: number;
+          // make any final adjustments to properties
+          if (isLinkedPoint(obj)) {
+            // copies of linked points should snap
+            assign(props, { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit });
+          }
           const change: JXGChange = {
                   operation: "create",
                   properties: { ...props, id: newIds[id], name: obj.name }
@@ -775,6 +779,8 @@ export const GeometryContentModel = types
               }
               break;
             case "point":
+              let x: number;
+              let y: number;
               [ , x, y] = (obj as JXG.Point).coords.usrCoords;
               assign(change, {
                 target: "point",
