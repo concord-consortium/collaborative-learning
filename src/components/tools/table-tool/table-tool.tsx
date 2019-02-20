@@ -6,8 +6,8 @@ import { IMenuItemFlags } from "./table-header-menu";
 import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { canonicalizeValue, ILinkProperties, ITableLinkProperties, TableContentModelType
-        } from "../../../models/tools/table/table-content";
+import { canonicalizeValue, getRowLabel, ILinkProperties, ITableLinkProperties,
+          TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -22,6 +22,7 @@ interface IProps {
 
 // all properties are optional
 interface IPartialState {
+  metadata?: TableMetadataModelType;
   dataSet?: IDataSet;
   syncedChanges?: number;
   prevContent?: TableContentModelType;
@@ -46,6 +47,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const newState: IPartialState = {};
     if (content !== state.prevContent) {
       newState.prevContent = tableContent;
+      newState.metadata = tableContent.metadata;
     }
     if (state.syncedChanges < tableContent.changes.length) {
       tableContent.applyChanges(state.dataSet, state.syncedChanges);
@@ -101,9 +103,9 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private indexValueGetter = (params: ValueGetterParams) => {
-    const content = this.getContent();
-    return content && content.isLinked && (params.data.id !== LOCAL_ROW_ID)
-            ? content.getRowLabel(params.node.rowIndex)
+    const { metadata } = this.state;
+    return metadata && metadata.isLinked && (params.data.id !== LOCAL_ROW_ID)
+            ? getRowLabel(params.node.rowIndex)
             : "";
   }
 

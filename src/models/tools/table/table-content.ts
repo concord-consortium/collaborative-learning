@@ -28,6 +28,10 @@ export function canonicalizeValue(value: number | string | undefined) {
   return isFinite(num) ? num : 0;
 }
 
+export function getRowLabel(index: number, prefix: string = "p") {
+  return `${prefix}${index + 1}`;
+}
+
 export interface ITransferCase {
   id: string;
   label?: string;
@@ -77,6 +81,11 @@ export const TableMetadataModel = types
     id: types.string,
     linkedGeometries: types.array(types.string)
   })
+  .views(self => ({
+    get isLinked() {
+      return self.linkedGeometries.length > 0;
+    }
+  }))
   .actions(self => ({
     addLinkedGeometry(id: string) {
       if (self.linkedGeometries.indexOf(id) < 0) {
@@ -145,7 +154,7 @@ export const TableContentModel = types
       return self.metadata.linkedGeometries.length > 0;
     },
     getRowLabel(index: number) {
-      return `p${index + 1}`;
+      return getRowLabel(index);
     }
   }))
   .views(self => ({
