@@ -61,6 +61,16 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
   return assign(defaults, otherProps, overrides);
 }
 
+export function guessUserDesiredBoundingBox(board: JXG.Board) {
+  const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
+  const unitX = board.canvasWidth / (xMax - xMin);
+  const unitY = board.canvasHeight / (yMax - yMin);
+  const xBufferRange = kAxisBuffer / unitX;
+  const yBufferRange = kAxisBuffer / unitY;
+
+  return [xMin + xBufferRange, yMax - yBufferRange, xMax - xBufferRange, yMin + yBufferRange];
+}
+
 function addAxes(board: JXG.Board, unitX: number, unitY: number) {
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
@@ -132,8 +142,8 @@ export const boardChangeAgent: JXGChangeAgent = {
         const xMin = boardScale.xMin - xBuffer;
         const yMin = boardScale.yMin - yBuffer;
         if (isFinite(xMin) && isFinite(yMin) && isFinite(unitX) && isFinite(unitY)) {
-          const xRange = width / unitX + (xBuffer * 2);
-          const yRange = height / unitY + (yBuffer * 2);
+          const xRange = width / unitX;
+          const yRange = height / unitY;
           const bbox = [xMin, yMin + yRange, xMin + xRange, yMin] as [number, number, number, number];
           board.setBoundingBox(bbox);
           board.objectsList.forEach(el => {

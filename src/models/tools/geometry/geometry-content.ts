@@ -3,7 +3,8 @@ import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelTy
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
-import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
+import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels,
+  kAxisBuffer } from "./jxg-board";
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
@@ -366,8 +367,8 @@ export const GeometryContentModel = types
     }
 
     function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
-      const width = board.canvasWidth;
-      const height = board.canvasHeight;
+      const width = board.canvasWidth - kAxisBuffer * 2;
+      const height = board.canvasHeight - kAxisBuffer * 2;
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
       const change: JXGChange = {

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Button, Dialog } from "@blueprintjs/core";
 import { round } from "lodash";
+import { guessUserDesiredBoundingBox } from "../../../models/tools/geometry/jxg-board";
 
 interface IProps {
   board: JXG.Board;
@@ -15,14 +16,13 @@ interface IState {
   yMax: string;
 }
 
-export default
-class SettingsDialog extends React.Component<IProps, IState> {
-  public boundingBox = this.props.board.getBoundingBox();
+export default class SettingsDialog extends React.Component<IProps, IState> {
+  public boundingBox = guessUserDesiredBoundingBox(this.props.board);
   public state = {
-            xMin: JXG.toFixed(this.props.board.getBoundingBox()[0], 1),
-            yMax: JXG.toFixed(this.props.board.getBoundingBox()[1], 1),
-            xMax: JXG.toFixed(this.props.board.getBoundingBox()[2], 1),
-            yMin: JXG.toFixed(this.props.board.getBoundingBox()[3], 1)
+            xMin: JXG.toFixed(this.boundingBox[0], 1),
+            yMax: JXG.toFixed(this.boundingBox[1], 1),
+            xMax: JXG.toFixed(this.boundingBox[2], 1),
+            yMin: JXG.toFixed(this.boundingBox[3], 1)
           };
 
   public render() {
