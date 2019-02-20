@@ -6,7 +6,7 @@ import { IMenuItemFlags } from "./table-header-menu";
 import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { ILinkProperties, IRowLabel, ITableLinkProperties, TableContentModelType
+import { canonicalizeValue, ILinkProperties, ITableLinkProperties, TableContentModelType
         } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
@@ -102,7 +102,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   private indexValueGetter = (params: ValueGetterParams) => {
     const content = this.getContent();
-    return content.isLinked && (params.data.id !== LOCAL_ROW_ID)
+    return content && content.isLinked && (params.data.id !== LOCAL_ROW_ID)
             ? content.getRowLabel(params.node.rowIndex)
             : "";
   }
@@ -124,9 +124,10 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const attrCount = dataSet.attributes.length;
     const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
     const yAttr = attrCount > 1 ? dataSet.attributes[1] : undefined;
-    const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : 0;
-    const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : 0;
-    return [x, y];
+    // convert non-numeric values to 0
+    const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : 0;
+    const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : 0;
+    return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
   }
 
   private getTableActionLinks(): ILinkProperties {
