@@ -67,10 +67,23 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button')
     }
     showAngle(){
-        cy.get('.button.angle-label.enabled').click();
+        cy.get('.geometry-tool .button.angle-label.enabled').click();
     }
     hideAngle(){
-        cy.get('.button.angle-label.enabled').click();
+        cy.get('.geometry-tool .button.angle-label.enabled').click();
+    }
+    copyGraphElement(){
+        cy.get('.geometry-tool .button.duplicate.enabled').click();
+    }
+    addMovableLine(){
+        cy.get('.geometry-tool .button.movable-line.enabled').click();
+    }
+    addComment(){
+        cy.get('.geometry-tool .button.comment.enabled').click();
+    }
+    deleteGraphElement(){
+        cy.get('.geometry-tool .button.delete.enabled').click();
+
     }
 }
 export default GraphToolTile;
