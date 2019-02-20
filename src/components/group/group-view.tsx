@@ -126,7 +126,7 @@ export class GroupViewComponent extends BaseComponent<IProps, {}> {
     return (e: React.DragEvent<HTMLDivElement>) => {
       const {ui, documents} = this.stores;
       const {sectionWorkspace} = ui;
-      const documentKey = e.dataTransfer.getData(DocumentDragKey);
+      const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
       const document = documentKey ? documents.getDocument(documentKey) : null;
       if (document) {
         if (side === "primary") {
