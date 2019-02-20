@@ -1,12 +1,20 @@
-const graphUnit=18.3;
+const graphUnit=18.33;
 
 class GraphToolTile{
-    transformCoordinate(axis, num){
+    transformFromCoordinate(axis, num){
         if (axis=='x'){
-            return (num+1)*18.3;
+            return (num+1)*graphUnit;
         }
         if (axis=='y'){
-            return 320-((num+1.2)*18.3);
+            return 320-((num+1.2)*graphUnit);
+        }
+    }
+    transformToCoordinate(axis, num){
+        if (axis=='x'){
+            return (Math.round(((num/graphUnit)-1)*100)/100)
+        }
+        if (axis=='y'){
+            return (Math.round((((num/graphUnit)-1.24))*100)/100)
         }
     }
 
@@ -18,8 +26,18 @@ class GraphToolTile{
         return cy.get('.canvas-area .geometry-content');
     }
 
-    getGraphPointText(){ //This is the point coordinate text
-        return cy.get('.geometry-content.editable .JXGinfobox');
+    getGraphPointCoordinates(){ //This is the point coordinate text
+        let x=0,
+            y=0;
+
+        return this.getGraphPoint().last()
+            .then(($point)=>{
+                x = $point.attr('cx');
+                y = $point.attr('cy');
+                var coords = ('"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"');
+                return coords
+            });
+
     }
 
     getGraphPointLabel(){ //This is the letter label for a point
@@ -27,13 +45,14 @@ class GraphToolTile{
     }
 
     getGraphPoint(){
-        return cy.get('.geometry-content.editable ellipse');
+        return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
-    selectGraphPoint(x,y){
-        let transX=this.transformCoordinate('x', x),
-            transY=this.transformCoordinate('y', y);
 
-        this.getGraphTile().last().click(transX,transY, {force:true});
+    selectGraphPoint(x,y){
+        let transX=this.transformFromCoordinate('x', x),
+            transY=this.transformFromCoordinate('y', y);
+
+        this.getGraphTile().last().click(transX,transY);
     }
 
     getGraphPointID(){
@@ -53,8 +72,8 @@ class GraphToolTile{
     }
 
     addPointToGraph(x,y){
-        let transX=this.transformCoordinate('x', x),
-            transY=this.transformCoordinate('y', y);
+        let transX=this.transformFromCoordinate('x', x),
+            transY=this.transformFromCoordinate('y', y);
 
         this.getGraphTile().last().click(transX,transY, {force:true});
     }

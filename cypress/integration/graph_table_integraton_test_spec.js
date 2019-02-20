@@ -21,8 +21,8 @@ function addTableAndGraph(){
 }
 
 function deleteTableAndGraph(){
-    canvas.deleteTile('graph')
-//    canvas.deleteTile('table')
+    canvas.deleteTile('graph');
+    canvas.deleteTile('table');
 }
 
 function connectTableToGraph(){
@@ -34,13 +34,10 @@ function connectTableToGraph(){
         .trigger('drop', {dataTransfer});
     tableToolTile.getTableTile()
         .trigger('dragend');
-    tableToolTile.getTableCell().first().type('5');
-    tableToolTile.getTableCell().last().type('5{enter}');
-    graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-    // graphToolTile.getGraphPoint
 }
+
 context('Tests for graph and table integration', function(){
-    describe('connect table to graph before adding points', function(){
+    describe.only('connect table to graph before adding coordinates', function(){
         it('setup', function(){
             leftNav.openToWorkspace('Extra Workspace');
             addTableAndGraph();
@@ -63,6 +60,12 @@ context('Tests for graph and table integration', function(){
                 //Add a yCoord in the y column
                 //verify that p2 appears in (0,yCoord)
             });
+        });
+        it('will add coordinates in the table', function(){
+            tableToolTile.getTableCell().first().type('5');
+            tableToolTile.getTableCell().last().type('5{enter}');
+            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+            graphToolTile.getGraphPointCoordinates().should('contain', '(5, 10)' );
         });
         it('will add a point at the origin', function(){
 
@@ -91,10 +94,6 @@ context('Tests for graph and table integration', function(){
     it('will delete a point in the table', function(){
 
     });
-    it('will publish the workspace', function(){ //for 2up test in learning log test
-
-    })
-    //delete of connected table will happen after save and restore test
 });
 
 context('Test normal graph functions in a connected graph', function(){
