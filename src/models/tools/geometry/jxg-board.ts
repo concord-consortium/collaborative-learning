@@ -6,6 +6,7 @@ import { assign, each, find } from "lodash";
 export const kGeometryProtoSize = 480;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
 export const kGeometryDefaultAxisMin = -1;
+export const kAxisBuffer = 20;
 export const isBoard = (v: any) => v instanceof JXG.Board;
 export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
 export const getAxisType = (v: any) => {
@@ -126,12 +127,14 @@ export const boardChangeAgent: JXGChangeAgent = {
         const height = board.canvasHeight;
         const unitX = boardScale.unitX as number;
         const unitY = boardScale.unitY as number;
-        const xMin = boardScale.xMin as number;
-        const yMin = boardScale.yMin as number;
+        const xBuffer = kAxisBuffer / unitX;
+        const yBuffer = kAxisBuffer / unitY;
+        const xMin = boardScale.xMin - xBuffer;
+        const yMin = boardScale.yMin - yBuffer;
         if (isFinite(xMin) && isFinite(yMin) && isFinite(unitX) && isFinite(unitY)) {
-          const xUnits = width / unitX;
-          const yUnits = height / unitY;
-          const bbox = [xMin, yMin + yUnits, xMin + xUnits, yMin] as [number, number, number, number];
+          const xRange = width / unitX + (xBuffer * 2);
+          const yRange = height / unitY + (yBuffer * 2);
+          const bbox = [xMin, yMin + yRange, xMin + xRange, yMin] as [number, number, number, number];
           board.setBoundingBox(bbox);
           board.objectsList.forEach(el => {
             if (el.elType === "axis") {
