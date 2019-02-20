@@ -72,27 +72,54 @@ context('Tests for graph and table integration', function(){
         });
         it('will create a polygon in the table', function(){ //first point is created in previous it
 
-    });
-    it('will copy a point', function(){
+        });
+        it('will change the name of the axis in the table', function(){
+
+        });
+        it('will add a polygon directly onto the graph', function(){
+
+        });
+        it('will add and angle to a point created from a table', function(){
+
+        });
+
+        it('will delete a point in the table', function(){
+
+        });
+        it('will add an image to a graph that is connected to a table', function(){
 
     });
     it('will copy a polygon', function(){
 
-    });
-    it('will change the name of the axis in the table', function(){
+        })
+    })
+    describe('connect table to graph after adding coordinates in table', function(){
+        describe('Test blank cells',function(){
+            it('setup', function(){
+                leftNav.openToWorkspace('What if...?');
+                addTableAndGraph();
+            })
+        });
 
-    });
-    it('will add an angle to a point created from a table', function(){
+        it('will add coordinates in the table', function(){
+            tableToolTile.getTableCell().first().type('5');
+            tableToolTile.getTableCell().last().type('5{enter}');
+            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+            graphToolTile.getGraphPointCoordinates().should('contain','(5, 5)');
+        });
+        it('will change the name of the axis in the table', function(){
 
-    });
-    it('will add a row in the table, and add a point to the graph', function(){
+        });
+        it('will connect table to graph', function(){
+            connectTableToGraph();
+        });
+        it('will add an angle to a point created from a table', function(){
 
-    });
-    it('will delete a point in the graph that was added from the table', function(){
-        //verify that it is not possible - graph delete icon should be disabled
-    });
-    it('will delete a point in the table', function(){
+        });
 
+        it('will delete a point in the table', function(){
+
+        });
     });
 });
 
@@ -143,7 +170,7 @@ context('Learning log', function(){
         tableToolTile.getTableCell().first().type('5');
         tableToolTile.getTableCell().last().type('5{enter}');
         graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-        // graphToolTile.getGraphPoint
+        // graphToolTile.getGraphPointCoordinates().should('contain','(5,5)');
         //verify that table has p1 in the row
     });
     it('will create a polygon in the table', function(){ //first point is created in previous it
