@@ -60,6 +60,42 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
   return assign(defaults, otherProps, overrides);
 }
 
+function addAxes(board: JXG.Board, unitX: number, unitY: number) {
+  const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
+  const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
+  board.removeGrids();
+  board.options.grid = { ...board.options.grid, gridX: xMinorTickDistance, gridY: yMinorTickDistance };
+  board.addGrid();
+  const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
+    name: "x",
+    withLabel: true,
+    label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]}
+  });
+  xAxis.removeAllTicks();
+  board.create("ticks", [xAxis, xMajorTickDistance], {
+    strokeColor: "#bbb",
+    majorHeight: -1,
+    drawLabels: true,
+    label: { anchorX: "middle", offset: [-8, -10] },
+    minorTicks: xMinorTicks,
+    drawZero: true
+  });
+  const yAxis = board.create("axis", [ [0, 0], [0, 1] ], {
+    name: "y",
+    withLabel: true,
+    label: {fontSize: 13, position: "rt", offset: [15, 0]}
+  });
+  yAxis.removeAllTicks();
+  board.create("ticks", [yAxis, yMajorTickDistance], {
+    strokeColor: "#bbb",
+    majorHeight: -1,
+    drawLabels: true,
+    label: { anchorX: "right", offset: [-4, -1] },
+    minorTicks: yMinorTicks,
+    drawZero: false
+  });
+}
+
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
     const domElementID = boardDomId as string;
@@ -72,41 +108,11 @@ export const boardChangeAgent: JXGChangeAgent = {
     const changeProps = change.properties && change.properties as JXGProperties;
     const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
     const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
-    const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
-    const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
     // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-    const overrides = { axis: false, keepaspectratio: unitX === unitY,
-                        grid: { gridX: xMinorTickDistance, gridY: yMinorTickDistance } };
+    const overrides = { axis: false, keepaspectratio: unitX === unitY };
     const props = combineProperties(domElementID, defaults, change.properties, overrides);
     const board = isBoard(boardDomId) ? boardDomId as JXG.Board : JXG.JSXGraph.initBoard(domElementID, props);
-    const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
-                                name: "x",
-                                withLabel: true,
-                                label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]}
-                  });
-    xAxis.removeAllTicks();
-    board.create("ticks", [xAxis, xMajorTickDistance], {
-                  strokeColor: "#bbb",
-                  majorHeight: -1,
-                  drawLabels: true,
-                  label: { anchorX: "middle", offset: [-8, -10] },
-                  minorTicks: xMinorTicks,
-                  drawZero: true
-                });
-    const yAxis = board.create("axis", [ [0, 0], [0, 1] ], {
-                                name: "y",
-                                withLabel: true,
-                                label: {fontSize: 13, position: "rt", offset: [15, 0]}
-                  });
-    yAxis.removeAllTicks();
-    board.create("ticks", [yAxis, yMajorTickDistance], {
-                  strokeColor: "#bbb",
-                  majorHeight: -1,
-                  drawLabels: true,
-                  label: { anchorX: "right", offset: [-4, -1] },
-                  minorTicks: yMinorTicks,
-                  drawZero: false
-                });
+    addAxes(board, unitX, unitY);
     return board;
   },
 
@@ -127,6 +133,12 @@ export const boardChangeAgent: JXGChangeAgent = {
           const yUnits = height / unitY;
           const bbox = [xMin, yMin + yUnits, xMin + xUnits, yMin] as [number, number, number, number];
           board.setBoundingBox(bbox);
+          board.objectsList.forEach(el => {
+            if (el.elType === "axis") {
+              board.removeObject(el);
+            }
+          });
+          addAxes(board, unitX, unitY);
         }
       }
       board.update();

@@ -50,6 +50,7 @@ declare namespace JXG {
     zoomFactor: number;
     zoomX: number;
     zoomY: number;
+    options: any;
 
     objects: { [id: string]: GeometryElement };
     objectsList: GeometryElement[];
@@ -70,6 +71,8 @@ declare namespace JXG {
     fullUpdate: () => JXG.Board;
     suspendUpdate: () => JXG.Board;
     unsuspendUpdate: () => JXG.Board;
+    addGrid: () => void;
+    removeGrids: () => void;
   }
 
   class Coords {
