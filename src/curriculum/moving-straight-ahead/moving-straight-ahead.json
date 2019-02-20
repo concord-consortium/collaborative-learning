@@ -1922,8 +1922,8 @@
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5],
-                          "axisRange": [6, 6]
+                          "axisMin": [-0.2, -1],
+                          "axisRange": [5, 11]
                         }
                       },
                       "objects": [
@@ -1977,8 +1977,8 @@
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5],
-                          "axisRange": [6, 6]
+                          "axisMin": [-0.2, -1],
+                          "axisRange": [5, 11]
                         }
                       },
                       "objects": [
