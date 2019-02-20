@@ -20,7 +20,7 @@ context('Test graph tool functionalities', function(){
             canvas.getCanvasTitle().should('contain','Extra Workspace');
             canvas.addGraphTile();
             graphToolTile.addPointToGraph(0,0);
-            graphToolTile.getGraphPointText().should('have.text', '0,0');
+            graphToolTile.getGraphPointCoordinates().should('have.text', '0,0');
         });
         it('will add points to a graph', function(){
             leftNav.openToWorkspace('Now What');
@@ -55,7 +55,7 @@ context('Test graph tool functionalities', function(){
             leftNav.openToWorkspace('Extra Workspace');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','Extra Workspace');
-            graphToolTile.getGraphPointText().last().should('have.text', '0,0');
+            graphToolTile.getGraphPointCoordinates().last().should('have.text', '0,0');
         });
         it('will verify restore of polygon', function(){
             leftNav.openToWorkspace('What if...?');
@@ -93,7 +93,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.selectGraphPoint(13.2,5);
                 pointId=graphToolTile.getGraphPointID();
                 cy.log(pointId);
-                // graphToolTile.getGraphPointText().should('have.text', '13.2,5');
+                // graphToolTile.getGraphPointCoordinates().should('have.text', '13.2,5');
             });
             // it('will drag a point to a new location', function(){
             //
