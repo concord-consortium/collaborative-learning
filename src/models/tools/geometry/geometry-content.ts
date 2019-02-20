@@ -358,8 +358,8 @@ export const GeometryContentModel = types
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       const [xMin, , , yMin] = board.getBoundingBox();
-      const newXMax = scaledWidth / unitX + xMin;
-      const newYMax = scaledHeight / unitY + yMin;
+      const newXMax = Math.max(scaledWidth / unitX + xMin, 1);
+      const newYMax = Math.max(scaledHeight / unitY + yMin, 1);
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
       board.update();
