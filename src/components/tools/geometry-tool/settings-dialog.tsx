@@ -4,7 +4,6 @@ import { round } from "lodash";
 
 interface IProps {
   board: JXG.Board;
-  isOpen: boolean;
   onAccept: (xMax: number, yMax: number, xMin: number, yMin: number) => void;
   onClose: () => void;
 }
@@ -30,7 +29,7 @@ class SettingsDialog extends React.Component<IProps, IState> {
     return (
       <Dialog
         icon="text-highlight"
-        isOpen={this.props.isOpen}
+        isOpen={true}
         onClose={this.props.onClose}
         title={`Edit Axes`}
         canOutsideClickClose={false}

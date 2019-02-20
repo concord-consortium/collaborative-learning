@@ -335,12 +335,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderSettingsEditor() {
     const { board, settingsOpen } = this.state;
-    if (board) {
+    if (board && settingsOpen) {
       return (
         <SettingsDialog
           key="editor"
           board={board}
-          isOpen={settingsOpen}
           onAccept={this.handleUpdateSettings}
           onClose={this.closeSettings}
         />
