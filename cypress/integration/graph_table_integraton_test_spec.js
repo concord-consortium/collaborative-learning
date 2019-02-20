@@ -21,8 +21,8 @@ function addTableAndGraph(){
 }
 
 function deleteTableAndGraph(){
-    canvas.deleteTile('graph')
-//    canvas.deleteTile('table')
+    canvas.deleteTile('graph');
+    canvas.deleteTile('table');
 }
 
 function connectTableToGraph(){
@@ -34,13 +34,10 @@ function connectTableToGraph(){
         .trigger('drop', {dataTransfer});
     tableToolTile.getTableTile()
         .trigger('dragend');
-    tableToolTile.getTableCell().first().type('5');
-    tableToolTile.getTableCell().last().type('5{enter}');
-    graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-    // graphToolTile.getGraphPoint
 }
+
 context('Tests for graph and table integration', function(){
-    describe('connect table to graph before adding points', function(){
+    describe.only('connect table to graph before adding coordinates', function(){
         it('setup', function(){
             leftNav.openToWorkspace('Extra Workspace');
             addTableAndGraph();
@@ -63,6 +60,12 @@ context('Tests for graph and table integration', function(){
                 //Add a yCoord in the y column
                 //verify that p2 appears in (0,yCoord)
             });
+        });
+        it('will add coordinates in the table', function(){
+            tableToolTile.getTableCell().first().type('5');
+            tableToolTile.getTableCell().last().type('5{enter}');
+            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+            graphToolTile.getGraphPointCoordinates().should('contain', '(5, 10)' );
         });
         it('will add a point at the origin', function(){
 
@@ -95,101 +98,37 @@ context('Tests for graph and table integration', function(){
     describe('connect table to graph after adding coordinates in table', function(){
         describe('Test blank cells',function(){
             it('setup', function(){
-                leftNav.openToWorkspace('What if...?')
+                leftNav.openToWorkspace('What if...?');
                 addTableAndGraph();
-
             })
         });
 
-        it('setup', function(){
-            leftNav.openToWorkspace('Extra Workspace');
-            addTableAndGraph();
-        });
-        it('will connect table to graph', function(){
-            const dataTransfer = new DataTransfer;
-
-            tableToolTile.getTableTile()
-                .trigger('dragstart', {dataTransfer});
-            graphToolTile.getGraphTile()
-                .trigger('drop', {dataTransfer});
-            tableToolTile.getTableTile()
-                .trigger('dragend');
+        it('will add coordinates in the table', function(){
             tableToolTile.getTableCell().first().type('5');
             tableToolTile.getTableCell().last().type('5{enter}');
             graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-            // graphToolTile.getGraphPoint
-        });
-        it('will create a polygon in the table', function(){ //first point is created in previous it
-
+            cy.log(graphToolTile.getGraphPointCoordinates());
         });
         it('will change the name of the axis in the table', function(){
 
         });
-        it('will add a polygon directly onto the graph', function(){
-
+        it('will connect table to graph', function(){
+            connectTableToGraph();
         });
-        it('will add and angle to a point created from a table', function(){
+        it('will add an angle to a point created from a table', function(){
 
         });
 
         it('will delete a point in the table', function(){
 
         });
-    })
-
-context('Tests for graph and table integration', function(){
-    it('setup 1', function(){
-        leftNav.openToWorkspace('Extra Workspace');
-        canvas.addTableTile();
-        canvas.addGraphTile();
     });
-    it('will connect table to graph', function(){
-        const dataTransfer = new DataTransfer;
-
-        tableToolTile.getTableTile()
-            .trigger('dragstart', {dataTransfer});
-        graphToolTile.getGraphTile()
-            .trigger('drop', {dataTransfer});
-        tableToolTile.getTableTile()
-            .trigger('dragend');
-        tableToolTile.getTableCell().first().type('5');
-        tableToolTile.getTableCell().last().type('5{enter}');
-        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-        // graphToolTile.getGraphPoint
-        //verify that table has p1 in the row
-    });
-    it('will create a polygon in the table', function(){ //first point is created in previous it
-
-    });
-    it('will copy a point', function(){
-
-    });
-    it('will copy a polygon', function(){
-
-    });
-    it('will change the name of the axis in the table', function(){
-
-    });
-    it('will add an angle to a point created from a table', function(){
-
-    });
-    it('will add a row in the table, and add a point to the graph', function(){
-
-    });
-    it('will delete a point in the graph that was added from the table', function(){
-        //verify that it is not possible - graph delete icon should be disabled
-    });
-    it('will delete a point in the table', function(){
-
-    });
-    it('will publish the workspace', function(){ //for 2up test in learning log test
-
-    })
-    //delete of connected table will happen after save and restore test
 });
 
 context('Test normal graph functions in a connected graph', function(){
     it('setup 2 - connect table to graph', function(){
+        const dataTransfer = new DataTransfer;
+
         leftNav.openToWorkspace('Now What');
         canvas.addTableTile();
         canvas.addGraphTile();
@@ -197,7 +136,7 @@ context('Test normal graph functions in a connected graph', function(){
     it('will connect table to graph', function(){
         const dataTransfer = new DataTransfer;
 
-        tableToolTile.getTableTile()
+        tableToolTile.getTableTile().last()
             .trigger('dragstart', {dataTransfer});
         graphToolTile.getGraphTile()
             .trigger('drop', {dataTransfer});
@@ -206,7 +145,7 @@ context('Test normal graph functions in a connected graph', function(){
         tableToolTile.getTableCell().first().type('5');
         tableToolTile.getTableCell().last().type('5{enter}');
         graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-        // graphToolTile.getGraphPoint
+        // graphToolTile.getGraphPointCoordinates().should('contain','(5,5)');
     });
     it('will add a polygon', function(){
 
@@ -235,7 +174,7 @@ context('Learning log', function(){
         tableToolTile.getTableCell().first().type('5');
         tableToolTile.getTableCell().last().type('5{enter}');
         graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-        // graphToolTile.getGraphPoint
+        // graphToolTile.getGraphPointCoordinates().should('contain','(5,5)');
         //verify that table has p1 in the row
     });
     it('will create a polygon in the table', function(){ //first point is created in previous it
