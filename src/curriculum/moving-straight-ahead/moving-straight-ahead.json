@@ -532,75 +532,75 @@
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-1, -10],
-                          "axisRange": [55, 590]
+                          "axisMin": [-5, -50],
+                          "axisRange": [55, 500]
                         }
                       },
                       "objects": [
                         {
                           "type": "point",
                           "parents": [
-                            [0, 100]
+                            [0, 500]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [1, 90]
+                            [5, 450]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [2, 80]
+                            [10, 400]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [3, 70]
+                            [15, 350]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [4, 60]
+                            [20, 300]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [5, 50]
+                            [25, 250]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [6, 40]
+                            [30, 200]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [7, 30]
+                            [35, 150]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [8, 20]
+                            [40, 100]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [9, 10]
+                            [45, 50]
                           ]
                         },
                         {
                           "type": "point",
                           "parents": [
-                            [10, 0]
+                            [50, 0]
                           ]
                         }
                       ]
