@@ -66,6 +66,7 @@ declare namespace JXG {
     setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => JXG.Board;
     showInfobox: (value: boolean) => JXG.Board;
     update: (drag?: JXG.GeometryElement) => JXG.Board;
+    fullUpdate: () => JXG.Board;
     suspendUpdate: () => JXG.Board;
     unsuspendUpdate: () => JXG.Board;
   }

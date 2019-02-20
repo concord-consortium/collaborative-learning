@@ -285,7 +285,6 @@ export const GeometryContentModel = types
   }))
   .extend(self => {
 
-    let viewCount = 0;
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
@@ -848,9 +847,6 @@ export const GeometryContentModel = types
 
     return {
       views: {
-        get nextViewId() {
-          return ++viewCount;
-        },
         get isUserResizable() {
           return true;
         },
