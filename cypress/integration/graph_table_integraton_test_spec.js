@@ -46,55 +46,65 @@ context('Tests for graph and table integration', function(){
         describe('Test blank cells',function(){
             it('will add a blank row', function(){
                 tableToolTile.addNewRow();
-                //verify there is a point at 0,0 labeled p1
+                tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
+                graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+                graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)' )
             });
             it('will add a coordinate in x only column', function(){
-                let xCoord = 10;
+                let xCoord = '9';
                 tableToolTile.addNewRow();
-                //Add a xCoord in the x column
-                //verify that p2 appears in (xCoord,0)
+                tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
+                tableToolTile.getTableCell().eq(2).type('9{enter}');
+                graphToolTile.getGraphPointLabel().contains('p2').should('exist');
+                graphToolTile.getGraphPointCoordinates().should('contain', '('+xCoord+', 0)' )
             });
             it('will add a coordinate in y only column', function(){
-                let yCoord = 10;
+                let yCoord = '9';
                 tableToolTile.addNewRow();
-                //Add a yCoord in the y column
-                //verify that p2 appears in (0,yCoord)
+                tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
+                tableToolTile.getTableCell().eq(5).type(yCoord+'{enter}');
+                graphToolTile.getGraphPointLabel().contains('p3').should('exist');
+                graphToolTile.getGraphPointCoordinates().should('contain', '(0, '+yCoord+' )');
             });
         });
-        it('will add coordinates in the table', function(){
-            tableToolTile.getTableCell().first().type('5');
-            tableToolTile.getTableCell().last().type('5{enter}');
-            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-            graphToolTile.getGraphPointCoordinates().should('contain', '(5, 10)' );
+        describe('test creating a polygon', function (){
+            it('will add both coordinates in the table', function(){
+                tableToolTile.getTableCell().eq(6).type('5');
+                tableToolTile.getTableCell().last().type('5{enter}');
+                graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+                graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
+            });
+            it('will create a polygon', function(){ //first point is created in previous it
+                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+                graphToolTile.getGraphPolygon().should('exist')
+            });
         });
-        it('will add a point at the origin', function(){
+        describe('text axes changes', function(){
+            it('will change the name of the axis in the table', function(){
 
+            });
         });
-        it('will create a polygon in the table', function(){ //first point is created in previous it
+        describe('normal graph interactions', function(){
+            it('will add a polygon directly onto the graph', function(){
 
+            });
+            it('will add and angle to a point created from a table', function(){
+
+            });
+
+            it('will delete a point in the table', function(){
+
+            });
+            it('will add an image to a graph that is connected to a table', function(){
+
+            });
         });
-        it('will change the name of the axis in the table', function(){
+        describe('Test disconnecting the table', function(){
+            it('will delete the connected table', function(){
 
+            });
         });
-        it('will add a polygon directly onto the graph', function(){
-
-        });
-        it('will add and angle to a point created from a table', function(){
-
-        });
-
-        it('will delete a point in the table', function(){
-
-        });
-        it('will add an image to a graph that is connected to a table', function(){
-
-        });
-        it('will delete the connected table', function(){
     });
-    it('will add an image to a graph that is connected to a table', function(){
-
-        })
-    })
     describe('connect table to graph after adding coordinates in table', function(){
         describe('Test blank cells',function(){
             it('setup', function(){
@@ -102,7 +112,9 @@ context('Tests for graph and table integration', function(){
                 addTableAndGraph();
             })
         });
+        it('will add a point at the origin', function(){
 
+        });
         it('will add coordinates in the table', function(){
             tableToolTile.getTableCell().first().type('5');
             tableToolTile.getTableCell().last().type('5{enter}');
