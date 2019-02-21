@@ -50,14 +50,21 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
 }
 
 function defaultGeometryBoardChange(overrides?: JXGProperties) {
+  // TODO: refactor this
+  const [xMin, yMax, xMax, yMin] = getBoardBounds();
+  const unitX = kGeometryDefaultPixelsPerUnit;
+  const unitY = kGeometryDefaultPixelsPerUnit;
+  const xBufferRange = kAxisBuffer / unitX;
+  const yBufferRange = kAxisBuffer / unitY;
+  const boundingBox = [xMin - xBufferRange, yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: {
                   axis: true,
-                  boundingBox: getBoardBounds(),
-                  unitX: kGeometryDefaultPixelsPerUnit,
-                  unitY: kGeometryDefaultPixelsPerUnit,
+                  boundingBox,
+                  unitX,
+                  unitY,
                   ...overrides
                 }
   };

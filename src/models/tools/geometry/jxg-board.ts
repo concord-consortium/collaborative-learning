@@ -5,8 +5,8 @@ import { assign, each, find, values } from "lodash";
 
 export const kGeometryProtoSize = 480;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
-export const kGeometryDefaultAxisMin = -1;
-export const kAxisBuffer = 25;
+export const kGeometryDefaultAxisMin = 0;
+export const kAxisBuffer = 20;
 export const isBoard = (v: any) => v instanceof JXG.Board;
 export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
 export const isAxisLabel = (v: any) => v instanceof JXG.Text && values(v.ancestors).find(el => isAxis(el));
