@@ -393,7 +393,7 @@ export const GeometryContentModel = types
         operation: "update",
         target: "board",
         targetID: board.id,
-        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth, canvasHeight} }
+        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
       };
       _applyChange(undefined, change);
     }
