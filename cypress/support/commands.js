@@ -41,7 +41,6 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
-        cy.wait(2000)
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         cy.wait(3000);
     }
