@@ -55,3 +55,7 @@
   font-size: 12pt;
 }
 
+.nc-dialog-row {
+  display: flex;
+  flex-direction: row;
+}

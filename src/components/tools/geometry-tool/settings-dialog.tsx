@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Button, Dialog } from "@blueprintjs/core";
-import { round } from "lodash";
 import { guessUserDesiredBoundingBox } from "../../../models/tools/geometry/jxg-board";
 
 interface IProps {
@@ -34,10 +33,14 @@ export default class SettingsDialog extends React.Component<IProps, IState> {
         title={`Edit Axes`}
         canOutsideClickClose={false}
       >
-        { this.renderOption("x max", this.state.xMax, this.handleXMaxChange) }
-        { this.renderOption("y max", this.state.yMax, this.handleYMaxChange) }
-        { this.renderOption("x min", this.state.xMin, this.handleXMinChange) }
-        { this.renderOption("y min", this.state.yMin, this.handleYMinChange) }
+        <div className="nc-dialog-row">
+          { this.renderOption("x min", this.state.xMin, this.handleXMinChange) }
+          { this.renderOption("x max", this.state.xMax, this.handleXMaxChange) }
+        </div>
+        <div className="nc-dialog-row">
+          { this.renderOption("y min", this.state.yMin, this.handleYMinChange) }
+          { this.renderOption("y max", this.state.yMax, this.handleYMaxChange) }
+        </div>
         <div className="nc-dialog-buttons">
           <Button
             className="nc-dialog-button pt-intent-primary"
