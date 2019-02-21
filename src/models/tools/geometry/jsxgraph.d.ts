@@ -142,6 +142,7 @@ declare namespace JXG {
     point1: JXG.Point;
     point2: JXG.Point;
     parentPolygon?: JXG.Polygon;
+    label?: JXG.Text;
   }
 
   class Text extends CoordsElement {
