@@ -1,6 +1,8 @@
 import { JXGChangeAgent, JXGCoordPair, ILinkProperties } from "./jxg-changes";
-import { createPoint, pointChangeAgent, isPoint } from "./jxg-point";
+import { createPoint, isPoint, pointChangeAgent } from "./jxg-point";
 import { ITableLinkProperties } from "../table/table-content";
+
+export const isLinkedPoint = (v: any) => isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
 
 // Eventually should use a different color for each table
 const linkedPointColor = "#0099FF";
