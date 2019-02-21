@@ -4,7 +4,7 @@ import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
 import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels,
-  kAxisBuffer } from "./jxg-board";
+  kAxisBuffer, guessUserDesiredBoundingBox} from "./jxg-board";
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
@@ -356,13 +356,23 @@ export const GeometryContentModel = types
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
       const scaledWidth = width / (scale || 1);
       const scaledHeight = height / (scale || 1);
+      const widthMultiplier = scaledWidth / board.canvasWidth;
+      const heightMultiplier = scaledHeight / board.canvasHeight;
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
-      const [xMin, , , yMin] = board.getBoundingBox();
-      const newXMax = scaledWidth / unitX + xMin;
-      const newYMax = scaledHeight / unitY + yMin;
+      // Remove the buffers to correct the graph proportions
+      const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
+      const xBufferRange = kAxisBuffer / unitX;
+      const yBufferRange = kAxisBuffer / unitY;
+      // Add the buffers back post-scaling
+      const newBoundingBox = [
+        xMin * widthMultiplier - xBufferRange,
+        yMax * heightMultiplier + yBufferRange,
+        xMax * widthMultiplier + xBufferRange,
+        yMin * heightMultiplier - yBufferRange
+      ] as [number, number, number, number];
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
-      board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
+      board.setBoundingBox(newBoundingBox, unitX === unitY);
       board.update();
     }
 

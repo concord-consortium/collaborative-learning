@@ -6,7 +6,7 @@ import { assign, each, find } from "lodash";
 export const kGeometryProtoSize = 480;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
 export const kGeometryDefaultAxisMin = -1;
-export const kAxisBuffer = 20;
+export const kAxisBuffer = 25;
 export const isBoard = (v: any) => v instanceof JXG.Board;
 export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
 export const getAxisType = (v: any) => {
@@ -124,6 +124,7 @@ export const boardChangeAgent: JXGChangeAgent = {
     const props = combineProperties(domElementID, defaults, change.properties, overrides);
     const board = isBoard(boardDomId) ? boardDomId as JXG.Board : JXG.JSXGraph.initBoard(domElementID, props);
     addAxes(board, unitX, unitY);
+    props.boundingBox && board.setBoundingBox(props.boundingBox);
     return board;
   },
 
