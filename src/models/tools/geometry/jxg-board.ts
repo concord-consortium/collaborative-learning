@@ -134,14 +134,19 @@ export const boardChangeAgent: JXGChangeAgent = {
     if (board) {
       const boardScale = props.boardScale;
       if (boardScale) {
+        const { canvasWidth, canvasHeight } = boardScale;
         const width = board.canvasWidth;
         const height = board.canvasHeight;
+        const widthMultiplier = width / canvasWidth;
+        const heightMultiplier = height / canvasHeight;
         const unitX = boardScale.unitX as number;
         const unitY = boardScale.unitY as number;
         const xBuffer = kAxisBuffer / unitX;
         const yBuffer = kAxisBuffer / unitY;
-        const xMin = boardScale.xMin - xBuffer;
-        const yMin = boardScale.yMin - yBuffer;
+        // The change might have been performed on a different-sized tile due to a 2-up switch or reload
+        // In that case, we need to scale the min/max to preserve user-intended ratios
+        const xMin = (boardScale.xMin - xBuffer) * widthMultiplier;
+        const yMin = (boardScale.yMin - yBuffer) * heightMultiplier;
         if (isFinite(xMin) && isFinite(yMin) && isFinite(unitX) && isFinite(unitY)) {
           const xRange = width / unitX;
           const yRange = height / unitY;

@@ -377,15 +377,16 @@ export const GeometryContentModel = types
     }
 
     function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
-      const width = board.canvasWidth - kAxisBuffer * 2;
-      const height = board.canvasHeight - kAxisBuffer * 2;
+      const { canvasWidth, canvasHeight } = board;
+      const width = canvasWidth - kAxisBuffer * 2;
+      const height = canvasHeight - kAxisBuffer * 2;
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
       const change: JXGChange = {
         operation: "update",
         target: "board",
         targetID: board.id,
-        properties: { boardScale: {xMin, yMin, unitX, unitY} }
+        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth, canvasHeight} }
       };
       _applyChange(undefined, change);
     }
