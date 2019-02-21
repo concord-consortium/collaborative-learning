@@ -1,7 +1,7 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
-import { castArray, each, find, uniqWith, isEqual } from "lodash";
+import { castArray, each, find, uniqWith } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { GeometryContentModelType } from "./geometry-content";
 
@@ -46,7 +46,12 @@ export const getBoundingBoxIntersections = (slope: number, intercept: number, bo
   // There will be duplicate intersection points if the line intersects a corner
   const uniqueIntersections = uniqWith(
     [topIntersection, rightIntersection, bottomIntersection, leftIntersection],
-    isEqual
+    (point, otherPoint) => {
+      return (
+        // Floating point equality test
+        Math.abs(point[0] - otherPoint[0]) < Number.EPSILON && Math.abs(point[1] - otherPoint[1]) < Number.EPSILON
+      );
+    }
   );
   return uniqueIntersections
     .filter(pt => {
