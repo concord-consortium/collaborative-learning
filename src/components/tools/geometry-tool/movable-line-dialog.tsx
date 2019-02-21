@@ -16,7 +16,7 @@ interface IState {
 }
 
 export default
-class LineDialog extends React.Component<IProps, IState> {
+class MovableLineDialog extends React.Component<IProps, IState> {
   public state = {
             slope: "" + round(this.props.line.getSlope(), 1) || "",
             intercept: "" + round(this.props.line.getRise(), 1) || "",

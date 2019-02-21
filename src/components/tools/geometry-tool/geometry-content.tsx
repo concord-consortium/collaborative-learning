@@ -29,7 +29,7 @@ import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovab
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
-import LineDialog from "./line-dialog";
+import MovableLineDialog from "./movable-line-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -337,7 +337,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const line = this.state.selectedLine;
     if (line) {
       return (
-        <LineDialog
+        <MovableLineDialog
           key="editor"
           isOpen={line != null}
           onAccept={this.handleUpdateLine}
