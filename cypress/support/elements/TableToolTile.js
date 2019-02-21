@@ -20,7 +20,7 @@ class TableToolTile{
     }
     renameColumn(column, title){
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Rename Column').click()
+        cy.get('.bp3-menu-item div').contains('Rename Column').click().click()
         cy.get('.bp3-menu-item div').contains(column).click()
         // cy.get('[data-test=rename-column-menu-item]').click().click();
         // cy.get('[data-test=attr-menu-item]').contains(column).click();
