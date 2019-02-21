@@ -363,8 +363,8 @@ export const GeometryContentModel = types
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
       const scaledWidth = width / (scale || 1);
       const scaledHeight = height / (scale || 1);
-      const widthMultiplier = scaledWidth / board.canvasWidth;
-      const heightMultiplier = scaledHeight / board.canvasHeight;
+      const widthMultiplier = (scaledWidth - kAxisBuffer * 2) / (board.canvasWidth - kAxisBuffer * 2);
+      const heightMultiplier = (scaledHeight - kAxisBuffer * 2) / (board.canvasHeight - kAxisBuffer * 2);
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       // Remove the buffers to correct the graph proportions
@@ -379,7 +379,7 @@ export const GeometryContentModel = types
         yMin * heightMultiplier - yBufferRange
       ] as [number, number, number, number];
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
-      board.setBoundingBox(newBoundingBox, unitX === unitY);
+      board.setBoundingBox(newBoundingBox, false);
       board.update();
     }
 

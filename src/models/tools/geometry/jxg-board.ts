@@ -64,8 +64,8 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
 
 export function guessUserDesiredBoundingBox(board: JXG.Board) {
   const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
-  const unitX = board.canvasWidth / (xMax - xMin);
-  const unitY = board.canvasHeight / (yMax - yMin);
+  const unitX = board.unitX || board.canvasWidth / (xMax - xMin);
+  const unitY = board.unitY || board.canvasHeight / (yMax - yMin);
   const xBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
 
