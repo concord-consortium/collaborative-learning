@@ -1,6 +1,6 @@
 class DrawToolTile{
     getDrawTile(){
-        return cy.get('.canvas .drawing-tool');
+        return cy.get('.canvas-area .drawing-tool');
     }
     getDrawToolMenu(){
         return cy.get('.drawing-tool-button[title="Settings"')

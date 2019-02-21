@@ -42,6 +42,14 @@ class LearningLog {
         return cy.get('[data-test=learning-log-single-workspace] .canvas .text-tool')
     }
 
+    getLLTableTool(){
+        return cy.get('[data-test=learning-log-single-workspace] > .toolbar > .tool.table');
+    }
+
+    getLLTableTile(){
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .neo-codap-case-table');
+    }
+
     getLLGraphTool(){
         return cy.get('[data-test=learning-log-single-workspace] > .toolbar > .tool.geometry');
     }
@@ -93,15 +101,15 @@ class LearningLog {
 
     addLLGraphTile(){
         this.getLLGraphTool().click({force: true});
-        this.getLLGraphTile().last().click();
-        this.getLLGraphTile().last().click(); //Adds a point on the graph
-        this.getLLGraphPointText().last().should('contain', 'A' );
-        this.addLLPointToGraph(40,35);
-        // this.getLLGraphPointText().last().should('contain', 'B' );
-        this.addLLPointToGraph(240,70);
-        // this.getLLGraphPointText().last().should('contain', 'C' );
-        this.addLLPointToGraph(40,170);
-        // this.getLLGraphPointText().last().should('contain', 'D' );
+        // this.getLLGraphTile().last().click();
+        // this.getLLGraphTile().last().click(); //Adds a point on the graph
+        // this.getLLGraphPointText().last().should('contain', 'A' );
+        // this.addLLPointToGraph(40,35);
+        // // this.getLLGraphPointText().last().should('contain', 'B' );
+        // this.addLLPointToGraph(240,70);
+        // // this.getLLGraphPointText().last().should('contain', 'C' );
+        // this.addLLPointToGraph(40,170);
+        // // this.getLLGraphPointText().last().should('contain', 'D' );
     }
 
     addLLImageTile(){

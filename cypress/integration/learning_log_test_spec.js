@@ -4,6 +4,7 @@ import RightNav from '../support/elements/RightNav';
 import LeftNav from '../support/elements/LeftNav';
 import Canvas from '../support/elements/Canvas';
 import GraphToolTile from '../support/elements/GraphToolTile';
+import TextToolTile from '../support/elements/TextToolTile'
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,
@@ -11,23 +12,10 @@ context('Test bottom tabs', function(){
         rightNav = new RightNav,
         leftNav = new LeftNav,
         canvas = new Canvas,
-        graphToolTile = new GraphToolTile;
+        graphToolTile = new GraphToolTile,
+        textToolTile = new TextToolTile;
 
     describe('Test learning log interaction with main canvas', function(){
-        it('verify bottom tabs open to correct content and right-nav tabs is still clickable', function(){
-            bottomNav.getBottomNavTabs().each(($tab,index,$list)=>{
-                let tabName = $tab.text();  //get the tab label
-                cy.wrap($tab).click({force:true}); //click on tab
-                bottomNav.getBottomNavExpandedSpace().should('be.visible');
-                rightNav.getRightNavTabs().each(($rightTab,rightIndex,$rightList)=>{ //click on right nav tabs
-                    cy.wrap($rightTab).click({force:true});
-                    cy.wait(1000);
-                    rightNav.getRightNavExpandedSpace().should('be.visible');
-                    cy.wrap($rightTab).click() //close right nav tab
-                });
-                bottomNav.getBottomNavTabs().should('contain',tabName).click();//closes the bottom nav tab
-            });
-        });
         it('will verify restore of already open canvas in main workspace after opening learning log', function(){
             //     //Open Introduction tab
             //     //Open Introduction canvas
@@ -36,8 +24,8 @@ context('Test bottom tabs', function(){
                 canvas.getCanvasTitle().should('contain',tab);
             //     //Add a text tool and text
                 canvas.addTextTile();
-                canvas.enterText('I will be in the LL_'+tab);
-                canvas.getTextTile().last().should('contain', 'LL_'+tab);
+                textToolTile.enterText('I will be in the LL_'+tab);
+                textToolTile.getTextTile().last().should('contain', 'LL_'+tab);
             //     //Add a graph tool and a shape
                 canvas.addGraphTile();
                 graphToolTile.getGraphTile().last().click();
@@ -130,7 +118,7 @@ context('Test bottom tabs', function(){
             canvas.publishCanvas();
             learningLog.openLearningLogTab();//open learning log
             rightNav.openClassWorkTab();
-            rightNav.openClassWorkSections();
+            // rightNav.openClassWorkSections();
             rightNav.openClassWorkAreaCanvasItem(classWorkTitle);
             cy.get('.workspaces > .right-workspace > .document').should('be.visible'); //verify 2 up view is showing
             //Verify LL_Introduction is on the left and Introduction is on the right

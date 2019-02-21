@@ -1,10 +1,17 @@
 import GraphToolTile from './GraphToolTile'
 import ImageToolTile from './ImageToolTile'
 import DrawToolTile from './DrawToolTile'
+import TextToolTile from './TextToolTile'
+import TableToolTile from './TableToolTile'
+
+
 
 let graphToolTile = new GraphToolTile,
     imageToolTile = new ImageToolTile,
-    drawToolTile = new DrawToolTile;
+    drawToolTile = new DrawToolTile,
+    textToolTile = new TextToolTile,
+    tableToolTile = new TableToolTile;
+
 
 class Canvas{
 
@@ -13,7 +20,6 @@ class Canvas{
     }
 
     getCanvasTitle(){
-        // return cy.get('.group-view > .single-workspace > .document > .titlebar > .title')
         return cy.get('[data-test=document-title]')
     }
 
@@ -60,10 +66,12 @@ class Canvas{
         this.getFourToOneUpViewToggle().click();
         this.getSingleCanvas().should('be.visible');
     }
-
+    singleCanvas(){
+        return '[data-test=canvas]:first'
+    }
     getSingleCanvas(){
         // return cy.get('.canvas-area > .canvas');
-        return cy.get('[data-test=canvas]:first');
+        return cy.get(this.singleCanvas());
     }
 
     getSingleCanvasDocumentContent(){
@@ -77,12 +85,15 @@ class Canvas{
     getLeftSideFourUpView(){
         return cy.get('.left-workspace .canvas-area .four-up')
     }
+    northWestCanvas(){
+        return '.canvas-area .four-up .canvas-container.north-west'
+    }
 
     getNorthEastCanvas(){
         return cy.get('.canvas-area .four-up .canvas-container.north-east');
     }
     getNorthWestCanvas(){
-        return cy.get('.canvas-area .four-up .canvas-container.north-west');
+        return cy.get(this.northWestCanvas());
     }
     getSouthEastCanvas(){
         return cy.get('.canvas-area .four-up .canvas-container.south-east');
@@ -122,35 +133,17 @@ class Canvas{
     getRightSideToolPalette(){
         return cy.get('.right-workspace > .toolbar');
     }
-
-    getTextTool(){
-        return cy.get('.single-workspace > .toolbar > .tool.text');
+    getSelectTool(){
+        return cy.get('.single-workspace .tool.select[title=Select]');
     }
 
     addTextTile(){
-        this.getTextTool().click({force:true});
+        cy.get('.single-workspace .tool.text').click({force:true});
     }
 
-    getTextTile(){
-        return cy.get('.canvas .text-tool.editable');
+    addTableTile(){
+        cy.get('.single-workspace .tool.table').click({force:true});
     }
-
-    enterText(text){
-        this.getTextTile().last().click({force:true});
-        this.getTextTile().last().type(text);
-        this.getTextTile().last().should('contain',text);
-    }
-
-    addText(text){
-        this.getTextTile().last().type(text);
-        this.getTextTile().last().should('contain',text);
-    }
-
-    deleteText(text){
-        this.getTextTile().last().type(text);
-        this.getTextTile().last().should('not.contain', 'delete');
-    }
-
     addGraphTile(){
         cy.get('.single-workspace .tool.geometry').click({force: true});
     }
@@ -170,7 +163,8 @@ class Canvas{
     deleteTile(tile){
         switch(tile) {
             case 'text':
-                this.getTextTile().last().click({force:true});
+                textToolTile.getTextTile().first()
+                    .invoke('attr', 'class', 'selected');
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({force:true});
@@ -181,20 +175,18 @@ class Canvas{
             case 'draw':
                 drawToolTile.getDrawTile().last().click({force:true});
                 break;
-            // case 'table':
-            //     this.getTableTile().last().click({force:true});
-            //     break;
+            case 'table':
+                tableToolTile.getTableTile().last().click({force:true});
+                break;
         }
         this.getDeleteTool().click({force: true});
     }
 
     scrollToBottom(element){
-        // cy.get('.canvas-area > .canvas > .document-content').scrollTo('bottom');
         element.scrollTo('bottom');
     }
 
     scrollToTop(element){
-        // cy.get('.canvas-area > .canvas > .document-content').scrollTo('top') ;
         element.scrollTo('top');
     }
 
@@ -231,12 +223,13 @@ class Canvas{
      }
 
      getRightSideWorkspaceTitle(){
-        // return cy.get('.right-workspace > .document > .titlebar > .title')
          return cy.get('.right-workspace [data-test=document-title]')
      }
+    getRightSideLLTitle(){
+        return cy.get('.right-workspace [data-test=learning-log-title]')
+    }
 
      getLeftSideWorkspaceTitle(){
-        // return cy.get('.left-workspace > .document > .titlebar > .title')
          return cy.get('.left-workspace [data-test=document-title]')
      }
 }

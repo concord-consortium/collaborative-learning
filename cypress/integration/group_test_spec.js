@@ -1,8 +1,10 @@
 import LeftNav from '../support/elements/LeftNav'
 import Canvas from '../support/elements/Canvas'
+import TextToolTile from '../support/elements/TextToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
+const textToolTile = new TextToolTile;
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
 context('Test group functionalities', function(){
@@ -24,9 +26,12 @@ context('Test group functionalities', function(){
                     leftNav.openToWorkspace('Now What');
                     cy.wait(3000);
                     canvas.addTextTile();
-                    canvas.enterText('This is to test the 4-up view of S'+studentArr[i]);
-                    canvas.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
+                    textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
+                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
                     canvas.addGraphTile();
+                    canvas.addTableTile();
+                    canvas.addDrawTile();
+                    canvas.addImageTile();
                     canvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);
                 }
@@ -63,8 +68,8 @@ context('Test group functionalities', function(){
             // });
             it('will verify editing own canvas is still possible in 4-up view', function(){
                 canvas.addTextTile();
-                canvas.getTextTile().last().type('Hello World!');
-                canvas.getTextTile().last().should('contain', 'Hello World');
+                textToolTile.getTextTile().first().type('Hello World!');
+                textToolTile.getTextTile().first().should('contain', 'Hello World');
                 canvas.addGraphTile();
                 // cy.get('.canvas-container.north-west > .canvas-scaler > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool').last().click();
                 // cy.get('.canvas-container.north-west > .canvas-scaler > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me  > .geometry-tool > .JXGtext').last().should('contain', 'A' );
@@ -79,6 +84,9 @@ context('Test group functionalities', function(){
                 canvas.openOneUpViewFromFourUp(); //clean up
 
             });
+            it('will try to delete elements from other canvases in 4 up view', function(){
+                //TODO
+            })
 
         //     //TODO: have to figure out drag and drop
         //     it('will copy text from one canvas to own canvas', function(){
