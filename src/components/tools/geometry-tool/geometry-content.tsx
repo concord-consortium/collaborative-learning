@@ -7,7 +7,7 @@ import { GeometryContentModelType, setElementColor } from "../../../models/tools
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -15,7 +15,7 @@ import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { JXGChange, ILinkProperties, JXGElement } from "../../../models/tools/geometry/jxg-changes";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
@@ -507,9 +507,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      // XXX: Hack - rescaling the board should return the new axes
-      setTimeout(() => this.handleCreateAxes(board));
+      const boardElems = content.rescaleBoard(board, xMax, yMax, xMin, yMin) as JXGElement[];
+      if (boardElems) {
+        const axes = boardElems.filter(el => isAxis(el)) as JXG.Line[];
+        axes.forEach(axis => this.handleCreateAxis(axis));
+        setTimeout(() => {
+          const newBoard = boardElems.find(el => isBoard(el)) as JXG.Board;
+          if (newBoard) {
+            const newAxes = newBoard.objectsList.filter(isAxis);
+            console.log(axes.map(axis => axis.id));
+            console.log(newAxes.map(axis => axis.id));
+            newAxes.forEach(this.handleCreateAxis);
+          }
+        });
+      }
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -1099,16 +1110,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
-    this.handleCreateAxes(board);
+    board.objectsList.filter(el => isAxis(el)).forEach(this.handleCreateAxis);
   }
 
-  private handleCreateAxes = (board: JXG.Board) => {
+  private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
       this.handleOpenAxisSettings();
     };
 
-    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
+    axis.label && axis.label.on("down", handlePointerDown);
   }
 
   private handleCreatePoint = (point: JXG.Point) => {

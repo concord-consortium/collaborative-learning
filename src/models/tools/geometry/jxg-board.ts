@@ -106,6 +106,7 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number) {
     minorTicks: yMinorTicks,
     drawZero: false
   });
+  return [xAxis, yAxis];
 }
 
 export const boardChangeAgent: JXGChangeAgent = {
@@ -161,12 +162,12 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          addAxes(board, unitX, unitY);
+          const axes = addAxes(board, unitX, unitY);
+          board.update();
+          return [board, ...axes];
         }
       }
-      board.update();
     }
-    return board;
   },
 
   delete: (board: JXG.Board, change: JXGChange) => {
