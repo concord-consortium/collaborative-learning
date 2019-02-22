@@ -51,7 +51,7 @@ interface IState extends SizeMeProps {
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
-  settingsOpen: boolean;
+  axisSettingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -168,7 +168,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           syncedChanges: 0,
           disableRotate: false,
           redoStack: [],
-          settingsOpen: false,
+          axisSettingsOpen: false,
         };
 
   private elementId: string;
@@ -333,8 +333,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSettingsEditor() {
-    const { board, settingsOpen } = this.state;
-    if (board && settingsOpen) {
+    const { board, axisSettingsOpen } = this.state;
+    if (board && axisSettingsOpen) {
       return (
         <SettingsDialog
           key="editor"
@@ -465,7 +465,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private closeSettings = () => {
-    this.setState({ settingsOpen: false });
+    this.setState({ axisSettingsOpen: false });
   }
 
   // TODO: Create comments after the dialog is complete + prevent empty comments
@@ -490,8 +490,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleOpenSettings = () => {
-    this.setState({ settingsOpen: true });
+  private handleOpenAxisSettings = () => {
+    this.setState({ axisSettingsOpen: true });
   }
 
   private handleUpdateComment = (commentId: string, text: string = "") => {
@@ -511,7 +511,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // XXX: Hack - rescaling the board should return the new axes
       setTimeout(() => this.handleCreateAxes(board));
     }
-    this.setState({ settingsOpen: false });
+    this.setState({ axisSettingsOpen: false });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -1104,7 +1104,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateAxes = (board: JXG.Board) => {
     const handlePointerDown = (evt: any) => {
-      this.handleOpenSettings();
+      this.handleOpenAxisSettings();
     };
 
     const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
