@@ -3,7 +3,8 @@ import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelTy
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
-import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
+import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
+          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
@@ -20,8 +21,7 @@ import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
 
-const kGeometryDefaultWidth = 480;
-export const kGeometryDefaultHeight = 320;
+export { kGeometryDefaultHeight };
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -49,14 +49,21 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
 }
 
 function defaultGeometryBoardChange(overrides?: JXGProperties) {
+  // TODO: refactor this
+  const [xMin, yMax, xMax, yMin] = getBoardBounds();
+  const unitX = kGeometryDefaultPixelsPerUnit;
+  const unitY = kGeometryDefaultPixelsPerUnit;
+  const xBufferRange = kAxisBuffer / unitX;
+  const yBufferRange = kAxisBuffer / unitY;
+  const boundingBox = [xMin - xBufferRange, yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: {
                   axis: true,
-                  boundingBox: getBoardBounds(),
-                  unitX: kGeometryDefaultPixelsPerUnit,
-                  unitY: kGeometryDefaultPixelsPerUnit,
+                  boundingBox,
+                  unitX,
+                  unitY,
                   ...overrides
                 }
   };
@@ -353,16 +360,43 @@ export const GeometryContentModel = types
     }
 
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
-      const scaledWidth = width / (scale || 1);
-      const scaledHeight = height / (scale || 1);
+      // JSX Graph canvasWidth and canvasHeight are truncated to integers,
+      // so we need to do the same to get the new canvasWidth and canvasHeight values
+      const scaledWidth = Math.trunc(width) / (scale || 1);
+      const scaledHeight = Math.trunc(height) / (scale || 1);
+      const widthMultiplier = (scaledWidth - kAxisBuffer * 2) / (board.canvasWidth - kAxisBuffer * 2);
+      const heightMultiplier = (scaledHeight - kAxisBuffer * 2) / (board.canvasHeight - kAxisBuffer * 2);
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
-      const [xMin, , , yMin] = board.attr.boundingbox;
-      const newXMax = scaledWidth / unitX + xMin;
-      const newYMax = scaledHeight / unitY + yMin;
+      // Remove the buffers to correct the graph proportions
+      const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
+      const xBufferRange = kAxisBuffer / unitX;
+      const yBufferRange = kAxisBuffer / unitY;
+      // Add the buffers back post-scaling
+      const newBoundingBox: JXG.BoundingBox = [
+        xMin * widthMultiplier - xBufferRange,
+        yMax * heightMultiplier + yBufferRange,
+        xMax * widthMultiplier + xBufferRange,
+        yMin * heightMultiplier - yBufferRange
+      ];
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
-      board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
+      board.setBoundingBox(newBoundingBox, false);
       board.update();
+    }
+
+    function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
+      const { canvasWidth, canvasHeight } = board;
+      const width = canvasWidth - kAxisBuffer * 2;
+      const height = canvasHeight - kAxisBuffer * 2;
+      const unitX = width / (xMax - xMin);
+      const unitY = height / (yMax - yMin);
+      const change: JXGChange = {
+        operation: "update",
+        target: "board",
+        targetID: board.id,
+        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
+      };
+      _applyChange(undefined, change);
     }
 
     function updateScale(board: JXG.Board, scale: number) {
@@ -880,6 +914,7 @@ export const GeometryContentModel = types
       actions: {
         initializeBoard,
         destroyBoard,
+        rescaleBoard,
         resizeBoard,
         updateScale,
         addChange,

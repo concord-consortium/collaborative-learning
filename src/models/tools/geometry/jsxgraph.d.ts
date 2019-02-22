@@ -24,11 +24,13 @@ declare namespace JXG {
     Value: () => number;
   }
 
+  type BoundingBox = [number, number, number, number];
+
   class Board {
     id: string;
     attr: {
       // [x1,y1,x2,y2] upper left corner, lower right corner
-      boundingbox: [number, number, number, number]
+      boundingbox: BoundingBox
     };
     axis: boolean;
     canvasWidth: number;
@@ -50,6 +52,7 @@ declare namespace JXG {
     zoomFactor: number;
     zoomX: number;
     zoomY: number;
+    options: any;
 
     objects: { [id: string]: GeometryElement };
     objectsList: GeometryElement[];
@@ -64,12 +67,15 @@ declare namespace JXG {
 
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => JXG.Board;
-    setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => JXG.Board;
+    getBoundingBox: () => BoundingBox;
+    setBoundingBox: (boundingBox: BoundingBox, keepaspectratio?: boolean) => JXG.Board;
     showInfobox: (value: boolean) => JXG.Board;
     update: (drag?: JXG.GeometryElement) => JXG.Board;
     fullUpdate: () => JXG.Board;
     suspendUpdate: () => JXG.Board;
     unsuspendUpdate: () => JXG.Board;
+    addGrid: () => void;
+    removeGrids: () => void;
   }
 
   class Coords {
@@ -141,6 +147,7 @@ declare namespace JXG {
     parentPolygon?: JXG.Polygon;
     getRise: () => number;
     getSlope: () => number;
+    label?: JXG.Text;
   }
 
   class Text extends CoordsElement {

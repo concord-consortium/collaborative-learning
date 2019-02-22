@@ -12,6 +12,8 @@ export interface JXGProperties {
   id?: string;
   position?: JXGCoordPair;
   url?: string;
+  xMin?: number;
+  yMin?: number;
   unitX?: number;
   unitY?: number;
   [key: string]: any;
