@@ -395,7 +395,7 @@ export const GeometryContentModel = types
         targetID: board.id,
         properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
       };
-      _applyChange(undefined, change);
+      return _applyChange(board, change);
     }
 
     function updateScale(board: JXG.Board, scale: number) {

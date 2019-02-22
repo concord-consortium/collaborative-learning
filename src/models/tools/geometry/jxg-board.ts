@@ -166,6 +166,7 @@ export const boardChangeAgent: JXGChangeAgent = {
       }
       board.update();
     }
+    return board;
   },
 
   delete: (board: JXG.Board, change: JXGChange) => {
