@@ -1,5 +1,36 @@
 # Changelog
 
+## Version 0.5.0 - released February 22, 2019
+
+- Curriculum
+  - Moving Straight Ahead unit
+- Geometry Tool
+  - Features
+    - Toolbar
+    - Movable line
+    - Undo/redo
+    - Link Tables to Geometry
+    - Import schema for authoring
+    - Comment objects
+    - Axis scaling
+  - Bugs
+    - Fix polygon vertex deletion
+    - Fix polygon rotation bug
+    - Fix polygon copy bug
+    - Fix snap behavior of copied points
+    - Fix bugs with polygons created from linked points
+- Table Tool
+  - Features
+    - Link Tables to Geometry
+    - Copy/paste table rows
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 476,664 bytes | 0.3% |
+| index.js | 3,891,351 bytes | 0.2% |
+
 ## Version 0.4.0 - released January 28, 2019
 
 - Teacher: group- and user-specific supports by section
@@ -26,10 +57,10 @@
 
 | File | Size | % Change from Previous Release |
 |---|---|---|
-| index.css | 468,424 bytes | 47% |
-| index.js | 3,856,819 bytes | 31% |
+| index.css | 468,424 bytes | 1.8% |
+| index.js | 3,856,819 bytes | 0.9% |
 
-## Version 0.3.0 - released January 11, 2018
+## Version 0.3.0 - released January 11, 2019
 
 - Feature: Teacher-authored class-wide supports
 - Geometry: Fix overlapping polygon edge selection
@@ -44,7 +75,7 @@
 | index.css | 319,536 bytes | 0.3% |
 | index.js | 2,945,232 bytes | 0.2% |
 
-## Version 0.2.2 - released January 7, 2018
+## Version 0.2.2 - released January 7, 2019
 
 - Geometry: Improve initialization performance
 
@@ -55,7 +86,7 @@
 | index.css | 318,477 bytes | 0.0% |
 | index.js | 2,938,753 bytes | 0.0% |
 
-## Version 0.2.1 - released January 6, 2018
+## Version 0.2.1 - released January 6, 2019
 
 - Geometry: Fix polygon edge drag bug
 - Internal: Add support for multiple units
