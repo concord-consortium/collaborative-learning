@@ -92,7 +92,7 @@ export default class SettingsDialog extends React.Component<IProps, IState> {
     const yMax = parseFloat(this.state.yMax);
     const xMin = parseFloat(this.state.xMin);
     const yMin = parseFloat(this.state.yMin);
-    if (!isNaN(xMax) && !isNaN(yMax) && !isNaN(xMin) && !isNaN(yMin)) {
+    if (isFinite(xMax) && isFinite(yMax) && isFinite(xMin) && isFinite(yMin)) {
       onAccept(xMax, yMax, xMin, yMin);
     } else {
       this.handleCancel();

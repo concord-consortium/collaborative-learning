@@ -9,7 +9,7 @@ export const kGeometryDefaultAxisMin = 0;
 export const kAxisBuffer = 20;
 export const isBoard = (v: any) => v instanceof JXG.Board;
 export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
-export const isAxisLabel = (v: any) => v instanceof JXG.Text && values(v.ancestors).find(el => isAxis(el));
+export const isAxisLabel = (v: any) => v instanceof JXG.Text && !!values(v.ancestors).find(el => isAxis(el));
 export const getAxisType = (v: any) => {
   // stdform encodes orientation of axes
   const [ , stdFormY, stdFormX] = v.stdform;
@@ -64,8 +64,8 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
 
 export function guessUserDesiredBoundingBox(board: JXG.Board) {
   const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
-  const unitX = board.unitX || board.canvasWidth / (xMax - xMin);
-  const unitY = board.unitY || board.canvasHeight / (yMax - yMin);
+  const unitX = board.unitX;
+  const unitY = board.unitY;
   const xBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
 

@@ -54,8 +54,3 @@
   margin: 0 1em 0 0;
   font-size: 12pt;
 }
-
-.nc-dialog-row {
-  display: flex;
-  flex-direction: row;
-}

@@ -237,7 +237,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
         handleDelete: this.handleDelete,
-        handleOpenSettings: this.handleOpenSettings
       };
       onSetToolButtonHandlers(handlers);
     }
