@@ -125,7 +125,10 @@ export const boardChangeAgent: JXGChangeAgent = {
     const props = combineProperties(domElementID, defaults, change.properties, overrides);
     const board = isBoard(boardDomId) ? boardDomId as JXG.Board : JXG.JSXGraph.initBoard(domElementID, props);
     addAxes(board, unitX, unitY);
-    props.boundingBox && board.setBoundingBox(props.boundingBox);
+    if (props.boundingBox && props.boundingBox.every((val: number) => isFinite(val))) {
+      board.setBoundingBox(props.boundingBox);
+    }
+
     return board;
   },
 
