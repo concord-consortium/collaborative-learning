@@ -8,7 +8,7 @@ import { GeometryContentModelType, setElementColor } from "../../../models/tools
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -30,6 +30,7 @@ import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovab
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import MovableLineDialog from "./movable-line-dialog";
+import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -53,6 +54,7 @@ interface IState extends SizeMeProps {
   selectedComment?: JXG.Text;
   selectedLine?: JXG.Line;
   showInvalidTableDataAlert?: boolean;
+  axisSettingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -168,7 +170,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {
           syncedChanges: 0,
           disableRotate: false,
-          redoStack: []
+          redoStack: [],
+          axisSettingsOpen: false,
         };
 
   private elementId: string;
@@ -236,7 +239,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleDelete: this.handleDelete
+        handleDelete: this.handleDelete,
       };
       onSetToolButtonHandlers(handlers);
     }
@@ -304,6 +307,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return ([
       this.renderCommentEditor(),
       this.renderLineEditor(),
+      this.renderSettingsEditor(),
       <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -343,6 +347,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
+        />
+      );
+    }
+  }
+
+  private renderSettingsEditor() {
+    const { board, axisSettingsOpen } = this.state;
+    if (board && axisSettingsOpen) {
+      return (
+        <AxisSettingsDialog
+          key="editor"
+          board={board}
+          onAccept={this.handleUpdateSettings}
+          onClose={this.closeSettings}
         />
       );
     }
@@ -494,6 +512,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedLine: undefined });
   }
 
+  private closeSettings = () => {
+    this.setState({ axisSettingsOpen: false });
+  }
+
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -516,6 +538,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleOpenAxisSettings = () => {
+    this.setState({ axisSettingsOpen: true });
+  }
+
   private handleUpdateComment = (commentId: string, text: string = "") => {
     const { board } = this.state;
     const content = this.getContent();
@@ -532,6 +558,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const props = [{position: point1}, {position: point2}];
     this.applyChange(() => content.updateObjects(board, ids, props));
     this.setState({ selectedLine: undefined });
+  }
+
+  private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      // XXX: Hack - rescaling the board should return the new axes
+      setTimeout(() => this.handleCreateAxes(board));
+    }
+    this.setState({ axisSettingsOpen: false });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -1076,9 +1113,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // clicks on visible points and edges don't create new points
       for (const elt of board.objectsList) {
-        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt)) &&
+        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt) || isAxisLabel(elt)) &&
             elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
@@ -1124,6 +1160,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
+    this.handleCreateAxes(board);
+  }
+
+  private handleCreateAxes = (board: JXG.Board) => {
+    const handlePointerDown = (evt: any) => {
+      this.handleOpenAxisSettings();
+    };
+
+    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
   }
 
   private handleCreatePoint = (point: JXG.Point) => {
