@@ -22,6 +22,11 @@ export function defaultTableContent() {
                           } as any);
 }
 
+export function isLinkableValue(value: number | string | undefined) {
+  if ((value == null) || (value === "")) return false;
+  return isFinite(Number(value));
+}
+
 export function canonicalizeValue(value: number | string | undefined) {
   if (value == null) return 0;
   const num = Number(value);
@@ -401,6 +406,18 @@ export const TableContentModel = types
         dataSet.setCanonicalCaseValues([caseValues]);
       }
       return dataSet;
+    },
+    isValidForGeometryLink() {
+      const dataSet = DataSet.create();
+      self.applyChanges(dataSet);
+
+      const attrIds = dataSet.attributes.map(attr => attr.id);
+      for (const aCase of dataSet.cases) {
+        if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
+          return false;
+        }
+      }
+      return true;
     }
   }));
 

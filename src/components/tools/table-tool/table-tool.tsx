@@ -2,6 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
+import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
 import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
@@ -107,6 +108,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}
           attrValueFormatter={this.attrValueFormatter}
+          cellEditorComponent={LinkedTableCellEditor}
+          cellEditorParams={{ metadata: this.getContent().metadata }}
           defaultPrecision={1}
           itemFlags={itemFlags}
           readOnly={readOnly}

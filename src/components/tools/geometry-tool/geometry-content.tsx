@@ -1,6 +1,7 @@
 import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
+import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IToolButtonHandlers, SizeMeProps } from "./geometry-shared";
 import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
@@ -50,6 +51,7 @@ interface IState extends SizeMeProps {
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
+  showInvalidTableDataAlert?: boolean;
 }
 
 interface JXGPtrEvent {
@@ -308,7 +310,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
-      this.renderRotateHandle()
+      this.renderRotateHandle(),
+      this.renderInvalidTableDataAlert()
     ]);
   }
 
@@ -342,6 +345,30 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         scale={this.props.scale}
         onRotate={this.handleRotatePolygon} />
     );
+  }
+
+  private renderInvalidTableDataAlert() {
+    const { showInvalidTableDataAlert } = this.state;
+    if (!showInvalidTableDataAlert) return;
+
+    return (
+      <Alert
+          confirmButtonText="OK"
+          icon="error"
+          intent={Intent.DANGER}
+          isOpen={true}
+          onClose={this.handleCloseInvalidTableDataAlert}
+          canEscapeKeyCancel={true}
+      >
+        <p>
+          Linked data must be numeric. Please edit the table values so that all cells contain numbers.
+        </p>
+      </Alert>
+    );
+  }
+
+  private handleCloseInvalidTableDataAlert = () => {
+    this.setState({ showInvalidTableDataAlert: false });
   }
 
   private getContent() {
@@ -776,6 +803,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const tableContent = this.getTableContent(dragTileId);
     if (tableContent && parsedContent && board) {
+      if (!tableContent.isValidForGeometryLink()) {
+        this.setState({ showInvalidTableDataAlert: true });
+        return;
+      }
       const dataSet = tableContent.getSharedData();
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
