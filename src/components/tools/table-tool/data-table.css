@@ -28,30 +28,13 @@
 
 .ag-cell-edit-input {
   font-size: 14px;
-  padding-left: 8px;
+  text-align: center;
+}
+
+.ag-cell-edit-input.invalid-cell {
+  color: red;
 }
 
 .nc-table-menu-popover {
   margin-left: 8px;
 }
-
-.nc-attribute-name-prompt {
-  padding: 1em;
-  font-size: 12pt;
-}
-
-.nc-attribute-name-input {
-  margin: 0 1em;
-  font-size: 12pt;
-}
-
-.nc-dialog-buttons {
-  margin: 2em 0 0 0;
-}
-
-.nc-dialog-button {
-  float: right;
-  margin: 0 1em 0 0;
-  font-size: 12pt;
-}
-

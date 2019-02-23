@@ -82,6 +82,28 @@ context('Tests for graph and table integration', function(){
         describe('text axes changes', function(){
             it('will change the name of the axis in the table', function(){
 
+=======
+            it('will change the name of the x-axis in the table', function(){
+                let id='';
+                tableToolTile.renameColumn('x', 'mars');
+                graphToolTile.getGraphAxisLabelId('x')
+                    .then((id)=>{
+                        id='#'.concat(id);
+                        cy.get(id).then(($el)=>{
+                            expect($el.text()).to.contain('mars');                        })
+                    });
+            });
+            it('will change the name of the y-axis in the table', function(){
+                let id='';
+                tableToolTile.renameColumn('y', 'venus');
+                graphToolTile.getGraphAxisLabelId('y')
+                    .then((id)=> {
+                        id = '#'.concat(id);
+                        cy.get(id).then(($el) => {
+                            expect($el.text()).to.contain('venus');
+                        });
+                    });
+>>>>>>> 2bf807a3ae596054207f83a79efdd6f3cee72330
             });
         });
         describe('normal graph interactions', function(){
@@ -98,6 +120,9 @@ context('Tests for graph and table integration', function(){
             it('will add an image to a graph that is connected to a table', function(){
 
             });
+        });
+        describe('test non-numeric entries in table', function(){
+
         });
         describe('Test disconnecting the table', function(){
             it('will delete the connected table', function(){
@@ -119,7 +144,7 @@ context('Tests for graph and table integration', function(){
             tableToolTile.getTableCell().first().type('5');
             tableToolTile.getTableCell().last().type('5{enter}');
             graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-            cy.log(graphToolTile.getGraphPointCoordinates());
+            graphToolTile.getGraphPointCoordinates().should('contain','(5, 5)');
         });
         it('will change the name of the axis in the table', function(){
 
@@ -139,25 +164,10 @@ context('Tests for graph and table integration', function(){
 
 context('Test normal graph functions in a connected graph', function(){
     it('setup 2 - connect table to graph', function(){
-        const dataTransfer = new DataTransfer;
-
         leftNav.openToWorkspace('Now What');
         canvas.addTableTile();
         canvas.addGraphTile();
-    });
-    it('will connect table to graph', function(){
-        const dataTransfer = new DataTransfer;
-
-        tableToolTile.getTableTile().last()
-            .trigger('dragstart', {dataTransfer});
-        graphToolTile.getGraphTile()
-            .trigger('drop', {dataTransfer});
-        tableToolTile.getTableTile()
-            .trigger('dragend');
-        tableToolTile.getTableCell().first().type('5');
-        tableToolTile.getTableCell().last().type('5{enter}');
-        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-        // graphToolTile.getGraphPointCoordinates().should('contain','(5,5)');
+        connectTableToGraph();
     });
     it('will add a polygon', function(){
 

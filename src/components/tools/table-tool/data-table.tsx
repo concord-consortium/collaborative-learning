@@ -8,7 +8,7 @@ import { IAttribute, IValueType } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
 import { CellEditingStartedEvent, CellEditingStoppedEvent, ColDef, Column,
-          ColumnApi, GridApi, GridCellDef, GridReadyEvent, RowNode, SortChangedEvent,
+          ColumnApi, GridApi, GridCellDef, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
           TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams } from "ag-grid-community";
 import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
@@ -44,6 +44,8 @@ interface IProps {
   readOnly?: boolean;
   indexValueGetter?: (params: ValueGetterParams) => string;
   attrValueFormatter?: (params: ValueFormatterParams) => string;
+  cellEditorComponent?: new () => ICellEditorComp;
+  cellEditorParams?: any;
   autoSizeColumns?: boolean;
   defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
@@ -96,6 +98,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   private gridColumnDefs: ColDef[] = [];
   private gridRowData: Array<IGridRow | undefined> = [];
+  private components = this.props.cellEditorComponent
+                        ? { clientCellEditor: this.props.cellEditorComponent }
+                        : undefined;
   private localRow: ICaseCreation = {};
   private checkForEnterAfterCellEditingStopped = false;
   private checkForEnterAfterLocalDataEntry = false;
@@ -335,7 +340,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           return 0;
         }
         return floatA - floatB;
-      }
+      },
+      cellEditor: this.props.cellEditorComponent ? "clientCellEditor" : undefined,
+      cellEditorParams: this.props.cellEditorParams,
     });
   }
 
@@ -763,6 +770,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           enableCellChangeFlash={true}
           onCellEditingStarted={this.handleCellEditingStarted}
           onCellEditingStopped={this.handleCellEditingStopped}
+          components={this.components}
           tabToNextCell={this.handleTabToNextCell}
           postSort={this.handlePostSort}
           onSortChanged={this.handleSortChanged}

@@ -3,11 +3,13 @@ import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelTy
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
         } from "./jxg-changes";
-import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAxisLabels } from "./jxg-board";
+import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
+          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
-import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
-import { isPolygon, isVisibleEdge, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
+import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
+import { isLinkedPoint } from "./jxg-table-link";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -19,8 +21,7 @@ import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
 
-const kGeometryDefaultWidth = 480;
-export const kGeometryDefaultHeight = 320;
+export { kGeometryDefaultHeight };
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -48,14 +49,21 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
 }
 
 function defaultGeometryBoardChange(overrides?: JXGProperties) {
+  // TODO: refactor this
+  const [xMin, yMax, xMax, yMin] = getBoardBounds();
+  const unitX = kGeometryDefaultPixelsPerUnit;
+  const unitY = kGeometryDefaultPixelsPerUnit;
+  const xBufferRange = kAxisBuffer / unitX;
+  const yBufferRange = kAxisBuffer / unitY;
+  const boundingBox = [xMin - xBufferRange, yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: {
                   axis: true,
-                  boundingBox: getBoardBounds(),
-                  unitX: kGeometryDefaultPixelsPerUnit,
-                  unitY: kGeometryDefaultPixelsPerUnit,
+                  boundingBox,
+                  unitX,
+                  unitY,
                   ...overrides
                 }
   };
@@ -161,6 +169,11 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   }
 }
 
+function isUndoableChange(change: JXGChange) {
+  if ((change.operation === "delete") && (change.target === "tableLink")) return false;
+  return true;
+}
+
 export const GeometryContentModel = types
   .model("GeometryContent", {
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
@@ -203,17 +216,18 @@ export const GeometryContentModel = types
   }))
   .views(self => ({
     getDeletableSelectedIds(board: JXG.Board) {
-      return self.selectedIds
-                  .filter(id => {
-                    const elt = board.objects[id];
-                    return elt && !elt.getAttribute("fixed") && !elt.getAttribute("clientUndeletable");
-                  });
+      // returns the ids in creation order
+      return board.objectsList
+                  .filter(obj => self.isSelected(obj.id) &&
+                          !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
+                  .map(obj => obj.id);
     },
     canUndo() {
       const hasUndoableChanges = self.changes.length > 1;
       if (!hasUndoableChanges) return false;
       const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
       const lastChangeParsed: JXGChange = lastChange && safeJsonParse(lastChange);
+      if (!isUndoableChange(lastChangeParsed)) return false;
       const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
       if (!lastChangeLinks) return true;
       const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
@@ -279,7 +293,6 @@ export const GeometryContentModel = types
   }))
   .extend(self => {
 
-    let viewCount = 0;
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
@@ -347,16 +360,43 @@ export const GeometryContentModel = types
     }
 
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
-      const scaledWidth = width / (scale || 1);
-      const scaledHeight = height / (scale || 1);
+      // JSX Graph canvasWidth and canvasHeight are truncated to integers,
+      // so we need to do the same to get the new canvasWidth and canvasHeight values
+      const scaledWidth = Math.trunc(width) / (scale || 1);
+      const scaledHeight = Math.trunc(height) / (scale || 1);
+      const widthMultiplier = (scaledWidth - kAxisBuffer * 2) / (board.canvasWidth - kAxisBuffer * 2);
+      const heightMultiplier = (scaledHeight - kAxisBuffer * 2) / (board.canvasHeight - kAxisBuffer * 2);
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
-      const [xMin, , , yMin] = board.attr.boundingbox;
-      const newXMax = scaledWidth / unitX + xMin;
-      const newYMax = scaledHeight / unitY + yMin;
+      // Remove the buffers to correct the graph proportions
+      const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
+      const xBufferRange = kAxisBuffer / unitX;
+      const yBufferRange = kAxisBuffer / unitY;
+      // Add the buffers back post-scaling
+      const newBoundingBox: JXG.BoundingBox = [
+        xMin * widthMultiplier - xBufferRange,
+        yMax * heightMultiplier + yBufferRange,
+        xMax * widthMultiplier + xBufferRange,
+        yMin * heightMultiplier - yBufferRange
+      ];
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
-      board.setBoundingBox([xMin, newYMax, newXMax, yMin], unitX === unitY);
+      board.setBoundingBox(newBoundingBox, false);
       board.update();
+    }
+
+    function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
+      const { canvasWidth, canvasHeight } = board;
+      const width = canvasWidth - kAxisBuffer * 2;
+      const height = canvasHeight - kAxisBuffer * 2;
+      const unitX = width / (xMax - xMin);
+      const unitY = height / (yMax - yMin);
+      const change: JXGChange = {
+        operation: "update",
+        target: "board",
+        targetID: board.id,
+        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
+      };
+      _applyChange(undefined, change);
     }
 
     function updateScale(board: JXG.Board, scale: number) {
@@ -751,8 +791,11 @@ export const GeometryContentModel = types
         const obj = board.objects[id];
         const props = properties[id];
         if (obj) {
-          let x: number;
-          let y: number;
+          // make any final adjustments to properties
+          if (isLinkedPoint(obj)) {
+            // copies of linked points should snap
+            assign(props, { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit });
+          }
           const change: JXGChange = {
                   operation: "create",
                   properties: { ...props, id: newIds[id], name: obj.name }
@@ -770,6 +813,8 @@ export const GeometryContentModel = types
               }
               break;
             case "point":
+              let x: number;
+              let y: number;
               [ , x, y] = (obj as JXG.Point).coords.usrCoords;
               assign(change, {
                 target: "point",
@@ -795,8 +840,8 @@ export const GeometryContentModel = types
     function deleteSelection(board: JXG.Board) {
       const selectedIds = self.getDeletableSelectedIds(board);
 
-      // remove points from polygons if possible
-      removePointsToBeDeletedFromPolygons(board, selectedIds);
+      // remove points from polygons; identify additional objects to delete
+      selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
 
       self.deselectAll(board);
       board.showInfobox(false);
@@ -842,9 +887,6 @@ export const GeometryContentModel = types
 
     return {
       views: {
-        get nextViewId() {
-          return ++viewCount;
-        },
         get isUserResizable() {
           return true;
         },
@@ -872,6 +914,7 @@ export const GeometryContentModel = types
       actions: {
         initializeBoard,
         destroyBoard,
+        rescaleBoard,
         resizeBoard,
         updateScale,
         addChange,

@@ -2,6 +2,17 @@
 const nanoid = require("nanoid");
 
 /*
+ * castArrayCopy()
+ *
+ * returns an array for simple items, and a copy of the array for arrays
+ */
+export function castArrayCopy(itemOrArray: any) {
+  return Array.isArray(itemOrArray)
+          ? itemOrArray.slice()
+          : [itemOrArray];
+}
+
+/*
  * safeJsonParse()
  *
  * returns undefined on error rather than throwing an exception

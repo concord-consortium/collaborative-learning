@@ -1,13 +1,14 @@
 import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
+import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IToolButtonHandlers, SizeMeProps } from "./geometry-shared";
 import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -23,10 +24,13 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { assign, castArray, debounce, each, filter, find, keys, size as _size } from "lodash";
-import { isVisibleMovableLine, isMovableLine } from "../../../models/tools/geometry/jxg-movable-line";
+import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
+import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineEquation,
+  handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import MovableLineDialog from "./movable-line-dialog";
+import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
 import "./geometry-tool.sass";
@@ -37,7 +41,6 @@ export interface IProps extends IGeometryProps {
 }
 
 interface IState extends SizeMeProps {
-  elementId?: string;
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
@@ -49,6 +52,9 @@ interface IState extends SizeMeProps {
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
+  selectedLine?: JXG.Line;
+  showInvalidTableDataAlert?: boolean;
+  axisSettingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -90,20 +96,18 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
 
   return { newElements: newElements.length ? newElements : undefined, syncedChanges };
 }
+
+let sViewCount = 0;
+function nextViewId() {
+  return ++sViewCount;
+}
 ​
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { context, model: { id, content }, scale } = nextProps;
-    if (!prevState.elementId) {
-      // elide uuid for readability/debugging
-      const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
-      const viewId = (content as GeometryContentModelType).nextViewId;
-      return { content, elementId: `${context}-${debugId}-${viewId}` };
-    }
-
+    const { model: { content }, scale } = nextProps;
     if (!prevState.board) { return null; }
 
     const nextState: IState = {} as any;
@@ -166,9 +170,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {
           syncedChanges: 0,
           disableRotate: false,
-          redoStack: []
+          redoStack: [],
+          axisSettingsOpen: false,
         };
 
+  private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
 
@@ -221,15 +227,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    if (this.props.onSetToolButtonHandlers) {
+    const { context, model: { id, content }, onSetToolButtonHandlers } = props;
+
+    // elide uuid for readability/debugging
+    const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
+    this.elementId = `${context}-${debugId}-${nextViewId()}`;
+
+    if (onSetToolButtonHandlers) {
       const handlers: IToolButtonHandlers = {
         handleDuplicate: this.handleDuplicate,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleDelete: this.handleDelete
+        handleDelete: this.handleDelete,
       };
-      this.props.onSetToolButtonHandlers(handlers);
+      onSetToolButtonHandlers(handlers);
     }
   }
 
@@ -294,7 +306,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const classes = `geometry-content ${editableClass}`;
     return ([
       this.renderCommentEditor(),
-      <div id={this.state.elementId} key="jsxgraph"
+      this.renderLineEditor(),
+      this.renderSettingsEditor(),
+      <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
           tabIndex={this.props.tabIndex}
@@ -302,7 +316,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
-      this.renderRotateHandle()
+      this.renderRotateHandle(),
+      this.renderInvalidTableDataAlert()
     ]);
   }
 
@@ -322,18 +337,73 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private renderLineEditor() {
+    const line = this.state.selectedLine;
+    if (line) {
+      return (
+        <MovableLineDialog
+          key="editor"
+          isOpen={line != null}
+          onAccept={this.handleUpdateLine}
+          onClose={this.closeLineDialog}
+          line={line}
+        />
+      );
+    }
+  }
+
+  private renderSettingsEditor() {
+    const { board, axisSettingsOpen } = this.state;
+    if (board && axisSettingsOpen) {
+      return (
+        <AxisSettingsDialog
+          key="editor"
+          board={board}
+          onAccept={this.handleUpdateSettings}
+          onClose={this.closeSettings}
+        />
+      );
+    }
+  }
+
   private renderRotateHandle() {
     const { board, disableRotate } = this.state;
     const selectedPolygon = board && !disableRotate && !this.props.readOnly
                               ? this.getContent().getOneSelectedPolygon(board) : undefined;
+    const rotatablePolygon = selectedPolygon && selectedPolygon.vertices.every(pt => !pt.getAttribute("fixed"))
+                              ? selectedPolygon : undefined;
     return (
       <RotatePolygonIcon
         key="rotate-polygon-icon"
         board={board}
-        polygon={selectedPolygon}
+        polygon={rotatablePolygon}
         scale={this.props.scale}
         onRotate={this.handleRotatePolygon} />
     );
+  }
+
+  private renderInvalidTableDataAlert() {
+    const { showInvalidTableDataAlert } = this.state;
+    if (!showInvalidTableDataAlert) return;
+
+    return (
+      <Alert
+          confirmButtonText="OK"
+          icon="error"
+          intent={Intent.DANGER}
+          isOpen={true}
+          onClose={this.handleCloseInvalidTableDataAlert}
+          canEscapeKeyCancel={true}
+      >
+        <p>
+          Linked data must be numeric. Please edit the table values so that all cells contain numbers.
+        </p>
+      </Alert>
+    );
+  }
+
+  private handleCloseInvalidTableDataAlert = () => {
+    this.setState({ showInvalidTableDataAlert: false });
   }
 
   private getContent() {
@@ -345,14 +415,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private initializeContent() {
-    const { model: { content } } = this.props;
-    if ((content.type !== "Geometry") || !this.state.elementId) { return; }
-
-    const domElt = document.getElementById(this.state.elementId);
+    const content = this.getContent();
+    const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
-      const board = content.initializeBoard(this.state.elementId, this.handleCreateElement);
+      const board = content.initializeBoard(this.elementId, this.handleCreateElement);
       if (board) {
         this.handleCreateBoard(board);
         const imageUrl = this.getContent().getLastImageUrl();
@@ -440,6 +508,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedComment: undefined });
   }
 
+  private closeLineDialog = () => {
+    this.setState({ selectedLine: undefined });
+  }
+
+  private closeSettings = () => {
+    this.setState({ axisSettingsOpen: false });
+  }
+
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -462,6 +538,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleOpenAxisSettings = () => {
+    this.setState({ axisSettingsOpen: true });
+  }
+
   private handleUpdateComment = (commentId: string, text: string = "") => {
     const { board } = this.state;
     const content = this.getContent();
@@ -469,6 +549,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       content.updateComment(board, commentId, { text });
     }
     this.setState({ selectedComment: undefined });
+  }
+
+  private handleUpdateLine = (line: JXG.Line, point1: [number, number], point2: [number, number]) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    const ids = [line.point1.id, line.point2.id];
+    const props = [{position: point1}, {position: point2}];
+    this.applyChange(() => content.updateObjects(board, ids, props));
+    this.setState({ selectedLine: undefined });
+  }
+
+  private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      // XXX: Hack - rescaling the board should return the new axes
+      setTimeout(() => this.handleCreateAxes(board));
+    }
+    this.setState({ axisSettingsOpen: false });
   }
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -770,6 +870,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const tableContent = this.getTableContent(dragTileId);
     if (tableContent && parsedContent && board) {
+      if (!tableContent.isValidForGeometryLink()) {
+        this.setState({ showInvalidTableDataAlert: true });
+        return;
+      }
       const dataSet = tableContent.getSharedData();
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
@@ -802,7 +906,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     else if (isMovableLine(elt)) {
       this.handleCreateLine(elt as JXG.Line);
     }
-    else if (isComment(elt)) {
+    else if (isComment(elt) || isMovableLineEquation(elt)) {
       this.handleCreateText(elt as JXG.Text);
     }
   }
@@ -868,7 +972,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       content.metadata.selection.forEach((isSelected, id) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
-        if (pt && isSelected) {
+        if (pt && isSelected && !pt.getAttribute("fixed")) {
           this.dragPts[id] = {
             initial: copyCoords(pt.coords),
             snapToGrid: pt.getAttribute("snapToGrid")
@@ -1009,9 +1113,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // clicks on visible points and edges don't create new points
       for (const elt of board.objectsList) {
-        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt)) &&
+        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt) || isAxisLabel(elt)) &&
             elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
@@ -1057,6 +1160,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
+    this.handleCreateAxes(board);
+  }
+
+  private handleCreateAxes = (board: JXG.Board) => {
+    const handlePointerDown = (evt: any) => {
+      this.handleOpenAxisSettings();
+    };
+
+    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
   }
 
   private handleCreatePoint = (point: JXG.Point) => {
@@ -1067,6 +1180,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
+      const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
@@ -1079,13 +1193,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       }
       else {
-        this.dragPts = { [id]: { initial: coords } };
+        this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
         this.lastPointDown = { evt, coords };
 
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
           if (hasSelectionModifier(evt)) {
             geometryContent.deselectElement(id);
+          }
+
+          if (isMovableLineControlPoint(point)) {
+            handleControlPointClick(point, geometryContent);
           }
         }
         // click on unselected element
@@ -1097,7 +1215,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           geometryContent.selectElement(id);
         }
 
-        if (!this.props.readOnly) {
+        if (isPointDraggable) {
           this.beginDragSelectedPoints(evt, point);
         }
 
@@ -1106,7 +1224,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handleDrag = (evt: any) => {
-      if (this.props.readOnly) return;
+      if (this.props.readOnly || point.getAttribute("fixed")) return;
 
       const id = point.id;
       let dragEntry = this.dragPts[id];
@@ -1356,6 +1474,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
 
           content.selectElement(text.id);
+        }
+      } else if (isMovableLineEquation(text)) {
+        if (board) {
+          const parentLine = values(text.ancestors)[0] as JXG.Line;
+          if (parentLine) {
+            this.setState({selectedLine: parentLine});
+          }
         }
       }
     };
