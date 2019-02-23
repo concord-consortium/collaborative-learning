@@ -99,7 +99,6 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     if (props.boundingBox && props.boundingBox.every((val: number) => isFinite(val))) {
       board.setBoundingBox(props.boundingBox);
     }
-    addAxes(board, unitX, unitY);
     return board;
 }
 
@@ -141,10 +140,15 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number) {
 
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
-    return isBoard(boardDomId)
-            ? boardDomId as JXG.Board
-            : createBoard(boardDomId as string, change.properties);
-  },
+    const board = isBoard(boardDomId)
+                    ? boardDomId as JXG.Board
+                    : createBoard(boardDomId as string, change.properties);
+    // If we created the board from a DOM element ID, then we need to add the axes.
+    // If we are undoing an action, then the board already exists but its axes have
+    // been removed, so we have to add the axes in that case as well.
+    addAxes(board, board.unitX, board.unitY);
+    return board;
+},
 
   update: (board: JXG.Board, change: JXGChange) => {
     if (!change.properties) { return; }
