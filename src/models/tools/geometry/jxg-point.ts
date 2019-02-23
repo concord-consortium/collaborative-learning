@@ -1,7 +1,7 @@
 import { JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { isCommentType } from "./jxg-comment";
 import { objectChangeAgent } from "./jxg-object";
-import { removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { prepareToDeleteObjects } from "./jxg-polygon";
 import { castArray, values } from "lodash";
 import * as uuid from "uuid/v4";
 
@@ -80,7 +80,7 @@ export const pointChangeAgent: JXGChangeAgent = {
   update: objectChangeAgent.update,
 
   delete: (board, change) => {
-    removePointsToBeDeletedFromPolygons(board, castArray(change.targetID));
+    prepareToDeleteObjects(board, castArray(change.targetID));
     objectChangeAgent.delete(board, change);
   }
 };

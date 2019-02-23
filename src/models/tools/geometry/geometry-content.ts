@@ -7,7 +7,7 @@ import { isBoard, kGeometryDefaultPixelsPerUnit, kGeometryDefaultAxisMin, syncAx
 import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, kPointDefaults, isPoint } from "./jxg-point";
-import { isPolygon, isVisibleEdge, removePointsToBeDeletedFromPolygons } from "./jxg-polygon";
+import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -161,6 +161,11 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   }
 }
 
+function isUndoableChange(change: JXGChange) {
+  if ((change.operation === "delete") && (change.target === "tableLink")) return false;
+  return true;
+}
+
 export const GeometryContentModel = types
   .model("GeometryContent", {
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
@@ -203,17 +208,18 @@ export const GeometryContentModel = types
   }))
   .views(self => ({
     getDeletableSelectedIds(board: JXG.Board) {
-      return self.selectedIds
-                  .filter(id => {
-                    const elt = board.objects[id];
-                    return elt && !elt.getAttribute("fixed") && !elt.getAttribute("clientUndeletable");
-                  });
+      // returns the ids in creation order
+      return board.objectsList
+                  .filter(obj => self.isSelected(obj.id) &&
+                          !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
+                  .map(obj => obj.id);
     },
     canUndo() {
       const hasUndoableChanges = self.changes.length > 1;
       if (!hasUndoableChanges) return false;
       const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
       const lastChangeParsed: JXGChange = lastChange && safeJsonParse(lastChange);
+      if (!isUndoableChange(lastChangeParsed)) return false;
       const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
       if (!lastChangeLinks) return true;
       const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
@@ -279,7 +285,6 @@ export const GeometryContentModel = types
   }))
   .extend(self => {
 
-    let viewCount = 0;
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
@@ -795,8 +800,8 @@ export const GeometryContentModel = types
     function deleteSelection(board: JXG.Board) {
       const selectedIds = self.getDeletableSelectedIds(board);
 
-      // remove points from polygons if possible
-      removePointsToBeDeletedFromPolygons(board, selectedIds);
+      // remove points from polygons; identify additional objects to delete
+      selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
 
       self.deselectAll(board);
       board.showInfobox(false);
@@ -842,9 +847,6 @@ export const GeometryContentModel = types
 
     return {
       views: {
-        get nextViewId() {
-          return ++viewCount;
-        },
         get isUserResizable() {
           return true;
         },

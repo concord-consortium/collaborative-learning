@@ -22,6 +22,16 @@ export function defaultTableContent() {
                           } as any);
 }
 
+export function canonicalizeValue(value: number | string | undefined) {
+  if (value == null) return 0;
+  const num = Number(value);
+  return isFinite(num) ? num : 0;
+}
+
+export function getRowLabel(index: number, prefix: string = "p") {
+  return `${prefix}${index + 1}`;
+}
+
 export interface ITransferCase {
   id: string;
   label?: string;
@@ -71,6 +81,11 @@ export const TableMetadataModel = types
     id: types.string,
     linkedGeometries: types.array(types.string)
   })
+  .views(self => ({
+    get isLinked() {
+      return self.linkedGeometries.length > 0;
+    }
+  }))
   .actions(self => ({
     addLinkedGeometry(id: string) {
       if (self.linkedGeometries.indexOf(id) < 0) {
@@ -139,7 +154,7 @@ export const TableContentModel = types
       return self.metadata.linkedGeometries.length > 0;
     },
     getRowLabel(index: number) {
-      return `p${index + 1}`;
+      return getRowLabel(index);
     }
   }))
   .views(self => ({
@@ -366,14 +381,24 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
-    getSharedData() {
+    getSharedData(canonicalize: boolean = true) {
       const dataSet = DataSet.create();
       self.applyChanges(dataSet);
-      dataSet.addAttributeWithID({ id: uniqueId(), name: kLabelAttrName });
+
+      const attrIds = dataSet.attributes.map(attr => attr.id);
+      const kLabelId = uniqueId();
+      dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
       for (let i = 0; i < dataSet.cases.length; ++i) {
-        const id = dataSet.cases[i].__id__;
+        const caseId = dataSet.cases[i].__id__;
         const label = self.getRowLabel(i);
-        dataSet.setCaseValues([{ __id__: id, __label__: label }]);
+        const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
+        if (canonicalize) {
+          attrIds.forEach(attrId => {
+            const value = dataSet.getValue(caseId, attrId);
+            caseValues[attrId] = canonicalizeValue(value);
+          });
+        }
+        dataSet.setCanonicalCaseValues([caseValues]);
       }
       return dataSet;
     }

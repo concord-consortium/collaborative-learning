@@ -106,8 +106,8 @@ context('Test Canvas', function(){
                 tableToolTile.getTableTile().should('exist');
             });
             it('verifies scrolling', function(){
-                canvas.scrollToBottom(canvas.getSingleCanvasDocumentContent());
-                canvas.scrollToTop(canvas.getSingleCanvasDocumentContent());
+                tableToolTile.getTableTile().scrollIntoView().click();
+                textToolTile.getTextTile().first().scrollIntoView();
             });
             // TODO:4-up view canvas selector does not work in cypress even though it works in Chrome. it currently selects the entire canvas and not the scaled one
             // it('verifies scrolling in 4up view', function(){

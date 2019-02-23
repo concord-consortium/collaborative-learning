@@ -34,7 +34,7 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
     const props: any = change.properties;
     if (Array.isArray(parents && parents[0])) {
       result = (parents || []).map((coords, i) => {
-        return createLinkedPoint(board as JXG.Board, coords as JXGCoordPair, props && props[i]);
+        return createLinkedPoint(board as JXG.Board, coords as JXGCoordPair, props && props[i], change.links);
       });
     }
     else {

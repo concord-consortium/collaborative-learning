@@ -1,14 +1,32 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
-import { castArray } from "lodash";
+import { castArray, each, find } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
+import { GeometryContentModelType } from "./geometry-content";
 
 export const isMovableLine = (v: any) => {
   return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
 };
 
 export const isVisibleMovableLine = (v: any) => isMovableLine(v) && v.visProp.visible;
+
+export const isMovableLineControlPoint = (v: any) => {
+  return v instanceof JXG.Point && v.getAttribute("clientType") === kMovableLineType;
+};
+
+// When a control point is clicked, deselect the rest of the line so the line slope can be changed
+export const handleControlPointClick = (point: JXG.Point, content: GeometryContentModelType) => {
+  const line = find(point.descendants, el => isMovableLine(el));
+  if (line) {
+    content.deselectElement(line.id);
+    each(line.ancestors, (parentPoint, parentId) => {
+      if (parentId !== point.id) {
+        content.deselectElement(parentId);
+      }
+    });
+  }
+};
 
 export const kMovableLineType = "movableLine";
 

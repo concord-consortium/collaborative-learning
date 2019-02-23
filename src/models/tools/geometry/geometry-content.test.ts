@@ -46,8 +46,6 @@ describe("GeometryContent", () => {
     expect(content.type).toBe(kGeometryToolID);
     expect(content.changes).toEqual([]);
 
-    expect(content.nextViewId).toBe(1);
-    expect(content.nextViewId).toBe(2);
     destroy(content);
   });
 
@@ -55,7 +53,6 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard(_content => {
       _content.addChange({ operation: "create", target: "point", parents: [1, 1] });
     });
-    expect(content.nextViewId).toBe(1);
     expect(isBoard(board)).toBe(true);
 
     content.resizeBoard(board, 200, 200);
