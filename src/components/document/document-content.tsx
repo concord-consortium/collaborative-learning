@@ -134,7 +134,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap, highlightPendingDropLocation } = content;
     const { dropRowInfo } = this.state;
-    let tabIndex = 1;
     this.rowRefs = [];
     return rowOrder.map((rowId, index) => {
       const row = rowMap.get(rowId);
@@ -147,11 +146,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (!dropHighlight && index === highlightPendingDropLocation) {
         dropHighlight = "bottom";
       }
-      const _tabIndex = tabIndex;
-      tabIndex += row ? row.tiles.length : 0;
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  tabIndex={_tabIndex} height={rowHeight} tileMap={tileMap}
+                                  height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;

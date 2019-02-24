@@ -60,7 +60,6 @@ interface IProps {
   context: string;
   docId: string;
   scale?: number;
-  tabIndex?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
@@ -114,6 +113,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
+          tabIndex={-1}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
           draggable={true}
