@@ -275,7 +275,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { newElements } = this.state;
     if (newElements && newElements.length) {
-      newElements.forEach(elt => this.handleCreateElement(elt));
+      this.handleCreateElements(newElements);
       this.setState({ newElements: undefined });
     }
 
@@ -417,7 +417,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
-      const board = content.initializeBoard(this.elementId, this.handleCreateElement);
+      const board = content.initializeBoard(this.elementId, this.handleCreateElements);
       if (board) {
         this.handleCreateBoard(board);
         const imageUrl = this.getContent().getLastImageUrl();
@@ -479,12 +479,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
       this.applyChange(() => {
-          const elems = content.addMovableLine(board, [[0, 0], [5, 5]], props);
-          if (elems) {
-            elems.forEach(elem => this.handleCreateElement(elem));
-          }
+        const elems = content.addMovableLine(board, [[0, 0], [5, 5]]);
+        this.handleCreateElements(elems);
       });
     }
   }
@@ -871,25 +868,28 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCreateElement = (elt?: JXG.GeometryElement) => {
-    if (this.props.readOnly && (elt != null)) {
-      elt.setAttribute({ fixed: true });
-    }
-    if (isPoint(elt)) {
-      this.handleCreatePoint(elt as JXG.Point);
-    }
-    else if (isPolygon(elt)) {
-      this.handleCreatePolygon(elt as JXG.Polygon);
-    }
-    else if (isVertexAngle(elt)) {
-      this.handleCreateVertexAngle(elt as JXG.Angle);
-    }
-    else if (isMovableLine(elt)) {
-      this.handleCreateLine(elt as JXG.Line);
-    }
-    else if (isComment(elt) || isMovableLineEquation(elt)) {
-      this.handleCreateText(elt as JXG.Text);
-    }
+  private handleCreateElements = (elts?: JXG.GeometryElement | JXG.GeometryElement[]) => {
+    const _elts = elts ? castArray(elts) : [];
+    _elts.forEach(elt => {
+      if (this.props.readOnly && (elt != null)) {
+        elt.setAttribute({ fixed: true });
+      }
+      if (isPoint(elt)) {
+        this.handleCreatePoint(elt as JXG.Point);
+      }
+      else if (isPolygon(elt)) {
+        this.handleCreatePolygon(elt as JXG.Polygon);
+      }
+      else if (isVertexAngle(elt)) {
+        this.handleCreateVertexAngle(elt as JXG.Angle);
+      }
+      else if (isMovableLine(elt)) {
+        this.handleCreateLine(elt as JXG.Line);
+      }
+      else if (isComment(elt) || isMovableLineEquation(elt)) {
+        this.handleCreateText(elt as JXG.Text);
+      }
+    });
   }
 
   private applyChange(change: () => void) {
@@ -922,7 +922,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (parsedChange) {
             const result = content.applyChange(board, parsedChange);
             if (result) {
-              this.handleCreateElement(result as JXG.GeometryElement);
+              this.handleCreateElements(result as JXG.GeometryElement | JXG.GeometryElement[]);
             }
           }
         }

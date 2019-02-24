@@ -812,10 +812,21 @@ export const GeometryContentModel = types
                 });
               }
               break;
+            case "line":
+              if (isMovableLine(obj)) {
+                const movableLine = obj as JXG.Line;
+                const [ , x1, y1] = movableLine.point1.coords.usrCoords;
+                const [ , x2, y2] = movableLine.point2.coords.usrCoords;
+                assign(change, {
+                  target: "movableLine",
+                  parents: [[x1, y1], [x2, y2]]
+                });
+              }
+              break;
             case "point":
-              let x: number;
-              let y: number;
-              [ , x, y] = (obj as JXG.Point).coords.usrCoords;
+              // don't copy movable line points independently
+              if (obj.getAttribute("clientType") === "movableLine") return;
+              const [ , x, y] = (obj as JXG.Point).coords.usrCoords;
               assign(change, {
                 target: "point",
                 parents: [x, y]
