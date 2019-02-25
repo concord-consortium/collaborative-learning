@@ -11,11 +11,9 @@ class GraphToolTile{
     }
     transformToCoordinate(axis, num){
         if (axis=='x'){
-            // return (Math.round(((num-graphUnit)/graphUnit)*100)/100)
             return Math.round(((num-graphUnit)/graphUnit))
         }
         if (axis=='y'){
-            // return (Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit)))*100)/100)
             return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))))
         }
     }

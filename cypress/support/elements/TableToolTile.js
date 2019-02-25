@@ -15,15 +15,15 @@ class TableToolTile{
     }
     addNewRow(){
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('New Row').click()
-        // cy.get('[data-test=new-row-menu-item]').click();
+        // cy.get('.bp3-menu-item div').contains('New Row').click()
+        cy.get('[data-test=new-row-menu-item]').click();
     }
     renameColumn(column, title){
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Rename Column').click().click()
-        cy.get('.bp3-menu-item div').contains(column).click()
-        // cy.get('[data-test=rename-column-menu-item]').click().click();
-        // cy.get('[data-test=attr-menu-item]').contains(column).click();
+        // cy.get('.bp3-menu-item div').contains('Rename Column').click().click()
+        // cy.get('.bp3-menu-item div').contains(column).click()
+        cy.get('[data-test=rename-column-menu-item]').click().click();
+        cy.get('[data-test=attr-menu-item]').contains(column).click();
         this.renameColumnDialog(title);
     }
     removeRows(i){
