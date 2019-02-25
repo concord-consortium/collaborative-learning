@@ -1154,7 +1154,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateAxes = (board: JXG.Board) => {
     const handlePointerDown = (evt: any) => {
-      this.handleOpenAxisSettings();
+      if (!this.props.readOnly) {
+        this.handleOpenAxisSettings();
+      }
     };
 
     const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
@@ -1447,10 +1449,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateText = (text: JXG.Text) => {
     const handlePointerDown = (evt: any) => {
       const content = this.getContent();
+      const { readOnly } = this.props;
       const { board } = this.state;
       if (isComment(text)) {
         const coords = copyCoords(text.coords);
-        if (this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+        if (this.isDoubleClick(this.lastPointDown, { evt, coords }) && !readOnly) {
           this.setState({selectedComment: text});
           this.lastPointDown = undefined;
         } else {
@@ -1467,7 +1470,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       } else if (isMovableLineEquation(text)) {
         if (board) {
           const parentLine = values(text.ancestors)[0] as JXG.Line;
-          if (parentLine) {
+          if (parentLine && !readOnly) {
             this.setState({selectedLine: parentLine});
           }
         }
