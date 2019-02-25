@@ -3,17 +3,18 @@ import { SizeMe } from "react-sizeme";
 import { observer } from "mobx-react";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { GeometryContentComponent } from "./geometry-content";
-import { IGeometryProps, IToolButtonHandlers, SizeMeProps } from "./geometry-shared";
+import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
 import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { HotKeys } from "../../../utilities/hot-keys";
 import * as classNames from "classnames";
 
 import "./geometry-tool.sass";
 
 interface IState {
   board?: JXG.Board;
-  handlers?: IToolButtonHandlers;
+  handlers?: IActionHandlers;
 }
 
 @observer
@@ -29,9 +30,11 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
 
   public state: IState = {};
 
+  private hotKeys: HotKeys = new HotKeys();
+
   public render() {
     return (
-      <div className="geometry-tool">
+      <div className="geometry-tool" tabIndex={0} onKeyDown={this.handleKeyDown} >
         {!this.props.readOnly ? this.renderToolbar() : null}
         {this.renderContent()}
       </div>
@@ -88,7 +91,7 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
                 <GeometryContentComponent
                   size={size}
                   onSetBoard={this.handleSetBoard}
-                  onSetToolButtonHandlers={this.handleSetToolButtonHandlers}
+                  onSetActionHandlers={this.handleSetActionHandlers}
                   {...this.props} />
               </div>
             );
@@ -98,11 +101,25 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
     );
   }
 
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    this.hotKeys.dispatch(e);
+  }
+
   private handleSetBoard = (board: JXG.Board) => {
     this.setState({ board });
   }
 
-  private handleSetToolButtonHandlers = (handlers: IToolButtonHandlers) => {
-    this.setState({ handlers });
+  private handleSetActionHandlers = (handlers: IActionHandlers) => {
+    this.setState({ handlers }, () => {
+      this.hotKeys.register({
+        "backspace": handlers.handleDelete,
+        "delete": handlers.handleDelete,
+        "cmd-c": handlers.handleCopy,
+        "cmd-x": handlers.handleCut,
+        "cmd-v": handlers.handlePaste,
+        "cmd-z": handlers.handleUndo,
+        "cmd-shift-z": handlers.handleRedo,
+      });
+    });
   }
 }

@@ -8,12 +8,17 @@ export interface SizeMeProps {
   };
 }
 
-export interface IToolButtonHandlers {
+export interface IActionHandlers {
+  handleCut: () => void;
+  handleCopy: () => void;
+  handlePaste: () => void;
   handleDuplicate: () => void;
+  handleDelete: () => void;
+  handleUndo: () => void;
+  handleRedo: () => void;
   handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
   handleCreateComment: () => void;
-  handleDelete: () => void;
 }
 
 export interface IGeometryProps extends SizeMeProps {

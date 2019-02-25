@@ -3,7 +3,7 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { IGeometryProps, IToolButtonHandlers, SizeMeProps } from "./geometry-shared";
+import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
 import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
@@ -23,7 +23,6 @@ import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { HotKeys } from "../../../utilities/hot-keys";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineEquation,
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
@@ -37,7 +36,7 @@ import "./geometry-tool.sass";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
-  onSetToolButtonHandlers: (handlers: IToolButtonHandlers) => void;
+  onSetActionHandlers: (handlers: IActionHandlers) => void;
 }
 
 interface IState extends SizeMeProps {
@@ -180,8 +179,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private disposeSelectionObserver: any;
 
-  private hotKeys: HotKeys = new HotKeys();
-
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
@@ -227,21 +224,24 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    const { context, model: { id, content }, onSetToolButtonHandlers } = props;
+    const { context, model, onSetActionHandlers } = props;
 
-    // elide uuid for readability/debugging
-    const debugId = `${id.slice(0, 4)}_${id.slice(id.length - 4)}`;
-    this.elementId = `${context}-${debugId}-${nextViewId()}`;
+    this.elementId = `${context}-${model.id}-${nextViewId()}`;
 
-    if (onSetToolButtonHandlers) {
-      const handlers: IToolButtonHandlers = {
+    if (onSetActionHandlers) {
+      const handlers: IActionHandlers = {
+        handleCut: this.handleCut,
+        handleCopy: this.handleCopy,
+        handlePaste: this.handlePaste,
         handleDuplicate: this.handleDuplicate,
+        handleDelete: this.handleDelete,
+        handleUndo: this.handleUndo,
+        handleRedo: this.handleRedo,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleCreateComment: this.handleCreateComment,
-        handleDelete: this.handleDelete,
+        handleCreateComment: this.handleCreateComment
       };
-      onSetToolButtonHandlers(handlers);
+      onSetActionHandlers(handlers);
     }
   }
 
@@ -265,8 +265,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
     }
-
-    this.initializeHotKeys();
   }
 
   public componentDidUpdate() {
@@ -312,7 +310,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           className={classes}
           ref={elt => this.domElement = elt}
           tabIndex={this.props.tabIndex}
-          onKeyDown={this.handleKeyDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
@@ -432,18 +429,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                                 board ? { board } : null);
       this.setState(newState);
     }
-  }
-
-  private initializeHotKeys() {
-    this.hotKeys.register({
-      "backspace": this.handleDelete,
-      "delete": this.handleDelete,
-      "cmd-c": this.handleCopy,
-      "cmd-x": this.handleCut,
-      "cmd-v": this.handlePaste,
-      "cmd-z": this.handleUndo,
-      "cmd-shift-z": this.handleRedo,
-    });
   }
 
   private getBackgroundImage(_board?: JXG.Board) {
@@ -757,10 +742,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
       return true;
     }
-  }
-
-  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    this.hotKeys.dispatch(e);
   }
 
   private isDragTileInSameDocument(e: React.DragEvent<HTMLDivElement>) {
