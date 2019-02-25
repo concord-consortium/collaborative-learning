@@ -1,6 +1,6 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { syncClientColors } from "./jxg-point";
+import { kSnapUnit, syncClientColors } from "./jxg-point";
 import { castArray, each, find, uniqWith } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { GeometryContentModelType } from "./geometry-content";
@@ -98,6 +98,9 @@ const lineSpecificProps = {
 };
 
 const pointSpecificProps = {
+  snapToGrid: true,
+  snapSizeX: kSnapUnit,
+  snapSizeY: kSnapUnit,
   highlightStrokeColor: darkBlue,
   name: "",
 };
