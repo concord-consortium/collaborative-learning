@@ -28,8 +28,8 @@
 
 | File | Size | % Change from Previous Release |
 |---|---|---|
-| index.css | 476,664 bytes | 0.3% |
-| index.js | 3,891,351 bytes | 0.2% |
+| index.css | 476,805 bytes | 0.3% |
+| index.js | 3,897,231 bytes | 0.2% |
 
 ## Version 0.4.0 - released January 28, 2019
 
