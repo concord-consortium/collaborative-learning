@@ -1095,8 +1095,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
 
       for (const elt of board.objectsList) {
-        if ((isVisiblePoint(elt) || isVisibleEdge(elt) || isVisibleMovableLine(elt) || isAxisLabel(elt)) &&
-            elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+        if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
           return;
         }
       }
@@ -1117,6 +1116,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
         });
       }
+    };
+
+    const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
+      return isVisiblePoint(elt)
+        || isVisibleEdge(elt)
+        || isVisibleMovableLine(elt)
+        || isAxisLabel(elt)
+        || isComment(elt)
+        || isMovableLineEquation(elt);
     };
 
     // synchronize initial selection
