@@ -53,21 +53,23 @@ class GraphToolTile{
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
+    getGraphPointAtCoordinate(x,y) {
+        let transX=this.transformFromCoordinate('x', x),
+            transY=this.transformFromCoordinate('y', y);
+        this.getGraphTile().last().click(transX,transY);
+    }
     selectGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
         this.getGraphTile().last().click(transX,transY);
     }
-    getGraphPointID(){
-        let pointId='';
-         return cy.get('.geometry-content.editable ellipse').last()
+    getGraphPointID(point){
+         return cy.get('.geometry-content.editable ellipse').eq(point)
             .then(($el)=>{
-                return $el.attr('id');
-            // }).then((id)=>{
-            //     pointId=id;
+                let id=$el.attr('id');
+                return id;
          });
-         return pointId;
     }
     getGraphPolygon(){
         return cy.get('.geometry-content.editable polygon');
@@ -89,6 +91,9 @@ class GraphToolTile{
     }
     hideAngle(){
         cy.get('.geometry-tool .button.angle-label.enabled').click();
+    }
+    getAngleAdornment(){
+        return cy.get('.geometry-content g polygon').siblings('path');
     }
     copyGraphElement(){
         cy.get('.geometry-tool .button.duplicate.enabled').click();
