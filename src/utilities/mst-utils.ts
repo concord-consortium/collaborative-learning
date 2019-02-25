@@ -1,4 +1,5 @@
 import { IAnyStateTreeNode, getParent, getType } from "mobx-state-tree";
+import { DocumentContentModelType } from "../models/document/document-content";
 
 /**
  * Returns an ancestor of a node whose type name is `typeName`, if any.
@@ -13,4 +14,9 @@ export function getParentWithTypeName(target: IAnyStateTreeNode, typeName: strin
       parent = getParent(parent);
   }
   return undefined;
+}
+
+export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
+  const documentContent = getParentWithTypeName(target, "DocumentContent") as DocumentContentModelType;
+  return documentContent && documentContent.getTileContent(tileId);
 }

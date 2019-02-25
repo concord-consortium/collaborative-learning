@@ -1,7 +1,7 @@
 import mock from "xhr-mock";
 import { IStores, createStores } from "../models/stores/stores";
 import { Logger, LogEventName } from "./logger";
-import { ToolTileModel, ToolTileModelType } from "../models/tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModelType } from "../models/tools/tool-tile";
 import { defaultTextContent } from "../models/tools/text/text-content";
 import { SectionDocument, DocumentModel, DocumentModelType } from "../models/document/document";
 import { createSingleTileContent } from "../utilities/test-utils";
@@ -59,7 +59,7 @@ describe("logger", () => {
     });
 
     it("can log tile creation", async (done) => {
-      const tile = ToolTileModel.create({content: defaultTextContent()});
+      const tile = createToolTileModelFromContent(defaultTextContent());
 
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());

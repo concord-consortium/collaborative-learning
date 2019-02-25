@@ -1,4 +1,7 @@
-class ImageTool{
+class ImageToolTile{
+    getImageTile(){
+        return cy.get('.canvas-area .image-tool');
+    }
     getImageToolControl(){
         return cy.get('.image-tool.editable > .image-tool-controls')
     }
@@ -13,4 +16,4 @@ class ImageTool{
     }
 }
 
-export default ImageTool;
+export default ImageToolTile;

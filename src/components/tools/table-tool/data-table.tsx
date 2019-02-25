@@ -8,7 +8,7 @@ import { IAttribute, IValueType } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
 import { CellEditingStartedEvent, CellEditingStoppedEvent, ColDef, Column,
-          ColumnApi, GridApi, GridCellDef, GridReadyEvent, RowNode, SortChangedEvent,
+          ColumnApi, GridApi, GridCellDef, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
           TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams } from "ag-grid-community";
 import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
@@ -42,9 +42,15 @@ interface IProps {
   dataSet?: IDataSet;
   changeCount: number;
   readOnly?: boolean;
+  indexValueGetter?: (params: ValueGetterParams) => string;
+  attrValueFormatter?: (params: ValueFormatterParams) => string;
+  cellEditorComponent?: new () => ICellEditorComp;
+  cellEditorParams?: any;
   autoSizeColumns?: boolean;
+  defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
+  onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
@@ -57,7 +63,7 @@ interface IState {
   addAttributeButtonPos: IPos|null;
 }
 
-const LOCAL_ROW_ID = "__local__";
+export const LOCAL_ROW_ID = "__local__";
 const LOCAL_ROW_STYLE = {backgroundColor: "#cfc"};
 
 interface IRowStyleParams {
@@ -92,6 +98,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   private gridColumnDefs: ColDef[] = [];
   private gridRowData: Array<IGridRow | undefined> = [];
+  private components = this.props.cellEditorComponent
+                        ? { clientCellEditor: this.props.cellEditorComponent }
+                        : undefined;
   private localRow: ICaseCreation = {};
   private checkForEnterAfterCellEditingStopped = false;
   private checkForEnterAfterLocalDataEntry = false;
@@ -151,12 +160,22 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         }
       });
     }
+
+    if (this.props.onGridReady) {
+      this.props.onGridReady(gridReadyParams);
+    }
   }
 
   public getRowNodeId = (data: { id: string }) => data.id;
 
   public getRowIndexColumnDef(): ColDef {
     const { itemFlags, readOnly } = this.props;
+
+    function defaultIndexValueGetter(params: ValueGetterParams) {
+      // default just returns a row/case index
+      return params.node.rowIndex + 1;
+    }
+
     return ({
       headerName: "",
       headerComponentFramework: TableHeaderMenu,
@@ -208,10 +227,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       width: 50,
       pinned: "left",
       lockPosition: true,
-      valueGetter: (params) => {
-        return "";
-        // return params.node.rowIndex + 1; // caseIndex
-      },
+      valueGetter: this.props.indexValueGetter || defaultIndexValueGetter,
       suppressMovable: true,
       resizable: false,
       suppressNavigable: true
@@ -237,6 +253,23 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   public getAttributeColumnDef(attribute: IAttribute): ColDef {
     const { readOnly } = this.props;
+
+    function defaultAttrValueFormatter(params: ValueFormatterParams) {
+      const colName = params.colDef.field || params.colDef.headerName || "";
+      const colPlaces: { [key: string]: number } = {
+              day: 0,
+              distance: 1,
+              speed: 2
+            };
+      let places = colPlaces[colName];
+      if ((places == null) && (this.props.defaultPrecision != null)) {
+        places = this.props.defaultPrecision;
+      }
+      return (places != null) && (typeof params.value === "number")
+                ? params.value.toFixed(places)
+                : params.value;
+    }
+
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
       cellClass: "cdp-row-data-cell",
@@ -266,18 +299,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         });
         return value;
       },
-      valueFormatter: (params: ValueFormatterParams) => {
-        const colName = params.colDef.field || params.colDef.headerName || "";
-        const colPlaces: { [key: string]: number } = {
-                day: 0,
-                distance: 1,
-                speed: 2
-              };
-        const places = colPlaces[colName];
-        return (places != null) && (typeof params.value === "number")
-                  ? params.value.toFixed(places)
-                  : params.value;
-      },
+      valueFormatter: this.props.attrValueFormatter || defaultAttrValueFormatter,
       valueSetter: (params: ValueSetterParams) => {
         const { dataSet } = this.props;
         if (!dataSet || (params.newValue === params.oldValue)) { return false; }
@@ -318,7 +340,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           return 0;
         }
         return floatA - floatB;
-      }
+      },
+      cellEditor: this.props.cellEditorComponent ? "clientCellEditor" : undefined,
+      cellEditorParams: this.props.cellEditorParams,
     });
   }
 
@@ -746,6 +770,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           enableCellChangeFlash={true}
           onCellEditingStarted={this.handleCellEditingStarted}
           onCellEditingStopped={this.handleCellEditingStopped}
+          components={this.components}
           tabToNextCell={this.handleTabToNextCell}
           postSort={this.handlePostSort}
           onSortChanged={this.handleSortChanged}

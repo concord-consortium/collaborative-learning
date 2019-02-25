@@ -1,9 +1,14 @@
 import { types, Instance } from "mobx-state-tree";
-import { IDataSet, ICaseCreation, ICase } from "../../data/data-set";
+import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
+import { GeometryContentModelType } from "../geometry/geometry-content";
+import { JXGChange } from "../geometry/jxg-changes";
+import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kTableToolID = "Table";
+export const kCaseIdName = "__id__";
+export const kLabelAttrName = "__label__";
 
 export const kTableDefaultHeight = 160;
 
@@ -17,12 +22,48 @@ export function defaultTableContent() {
                           } as any);
 }
 
+export function isLinkableValue(value: number | string | undefined) {
+  if ((value == null) || (value === "")) return false;
+  return isFinite(Number(value));
+}
+
+export function canonicalizeValue(value: number | string | undefined) {
+  if (value == null) return 0;
+  const num = Number(value);
+  return isFinite(num) ? num : 0;
+}
+
+export function getRowLabel(index: number, prefix: string = "p") {
+  return `${prefix}${index + 1}`;
+}
+
+export interface ITransferCase {
+  id: string;
+  label?: string;
+  x: number;
+  y: number;
+}
+
+export interface IRowLabel {
+  id: string;
+  label: string;
+}
+
 export interface IColumnProperties {
   name: string;
 }
 
 export interface IRowProperties {
   [key: string]: any;
+}
+
+export interface ILinkProperties {
+  id: string;
+  tileIds: string[];
+}
+
+export interface ITableLinkProperties extends ILinkProperties {
+  labels?: IRowLabel[];
 }
 
 export interface ITableProperties {
@@ -34,10 +75,39 @@ export interface ITableProperties {
 
 export interface ITableChange {
   action: "create" | "update" | "delete";
-  target: "rows" | "columns";
+  target: "rows" | "columns" | "geometryLink";
   ids?: string | string[];
-  props?: ITableProperties | IColumnProperties | IRowProperties[];
+  props?: ITableProperties;
+  links?: ILinkProperties;
 }
+
+export const TableMetadataModel = types
+  .model("TableMetadata", {
+    id: types.string,
+    linkedGeometries: types.array(types.string)
+  })
+  .views(self => ({
+    get isLinked() {
+      return self.linkedGeometries.length > 0;
+    }
+  }))
+  .actions(self => ({
+    addLinkedGeometry(id: string) {
+      if (self.linkedGeometries.indexOf(id) < 0) {
+        self.linkedGeometries.push(id);
+      }
+    },
+    removeLinkedGeometry(id: string) {
+      const index = self.linkedGeometries.indexOf(id);
+      if (index >= 0) {
+        self.linkedGeometries.splice(index, 1);
+      }
+    },
+    clearLinkedGeometries() {
+      self.linkedGeometries.clear();
+    }
+  }));
+export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
 
 export const TableContentModel = types
   .model("TableContent", {
@@ -45,6 +115,9 @@ export const TableContentModel = types
     isImported: false,
     changes: types.array(types.string)
   })
+  .volatile(self => ({
+    metadata: undefined as any as TableMetadataModelType
+  }))
   .preProcessSnapshot(snapshot => {
     const s = snapshot as any;
     // handle import format
@@ -79,11 +152,71 @@ export const TableContentModel = types
     return snapshot;
   })
   .views(self => ({
-    isUserResizable() {
+    get isUserResizable() {
       return true;
+    },
+    get isLinked() {
+      return self.metadata.linkedGeometries.length > 0;
+    },
+    getRowLabel(index: number) {
+      return getRowLabel(index);
+    }
+  }))
+  .views(self => ({
+    getGeometryContent(tileId: string) {
+      const content = getTileContentById(self, tileId);
+      return content && content as GeometryContentModelType;
+    },
+    getClientLinks(linkId: string, dataSet: IDataSet, addLabelMap: boolean): ITableLinkProperties {
+      let labels: IRowLabel[] = [];
+      if (addLabelMap && dataSet) {
+        labels = dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: self.getRowLabel(i) }));
+      }
+      ["xAxis", "yAxis"].forEach((axis, index) => {
+        const attr = dataSet.attributes.length > index ? dataSet.attributes[index] : undefined;
+        if (attr) {
+          labels.unshift({ id: axis, label: attr.name });
+        }
+      });
+      return { id: linkId, tileIds: [self.metadata.id], labels };
+    },
+    canUndo() {
+      return false;
+      // const hasUndoableChanges = self.changes.length > 1;
+      // if (!hasUndoableChanges) return false;
+      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      // const lastChangeParsed: ITableChange = lastChange && safeJsonParse(lastChange);
+      // const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      // if (!lastChangeLinks) return true;
+      // const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
+      // const linkedTile = linkedTiles && linkedTiles[0];
+      // const tableContent = linkedTile ? self.getGeometryContent(linkedTile) : undefined;
+      // return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
+    },
+    canUndoLinkedChange(change: JXGChange) {
+      return false;
+      // const hasUndoableChanges = self.changes.length > 1;
+      // if (!hasUndoableChanges) return false;
+      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      // const lastChangeParsed = lastChange && safeJsonParse(lastChange);
+      // const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      // if (!lastChangeLinks) return false;
+      // const tableActionLinkId = lastChangeLinks && lastChangeLinks.id;
+      // const geometryActionLinkId = change.links && change.links.id;
+      // return tableActionLinkId && geometryActionLinkId && (tableActionLinkId === geometryActionLinkId);
     }
   }))
   .actions(self => ({
+    doPostCreate(metadata: TableMetadataModelType) {
+      self.metadata = metadata;
+    },
+    willRemoveFromDocument() {
+      self.metadata.linkedGeometries.forEach(geometryId => {
+        const geometryContent = self.getGeometryContent(geometryId);
+        geometryContent && geometryContent.removeTableLink(undefined, self.metadata.id);
+      });
+      self.metadata.clearLinkedGeometries();
+    },
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));
     }
@@ -104,7 +237,7 @@ export const TableContentModel = types
               ids
             });
     },
-    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
+    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
       self.appendChange({
             action: "create",
             target: "rows",
@@ -115,10 +248,11 @@ export const TableContentModel = types
                       return { ...others };
                     }),
               beforeId: beforeID
-            }
+            },
+            links
           });
     },
-    setCanonicalCaseValues(caseValues: ICase[]) {
+    setCanonicalCaseValues(caseValues: ICase[], links?: ILinkProperties) {
       const ids: string[] = [];
       const values = caseValues.map(aCase => {
                       const { __id__, ...others } = aCase;
@@ -129,18 +263,36 @@ export const TableContentModel = types
             action: "update",
             target: "rows",
             ids,
-            props: values
+            props: values as ITableProperties,
+            links
       });
     },
-    removeCases(ids: string[]) {
+    removeCases(ids: string[], links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "rows",
-            ids
+            ids,
+            links
           });
+    },
+    addGeometryLink(geometryId: string, links: ILinkProperties) {
+      self.appendChange({
+            action: "create",
+            target: "geometryLink",
+            ids: geometryId,
+            links
+      });
+    },
+    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
+      self.appendChange({
+            action: "delete",
+            target: "geometryLink",
+            ids: geometryId,
+            links
+      });
     }
   }))
-  .actions(self => ({
+  .views(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange) {
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
@@ -157,9 +309,14 @@ export const TableContentModel = types
                           const id = change.ids && change.ids[index] || uniqueId();
                           return { __id__: id, ...row };
                         });
+          const beforeId = tableProps && tableProps.beforeId;
           if (rows && rows.length) {
-            dataSet.addCanonicalCasesWithIDs(rows);
+            dataSet.addCanonicalCasesWithIDs(rows, beforeId);
           }
+          break;
+        case "geometryLink":
+          const geometryId = change.ids && change.ids as string;
+          geometryId && self.metadata.addLinkedGeometry(geometryId);
           break;
       }
     },
@@ -199,10 +356,14 @@ export const TableContentModel = types
             dataSet.removeCases(ids);
           }
           break;
+        case "geometryLink":
+          const geometryId = change.ids && change.ids as string;
+          geometryId && self.metadata.removeLinkedGeometry(geometryId);
+          break;
       }
     }
   }))
-  .actions(self => ({
+  .views(self => ({
     applyChange(dataSet: IDataSet, change: ITableChange) {
       switch (change.action) {
         case "create":
@@ -214,7 +375,7 @@ export const TableContentModel = types
       }
     }
   }))
-  .actions(self => ({
+  .views(self => ({
     applyChanges(dataSet: IDataSet, start: number = 0) {
       for (let i = start; i < self.changes.length; ++i) {
         const change = safeJsonParse(self.changes[i]);
@@ -222,6 +383,41 @@ export const TableContentModel = types
           self.applyChange(dataSet, change);
         }
       }
+    }
+  }))
+  .views(self => ({
+    getSharedData(canonicalize: boolean = true) {
+      const dataSet = DataSet.create();
+      self.applyChanges(dataSet);
+
+      const attrIds = dataSet.attributes.map(attr => attr.id);
+      const kLabelId = uniqueId();
+      dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
+      for (let i = 0; i < dataSet.cases.length; ++i) {
+        const caseId = dataSet.cases[i].__id__;
+        const label = self.getRowLabel(i);
+        const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
+        if (canonicalize) {
+          attrIds.forEach(attrId => {
+            const value = dataSet.getValue(caseId, attrId);
+            caseValues[attrId] = canonicalizeValue(value);
+          });
+        }
+        dataSet.setCanonicalCaseValues([caseValues]);
+      }
+      return dataSet;
+    },
+    isValidForGeometryLink() {
+      const dataSet = DataSet.create();
+      self.applyChanges(dataSet);
+
+      const attrIds = dataSet.attributes.map(attr => attr.id);
+      for (const aCase of dataSet.cases) {
+        if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
+          return false;
+        }
+      }
+      return true;
     }
   }));
 

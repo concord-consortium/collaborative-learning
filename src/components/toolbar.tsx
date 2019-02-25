@@ -57,7 +57,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
             draggable={true}
             onMouseEnter={this.showDropRowHighlight}
             onMouseLeave={this.removeDropRowHighlight}>
-          <Icon icon="th" iconSize={20} color="white" />
+          <svg className={`icon icon-table-tool`}>
+            <use xlinkHref={`#icon-table-tool`} />
+          </svg>
         </div>
         <div className="tool geometry" title="Geometry"
             onClick={handleClickTool("geometry")}

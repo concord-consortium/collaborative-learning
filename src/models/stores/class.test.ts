@@ -1,4 +1,4 @@
-import { ClassModel, ClassStudentModel } from "./class";
+import { ClassModel, ClassUserModel } from "./class";
 import { ClassInfo } from "../../lib/auth";
 
 describe("Class model", () => {
@@ -8,11 +8,12 @@ describe("Class model", () => {
       name: "test class",
       classHash: "test"
     });
-    expect(clazz.students.length).toEqual(0);
+    expect(clazz.users.size).toEqual(0);
   });
 
   it("uses override values", () => {
-    const student = ClassStudentModel.create({
+    const student = ClassUserModel.create({
+      type: "student",
       id: "1",
       firstName: "First",
       lastName: "Student",
@@ -22,13 +23,13 @@ describe("Class model", () => {
     const clazz = ClassModel.create({
       name: "test class",
       classHash: "test",
-      students: [
-        student
-      ]
+      users: {
+        1: student
+      }
     });
-    expect(clazz.students.length).toEqual(1);
-    expect(clazz.getStudentById("1")).toBe(student);
-    expect(clazz.getStudentById("2")).toEqual(undefined);
+    expect(clazz.users.size).toEqual(1);
+    expect(clazz.getUserById("1")).toBe(student);
+    expect(clazz.getUserById("2")).toBeUndefined();
   });
 
   it("updates from the portal", () => {
@@ -56,6 +57,6 @@ describe("Class model", () => {
       teachers: []
     };
     clazz.updateFromPortal(classInfo);
-    expect(clazz.students.length).toEqual(1);
+    expect(clazz.users.size).toEqual(1);
   });
 });

@@ -24,7 +24,7 @@ context('Test image functionalities', function(){
         });
         it('will upload png file from user computer', function(){
             const imageFilePath='image.png';
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','What if');
             canvas.addImageTile();
@@ -45,7 +45,7 @@ context('Test image functionalities', function(){
         });
         it('will upload jpg file from user computer', function(){
             const imageFilePath='case_image.jpg';
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','What if');
             canvas.addImageTile();
@@ -65,7 +65,7 @@ context('Test image functionalities', function(){
         });
         it('will upload gif file from user computer', function(){
             const imageFilePath='model_image.gif';
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','What if');
             canvas.addImageTile();
@@ -90,7 +90,7 @@ context('Test image functionalities', function(){
         it('will verify all three images that were added by upload in above test are in the tab when re-opened', function(){
             const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
 
-            leftNav.openToWorkspace('What if');
+            leftNav.openToWorkspace('What if...?');
             cy.wait(5000)
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);

@@ -19,15 +19,18 @@ declare namespace JXG {
     point3: GeometryElement;
     pointsquare: GeometryElement;
     radiuspoint: GeometryElement;
+    dot?: GeometryElement;
 
     Value: () => number;
   }
+
+  type BoundingBox = [number, number, number, number];
 
   class Board {
     id: string;
     attr: {
       // [x1,y1,x2,y2] upper left corner, lower right corner
-      boundingbox: [number, number, number, number]
+      boundingbox: BoundingBox
     };
     axis: boolean;
     canvasWidth: number;
@@ -49,11 +52,13 @@ declare namespace JXG {
     zoomFactor: number;
     zoomX: number;
     zoomY: number;
+    options: any;
 
     objects: { [id: string]: GeometryElement };
     objectsList: GeometryElement[];
 
     create: (elementType: string, parents?: any, attributes?: any) => any;
+    hasPoint: (x: number, y: number) => boolean;
     removeObject: (object: GeometryElement) => JXG.Board;
     on: (event: string, handler: (evt: any) => void) => void;
     getCoordsTopLeftCorner: () => number[];
@@ -62,11 +67,15 @@ declare namespace JXG {
 
     resizeContainer: (canvasWidth: number, canvasHeight: number,
                       dontSet?: boolean, dontSetBoundingBox?: boolean) => JXG.Board;
-    setBoundingBox: (boundingBox: [number, number, number, number], keepaspectratio?: boolean) => JXG.Board;
+    getBoundingBox: () => BoundingBox;
+    setBoundingBox: (boundingBox: BoundingBox, keepaspectratio?: boolean) => JXG.Board;
     showInfobox: (value: boolean) => JXG.Board;
     update: (drag?: JXG.GeometryElement) => JXG.Board;
+    fullUpdate: () => JXG.Board;
     suspendUpdate: () => JXG.Board;
     unsuspendUpdate: () => JXG.Board;
+    addGrid: () => void;
+    removeGrids: () => void;
   }
 
   class Coords {
@@ -98,10 +107,13 @@ declare namespace JXG {
     type: number;
     name: string;
     ancestors: { [id: string]: GeometryElement };
+    descendants: { [id: string]: GeometryElement };
     parents: Array<string | GeometryElement>;
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
     lastDragTime: Date;
+    stdform: [number, number, number, number, number, number, number, number];
+    transformations: any[];
     visProp: { [prop: string]: any };
     visPropCalc: { [prop: string]: any };
     fixed: boolean;
@@ -114,6 +126,7 @@ declare namespace JXG {
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
     on: (event: string, handler: EventHandler) => void;
+    _set: (key: string, value: string) => void;
   }
 
   const JSXGraph: {
@@ -129,6 +142,18 @@ declare namespace JXG {
   }
 
   class Line extends GeometryElement {
+    point1: JXG.Point;
+    point2: JXG.Point;
+    parentPolygon?: JXG.Polygon;
+    getRise: () => number;
+    getSlope: () => number;
+    label?: JXG.Text;
+  }
+
+  class Text extends CoordsElement {
+    plaintext: string;
+    size: [number, number]; // [width, height]
+    setText: (content: string) => void;
   }
 
   const Math: {
@@ -146,8 +171,10 @@ declare namespace JXG {
 
   class Polygon extends GeometryElement {
     vertices: JXG.Point[];
+    borders: JXG.Line[];
 
     findPoint: (point: JXG.Point) => number;
+    removePoints: (...points: JXG.Point[]) => void;
   }
 
   class Sector extends Curve {

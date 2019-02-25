@@ -1,5 +1,14 @@
+import { sortByCreation, kReverse } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
+import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
+
+// Inexplicably, we occasionally encounter JSXGraph objects with null
+// transformations which cause JSXGraph to crash. Until we figure out
+// the root cause of this phenomenon, this utility eliminates the nulls.
+function validateTransformations(elt: JXG.GeometryElement) {
+  elt.transformations = (elt.transformations || []).filter(t => t != null);
+}
 
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
@@ -17,6 +26,7 @@ export const objectChangeAgent: JXGChangeAgent = {
       if (obj && objProps) {
         const { position, ...others } = objProps;
         if (position != null) {
+          validateTransformations(obj);
           obj.setPosition(JXG.COORDS_BY_USER, position);
         }
         if (size(others)) {
@@ -29,7 +39,9 @@ export const objectChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     if (!change.targetID) { return; }
-    const ids = Array.isArray(change.targetID) ? change.targetID : [change.targetID];
+    const ids = castArrayCopy(change.targetID);
+    sortByCreation(board, ids, kReverse);
+    // remove objects in reverse order of creation
     ids.forEach((id) => {
       const obj = board.objects[id] as JXG.GeometryElement;
       if (obj) {

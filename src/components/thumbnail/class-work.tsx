@@ -72,7 +72,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
           </div>
           <div className={"list " + (this.state.sectionShown[sectionType] ? "shown" : "hidden")}>
           {publications.map((publication) => {
-            const user = this.stores.class.getStudentById(publication.uid);
+            const user = this.stores.class.getUserById(publication.uid);
             return (
               publication.sectionId === sectionType ?
               <div

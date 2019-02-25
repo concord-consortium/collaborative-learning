@@ -39,7 +39,15 @@ class LearningLog {
     }
 
     getLLTextTile(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .text-tool')
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .text-tool')
+    }
+
+    getLLTableTool(){
+        return cy.get('[data-test=learning-log-single-workspace] > .toolbar > .tool.table');
+    }
+
+    getLLTableTile(){
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .neo-codap-case-table');
     }
 
     getLLGraphTool(){
@@ -47,11 +55,11 @@ class LearningLog {
     }
 
     getLLGraphTile(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-size-me> .geometry-tool');
+        return cy.get('[data-test=learning-log-single-workspace] .canvas .geometry-tool .geometry-content');
     }
 
     getLLGraphPointText(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool > .JXGtext');
+        return cy.get('[data-test=learning-log-single-workspace] .canvas  .geometry-tool .geometry-content > .JXGtext');
     }
 
     getLLImageTool(){
@@ -93,15 +101,15 @@ class LearningLog {
 
     addLLGraphTile(){
         this.getLLGraphTool().click({force: true});
-        this.getLLGraphTile().last().click();
-        this.getLLGraphTile().last().click(); //Adds a point on the graph
-        this.getLLGraphPointText().last().should('contain', 'A' );
-        this.addLLPointToGraph(40,35);
-        // this.getLLGraphPointText().last().should('contain', 'B' );
-        this.addLLPointToGraph(240,70);
-        // this.getLLGraphPointText().last().should('contain', 'C' );
-        this.addLLPointToGraph(40,170);
-        // this.getLLGraphPointText().last().should('contain', 'D' );
+        // this.getLLGraphTile().last().click();
+        // this.getLLGraphTile().last().click(); //Adds a point on the graph
+        // this.getLLGraphPointText().last().should('contain', 'A' );
+        // this.addLLPointToGraph(40,35);
+        // // this.getLLGraphPointText().last().should('contain', 'B' );
+        // this.addLLPointToGraph(240,70);
+        // // this.getLLGraphPointText().last().should('contain', 'C' );
+        // this.addLLPointToGraph(40,170);
+        // // this.getLLGraphPointText().last().should('contain', 'D' );
     }
 
     addLLImageTile(){
@@ -110,7 +118,7 @@ class LearningLog {
 
     addLLPointToGraph(x,y){
         this.getLLGraphTile().last();
-        cy.get('[data-test=learning-log-single-workspace] > .document > .canvas-area > .canvas > .document-content > .tile-row > .tool-tile > .geometry-size-me > .geometry-tool').last().click(x,y, {force:true});
+        cy.get('[data-test=learning-log-single-workspace] .canvas .geometry-tool .geometry-content').last().click(x,y, {force:true});
     }
 
     getSingleCanvas(){
@@ -118,17 +126,17 @@ class LearningLog {
     }
 
     getTwoUpViewToggle(){
-        return cy.get('[data-test=learning-log-single-workspace] > .document > .statusbar > .actions > .action > .icon-up2');
+        return cy.get('[data-test=learning-log-single-workspace] .action > .icon-up2');
     }
     getTwoToOneUpViewToggle(){// from 2up view
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .statusbar > .actions > .action > .icon-up2');
+        return cy.get('[data-test=learning-log-left-workspace] .action > .icon-up2');
     }
 
     getRightSideWorkspace(){
         return cy.get('[data-test=learning-log-right-workspace]')
     }
     getLeftSideWorkspace(){
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .canvas-area > .canvas');
+        return cy.get('[data-test=learning-log-left-workspace] .canvas');
     }
 
     getLeftSideToolPalette(){
@@ -152,11 +160,11 @@ class LearningLog {
     }
 
     getRightSideWorkspaceTitle(){
-        return cy.get('[data-test=learning-log-right-workspace] > .document > .titlebar > .title')
+        return cy.get('[data-test=learning-log-right-workspace] .title')
     }
 
     getLeftSideWorkspaceTitle(){
-        return cy.get('[data-test=learning-log-left-workspace] > .document > .titlebar > .title')
+        return cy.get('[data-test=learning-log-left-workspace] .title')
     }
 
     getLLPublishIcon(){

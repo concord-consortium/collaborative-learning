@@ -2,7 +2,8 @@ import { IAnyType, types } from "mobx-state-tree";
 import { kGeometryToolID, GeometryContentModel, GeometryContentModelType,
           GeometryMetadataModel, GeometryMetadataModelType } from "./geometry/geometry-content";
 import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
-import { kTableToolID, TableContentModel, TableContentModelType } from "./table/table-content";
+import { kTableToolID, TableContentModel, TableContentModelType,
+          TableMetadataModel, TableMetadataModelType } from "./table/table-content";
 import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
 import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./unknown-content";
 import { DrawingContentModelType, DrawingContentModel, kDrawingToolID,
@@ -35,6 +36,7 @@ export type ToolContentUnionType = GeometryContentModelType |
                                     UnknownContentModelType;
 
 export type ToolMetadataUnionType = GeometryMetadataModelType |
+                                    TableMetadataModelType |
                                     DrawingToolMetadataModelType;
 
 interface IToolMap {
@@ -59,6 +61,7 @@ export const _private: IPrivate = {
 
   metadataMap: {
     [kGeometryToolID]: GeometryMetadataModel,
+    [kTableToolID]: TableMetadataModel,
     [kDrawingToolID]: DrawingToolMetadataModel
   },
 

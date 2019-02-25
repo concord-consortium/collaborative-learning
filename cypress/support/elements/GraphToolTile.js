@@ -15,19 +15,19 @@ class GraphToolTile{
     }
 
     getGraphTile(){
-        return cy.get('.canvas-area > .canvas > .document-content > .tile-row >  .tool-tile > .geometry-size-me > .geometry-tool');
+        return cy.get('.canvas-area .geometry-content');
     }
 
     getGraphPointText(){ //This is the point coordinate text
-        return cy.get('.geometry-tool.editable > .JXGinfobox');
+        return cy.get('.geometry-content.editable .JXGinfobox');
     }
 
     getGraphPointLabel(){ //This is the letter label for a point
-        return cy.get('.geometry-tool.editable > .JXGtext');
+        return cy.get('.geometry-content.editable .JXGtext');
     }
 
     getGraphPoint(){
-        return cy.get('.geometry-tool.editable > svg > g > ellipse');
+        return cy.get('.geometry-content.editable ellipse');
     }
     selectGraphPoint(x,y){
         let transX=this.transformCoordinate('x', x),
@@ -38,7 +38,7 @@ class GraphToolTile{
 
     getGraphPointID(){
         let pointId='';
-         cy.get('.geometry-tool.editable > svg > g > ellipse').last()
+         cy.get('.geometry-content.editable ellipse').last()
             .then(($el)=>{
                 return $el.attr('id');
             }).then((id)=>{
@@ -49,7 +49,7 @@ class GraphToolTile{
 
     }
     getGraphPolygon(){
-        return cy.get('.geometry-tool.editable > svg > g > polygon');
+        return cy.get('.geometry-content.editable polygon');
     }
 
     addPointToGraph(x,y){
@@ -67,12 +67,10 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button')
     }
     showAngle(){
-        this.getGraphToolMenuIcon().click();
-        cy.get('.bp3-text-overflow-ellipsis').contains('Show Angle').click();
+        cy.get('.button.angle-label.enabled').click();
     }
     hideAngle(){
-        this.getGraphToolMenuIcon().click();
-        cy.get('.bp3-text-overflow-ellipsis').contains('Hide Angle').click();
+        cy.get('.button.angle-label.enabled').click();
     }
 }
 export default GraphToolTile;

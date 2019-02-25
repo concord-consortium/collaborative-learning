@@ -77,8 +77,8 @@ export const DocumentsModel = types
           });
 
         return latestPublications.sort((pub1, pub2) => {
-          const user1 = clazz.getStudentById(pub1.uid);
-          const user2 = clazz.getStudentById(pub2.uid);
+          const user1 = clazz.getUserById(pub1.uid);
+          const user2 = clazz.getUserById(pub2.uid);
           // Every publication should have a user, but if it's missing, sort that document last
           if (!user1 || !user2) return (user2 ? 1 : 0) - (user1 ? 1 : 0);
           return user1.lastName !== user2.lastName

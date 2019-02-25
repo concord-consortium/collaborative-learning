@@ -1,6 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
+import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kTextToolID = "Text";
 
@@ -18,6 +19,7 @@ export const emptyJson: ValueJSON = {
                   nodes: [{
                     object: "text",
                     leaves: [{
+                      object: "leaf",
                       text: ""
                     }]
                   }]
@@ -33,6 +35,7 @@ const errorJson: ValueJSON = {
             nodes: [{
               object: "text",
               leaves: [{
+                object: "leaf",
                 text: "A slate error occurred"
               }]
             }]
@@ -51,7 +54,7 @@ export const TextContentModel = types
     get joinText() {
       return Array.isArray(self.text)
               ? self.text.join("\n")
-              : self.text;
+              : self.text as string;
 
     }
   }))
@@ -59,17 +62,9 @@ export const TextContentModel = types
 
     // views
     function getSlate() {
-      const text = Array.isArray(self.text) ? "" : self.text;
-      let parsed = emptyJson;
-      if (text) {
-        try {
-          parsed = JSON.parse(text);
-        }
-        catch (e) {
-          // TODO: error handling strategy
-          parsed = errorJson;
-        }
-      }
+      const parsed = Array.isArray(self.text)
+                      ? emptyJson
+                      : safeJsonParse(self.text as string) || emptyJson;
       return Value.fromJSON(parsed);
     }
 

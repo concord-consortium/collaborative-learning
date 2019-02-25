@@ -31,6 +31,12 @@ interface TileLoggingMetadata {
   originalTileId?: string;
 }
 
+export enum LogEventMethod {
+  DO = "do",
+  UNDO = "undo",
+  REDO = "redo"
+}
+
 export enum LogEventName {
   CREATE_TILE,
   COPY_TILE,
@@ -47,8 +53,10 @@ export enum LogEventName {
   CREATE_LEARNING_LOG,
 
   GRAPH_TOOL_CHANGE,
-  DRAWING_TOOL_CHANGE
+  DRAWING_TOOL_CHANGE,
 
+  TILE_UNDO,
+  TILE_REDO,
 }
 
 type ToolChangeEventType = JXGChange | DrawingToolChange;
@@ -63,11 +71,11 @@ export class Logger {
     this._instance.investigationTitle = investigation.title;
   }
 
-  public static log(event: LogEventName, parameters?: object) {
+  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod) {
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
-    const logMessage = Logger.Instance.createLogMessage(eventString, parameters);
+    const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
     sendToLoggingService(logMessage);
   }
 
@@ -113,14 +121,20 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logToolChange(eventName: LogEventName, operation: string, change: ToolChangeEventType, toolId: string) {
+  public static logToolChange(
+    eventName: LogEventName,
+    operation: string,
+    change: ToolChangeEventType,
+    toolId: string,
+    method?: LogEventMethod)
+  {
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
       ...change
     };
 
-    Logger.log(eventName, parameters);
+    Logger.log(eventName, parameters, method);
   }
 
   private static _instance: Logger;
@@ -144,7 +158,11 @@ export class Logger {
     this.session = uuid();
   }
 
-  private createLogMessage(event: string, parameters?: {section?: string}): LogMessage {
+  private createLogMessage(
+    event: string,
+    parameters?: {section?: string},
+    method: LogEventMethod = LogEventMethod.DO
+  ): LogMessage {
     const {user, ui, documents} = this.stores;
 
     // If params doesn't already specify a section, see if we know what section the user is in.
@@ -169,7 +187,7 @@ export class Logger {
       section,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
       event,
-      method: "do",           // eventually we will want to support undo, redo
+      method,
       parameters
     };
 

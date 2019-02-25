@@ -1,12 +1,12 @@
 class RightNav{
     getRightNavTabs(){
-        return cy.get('.right-nav > .tabs > .tab');
+        return cy.get('.right-nav .tab');
     }
     getMyWorkTab(){
         return cy.get('#rightNavTabMy\\ Work.tab');
     }
     getRightNavExpandedSpace(){
-        return cy.get('.right-nav > .expanded-area.expanded');
+        return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
     }
 
     getAllMyWorkAreaCanvasItems(){
@@ -14,14 +14,15 @@ class RightNav{
     }
 
     openMyWorkAreaCanvasItem(title){
-        cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
+        cy.get('[data-test=my-work-list-items][title*="'+title+'"] .scaled-list-item').click();
         // cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
         // cy.get('.my-work > .list > .list-item[title*="'+title+'"]').click();
     }
 
     openMyWorkTab(){
         this.getMyWorkTab().click({force:true});
-        this.getRightNavExpandedSpace().should('be.visible');
+        this.getRightNavExpandedSpace();
+        // this.getRightNavExpandedSpace().should('be.visible');
     }
 
     closeMyWorkTab(){
@@ -44,8 +45,7 @@ class RightNav{
     }
 
     openClassWorkAreaCanvasItem(title){
-        // this test, as well as the previous implementation, might have unexpected results if we have
-        // multiple items within a Class Work section
+        cy.get('[data-test=class-work-section] .title').contains(title).click();
         cy.get('[data-test=class-work-list-items] > .info').parent().click();
     }
 

@@ -12,8 +12,9 @@
   .tool-tile-drag-handle
     position: absolute
     right: 0px
-    width: $double-margin
-    height: $double-margin
+    box-sizing: content-box
+    width: 21px
+    height: 21px
     border-radius: $border-radius
     border-top-left-radius: 0
     border-bottom-right-radius: 0
@@ -31,8 +32,9 @@
       opacity: 1
 
     .icon
-      width: 20px
-      height: 20px
+      width: 23px
+      height: 23px
+      margin-top: -1px
       left: 0px
 
   &.selected

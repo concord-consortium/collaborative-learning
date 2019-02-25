@@ -1,12 +1,11 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
-import { DataSet } from "../data/data-set";
 import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
 import { defaultGeometryContent, kGeometryDefaultHeight } from "../tools/geometry/geometry-content";
 import { defaultImageContent } from "../tools/image/image-content";
 import { defaultTableContent, kTableDefaultHeight } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
@@ -34,8 +33,6 @@ export const DocumentContentModel = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
-    // data shared between tools
-    shared: types.maybe(DataSet)
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -66,6 +63,10 @@ export const DocumentContentModel = types
       },
       getTile(tileId: string) {
         return self.tileMap.get(tileId);
+      },
+      getTileContent(tileId: string) {
+        const tile = self.tileMap.get(tileId);
+        return tile && tile.content;
       },
       getRow(rowId: string) {
         return self.rowMap.get(rowId);
@@ -144,7 +145,7 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
-      const tile = ToolTileModel.create({ content });
+      const tile = createToolTileModelFromContent(content);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -178,7 +179,7 @@ export const DocumentContentModel = types
       if (addSidecarNotes) {
         const { rowId } = result;
         const row = self.rowMap.get(rowId);
-        const tile = ToolTileModel.create({ content: defaultTextContent() });
+        const tile = createToolTileModelFromContent(defaultTextContent());
         self.tileMap.put(tile);
         row!.insertTileInRow(tile, 1);
         result.additionalTileIds = [ tile.id ];
@@ -235,6 +236,8 @@ export const DocumentContentModel = types
       self.rowMap.forEach(row => {
         // remove from row
         if (row.hasTile(tileId)) {
+          const tile = self.getTile(tileId);
+          tile && tile.willRemoveFromDocument();
           row.removeTileFromRow(tileId);
         }
         // track empty rows

@@ -37,21 +37,25 @@ describe("supports model", () => {
     expect(omitUndefined(getSnapshot(supports))).toEqual({
       curricularSupports: [
         {
+          supportType: "curricular",
           text: "support #1",
           type: "unit",
           visible: true,
         },
         {
+          supportType: "curricular",
           text: "support #2",
           type: "investigation",
           visible: false,
         },
         {
+          supportType: "curricular",
           text: "support #3",
           type: "problem",
           visible: true,
         },
         {
+          supportType: "curricular",
           text: "support #4",
           type: "section",
           visible: false,
@@ -60,6 +64,7 @@ describe("supports model", () => {
       classSupports: [
         {
           key: "1",
+          supportType: "teacher",
           text: "support #5",
           type: "problem",
           audience: {
@@ -215,12 +220,14 @@ describe("supports model", () => {
     expect(supports.getSupportsForUserProblem(SectionType.introduction, "groupId", "userId")).toEqual([
       {
         sectionId: "introduction",
+        supportType: "curricular",
         text: "Investigation 1, Problem 1, section: introduction, support #1",
         type: "section",
         visible: false,
       },
       {
         sectionId: "introduction",
+        supportType: "curricular",
         text: "Investigation 1, Problem 1, section: introduction, support #2",
         type: "section",
         visible: false,

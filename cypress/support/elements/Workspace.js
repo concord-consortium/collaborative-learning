@@ -42,11 +42,11 @@ class Workspace{
     }
 
     getDialogOKButton(){
-        return cy.get('[data-test=dialog-buttons] > #okButton');
+        return cy.get('[data-test=dialog-buttons] #okButton');
     }
 
     getDialogCancelButton(){
-        return cy.get('[data-test=dialog-buttons] > #cancelButton');
+        return cy.get('[data-test=dialog-buttons] #cancelButton');
     }
 }
 

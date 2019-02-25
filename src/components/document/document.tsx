@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import * as FileSaver from "file-saver";
 
-import { SupportItemModelType } from "../../models/stores/supports";
+import { SupportItemModelType, SupportType } from "../../models/stores/supports";
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
@@ -75,7 +75,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <svg key="download" className={`icon icon-download`}
+                            ? <svg key="download" className={`action icon icon-download`}
                                     onClick={this.handleDownloadTileJson}>
                                 <use xlinkHref={`#icon-publish`} />
                               </svg>
@@ -89,7 +89,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`icon icon-publish`} data-test="publish-icon"
+              <svg key="publish" className={`action icon icon-publish`} data-test="publish-icon"
                    onClick={this.handlePublishWorkspace}>
                 <use xlinkHref={`#icon-publish`} />
               </svg>,
@@ -230,12 +230,13 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         {supports.map((support) => {
           const {index, item} = support;
           const visibility = !anyActive || item.visible ? "show" : "hide";
+          const audience = item.supportType === SupportType.teacher ? item.audience.type : "curricular";
           return (
             <svg
               key={index}
               onClick={this.handleToggleSupport(item)}
               className={`icon ${this.getSupportName(index)} ${visibility}`}
-              data-test="support-icon"
+              data-test={`support-icon ${audience}`}
             >
               <use xlinkHref={`#${this.getSupportName(index)}`} />
             </svg>

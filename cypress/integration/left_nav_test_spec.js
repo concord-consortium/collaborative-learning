@@ -11,7 +11,6 @@ describe('Test Left tabs',function(){
      leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
          titleArr.push($tab.text());
      }).then(($tab)=> {
-
          for (i = 0; i < $tab.length - 1; i++) {
              let title = $tab.text;
              cy.get('#leftNavTab' + i).click({force:true});

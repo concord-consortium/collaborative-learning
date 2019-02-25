@@ -616,6 +616,7 @@ interface DrawingLayerViewProps {
 }
 
 interface DrawingLayerViewState {
+  toolbarSettings?: ToolbarSettings;
   currentDrawingObject: LineObject|RectangleObject|EllipseObject|VectorObject|null;
   objects: ObjectMap;
   selectedObjects: DrawingObject[];
@@ -691,12 +692,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
     const drawingContent = this.props.model.content as DrawingContentModelType;
-    const prevDrawingContent = prevProps.model.content as DrawingContentModelType;
 
     this.syncChanges();
 
     const newSettings = this.toolbarSettings(drawingContent);
-    const prevSettings = this.toolbarSettings(prevDrawingContent);
+    const prevSettings = this.state.toolbarSettings;
     if (JSON.stringify(newSettings) !== JSON.stringify(prevSettings)) {
       this.setCurrentToolSettings(newSettings);
     }
@@ -764,6 +764,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public setCurrentToolSettings(settings: ToolbarSettings) {
     if (this.currentTool) {
       this.currentTool.setSettings(settings);
+      this.setState({ toolbarSettings: settings });
     }
   }
 
