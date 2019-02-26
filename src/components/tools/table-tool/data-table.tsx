@@ -624,10 +624,17 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     this.editCellEvent = event;
 
     if (this.localRowChangeTimer) {
+      // The user stopped editing a cell in the local/input row, but started
+      // editing another cell before the timer expired. We cancel the timer
+      // and then decide whether to create a new case depending on whether
+      // the new cell being edited is in the local/input row or not.
       clearTimeout(this.localRowChangeTimer);
       this.localRowChangeTimer = undefined;
 
       if (event.node.id !== LOCAL_ROW_ID) {
+        // If the new cell being edited is not in the local/input row, then
+        // we should add the new case, but also save/restore the edit state
+        // for the cell now being edited.
         this.saveCellEditState();
         this.addLocalCaseToTable();
         setTimeout(() => {
@@ -647,8 +654,16 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   public handleCellEditingStopped = (event: CellEditingStoppedEvent) => {
     this.checkForEnterAfterCellEditingStopped = true;
 
+    // When the user stops editing a cell in the local/input row, we want to add
+    // the new case to the dataset, as long as the user has actually edited the
+    // value or explicitly requested the new row (by pressing the enter key).
     if (event.node.id === LOCAL_ROW_ID) {
       if (this.isProcessingEnterKey || this.hasCellEditValueChanged(this.editCellEvent, event)) {
+        // We set a timeout so that this can be canceled. If the user immediately starts
+        // editing another cell in the local/input row, then we do _not_ want to add the
+        // new case to the dataset until the user stops editing the row entirely.
+        // We assume that 10 ms is sufficient to allow the next cell edit to begin,
+        // if there is one starting up immediately, e.g. when tabbing to the next cell.
         this.localRowChangeTimer = setTimeout(() => {
           this.localRowChangeTimer = undefined;
           this.addLocalCaseToTable();
@@ -669,7 +684,11 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     return params.nextCellDef;
   }
 
-  public handleKeyDownCapture = (e: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => {
+  public handleKeyDownCapture = (e: KeyboardEvent) => {
+    // Track whether or not we are processing an enter key event, because
+    // we use that information to decide when/whether to create a new case.
+    // We use a browser event handler because the corresponding React event
+    // handler didn't work as expected.
     if ((e.keyCode === 13) && !e.shiftKey) {
       this.isProcessingEnterKey = true;
     }
