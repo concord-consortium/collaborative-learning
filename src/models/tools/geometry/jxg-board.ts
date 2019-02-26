@@ -57,19 +57,22 @@ export function sortByCreation(board: JXG.Board, ids: string[], reverse: boolean
 }
 
 function combineProperties(domElementID: string, defaults: any, changeProps: any, overrides: any) {
+  const { id, ...otherProps } = changeProps;
+  otherProps.boundingBox = scaleBoundingBoxToElement(domElementID, changeProps);
+  return assign(defaults, otherProps, overrides);
+}
+
+function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const elt = document.getElementById(domElementID);
   let eltBounds = elt && elt.getBoundingClientRect();
-  const { id, ...otherProps } = changeProps;
   if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
     eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
   }
-  // adjust boundingBox to actual size of dom element
   const { boundingBox, unitX, unitY } = changeProps;
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
   const xMax = xMin + eltBounds.width / (unitX || kGeometryDefaultPixelsPerUnit);
   const yMax = yMin + eltBounds.height / (unitY || kGeometryDefaultPixelsPerUnit);
-  otherProps.boundingBox = [xMin, yMax, xMax, yMin];
-  return assign(defaults, otherProps, overrides);
+  return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
 export function guessUserDesiredBoundingBox(board: JXG.Board) {
@@ -96,13 +99,13 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     const overrides = { axis: false, keepaspectratio: unitX === unitY };
     const props = combineProperties(domElementId, defaults, changeProps, overrides);
     const board = JXG.JSXGraph.initBoard(domElementId, props);
-    if (props.boundingBox && props.boundingBox.every((val: number) => isFinite(val))) {
-      board.setBoundingBox(props.boundingBox);
-    }
     return board;
 }
 
-function addAxes(board: JXG.Board, unitX: number, unitY: number) {
+function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: JXG.BoundingBox) {
+  if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
+    board.setBoundingBox(boundingBox);
+  }
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
   board.removeGrids();
@@ -141,13 +144,15 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number) {
 
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
+    const props = change.properties;
     const board = isBoard(boardDomId)
                     ? boardDomId as JXG.Board
-                    : createBoard(boardDomId as string, change.properties);
+                    : createBoard(boardDomId as string, props);
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
-    const axes = addAxes(board, board.unitX, board.unitY);
+    const updatedBoundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
+    const axes = addAxes(board, board.unitX, board.unitY, updatedBoundingBox);
     return [board, ...axes];
 },
 
@@ -180,10 +185,11 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          addAxes(board, unitX, unitY);
+          const axes = addAxes(board, unitX, unitY);
+          board.update();
+          return axes;
         }
       }
-      board.update();
     }
   },
 
