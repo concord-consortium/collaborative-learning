@@ -341,10 +341,9 @@ export const GeometryContentModel = types
             if (isBoard(changeElem)) {
               board = changeElem as JXG.Board;
               board.suspendUpdate();
-            } else {
-              if (onCreate) {
-                onCreate(changeElem as JXG.GeometryElement);
-              }
+            }
+            else if (onCreate) {
+              onCreate(changeElem as JXG.GeometryElement);
             }
           });
         });

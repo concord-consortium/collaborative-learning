@@ -71,13 +71,8 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
       const result = content.syncChange(board, change);
-      if (result instanceof JXG.GeometryElement) {
-        newElements.push(result);
-      }
-      else if (Array.isArray(result)) {
-        const elts = result.filter(elt => elt instanceof JXG.GeometryElement) as JXG.GeometryElement[];
-        newElements.push(...elts);
-      }
+      const elts = castArray(result).filter(elt => elt instanceof JXG.GeometryElement) as JXG.GeometryElement[];
+      newElements.push(...elts);
       if (change.operation === "update") {
         const ids = castArray(change.targetID);
         const targets = ids.map(id => board.objects[id]);
@@ -547,8 +542,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (board) {
       content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      // XXX: Hack - rescaling the board should return the new axes
-      setTimeout(() => this.handleCreateAxes(board));
+      // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
+      // We wait until the board has updated its axes to apply the listeners
+      setTimeout(() => {
+        const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+        axes.forEach(this.handleCreateAxis);
+      });
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -1162,11 +1161,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     axis.label && axis.label.on("down", handlePointerDown);
-  }
-
-  private handleCreateAxes = (board: JXG.Board) => {
-    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-    axes.forEach(this.handleCreateAxis);
   }
 
   private handleCreatePoint = (point: JXG.Point) => {

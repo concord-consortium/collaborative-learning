@@ -103,14 +103,14 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
 }
 
 function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: JXG.BoundingBox) {
-  if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
-    board.setBoundingBox(boundingBox);
-  }
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
   board.removeGrids();
   board.options.grid = { ...board.options.grid, gridX: xMinorTickDistance, gridY: yMinorTickDistance };
   board.addGrid();
+  if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
+    board.setBoundingBox(boundingBox);
+  }
   const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
     name: "x",
     withLabel: true,
@@ -185,11 +185,10 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          const axes = addAxes(board, unitX, unitY);
-          board.update();
-          return axes;
+          addAxes(board, unitX, unitY);
         }
       }
+      board.update();
     }
   },
 
