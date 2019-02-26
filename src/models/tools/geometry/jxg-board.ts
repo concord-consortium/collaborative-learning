@@ -136,6 +136,7 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number) {
     minorTicks: yMinorTicks,
     drawZero: false
   });
+  return [xAxis, yAxis];
 }
 
 export const boardChangeAgent: JXGChangeAgent = {
@@ -146,8 +147,8 @@ export const boardChangeAgent: JXGChangeAgent = {
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
-    addAxes(board, board.unitX, board.unitY);
-    return board;
+    const axes = addAxes(board, board.unitX, board.unitY);
+    return [board, ...axes];
 },
 
   update: (board: JXG.Board, change: JXGChange) => {

@@ -8,7 +8,7 @@ import { GeometryContentModelType, setElementColor } from "../../../models/tools
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -75,7 +75,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
         newElements.push(result);
       }
       else if (Array.isArray(result)) {
-        const elts = result as JXG.GeometryElement[];
+        const elts = result.filter(elt => elt instanceof JXG.GeometryElement) as JXG.GeometryElement[];
         newElements.push(...elts);
       }
       if (change.operation === "update") {
@@ -889,6 +889,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isComment(elt) || isMovableLineEquation(elt)) {
         this.handleCreateText(elt as JXG.Text);
       }
+      else if (isAxis(elt)) {
+        this.handleCreateAxis(elt as JXG.Line);
+      }
     });
   }
 
@@ -1149,18 +1152,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
-    this.handleCreateAxes(board);
   }
 
-  private handleCreateAxes = (board: JXG.Board) => {
+  private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
       if (!this.props.readOnly) {
         this.handleOpenAxisSettings();
       }
     };
 
+    axis.label && axis.label.on("down", handlePointerDown);
+  }
+
+  private handleCreateAxes = (board: JXG.Board) => {
     const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
+    axes.forEach(this.handleCreateAxis);
   }
 
   private handleCreatePoint = (point: JXG.Point) => {

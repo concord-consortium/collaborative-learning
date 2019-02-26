@@ -35,8 +35,9 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
   let _board: JXG.Board | undefined;
   const results = changes.map(change => {
                     const result = applyChange(_board || board, change, onChangeApplied);
-                    if ((typeof board === "string") && isBoard(result)) {
-                      _board = result as JXG.Board;
+                    const resultBoard = castArray(result).find(isBoard) as JXG.Board;
+                    if ((typeof board === "string") && resultBoard) {
+                      _board = resultBoard;
                       _board.suspendUpdate();
                     }
                     return result;
