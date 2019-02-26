@@ -1,5 +1,6 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
+import { Alert, Intent } from "@blueprintjs/core";
 import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
@@ -7,7 +8,7 @@ import { IMenuItemFlags } from "./table-header-menu";
 import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { canonicalizeValue, getRowLabel, ILinkProperties, ITableLinkProperties,
+import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
           TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
@@ -41,6 +42,7 @@ interface IPartialState {
 interface IState extends IPartialState {
   dataSet: IDataSet;
   syncedChanges: number;
+  showInvalidPasteAlert: boolean;
 }
 
 @inject("stores")
@@ -66,7 +68,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {
                   dataSet: DataSet.create(),
-                  syncedChanges: 0
+                  syncedChanges: 0,
+                  showInvalidPasteAlert: false
                 };
 
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
@@ -119,8 +122,33 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
           onRemoveCases={this.handleRemoveCases}
         />
+        {this.renderInvalidPasteAlert()}
       </div>
     );
+  }
+
+  private renderInvalidPasteAlert() {
+    const { showInvalidPasteAlert } = this.state;
+    if (!showInvalidPasteAlert) return;
+
+    return (
+      <Alert
+          confirmButtonText="OK"
+          icon="error"
+          intent={Intent.DANGER}
+          isOpen={true}
+          onClose={this.handleCloseInvalidPasteAlert}
+          canEscapeKeyCancel={true}
+      >
+        <p>
+          Linked data must be numeric. Please edit the table values so that all pasted cells contain numbers.
+        </p>
+      </Alert>
+    );
+  }
+
+  private handleCloseInvalidPasteAlert = () => {
+    this.setState({ showInvalidPasteAlert: false });
   }
 
   private getContent() {
@@ -191,15 +219,26 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
             attrMap[attr.id] = this.state.dataSet.attributes[i].id;
           }
         });
+        let doesTableContainUnlinkableValues = false;
         const cases = clipData.cases.map(srcCase => {
           const dstCase: ICase = { __id__: uniqueId() };
           each(srcCase, (value, attrID) => {
             const dstAttrID = attrMap[attrID];
-            if (dstAttrID) dstCase[dstAttrID] = value;
+            if (dstAttrID) {
+              dstCase[dstAttrID] = value;
+              if (!isLinkableValue(value)) {
+                doesTableContainUnlinkableValues = true;
+              }
+            }
           });
           return dstCase;
         });
-        this.handleAddCanonicalCases(cases);
+        if (content.isLinked && doesTableContainUnlinkableValues) {
+          this.setState({ showInvalidPasteAlert: true });
+        }
+        else {
+          this.handleAddCanonicalCases(cases);
+        }
       }
     }
   }
