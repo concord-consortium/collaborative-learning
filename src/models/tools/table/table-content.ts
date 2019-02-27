@@ -316,7 +316,8 @@ export const TableContentModel = types
           break;
         case "geometryLink":
           const geometryId = change.ids && change.ids as string;
-          geometryId && self.metadata.addLinkedGeometry(geometryId);
+          const geometryContent = geometryId && self.getGeometryContent(geometryId);
+          geometryContent && self.metadata.addLinkedGeometry(geometryId!);
           break;
       }
     },
