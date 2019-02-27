@@ -14,7 +14,7 @@ import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
-import { cloneDeep, each, sortedIndexOf } from "lodash";
+import { each, sortedIndexOf } from "lodash";
 
 import "./table-tool.sass";
 
@@ -303,12 +303,24 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
-    const cases = newCases.map(aCase => ({ __id__: uniqueId(), ...cloneDeep(aCase) }));
+  private handleAddCanonicalCases = (newCases: ICase[]) => {
+    const validateCase = (aCase: ICase) => {
+      const newCase: ICase = { __id__: uniqueId() };
+      if (this.getContent().isLinked) {
+        // validate linkable values
+        this.state.dataSet.attributes.forEach(attr => {
+          const value = aCase[attr.id];
+          newCase[attr.id] = isLinkableValue(value) ? value : 0;
+        });
+        return newCase;
+      }
+      return { ...newCase, ...aCase };
+    };
+    const cases = newCases.map(aCase => validateCase(aCase));
     const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
     const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
     const tableActionLinks = this.getTableActionLinks();
-    this.getContent().addCanonicalCases(cases, firstSelectedRowId, tableActionLinks);
+    this.getContent().addCanonicalCases(cases as ICaseCreation[], firstSelectedRowId, tableActionLinks);
     setTimeout(() => {
       const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
       const props = cases.map(aCase => ({ id: aCase.__id__ }));
