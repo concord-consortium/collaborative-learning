@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
@@ -1131,4 +1131,19 @@ function preprocessImportFormat(snapshot: any) {
   return {
     changes: changes.map(change => JSON.stringify(change))
   };
+}
+
+export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
+                                             idMap: { [id: string]: string }) {
+  snapshot.changes = snapshot.changes.map(changeJson => {
+    const change: JXGChange = safeJsonParse(changeJson);
+    if ((change.operation === "create") && (change.target === "tableLink")) {
+      change.targetID = idMap[change.targetID as string];
+    }
+    if (change.links) {
+      change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
+    }
+    return JSON.stringify(change);
+  });
+  return snapshot;
 }
