@@ -335,19 +335,17 @@ export const GeometryContentModel = types
       let board: JXG.Board | undefined;
       applyChanges(domElementID, changes, onChangeApplied)
         .filter(result => result != null)
-        .forEach(elt => {
-          if (isBoard(elt)) {
-            board = elt as JXG.Board;
-            board.suspendUpdate();
-          }
-          else if (Array.isArray(elt)) {
-            if (onCreate) {
-              elt.forEach(el => onCreate(el as JXG.GeometryElement));
+        .forEach(changeResult => {
+          const changeElems = castArray(changeResult);
+          changeElems.forEach(changeElem => {
+            if (isBoard(changeElem)) {
+              board = changeElem as JXG.Board;
+              board.suspendUpdate();
             }
-          }
-          else if (elt && onCreate) {
-            onCreate(elt as JXG.GeometryElement);
-          }
+            else if (onCreate) {
+              onCreate(changeElem as JXG.GeometryElement);
+            }
+          });
         });
       if (board) {
         board.unsuspendUpdate();

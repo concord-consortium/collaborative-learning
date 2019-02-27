@@ -8,7 +8,7 @@ import { GeometryContentModelType, setElementColor } from "../../../models/tools
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -71,13 +71,8 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
       const result = content.syncChange(board, change);
-      if (result instanceof JXG.GeometryElement) {
-        newElements.push(result);
-      }
-      else if (Array.isArray(result)) {
-        const elts = result as JXG.GeometryElement[];
-        newElements.push(...elts);
-      }
+      const elts = castArray(result).filter(elt => elt instanceof JXG.GeometryElement) as JXG.GeometryElement[];
+      newElements.push(...elts);
       if (change.operation === "update") {
         const ids = castArray(change.targetID);
         const targets = ids.map(id => board.objects[id]);
@@ -547,8 +542,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (board) {
       content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      // XXX: Hack - rescaling the board should return the new axes
-      setTimeout(() => this.handleCreateAxes(board));
+      // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
+      // We wait until the board has updated its axes to apply the listeners
+      setTimeout(() => {
+        const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+        axes.forEach(this.handleCreateAxis);
+      });
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -889,6 +888,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isComment(elt) || isMovableLineEquation(elt)) {
         this.handleCreateText(elt as JXG.Text);
       }
+      else if (isAxis(elt)) {
+        this.handleCreateAxis(elt as JXG.Line);
+      }
     });
   }
 
@@ -1149,18 +1151,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
-    this.handleCreateAxes(board);
   }
 
-  private handleCreateAxes = (board: JXG.Board) => {
+  private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
       if (!this.props.readOnly) {
         this.handleOpenAxisSettings();
       }
     };
 
-    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
+    axis.label && axis.label.on("down", handlePointerDown);
   }
 
   private handleCreatePoint = (point: JXG.Point) => {
