@@ -296,7 +296,7 @@ export const GeometryContentModel = types
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
-    function onChangeApplied(board: JXG.Board | undefined, change: JXGChange) {
+    function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
@@ -308,8 +308,11 @@ export const GeometryContentModel = types
           const xEntry = labels && labels.find(entry => entry.id === "xAxis");
           const yEntry = labels && labels.find(entry => entry.id === "yAxis");
           if (op === "create") {
-            const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
-            self.metadata.addTableLink(tableId, axes);
+            const tableContent = self.getTableContent(tableId);
+            if (tableContent) {
+              const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
+              self.metadata.addTableLink(tableId, axes);
+            }
           }
           else if (op === "delete") {
             self.metadata.removeTableLink(tableId);
@@ -320,10 +323,13 @@ export const GeometryContentModel = types
             }
           }
         }
+      }
+    }
 
-        if (board) {
-          syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
-        }
+    function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
+      const target = change.target.toLowerCase();
+      if (board && (target === "tablelink")) {
+        syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
       }
     }
 
@@ -333,7 +339,7 @@ export const GeometryContentModel = types
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
       let board: JXG.Board | undefined;
-      applyChanges(domElementID, changes, onChangeApplied)
+      applyChanges(domElementID, changes, handleWillApplyChange, handleDidApplyChange)
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -890,7 +896,7 @@ export const GeometryContentModel = types
 
     function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
-        return applyChange(board, change, onChangeApplied);
+        return applyChange(board, change, handleWillApplyChange, handleDidApplyChange);
       }
     }
 
