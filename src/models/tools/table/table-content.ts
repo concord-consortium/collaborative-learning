@@ -5,6 +5,7 @@ import { castArray, each } from "lodash";
 import { GeometryContentModelType } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -219,6 +220,9 @@ export const TableContentModel = types
     },
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));
+
+      const toolId = self.metadata && self.metadata.id || "";
+      Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
   }))
   .actions(self => ({
