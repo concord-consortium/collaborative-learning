@@ -16,26 +16,26 @@ context('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
         it('will add a point to the origin', function(){
             leftNav.openToWorkspace('Extra Workspace');
-            cy.wait(2000);
+            cy.wait(1500);
             canvas.getCanvasTitle().should('contain','Extra Workspace');
             canvas.addGraphTile();
             graphToolTile.addPointToGraph(0,0);
-            graphToolTile.getGraphPointText().should('have.text', '0,0');
+            graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will add points to a graph', function(){
             leftNav.openToWorkspace('Now What');
-            cy.wait(2000);
+            cy.wait(1500);
             canvas.getCanvasTitle().should('contain','Now What');
             canvas.addGraphTile();
             graphToolTile.getGraphTile().last().click();
             graphToolTile.addPointToGraph(5,5);
             graphToolTile.addPointToGraph(10,5);
             graphToolTile.addPointToGraph(10,10);
-            cy.wait(2000)
+            // cy.wait(2000)
         });
         it('will add a polygon to a graph', function(){
             leftNav.openToWorkspace('What if...?');
-            cy.wait(2000);
+            cy.wait(1500);
             canvas.getCanvasTitle().should('contain','What if');
             canvas.addGraphTile();
             graphToolTile.getGraphTile().last().click();
@@ -43,19 +43,19 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(7.4, 2.2);
             graphToolTile.addPointToGraph(13.2,5);
             graphToolTile.addPointToGraph(13.2,5);
-            graphToolTile.getGraphPoint().last().click({force:true});
-            graphToolTile.getGraphPoint().last().click({force:true});
+            graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+            // graphToolTile.getGraphPoint().last();
             graphToolTile.getGraphPolygon().should('exist');
-            cy.wait(2000)
+            // cy.wait(2000)
         });
     });
 
     describe('restore points to canvas', function(){
         it('will verify restore of point at origin', function(){
             leftNav.openToWorkspace('Extra Workspace');
-            cy.wait(2000);
+            cy.wait(1500);
             canvas.getCanvasTitle().should('contain','Extra Workspace');
-            graphToolTile.getGraphPointText().last().should('have.text', '0,0');
+            graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will verify restore of polygon', function(){
             leftNav.openToWorkspace('What if...?');
@@ -70,7 +70,7 @@ context('Test graph tool functionalities', function(){
             cy.wait(2000);
             canvas.getCanvasTitle().should('contain','Now What');
             graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-                expect($list).to.have.length(8);
+                expect($list).to.have.length(4);
             })
         });
 
@@ -85,76 +85,82 @@ context('Test graph tool functionalities', function(){
         });
     });
 
-    describe('interact with points and polygons', function(){
-        it('will select a point', function(){
-            var pointId='';
-            graphToolTile.getGraphTile().click();
-            graphToolTile.selectGraphPoint(13.2,5);
-            pointId=graphToolTile.getGraphPointID();
-            cy.log(pointId);
-            // graphToolTile.getGraphPointText().should('have.text', '13.2,5');
-        });
-        // it('will drag a point to a new location', function(){
-        //
-        // });
-        // it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
-        //
-        // });
-        it('will show and hide angles to a polygon', function(){
-            //TODO need a way to verify the angles are showing and hidden
-            graphToolTile.selectGraphPoint(13.2,5);
-            graphToolTile.showAngle();
-            graphToolTile.selectGraphPoint(7.4, 2.2);
-            graphToolTile.showAngle();
-            graphToolTile.selectGraphPoint(3.2,4);
-            graphToolTile.showAngle();
-            graphToolTile.selectGraphPoint(13.2,5);
-            graphToolTile.hideAngle();
-            graphToolTile.selectGraphPoint(7.4, 2.2);
-            graphToolTile.hideAngle();
-            graphToolTile.selectGraphPoint(3.2,4);
-            graphToolTile.hideAngle();
+    context('Graph Toolbar', function(){
+        describe('interact with points and polygons', function(){
+            it('will select a point', function(){
+                let point=4;
+                graphToolTile.getGraphTile().click();
+                graphToolTile.selectGraphPoint(13.2,5);
+                // graphToolTile.getGraphPointID(point)
+                //     .then((id)=>{
+                //         id='#'.concat(id);
+                //         cy.get(id).then(($el)=>{
+                //             expect($el).to.have.text('(13.20, 5)');
+                //         })
+                //     });
+                // graphToolTile.getGraphPointCoordinates().should('contain', '(13.20, 5)');
+            });
+            // it('will drag a point to a new location', function(){
+            //
+            // });
+            // it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
+            //
+            // });
+            it('will show and hide angles to a polygon', function(){
+                //TODO need a way to verify the angles are showing and hidden
+                graphToolTile.selectGraphPoint(13.2,5);
+                graphToolTile.showAngle();
+                graphToolTile.selectGraphPoint(7.4, 2.2);
+                graphToolTile.showAngle();
+                graphToolTile.selectGraphPoint(3.2,4);
+                graphToolTile.showAngle();
+                graphToolTile.selectGraphPoint(13.2,5);
+                graphToolTile.hideAngle();
+                graphToolTile.selectGraphPoint(7.4, 2.2);
+                graphToolTile.hideAngle();
+                graphToolTile.selectGraphPoint(3.2,4);
+                graphToolTile.hideAngle();
 
-            //Add the angles angle for the restore test later
-            graphToolTile.selectGraphPoint(13.2,5);
-            graphToolTile.showAngle();
-            graphToolTile.selectGraphPoint(7.4, 2.2);
-            graphToolTile.showAngle();
-            graphToolTile.selectGraphPoint(3.2,4);
-            graphToolTile.showAngle();
-        });
-        it('will select a polygon', function(){
-            leftNav.openToWorkspace('Introduction');
-            cy.wait(2000);
-            canvas.getCanvasTitle().should('contain','Introduction');
-            canvas.addGraphTile();
-            // graphToolTile.getGraphTile().last().click();
-            graphToolTile.addPointToGraph(5,5);
-            graphToolTile.addPointToGraph(10,5);
-            graphToolTile.addPointToGraph(10,10);
-            graphToolTile.addPointToGraph(5,10);
-            graphToolTile.addPointToGraph(5,10);
-            graphToolTile.addPointToGraph(5,10);
-            graphToolTile.getGraphPoint().last().click({force:true});
-            graphToolTile.getGraphPoint().last().click({force:true});
-            cy.wait(2000);
-            // graphToolTile.getGraphPointID();
-            graphToolTile.getGraphPolygon().click({force:true});
-            graphToolTile.getRotateTool().should('be.visible');
-        });
-        it('will rotate a polygon', function(){
-            //not sure how to verify the rotation
-            graphToolTile.getRotateTool()
-                .trigger('mousedown')
-                .trigger('dragstart')
-                .trigger('mousemove',28, -73, {force:true})
-                .trigger('dragend')
-                .trigger('drop')
-                .trigger('mouseup');
-            //TODO verify points are in new location
+                //Add the angles angle for the restore test later
+                graphToolTile.selectGraphPoint(13.2,5);
+                graphToolTile.showAngle();
+                graphToolTile.selectGraphPoint(7.4, 2.2);
+                graphToolTile.showAngle();
+                graphToolTile.selectGraphPoint(3.2,4);
+                graphToolTile.showAngle();
+            });
+            it('will select a polygon', function(){
+                leftNav.openToWorkspace('Introduction');
+                cy.wait(2000);
+                canvas.getCanvasTitle().should('contain','Introduction');
+                canvas.addGraphTile();
+                // graphToolTile.getGraphTile().last().click();
+                graphToolTile.addPointToGraph(5,5);
+                graphToolTile.addPointToGraph(10,5);
+                graphToolTile.addPointToGraph(10,10);
+                graphToolTile.addPointToGraph(5,10);
+                // graphToolTile.addPointToGraph(5,10);
+                // graphToolTile.addPointToGraph(5,10);
+                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+                // graphToolTile.getGraphPoint().last();
+                cy.wait(1000);
+                // graphToolTile.getGraphPointID();
+                graphToolTile.getGraphPolygon().click({force:true});
+                graphToolTile.getRotateTool().should('be.visible');
+            });
+            it('will rotate a polygon', function(){
+                //not sure how to verify the rotation
+                graphToolTile.getRotateTool()
+                    .trigger('mousedown')
+                    .trigger('dragstart')
+                    .trigger('mousemove',28, -73, {force:true})
+                    .trigger('dragend')
+                    .trigger('drop')
+                    .trigger('mouseup');
+                //TODO verify points are in new location
 
-        });
-        it('will drag a polygon to a new location', function(){ //TODO still not working
+            });
+            it('will drag a polygon to a new location', function(){ //TODO still not working
                 graphToolTile.getGraphPolygon()
                     .trigger('mousedown', {force:true})
                     .trigger('dragstart', {force:true})
@@ -163,80 +169,90 @@ context('Test graph tool functionalities', function(){
                     .trigger('dragend', 100, 150, {force:true})
                     .trigger('drop', 100, 150,{force:true})
                     .trigger('mouseup',{force:true});
+            });
+            it('will copy and paste a polygon', function(){
+                //TODO
+            });
+            it('will restore changes to a graph', function(){
+                leftNav.openToWorkspace('Now What');
+                leftNav.openToWorkspace('What if...?');
+                //TODO verify angles are showing
+                leftNav.openToWorkspace('Introduction');
+                //TODO verify polygon is present and rotated
+
+            })
         });
-        it('will copy and paste a polygon', function(){
-            //TODO
-        });
-        it('will restore changes to a graph', function(){
-            leftNav.openToWorkspace('Now What');
-            leftNav.openToWorkspace('What if...?');
-            //TODO verify angles are showing
-            leftNav.openToWorkspace('Introduction');
-            //TODO verify polygon is present and rotated
 
+
+
+        describe('delete points and polygons', function(){
+            it('will delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
+                leftNav.openToWorkspace('Initial Challenge');
+                cy.wait(1500);
+                canvas.getCanvasTitle().should('contain','Initial Challenge');
+                canvas.addGraphTile();
+
+                let basePointCount = 3; // number of points in a newly created geometry tool
+
+                graphToolTile.addPointToGraph(5,5);
+                graphToolTile.addPointToGraph(10,5);
+                graphToolTile.addPointToGraph(10,10);
+                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+
+                // graphToolTile.addPointToGraph(10,10);
+                // graphToolTile.addPointToGraph(10,10); //to create the polygon
+
+                graphToolTile.getGraphPoint().should('have.length', basePointCount)
+                graphToolTile.getGraphPoint().last().click({force:true});
+                canvas.getDeleteTool().click();
+                graphToolTile.getGraphPoint().should('have.length', basePointCount - 1)
+                graphToolTile.getGraphPolygon().should('exist');
+
+                graphToolTile.selectGraphPoint(10,5);
+                // graphToolTile.getGraphPoint().last().click();
+                canvas.getDeleteTool().click();
+                graphToolTile.getGraphPoint().should('have.length', basePointCount -2)
+                graphToolTile.getGraphPolygon().should('not.exist');
+                graphToolTile.selectGraphPoint(5,5);
+                canvas.getDeleteTool().click();
+                graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
+            })
+
+            it('will add a movable line', function(){
+                graphToolTile.addMovableLine();
+            })
+            it('will move the movable line',
+
+            )
+
+            // it('will delete points with keyboard', function(){ //current cypress behavior does not allow for "typing" into non-text field
+            //     leftNav.openToWorkspace('Initial Challenge');
+            //     cy.wait(2000);
+            //     canvas.getCanvasTitle().should('contain','Initial Challenge');
+            //     canvas.addGraphTile();
+            //     graphToolTile.getGraphTile().last().click();
+            //     graphToolTile.getGraphTile().last().click(40,35, {force:true});
+            //     graphToolTile.getGraphTile().last().click(140,70, {force:true});
+            //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
+            //         expect($list).to.have.length(7);
+            //     });
+            //     graphToolTile.getGraphPoint().last().click({force:true});
+            //     graphToolTile.getGraphPoint().last().type('{backspace}');
+            //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
+            //         expect($list).to.have.length(6);
+            //     });
+            //     graphToolTile.getGraphPoint().last().click({force:true});
+            //     graphToolTile.getGraphPoint().last().type('{del}');
+            //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
+            //         expect($list).to.have.length(5);
+            //     });
+            //     graphToolTile.getGraphPoint().last().click();
+            //     canvas.getDeleteTool().click();
+            //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
+            //         expect($list).to.have.length(4);
+            //     });
+            // })
         })
-    });
-
-
-
-    describe('delete points and polygons', function(){
-        it('will delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
-            leftNav.openToWorkspace('Initial Challenge');
-            cy.wait(2000);
-            canvas.getCanvasTitle().should('contain','Initial Challenge');
-            canvas.addGraphTile();
-
-            let basePointCount = 4; // number of points in a newly created geometry tool
-
-            graphToolTile.addPointToGraph(5,5);
-            graphToolTile.addPointToGraph(10,5);
-            graphToolTile.addPointToGraph(10,10);
-            graphToolTile.addPointToGraph(10,10);
-            graphToolTile.addPointToGraph(10,10); //to create the polygon
-
-            graphToolTile.getGraphPoint().should('have.length', basePointCount + 3)
-            graphToolTile.getGraphPoint().last().click({force:true});
-            canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().should('have.length', basePointCount + 2)
-            graphToolTile.getGraphPolygon().should('exist');
-
-            graphToolTile.selectGraphPoint(10,5);
-            // graphToolTile.getGraphPoint().last().click();
-            canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().should('have.length', basePointCount + 1)
-            graphToolTile.getGraphPolygon().should('not.exist');
-            graphToolTile.selectGraphPoint(5,5);
-            canvas.getDeleteTool().click();
-            graphToolTile.getGraphPoint().should('have.length', basePointCount)
-        })
-
-        // it('will delete points with keyboard', function(){ //current cypress behavior does not allow for "typing" into non-text field
-        //     leftNav.openToWorkspace('Initial Challenge');
-        //     cy.wait(2000);
-        //     canvas.getCanvasTitle().should('contain','Initial Challenge');
-        //     canvas.addGraphTile();
-        //     graphToolTile.getGraphTile().last().click();
-        //     graphToolTile.getGraphTile().last().click(40,35, {force:true});
-        //     graphToolTile.getGraphTile().last().click(140,70, {force:true});
-        //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-        //         expect($list).to.have.length(7);
-        //     });
-        //     graphToolTile.getGraphPoint().last().click({force:true});
-        //     graphToolTile.getGraphPoint().last().type('{backspace}');
-        //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-        //         expect($list).to.have.length(6);
-        //     });
-        //     graphToolTile.getGraphPoint().last().click({force:true});
-        //     graphToolTile.getGraphPoint().last().type('{del}');
-        //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-        //         expect($list).to.have.length(5);
-        //     });
-        //     graphToolTile.getGraphPoint().last().click();
-        //     canvas.getDeleteTool().click();
-        //     graphToolTile.getGraphPoint().each(($point, index, $list)=>{
-        //         expect($list).to.have.length(4);
-        //     });
-        // })
     })
 
 });
