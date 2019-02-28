@@ -54,7 +54,8 @@ context('Tests for graph and table integration', function(){
                 let xCoord = '9';
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
-                tableToolTile.getTableCell().eq(2).type('9{enter}');
+                tableToolTile.getTableCell().eq(2).type(xCoord);
+                tableToolTile.getTableCell().eq(3).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p2').should('exist');
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+xCoord+', 0)' )
             });
@@ -62,7 +63,8 @@ context('Tests for graph and table integration', function(){
                 let yCoord = '9';
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
-                tableToolTile.getTableCell().eq(5).type(yCoord+'{enter}');
+                tableToolTile.getTableCell().eq(5).type(yCoord);
+                tableToolTile.getTableCell().eq(4).type('0');
                 graphToolTile.getGraphPointLabel().contains('p3').should('exist');
                 graphToolTile.getGraphPointCoordinates().should('contain', '(0, '+yCoord+')');
             });
@@ -70,7 +72,11 @@ context('Tests for graph and table integration', function(){
         describe('test creating a polygon', function (){
             it('will add both coordinates in the table', function(){
                 tableToolTile.getTableCell().eq(6).type('5');
-                tableToolTile.getTableCell().last().type('5{enter}');
+                tableToolTile.getTableCell().eq(7).type('0');
+                tableToolTile.getTableCell().eq(8).type(' ');//need to create the next row
+                tableToolTile.getTableCell().eq(7).type('5');//go back and update p4 to be the right coords.
+                tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
+
                 //verify p4 is on the table
                 graphToolTile.getGraphPointLabel().contains('p4').should('exist');
                 graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
@@ -85,7 +91,8 @@ context('Tests for graph and table integration', function(){
             });
             it('will move a point by changing coordinates on the table', function(){
                 let new_x = '8';
-                tableToolTile.getTableCell().eq(6).type(new_x+'{enter}');
+                tableToolTile.getTableCell().eq(6).type(new_x);
+                tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+new_x+', 5)' )
             })
             it('will delete a point in the table', function(){
@@ -192,11 +199,19 @@ context('Tests for graph and table integration', function(){
         })
         it('will add coordinates in the table', function(){
             tableToolTile.getTableCell().eq(0).type('5');
-            tableToolTile.getTableCell().eq(1).type('5{enter}');
+            tableToolTile.getTableCell().eq(1).type('5');
             tableToolTile.getTableCell().eq(2).type('0');
-            tableToolTile.getTableCell().eq(3).type('0{enter}');
+            tableToolTile.getTableCell().eq(3).type('0');
             tableToolTile.getTableCell().eq(4).type('9');
-            tableToolTile.getTableCell().eq(5).type('5{enter}');
+            tableToolTile.getTableCell().eq(5).type('5');
+            tableToolTile.getTableCell().eq(6).type(' '); //type in space in the ghost row in lieu of {enter}
+            tableToolTile.getTableCell().eq(1).type('5');
+            tableToolTile.getTableCell().eq(6).type(' ');
+            tableToolTile.getTableCell().eq(3).type('0');
+            tableToolTile.getTableCell().eq(6).type(' ');
+            tableToolTile.getTableCell().eq(5).type('5');
+            tableToolTile.getTableCell().eq(6).type(' ');
+
         });
         it('will change the name of the axis in the table', function(){
             tableToolTile.renameColumn('x', 'neptune');
@@ -218,7 +233,6 @@ context('Tests for graph and table integration', function(){
             graphToolTile.getGraphPointLabel().contains('p3').should('exist');
             // graphToolTile.getGraphPointCoordinates().should('contain', '(9, 5)' )
         });
-
         it('verify axes names are on the graph', function(){
             graphToolTile.getGraphAxisLabelId('x')
             .then((id)=>{
