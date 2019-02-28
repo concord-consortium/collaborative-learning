@@ -95,11 +95,6 @@ context('Table Tool Tile',function(){
             tableToolTile.getTableCell().first().should('contain','1');
 
             tableToolTile.getTableRow().should('have.length', 3);
-
-            //also verify that new row is added when row "enter" key is sent to the last row
-            // tableToolTile.getTableCell().last().type('{enter}');
-            // cy.wait(100);
-            // tableToolTile.getTableRow().should('have.length', 4);
         });
     });
    describe('share table', function(){
@@ -112,7 +107,9 @@ context('Table Tool Tile',function(){
        it('will publish canvas', function(){
            canvas.publishCanvas();
            // rightNav.openClassWorkTab();
-           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
+           // rightNav.getClassWorkAreaCanvasItem()
+        //              .should('have.length',1)
+        //              .and('contain','Introduction')
            // need to verify that it is in the Class Work right nav
        });
    });
