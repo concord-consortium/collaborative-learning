@@ -7,8 +7,17 @@ export const isLinkedPoint = (v: any) => isPoint(v) && (v.getAttribute("clientTy
 // Eventually should use a different color for each table
 const linkedPointColor = "#0099FF";
 
+export type IsValidTableLinkFunctionType = (boardId: string, tableId?: string) => boolean;
+
+let isValidTableLinkFunction: IsValidTableLinkFunctionType;
+
+export function injectIsValidTableLinkFunction(isValidTableLink: IsValidTableLinkFunctionType) {
+  isValidTableLinkFunction = isValidTableLink;
+}
+
 function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, links?: ILinkProperties) {
   const tableId = links && links.tileIds && links.tileIds[0];
+  if (!isValidTableLinkFunction(board.container, tableId)) return;
   const linkedProps = {
           clientType: "linkedPoint",
           fixed: true,

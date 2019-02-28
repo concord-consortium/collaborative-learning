@@ -1,8 +1,10 @@
-import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
-import { defaultGeometryContent, kGeometryDefaultHeight } from "../tools/geometry/geometry-content";
+import { defaultGeometryContent, kGeometryDefaultHeight, GeometryContentModelType, mapTileIdsInGeometrySnapshot
+        } from "../tools/geometry/geometry-content";
 import { defaultImageContent } from "../tools/image/image-content";
-import { defaultTableContent, kTableDefaultHeight } from "../tools/table/table-content";
+import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTileIdsInTableSnapshot
+        } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
 import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
@@ -100,6 +102,20 @@ export const DocumentContentModel = types
           });
           return _tileMap;
         })(snapshot.tileMap);
+
+        each(snapshot.tileMap, (tile, id) => {
+          const tileContent = tile.content;
+          switch (tileContent.type) {
+            case "Geometry":
+              const geometryContentSnapshot: SnapshotOut<GeometryContentModelType> = tileContent;
+              mapTileIdsInGeometrySnapshot(geometryContentSnapshot, idMap);
+              break;
+            case "Table":
+              const tableContentSnapshot: SnapshotOut<TableContentModelType> = tileContent;
+              mapTileIdsInTableSnapshot(tableContentSnapshot, idMap);
+              break;
+          }
+        });
 
         snapshot.rowMap = (rowMap => {
           const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};

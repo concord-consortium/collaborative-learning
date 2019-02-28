@@ -4,19 +4,21 @@ import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
-import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, GeometryMetadataModelType, setElementColor
+        } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
+import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
@@ -60,6 +62,18 @@ interface JXGPtrEvent {
   evt: any;
   coords: JXG.Coords;
 }
+
+interface IBoardContentMapEntry {
+  modelId: string;
+  metadata: GeometryMetadataModelType;
+}
+const sBoardContentMetadataMap: { [id: string]: IBoardContentMapEntry } = {};
+
+injectIsValidTableLinkFunction((boardDomId: string, tableId?: string) => {
+  const entry = boardDomId && sBoardContentMetadataMap[boardDomId];
+  const metadata = entry && entry.metadata;
+  return metadata && tableId ? metadata.isLinkedToTable(tableId) : false;
+});
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           prevSyncedChanges?: number, readOnly?: boolean) {
@@ -222,6 +236,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { context, model, onSetActionHandlers } = props;
 
     this.elementId = `${context}-${model.id}-${nextViewId()}`;
+    sBoardContentMetadataMap[this.elementId] = {
+      modelId: model.id,
+      metadata: (model.content as GeometryContentModelType).metadata
+    };
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {
@@ -285,6 +303,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     const board = this.state.board;
     if (board) {
+      delete sBoardContentMetadataMap[this.elementId];
+
       // delay so any asynchronous JSXGraph actions have time to complete
       setTimeout(() => {
         JXG.JSXGraph.freeBoard(board);
