@@ -103,13 +103,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
                         : undefined;
   private localRow: ICaseCreation = {};
   private checkForEnterAfterCellEditingStopped = false;
-  private checkForEnterAfterLocalDataEntry = false;
+  private localRowChangeTimer?: any;
 
   private prevEditCell?: GridCellDef;
   private editCellEvent?: CellEditingStartedEvent;
   private savedFocusedCell?: ICellIDs;
   private savedEditCell?: ICellIDs;
   private savedEditContent?: string;
+  private isProcessingEnterKey?: boolean;
 
   private gridElement: HTMLDivElement|null;
   private headerElement: HTMLDivElement|null;
@@ -306,7 +307,6 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         if (params.data.id === LOCAL_ROW_ID) {
           if (params.colDef.colId) {
             this.localRow[params.colDef.colId] = params.newValue;
-            this.checkForEnterAfterLocalDataEntry = true;
           }
           return !!params.colDef.colId;
         }
@@ -412,12 +412,20 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
   }
 
-  public startEditingSameColumnOfNextRow = () => {
-    if (this.gridApi && this.prevEditCell) {
-      const rowIndex = this.prevEditCell.rowIndex + 1;
-      const colKey = this.prevEditCell.column.getColId();
-      this.gridApi.setFocusedCell( rowIndex, colKey);
+  public startEditingCell = (rowIndex: number, colKey: string) => {
+    if (this.gridApi && (rowIndex != null) && colKey) {
+      this.gridApi.setFocusedCell(rowIndex, colKey);
       this.gridApi.startEditingCell({ rowIndex, colKey });
+    }
+  }
+
+  public startEditingSameColumnOfNextRow = (backwards: boolean) => {
+    if (this.gridApi && this.prevEditCell) {
+      const rowIndex = this.prevEditCell.rowIndex + (backwards ? -1 : 1);
+      const colKey = this.prevEditCell.column.getColId();
+      if ((rowIndex >= 0) && colKey) {
+        this.startEditingCell(rowIndex, colKey);
+      }
     }
   }
 
@@ -426,8 +434,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       const rowIndex = this.prevEditCell.rowIndex + 1;
       const columns = this.gridColumnApi.getAllDisplayedColumns();
       const colKey = columns[1].getColId();
-      this.gridApi.setFocusedCell( rowIndex, colKey);
-      this.gridApi.startEditingCell({ rowIndex, colKey });
+      this.startEditingCell(rowIndex, colKey);
     }
   }
 
@@ -613,10 +620,56 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public handleCellEditingStarted = (event: CellEditingStartedEvent) => {
+    this.prevEditCell = this.gridApi && this.gridApi.getEditingCells()[0] || undefined;
     this.editCellEvent = event;
+
+    if (this.localRowChangeTimer) {
+      // The user stopped editing a cell in the local/input row, but started
+      // editing another cell before the timer expired. We cancel the timer
+      // and then decide whether to create a new case depending on whether
+      // the new cell being edited is in the local/input row or not.
+      clearTimeout(this.localRowChangeTimer);
+      this.localRowChangeTimer = undefined;
+
+      if (event.node.id !== LOCAL_ROW_ID) {
+        // If the new cell being edited is not in the local/input row, then
+        // we should add the new case, but also save/restore the edit state
+        // for the cell now being edited.
+        this.saveCellEditState();
+        this.addLocalCaseToTable();
+        setTimeout(() => {
+          this.restoreCellEditState();
+        });
+      }
+    }
+  }
+
+  public hasCellEditValueChanged(startEvent: CellEditingStartedEvent | undefined, stopEvent: CellEditingStoppedEvent) {
+    const orgValue = startEvent && startEvent.value || "";
+    const newValue = stopEvent && stopEvent.value || "";
+    // tslint:disable-next-line: triple-equals
+    return newValue != orgValue;
   }
 
   public handleCellEditingStopped = (event: CellEditingStoppedEvent) => {
+    this.checkForEnterAfterCellEditingStopped = true;
+
+    // When the user stops editing a cell in the local/input row, we want to add
+    // the new case to the dataset, as long as the user has actually edited the
+    // value or explicitly requested the new row (by pressing the enter key).
+    if (event.node.id === LOCAL_ROW_ID) {
+      if (this.isProcessingEnterKey || this.hasCellEditValueChanged(this.editCellEvent, event)) {
+        // We set a timeout so that this can be canceled. If the user immediately starts
+        // editing another cell in the local/input row, then we do _not_ want to add the
+        // new case to the dataset until the user stops editing the row entirely.
+        // We assume that 10 ms is sufficient to allow the next cell edit to begin,
+        // if there is one starting up immediately, e.g. when tabbing to the next cell.
+        this.localRowChangeTimer = setTimeout(() => {
+          this.localRowChangeTimer = undefined;
+          this.addLocalCaseToTable();
+        }, 10);
+      }
+    }
     this.editCellEvent = undefined;
     this.checkForEnterAfterCellEditingStopped = true;
   }
@@ -625,27 +678,32 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     this.prevEditCell = params.previousCellDef;
     if (params.editing && !params.backwards && !params.nextCellDef) {
       setTimeout(() => {
-        this.addLocalCaseToTable();
         setTimeout(this.startEditingFirstColumnOfNextRow);
       });
     }
     return params.nextCellDef;
   }
 
-  public handleKeyUp = (e: KeyboardEvent) => {
+  public handleKeyDownCapture = (e: KeyboardEvent) => {
+    // Track whether or not we are processing an enter key event, because
+    // we use that information to decide when/whether to create a new case.
+    // We use a browser event handler because the corresponding React event
+    // handler didn't work as expected.
+    if ((e.keyCode === 13) && !e.shiftKey) {
+      this.isProcessingEnterKey = true;
+    }
+  }
+
+  public handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const startEditingNextRow = this.startEditingSameColumnOfNextRow.bind(this, e.shiftKey);
+
     if (e.keyCode === 13) {
-      const focusedCell = this.gridApi && this.gridApi.getFocusedCell();
-      this.prevEditCell = focusedCell ? focusedCell.getGridCellDef() : undefined;
-      if (this.checkForEnterAfterLocalDataEntry) {
-        this.addLocalCaseToTable();
-        setTimeout(this.startEditingSameColumnOfNextRow);
+      if (this.checkForEnterAfterCellEditingStopped) {
+        setTimeout(startEditingNextRow);
       }
-      else if (this.checkForEnterAfterCellEditingStopped) {
-        setTimeout(this.startEditingSameColumnOfNextRow);
-      }
+      this.isProcessingEnterKey = false;
     }
 
-    this.checkForEnterAfterLocalDataEntry = false;
     this.checkForEnterAfterCellEditingStopped = false;
   }
 
@@ -680,11 +738,15 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public componentDidMount() {
-    window.addEventListener("keyup", this.handleKeyUp);
+    if (this.gridElement) {
+      this.gridElement.addEventListener("keydown", this.handleKeyDownCapture, true);
+    }
   }
 
   public componentWillUnmount() {
-    window.removeEventListener("keyup", this.handleKeyUp);
+    if (this.gridElement) {
+      this.gridElement.removeEventListener("keydown", this.handleKeyDownCapture, true);
+    }
   }
 
   public componentWillReceiveProps(nextProps: IProps) {
@@ -754,7 +816,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       <div className="neo-codap-case-table ag-theme-fresh"
           ref={(el) => this.gridElement = el}
           draggable={true}
-          onDragStart={this.handleDragStart}>
+          onDragStart={this.handleDragStart}
+          onKeyUp={this.handleKeyUp}>
         <AgGridReact
           columnDefs={this.gridColumnDefs}
           getRowNodeId={this.getRowNodeId}
@@ -768,6 +831,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           suppressDragLeaveHidesColumns={true}
           getRowStyle={this.getRowStyle}
           enableCellChangeFlash={true}
+          stopEditingWhenGridLosesFocus={true}
           onCellEditingStarted={this.handleCellEditingStarted}
           onCellEditingStopped={this.handleCellEditingStopped}
           components={this.components}

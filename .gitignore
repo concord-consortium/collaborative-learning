@@ -4,3 +4,5 @@ node_modules
 npm-error.log
 .DS_Store
 serviceAccountKey.json
+.idea
+cypress/screenshots

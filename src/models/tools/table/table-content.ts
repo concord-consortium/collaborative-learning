@@ -1,10 +1,11 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
 import { GeometryContentModelType } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -219,6 +220,9 @@ export const TableContentModel = types
     },
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));
+
+      const toolId = self.metadata && self.metadata.id || "";
+      Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
   }))
   .actions(self => ({
@@ -316,7 +320,8 @@ export const TableContentModel = types
           break;
         case "geometryLink":
           const geometryId = change.ids && change.ids as string;
-          geometryId && self.metadata.addLinkedGeometry(geometryId);
+          const geometryContent = geometryId && self.getGeometryContent(geometryId);
+          geometryContent && self.metadata.addLinkedGeometry(geometryId!);
           break;
       }
     },
@@ -454,4 +459,19 @@ export function convertImportToChanges(snapshot: any) {
     changes.push({ action: "create", target: "rows", props: { rows } });
   }
   return changes.map(change => JSON.stringify(change));
+}
+
+export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentModelType>,
+                                          idMap: { [id: string]: string }) {
+  snapshot.changes = snapshot.changes.map(changeJson => {
+    const change: ITableChange = safeJsonParse(changeJson);
+    if ((change.action === "create") && (change.target === "geometryLink")) {
+      change.ids = idMap[change.ids as string];
+    }
+    if (change.links) {
+      change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
+    }
+    return JSON.stringify(change);
+  });
+  return snapshot;
 }

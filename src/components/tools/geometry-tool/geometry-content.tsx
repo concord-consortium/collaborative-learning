@@ -4,19 +4,21 @@ import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
-import { GeometryContentModelType, setElementColor } from "../../../models/tools/geometry/geometry-content";
+import { GeometryContentModelType, GeometryMetadataModelType, setElementColor
+        } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
 import CommentDialog from "./comment-dialog";
+import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
@@ -61,6 +63,18 @@ interface JXGPtrEvent {
   coords: JXG.Coords;
 }
 
+interface IBoardContentMapEntry {
+  modelId: string;
+  metadata: GeometryMetadataModelType;
+}
+const sBoardContentMetadataMap: { [id: string]: IBoardContentMapEntry } = {};
+
+injectIsValidTableLinkFunction((boardDomId: string, tableId?: string) => {
+  const entry = boardDomId && sBoardContentMetadataMap[boardDomId];
+  const metadata = entry && entry.metadata;
+  return metadata && tableId ? metadata.isLinkedToTable(tableId) : false;
+});
+
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           prevSyncedChanges?: number, readOnly?: boolean) {
   const newElements: JXG.GeometryElement[] = [];
@@ -71,13 +85,8 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
       const result = content.syncChange(board, change);
-      if (result instanceof JXG.GeometryElement) {
-        newElements.push(result);
-      }
-      else if (Array.isArray(result)) {
-        const elts = result as JXG.GeometryElement[];
-        newElements.push(...elts);
-      }
+      const elts = castArray(result).filter(elt => elt instanceof JXG.GeometryElement) as JXG.GeometryElement[];
+      newElements.push(...elts);
       if (change.operation === "update") {
         const ids = castArray(change.targetID);
         const targets = ids.map(id => board.objects[id]);
@@ -227,6 +236,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { context, model, onSetActionHandlers } = props;
 
     this.elementId = `${context}-${model.id}-${nextViewId()}`;
+    sBoardContentMetadataMap[this.elementId] = {
+      modelId: model.id,
+      metadata: (model.content as GeometryContentModelType).metadata
+    };
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {
@@ -290,6 +303,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     const board = this.state.board;
     if (board) {
+      delete sBoardContentMetadataMap[this.elementId];
+
       // delay so any asynchronous JSXGraph actions have time to complete
       setTimeout(() => {
         JXG.JSXGraph.freeBoard(board);
@@ -547,8 +562,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (board) {
       content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      // XXX: Hack - rescaling the board should return the new axes
-      setTimeout(() => this.handleCreateAxes(board));
+      // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
+      // We wait until the board has updated its axes to apply the listeners
+      setTimeout(() => {
+        const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+        axes.forEach(this.handleCreateAxis);
+      });
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -889,6 +908,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isComment(elt) || isMovableLineEquation(elt)) {
         this.handleCreateText(elt as JXG.Text);
       }
+      else if (isAxis(elt)) {
+        this.handleCreateAxis(elt as JXG.Line);
+      }
     });
   }
 
@@ -1149,18 +1171,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
-    this.handleCreateAxes(board);
   }
 
-  private handleCreateAxes = (board: JXG.Board) => {
+  private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
       if (!this.props.readOnly) {
         this.handleOpenAxisSettings();
       }
     };
 
-    const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-    axes.forEach(axis => axis.label && axis.label.on("down", handlePointerDown));
+    axis.label && axis.label.on("down", handlePointerDown);
   }
 
   private handleCreatePoint = (point: JXG.Point) => {

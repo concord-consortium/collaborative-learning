@@ -7,6 +7,7 @@ import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
+import { ITableChange } from "../models/tools/table/table-content";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -54,12 +55,13 @@ export enum LogEventName {
 
   GRAPH_TOOL_CHANGE,
   DRAWING_TOOL_CHANGE,
+  TABLE_TOOL_CHANGE,
 
   TILE_UNDO,
   TILE_REDO,
 }
 
-type ToolChangeEventType = JXGChange | DrawingToolChange;
+type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {

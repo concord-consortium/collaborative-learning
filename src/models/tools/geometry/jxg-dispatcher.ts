@@ -11,7 +11,8 @@ import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray } from "lodash";
 
-type OnChangeApplied = (board: JXG.Board | undefined, change: JXGChange) => void;
+type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => void;
+type OnDidApplyChange = (board: JXG.Board | undefined, change: JXGChange) => void;
 
 interface JXGChangeAgents {
   [key: string]: JXGChangeAgent;
@@ -31,12 +32,15 @@ const agents: JXGChangeAgents = {
 };
 
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
-                             onChangeApplied?: OnChangeApplied): JXGChangeResult[] {
+                             onWillApplyChange?: OnWillApplyChange,
+                             onDidApplyChange?: OnDidApplyChange): JXGChangeResult[] {
   let _board: JXG.Board | undefined;
   const results = changes.map(change => {
-                    const result = applyChange(_board || board, change, onChangeApplied);
-                    if ((typeof board === "string") && isBoard(result)) {
-                      _board = result as JXG.Board;
+                    const result = applyChange(_board || board, change,
+                                               onWillApplyChange, onDidApplyChange);
+                    const resultBoard = castArray(result).find(isBoard) as JXG.Board;
+                    if ((typeof board === "string") && resultBoard) {
+                      _board = resultBoard;
                       _board.suspendUpdate();
                     }
                     return result;
@@ -48,9 +52,16 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
 }
 
 export function applyChange(board: JXG.Board|string, change: JXGChange,
-                            onChangeApplied?: OnChangeApplied): JXGChangeResult {
+                            onWillApplyChange?: OnWillApplyChange,
+                            onDidApplyChange?: OnDidApplyChange): JXGChangeResult {
   let _board = board as JXG.Board;
   const target = change.target.toLowerCase();
+
+  // give clients a chance to intercede before the change is applied
+  if (onWillApplyChange) {
+    onWillApplyChange(board, change);
+  }
+
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
     applyUpdateObjects(_board, change);
@@ -62,10 +73,13 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
     return;
   }
   const result = dispatchChange(board, change);
-  if (onChangeApplied) {
+
+  // give clients a chance to intercede after the change has been applied
+  if (onDidApplyChange) {
     if (isBoard(result)) _board = result as JXG.Board;
-    onChangeApplied(_board, change);
+    onDidApplyChange(_board, change);
   }
+
   return result;
 }
 

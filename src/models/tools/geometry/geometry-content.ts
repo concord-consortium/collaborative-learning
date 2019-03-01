@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
@@ -296,7 +296,7 @@ export const GeometryContentModel = types
     let suspendCount = 0;
     let batchChanges: string[] = [];
 
-    function onChangeApplied(board: JXG.Board | undefined, change: JXGChange) {
+    function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
@@ -308,8 +308,11 @@ export const GeometryContentModel = types
           const xEntry = labels && labels.find(entry => entry.id === "xAxis");
           const yEntry = labels && labels.find(entry => entry.id === "yAxis");
           if (op === "create") {
-            const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
-            self.metadata.addTableLink(tableId, axes);
+            const tableContent = self.getTableContent(tableId);
+            if (tableContent) {
+              const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
+              self.metadata.addTableLink(tableId, axes);
+            }
           }
           else if (op === "delete") {
             self.metadata.removeTableLink(tableId);
@@ -320,10 +323,13 @@ export const GeometryContentModel = types
             }
           }
         }
+      }
+    }
 
-        if (board) {
-          syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
-        }
+    function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
+      const target = change.target.toLowerCase();
+      if (board && (target === "tablelink")) {
+        syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
       }
     }
 
@@ -333,21 +339,19 @@ export const GeometryContentModel = types
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
       let board: JXG.Board | undefined;
-      applyChanges(domElementID, changes, onChangeApplied)
+      applyChanges(domElementID, changes, handleWillApplyChange, handleDidApplyChange)
         .filter(result => result != null)
-        .forEach(elt => {
-          if (isBoard(elt)) {
-            board = elt as JXG.Board;
-            board.suspendUpdate();
-          }
-          else if (Array.isArray(elt)) {
-            if (onCreate) {
-              elt.forEach(el => onCreate(el as JXG.GeometryElement));
+        .forEach(changeResult => {
+          const changeElems = castArray(changeResult);
+          changeElems.forEach(changeElem => {
+            if (isBoard(changeElem)) {
+              board = changeElem as JXG.Board;
+              board.suspendUpdate();
             }
-          }
-          else if (elt && onCreate) {
-            onCreate(elt as JXG.GeometryElement);
-          }
+            else if (onCreate) {
+              onCreate(changeElem as JXG.GeometryElement);
+            }
+          });
         });
       if (board) {
         board.unsuspendUpdate();
@@ -892,7 +896,7 @@ export const GeometryContentModel = types
 
     function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
-        return applyChange(board, change, onChangeApplied);
+        return applyChange(board, change, handleWillApplyChange, handleDidApplyChange);
       }
     }
 
@@ -1133,4 +1137,19 @@ function preprocessImportFormat(snapshot: any) {
   return {
     changes: changes.map(change => JSON.stringify(change))
   };
+}
+
+export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
+                                             idMap: { [id: string]: string }) {
+  snapshot.changes = snapshot.changes.map(changeJson => {
+    const change: JXGChange = safeJsonParse(changeJson);
+    if ((change.operation === "create") && (change.target === "tableLink")) {
+      change.targetID = idMap[change.targetID as string];
+    }
+    if (change.links) {
+      change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
+    }
+    return JSON.stringify(change);
+  });
+  return snapshot;
 }

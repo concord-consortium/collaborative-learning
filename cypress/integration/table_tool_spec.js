@@ -79,14 +79,22 @@ context('Table Tool Tile',function(){
     });
     describe('edit table entries', function(){
         it('will add content to table', function(){
-            tableToolTile.getTableCell().first().type('0');
-            tableToolTile.getTableCell().last().type('5{enter}');
-            tableToolTile.getTableCell().first().should('contain','0');
-            tableToolTile.getTableCell().eq(1).should('contain', '5');
-            tableToolTile.getTableRow().should('have.length',2);
-            //also verify that new row is added when row "enter" key is sent to the last row
-            tableToolTile.getTableCell().first().type('{enter}');
-            tableToolTile.getTableRow().should('have.length',3);
+            tableToolTile.getTableCell().first().type('3');
+            tableToolTile.getTableCell().last().click();
+            cy.wait(100);
+            tableToolTile.getTableCell().first().should('contain','3');
+
+            tableToolTile.getTableCell().last().type('2');
+            tableToolTile.getTableCell().first().click();
+            cy.wait(100);
+            tableToolTile.getTableCell().eq(1).should('contain', '2');
+
+            tableToolTile.getTableCell().first().type('1');
+            tableToolTile.getTableCell().last().click();
+            cy.wait(100);
+            tableToolTile.getTableCell().first().should('contain','1');
+
+            tableToolTile.getTableRow().should('have.length', 3);
         });
     });
    describe('share table', function(){
@@ -99,7 +107,9 @@ context('Table Tool Tile',function(){
        it('will publish canvas', function(){
            canvas.publishCanvas();
            // rightNav.openClassWorkTab();
-           // rightNav.getClassWorkAreaCanvasItem().should('have.length',1).and('contain','Introduction')
+           // rightNav.getClassWorkAreaCanvasItem()
+        //              .should('have.length',1)
+        //              .and('contain','Introduction')
            // need to verify that it is in the Class Work right nav
        });
    });
