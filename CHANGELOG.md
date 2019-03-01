@@ -1,6 +1,19 @@
 # Changelog
 
-## Version 0.5.0 - released February 22, 2019
+## Version 0.5.1 - released February 28, 2019
+
+- Log table changes
+- More cypress test coverage
+- Bug fixes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 476,805 bytes | 0.0% |
+| index.js | 3,899,990 bytes | 0.0% |
+
+## Version 0.5.0 - released February 25, 2019
 
 - Curriculum
   - Moving Straight Ahead unit
