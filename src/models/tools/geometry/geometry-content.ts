@@ -247,6 +247,11 @@ export const GeometryContentModel = types
       return geometryActionLinkId && tableActionLinkId && (geometryActionLinkId === tableActionLinkId);
     }
   }))
+  .views(self => ({
+    hasDeletableSelection(board: JXG.Board) {
+      return self.getDeletableSelectedIds(board).length > 0;
+    }
+  }))
   .actions(self => ({
     selectElement(id: string) {
       if (!self.isSelected(id)) {

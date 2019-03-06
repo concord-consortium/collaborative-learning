@@ -267,12 +267,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       this.props.toolApiInterface.register(this.props.model.id, {
         hasSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
-          return geometryContent.hasSelection();
+          // Note: hasSelection() returns true when there is a selection whether or not
+          // the selection is deletable. We could test for hasDeletableSelection() here,
+          // but the effect of that would be that the document toolbar would still enable
+          // the delete button when undeletable content is selected, but now clicking the
+          // delete button would delete the entire tile. For now, we preserve the current
+          // behavior of enabling the toolbar for an undeletable selection.
+          return !!geometryContent && geometryContent.hasSelection();
         },
         deleteSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
           const { board } = this.state;
-          if (board) {
+          if (geometryContent && board) {
             geometryContent.deleteSelection(board);
           }
         }
@@ -309,6 +315,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       setTimeout(() => {
         JXG.JSXGraph.freeBoard(board);
       });
+    }
+
+    if (!this.props.readOnly && this.props.toolApiInterface) {
+      this.props.toolApiInterface.unregister(this.props.model.id);
     }
 
     this._isMounted = false;
