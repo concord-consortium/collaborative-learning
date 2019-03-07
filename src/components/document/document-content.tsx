@@ -366,6 +366,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
+    if (!e.dataTransfer) return;
     const dragSrc = e.dataTransfer.getData(kDragTileSource);
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dragTileContent = e.dataTransfer.getData(kDragTileContent);

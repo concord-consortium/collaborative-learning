@@ -48,9 +48,11 @@ export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
 }
 
 export function extractDragTileType(dataTransfer: DataTransfer) {
-  for (const type of dataTransfer.types) {
-    const result = /org\.concord\.clue\.tile\.type\.(.*)$/.exec(type);
-    if (result) return result[1];
+  if (dataTransfer && dataTransfer.types) {
+    for (const type of dataTransfer.types) {
+      const result = /org\.concord\.clue\.tile\.type\.(.*)$/.exec(type);
+      if (result) return result[1];
+    }
   }
 }
 
@@ -162,6 +164,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const id = snapshot.id;
     delete snapshot.id;
     const dragData = JSON.stringify(snapshot);
+    if (!e.dataTransfer) return;
     e.dataTransfer.setData(kDragTileSource, docId);
     if (height) {
       e.dataTransfer.setData(kDragRowHeight, String(height));
