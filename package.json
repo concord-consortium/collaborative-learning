@@ -127,6 +127,7 @@
     "ag-grid-community": "^20.0.0",
     "ag-grid-react": "^20.0.0",
     "classnames": "^2.2.6",
+    "expr-eval": "^1.2.2",
     "file-saver": "^2.0.1",
     "firebase": "^5.8.2",
     "immutable": "^3.8.2",

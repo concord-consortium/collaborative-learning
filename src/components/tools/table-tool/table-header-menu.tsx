@@ -5,6 +5,9 @@ import { IDataSet } from "../../../models/data/data-set";
 import { GridApi } from "ag-grid-community";
 import { Icon, Menu, Popover, Position, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { listenForTableEvents } from "../../../models/tools/table/table-events";
+import { TableMetadataModelType } from "../../../models/tools/table/table-content";
+import UpdateExpressionDialog from "./update-expression-dialog";
+import { IAttribute } from "../../../models/data/attribute";
 
 export interface IMenuItemFlags {
   addAttribute?: boolean;
@@ -17,11 +20,13 @@ export interface IMenuItemFlags {
 
 interface IProps {
   api: GridApi;
+  metadata: TableMetadataModelType;
   dataSet?: IDataSet;
   readOnly?: boolean;
   itemFlags?: IMenuItemFlags;
   onNewAttribute: (name: string) => void;
   onRenameAttribute: (id: string, name: string) => void;
+  onUpdateExpression: (id: string, expression: string) => void;
   onNewCase: () => void;
   onRemoveAttribute: (id: string) => void;
   onRemoveCases: (ids: string[]) => void;
@@ -33,6 +38,10 @@ interface IState {
   isRenameAttributeDialogOpen: boolean;
   renameAttributeId: string;
   renameAttributeName: string;
+
+  isUpdateExpressionDialogOpen: boolean;
+  updateExpressionAttributeId: string;
+  updateExpressionValue: string;
 }
 
 export class TableHeaderMenu extends React.Component<IProps, IState> {
@@ -44,7 +53,11 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       isNewAttributeDialogOpen: false,
       isRenameAttributeDialogOpen: false,
       renameAttributeId: "",
-      renameAttributeName: ""
+      renameAttributeName: "",
+
+      isUpdateExpressionDialogOpen: false,
+      updateExpressionAttributeId: "",
+      updateExpressionValue: ""
     };
 
     listenForTableEvents((event) => {
@@ -85,6 +98,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
           onClose={this.closeNewAttributeDialog}
         />
         {this.renderRenameColumnDialog()}
+        {this.renderUpdateExpressionDialog()}
       </div>
     );
   }
@@ -99,6 +113,23 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                 name={this.state.renameAttributeName}
               />
             : null;
+  }
+
+  private renderUpdateExpressionDialog() {
+    const id = this.state.updateExpressionAttributeId;
+    const { dataSet } = this.props;
+    if (!id || !dataSet || !this.state.isUpdateExpressionDialogOpen) return null;
+    const xName = dataSet.attributes[0].name;
+    const yName = dataSet.attrFromID(id).name;
+    return <UpdateExpressionDialog
+            id={id}
+            isOpen={true}
+            onUpdateExpression={this.handleUpdateExpressionCallback}
+            onClose={this.closeUpdateExpressionDialog}
+            expression={this.props.metadata.expressions.get(id) || ""}
+            xName={xName}
+            yName={yName}
+          />;
   }
 
   private openNewAttributeDialog = () => {
@@ -123,6 +154,23 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       isRenameAttributeDialogOpen: true,
       renameAttributeId: attrID,
       renameAttributeName: name
+    });
+  }
+
+  private closeUpdateExpressionDialog = () => {
+    this.setState({ isUpdateExpressionDialogOpen: false });
+  }
+
+  private handleUpdateExpressionCallback = (id: string, expression: string) => {
+    this.props.onUpdateExpression(id, expression);
+    this.closeUpdateExpressionDialog();
+  }
+
+  private handleUpdateExpression = (evt: React.MouseEvent<HTMLElement>, attrID: string, expression: string) => {
+    this.setState({
+      isUpdateExpressionDialogOpen: true,
+      updateExpressionAttributeId: attrID,
+      updateExpressionValue: expression
     });
   }
 
@@ -155,9 +203,13 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
   }
 
   private renderAttributeSubMenuItems(onClick: (evt: React.MouseEvent<HTMLElement>,
-                                                attrID: string, name?: string) => void) {
+                                                attrID: string, name?: string) => void,
+                                      attributesFilter?: (attr: IAttribute, index: number) => boolean) {
     if (!this.props.dataSet || !this.props.dataSet.attributes.length) { return null; }
-    return this.props.dataSet.attributes.map((attr) => {
+    const attributes = attributesFilter
+      ? this.props.dataSet.attributes.filter(attributesFilter)
+      : this.props.dataSet.attributes;
+    return attributes.map((attr) => {
       function handleClick(evt: React.MouseEvent<HTMLElement>) {
         return onClick(evt, attr.id, attr.name);
       }
@@ -202,6 +254,16 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                               {this.renderAttributeSubMenuItems(this.handleRenameAttribute)}
                             </MenuItem>
                           : null;
+    const updateExpression = itemFlags.renameAttribute !== false
+                            ? <MenuItem
+                                icon="text-highlight"
+                                text={`Set Expression...`}
+                                data-test={`set-expression-menu-item`}
+                                disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
+                              >
+                                {this.renderAttributeSubMenuItems(this.handleUpdateExpression, (attr, i) => i > 0)}
+                              </MenuItem>
+                            : null;
     const removeColumn = itemFlags.removeAttribute !== false
                           ? <MenuItem
                               icon="remove-column"
@@ -229,6 +291,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         {renameColumn}
         {removeColumn}
         {removeRows}
+        {updateExpression}
       </Menu>
     );
   }

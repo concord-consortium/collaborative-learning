@@ -416,6 +416,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           isOpen={true}
           onClose={this.handleCloseInvalidTableDataAlert}
           canEscapeKeyCancel={true}
+          key={"invalid-table-alert"}
       >
         <p>
           Linked data must be numeric. Please edit the table values so that all cells contain numbers.

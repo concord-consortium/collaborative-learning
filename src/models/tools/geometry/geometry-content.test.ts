@@ -53,6 +53,8 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard(_content => {
       _content.addChange({ operation: "create", target: "point", parents: [1, 1] });
     });
+    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
+    content.doPostCreate(metadata);
     expect(isBoard(board)).toBe(true);
 
     content.resizeBoard(board, 200, 200);

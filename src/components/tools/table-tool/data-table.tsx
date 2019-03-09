@@ -15,6 +15,7 @@ import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-fresh.css";
 import "./data-table.css";
+import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 
 export const TableComponentSortModelData = types.model("TableComponentSortModelData", {
   colId: types.string,
@@ -39,6 +40,7 @@ interface IPos {
 }
 
 interface IProps {
+  metadata: TableMetadataModelType;
   dataSet?: IDataSet;
   changeCount: number;
   readOnly?: boolean;
@@ -52,6 +54,7 @@ interface IProps {
   tableComponentData?: ITableComponentData|null;
   onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
+  onSetExpression?: (colId: string, expression: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
   onRemoveCases?: (ids: string[]) => void;
@@ -182,6 +185,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       headerComponentFramework: TableHeaderMenu,
       headerComponentParams: {
         api: this.gridApi,
+        metadata: this.props.metadata,
         dataSet: this.props.dataSet,
         readOnly,
         itemFlags,
@@ -196,6 +200,11 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           else {
             const { dataSet } = this.props;
             dataSet && dataSet.setAttributeName(id, name);
+          }
+        },
+        onUpdateExpression: (id: string, expression: string) => {
+          if (this.props.onSetExpression) {
+            this.props.onSetExpression(id, expression);
           }
         },
         onNewCase: () => {
@@ -253,7 +262,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public getAttributeColumnDef(attribute: IAttribute): ColDef {
-    const { readOnly } = this.props;
+    const { readOnly, metadata } = this.props;
+    const expression = metadata.expressions.get(attribute.id);
+    const editable = !readOnly && !expression;
 
     function defaultAttrValueFormatter(params: ValueFormatterParams) {
       const colName = params.colDef.field || params.colDef.headerName || "";
@@ -273,12 +284,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
-      cellClass: "cdp-row-data-cell",
+      cellClass: `cdp-row-data-cell ${!editable ? "locked" : "editable"}`,
       headerName: attribute.name,
       field: attribute.name,
       tooltipField: attribute.name,
       colId: attribute.id,
-      editable: !readOnly,
+      editable,
       width: defaultWidth,
       resizable: true,
       lockPosition: true,
@@ -289,15 +300,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         if (params.data.id === LOCAL_ROW_ID) {
           return attrID ? this.localRow[attrID] : undefined;
         }
-        let value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
-        // valueGetter includes in-flight changes
-        this.localChanges.forEach((change) => {
-          if ((change.__id__ === caseID) && (attrID != null)) {
-            if (change[attrID] != null) {
-              value = change[attrID] as IValueType;
-            }
-          }
-        });
+        const value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
         return value;
       },
       valueFormatter: this.props.attrValueFormatter || defaultAttrValueFormatter,
@@ -386,6 +389,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       const colDef = columnApi.getColumn(newColDef.colId).getColDef();
       if (colDef.headerName !== newColDef.headerName) {
         colDef.headerName = newColDef.headerName;
+      }
+      if (colDef.editable !== newColDef.editable) {
+        colDef.editable = newColDef.editable;
+      }
+      if (colDef.cellClass !== newColDef.cellClass) {
+        colDef.cellClass = newColDef.cellClass;
       }
     });
     if (this.gridApi) {

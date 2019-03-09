@@ -6,6 +6,8 @@ import { GeometryContentModelType } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
+import { Parser } from "expr-eval";
+import { kSerializedXKey } from "../../../components/tools/table-tool/update-expression-dialog";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -72,6 +74,7 @@ export interface ITableProperties {
   rows?: IRowProperties[];
   beforeId?: string | string[];
   name?: string;
+  expression?: string;
 }
 
 export interface ITableChange {
@@ -85,7 +88,8 @@ export interface ITableChange {
 export const TableMetadataModel = types
   .model("TableMetadata", {
     id: types.string,
-    linkedGeometries: types.array(types.string)
+    linkedGeometries: types.array(types.string),
+    expressions: types.map(types.string)
   })
   .views(self => ({
     get isLinked() {
@@ -106,6 +110,9 @@ export const TableMetadataModel = types
     },
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
+    },
+    setExpression(colId: string, expression: string) {
+      self.expressions.set(colId, expression);
     }
   }));
 export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
@@ -241,6 +248,14 @@ export const TableContentModel = types
               ids
             });
     },
+    setExpression(id: string, expression: string) {
+      self.appendChange({
+        action: "update",
+        target: "columns",
+        ids: id,
+        props: { expression }
+      });
+    },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
       self.appendChange({
             action: "create",
@@ -297,6 +312,24 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
+    updateDatasetByExpressions(dataSet: IDataSet) {
+      dataSet.attributes.forEach(attr => {
+        const expression = self.metadata.expressions.get(attr.id);
+        if (expression) {
+          const xAttr = dataSet.attributes[0];
+          const parser = new Parser();
+          for (let i = 0; i < attr.values.length; i++) {
+            const xVal = xAttr.value(i) as number;
+            const expressionVal = parser.parse(expression).evaluate({[kSerializedXKey]: xVal});
+            attr.setValue(i, isFinite(expressionVal) ? expressionVal : "");
+          }
+        }
+      });
+
+      return dataSet;
+    }
+  }))
+  .views(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange) {
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
@@ -317,6 +350,7 @@ export const TableContentModel = types
           if (rows && rows.length) {
             dataSet.addCanonicalCasesWithIDs(rows, beforeId);
           }
+          self.updateDatasetByExpressions(dataSet);
           break;
         case "geometryLink":
           const geometryId = change.ids && change.ids as string;
@@ -336,6 +370,10 @@ export const TableContentModel = types
                 case "name":
                   dataSet.setAttributeName(ids[colIndex], value);
                   break;
+                case "expression":
+                  self.metadata.setExpression(ids[colIndex], value);
+                  self.updateDatasetByExpressions(dataSet);
+                  break;
               }
             });
           });
@@ -345,6 +383,7 @@ export const TableContentModel = types
           rowProps && rowProps.forEach((row: any, rowIndex) => {
             dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
           });
+          self.updateDatasetByExpressions(dataSet);
           break;
       }
     },

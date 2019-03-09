@@ -11,7 +11,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
           TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
-import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
+import { JXGCoordPair, JXGProperties } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
@@ -107,6 +107,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           tabIndex={this.props.tabIndex} onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
+          metadata={this.getContent().metadata}
           changeCount={this.state.syncedChanges}
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}
@@ -118,6 +119,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
           onSetAttributeName={this.handleSetAttributeName}
+          onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
           onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
           onRemoveCases={this.handleRemoveCases}
@@ -298,6 +300,29 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
         const geometryContent = this.getGeometryContent(id);
         if (geometryContent) {
           geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
+        }
+      });
+    });
+  }
+
+  private handleSetExpression = (attributeId: string, expression: string) => {
+    this.getContent().setExpression(attributeId, expression);
+    setTimeout(() => {
+      const dataSet = this.state.dataSet;
+      const tableActionLinks = this.getTableActionLinks();
+      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
+      const ids: string[] = [];
+      const props: JXGProperties[] = [];
+      dataSet.cases.forEach(aCase => {
+        const caseId = aCase.__id__;
+        ids.push(caseId);
+        const position = this.getPositionOfPoint(caseId) as JXGCoordPair;
+        props.push({ position });
+      });
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.updateObjects(undefined, ids, props, geomActionLinks);
         }
       });
     });

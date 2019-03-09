@@ -38,3 +38,7 @@
 .nc-table-menu-popover {
   margin-left: 8px;
 }
+
+.cdp-row-data-cell.locked {
+  background-color: #DDD;
+}
