@@ -75,6 +75,7 @@ export interface ITableProperties {
   beforeId?: string | string[];
   name?: string;
   expression?: string;
+  rawExpression?: string;
 }
 
 export interface ITableChange {
@@ -89,7 +90,8 @@ export const TableMetadataModel = types
   .model("TableMetadata", {
     id: types.string,
     linkedGeometries: types.array(types.string),
-    expressions: types.map(types.string)
+    expressions: types.map(types.string),
+    rawExpressions: types.map(types.string)
   })
   .views(self => ({
     get isLinked() {
@@ -113,6 +115,18 @@ export const TableMetadataModel = types
     },
     setExpression(colId: string, expression: string) {
       self.expressions.set(colId, expression);
+    },
+    setRawExpression(colId: string, rawExpression: string) {
+      self.rawExpressions.set(colId, rawExpression);
+    },
+    clearRawExpressions(varName: string) {
+      const parser = new Parser();
+      self.expressions.forEach((expression, colId) => {
+        const parsedExpression = parser.parse(expression);
+        if (parsedExpression.variables().indexOf(varName) > -1) {
+          self.rawExpressions.delete(colId);
+        }
+      });
     }
   }));
 export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
@@ -248,12 +262,12 @@ export const TableContentModel = types
               ids
             });
     },
-    setExpression(id: string, expression: string) {
+    setExpression(id: string, expression: string, rawExpression: string) {
       self.appendChange({
         action: "update",
         target: "columns",
         ids: id,
-        props: { expression }
+        props: { expression, rawExpression }
       });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
@@ -368,11 +382,18 @@ export const TableContentModel = types
             each(col, (value, prop) => {
               switch (prop) {
                 case "name":
-                  dataSet.setAttributeName(ids[colIndex], value);
+                  const colId = ids[colIndex];
+                  dataSet.setAttributeName(colId, value);
+                  if (colIndex === 0) {
+                    self.metadata.clearRawExpressions(kSerializedXKey);
+                  }
                   break;
                 case "expression":
                   self.metadata.setExpression(ids[colIndex], value);
                   self.updateDatasetByExpressions(dataSet);
+                  break;
+                case "rawExpression":
+                  self.metadata.setRawExpression(ids[colIndex], value);
                   break;
               }
             });

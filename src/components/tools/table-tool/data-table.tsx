@@ -54,7 +54,7 @@ interface IProps {
   tableComponentData?: ITableComponentData|null;
   onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
-  onSetExpression?: (colId: string, expression: string) => void;
+  onSetExpression?: (colId: string, expression: string, rawExpression: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
   onRemoveCases?: (ids: string[]) => void;
@@ -202,9 +202,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             dataSet && dataSet.setAttributeName(id, name);
           }
         },
-        onUpdateExpression: (id: string, expression: string) => {
+        onUpdateExpression: (id: string, expression: string, rawExpression: string) => {
           if (this.props.onSetExpression) {
-            this.props.onSetExpression(id, expression);
+            this.props.onSetExpression(id, expression, rawExpression);
           }
         },
         onNewCase: () => {

@@ -26,7 +26,7 @@ interface IProps {
   itemFlags?: IMenuItemFlags;
   onNewAttribute: (name: string) => void;
   onRenameAttribute: (id: string, name: string) => void;
-  onUpdateExpression: (id: string, expression: string) => void;
+  onUpdateExpression: (id: string, expression: string, rawExpression: string) => void;
   onNewCase: () => void;
   onRemoveAttribute: (id: string) => void;
   onRemoveCases: (ids: string[]) => void;
@@ -127,6 +127,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
             onUpdateExpression={this.handleUpdateExpressionCallback}
             onClose={this.closeUpdateExpressionDialog}
             expression={this.props.metadata.expressions.get(id) || ""}
+            rawExpression={this.props.metadata.rawExpressions.get(id) || ""}
             xName={xName}
             yName={yName}
           />;
@@ -161,8 +162,8 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     this.setState({ isUpdateExpressionDialogOpen: false });
   }
 
-  private handleUpdateExpressionCallback = (id: string, expression: string) => {
-    this.props.onUpdateExpression(id, expression);
+  private handleUpdateExpressionCallback = (id: string, expression: string, rawExpression: string) => {
+    this.props.onUpdateExpression(id, expression, rawExpression);
     this.closeUpdateExpressionDialog();
   }
 

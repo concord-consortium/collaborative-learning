@@ -305,8 +305,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private handleSetExpression = (attributeId: string, expression: string) => {
-    this.getContent().setExpression(attributeId, expression);
+  private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {
+    this.getContent().setExpression(attributeId, expression, rawExpression);
     setTimeout(() => {
       const dataSet = this.state.dataSet;
       const tableActionLinks = this.getTableActionLinks();

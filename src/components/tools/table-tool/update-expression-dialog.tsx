@@ -7,9 +7,10 @@ import "./update-expression-dialog.sass";
 interface IProps {
   id: string;
   isOpen: boolean;
-  onUpdateExpression: (id: string, expression: string) => void;
+  onUpdateExpression: (id: string, expression: string, rawExpression: string) => void;
   onClose: () => void;
   expression: string;
+  rawExpression: string;
   xName?: string;
   yName?: string;
 }
@@ -25,7 +26,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
   constructor(props: IProps) {
     super(props);
     this.state = {
-      expression: this.prettifyExpression(this.props.expression) || ""
+      expression: this.props.rawExpression || this.prettifyExpression(this.props.expression) || ""
     };
   }
 
@@ -102,7 +103,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
     if (this.props.onUpdateExpression && !this.getValidationError()) {
       // Store a canonical version of the expression so it does not need to change on column renames
       const canonicalExpression = this.canonicalizeExpression(this.state.expression);
-      this.props.onUpdateExpression(this.props.id, canonicalExpression);
+      this.props.onUpdateExpression(this.props.id, canonicalExpression, this.state.expression);
     }
   }
 
