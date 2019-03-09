@@ -332,8 +332,9 @@ export const GeometryContentModel = types
     }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
+      const { operation } = change;
       const target = change.target.toLowerCase();
-      if (board && (target === "tablelink")) {
+      if (board && (target === "tablelink" || (target === "board" && operation === "update"))) {
         syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
       }
     }
