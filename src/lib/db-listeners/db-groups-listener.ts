@@ -2,6 +2,7 @@ import { DB } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
 import * as firebase from "firebase/app";
 import { SectionDocument } from "../../models/document/document";
+import { map } from "lodash";
 
 export class DBGroupsListener {
   private db: DB;
@@ -57,22 +58,24 @@ export class DBGroupsListener {
 
     // ensure that the current user is not in more than 1 group and groups are not oversubscribed
     Object.keys(groups).forEach((groupId) => {
-      const groupUsers = groups[groupId].users || {};
-      const userKeys = Object.keys(groupUsers);
-      if (userKeys.indexOf(user.id) !== -1) {
+      const rawUsers = groups[groupId].users || {};
+      // rawUsers can get interpreted as an array instead of a map if user IDs are small (e.g. in demo mode)
+      // So, make sure to filter out empty array spaces and convert number IDs to strings for standardization
+      const groupUsers = map(rawUsers, (groupUser, uid) => ({uid: `${uid}`, user: groupUser}))
+        .filter(groupUser => !!groupUser.user);
+      if (groupUsers.find(groupUser => groupUser.uid === user.id)) {
         myGroupIds.push(groupId);
       }
-      if (userKeys.length > 4) {
+      if (groupUsers.length > 4) {
         // sort the users by connected timestamp and find the newest users to kick out
-        const users = userKeys.map((uid) => groupUsers[uid]);
-        users.sort((a, b) => a.connectedTimestamp - b.connectedTimestamp);
-        users.splice(0, 4);
-        users.forEach((userToRemove) => {
+        groupUsers.sort((a, b) => a.user.connectedTimestamp - b.user.connectedTimestamp);
+        for (let i = 4; i < groupUsers.length; i++) {
+          const userToRemove = groupUsers[i];
           const userPath = this.db.firebase.getFullPath(
-            this.db.firebase.getGroupUserPath(user, groupId, userToRemove.self.uid)
+            this.db.firebase.getGroupUserPath(user, groupId, userToRemove.uid)
           );
           overSubscribedUserUpdates[userPath] = null;
-        });
+        }
       }
     });
 
