@@ -284,7 +284,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
-      cellClass: `cdp-row-data-cell ${!editable ? "locked" : "editable"}`,
+      cellClass: `cdp-row-data-cell ${expression ? "has-expression" : ""}`,
       headerName: attribute.name,
       field: attribute.name,
       tooltipField: attribute.name,
