@@ -41,7 +41,6 @@ interface IState {
 
   isUpdateExpressionDialogOpen: boolean;
   updateExpressionAttributeId: string;
-  updateExpressionValue: string;
 }
 
 export class TableHeaderMenu extends React.Component<IProps, IState> {
@@ -56,8 +55,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       renameAttributeName: "",
 
       isUpdateExpressionDialogOpen: false,
-      updateExpressionAttributeId: "",
-      updateExpressionValue: ""
+      updateExpressionAttributeId: ""
     };
 
     listenForTableEvents((event) => {
@@ -167,12 +165,15 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     this.closeUpdateExpressionDialog();
   }
 
-  private handleUpdateExpression = (evt: React.MouseEvent<HTMLElement>, attrID: string, expression: string) => {
-    this.setState({
-      isUpdateExpressionDialogOpen: true,
-      updateExpressionAttributeId: attrID,
-      updateExpressionValue: expression
-    });
+  private handleUpdateExpression = (evt: React.MouseEvent<HTMLElement>) => {
+    const { dataSet } = this.props;
+    const yAttr = dataSet && dataSet.attributes[1];
+    if (yAttr) {
+      this.setState({
+        isUpdateExpressionDialogOpen: true,
+        updateExpressionAttributeId: yAttr.id
+      });
+    }
   }
 
   private handleNewCase = () => {
@@ -204,13 +205,9 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
   }
 
   private renderAttributeSubMenuItems(onClick: (evt: React.MouseEvent<HTMLElement>,
-                                                attrID: string, name?: string) => void,
-                                      attributesFilter?: (attr: IAttribute, index: number) => boolean) {
+                                                attrID: string, name?: string) => void) {
     if (!this.props.dataSet || !this.props.dataSet.attributes.length) { return null; }
-    const attributes = attributesFilter
-      ? this.props.dataSet.attributes.filter(attributesFilter)
-      : this.props.dataSet.attributes;
-    return attributes.map((attr) => {
+    return this.props.dataSet.attributes.map((attr) => {
       function handleClick(evt: React.MouseEvent<HTMLElement>) {
         return onClick(evt, attr.id, attr.name);
       }
@@ -260,10 +257,9 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                                 icon="text-highlight"
                                 text={`Set Expression...`}
                                 data-test={`set-expression-menu-item`}
-                                disabled={!this.props.dataSet || !this.props.dataSet.attributes.length}
-                              >
-                                {this.renderAttributeSubMenuItems(this.handleUpdateExpression, (attr, i) => i > 0)}
-                              </MenuItem>
+                                disabled={!this.props.dataSet || this.props.dataSet.attributes.length < 2}
+                                onClick={this.handleUpdateExpression}
+                              />
                             : null;
     const removeColumn = itemFlags.removeAttribute !== false
                           ? <MenuItem
