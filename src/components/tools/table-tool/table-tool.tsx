@@ -94,6 +94,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly } = this.props;
+    const metadata = this.getContent().metadata;
     const itemFlags: IMenuItemFlags = {
             addAttribute: false,
             addCase: true,
@@ -107,7 +108,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           tabIndex={this.props.tabIndex} onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
-          metadata={this.getContent().metadata}
+          expressions={metadata.expressions}
+          rawExpressions={metadata.rawExpressions}
           changeCount={this.state.syncedChanges}
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}

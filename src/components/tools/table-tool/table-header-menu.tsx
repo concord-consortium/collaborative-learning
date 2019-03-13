@@ -5,7 +5,6 @@ import { IDataSet } from "../../../models/data/data-set";
 import { GridApi } from "ag-grid-community";
 import { Icon, Menu, Popover, Position, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { listenForTableEvents } from "../../../models/tools/table/table-events";
-import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import UpdateExpressionDialog from "./update-expression-dialog";
 import { IAttribute } from "../../../models/data/attribute";
 
@@ -20,7 +19,8 @@ export interface IMenuItemFlags {
 
 interface IProps {
   api: GridApi;
-  metadata: TableMetadataModelType;
+  expressions?: Map<string, string>;
+  rawExpressions?: Map<string, string>;
   dataSet?: IDataSet;
   readOnly?: boolean;
   itemFlags?: IMenuItemFlags;
@@ -117,7 +117,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
 
   private renderUpdateExpressionDialog() {
     const id = this.state.updateExpressionAttributeId;
-    const { dataSet } = this.props;
+    const { dataSet, expressions, rawExpressions } = this.props;
     if (!id || !dataSet || !this.state.isUpdateExpressionDialogOpen) return null;
     const xName = dataSet.attributes[0].name;
     const yName = dataSet.attrFromID(id).name;
@@ -126,8 +126,8 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
             isOpen={true}
             onUpdateExpression={this.handleUpdateExpressionCallback}
             onClose={this.closeUpdateExpressionDialog}
-            expression={this.props.metadata.expressions.get(id) || ""}
-            rawExpression={this.props.metadata.rawExpressions.get(id) || ""}
+            expression={expressions && expressions.get(id) || ""}
+            rawExpression={rawExpressions && rawExpressions.get(id) || ""}
             xName={xName}
             yName={yName}
           />;

@@ -14,8 +14,8 @@ import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientS
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-fresh.css";
+
 import "./data-table.css";
-import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 
 export const TableComponentSortModelData = types.model("TableComponentSortModelData", {
   colId: types.string,
@@ -40,7 +40,8 @@ interface IPos {
 }
 
 interface IProps {
-  metadata: TableMetadataModelType;
+  expressions?: Map<string, string>;
+  rawExpressions?: Map<string, string>;
   dataSet?: IDataSet;
   changeCount: number;
   readOnly?: boolean;
@@ -185,7 +186,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       headerComponentFramework: TableHeaderMenu,
       headerComponentParams: {
         api: this.gridApi,
-        metadata: this.props.metadata,
+        expressions: this.props.expressions,
+        rawExpressions: this.props.rawExpressions,
         dataSet: this.props.dataSet,
         readOnly,
         itemFlags,
@@ -262,8 +264,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public getAttributeColumnDef(attribute: IAttribute): ColDef {
-    const { readOnly, metadata } = this.props;
-    const expression = metadata.expressions.get(attribute.id);
+    const { readOnly, expressions } = this.props;
+    const expression = expressions && expressions.get(attribute.id);
     const editable = !readOnly && !expression;
 
     function defaultAttrValueFormatter(params: ValueFormatterParams) {
