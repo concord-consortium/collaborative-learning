@@ -303,6 +303,17 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           return attrID ? this.localRow[attrID] : undefined;
         }
         const value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
+        // The purpose of the code below was to get recently changed cells in case
+        // they've been updated but not yet received from Firebase. It was removed as
+        // it overwrites updates from expressions and it is not clear that it remains necessary.
+        // However, if changes are failing to appear across tables, it would be worth reconsidering this logic.
+        // this.localChanges.forEach((change) => {
+        //   if ((change.__id__ === caseID) && (attrID != null)) {
+        //     if (change[attrID] != null) {
+        //       value = change[attrID] as IValueType;
+        //     }
+        //   }
+        // });
         return value;
       },
       valueFormatter: this.props.attrValueFormatter || defaultAttrValueFormatter,
