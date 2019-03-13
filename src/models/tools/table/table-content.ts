@@ -332,9 +332,10 @@ export const TableContentModel = types
         if (expression) {
           const xAttr = dataSet.attributes[0];
           const parser = new Parser();
+          const parsedExpression = parser.parse(expression);
           for (let i = 0; i < attr.values.length; i++) {
             const xVal = xAttr.value(i) as number;
-            const expressionVal = parser.parse(expression).evaluate({[kSerializedXKey]: xVal});
+            const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
             attr.setValue(i, isFinite(expressionVal) ? expressionVal : "");
           }
         }
@@ -363,8 +364,8 @@ export const TableContentModel = types
           const beforeId = tableProps && tableProps.beforeId;
           if (rows && rows.length) {
             dataSet.addCanonicalCasesWithIDs(rows, beforeId);
+            self.updateDatasetByExpressions(dataSet);
           }
-          self.updateDatasetByExpressions(dataSet);
           break;
         case "geometryLink":
           const geometryId = change.ids && change.ids as string;
@@ -401,10 +402,12 @@ export const TableContentModel = types
           break;
         case "rows":
           const rowProps = change && change.props && castArray(change.props);
-          rowProps && rowProps.forEach((row: any, rowIndex) => {
-            dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
-          });
-          self.updateDatasetByExpressions(dataSet);
+          if (rowProps) {
+            rowProps.forEach((row: any, rowIndex) => {
+              dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
+            });
+            self.updateDatasetByExpressions(dataSet);
+          }
           break;
       }
     },
