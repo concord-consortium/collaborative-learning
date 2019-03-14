@@ -18,10 +18,10 @@ interface IState {
 export default class AxisSettingsDialog extends React.Component<IProps, IState> {
   public boundingBox = guessUserDesiredBoundingBox(this.props.board);
   public state = {
-            xMin: JXG.toFixed(this.boundingBox[0], 1),
-            yMax: JXG.toFixed(this.boundingBox[1], 1),
-            xMax: JXG.toFixed(this.boundingBox[2], 1),
-            yMin: JXG.toFixed(this.boundingBox[3], 1)
+            xMin: JXG.toFixed(Math.min(0, this.boundingBox[0]), 1),
+            yMax: JXG.toFixed(Math.max(0, this.boundingBox[1]), 1),
+            xMax: JXG.toFixed(Math.max(0, this.boundingBox[2]), 1),
+            yMin: JXG.toFixed(Math.min(0, this.boundingBox[3]), 1)
           };
 
   public render() {
