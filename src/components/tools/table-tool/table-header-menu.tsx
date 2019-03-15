@@ -288,7 +288,10 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         {renameColumn}
         {removeColumn}
         {removeRows}
-        {updateExpression}
+        {
+          // Disabling for 0.5.2 release - uncomment for 0.6.0
+          /*updateExpression*/
+        }
       </Menu>
     );
   }

@@ -68,10 +68,11 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
     eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
   }
-  const { boundingBox, unitX, unitY } = changeProps;
+  const { boundingBox } = changeProps;
+  const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
-  const xMax = xMin + eltBounds.width / (unitX || kGeometryDefaultPixelsPerUnit);
-  const yMax = yMin + eltBounds.height / (unitY || kGeometryDefaultPixelsPerUnit);
+  const xMax = xMin + eltBounds.width / unitX;
+  const yMax = yMin + eltBounds.height / unitY;
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
@@ -85,6 +86,12 @@ export function guessUserDesiredBoundingBox(board: JXG.Board) {
   return [xMin + xBufferRange, yMax - yBufferRange, xMax - xBufferRange, yMin + yBufferRange];
 }
 
+function getAxisUnitsFromProps(changeProps?: JXGProperties) {
+  const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
+  const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
+  return [unitX, unitY];
+}
+
 function createBoard(domElementId: string, properties?: JXGProperties) {
     const defaults = {
             keepaspectratio: true,
@@ -93,8 +100,7 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
             minimizeReflow: "none"
           };
     const changeProps = properties && properties as JXGProperties;
-    const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
-    const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
+    const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
     // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
     const overrides = { axis: false, keepaspectratio: unitX === unitY };
     const props = combineProperties(domElementId, defaults, changeProps, overrides);
@@ -152,7 +158,8 @@ export const boardChangeAgent: JXGChangeAgent = {
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
     const updatedBoundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
-    const axes = addAxes(board, board.unitX, board.unitY, updatedBoundingBox);
+    const [unitX, unitY] = getAxisUnitsFromProps(props);
+    const axes = addAxes(board, unitX, unitY, updatedBoundingBox);
     return [board, ...axes];
 },
 
