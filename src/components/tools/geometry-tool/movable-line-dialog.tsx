@@ -137,6 +137,7 @@ class MovableLineDialog extends React.Component<IProps, IState> {
   }
 
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
+    evt.stopPropagation();
     if (evt.keyCode === 13) {
       this.handleAccept();
     } else if (evt.keyCode === 27) {
