@@ -1,5 +1,23 @@
 # Changelog
 
+## Version 0.5.2 - released March 15, 2019
+
+- Geometry bug fixes
+  - Fix axis labels after rescaling
+  - Fix axis handlers on reload/undo
+  - Fix invalid default axis bounds
+  - Fix incorrect grid lines after undo
+  - Fix accidental delete on dialog backspace
+- Add table scrolling
+- Rollbar fixes + error aggregation
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 477,365 bytes | 0.1% |
+| index.js | 3,926,468 bytes | 0.7% |
+
 ## Version 0.5.1 - released February 28, 2019
 
 - Log table changes
