@@ -182,6 +182,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           axisSettingsOpen: false,
         };
 
+  private modelId: string;
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
@@ -235,6 +236,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { context, model, onSetActionHandlers } = props;
 
+    this.modelId = model.id;
     this.elementId = `${context}-${model.id}-${nextViewId()}`;
     sBoardContentMetadataMap[this.elementId] = {
       modelId: model.id,
@@ -318,7 +320,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
 
     if (!this.props.readOnly && this.props.toolApiInterface) {
-      this.props.toolApiInterface.unregister(this.props.model.id);
+      this.props.toolApiInterface.unregister(this.modelId);
     }
 
     this._isMounted = false;
