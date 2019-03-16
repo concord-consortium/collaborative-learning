@@ -49,7 +49,6 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
           <input
             className="nc-attribute-name-input pt-input"
             type="text"
-            maxLength={20}
             placeholder={`Column Expression`}
             value={this.state.expression}
             onChange={this.handleExpressionChange}
