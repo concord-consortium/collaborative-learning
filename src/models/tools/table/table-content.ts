@@ -122,9 +122,11 @@ export const TableMetadataModel = types
     clearRawExpressions(varName: string) {
       const parser = new Parser();
       self.expressions.forEach((expression, colId) => {
-        const parsedExpression = parser.parse(expression);
-        if (parsedExpression.variables().indexOf(varName) > -1) {
-          self.rawExpressions.delete(colId);
+        if (expression) {
+          const parsedExpression = parser.parse(expression);
+          if (parsedExpression.variables().indexOf(varName) > -1) {
+            self.rawExpressions.delete(colId);
+          }
         }
       });
     }

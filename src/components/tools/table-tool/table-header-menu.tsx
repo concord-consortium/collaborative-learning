@@ -3,10 +3,9 @@ import NewColumnDialog from "./new-column-dialog";
 import RenameColumnDialog from "./rename-column-dialog";
 import { IDataSet } from "../../../models/data/data-set";
 import { GridApi } from "ag-grid-community";
-import { Icon, Menu, Popover, Position, MenuDivider, MenuItem } from "@blueprintjs/core";
+import { Icon, Menu, Popover, Position, MenuDivider, MenuItem, Alert, Intent } from "@blueprintjs/core";
 import { listenForTableEvents } from "../../../models/tools/table/table-events";
 import UpdateExpressionDialog from "./update-expression-dialog";
-import { IAttribute } from "../../../models/data/attribute";
 
 export interface IMenuItemFlags {
   addAttribute?: boolean;
@@ -41,6 +40,7 @@ interface IState {
 
   isUpdateExpressionDialogOpen: boolean;
   updateExpressionAttributeId: string;
+  showInvalidVariableAlert: boolean;
 }
 
 export class TableHeaderMenu extends React.Component<IProps, IState> {
@@ -55,7 +55,8 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       renameAttributeName: "",
 
       isUpdateExpressionDialogOpen: false,
-      updateExpressionAttributeId: ""
+      updateExpressionAttributeId: "",
+      showInvalidVariableAlert: false
     };
 
     listenForTableEvents((event) => {
@@ -78,6 +79,11 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     });
   }
 
+  public validateExpressionColumnName(name: string) {
+    // valid variable names are only letters
+    return /^[a-z]+$/i.test(name);
+  }
+
   public render() {
     if (this.props.readOnly) return null;
     return (
@@ -97,11 +103,14 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         />
         {this.renderRenameColumnDialog()}
         {this.renderUpdateExpressionDialog()}
+        {this.renderInvalidVariableAlert()}
       </div>
     );
   }
 
   private renderRenameColumnDialog() {
+    const { expressions } = this.props;
+    const nonNullExpression = expressions && Array.from(expressions.values()).some(expr => !!expr);
     return this.state.isRenameAttributeDialogOpen
             ? <RenameColumnDialog
                 id={this.state.renameAttributeId}
@@ -109,6 +118,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                 onRenameAttribute={this.handleRenameAttributeCallback}
                 onClose={this.closeRenameAttributeDialog}
                 name={this.state.renameAttributeName}
+                nameValidator={nonNullExpression ? this.validateExpressionColumnName : undefined}
               />
             : null;
   }
@@ -167,12 +177,19 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
 
   private handleUpdateExpression = (evt: React.MouseEvent<HTMLElement>) => {
     const { dataSet } = this.props;
+    const xAttr = dataSet && dataSet.attributes[0];
     const yAttr = dataSet && dataSet.attributes[1];
-    if (yAttr) {
-      this.setState({
-        isUpdateExpressionDialogOpen: true,
-        updateExpressionAttributeId: yAttr.id
-      });
+    if (xAttr && yAttr) {
+      if (this.validateExpressionColumnName(xAttr.name) && this.validateExpressionColumnName(xAttr.name)) {
+        this.setState({
+          isUpdateExpressionDialogOpen: true,
+          updateExpressionAttributeId: yAttr.id
+        });
+      } else {
+        this.setState({
+          showInvalidVariableAlert: true
+        });
+      }
     }
   }
 
@@ -220,6 +237,31 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         />
       );
     });
+  }
+
+  private renderInvalidVariableAlert() {
+    const { showInvalidVariableAlert } = this.state;
+    if (!showInvalidVariableAlert) return;
+
+    return (
+      <Alert
+          confirmButtonText="OK"
+          icon="error"
+          intent={Intent.DANGER}
+          isOpen={true}
+          onClose={this.handleCloseInvalidVariableAlert}
+          canEscapeKeyCancel={true}
+          key={"invalid-variable-alert"}
+      >
+        <p>
+          The names of all columns must be a single word to create expressions.
+        </p>
+      </Alert>
+    );
+  }
+
+  private handleCloseInvalidVariableAlert = () => {
+    this.setState({ showInvalidVariableAlert: false });
   }
 
   private renderMenu() {
@@ -288,10 +330,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         {renameColumn}
         {removeColumn}
         {removeRows}
-        {
-          // Disabling for 0.5.2 release - uncomment for 0.6.0
-          /*updateExpression*/
-        }
+        {updateExpression}
       </Menu>
     );
   }
