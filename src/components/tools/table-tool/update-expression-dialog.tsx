@@ -68,6 +68,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
             disabled={errorMessage != null}
           />
           <Button className="nc-dialog-button" text="Cancel"  onClick={this.props.onClose}/>
+          <Button className="nc-dialog-button" text="Clear"  onClick={this.handleClearExpression}/>
         </div>
       </Dialog>
     );
@@ -96,6 +97,12 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
 
   private handleExpressionChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({ expression: (evt.target as HTMLInputElement).value });
+  }
+
+  private handleClearExpression = () => {
+    if (this.props.onUpdateExpression) {
+      this.props.onUpdateExpression(this.props.id, "", "");
+    }
   }
 
   private handleSubmitExpression = () => {
