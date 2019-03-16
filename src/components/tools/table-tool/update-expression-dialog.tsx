@@ -49,7 +49,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
           <input
             className="nc-attribute-name-input pt-input"
             type="text"
-            placeholder={`Column Expression`}
+            placeholder={`e.g. 3*${xName}+2`}
             value={this.state.expression}
             onChange={this.handleExpressionChange}
             onKeyDown={this.handleKeyDown}
