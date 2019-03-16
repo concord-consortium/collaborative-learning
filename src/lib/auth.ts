@@ -186,7 +186,11 @@ export interface PortalFirebaseTeacherJWT extends BasePortalFirebaseJWT {
 export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacherJWT;
 
 export const getErrorMessage = (err: any, res: superagent.Response) => {
-  return (res.body ? res.body.message : null) || err;
+  // The response should always be non-null, per the typedef and documentation:
+  // cf. https://visionmedia.github.io/superagent/#error-handling
+  // However, Rollbar has reported errors due to undefined responses
+  // Using err.status or err.response, per the above link, may be preferable here
+  return (res && res.body ? res.body.message : null) || err;
 };
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {

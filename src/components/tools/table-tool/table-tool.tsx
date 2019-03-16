@@ -11,7 +11,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
           TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
-import { JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
+import { JXGCoordPair, JXGProperties } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
@@ -94,6 +94,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly } = this.props;
+    const metadata = this.getContent().metadata;
     const itemFlags: IMenuItemFlags = {
             addAttribute: false,
             addCase: true,
@@ -107,6 +108,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           tabIndex={this.props.tabIndex} onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
+          expressions={metadata.expressions}
+          rawExpressions={metadata.rawExpressions}
           changeCount={this.state.syncedChanges}
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}
@@ -118,6 +121,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
           onSetAttributeName={this.handleSetAttributeName}
+          onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
           onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
           onRemoveCases={this.handleRemoveCases}
@@ -289,15 +293,53 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return this.getGeometryActionLinks(links, true);
   }
 
+  // XXX: After changing the content, it is destroyed by MST. We use a timeout between consecutive content updates
+  // in the hopes that the content will be re-created when execution resumes. However, in some cases the content
+  // is still undefined - this function lets us aggregate the resulting errors for monitoring.
+  // Ultimately, the content update problem must be resolved to prevent this from happening.
+  private assertValidContent = () => {
+    const content = this.getContent();
+    if (!content) {
+      const _Rollbar = (window as any).Rollbar;
+      _Rollbar.error("TableTool.assertValidContent: Invalid content after timeout");
+    }
+    return !!content;
+  }
+
   private handleSetAttributeName = (attributeId: string, name: string) => {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().setAttributeName(attributeId, name);
     setTimeout(() => {
+      if (!this.assertValidContent()) return;
       const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
       this.getContent().metadata.linkedGeometries.forEach(id => {
         const geometryContent = this.getGeometryContent(id);
         if (geometryContent) {
           geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
+        }
+      });
+    });
+  }
+
+  private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {
+    this.getContent().setExpression(attributeId, expression, rawExpression);
+    setTimeout(() => {
+      if (!this.assertValidContent()) return;
+      const dataSet = this.state.dataSet;
+      const tableActionLinks = this.getTableActionLinks();
+      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
+      const ids: string[] = [];
+      const props: JXGProperties[] = [];
+      dataSet.cases.forEach(aCase => {
+        const caseId = aCase.__id__;
+        ids.push(caseId);
+        const position = this.getPositionOfPoint(caseId) as JXGCoordPair;
+        props.push({ position });
+      });
+      this.getContent().metadata.linkedGeometries.forEach(id => {
+        const geometryContent = this.getGeometryContent(id);
+        if (geometryContent) {
+          geometryContent.updateObjects(undefined, ids, props, geomActionLinks);
         }
       });
     });
@@ -322,6 +364,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().addCanonicalCases(cases as ICaseCreation[], firstSelectedRowId, tableActionLinks);
     setTimeout(() => {
+      if (!this.assertValidContent()) return;
       const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
       const props = cases.map(aCase => ({ id: aCase.__id__ }));
       const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
@@ -339,6 +382,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().setCanonicalCaseValues([caseValues], tableActionLinks);
     setTimeout(() => {
+      if (!this.assertValidContent()) return;
       const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
       this.getContent().metadata.linkedGeometries.forEach(id => {
         const newPosition = this.getPositionOfPoint(caseId);
@@ -355,6 +399,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().removeCases(ids, tableActionLinks);
     setTimeout(() => {
+      if (!this.assertValidContent()) return;
       const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
       this.getContent().metadata.linkedGeometries.forEach(id => {
         const geometryContent = this.getGeometryContent(id);

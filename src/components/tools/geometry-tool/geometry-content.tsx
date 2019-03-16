@@ -182,6 +182,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           axisSettingsOpen: false,
         };
 
+  private modelId: string;
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
@@ -235,6 +236,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { context, model, onSetActionHandlers } = props;
 
+    this.modelId = model.id;
     this.elementId = `${context}-${model.id}-${nextViewId()}`;
     sBoardContentMetadataMap[this.elementId] = {
       modelId: model.id,
@@ -267,12 +269,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       this.props.toolApiInterface.register(this.props.model.id, {
         hasSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
-          return geometryContent.hasSelection();
+          // Note: hasSelection() returns true when there is a selection whether or not
+          // the selection is deletable. We could test for hasDeletableSelection() here,
+          // but the effect of that would be that the document toolbar would still enable
+          // the delete button when undeletable content is selected, but now clicking the
+          // delete button would delete the entire tile. For now, we preserve the current
+          // behavior of enabling the toolbar for an undeletable selection.
+          return !!geometryContent && geometryContent.hasSelection();
         },
         deleteSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
           const { board } = this.state;
-          if (board) {
+          if (geometryContent && board) {
             geometryContent.deleteSelection(board);
           }
         }
@@ -309,6 +317,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       setTimeout(() => {
         JXG.JSXGraph.freeBoard(board);
       });
+    }
+
+    if (!this.props.readOnly && this.props.toolApiInterface) {
+      this.props.toolApiInterface.unregister(this.modelId);
     }
 
     this._isMounted = false;
@@ -406,6 +418,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           isOpen={true}
           onClose={this.handleCloseInvalidTableDataAlert}
           canEscapeKeyCancel={true}
+          key={"invalid-table-alert"}
       >
         <p>
           Linked data must be numeric. Please edit the table values so that all cells contain numbers.
@@ -439,6 +452,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (imageUrl) {
           this.updateImageUrl(imageUrl);
         }
+        this.hackAxisHandlers(board);
       }
       const newState = assign({ syncedChanges: content.changes.length },
                                 board ? { board } : null);
@@ -454,6 +468,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return images.length > 0
             ? images[images.length - 1] as JXG.Image
             : undefined;
+  }
+
+  // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
+  // So, any time new axes could be created, we reattach the axis handlers
+  private hackAxisHandlers(board: JXG.Board) {
+    setTimeout(() => {
+      const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
+      axes.forEach(this.handleCreateAxis);
+    });
   }
 
   private updateImageUrl(url: string) {
@@ -562,12 +585,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (board) {
       content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
-      // We wait until the board has updated its axes to apply the listeners
-      setTimeout(() => {
-        const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-        axes.forEach(this.handleCreateAxis);
-      });
+      this.hackAxisHandlers(board);
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -634,6 +652,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.UNDO);
         });
       }
+
+      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -658,6 +678,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.REDO);
         });
       }
+
+      this.hackAxisHandlers(board);
     }
 
     return true;

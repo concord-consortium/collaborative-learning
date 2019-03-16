@@ -1,4 +1,5 @@
-import { defaultTableContent, kTableToolID, TableContentModel, convertImportToChanges } from "./table-content";
+import { defaultTableContent, kTableToolID, TableContentModel, convertImportToChanges,
+  TableMetadataModel } from "./table-content";
 import { DataSet } from "../../data/data-set";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { values } from "lodash";
@@ -208,6 +209,8 @@ describe("TableContent", () => {
           ];
     const snapshot = { changes: changes.map(change => JSON.stringify(change)) };
     const table = TableContentModel.create(snapshot);
+    const metadata = TableMetadataModel.create({ id: "table-1" });
+    table.doPostCreate(metadata);
     table.setAttributeName("zCol", "newZ");
     expect(table.changes.length).toBe(3);
     const change3 = safeJsonParse(table.changes[2]);

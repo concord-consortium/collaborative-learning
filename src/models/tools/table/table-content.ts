@@ -6,6 +6,8 @@ import { GeometryContentModelType } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
+import { Parser } from "expr-eval";
+import { kSerializedXKey } from "../../../components/tools/table-tool/update-expression-dialog";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -72,6 +74,8 @@ export interface ITableProperties {
   rows?: IRowProperties[];
   beforeId?: string | string[];
   name?: string;
+  expression?: string;
+  rawExpression?: string;
 }
 
 export interface ITableChange {
@@ -85,7 +89,9 @@ export interface ITableChange {
 export const TableMetadataModel = types
   .model("TableMetadata", {
     id: types.string,
-    linkedGeometries: types.array(types.string)
+    linkedGeometries: types.array(types.string),
+    expressions: types.map(types.string),
+    rawExpressions: types.map(types.string)
   })
   .views(self => ({
     get isLinked() {
@@ -106,6 +112,21 @@ export const TableMetadataModel = types
     },
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
+    },
+    setExpression(colId: string, expression: string) {
+      self.expressions.set(colId, expression);
+    },
+    setRawExpression(colId: string, rawExpression: string) {
+      self.rawExpressions.set(colId, rawExpression);
+    },
+    clearRawExpressions(varName: string) {
+      const parser = new Parser();
+      self.expressions.forEach((expression, colId) => {
+        const parsedExpression = parser.parse(expression);
+        if (parsedExpression.variables().indexOf(varName) > -1) {
+          self.rawExpressions.delete(colId);
+        }
+      });
     }
   }));
 export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
@@ -241,6 +262,14 @@ export const TableContentModel = types
               ids
             });
     },
+    setExpression(id: string, expression: string, rawExpression: string) {
+      self.appendChange({
+        action: "update",
+        target: "columns",
+        ids: id,
+        props: { expression, rawExpression }
+      });
+    },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
       self.appendChange({
             action: "create",
@@ -297,6 +326,25 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
+    updateDatasetByExpressions(dataSet: IDataSet) {
+      dataSet.attributes.forEach(attr => {
+        const expression = self.metadata.expressions.get(attr.id);
+        if (expression) {
+          const xAttr = dataSet.attributes[0];
+          const parser = new Parser();
+          const parsedExpression = parser.parse(expression);
+          for (let i = 0; i < attr.values.length; i++) {
+            const xVal = xAttr.value(i) as number;
+            const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+            attr.setValue(i, isFinite(expressionVal) ? expressionVal : "");
+          }
+        }
+      });
+
+      return dataSet;
+    }
+  }))
+  .views(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange) {
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
@@ -316,6 +364,7 @@ export const TableContentModel = types
           const beforeId = tableProps && tableProps.beforeId;
           if (rows && rows.length) {
             dataSet.addCanonicalCasesWithIDs(rows, beforeId);
+            self.updateDatasetByExpressions(dataSet);
           }
           break;
         case "geometryLink":
@@ -334,7 +383,18 @@ export const TableContentModel = types
             each(col, (value, prop) => {
               switch (prop) {
                 case "name":
-                  dataSet.setAttributeName(ids[colIndex], value);
+                  const colId = ids[colIndex];
+                  dataSet.setAttributeName(colId, value);
+                  if (colIndex === 0) {
+                    self.metadata.clearRawExpressions(kSerializedXKey);
+                  }
+                  break;
+                case "expression":
+                  self.metadata.setExpression(ids[colIndex], value);
+                  self.updateDatasetByExpressions(dataSet);
+                  break;
+                case "rawExpression":
+                  self.metadata.setRawExpression(ids[colIndex], value);
                   break;
               }
             });
@@ -342,9 +402,12 @@ export const TableContentModel = types
           break;
         case "rows":
           const rowProps = change && change.props && castArray(change.props);
-          rowProps && rowProps.forEach((row: any, rowIndex) => {
-            dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
-          });
+          if (rowProps) {
+            rowProps.forEach((row: any, rowIndex) => {
+              dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
+            });
+            self.updateDatasetByExpressions(dataSet);
+          }
           break;
       }
     },
