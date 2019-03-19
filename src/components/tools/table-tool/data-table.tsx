@@ -302,7 +302,10 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         if (params.data.id === LOCAL_ROW_ID) {
           return attrID ? this.localRow[attrID] : undefined;
         }
-        const value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
+        let value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
+        if (Number.isNaN(value as number)) {
+          value = "#ERR";
+        }
         // The purpose of the code below was to get recently changed cells in case
         // they've been updated but not yet received from Firebase. It was removed as
         // it overwrites updates from expressions and it is not clear that it remains necessary.
