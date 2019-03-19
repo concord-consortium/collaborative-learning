@@ -14,6 +14,7 @@ export const kCaseIdName = "__id__";
 export const kLabelAttrName = "__label__";
 
 export const kTableDefaultHeight = 160;
+export const kErrorString = "#ERR";
 
 export function defaultTableContent() {
   return TableContentModel.create({
@@ -26,7 +27,7 @@ export function defaultTableContent() {
 }
 
 export function isLinkableValue(value: number | string | undefined) {
-  return value == null || isFinite(Number(value));
+  return value == null || isFinite(Number(value)) || value === kErrorString;
 }
 
 export function canonicalizeValue(value: number | string | undefined) {
@@ -335,9 +336,21 @@ export const TableContentModel = types
           const parser = new Parser();
           const parsedExpression = parser.parse(expression);
           for (let i = 0; i < attr.values.length; i++) {
-            const xVal = xAttr.value(i) as number;
-            const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
-            attr.setValue(i, isFinite(expressionVal) ? expressionVal : "");
+            const xVal = xAttr.value(i) as number | string;
+            if (xVal == null || xVal === "") {
+              attr.setValue(i, undefined);
+            } else {
+              const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+              attr.setValue(i, isFinite(expressionVal) ? expressionVal : kErrorString);
+            }
+          }
+        } else {
+          for (let i = 0; i < attr.values.length; i++) {
+            const val = attr.value(i);
+            // Clean up error strings if an expression is deleted (and prevent users from typing the error string)
+            if (val === kErrorString) {
+              attr.setValue(i, undefined);
+            }
           }
         }
       });

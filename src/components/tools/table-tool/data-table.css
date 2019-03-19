@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+.ag-header-cell,
+.ag-cell {
+  min-width: 45px;
+}
+
 /* cf. https://github.com/ag-grid/ag-grid/issues/1864#issuecomment-410199641 */
 .ag-theme-fresh .ag-header-cell-label {
   display: inline !important;
