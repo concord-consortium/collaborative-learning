@@ -32,7 +32,7 @@
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
-    "build:webpack": "node --max_old_space_size=4096 node_modules/.bin/webpack --mode production",
+    "build:webpack": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:build": "tslint -c tslint-build.json 'src/**/*.{ts,tsx}'",
@@ -88,6 +88,7 @@
     "babel-core": "^6.26.3",
     "babel-jest": "^24.5.0",
     "copy-webpack-plugin": "^4.6.0",
+    "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
     "cypress": "^3.1.5",
     "enzyme": "^3.9.0",
