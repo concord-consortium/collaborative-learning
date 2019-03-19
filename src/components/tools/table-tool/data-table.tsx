@@ -303,7 +303,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           return attrID ? this.localRow[attrID] : undefined;
         }
         let value = dataSet && attrID ? dataSet.getValue(caseID, attrID) : undefined;
-        if (Number.isNaN(value as number)) {
+        if (Number.isNaN(value as any)) {
           value = "#ERR";
         }
         // The purpose of the code below was to get recently changed cells in case

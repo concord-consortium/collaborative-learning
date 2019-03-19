@@ -26,7 +26,7 @@ export function defaultTableContent() {
 }
 
 export function isLinkableValue(value: number | string | undefined) {
-  return value == null || Number.isNaN(value as number) || isFinite(Number(value));
+  return value == null || Number.isNaN(value as any) || isFinite(Number(value));
 }
 
 export function canonicalizeValue(value: number | string | undefined) {
@@ -347,7 +347,7 @@ export const TableContentModel = types
           for (let i = 0; i < attr.values.length; i++) {
             const val = attr.value(i);
             // Clean up displayed errors when an expression is deleted
-            if (Number.isNaN(val as number)) {
+            if (Number.isNaN(val as any)) {
               attr.setValue(i, undefined);
             }
           }
