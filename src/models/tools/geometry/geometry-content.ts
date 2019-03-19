@@ -1,8 +1,8 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
-import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType
-        } from "./jxg-changes";
+import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
+  JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
 import { isComment } from "./jxg-comment";
@@ -488,7 +488,7 @@ export const GeometryContentModel = types
     }
 
     function addPoints(board: JXG.Board | undefined,
-                       parents: JXGCoordPair[],
+                       parents: JXGUnsafeCoordPair[],
                        properties?: JXGProperties | JXGProperties[],
                        links?: ILinkProperties): JXG.Point[] {
       const props = castArray(properties);
@@ -598,13 +598,13 @@ export const GeometryContentModel = types
       const labelAttr = dataSet.attrFromName(kLabelAttrName);
       const caseCount = dataSet.cases.length;
       const ids: string[] = [];
-      const points: Array<{ label?: string, coords: JXGCoordPair }> = [];
+      const points: Array<{ label?: string, coords: JXGUnsafeCoordPair }> = [];
       for (let i = 0; i < caseCount; ++i) {
         const id = dataSet.cases[i].__id__;
         const label = labelAttr ? String(dataSet.getValue(id, labelAttr.id)) : undefined;
         const x = xAttr ? Number(dataSet.getValue(id, xAttr.id)) : undefined;
         const y = yAttr ? Number(dataSet.getValue(id, yAttr.id)) : undefined;
-        if (id && (x != null) && isFinite(x) && (y != null) && isFinite(y)) {
+        if (id) {
           ids.push(id);
           points.push({ label, coords: [x, y] });
         }

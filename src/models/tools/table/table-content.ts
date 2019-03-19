@@ -26,14 +26,13 @@ export function defaultTableContent() {
 }
 
 export function isLinkableValue(value: number | string | undefined) {
-  if ((value == null) || (value === "")) return false;
-  return isFinite(Number(value));
+  return value == null || isFinite(Number(value));
 }
 
 export function canonicalizeValue(value: number | string | undefined) {
-  if (value == null) return 0;
+  if (value == null || value === "") return undefined;
   const num = Number(value);
-  return isFinite(num) ? num : 0;
+  return isFinite(num) ? num : undefined;
 }
 
 export function getRowLabel(index: number, prefix: string = "p") {

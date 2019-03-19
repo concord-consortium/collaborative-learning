@@ -1,6 +1,6 @@
-import { JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
+import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { isCommentType } from "./jxg-comment";
-import { objectChangeAgent } from "./jxg-object";
+import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { castArray, values } from "lodash";
 import * as uuid from "uuid/v4";
@@ -44,7 +44,7 @@ export function syncClientColors(props: any) {
   return p;
 }
 
-export function createPoint(board: JXG.Board, parents: JXGCoordPair, changeProps: any) {
+export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, changeProps: any) {
   // If id is not provided we generate one, but this will prevent
   // model-level synchronization. This should only occur for very
   // old geometry tiles created before the introduction of the uuid.
@@ -57,7 +57,9 @@ export function createPoint(board: JXG.Board, parents: JXGCoordPair, changeProps
   if (props.snapSizeY === kPrevSnapUnit) {
     props.snapSizeY = kSnapUnit;
   }
-  return board.create("point", parents, props);
+  const isGraphable = isPositionGraphable(parents);
+  const point = board.create("point", getGraphablePosition(parents), {...props, visible: isGraphable});
+  return point;
 }
 
 export const pointChangeAgent: JXGChangeAgent = {
