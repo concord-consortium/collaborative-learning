@@ -79,9 +79,16 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     });
   }
 
-  public validateExpressionColumnName(name: string) {
-    // valid variable names are only letters
-    return /^[a-z]+$/i.test(name);
+  public buildColumnNameErrorGetter(columnHasExpression: boolean): (name: string) => string | undefined {
+    return (name: string) => {
+      if (!name) {
+        return "Column must have a non-empty name";
+      }
+      // TODO: Expand valid variable names to include additional character sets
+      if (columnHasExpression && !/^[a-z]+$/i.test(name)) {
+        return "Columns with expressions must have single-word names";
+      }
+    };
   }
 
   public render() {
@@ -110,7 +117,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
 
   private renderRenameColumnDialog() {
     const { expressions } = this.props;
-    const nonNullExpression = expressions && Array.from(expressions.values()).some(expr => !!expr);
+    const nonNullExpression = !!expressions && Array.from(expressions.values()).some(expr => !!expr);
     return this.state.isRenameAttributeDialogOpen
             ? <RenameColumnDialog
                 id={this.state.renameAttributeId}
@@ -118,7 +125,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                 onRenameAttribute={this.handleRenameAttributeCallback}
                 onClose={this.closeRenameAttributeDialog}
                 name={this.state.renameAttributeName}
-                nameValidator={nonNullExpression ? this.validateExpressionColumnName : undefined}
+                columnNameErrorGetter={this.buildColumnNameErrorGetter(nonNullExpression)}
               />
             : null;
   }
@@ -180,14 +187,14 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     const xAttr = dataSet && dataSet.attributes[0];
     const yAttr = dataSet && dataSet.attributes[1];
     if (xAttr && yAttr) {
-      if (this.validateExpressionColumnName(xAttr.name) && this.validateExpressionColumnName(xAttr.name)) {
+      if (this.buildColumnNameErrorGetter(true)(xAttr.name) || this.buildColumnNameErrorGetter(true)(yAttr.name)) {
         this.setState({
-          isUpdateExpressionDialogOpen: true,
-          updateExpressionAttributeId: yAttr.id
+          showInvalidVariableAlert: true
         });
       } else {
         this.setState({
-          showInvalidVariableAlert: true
+          isUpdateExpressionDialogOpen: true,
+          updateExpressionAttributeId: yAttr.id
         });
       }
     }

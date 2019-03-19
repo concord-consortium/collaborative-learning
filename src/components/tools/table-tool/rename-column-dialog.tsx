@@ -9,7 +9,7 @@ interface IProps {
   onRenameAttribute: (id: string, name: string) => void;
   onClose: () => void;
   name: string;
-  nameValidator?: (name: string) => boolean;
+  columnNameErrorGetter?: (name: string) => string | undefined;
 }
 
 interface IState {
@@ -64,14 +64,9 @@ class RenameColumnDialog extends React.Component<IProps, IState> {
   }
 
   private getValidationError = () => {
-    const { nameValidator } = this.props;
+    const { columnNameErrorGetter: errorGetter } = this.props;
     const { name } = this.state;
-    if (!name) {
-      return "Column must have a non-empty name";
-    }
-    if (nameValidator && !nameValidator(name)) {
-      return "Columns with expressions must have single-word names";
-    }
+    return errorGetter && errorGetter(name);
   }
 
   private handleNameChange = (evt: React.FormEvent<HTMLInputElement>) => {
