@@ -79,7 +79,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     });
   }
 
-  public buildColumnNameErrorGetter(columnHasExpression: boolean): (name: string) => string | undefined {
+  public buildColumnNameValidator(columnHasExpression: boolean): (name: string) => string | undefined {
     return (name: string) => {
       if (!name) {
         return "Column must have a non-empty name";
@@ -125,7 +125,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                 onRenameAttribute={this.handleRenameAttributeCallback}
                 onClose={this.closeRenameAttributeDialog}
                 name={this.state.renameAttributeName}
-                columnNameErrorGetter={this.buildColumnNameErrorGetter(nonNullExpression)}
+                columnNameValidator={this.buildColumnNameValidator(nonNullExpression)}
               />
             : null;
   }
@@ -187,7 +187,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     const xAttr = dataSet && dataSet.attributes[0];
     const yAttr = dataSet && dataSet.attributes[1];
     if (xAttr && yAttr) {
-      if (this.buildColumnNameErrorGetter(true)(xAttr.name) || this.buildColumnNameErrorGetter(true)(yAttr.name)) {
+      if (this.buildColumnNameValidator(true)(xAttr.name) || this.buildColumnNameValidator(true)(yAttr.name)) {
         this.setState({
           showInvalidVariableAlert: true
         });

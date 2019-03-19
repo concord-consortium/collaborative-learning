@@ -9,7 +9,7 @@ interface IProps {
   onRenameAttribute: (id: string, name: string) => void;
   onClose: () => void;
   name: string;
-  columnNameErrorGetter?: (name: string) => string | undefined;
+  columnNameValidator?: (name: string) => string | undefined;
 }
 
 interface IState {
@@ -64,9 +64,9 @@ class RenameColumnDialog extends React.Component<IProps, IState> {
   }
 
   private getValidationError = () => {
-    const { columnNameErrorGetter: errorGetter } = this.props;
+    const { columnNameValidator: validator } = this.props;
     const { name } = this.state;
-    return errorGetter && errorGetter(name);
+    return validator && validator(name);
   }
 
   private handleNameChange = (evt: React.FormEvent<HTMLInputElement>) => {
