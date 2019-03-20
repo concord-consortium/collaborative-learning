@@ -24,7 +24,6 @@ export interface IActionHandlers {
 export interface IGeometryProps extends SizeMeProps {
   context: string;
   scale?: number;
-  tabIndex?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
   toolApiInterface?: IToolApiInterface;

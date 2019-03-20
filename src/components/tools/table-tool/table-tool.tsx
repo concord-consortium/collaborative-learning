@@ -26,7 +26,6 @@ interface IClipboardCases {
 interface IProps {
   model: ToolTileModelType;
   readOnly?: boolean;
-  tabIndex?: number;  // required for focus()
 }
 
 // all properties are optional
@@ -105,7 +104,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           };
     return (
       <div className="table-tool" ref={this.domRef}
-          tabIndex={this.props.tabIndex} onKeyDown={this.handleKeyDown} >
+          tabIndex={0} onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
           expressions={metadata.expressions}

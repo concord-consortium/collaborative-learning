@@ -336,7 +336,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
-          tabIndex={this.props.tabIndex}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
@@ -1082,21 +1081,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateBoard = (board: JXG.Board) => {
 
     const handlePointerDown = (evt: any) => {
-      const { model, scale } = this.props;
-      const { ui } = this.stores;
-
-      // clicked tile gets keyboard focus
-      if (this.domElement) {
-        // requires non-empty tabIndex
-        this.domElement.focus();
-      }
-      // first click selects the tile; subsequent clicks create points
-      if (!ui.isSelectedTile(model)) {
-        ui.setSelectedTile(model);
-        return;
-      }
-
-      const coords = getEventCoords(board, evt, scale);
+      const coords = getEventCoords(board, evt, this.props.scale);
       const x = coords.usrCoords[1];
       const y = coords.usrCoords[2];
       if ((x != null) && isFinite(x) && (y != null) || isFinite(y)) {
