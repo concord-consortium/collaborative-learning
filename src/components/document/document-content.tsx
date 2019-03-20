@@ -84,6 +84,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderRows()}
         {this.props.children}
+        {this.renderSpacer()}
       </div>
     );
   }
@@ -153,6 +154,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
+  }
+
+  private renderSpacer = () => {
+    return this.props.readOnly ? null : <div className="spacer" />;
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
