@@ -44,9 +44,9 @@ export class LinkedTableCellEditor extends TextCellEditor {
   public isValid = (value: string) => {
     // don't apply validation unless the table is linked
     if (!this.metadata || !this.metadata.isLinked) return true;
-    // don't allow empty values
-    if ((value == null) || (value === "")) return false;
-    // values must be numeric
+    // allow empty values
+    if ((value == null) || (value === "")) return true;
+    // non-empty values must be numeric
     return isFinite(Number(value));
   }
 

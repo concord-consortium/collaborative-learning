@@ -49,8 +49,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
           <input
             className="nc-attribute-name-input pt-input"
             type="text"
-            maxLength={20}
-            placeholder={`Column Expression`}
+            placeholder={`e.g. 3*${xName}+2`}
             value={this.state.expression}
             onChange={this.handleExpressionChange}
             onKeyDown={this.handleKeyDown}
@@ -69,6 +68,7 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
             disabled={errorMessage != null}
           />
           <Button className="nc-dialog-button" text="Cancel"  onClick={this.props.onClose}/>
+          <Button className="nc-dialog-button" text="Clear"  onClick={this.handleClearExpression}/>
         </div>
       </Dialog>
     );
@@ -97,6 +97,12 @@ export default class UpdateExpressionDialog extends React.Component<IProps, ISta
 
   private handleExpressionChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({ expression: (evt.target as HTMLInputElement).value });
+  }
+
+  private handleClearExpression = () => {
+    if (this.props.onUpdateExpression) {
+      this.props.onUpdateExpression(this.props.id, "", "");
+    }
   }
 
   private handleSubmitExpression = () => {

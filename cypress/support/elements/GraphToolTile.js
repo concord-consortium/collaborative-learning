@@ -35,11 +35,11 @@ class GraphToolTile{
             return cy.get('.canvas-area .geometry-content .JXGtext').contains('y')
         }
     }
-    getGraphPointCoordinates(){ //This is the point coordinate text
+    getGraphPointCoordinates(index){ //This is the point coordinate text
         let x=0,
             y=0;
 
-        return this.getGraphPoint().last()
+        return (index > -1 ? this.getGraphPoint().eq(index) : this.getGraphPoint().last())
             .then(($point)=>{
                 x = $point.attr('cx');
                 y = $point.attr('cy');
