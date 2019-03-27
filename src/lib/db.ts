@@ -6,7 +6,8 @@ import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
-  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment } from "./db-types";
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
+  DBUserStar } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
   LearningLogPublication } from "../models/document/document";
 import { ImageModelType } from "../models/image";
@@ -654,6 +655,31 @@ export class DB {
     );
     updateRef.update({
       deleted: true
+    });
+  }
+
+  public createUserStar(document: DocumentModelType, starred: boolean) {
+    const { user } = this.stores;
+    const { key: docKey } = document;
+    const starsRef = this.firebase.ref(
+      this.firebase.getUserDocumentStarsPath(user, docKey)
+    );
+    const starRef = starsRef.push();
+    const star: DBUserStar = {
+      timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+      uid: user.id,
+      starred
+    };
+    starRef.set(star);
+  }
+
+  public setUserStarState(docKey: string, starKey: string, starred: boolean) {
+    const { user } = this.stores;
+    const updateRef = this.firebase.ref(
+      this.firebase.getUserDocumentStarsPath(user, docKey, starKey)
+    );
+    updateRef.update({
+      starred
     });
   }
 

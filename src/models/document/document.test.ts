@@ -30,6 +30,7 @@ describe("document model", () => {
       visibility: "public",
       groupUserConnections: {},
       comments: {},
+      stars: [],
       content: {
         rowMap: {},
         rowOrder: [],

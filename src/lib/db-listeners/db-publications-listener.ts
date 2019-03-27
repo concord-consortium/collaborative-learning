@@ -54,6 +54,22 @@ export class DBPublicationsListener {
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
           documents.add(doc);
+          onPatch(doc.stars, patch => {
+            const path = patch.path.split("/");
+            if (patch.op === "add") {
+              const star = patch.value;
+              const { starred, key } = star;
+              if (key === "") { // key will be assigned from Firebase node id
+                this.db.createUserStar(doc, starred);
+              }
+            } else if (patch.op === "replace" && path[path.length - 1] === "starred") {
+              const starIndex = parseInt(path[path.length - 2], 10);
+              const star = doc.getUserStarAtIndex(starIndex);
+              if (star) {
+                this.db.setUserStarState(doc.key, star.key, star.starred);
+              }
+            }
+          });
           onPatch(doc.comments, patch => {
             const path = patch.path.split("/");
             const tileId = path[1];
