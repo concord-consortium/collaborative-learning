@@ -26,14 +26,13 @@ export function defaultTableContent() {
 }
 
 export function isLinkableValue(value: number | string | undefined) {
-  if ((value == null) || (value === "")) return false;
-  return isFinite(Number(value));
+  return value == null || Number.isNaN(value as any) || isFinite(Number(value));
 }
 
 export function canonicalizeValue(value: number | string | undefined) {
-  if (value == null) return 0;
+  if (value == null || value === "") return undefined;
   const num = Number(value);
-  return isFinite(num) ? num : 0;
+  return isFinite(num) ? num : undefined;
 }
 
 export function getRowLabel(index: number, prefix: string = "p") {
@@ -122,9 +121,11 @@ export const TableMetadataModel = types
     clearRawExpressions(varName: string) {
       const parser = new Parser();
       self.expressions.forEach((expression, colId) => {
-        const parsedExpression = parser.parse(expression);
-        if (parsedExpression.variables().indexOf(varName) > -1) {
-          self.rawExpressions.delete(colId);
+        if (expression) {
+          const parsedExpression = parser.parse(expression);
+          if (parsedExpression.variables().indexOf(varName) > -1) {
+            self.rawExpressions.delete(colId);
+          }
         }
       });
     }
@@ -334,9 +335,21 @@ export const TableContentModel = types
           const parser = new Parser();
           const parsedExpression = parser.parse(expression);
           for (let i = 0; i < attr.values.length; i++) {
-            const xVal = xAttr.value(i) as number;
-            const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
-            attr.setValue(i, isFinite(expressionVal) ? expressionVal : "");
+            const xVal = xAttr.value(i) as number | string;
+            if (xVal == null || xVal === "") {
+              attr.setValue(i, undefined);
+            } else {
+              const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+              attr.setValue(i, isFinite(expressionVal) ? expressionVal : NaN);
+            }
+          }
+        } else {
+          for (let i = 0; i < attr.values.length; i++) {
+            const val = attr.value(i);
+            // Clean up displayed errors when an expression is deleted
+            if (Number.isNaN(val as any)) {
+              attr.setValue(i, undefined);
+            }
           }
         }
       });

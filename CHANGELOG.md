@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.6.0 - released March 27, 2019
+
+- Table equations + data generation!
+- Add space for expanding bottom tiles
+- Update dependencies
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 486,507 bytes | 1.9% |
+| index.js | 4,012,778 bytes | 2.2% |
+
 ## Version 0.5.2 - released March 15, 2019
 
 - Geometry bug fixes

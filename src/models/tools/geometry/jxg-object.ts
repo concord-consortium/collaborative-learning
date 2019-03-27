@@ -1,5 +1,5 @@
 import { sortByCreation, kReverse } from "./jxg-board";
-import { JXGChangeAgent } from "./jxg-changes";
+import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
 
@@ -8,6 +8,18 @@ import { castArray, size } from "lodash";
 // the root cause of this phenomenon, this utility eliminates the nulls.
 function validateTransformations(elt: JXG.GeometryElement) {
   elt.transformations = (elt.transformations || []).filter(t => t != null);
+}
+
+export function isPositionGraphable(pos: JXGUnsafeCoordPair) {
+  return pos[0] != null && pos[1] != null && isFinite(pos[0]) && isFinite(pos[1]);
+}
+
+export function getGraphablePosition(pos: JXGUnsafeCoordPair) {
+  return pos.map(val => {
+    if (val == null) return 0;
+    const num = Number(val);
+    return isFinite(num) ? num : 0;
+  }) as JXGCoordPair;
 }
 
 export const objectChangeAgent: JXGChangeAgent = {
@@ -19,7 +31,7 @@ export const objectChangeAgent: JXGChangeAgent = {
   update: (board, change) => {
     if (!change.targetID || !change.properties) { return; }
     const ids = castArray(change.targetID);
-    const props = castArray(change.properties);
+    const props: JXGProperties[] = castArray(change.properties);
     ids.forEach((id, index) => {
       const obj = board.objects[id] as JXG.GeometryElement;
       const objProps = index < props.length ? props[index] : props[0];
@@ -27,7 +39,13 @@ export const objectChangeAgent: JXGChangeAgent = {
         const { position, ...others } = objProps;
         if (position != null) {
           validateTransformations(obj);
-          obj.setPosition(JXG.COORDS_BY_USER, position);
+          if (isPositionGraphable(position)) {
+            obj.setPosition(JXG.COORDS_BY_USER, position as JXGCoordPair);
+            obj.setAttribute({visible: true});
+          } else {
+            obj.setPosition(JXG.COORDS_BY_USER, getGraphablePosition(position));
+            obj.setAttribute({visible: false});
+          }
         }
         if (size(others)) {
           obj.setAttribute(others);

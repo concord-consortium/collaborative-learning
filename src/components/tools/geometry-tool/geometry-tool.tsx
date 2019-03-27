@@ -1,6 +1,7 @@
 import * as React from "react";
 import { SizeMe } from "react-sizeme";
-import { observer } from "mobx-react";
+import { inject, observer } from "mobx-react";
+import { BaseComponent } from "../../base";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { GeometryContentComponent } from "./geometry-content";
 import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
@@ -17,8 +18,9 @@ interface IState {
   handlers?: IActionHandlers;
 }
 
+@inject("stores")
 @observer
-export default class GeometryToolComponent extends React.Component<IGeometryProps, IState> {
+export default class GeometryToolComponent extends BaseComponent<IGeometryProps, IState> {
 
   public static getDragImageNode(dragTargetNode: HTMLElement) {
     // dragTargetNode is the tool-tile div
@@ -30,11 +32,22 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
 
   public state: IState = {};
 
+  private domElement: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
+  private didLastMouseDownSelectTile: boolean = false;
 
   public render() {
+    // We must listen for pointer events because we want to get the events before
+    // JSXGraph, which appears to listen to pointer events on browsers that support them.
+    // We must listen for mouse events because some browsers (notably Safari) don't
+    // support pointer events.
     return (
-      <div className="geometry-tool" tabIndex={0} onKeyDown={this.handleKeyDown} >
+      <div className="geometry-tool" ref={this.domElement}
+          tabIndex={0} onKeyDown={this.handleKeyDown}
+          onPointerDownCapture={this.handlePointerDownCapture}
+          onPointerUpCapture={this.handlePointerUpCapture}
+          onMouseDownCapture={this.handlePointerDownCapture}
+          onMouseUpCapture={this.handlePointerUpCapture} >
         {!this.props.readOnly ? this.renderToolbar() : null}
         {this.renderContent()}
       </div>
@@ -99,6 +112,34 @@ export default class GeometryToolComponent extends React.Component<IGeometryProp
         </SizeMe>
       </div>
     );
+  }
+
+  private handlePointerDownCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+
+    // clicked tile gets keyboard focus
+    if (this.domElement.current) {
+      // requires non-empty tabIndex
+      this.domElement.current.focus();
+    }
+    // first click selects the tile
+    if (!ui.isSelectedTile(model)) {
+      ui.setSelectedTile(model);
+      this.didLastMouseDownSelectTile = true;
+      // prevent the click from taking effect, e.g. creating a point
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  private handlePointerUpCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (this.didLastMouseDownSelectTile) {
+      this.didLastMouseDownSelectTile = false;
+      // prevent the click from taking effect, e.g. creating a point
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

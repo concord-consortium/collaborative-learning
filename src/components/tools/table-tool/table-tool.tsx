@@ -11,7 +11,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
           TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
-import { JXGCoordPair, JXGProperties } from "../../../models/tools/geometry/jxg-changes";
+import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
@@ -26,7 +26,6 @@ interface IClipboardCases {
 interface IProps {
   model: ToolTileModelType;
   readOnly?: boolean;
-  tabIndex?: number;  // required for focus()
 }
 
 // all properties are optional
@@ -105,7 +104,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           };
     return (
       <div className="table-tool" ref={this.domRef}
-          tabIndex={this.props.tabIndex} onKeyDown={this.handleKeyDown} >
+          tabIndex={0} onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
           expressions={metadata.expressions}
@@ -266,7 +265,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return this.getContent().getGeometryContent(geometryId);
   }
 
-  private getPositionOfPoint(caseId: string): JXGCoordPair {
+  private getPositionOfPoint(caseId: string): JXGUnsafeCoordPair {
     const { dataSet } = this.state;
     const attrCount = dataSet.attributes.length;
     const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;

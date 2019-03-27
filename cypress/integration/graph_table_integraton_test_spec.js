@@ -44,29 +44,42 @@ context('Tests for graph and table integration', function(){
             connectTableToGraph();
         });
         describe('Test blank cells',function(){//verify this is still true
+          const xCoord = '9';
+          const yCoord = '9';
             it('will add a blank row', function(){ 
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
-                graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-                graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)' )
+                graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
             });
             it('will add a coordinate in x only column', function(){
-                let xCoord = '9';
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
                 tableToolTile.getTableCell().eq(2).type(xCoord);
                 tableToolTile.getTableCell().eq(3).type(' ');
-                graphToolTile.getGraphPointLabel().contains('p2').should('exist');
-                graphToolTile.getGraphPointCoordinates().should('contain', '('+xCoord+', 0)' )
+                graphToolTile.getGraphPointLabel().contains('p2').should('not.exist');
             });
             it('will add a coordinate in y only column', function(){
-                let yCoord = '9';
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
                 tableToolTile.getTableCell().eq(5).type(yCoord);
                 tableToolTile.getTableCell().eq(4).type('0');
+                graphToolTile.getGraphPointLabel().contains('p3').should('not.exist');
+            });
+            it('will update blank cells', function(){
+                tableToolTile.getTableCell().eq(0).type('0');
+                tableToolTile.getTableCell().eq(6).type(' '); // Unsure why, but this is necessary to store coordinate
+                tableToolTile.getTableCell().eq(1).type('0');
+                tableToolTile.getTableCell().eq(6).type(' ');
+                graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+                graphToolTile.getGraphPointCoordinates(0).should('contain', '(0, 0)' );
+                tableToolTile.getTableCell().eq(3).type('0');
+                tableToolTile.getTableCell().eq(6).type(' ');
+                graphToolTile.getGraphPointLabel().contains('p2').should('exist');
+                graphToolTile.getGraphPointCoordinates(1).should('contain', '('+xCoord+', 0)' );
+                tableToolTile.getTableCell().eq(4).type('0');
+                tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p3').should('exist');
-                graphToolTile.getGraphPointCoordinates().should('contain', '(0, '+yCoord+')');
+                graphToolTile.getGraphPointCoordinates(2).should('contain', '(0, '+yCoord+')');
             });
         });
         describe('test creating a polygon', function (){

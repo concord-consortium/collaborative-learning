@@ -5,12 +5,13 @@ export type JXGObjectType = "board" |"comment" |  "image" | "linkedPoint" | "mov
                               "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
+export type JXGUnsafeCoordPair = [number?, number?];
 
-export type JXGParentType = string | number | JXGCoordPair;
+export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
 
 export interface JXGProperties {
   id?: string;
-  position?: JXGCoordPair;
+  position?: JXGUnsafeCoordPair;
   url?: string;
   xMin?: number;
   yMin?: number;

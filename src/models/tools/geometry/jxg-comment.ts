@@ -1,7 +1,7 @@
-import { JXGChangeAgent, JXGProperties } from "./jxg-changes";
+import { JXGChangeAgent, JXGProperties, JXGCoordPair } from "./jxg-changes";
 import { isBoard } from "./jxg-board";
 import { isMovableLine } from "./jxg-movable-line";
-import { objectChangeAgent } from "./jxg-object";
+import { objectChangeAgent, isPositionGraphable } from "./jxg-object";
 import { isPoint } from "./jxg-point";
 import { isPolygon, isVisibleEdge } from "./jxg-polygon";
 import { values } from "lodash";
@@ -111,13 +111,13 @@ export const commentChangeAgent: JXGChangeAgent = {
         obj.setText(text);
         board.update();
       }
-      if (position) {
+      if (position && isPositionGraphable(position)) {
         // Element coordinates are not updated until a redraw occurs. So if redraws are suspended, and a comment or its
         // anchor has moved, the transform will be calculated from a stale position. We unsuspend updates to force a
         // refresh on coordinate positions.
         const wasSuspended = board.isSuspendedUpdate;
         if (wasSuspended) board.unsuspendUpdate();
-        obj.setPosition(JXG.COORDS_BY_USER, position);
+        obj.setPosition(JXG.COORDS_BY_USER, position as JXGCoordPair);
         board.update();
         if (wasSuspended) board.suspendUpdate();
       }
