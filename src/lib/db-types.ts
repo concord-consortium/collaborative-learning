@@ -222,4 +222,5 @@ export interface DBTileComment {
   uid: string;
   timestamp: number;
   selectionInfo?: string;
+  deleted?: boolean;
 }

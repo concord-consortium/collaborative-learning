@@ -34,14 +34,16 @@ export class DBCommentsListener {
         forEach(dbDocComments, (tileComments, tileId) => {
           const tileCommentsModel = TileCommentsModel.create({tileId});
           forEach(tileComments, (tileComment, commentKey) => {
-            const { uid, content, selectionInfo } = tileComment;
-            const commentModel = TileCommentModel.create({
-              uid,
-              key: commentKey,
-              text: content,
-              selectionInfo
-            });
-            tileCommentsModel.addComment(commentModel);
+            if (!tileComment.deleted) {
+              const { uid, content, selectionInfo } = tileComment;
+              const commentModel = TileCommentModel.create({
+                uid,
+                key: commentKey,
+                text: content,
+                selectionInfo
+              });
+              tileCommentsModel.addComment(commentModel);
+            }
           });
           docModel.setTileComments(tileId, tileCommentsModel);
         });

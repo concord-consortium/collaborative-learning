@@ -1,12 +1,13 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
-import { TileCommentsModelType } from "../../models/tools/tile-comments";
+import { TileCommentsModelType, TileCommentModelType } from "../../models/tools/tile-comments";
 import { IToolApiMap } from "./tool-tile";
 
 import "./tile-comments.sass";
 
 interface IProps {
+  docKey: string;
   model: TileCommentsModelType;
   toolApiMap?: IToolApiMap;
 }
@@ -16,8 +17,10 @@ interface IProps {
 export class TileCommentsComponent extends BaseComponent<IProps, {}> {
 
   public render() {
+    const { user } = this.stores;
     const { model } = this.props;
-    if (!model.visible && model.comments.length) {
+    if (!model.comments.length) return null;
+    if (!model.visible) {
       return this.renderClosed();
     }
     const { class: clazz } = this.stores;
@@ -38,12 +41,23 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
                 <div className="comment" key={comment.key}
                      onMouseEnter={this.handleHover(comment.selectionInfo)}
                      onMouseLeave={this.handleLeave(comment.selectionInfo)}>
+                  {user.id === comment.uid ? this.renderDelete(comment) : null}
                   {`${name}: ${comment.text}`}
                 </div>
               );
             })
           }
         </div>
+      </div>
+    );
+  }
+
+  private renderDelete = (comment: TileCommentModelType) => {
+    return (
+      <div className="delete" title="Delete" onClick={this.handleDelete(comment)}>
+        <svg className={`icon icon-delete-tool`}>
+          <use xlinkHref={`#icon-delete-tool`} />
+        </svg>
       </div>
     );
   }
@@ -62,6 +76,12 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
     if (toolApi && selectionInfo) {
       toolApi.unhighlightSelection(selectionInfo);
     }
+  }
+
+  private handleDelete = (comment: TileCommentModelType) => () => {
+    const { db } = this.stores;
+    const { docKey, model } = this.props;
+    db.deleteComment(docKey, model.tileId, comment.key);
   }
 
   private closeComments = () => {

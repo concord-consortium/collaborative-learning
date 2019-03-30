@@ -15,12 +15,22 @@
 
   .comments
     overflow: scroll
-    div
+    .title, .comment
       margin: 5px
     .title
       font-weight: bold
     .comment
       cursor: pointer
+      display: flex
+      align-items: center
+      .delete
+        display: flex
+        svg
+          width: 25px
+          height: 25px
+          cursor: pointer
+        &:hover
+          color: slategray
 
   .close svg
     position: absolute

@@ -15,6 +15,7 @@ import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
+import { TileCommentModelType } from "../models/tools/tile-comments";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -644,6 +645,16 @@ export class DB {
       comment.selectionInfo = selectionInfo;
     }
     commentRef.set(comment);
+  }
+
+  public deleteComment(docKey: string, tileId: string, commentKey: string) {
+    const { user } = this.stores;
+    const updateRef = this.firebase.ref(
+      this.firebase.getUserDocumentCommentsPath(user, docKey, tileId, commentKey)
+    );
+    updateRef.update({
+      deleted: true
+    });
   }
 
   public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {

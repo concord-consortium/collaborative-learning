@@ -93,10 +93,11 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
   }
 
-  public getUserDocumentCommentsPath(user: UserModelType, documentKey?: string, tileId?: string) {
+  public getUserDocumentCommentsPath(user: UserModelType, documentKey?: string, tileId?: string, commentKey?: string) {
     const docSuffix = documentKey ? `/${documentKey}` : "";
     const tileSuffix = tileId ? `/${tileId}` : "";
-    return `${this.getOfferingPath(user)}/documentComments${docSuffix}${tileSuffix}`;
+    const commentSuffix = commentKey ? `/${commentKey}` : "";
+    return `${this.getOfferingPath(user)}/documentComments${docSuffix}${tileSuffix}${commentSuffix}`;
   }
 
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {

@@ -150,7 +150,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     if (documentContent) {
       const commentsModel = documentContent.comments.get(tileId);
       if (commentsModel) {
-        return <TileCommentsComponent model={commentsModel} toolApiMap={toolApiMap}/>;
+        return <TileCommentsComponent model={commentsModel} toolApiMap={toolApiMap} docKey={documentContent.key}/>;
       }
     }
   }
