@@ -64,7 +64,7 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
 
 function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const elt = document.getElementById(domElementID);
-  let eltBounds = elt && elt.getBoundingClientRect();
+  let eltBounds = elt && { width: elt.offsetWidth, height: elt.offsetHeight };
   if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
     eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
   }
