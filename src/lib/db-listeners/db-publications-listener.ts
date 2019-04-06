@@ -1,6 +1,7 @@
 import { DB } from "../db";
 import { DBPublication } from "../db-types";
 import { forEach } from "lodash";
+import { onPatch } from "mobx-state-tree";
 
 export class DBPublicationsListener {
   private db: DB;
@@ -51,7 +52,29 @@ export class DBPublicationsListener {
     const {documents} = this.db.stores;
     if (publication) {
       this.db.createDocumentFromPublication(publication)
-        .then(documents.add);
+        .then(doc => {
+          documents.add(doc);
+          onPatch(doc.comments, patch => {
+            const path = patch.path.split("/");
+            const tileId = path[1];
+            if (patch.op === "add") {
+              const comment = patch.value;
+              const { text, selectionInfo } = comment;
+              if (text) {
+                this.db.createTileComment(doc, tileId, text, selectionInfo);
+              }
+            } else if (patch.op === "replace" && path[path.length - 1] === "deleted") {
+              const tileComments = doc.comments.get(tileId);
+              if (tileComments) {
+                const commentIndex = parseInt(path[path.length - 2], 10);
+                const comment = tileComments.getCommentAtIndex(commentIndex);
+                if (comment) {
+                  this.db.deleteComment(doc.key, tileId, comment.key);
+                }
+              }
+            }
+          });
+        });
     }
   }
 }

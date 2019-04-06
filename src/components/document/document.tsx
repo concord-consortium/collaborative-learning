@@ -255,13 +255,23 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleSaveComment = (tileId: string, comment: string) => {
-    const { documents, db } = this.stores;
+  private handleSaveComment = (comment: string, tileId: string) => {
+    const { documents, db, user } = this.stores;
     const document = documents.findDocumentOfTile(tileId);
     const toolApi = this.toolApiMap[tileId];
     const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
     if (document) {
-      db.createTileComment(document, tileId, comment, selectionInfo);
+      const newComment = TileCommentModel.create({
+        uid: user.id,
+        text: comment,
+        selectionInfo
+      });
+      let tileComments = document.comments.get(tileId);
+      if (!tileComments) {
+        tileComments = TileCommentsModel.create({ tileId });
+        document.setTileComments(tileId, tileComments);
+      }
+      tileComments.addComment(newComment);
     }
     this.handleCloseCommentDialog();
   }

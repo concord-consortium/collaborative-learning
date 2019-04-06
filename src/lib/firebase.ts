@@ -97,7 +97,7 @@ export class Firebase {
     const docSuffix = documentKey ? `/${documentKey}` : "";
     const tileSuffix = tileId ? `/${tileId}` : "";
     const commentSuffix = commentKey ? `/${commentKey}` : "";
-    return `${this.getOfferingPath(user)}/documentComments${docSuffix}${tileSuffix}${commentSuffix}`;
+    return `${this.getOfferingPath(user)}/commentaries/comments${docSuffix}${tileSuffix}${commentSuffix}`;
   }
 
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {

@@ -7,8 +7,14 @@ export const TileCommentModel = types
   key: types.optional(types.identifier, () => uuid()),
   uid: types.string,
   text: types.string,
-  selectionInfo: types.maybe(types.string)
-});
+  selectionInfo: types.maybe(types.string),
+  deleted: false
+})
+.actions(self  => ({
+  delete() {
+    self.deleted = true;
+  }
+}));
 export type TileCommentModelType = Instance<typeof TileCommentModel>;
 
 export const TileCommentsModel = types
@@ -26,6 +32,10 @@ export const TileCommentsModel = types
 
     addComment(comment: TileCommentModelType) {
       self.comments.push(comment);
+    },
+
+    getCommentAtIndex(index: number) {
+      return self.comments[index];
     }
   }));
 

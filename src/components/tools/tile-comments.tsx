@@ -79,9 +79,7 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDelete = (comment: TileCommentModelType) => () => {
-    const { db } = this.stores;
-    const { docKey, model } = this.props;
-    db.deleteComment(docKey, model.tileId, comment.key);
+    comment.delete();
   }
 
   private closeComments = () => {
