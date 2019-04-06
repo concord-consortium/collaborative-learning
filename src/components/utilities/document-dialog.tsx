@@ -2,11 +2,14 @@ import * as React from "react";
 import { Button, Dialog } from "@blueprintjs/core";
 
 interface IProps {
-  id: string;
-  isOpen: boolean;
-  onAccept: (id: string, name: string) => void;
+  parentId?: string;
+  onAccept: (content: string, parentId?: string) => void;
   onClose: () => void;
-  content: string;
+  content?: string;
+  title?: string;
+  prompt?: string;
+  placeholder?: string;
+  maxLength?: number;
 }
 
 interface IState {
@@ -14,28 +17,28 @@ interface IState {
 }
 
 export default
-class CommentDialog extends React.Component<IProps, IState> {
+class DocumentDialog extends React.Component<IProps, IState> {
 
   public state = {
             content: this.props.content || ""
           };
 
   public render() {
-    const prompt = "Comment";
+    const { title, prompt, placeholder, maxLength } = this.props;
     return (
       <Dialog
         icon="text-highlight"
-        isOpen={this.props.isOpen}
+        isOpen={true}
         onClose={this.props.onClose}
-        title={`Edit Comment`}
+        title={title}
         canOutsideClickClose={false}
       >
         <div className="nc-attribute-name-prompt">{prompt}:</div>
         <input
           className="nc-attribute-name-input pt-input"
           type="text"
-          maxLength={500}
-          placeholder={"Type comment here"}
+          maxLength={maxLength ? maxLength : 100}
+          placeholder={placeholder}
           value={this.state.content}
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
@@ -59,15 +62,14 @@ class CommentDialog extends React.Component<IProps, IState> {
   }
 
   private handleAccept = () => {
-    if (this.props.onAccept) {
-      this.props.onAccept(this.props.id, this.state.content);
-    }
+    const { onAccept, parentId } = this.props;
+    const { content } = this.state;
+    onAccept && onAccept(content, parentId);
   }
 
   private handleCancel = () => {
-    if (this.props.onClose) {
-      this.props.onClose();
-    }
+    const { onClose } = this.props;
+    onClose && onClose();
   }
 
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {

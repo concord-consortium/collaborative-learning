@@ -6,11 +6,13 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, SectionDocument, PublicationDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { SectionType } from "../../models/curriculum/section";
+import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
+import DocumentDialog from "../utilities/document-dialog";
 
 import "./document.sass";
 
@@ -24,9 +26,14 @@ interface IProps extends IBaseProps {
   isGhostUser?: boolean;
 }
 
+interface IState {
+  isCommentDialogOpen: boolean;
+  commentTileId: string;
+}
+
 @inject("stores")
 @observer
-export class DocumentComponent extends BaseComponent<IProps, {}> {
+export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
@@ -41,6 +48,11 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
       unregister: (id: string) => {
         delete this.toolApiMap[id];
       }
+    };
+
+    this.state = {
+      isCommentDialogOpen: false,
+      commentTileId: ""
     };
   }
 
@@ -172,7 +184,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const readOnly = forceReadOnly || this.props.readOnly;
     return (
       <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
-                        toolApiInterface={this.toolApiInterface} />
+                        toolApiInterface={this.toolApiInterface} toolApiMap={this.toolApiMap} />
     );
   }
 
@@ -189,6 +201,7 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {document} = this.props;
     const isPrimary = this.isPrimary();
     const showContents = isPrimary && (document.type === SectionDocument);
+    const showComment = !isPrimary && (document.type === PublicationDocument);
     return (
       <div className="statusbar">
         <div className="supports">
@@ -197,9 +210,64 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="actions">
           {isPrimary ? this.renderTwoUpButton() : null}
+          {showComment ? this.renderCommentButton() : null}
         </div>
+        {this.renderCommentDialog()}
       </div>
     );
+  }
+
+  private renderCommentDialog = () => {
+    const { isCommentDialogOpen, commentTileId } = this.state;
+    if (isCommentDialogOpen) {
+      return (
+        <DocumentDialog
+          parentId={commentTileId}
+          onAccept={this.handleSaveComment}
+          onClose={this.handleCloseCommentDialog}
+          title="Add Comment"
+          prompt="Enter a comment"
+          placeholder="Comment..."
+          maxLength={100}
+        />
+      );
+    }
+  }
+
+  private renderCommentButton() {
+    return (
+      <div className="tool comment" title="Comment"
+          onClick={this.handleComment}>
+        <svg className={`icon icon-geometry-comment`}>
+          <use xlinkHref={`#icon-geometry-comment`} />
+        </svg>
+      </div>
+    );
+  }
+
+  private handleComment = () => {
+    const { ui: { selectedTileId } } = this.stores;
+    if (selectedTileId ) {
+      this.setState({
+        isCommentDialogOpen: true,
+        commentTileId: selectedTileId
+      });
+    }
+  }
+
+  private handleSaveComment = (tileId: string, comment: string) => {
+    const { documents, db } = this.stores;
+    const document = documents.findDocumentOfTile(tileId);
+    const toolApi = this.toolApiMap[tileId];
+    const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
+    if (document) {
+      db.createTileComment(document, tileId, comment, selectionInfo);
+    }
+    this.handleCloseCommentDialog();
+  }
+
+  private handleCloseCommentDialog = () => {
+    this.setState({ isCommentDialogOpen: false });
   }
 
   private renderTwoUpButton() {

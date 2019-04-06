@@ -10,7 +10,6 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
-import CommentDialog from "./comment-dialog";
 import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -33,6 +32,7 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
+import DocumentDialog from "../../utilities/document-dialog";
 
 import "./geometry-tool.sass";
 
@@ -265,7 +265,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.initializeContent();
 
-    if (!this.props.readOnly && this.props.toolApiInterface) {
+    if (this.props.toolApiInterface) {
       this.props.toolApiInterface.register(this.props.model.id, {
         hasSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
@@ -280,8 +280,47 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         deleteSelection: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
           const { board } = this.state;
-          if (geometryContent && board) {
+          if (geometryContent && board && !this.props.readOnly) {
             geometryContent.deleteSelection(board);
+          }
+        },
+        getSelectionInfo: () => {
+          const geometryContent = this.props.model.content as GeometryContentModelType;
+          if (geometryContent) {
+            return JSON.stringify(geometryContent.selectedIds);
+          } else {
+            return "[]";
+          }
+        },
+        highlightSelection: (selectionInfo: string) => {
+          const { board } = this.state;
+          const content = this.getContent();
+          if (board && content) {
+            board.objectsList.forEach(obj => {
+              if (content.isSelected(obj.id)) {
+                setElementColor(board, obj.id, false);
+              }
+            });
+            const selectedIds: string[] = JSON.parse(selectionInfo);
+            selectedIds.forEach(key => {
+              setElementColor(board, key, true);
+            });
+          }
+        },
+        unhighlightSelection: (selectionInfo: string) => {
+          const { board } = this.state;
+          const content = this.getContent();
+          if (board && content) {
+            const selectedIds: string[] = JSON.parse(selectionInfo);
+            selectedIds.forEach(key => {
+              setElementColor(board, key, false);
+            });
+            // Return selection state to normal
+            board.objectsList.forEach(obj => {
+              if (content.isSelected(obj.id)) {
+                setElementColor(board, obj.id, true);
+              }
+            });
           }
         }
       });
@@ -348,13 +387,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const comment = this.state.selectedComment;
     if (comment) {
       return (
-        <CommentDialog
+        <DocumentDialog
           key="editor"
-          id={comment.id}
-          isOpen={this.state.selectedComment != null}
+          parentId={comment.id}
           onAccept={this.handleUpdateComment}
           onClose={this.closeCommentDialog}
           content={comment.plaintext}
+          title="Edit Comment"
+          prompt="Comment"
+          placeholder="Type comment here"
+          maxLength={500}
         />
       );
     }
@@ -561,7 +603,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ axisSettingsOpen: true });
   }
 
-  private handleUpdateComment = (commentId: string, text: string = "") => {
+  private handleUpdateComment = (text: string, commentId: string) => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {

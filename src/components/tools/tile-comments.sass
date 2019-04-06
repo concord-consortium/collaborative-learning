@@ -1,0 +1,45 @@
+@import ../vars
+  
+.tile-comments.open
+  position: absolute
+  right: 0
+  bottom: 0
+  background-color: lightgray
+  max-width: 50%
+  max-height: 100%
+  text-align: left
+  z-index: 9
+  border-top-left-radius: $border-radius
+  border-bottom-left-radius: $border-radius
+  overflow: scroll
+
+  .comments
+    overflow: scroll
+    div
+      margin: 5px
+    .title
+      font-weight: bold
+    .comment
+      cursor: pointer
+
+  .close svg
+    position: absolute
+    width: 30px
+    height: 30px
+    right: 0
+    top: 0
+    cursor: pointer
+
+.tile-comments.closed
+
+  .icon-geometry-comment
+    position: absolute
+    width: 30px
+    height: 30px
+    right: 0
+    z-index: 9
+    background-color: lightgray
+    bottom: 0
+    right: 0
+    cursor: pointer
+    border-top-left-radius: $border-radius

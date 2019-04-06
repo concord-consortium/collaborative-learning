@@ -15,11 +15,16 @@ import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
+import { TileCommentsComponent } from "./tile-comments";
+
 import "./tool-tile.sass";
 
 export interface IToolApi {
   hasSelection: () => boolean;
   deleteSelection: () => void;
+  getSelectionInfo: () => string;
+  highlightSelection: (selectionInfo: string) => void;
+  unhighlightSelection: (selectionInfo: string) => void;
 }
 
 export interface IToolApiInterface {
@@ -64,6 +69,7 @@ interface IProps {
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  toolApiMap?: IToolApiMap;
   onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
@@ -124,6 +130,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           </svg>
         </div>
         {this.renderTile(ToolComponent)}
+        {this.renderTileComments()}
       </div>
     );
   }
@@ -133,6 +140,19 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     return ToolComponent != null
             ? <ToolComponent key={tileId} {...this.props} />
             : null;
+  }
+
+  private renderTileComments() {
+    const tileId = this.props.model.id;
+    const { toolApiMap } = this.props;
+    const { documents } = this.stores;
+    const documentContent = documents.findDocumentOfTile(tileId);
+    if (documentContent) {
+      const commentsModel = documentContent.comments.get(tileId);
+      if (commentsModel) {
+        return <TileCommentsComponent model={commentsModel} toolApiMap={toolApiMap}/>;
+      }
+    }
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

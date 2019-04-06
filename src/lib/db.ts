@@ -6,7 +6,7 @@ import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
-  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport } from "./db-types";
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
   LearningLogPublication } from "../models/document/document";
 import { ImageModelType } from "../models/image";
@@ -626,6 +626,24 @@ export class DB {
             .then(image => fetch(image.imageData))
             .then(response => response.blob())
             .then(blob => URL.createObjectURL(blob));
+  }
+
+  public createTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {
+    const { user } = this.stores;
+    const { key: docKey, uid: docUserId } = document;
+    const commentsRef = this.firebase.ref(
+      this.firebase.getUserDocumentCommentsPath(user, docKey, tileId)
+    );
+    const commentRef = commentsRef.push();
+    const comment: DBTileComment = {
+      timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+      uid: user.id,
+      content,
+    };
+    if (selectionInfo) {
+      comment.selectionInfo = selectionInfo;
+    }
+    commentRef.set(comment);
   }
 
   public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {

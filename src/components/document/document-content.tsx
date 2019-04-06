@@ -8,7 +8,7 @@ import { DocumentTool } from "../../models/document/document";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
-        dragTileSrcDocId, kDragRowHeight, kDragTileCreate } from "../tools/tool-tile";
+        dragTileSrcDocId, kDragRowHeight, kDragTileCreate, IToolApiMap } from "../tools/tool-tile";
 
 import "./document-content.sass";
 
@@ -17,6 +17,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   readOnly?: boolean;
   scale?: number;
+  toolApiMap?: IToolApiMap;
 }
 
 interface IDragResizeRow {
@@ -131,7 +132,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderRows() {
-    const { content, ...others } = this.props;
+    const { content, toolApiMap, ...others } = this.props;
     if (!content) { return null; }
     const { rowMap, rowOrder, tileMap, highlightPendingDropLocation } = content;
     const { dropRowInfo } = this.state;
@@ -151,6 +152,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
                                   height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
+                                  toolApiMap={toolApiMap}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
