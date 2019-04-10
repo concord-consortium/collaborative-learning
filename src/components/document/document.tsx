@@ -204,7 +204,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     const isPrimary = this.isPrimary();
     const showContents = isPrimary && (document.type === SectionDocument);
-    const showComment = !isPrimary && (document.type === PublicationDocument);
+    // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
+    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    const showComment = false;
     return (
       <div className="statusbar">
         <div className="supports">
