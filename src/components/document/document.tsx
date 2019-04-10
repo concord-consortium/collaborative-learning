@@ -12,7 +12,7 @@ import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { SectionType } from "../../models/curriculum/section";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
-import DocumentDialog from "../utilities/document-dialog";
+import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
@@ -224,7 +224,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { isCommentDialogOpen, commentTileId } = this.state;
     if (isCommentDialogOpen) {
       return (
-        <DocumentDialog
+        <SingleStringDialog
           parentId={commentTileId}
           onAccept={this.handleSaveComment}
           onClose={this.handleCloseCommentDialog}

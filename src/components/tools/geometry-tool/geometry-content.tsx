@@ -32,7 +32,7 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
-import DocumentDialog from "../../utilities/document-dialog";
+import SingleStringDialog from "../../utilities/single-string-dialog";
 
 import "./geometry-tool.sass";
 
@@ -286,11 +286,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         },
         getSelectionInfo: () => {
           const geometryContent = this.props.model.content as GeometryContentModelType;
-          if (geometryContent) {
-            return JSON.stringify(geometryContent.selectedIds);
-          } else {
-            return "[]";
-          }
+          const selectedIds = geometryContent ? geometryContent.selectedIds : [];
+          return JSON.stringify(selectedIds);
         },
         setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
           const { board } = this.state;
@@ -383,7 +380,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const comment = this.state.selectedComment;
     if (comment) {
       return (
-        <DocumentDialog
+        <SingleStringDialog
           key="editor"
           parentId={comment.id}
           onAccept={this.handleUpdateComment}

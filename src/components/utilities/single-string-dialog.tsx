@@ -17,7 +17,7 @@ interface IState {
 }
 
 export default
-class DocumentDialog extends React.Component<IProps, IState> {
+class SingleStringDialog extends React.Component<IProps, IState> {
 
   public state = {
             content: this.props.content || ""
