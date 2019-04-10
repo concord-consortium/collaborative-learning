@@ -66,7 +66,7 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
     const { toolApiInterface, model } = this.props;
     const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
     if (toolApi && selectionInfo) {
-      toolApi.highlightSelection(selectionInfo);
+      toolApi.setSelectionHighlight(selectionInfo, true);
     }
   }
 
@@ -74,7 +74,7 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
     const { toolApiInterface, model } = this.props;
     const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
     if (toolApi && selectionInfo) {
-      toolApi.unhighlightSelection(selectionInfo);
+      toolApi.setSelectionHighlight(selectionInfo, false);
     }
   }
 

@@ -23,8 +23,7 @@ export interface IToolApi {
   hasSelection: () => boolean;
   deleteSelection: () => void;
   getSelectionInfo: () => string;
-  highlightSelection: (selectionInfo: string) => void;
-  unhighlightSelection: (selectionInfo: string) => void;
+  setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => void;
 }
 
 export interface IToolApiInterface {

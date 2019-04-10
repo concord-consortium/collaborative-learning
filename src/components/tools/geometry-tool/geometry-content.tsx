@@ -292,35 +292,31 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             return "[]";
           }
         },
-        highlightSelection: (selectionInfo: string) => {
-          const { board } = this.state;
-          const content = this.getContent();
-          if (board && content) {
-            board.objectsList.forEach(obj => {
-              if (content.isSelected(obj.id)) {
-                setElementColor(board, obj.id, false);
-              }
-            });
-            const selectedIds: string[] = JSON.parse(selectionInfo);
-            selectedIds.forEach(key => {
-              setElementColor(board, key, true);
-            });
-          }
-        },
-        unhighlightSelection: (selectionInfo: string) => {
+        setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
           const { board } = this.state;
           const content = this.getContent();
           if (board && content) {
             const selectedIds: string[] = JSON.parse(selectionInfo);
-            selectedIds.forEach(key => {
-              setElementColor(board, key, false);
-            });
-            // Return selection state to normal
-            board.objectsList.forEach(obj => {
-              if (content.isSelected(obj.id)) {
-                setElementColor(board, obj.id, true);
-              }
-            });
+            if (isHighlighted) {
+              board.objectsList.forEach(obj => {
+                if (content.isSelected(obj.id)) {
+                  setElementColor(board, obj.id, false);
+                }
+              });
+              selectedIds.forEach(key => {
+                setElementColor(board, key, true);
+              });
+            } else {
+              selectedIds.forEach(key => {
+                setElementColor(board, key, false);
+              });
+              // Return selection state to normal
+              board.objectsList.forEach(obj => {
+                if (content.isSelected(obj.id)) {
+                  setElementColor(board, obj.id, true);
+                }
+              });
+            }
           }
         }
       });
