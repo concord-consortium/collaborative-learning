@@ -2,14 +2,14 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileCommentsModelType, TileCommentModelType } from "../../models/tools/tile-comments";
-import { IToolApiMap } from "./tool-tile";
+import { IToolApiInterface } from "./tool-tile";
 
 import "./tile-comments.sass";
 
 interface IProps {
   docKey: string;
   model: TileCommentsModelType;
-  toolApiMap?: IToolApiMap;
+  toolApiInterface?: IToolApiInterface;
 }
 
 @inject("stores")
@@ -63,16 +63,16 @@ export class TileCommentsComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleHover = (selectionInfo?: string) => () => {
-    const { toolApiMap } = this.props;
-    const toolApi = toolApiMap && toolApiMap[this.props.model.tileId];
+    const { toolApiInterface, model } = this.props;
+    const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
     if (toolApi && selectionInfo) {
       toolApi.highlightSelection(selectionInfo);
     }
   }
 
   private handleLeave = (selectionInfo?: string) => () => {
-    const { toolApiMap } = this.props;
-    const toolApi = toolApiMap && toolApiMap[this.props.model.tileId];
+    const { toolApiInterface, model } = this.props;
+    const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
     if (toolApi && selectionInfo) {
       toolApi.unhighlightSelection(selectionInfo);
     }

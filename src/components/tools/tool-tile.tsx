@@ -30,6 +30,7 @@ export interface IToolApi {
 export interface IToolApiInterface {
   register: (id: string, toolApi: IToolApi) => void;
   unregister: (id: string) => void;
+  getToolApi: (id: string) => IToolApi;
 }
 
 export interface IToolApiMap {
@@ -69,7 +70,7 @@ interface IProps {
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
-  toolApiMap?: IToolApiMap;
+  toolApiInterface?: IToolApiInterface;
   onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
@@ -144,13 +145,17 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private renderTileComments() {
     const tileId = this.props.model.id;
-    const { toolApiMap } = this.props;
+    const { toolApiInterface } = this.props;
     const { documents } = this.stores;
     const documentContent = documents.findDocumentOfTile(tileId);
     if (documentContent) {
       const commentsModel = documentContent.comments.get(tileId);
       if (commentsModel) {
-        return <TileCommentsComponent model={commentsModel} toolApiMap={toolApiMap} docKey={documentContent.key}/>;
+        return <TileCommentsComponent
+                  model={commentsModel}
+                  toolApiInterface={toolApiInterface}
+                  docKey={documentContent.key}
+                />;
       }
     }
   }

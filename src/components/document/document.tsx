@@ -47,6 +47,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       },
       unregister: (id: string) => {
         delete this.toolApiMap[id];
+      },
+      getToolApi: (id: string) => {
+        return this.toolApiMap[id];
       }
     };
 
@@ -184,7 +187,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const readOnly = forceReadOnly || this.props.readOnly;
     return (
       <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
-                        toolApiInterface={this.toolApiInterface} toolApiMap={this.toolApiMap} />
+                        toolApiInterface={this.toolApiInterface} />
     );
   }
 

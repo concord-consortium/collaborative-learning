@@ -2,7 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
-import { ToolTileComponent, dragTileSrcDocId, IToolApiMap } from "../tools/tool-tile";
+import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import "./tile-row.sass";
 
@@ -53,7 +53,7 @@ interface IProps {
   tileMap: any;
   readOnly?: boolean;
   dropHighlight?: string;
-  toolApiMap?: IToolApiMap;
+  toolApiInterface?: IToolApiInterface;
 }
 
 interface IState {
@@ -82,7 +82,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTiles(rowHeight?: number) {
-    const { model, tileMap, toolApiMap, ...others } = this.props;
+    const { model, tileMap, ...others } = this.props;
     const { tiles } = model;
     if (!tiles) { return null; }
 
@@ -93,7 +93,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}
                                     onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
-                                    toolApiMap={toolApiMap}
                                     {...others} />
               : null;
     });
