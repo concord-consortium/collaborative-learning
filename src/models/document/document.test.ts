@@ -29,6 +29,7 @@ describe("document model", () => {
       title: undefined,
       visibility: "public",
       groupUserConnections: {},
+      comments: {},
       content: {
         rowMap: {},
         rowOrder: [],

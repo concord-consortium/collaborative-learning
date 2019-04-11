@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
+import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
 
@@ -24,6 +25,7 @@ export const DocumentModel = types
     key: types.string,
     createdAt: types.number,
     content: DocumentContentModel,
+    comments: types.map(TileCommentsModel),
     sectionId: types.maybe(types.string),
     groupId: types.maybe(types.string),
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
@@ -63,6 +65,10 @@ export const DocumentModel = types
     deleteTile(tileId: string) {
       self.content.deleteTile(tileId);
     },
+
+    setTileComments(tileId: string, comments: TileCommentsModelType) {
+      self.comments.set(tileId, comments);
+    }
   }));
 
 export type DocumentModelType = Instance<typeof DocumentModel>;

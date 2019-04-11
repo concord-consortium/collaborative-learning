@@ -12,6 +12,7 @@ import { DocumentModelType, SectionDocument } from "../../models/document/docume
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
+import { DBCommentsListener } from "./db-comments-listener";
 
 export interface ModelListeners {
   [key /* unique Key */: string]: {
@@ -47,6 +48,7 @@ export class DBListeners {
   private learningLogsListener: DBLearningLogsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
+  private commentsListener: DBCommentsListener;
 
   constructor(db: DB) {
     this.db = db;
@@ -56,6 +58,7 @@ export class DBListeners {
     this.learningLogsListener = new DBLearningLogsListener(db);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
+    this.commentsListener = new DBCommentsListener(db);
   }
 
   public start() {
@@ -76,6 +79,9 @@ export class DBListeners {
         })
         .then(() => {
           return this.supportsListener.start();
+        })
+        .then(() => {
+          return this.commentsListener.start();
         })
         .then(() => {
           this.isListening = true;

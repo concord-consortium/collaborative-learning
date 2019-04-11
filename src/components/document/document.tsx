@@ -6,11 +6,13 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, SectionDocument, PublicationDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { SectionType } from "../../models/curriculum/section";
+import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
+import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
@@ -24,9 +26,14 @@ interface IProps extends IBaseProps {
   isGhostUser?: boolean;
 }
 
+interface IState {
+  isCommentDialogOpen: boolean;
+  commentTileId: string;
+}
+
 @inject("stores")
 @observer
-export class DocumentComponent extends BaseComponent<IProps, {}> {
+export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
@@ -40,7 +47,15 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
       },
       unregister: (id: string) => {
         delete this.toolApiMap[id];
+      },
+      getToolApi: (id: string) => {
+        return this.toolApiMap[id];
       }
+    };
+
+    this.state = {
+      isCommentDialogOpen: false,
+      commentTileId: ""
     };
   }
 
@@ -189,6 +204,9 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
     const {document} = this.props;
     const isPrimary = this.isPrimary();
     const showContents = isPrimary && (document.type === SectionDocument);
+    // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
+    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    const showComment = false;
     return (
       <div className="statusbar">
         <div className="supports">
@@ -197,9 +215,74 @@ export class DocumentComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="actions">
           {isPrimary ? this.renderTwoUpButton() : null}
+          {showComment ? this.renderCommentButton() : null}
         </div>
+        {this.renderCommentDialog()}
       </div>
     );
+  }
+
+  private renderCommentDialog = () => {
+    const { isCommentDialogOpen, commentTileId } = this.state;
+    if (isCommentDialogOpen) {
+      return (
+        <SingleStringDialog
+          parentId={commentTileId}
+          onAccept={this.handleSaveComment}
+          onClose={this.handleCloseCommentDialog}
+          title="Add Comment"
+          prompt="Enter a comment"
+          placeholder="Comment..."
+          maxLength={100}
+        />
+      );
+    }
+  }
+
+  private renderCommentButton() {
+    return (
+      <div className="tool comment" title="Comment"
+          onClick={this.handleComment}>
+        <svg className={`icon icon-geometry-comment`}>
+          <use xlinkHref={`#icon-geometry-comment`} />
+        </svg>
+      </div>
+    );
+  }
+
+  private handleComment = () => {
+    const { ui: { selectedTileId } } = this.stores;
+    if (selectedTileId ) {
+      this.setState({
+        isCommentDialogOpen: true,
+        commentTileId: selectedTileId
+      });
+    }
+  }
+
+  private handleSaveComment = (comment: string, tileId: string) => {
+    const { documents, db, user } = this.stores;
+    const document = documents.findDocumentOfTile(tileId);
+    const toolApi = this.toolApiMap[tileId];
+    const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
+    if (document) {
+      const newComment = TileCommentModel.create({
+        uid: user.id,
+        text: comment,
+        selectionInfo
+      });
+      let tileComments = document.comments.get(tileId);
+      if (!tileComments) {
+        tileComments = TileCommentsModel.create({ tileId });
+        document.setTileComments(tileId, tileComments);
+      }
+      tileComments.addComment(newComment);
+    }
+    this.handleCloseCommentDialog();
+  }
+
+  private handleCloseCommentDialog = () => {
+    this.setState({ isCommentDialogOpen: false });
   }
 
   private renderTwoUpButton() {

@@ -2,7 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
-import { ToolTileComponent, dragTileSrcDocId } from "../tools/tool-tile";
+import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import "./tile-row.sass";
 
@@ -53,6 +53,7 @@ interface IProps {
   tileMap: any;
   readOnly?: boolean;
   dropHighlight?: string;
+  toolApiInterface?: IToolApiInterface;
 }
 
 interface IState {

@@ -216,3 +216,11 @@ export interface DBSupport {
   content: string;
   deleted: boolean;
 }
+
+export interface DBTileComment {
+  content: string;
+  uid: string;
+  timestamp: number;
+  selectionInfo?: string;
+  deleted?: boolean;
+}
