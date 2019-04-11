@@ -20,7 +20,7 @@ export class DBCommentsListener {
 
   public stop() {
     if (this.commentsRef) {
-      this.commentsRef.on("child_changed", this.handleUpdateComments);
+      this.commentsRef.off("child_changed", this.handleUpdateComments);
       this.commentsRef.off("child_added", this.handleUpdateComments);
     }
   }

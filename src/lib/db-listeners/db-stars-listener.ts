@@ -20,7 +20,7 @@ export class DBStarsListener {
 
   public stop() {
     if (this.starsRef) {
-      this.starsRef.on("child_changed", this.handleUpdateStars);
+      this.starsRef.off("child_changed", this.handleUpdateStars);
       this.starsRef.off("child_added", this.handleUpdateStars);
     }
   }
