@@ -92,9 +92,9 @@ export const DocumentModel = types
     },
 
     toggleUserStar(userId: string) {
-      const starIndex = self.stars.findIndex(star => star.uid === userId);
-      if (starIndex >= 0) {
-        self.stars[starIndex].starred = !self.stars[starIndex].starred;
+      const userStar = self.stars.find(star => star.uid === userId);
+      if (userStar) {
+        userStar.starred = !userStar.starred;
       }
     }
   }));
