@@ -83,7 +83,7 @@ export const DocumentModel = types
       if (starIndex >= 0) {
         self.stars[starIndex] = newStar;
       } else {
-        this.setUserStar(newStar);
+        self.stars.push(newStar);
       }
     },
 
