@@ -60,11 +60,12 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
   private renderSection = (sectionType: SectionType, publications: DocumentModelType[], index: number) => {
     const { user } = this.stores;
     if (publications.some(publication => publication.sectionId === sectionType)) {
-      const icon: string = this.state.sectionShown[sectionType] ? "#icon-down-arrow" : "#icon-right-arrow";
+      const icon = this.state.sectionShown[sectionType] ? "#icon-down-arrow" : "#icon-right-arrow";
+      const visibilityClass = this.state.sectionShown[sectionType] ? "shown" : "hidden";
       return (
         <div className={"section " + sectionType} key={index}>
           <div
-            className={"section-header " + (this.state.sectionShown[sectionType] ? "shown" : "hidden")}
+            className={"section-header " + visibilityClass}
             data-test="class-work-section"
             onClick={this.handleSectionClicked(sectionType)}
           >
@@ -73,7 +74,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
             </svg>
             <div className="title">{sectionInfo[sectionType].title}</div>
           </div>
-          <div className={"list " + (this.state.sectionShown[sectionType] ? "shown" : "hidden")}>
+          <div className={"list " + visibilityClass}>
           {publications.map((publication) => {
             const publicationUser = this.stores.class.getUserById(publication.uid);
             const pubStar = publication.stars.find( star => star.uid === user.id && star.starred );
