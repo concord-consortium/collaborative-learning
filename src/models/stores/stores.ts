@@ -10,6 +10,7 @@ import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { LearningLogWorkspace, SectionWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { ThingsModel, ThingsModelType } from "./things";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -28,6 +29,7 @@ export interface IStores {
   showDemoCreator: boolean;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
+  things: ThingsModelType;
 }
 
 export interface ICreateStores {
@@ -44,6 +46,7 @@ export interface ICreateStores {
   unit?: UnitModelType;
   demo?: DemoModelType;
   supports?: SupportsModelType;
+  things?: ThingsModelType;
 }
 
 export function createStores(params?: ICreateStores): IStores {
@@ -72,6 +75,7 @@ export function createStores(params?: ICreateStores): IStores {
     demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
-    clipboard: ClipboardModel.create()
+    clipboard: ClipboardModel.create(),
+    things: ThingsModel.create()
   };
 }

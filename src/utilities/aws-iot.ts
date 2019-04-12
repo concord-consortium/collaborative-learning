@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 
-// Credentials for limited account iot-test-user available in 1Password
+// Credentials for limited account iot-test-user2 available in 1Password
 const ak = "ACCESS_KEY";
 const sk = "SECRET_KEY";
 
