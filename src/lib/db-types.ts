@@ -224,3 +224,9 @@ export interface DBTileComment {
   selectionInfo?: string;
   deleted?: boolean;
 }
+
+export interface DBUserStar{
+  uid: string;
+  timestamp: number;
+  starred: boolean;
+}

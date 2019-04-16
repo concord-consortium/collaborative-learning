@@ -54,19 +54,34 @@ export class DBPublicationsListener {
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
           documents.add(doc);
+          onPatch(doc.stars, patch => {
+            const [, index, replaceKey] = patch.path.split("/");
+            if (patch.op === "add") {
+              const star = patch.value;
+              const { starred, key } = star;
+              if (key === "") { // key will be assigned from Firebase node id
+                this.db.createUserStar(doc, starred);
+              }
+            } else if (patch.op === "replace" && replaceKey === "starred") {
+              const starIndex = parseInt(index, 10);
+              const star = doc.getUserStarAtIndex(starIndex);
+              if (star) {
+                this.db.setUserStarState(doc.key, star.key, star.starred);
+              }
+            }
+          });
           onPatch(doc.comments, patch => {
-            const path = patch.path.split("/");
-            const tileId = path[1];
+            const [, tileId, , index, replaceKey] = patch.path.split("/");
             if (patch.op === "add") {
               const comment = patch.value;
               const { text, selectionInfo } = comment;
               if (text) {
                 this.db.createTileComment(doc, tileId, text, selectionInfo);
               }
-            } else if (patch.op === "replace" && path[path.length - 1] === "deleted") {
+            } else if (patch.op === "replace" && replaceKey === "deleted") {
               const tileComments = doc.comments.get(tileId);
               if (tileComments) {
-                const commentIndex = parseInt(path[path.length - 2], 10);
+                const commentIndex = parseInt(index, 10);
                 const comment = tileComments.getCommentAtIndex(commentIndex);
                 if (comment) {
                   this.db.deleteComment(doc.key, tileId, comment.key);
