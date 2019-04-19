@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { authenticate } from "../lib/auth";
-import { GroupViewComponent } from "./group/group-view";
+import { AppContentComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
@@ -142,7 +142,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       }
     }
 
-    return this.renderApp(<GroupViewComponent />);
+    return this.renderApp(<AppContentComponent />);
   }
 
   private renderApp(children: JSX.Element | JSX.Element[]) {
