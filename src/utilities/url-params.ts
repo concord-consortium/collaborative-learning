@@ -56,6 +56,9 @@ export interface QueryParams {
   qaGroup?: string;
   // db level to clear for qa
   qaClear?: DBClearLevel;
+
+  // Dataflow mode
+  dataflow?: boolean;
 }
 
 const params = parse(location.search);

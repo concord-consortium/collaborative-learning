@@ -82,7 +82,7 @@ describe('Test student join a group', function(){
     it('will verify cancel of leave group dialog',function(){
         //have student leave first group and join second group
         setup(student5);
-        cy.get('.app .header > .group > .name').contains('Group '+group1).click();
+        cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get('#cancelButton').should('contain','No').click();
         header.getGroupName().should('contain','Group '+group1);
         header.getUserName().should('contain','Student '+student5);
@@ -92,7 +92,7 @@ describe('Test student join a group', function(){
     it('will verify a student can switch groups',function(){
         //have student leave first group and join second group
         setup(student5);
-        cy.get('.app .header > .group > .name').contains('Group '+group1).click();
+        cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get("#okButton").should('contain','Yes').click();
         cy.get('.groups > .group-list > .group').contains('Group '+group2).click();
         header.getGroupName().should('contain','Group '+group2);
