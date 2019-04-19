@@ -72,7 +72,11 @@ module.exports = (env, argv) => {
       warningsFilter: /export .* was not found in/
     },
     plugins: [
-      new ForkTsCheckerWebpackPlugin(),
+      new ForkTsCheckerWebpackPlugin({
+        measureCompilationTime: true,
+        useTypescriptIncrementalApi: false,
+        workers: ForkTsCheckerWebpackPlugin.TWO_CPUS_FREE
+      }),
       new MiniCssExtractPlugin({
         filename: devMode ? "assets/index.css" : "assets/index.[hash].css"
       }),
