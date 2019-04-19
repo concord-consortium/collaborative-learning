@@ -8,7 +8,9 @@ import { GroupModelType } from "../../models/stores/groups";
 
 const MAX_GROUPS = 99;
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  iotValues: {[deviceId: string]: number};
+}
 
 interface IState {
   error?: string;
@@ -33,13 +35,20 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     const {db, user, groups} = this.stores;
     return (
       <div className="join">
-        <div className="join-title">Join Group</div>
+        <div className="join-title">Sensor Values</div>
         <div className="join-content">
-          {user ? <div className="welcome">Welcome {user.name}</div> : null}
-          {groups.allGroups.length > 0 && this.renderChooseExistingGroup()}
-          {this.renderChooseNewGroup()}
-          {this.renderError()}
+          {Object.keys(this.props.iotValues).map(deviceName => {
+            return this.renderDevice(deviceName, this.props.iotValues[deviceName]);
+          })}
         </div>
+      </div>
+    );
+  }
+
+  private renderDevice(deviceName: string, value: number) {
+    return (
+      <div key={deviceName}>
+        {`${deviceName}: ${value}`}
       </div>
     );
   }

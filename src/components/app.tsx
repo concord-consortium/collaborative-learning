@@ -6,6 +6,8 @@ import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
 import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
+import * as AWS from "aws-sdk";
+import { connect } from "mqtt";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
@@ -16,6 +18,7 @@ interface IProps extends IBaseProps {}
 interface IState {
   qaCleared: boolean;
   qaClearError?: string;
+  iotValues: {[deviceId: string]: number};
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
@@ -90,19 +93,122 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     });
 };
 
+const getUtils = () => {
+  return (AWS as any).util;
+};
+
+const getSignatureKey = (key: string, date: any, region: any, service: any) => {
+    const kDate = getUtils().crypto.hmac("AWS4" + key, date, "buffer");
+    const kRegion = getUtils().crypto.hmac(kDate, region, "buffer");
+    const kService = getUtils().crypto.hmac(kRegion, service, "buffer");
+    const kCredentials = getUtils().crypto.hmac(kService, "aws4_request", "buffer");
+    return kCredentials;
+};
+
+const getSignedUrl = (
+  host: string,
+  region: string,
+  credentials: { accessKeyId: string; secretAccessKey: any; sessionToken?: string; }) => {
+    const datetime = getUtils().date.iso8601(new Date()).replace(/[:\-]|\.\d{3}/g, "");
+    const date = datetime.substr(0, 8);
+
+    const method = "GET";
+    const protocol = "wss";
+    const uri = "/mqtt";
+    const service = "iotdevicegateway";
+    const algorithm = "AWS4-HMAC-SHA256";
+
+    const credentialScope = date + "/" + region + "/" + service + "/" + "aws4_request";
+    let canonicalQuerystring = "X-Amz-Algorithm=" + algorithm;
+    canonicalQuerystring += "&X-Amz-Credential=" + encodeURIComponent(credentials.accessKeyId + "/" + credentialScope);
+    canonicalQuerystring += "&X-Amz-Date=" + datetime;
+    canonicalQuerystring += "&X-Amz-SignedHeaders=host";
+
+    const canonicalHeaders = "host:" + host + "\n";
+    const payloadHash = getUtils().crypto.sha256("", "hex");
+    const canonicalRequest = method + "\n" + uri + "\n" + canonicalQuerystring +
+      "\n" + canonicalHeaders + "\nhost\n" + payloadHash;
+
+    const stringToSign = algorithm + "\n" + datetime + "\n" + credentialScope +
+      "\n" + getUtils().crypto.sha256(canonicalRequest, "hex");
+    const signingKey = getSignatureKey(credentials.secretAccessKey, date, region, service);
+    const signature = getUtils().crypto.hmac(signingKey, stringToSign, "hex");
+
+    canonicalQuerystring += "&X-Amz-Signature=" + signature;
+    if (credentials.sessionToken) {
+        canonicalQuerystring += "&X-Amz-Security-Token=" + encodeURIComponent(credentials.sessionToken);
+    }
+
+    const requestUrl = protocol + "://" + host + uri + "?" + canonicalQuerystring;
+    return requestUrl;
+};
+
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {
     qaCleared: false,
-    qaClearError: undefined
+    qaClearError: undefined,
+    iotValues: {}
   };
 
   public componentWillMount() {
     authAndConnect(this.stores, (qaCleared, qaClearError) => {
       this.setState({qaCleared, qaClearError});
     });
+
+    const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
+    const MQTT_TOPIC = "test_topic";
+
+    AWS.config.region = "us-east-1";
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: "us-east-1:153d6337-3421-4c34-a21f-d1d2143a5091"
+    });
+    (AWS.config.credentials as AWS.Credentials).get((err) => {
+      if (!err && AWS.config.credentials) {
+        const { accessKeyId, secretAccessKey, sessionToken } = AWS.config.credentials;
+
+        // List things
+        const iot = new AWS.Iot({
+          region: "us-east-1",
+          accessKeyId,
+          secretAccessKey,
+          sessionToken
+        });
+        const thingState = {...this.state.iotValues};
+        iot.listThings().promise().then(data => {
+          if (data && data.things) {
+            data.things.forEach(thing => {
+              if (thing.thingName) {
+                thingState[thing.thingName] = 0;
+              }
+            });
+          }
+          this.setState({
+            iotValues: thingState
+          });
+        });
+
+        // Subscribe
+        const url = getSignedUrl(AWS_IOT_ENDPOINT_HOST, "us-east-1", {
+          accessKeyId,
+          secretAccessKey,
+          sessionToken
+        });
+        const client = connect(url);
+        client.subscribe(MQTT_TOPIC);
+        client.on("message", (topic, rawMessage) => {
+          const message = JSON.parse(rawMessage as any);
+          if (message.client && message.value) {
+            const newState = {...this.state.iotValues};
+            newState[message.client] = message.value;
+            this.setState({iotValues: newState});
+          }
+        });
+      }
+    });
+
   }
 
   public componentWillUnmount() {
@@ -110,39 +216,39 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {user, ui, db, groups} = this.stores;
+    // const {user, ui, db, groups} = this.stores;
 
-    if (ui.showDemoCreator) {
-      return this.renderApp(<DemoCreatorComponment />);
-    }
+    // if (ui.showDemoCreator) {
+    //   return this.renderApp(<DemoCreatorComponment />);
+    // }
 
-    if (ui.error) {
-      return this.renderApp(this.renderError(ui.error));
-    }
+    // if (ui.error) {
+    //   return this.renderApp(this.renderError(ui.error));
+    // }
 
-    if (!user.authenticated || !db.listeners.isListening) {
-      return this.renderApp(this.renderLoading());
-    }
+    // if (!user.authenticated || !db.listeners.isListening) {
+    //   return this.renderApp(this.renderLoading());
+    // }
 
-    if (urlParams.qaClear) {
-      const {qaCleared, qaClearError} = this.state;
-      return this.renderApp(
-        <span className="qa-clear">
-          {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}
-        </span>
-      );
-    }
+    // if (urlParams.qaClear) {
+    //   const {qaCleared, qaClearError} = this.state;
+    //   return this.renderApp(
+    //     <span className="qa-clear">
+    //       {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}
+    //     </span>
+    //   );
+    // }
 
-    if (!groups.groupForUser(user.id)) {
-      if (user.type === "teacher") {
-        return this.renderApp(<TeacherDashboardComponent />);
-      }
-      else {
-        return this.renderApp(<GroupChooserComponent />);
-      }
-    }
+    // if (!groups.groupForUser(user.id)) {
+    //   if (user.type === "teacher") {
+    //     return this.renderApp(<TeacherDashboardComponent />);
+    //   }
+    //   else {
+    //     return this.renderApp(<GroupChooserComponent />);
+    //   }
+    // }
 
-    return this.renderApp(<GroupViewComponent />);
+    return this.renderApp(<GroupChooserComponent iotValues={this.state.iotValues}/>);
   }
 
   private renderApp(children: JSX.Element | JSX.Element[]) {
