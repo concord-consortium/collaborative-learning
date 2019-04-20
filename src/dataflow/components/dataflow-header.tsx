@@ -6,16 +6,32 @@ import { DataflowPanelType } from "./dataflow-types";
 import "./dataflow-header.sass";
 
 interface IProps extends IBaseProps {
-  panel: DataflowPanelType;
+  current: DataflowPanelType;
   onPanelChange?: (panel: DataflowPanelType) => void;
 }
+
+interface IPanelButtonProps extends IProps {
+  label: string;
+  panel: DataflowPanelType;
+}
+
+const PanelButton: React.FC<IPanelButtonProps> = (props) => {
+  const { current, onPanelChange, label, panel } = props;
+  const handlePanelChange = () => { onPanelChange && onPanelChange(panel); };
+  return (
+    <Button active={current === panel}
+            disabled={current !== panel && !onPanelChange}
+            onClick={handlePanelChange}>
+      {label}
+    </Button>
+  );
+};
 
 @inject("stores")
 @observer
 export class DataflowHeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
-    const { panel, onPanelChange } = this.props;
     const {appMode, appVersion, db, user} = this.stores;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
@@ -26,21 +42,9 @@ export class DataflowHeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="middle">
           <ButtonGroup>
-            <Button active={panel === "control-panels"}
-                    disabled={panel !== "control-panels" && !onPanelChange}
-                    onClick={this.handleControlPanelsClick}>
-              Control Panels
-            </Button>
-            <Button active={panel === "flow-creator"}
-                    disabled={panel !== "flow-creator" && !onPanelChange}
-                    onClick={this.handleFlowCreatorClick}>
-              Data Flow Creator
-            </Button>
-            <Button active={panel === "data-stories"}
-                    disabled={panel !== "data-stories" && !onPanelChange}
-                    onClick={this.handleDataStoriesClick}>
-              Data Stories
-            </Button>
+            <PanelButton label="Control Panels" panel="control-panels" {...this.props} />
+            <PanelButton label="Data Flow Creator" panel="flow-creator" {...this.props} />
+            <PanelButton label="Data Stories" panel="data-stories" {...this.props} />
           </ButtonGroup>
         </div>
         <div className="right">
@@ -51,17 +55,5 @@ export class DataflowHeaderComponent extends BaseComponent<IProps, {}> {
         </div>
       </div>
     );
-  }
-
-  private handleControlPanelsClick = () => {
-    this.props.onPanelChange && this.props.onPanelChange("control-panels");
-  }
-
-  private handleFlowCreatorClick = () => {
-    this.props.onPanelChange && this.props.onPanelChange("flow-creator");
-  }
-
-  private handleDataStoriesClick = () => {
-    this.props.onPanelChange && this.props.onPanelChange("data-stories");
   }
 }

@@ -23,7 +23,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="dataflow-app-content">
         <DataflowHeaderComponent
-          panel={this.state.panel}
+          current={this.state.panel}
           onPanelChange={this.handlePanelChange} />
         <div className="single-workspace">
           {this.renderPanel()}

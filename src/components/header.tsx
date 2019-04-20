@@ -12,7 +12,7 @@ interface IProps extends IBaseProps {
 export const HeaderComponent: React.FC<IProps> = (props) => {
   return (
     urlParams.dataflow !== undefined
-      ? <DataflowHeaderComponent panel="control-panels" {...props} />
+      ? <DataflowHeaderComponent current="control-panels" {...props} />
       : <ClueHeaderComponent {...props} />
   );
 };
