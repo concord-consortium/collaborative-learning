@@ -2,8 +2,9 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { DataflowHeaderComponent } from "./dataflow-header";
 import { DataflowPanelType } from "./dataflow-types";
-import { BaseComponent, IBaseProps } from "../../components/base";
+import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { DialogComponent } from "../../components/utilities/dialog";
+import { DeviceListComponent } from "./device-list";
 
 import "./dataflow-app-content.sass";
 
@@ -18,6 +19,16 @@ interface IState {
 export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = { panel: "control-panels" };
+
+  public componentWillMount() {
+    const { iot } = this.stores;
+    iot.connect(this.stores);
+  }
+
+  public componentWillUnmount() {
+    const { iot } = this.stores;
+    iot.disconnect();
+  }
 
   public render() {
     return (
@@ -45,7 +56,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
         return <div>DataFlow: Data Stories</div>;
       case "control-panels":
       default:
-        return <div>DataFlow: Control Panels</div>;
+        return <DeviceListComponent />;
     }
   }
 
