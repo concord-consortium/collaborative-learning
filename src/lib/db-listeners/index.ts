@@ -196,12 +196,10 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    let initialLoad = true;
-    documentRef.on("value", (snapshot) => {
+    documentRef.once("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.db.parseDocumentContent(updatedDoc, initialLoad);
-        initialLoad = false;
+        const updatedContent = this.db.parseDocumentContent(updatedDoc);
         if (updatedContent) {
           const documentModel = documents.getDocument(documentKey);
           if (documentModel) {
