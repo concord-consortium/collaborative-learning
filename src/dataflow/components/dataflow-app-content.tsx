@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { ControlPanelComponent } from "./control-panel";
 import { DataflowHeaderComponent } from "./dataflow-header";
 import { DataflowPanelType } from "./dataflow-types";
 import { BaseComponent, IBaseProps } from "../../components/base";
@@ -45,7 +46,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
         return <div>DataFlow: Data Stories</div>;
       case "control-panels":
       default:
-        return <div>DataFlow: Control Panels</div>;
+        return <ControlPanelComponent />;
     }
   }
 

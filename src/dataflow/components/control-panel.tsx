@@ -1,9 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
-import { listThings } from "../../utilities/aws-iot";
-import { urlParams } from "../../utilities/url-params";
-import { ThingModel } from "../../models/data/thing";
+import { BaseComponent, IBaseProps } from "../../components/base";
+import { listThings } from "../utilities/aws-iot";
 
 interface IProps extends IBaseProps { }
 interface IState {
@@ -21,15 +19,13 @@ export class ControlPanelComponent extends BaseComponent<IProps, IState> {
   }
   public componentDidMount() {
     const { things } = this.stores;
-    if (urlParams.dataflow) {
-      listThings((thingList: any) => {
-        this.setState({ localThings: JSON.stringify(thingList) });
-        // console.log(thingList.things);
-        for (const t of thingList.things) {
-          things.addThing(t.thingArn, t.thingName, "", true);
-        }
-      });
-    }
+    listThings((thingList: any) => {
+      this.setState({ localThings: JSON.stringify(thingList) });
+      // console.log(thingList.things);
+      for (const t of thingList.things) {
+        things.addThing(t.thingArn, t.thingName, "", true);
+      }
+    });
   }
 
   public render() {
