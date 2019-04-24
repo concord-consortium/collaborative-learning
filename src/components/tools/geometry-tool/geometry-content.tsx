@@ -33,6 +33,7 @@ import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 import SingleStringDialog from "../../utilities/single-string-dialog";
+import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
@@ -80,7 +81,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   const newElements: JXG.GeometryElement[] = [];
   const changedElements: JXG.GeometryElement[] = [];
   const syncedChanges = content.changes.length;
-  board.suspendUpdate();
+  // board.suspendUpdate();
   for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
@@ -100,7 +101,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
 
   // update vertex angles affected by changed points
   updateVertexAnglesFromObjects(changedElements);
-  board.unsuspendUpdate();
+  // board.unsuspendUpdate();
 
   return { newElements: newElements.length ? newElements : undefined, syncedChanges };
 }
@@ -133,45 +134,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       geometryContent.updateScale(prevState.board, scale);
       nextState.scale = scale;
     }
-
-    if (content !== prevState.content) {
-      if (geometryContent.changes.length !== prevState.syncedChanges) {
-        // synchronize background image changes
-        let lastUrl;
-        for (let i = prevState.syncedChanges; i < geometryContent.changes.length; ++i) {
-          const jsonChange = geometryContent.changes[i];
-          const change = jsonChange && safeJsonParse(jsonChange);
-          const url = change && change.properties &&
-                        !Array.isArray(change.properties) &&
-                        change.properties.url;
-          if (url) lastUrl = url;
-        }
-        if (lastUrl) {
-          // signal update to be triggered in componentDidUpdate
-          nextState.imageContentUrl = lastUrl;
-        }
-        // If the incoming list of changes is shorter, an undo has occurred.
-        // In this case, clear the board and replay it.
-        if (prevState.syncedChanges > geometryContent.changes.length) {
-          const board = prevState.board;
-          board.suspendUpdate();
-          // Board initialization creates 2 objects: the info box and the grid.
-          // These won't be recreated if the board already exists so we don't delete them.
-          const kDefaultBoardObjects = 2;
-          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
-            board.removeObject(board.objectsList[i]);
-          }
-          board.unsuspendUpdate();
-        }
-        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
-                                ? 0
-                                : prevState.syncedChanges;
-        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
-      } else {
-        nextState.redoStack = [];
-      }
-      nextState.content = geometryContent;
-    }
+    nextState.content = geometryContent;
     return nextState;
   }
 
@@ -318,6 +281,57 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
     }
+
+    autorun(() => {
+      const { model: { content } } = this.props;
+      const prevState = this.state;
+      if (!prevState.board) { return null; }
+
+      const nextState: IState = {} as any;
+
+      const { readOnly } = this.props;
+      const geometryContent = content as GeometryContentModelType;
+
+      if (geometryContent.changes.length > prevState.syncedChanges) {
+        // synchronize background image changes
+        let lastUrl;
+        for (let i = prevState.syncedChanges; i < geometryContent.changes.length; ++i) {
+          const jsonChange = geometryContent.changes[i];
+          const change = jsonChange && safeJsonParse(jsonChange);
+          const url = change && change.properties &&
+                        !Array.isArray(change.properties) &&
+                        change.properties.url;
+          if (url) lastUrl = url;
+        }
+        if (lastUrl) {
+          // signal update to be triggered in componentDidUpdate
+          nextState.imageContentUrl = lastUrl;
+        }
+        // If the incoming list of changes is shorter, an undo has occurred.
+        // In this case, clear the board and replay it.
+        if (prevState.syncedChanges > geometryContent.changes.length) {
+          const board = prevState.board;
+          board.suspendUpdate();
+          // Board initialization creates 2 objects: the info box and the grid.
+          // These won't be recreated if the board already exists so we don't delete them.
+          const kDefaultBoardObjects = 2;
+          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
+            board.removeObject(board.objectsList[i]);
+          }
+          board.unsuspendUpdate();
+        }
+        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
+                                ? 0
+                                : prevState.syncedChanges;
+        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
+        if (this._isMounted) {
+          this.setState(nextState);
+        }
+      } else {
+        // TODO: is this working?
+        nextState.redoStack = [];
+      }
+    });
   }
 
   public componentDidUpdate() {
