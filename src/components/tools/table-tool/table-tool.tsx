@@ -15,6 +15,7 @@ import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
+import { autorun, IReactionDisposer } from "mobx";
 
 import "./table-tool.sass";
 
@@ -30,17 +31,13 @@ interface IProps {
 
 // all properties are optional
 interface IPartialState {
-  metadata?: TableMetadataModelType;
   dataSet?: IDataSet;
-  syncedChanges?: number;
-  prevContent?: TableContentModelType;
   autoSizeColumns?: boolean;
 }
 ​
 // some properties are required
 interface IState extends IPartialState {
   dataSet: IDataSet;
-  syncedChanges: number;
   showInvalidPasteAlert: boolean;
 }
 
@@ -50,45 +47,46 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public static tileHandlesSelection = true;
 
-  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
-    const { model: { content } } = props;
-    const tableContent = content as TableContentModelType;
-    const newState: IPartialState = {};
-    if (content !== state.prevContent) {
-      newState.prevContent = tableContent;
-      newState.metadata = tableContent.metadata;
-    }
-    if (state.syncedChanges < tableContent.changes.length) {
-      tableContent.applyChanges(state.dataSet, state.syncedChanges);
-      newState.syncedChanges = tableContent.changes.length;
-    }
-    return newState;
-  }
-
   public state: IState = {
                   dataSet: DataSet.create(),
-                  syncedChanges: 0,
                   showInvalidPasteAlert: false
                 };
 
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
+  private syncedChanges: number;
+  private disposers: IReactionDisposer[];
 
   private gridApi?: GridApi;
   private gridColumnApi?: ColumnApi;
 
   public componentDidMount() {
     this.initializeHotKeys();
+    this.syncedChanges = 0;
+    this.disposers = [];
 
     if (this.domRef.current) {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
+
+    this.disposers.push(autorun(() => {
+      const { model: { content } } = this.props;
+      const tableContent = content as TableContentModelType;
+      if (this.syncedChanges < tableContent.changes.length) {
+        tableContent.applyChanges(this.state.dataSet, this.syncedChanges);
+        this.syncedChanges = tableContent.changes.length;
+        // The state updates in applyChanges aren't picked up by React, so we force a render
+        this.forceUpdate();
+      }
+    }));
   }
 
   public componentWillUnmount() {
     if (this.domRef.current) {
       this.domRef.current.removeEventListener("mousedown", this.handleMouseDown);
     }
+
+    this.disposers.forEach(disposer => disposer());
   }
 
   public render() {
@@ -109,7 +107,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           dataSet={this.state.dataSet}
           expressions={metadata.expressions}
           rawExpressions={metadata.rawExpressions}
-          changeCount={this.state.syncedChanges}
+          changeCount={this.syncedChanges}
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}
           attrValueFormatter={this.attrValueFormatter}
@@ -247,7 +245,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private indexValueGetter = (params: ValueGetterParams) => {
-    const { metadata } = this.state;
+    const metadata = this.getContent().metadata;
     return metadata && metadata.isLinked && (params.data.id !== LOCAL_ROW_ID)
             ? getRowLabel(params.node.rowIndex)
             : "";
