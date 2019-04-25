@@ -6,6 +6,8 @@ import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { debounce } from "lodash";
 const placeholderImage = require("../../assets/image_placeholder.png");
+import { autorun, IReactionDisposer } from "mobx";
+
 import "./image-tool.sass";
 
 interface IProps extends IBaseProps {
@@ -19,7 +21,6 @@ interface IState {
   isLoading?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
-  syncedChanges: number;
 }
 
 const defaultImagePlaceholderSize = { width: 128, height: 128 };
@@ -28,18 +29,12 @@ const defaultImagePlaceholderSize = { width: 128, height: 128 };
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const content = nextProps.model.content as ImageContentModelType;
-    if (content.changeCount > prevState.syncedChanges) {
-      return { isLoading: true, imageContentUrl: content.url, syncedChanges: content.changeCount };
-    }
-    return {};
-  }
+  public state: IState = { isLoading: true };
 
-  public state: IState = { isLoading: true, syncedChanges: 0 };
-
+  private syncedChanges: number;
   private _isMounted = false;
   private inputElt: HTMLInputElement | null;
+  private disposers: IReactionDisposer[];
   private debouncedUpdateImage = debounce((url: string) => {
             gImageMap.getImage(url)
               .then(image => {
@@ -66,13 +61,27 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
+    this.syncedChanges = 0;
+    this.disposers = [];
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
     }
+
+    this.disposers.push(autorun(() => {
+      const content = this.getContent();
+      if (content.changeCount > this.syncedChanges) {
+        this.setState({
+          isLoading: true,
+          imageContentUrl: content.url
+        });
+        this.syncedChanges = content.changeCount;
+      }
+    }));
   }
 
   public componentWillUnmount() {
     this._isMounted = false;
+    this.disposers.forEach(disposer => disposer());
   }
 
   public componentDidUpdate() {
