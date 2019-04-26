@@ -40,6 +40,7 @@ import "./geometry-tool.sass";
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
+  onUpdateToolbar: () => void;
 }
 
 interface IState extends SizeMeProps {
@@ -1245,6 +1246,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
+              this.props.onUpdateToolbar();
             }
           });
           this.lastPointDown = undefined;
