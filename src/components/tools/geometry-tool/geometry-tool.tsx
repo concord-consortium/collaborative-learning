@@ -105,6 +105,7 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
                   size={size}
                   onSetBoard={this.handleSetBoard}
                   onSetActionHandlers={this.handleSetActionHandlers}
+                  onUpdateToolbar={this.handleUpdateToolbar}
                   {...this.props} />
               </div>
             );
@@ -112,6 +113,10 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
         </SizeMe>
       </div>
     );
+  }
+
+  private handleUpdateToolbar = () => {
+    this.forceUpdate();
   }
 
   private handlePointerDownCapture = (e: React.MouseEvent<HTMLDivElement>) => {
