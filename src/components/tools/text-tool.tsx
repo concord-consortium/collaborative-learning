@@ -6,6 +6,7 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import * as Immutable from "immutable";
+import { autorun, IReactionDisposer } from "mobx";
 
 interface SlateChange {
   operations: Immutable.List<Operation>;
@@ -20,27 +21,15 @@ interface IProps {
 }
 
 interface IState {
-  prevContent?: TextContentModelType;
   value?: Value;
 }
 ​
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<IProps, IState> {
-
-  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
-    const { model: { content } } = props;
-    if (content === state.prevContent) { return null; }
-    const textContent = content as TextContentModelType;
-    const newState: IState = { prevContent: textContent };
-    const value = textContent.convertSlate(state.value);
-    if (value !== state.value) {
-      newState.value = value;
-    }
-    return newState;
-  }
-
   public state: IState = {};
+  private disposers: IReactionDisposer[];
+  private prevText: any;
 
   public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
@@ -72,6 +61,30 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       }
       this.setState({ value: change.value });
     }
+  }
+
+  public componentDidMount() {
+    const inititialTextContent = this.props.model.content as TextContentModelType;
+    this.prevText = inititialTextContent.text;
+    const initialValue = inititialTextContent.convertSlate(this.state.value);
+    this.setState({
+      value: initialValue
+    });
+
+    this.disposers = [];
+    this.disposers.push(autorun(() => {
+      const textContent = this.props.model.content as TextContentModelType;
+      if (this.prevText !== textContent.text) {
+        const newValue = textContent.convertSlate(this.state.value);
+        this.setState({
+          value: newValue
+        });
+      }
+    }));
+  }
+
+  public componentWillUnmount() {
+    this.disposers.forEach(disposer => disposer());
   }
 
   public render() {
