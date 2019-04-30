@@ -58,15 +58,18 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     if (content.type === "Text") {
       if (!readOnly) {
         content.setSlate(change.value);
+
+        // The state will have updated in response to the content change, but the content loses the cursor position
+        // So, we update here using the raw change, which still contains the cursor position
+        this.setState({ value: change.value });
       }
-      this.setState({ value: change.value });
     }
   }
 
   public componentDidMount() {
     const inititialTextContent = this.props.model.content as TextContentModelType;
     this.prevText = inititialTextContent.text;
-    const initialValue = inititialTextContent.convertSlate(this.state.value);
+    const initialValue = inititialTextContent.convertSlate();
     this.setState({
       value: initialValue
     });
@@ -79,6 +82,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         this.setState({
           value: newValue
         });
+        this.prevText = textContent.text;
       }
     }));
   }
