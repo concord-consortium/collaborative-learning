@@ -406,7 +406,8 @@ export const GeometryContentModel = types
         targetID: board.id,
         properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
       };
-      _applyChange(undefined, change);
+      const axes = _applyChange(undefined, change);
+      return axes ? axes as any as JXG.Line[] : undefined;
     }
 
     function updateScale(board: JXG.Board, scale: number) {

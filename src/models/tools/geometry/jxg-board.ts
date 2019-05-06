@@ -192,10 +192,11 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          addAxes(board, unitX, unitY);
+          const axes = addAxes(board, unitX, unitY);
+          board.update();
+          return [...axes];
         }
       }
-      board.update();
     }
   },
 
