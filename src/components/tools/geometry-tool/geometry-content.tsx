@@ -491,7 +491,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (imageUrl) {
           this.updateImageUrl(imageUrl);
         }
-        this.hackAxisHandlers(board);
         this.setState({ board });
       }
       this.syncedChanges = content.changes.length;
@@ -506,15 +505,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return images.length > 0
             ? images[images.length - 1] as JXG.Image
             : undefined;
-  }
-
-  // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
-  // So, any time new axes could be created, we reattach the axis handlers
-  private hackAxisHandlers(board: JXG.Board) {
-    setTimeout(() => {
-      const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-      axes.forEach(this.handleCreateAxis);
-    });
   }
 
   private updateImageUrl(url: string) {
@@ -622,8 +612,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      this.hackAxisHandlers(board);
+      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -690,8 +682,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.UNDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -716,8 +706,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.REDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;

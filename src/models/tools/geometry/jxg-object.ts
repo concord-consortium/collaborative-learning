@@ -53,6 +53,7 @@ export const objectChangeAgent: JXGChangeAgent = {
       }
     });
     board.update();
+    return undefined;
   },
 
   delete: (board, change) => {
