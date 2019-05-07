@@ -933,11 +933,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.handleCreatePoint(pt);
         });
       });
-      setTimeout(() => {
-        const _tableContent = this.getTableContent(dragTileId);
-        const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-        _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
-      });
+
+      const _tableContent = this.getTableContent(dragTileId);
+      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+      _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
     }
   }
 
