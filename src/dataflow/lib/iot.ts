@@ -58,7 +58,7 @@ export class IoT {
     this.thingListener = setInterval(this.updateThings, 5000);
   }
 
-  private updateThings() {
+  private updateThings = () => {
     const  { thingStore } = this.stores;
     this.iotCore.listThings().promise().then(data => {
       if (data && data.things) {
