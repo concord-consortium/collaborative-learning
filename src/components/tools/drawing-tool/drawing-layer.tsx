@@ -691,6 +691,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           this.executeChange(change);
         }
         this.actionsCount = currentChangesLength;
+        this.forceUpdate();
       }
     }));
   }
