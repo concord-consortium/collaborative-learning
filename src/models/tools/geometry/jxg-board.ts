@@ -194,7 +194,7 @@ export const boardChangeAgent: JXGChangeAgent = {
           });
           const axes = addAxes(board, unitX, unitY);
           board.update();
-          return [...axes];
+          return axes;
         }
       }
     }
