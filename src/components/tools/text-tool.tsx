@@ -67,9 +67,9 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    const inititialTextContent = this.props.model.content as TextContentModelType;
-    this.prevText = inititialTextContent.text;
-    const initialValue = inititialTextContent.convertSlate();
+    const initialTextContent = this.props.model.content as TextContentModelType;
+    this.prevText = initialTextContent.text;
+    const initialValue = initialTextContent.convertSlate();
     this.setState({
       value: initialValue
     });
