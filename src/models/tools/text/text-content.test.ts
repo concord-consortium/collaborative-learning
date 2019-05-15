@@ -45,7 +45,7 @@ describe("TextContentModel", () => {
     const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
     expect(bogus1.getSlate()).toBeDefined();
     const bogus2 = TextContentModel.create({ format: "slate", text: ["foo", "bar"] });
-    expect(bogus2.convertSlate()).toBeDefined();
+    expect(bogus2.asSlate()).toBeDefined();
   });
 
   const fooJson: ValueJSON = {
@@ -67,15 +67,15 @@ describe("TextContentModel", () => {
   it("converts to slate correctly", () => {
     const foo = "foo";
     const model = TextContentModel.create({ text: foo });
-    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+    expect(Plain.serialize(model.asSlate())).toBe(foo);
 
     model.setMarkdown("foo");
     expect(model.format).toBe("markdown");
-    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+    expect(Plain.serialize(model.asSlate())).toBe(foo);
 
     const fooValue = Value.fromJSON(fooJson);
     model.setSlate(fooValue);
     expect(model.format).toBe("slate");
-    expect(Plain.serialize(model.convertSlate())).toBe(foo);
+    expect(Plain.serialize(model.asSlate())).toBe(foo);
   });
 });
