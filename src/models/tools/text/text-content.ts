@@ -56,56 +56,39 @@ export const TextContentModel = types
               ? self.text.join("\n")
               : self.text as string;
 
-    }
-  }))
-  .extend(self => {
-
-    // views
-    function getSlate() {
+    },
+    getSlate() {
       const parsed = Array.isArray(self.text)
                       ? emptyJson
                       : safeJsonParse(self.text as string) || emptyJson;
       return Value.fromJSON(parsed);
     }
-
-    function asSlate(): Value {
+  }))
+  .views(self => ({
+    asSlate(): Value {
       switch (self.format) {
         case "slate":
-          return getSlate();
+          return self.getSlate();
         case "markdown":
           // handle markdown import here; for now we treat as text
         default:
           return Plain.deserialize(self.joinText);
       }
     }
-
-    // actions
-    function setText(text: string) {
+  }))
+  .actions(self => ({
+    setText(text: string) {
       self.format = undefined;
       self.text = text;
-    }
-
-    function setMarkdown(text: string) {
+    },
+    setMarkdown(text: string) {
       self.format = "markdown";
       self.text = text;
-    }
-
-    function setSlate(value: Value) {
+    },
+    setSlate(value: Value) {
       self.format = "slate";
       self.text = JSON.stringify(value.toJSON());
     }
-
-    return {
-      views: {
-        getSlate,
-        asSlate
-      },
-      actions: {
-        setText,
-        setMarkdown,
-        setSlate
-      }
-    };
-  });
+  }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
