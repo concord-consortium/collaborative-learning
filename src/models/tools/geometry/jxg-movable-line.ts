@@ -1,4 +1,4 @@
-import { JXGChangeAgent } from "./jxg-changes";
+import { JXGChangeAgent, JXGProperties, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { kSnapUnit, syncClientColors } from "./jxg-point";
 import { castArray, each, find, uniqWith } from "lodash";
@@ -66,6 +66,16 @@ export const solveForY = (slope: number, intercept: number, x: number) => {
 
 export const solveForX = (slope: number, intercept: number, y: number) => {
   return (y - intercept) / slope;
+};
+
+export const isPositionSnapped = (pos: JXGUnsafeCoordPair) => {
+  return pos.every(num => num != null && isValueSnapped(num));
+};
+
+const isValueSnapped = (value: number) => {
+  const snappedValue = Number.parseFloat(value.toFixed(2));
+  // Snapped points can still return values with small deviations (but larger than Number.EPSILON)
+  return Math.abs(value - snappedValue) < .0001;
 };
 
 export const kMovableLineType = "movableLine";
@@ -167,8 +177,21 @@ export const movableLineChangeAgent: JXGChangeAgent = {
     }
   },
 
-  // update can be handled generically
-  update: objectChangeAgent.update,
+  update: (board, change) => {
+    if (!change.targetID || !change.properties) return;
+    const id = change.targetID as string;
+    const obj = board.objects[id] as JXG.GeometryElement;
+    if (isMovableLineControlPoint(obj)) {
+      const point = obj as JXG.Point;
+      const position = (change.properties as JXGProperties).position;
+      // Keep points snapped as long as possible, i.e. until they are programatically changed
+      if (position && !isPositionSnapped(position)) {
+        point.setAttribute({ snapToGrid: false });
+      }
+    }
+
+    objectChangeAgent.update(board, change);
+  },
 
   delete: (board, change) => {
     if (!change.targetID) return;
