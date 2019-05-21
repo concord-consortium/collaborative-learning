@@ -34,7 +34,7 @@ export const isMovableLineEquation = (v: any) => {
 
 // Returns the two points where the given line intersects the given board, sorted from left to right
 export const getBoundingBoxIntersections = (slope: number, intercept: number, board: JXG.Board) => {
-  const boundingBox = board.attr.boundingbox;
+  const boundingBox = board.getBoundingBox();
   const leftX = boundingBox[0];
   const topY = boundingBox[1];
   const rightX = boundingBox[2];
