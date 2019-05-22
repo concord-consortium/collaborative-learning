@@ -85,7 +85,7 @@ class MovableLineDialog extends React.Component<IProps, IState> {
     }
     const intersections = getBoundingBoxIntersections(slope, intercept, line.board);
     if (intersections.length < 2) {
-      return "Line would not be visible; please edit the slope or intercept.";
+      return "Please change the graph axes scale to make the line visible, and try again.";
     }
   }
 
