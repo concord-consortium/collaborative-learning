@@ -4,7 +4,6 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
-import { Icon } from "@blueprintjs/core";
 
 import "./toolbar.sass";
 

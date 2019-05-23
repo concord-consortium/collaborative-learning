@@ -1,16 +1,16 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { HeaderComponent } from "../header";
-import { LeftNavComponent } from "../navigation/left-nav";
-import { RightNavComponent } from "../navigation/right-nav";
-import { BottomNavComponent } from "../navigation/bottom-nav";
-import { DocumentComponent } from "../document/document";
-import { BaseComponent, IBaseProps } from "../base";
-import { DialogComponent } from "../utilities/dialog";
-import { DocumentDragKey, DocumentModelType, DocumentModel, SectionDocument } from "../../models/document/document";
-import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
+import { HeaderComponent } from "./header";
+import { LeftNavComponent } from "./navigation/left-nav";
+import { RightNavComponent } from "./navigation/right-nav";
+import { BottomNavComponent } from "./navigation/bottom-nav";
+import { DocumentComponent } from "./document/document";
+import { BaseComponent, IBaseProps } from "./base";
+import { DialogComponent } from "./utilities/dialog";
+import { DocumentDragKey, DocumentModelType, DocumentModel, SectionDocument } from "../models/document/document";
+import { parseGhostSectionDocumentKey } from "../models/stores/workspace";
 
-import "./group-view.sass";
+import "./app-content.sass";
 
 type WorkspaceSide = "primary" | "comparison";
 
@@ -24,12 +24,12 @@ const ghostSectionDocuments: GhostDocumentMap = {};
 
 @inject("stores")
 @observer
-export class GroupViewComponent extends BaseComponent<IProps, {}> {
+export class AppContentComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     return (
-      <div className="group-view">
+      <div className="app-content">
         <HeaderComponent isGhostUser={isGhostUser} />
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />

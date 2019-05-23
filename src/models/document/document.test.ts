@@ -29,6 +29,8 @@ describe("document model", () => {
       title: undefined,
       visibility: "public",
       groupUserConnections: {},
+      comments: {},
+      stars: [],
       content: {
         rowMap: {},
         rowOrder: [],

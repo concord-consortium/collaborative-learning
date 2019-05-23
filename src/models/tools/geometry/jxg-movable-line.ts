@@ -1,6 +1,6 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { kSnapUnit, syncClientColors } from "./jxg-point";
+import { syncClientColors } from "./jxg-point";
 import { castArray, each, find, uniqWith } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { GeometryContentModelType } from "./geometry-content";
@@ -34,7 +34,7 @@ export const isMovableLineEquation = (v: any) => {
 
 // Returns the two points where the given line intersects the given board, sorted from left to right
 export const getBoundingBoxIntersections = (slope: number, intercept: number, board: JXG.Board) => {
-  const boundingBox = board.attr.boundingbox;
+  const boundingBox = board.getBoundingBox();
   const leftX = boundingBox[0];
   const topY = boundingBox[1];
   const rightX = boundingBox[2];
@@ -98,10 +98,10 @@ const lineSpecificProps = {
 };
 
 const pointSpecificProps = {
-  snapToGrid: true,
-  snapSizeX: kSnapUnit,
-  snapSizeY: kSnapUnit,
+  snapToGrid: false,
   highlightStrokeColor: darkBlue,
+  clientUndeletable: true,
+  showInfobox: false,
   name: "",
 };
 
@@ -121,7 +121,6 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           id: `${lineId}-point1`,
           ...pointProps,
           ...pt1,
-          clientUndeletable: true
         }
       );
       const slopePoint = (board as JXG.Board).create(
@@ -131,7 +130,6 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           id: `${lineId}-point2`,
           ...pointProps,
           ...pt2,
-          clientUndeletable: true
         }
       );
       const overrides = {

@@ -343,7 +343,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     }
 
     if (appMode !== "authed") {
-      return resolve(this.generateDevAuthentication(unitCode, problemOrdinal));
+      return resolve(generateDevAuthentication(unitCode, problemOrdinal));
     }
 
     if (!bearerToken) {

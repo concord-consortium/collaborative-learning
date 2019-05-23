@@ -8,7 +8,7 @@ import { DocumentTool } from "../../models/document/document";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
-        dragTileSrcDocId, kDragRowHeight, kDragTileCreate } from "../tools/tool-tile";
+        dragTileSrcDocId, kDragRowHeight, kDragTileCreate, IToolApiInterface } from "../tools/tool-tile";
 
 import "./document-content.sass";
 
@@ -17,6 +17,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   readOnly?: boolean;
   scale?: number;
+  toolApiInterface?: IToolApiInterface;
 }
 
 interface IDragResizeRow {

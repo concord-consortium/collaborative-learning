@@ -6,7 +6,8 @@ import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
-  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport } from "./db-types";
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
+  DBUserStar } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
   LearningLogPublication } from "../models/document/document";
 import { ImageModelType } from "../models/image";
@@ -15,6 +16,7 @@ import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
+import { TileCommentModelType } from "../models/tools/tile-comments";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -626,6 +628,59 @@ export class DB {
             .then(image => fetch(image.imageData))
             .then(response => response.blob())
             .then(blob => URL.createObjectURL(blob));
+  }
+
+  public createTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {
+    const { user } = this.stores;
+    const { key: docKey, uid: docUserId } = document;
+    const commentsRef = this.firebase.ref(
+      this.firebase.getUserDocumentCommentsPath(user, docKey, tileId)
+    );
+    const commentRef = commentsRef.push();
+    const comment: DBTileComment = {
+      timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+      uid: user.id,
+      content,
+    };
+    if (selectionInfo) {
+      comment.selectionInfo = selectionInfo;
+    }
+    commentRef.set(comment);
+  }
+
+  public deleteComment(docKey: string, tileId: string, commentKey: string) {
+    const { user } = this.stores;
+    const updateRef = this.firebase.ref(
+      this.firebase.getUserDocumentCommentsPath(user, docKey, tileId, commentKey)
+    );
+    updateRef.update({
+      deleted: true
+    });
+  }
+
+  public createUserStar(document: DocumentModelType, starred: boolean) {
+    const { user } = this.stores;
+    const { key: docKey } = document;
+    const starsRef = this.firebase.ref(
+      this.firebase.getUserDocumentStarsPath(user, docKey)
+    );
+    const starRef = starsRef.push();
+    const star: DBUserStar = {
+      timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+      uid: user.id,
+      starred
+    };
+    starRef.set(star);
+  }
+
+  public setUserStarState(docKey: string, starKey: string, starred: boolean) {
+    const { user } = this.stores;
+    const updateRef = this.firebase.ref(
+      this.firebase.getUserDocumentStarsPath(user, docKey, starKey)
+    );
+    updateRef.update({
+      starred
+    });
   }
 
   public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {

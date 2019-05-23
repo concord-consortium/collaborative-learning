@@ -1,5 +1,7 @@
 import { DB } from "../db";
 import { DBPublication } from "../db-types";
+import { forEach } from "lodash";
+import { onPatch } from "mobx-state-tree";
 
 export class DBPublicationsListener {
   private db: DB;
@@ -10,24 +12,84 @@ export class DBPublicationsListener {
   }
 
   public start() {
-    this.publicationsRef = this.db.firebase.ref(
-      this.db.firebase.getPublicationsPath(this.db.stores.user)
-    );
-    this.publicationsRef.on("child_added", this.handlePublicationAdded);
+    return new Promise<void>((resolve, reject) => {
+      const publicationsRef = this.publicationsRef = this.db.firebase.ref(
+        this.db.firebase.getPublicationsPath(this.db.stores.user)
+      );
+      // use once() so we are ensured that publications are set before we resolve
+      publicationsRef.once("value", (snapshot) => {
+        this.handleLoadPublications(snapshot);
+        publicationsRef.on("child_added", this.handlePublicationChildAdded);
+      })
+      .then(snapshot => {
+        resolve();
+      })
+      .catch(reject);
+    });
   }
 
   public stop() {
     if (this.publicationsRef) {
-      this.publicationsRef.off("child_added", this.handlePublicationAdded);
+      this.publicationsRef.off("child_added", this.handlePublicationChildAdded);
     }
   }
 
-  private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents} = this.db.stores;
+  private handleLoadPublications = (snapshot: firebase.database.DataSnapshot) => {
+    const publications = snapshot.val();
+    if (publications) {
+      forEach(publications, (publication) => {
+        this.handlePublication(publication);
+      });
+    }
+  }
+
+  private handlePublicationChildAdded = (snapshot: firebase.database.DataSnapshot) => {
     const publication: DBPublication|null = snapshot.val();
+    this.handlePublication(publication);
+  }
+
+  private handlePublication = (publication: DBPublication|null) => {
+    const {documents} = this.db.stores;
     if (publication) {
       this.db.createDocumentFromPublication(publication)
-        .then(documents.add);
+        .then(doc => {
+          documents.add(doc);
+          onPatch(doc.stars, patch => {
+            const [, index, replaceKey] = patch.path.split("/");
+            if (patch.op === "add") {
+              const star = patch.value;
+              const { starred, key } = star;
+              if (key === "") { // key will be assigned from Firebase node id
+                this.db.createUserStar(doc, starred);
+              }
+            } else if (patch.op === "replace" && replaceKey === "starred") {
+              const starIndex = parseInt(index, 10);
+              const star = doc.getUserStarAtIndex(starIndex);
+              if (star) {
+                this.db.setUserStarState(doc.key, star.key, star.starred);
+              }
+            }
+          });
+          onPatch(doc.comments, patch => {
+            const [, tileId, , index, replaceKey] = patch.path.split("/");
+            if (patch.op === "add") {
+              const comment = patch.value;
+              const { text, selectionInfo } = comment;
+              if (text) {
+                this.db.createTileComment(doc, tileId, text, selectionInfo);
+              }
+            } else if (patch.op === "replace" && replaceKey === "deleted") {
+              const tileComments = doc.comments.get(tileId);
+              if (tileComments) {
+                const commentIndex = parseInt(index, 10);
+                const comment = tileComments.getCommentAtIndex(commentIndex);
+                if (comment) {
+                  this.db.deleteComment(doc.key, tileId, comment.key);
+                }
+              }
+            }
+          });
+        });
     }
   }
 }
