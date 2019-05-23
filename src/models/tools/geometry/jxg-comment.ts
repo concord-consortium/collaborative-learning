@@ -79,6 +79,8 @@ export const commentChangeAgent: JXGChangeAgent = {
           return centroid[index];
         }
       };
+      // Comments on table-linked points will not copy to new documents because the anchor isn't copied
+      if (!_board.objects[commentProps.anchor]) return;
 
       const id = commentProps.id;
       const comment = _board.create("text", [0, -1, ""], commentProps);
