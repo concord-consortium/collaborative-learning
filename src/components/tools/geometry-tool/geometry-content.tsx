@@ -1097,19 +1097,46 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragText(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
 
-     // only create a change object if there's actually a change
-    if (usrDiff[1] || usrDiff[2]) {
-      const id = dragTarget.id;
-      const dragStart = this.dragPts[id].initial;
-      if (dragStart) {
-        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
-        this.applyChange(() => content.updateComment(board, id, { position: newUsrCoords }));
-      }
+    // nothing to do if there's no change
+    if (!usrDiff[1] && !usrDiff[2]) return;
+
+    const clientType = dragTarget.getAttribute("clientType");
+    switch (clientType) {
+      case "comment":
+        this.endDragComment(evt, dragTarget, usrDiff);
+        break;
+      case "movableLine":
+        this.endDragMovableLineLabel(evt, dragTarget, usrDiff);
+        break;
+    }
+  }
+
+  private endDragMovableLineLabel(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    const id = dragTarget.id;
+    const dragStart = this.dragPts[id].initial;
+    const [ , xDiff, yDiff] = usrDiff;
+    if (dragStart && (xDiff || yDiff)) {
+      const [xOffset, yOffset] = dragTarget.getAttribute("offset") || [0, 0];
+      const offset = [xOffset + xDiff, yOffset + yDiff];
+      this.applyChange(() => content.updateMovableLineLabel(board!, id, { offset }));
+    }
+  }
+
+  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+    const { board } = this.state;
+    const content = this.getContent();
+    const id = dragTarget.id;
+    const dragStart = this.dragPts[id].initial;
+    if (dragStart) {
+      const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
+      this.applyChange(() => content.updateComment(board!, id, { position: newUsrCoords }));
     }
   }
 
@@ -1565,7 +1592,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         dragEntry.final = copyCoords(text.coords);
         const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                      dragEntry.initial.usrCoords) as number[];
-        this.endDragComment(evt, text, usrDiff);
+        this.endDragText(evt, text, usrDiff);
       }
 
       delete this.dragPts[id];

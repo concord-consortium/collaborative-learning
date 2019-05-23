@@ -514,6 +514,17 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
+    function updateMovableLineLabel(board: JXG.Board, labelId: string, properties: JXGProperties) {
+      const change: JXGChange = {
+        operation: "update",
+        target: "movableLine",
+        targetID: labelId,
+        properties
+      };
+      const label = _applyChange(board, change);
+      return label ? label as JXG.Text : undefined;
+    }
+
     function addComment(board: JXG.Board, anchorId: string) {
       const change: JXGChange = {
         operation: "create",
@@ -945,6 +956,7 @@ export const GeometryContentModel = types
         addPoint,
         addPoints,
         addMovableLine,
+        updateMovableLineLabel,
         removeObjects,
         updateObjects,
         createPolygonFromFreePoints,
