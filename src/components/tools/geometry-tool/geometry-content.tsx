@@ -1529,13 +1529,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
           content.selectElement(text.id);
         }
-      } else if (isMovableLineEquation(text)) {
-        if (board) {
-          const parentLine = values(text.ancestors)[0] as JXG.Line;
-          if (parentLine && !readOnly) {
-            this.setState({selectedLine: parentLine});
-          }
-        }
       }
     };
 
@@ -1551,6 +1544,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerUp = (evt: any) => {
+      const { readOnly } = this.props;
+      const { board } = this.state;
+      if (isMovableLineEquation(text) && board) {
+        // Extended clicks/drags don't open the movable line dialog
+        const clickTimeThreshold = 500;
+        if (evt.timeStamp - this.lastBoardDown.evt.timeStamp < clickTimeThreshold) {
+          const parentLine = values(text.ancestors)[0] as JXG.Line;
+          if (parentLine && !readOnly) {
+            this.setState({selectedLine: parentLine});
+          }
+        }
+      }
+
       const id = text.id;
       const dragEntry = this.dragPts[id];
       if (!dragEntry) { return; }

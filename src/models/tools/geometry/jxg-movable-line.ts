@@ -154,7 +154,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
             anchorY: "bottom",
             fontSize: 15,
             offset: [25, 0],
-            clientType: kMovableLineType
+            clientType: kMovableLineType,
+            fixed: false
           },
           ...line,
           ...overrides
