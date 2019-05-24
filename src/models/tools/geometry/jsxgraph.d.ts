@@ -108,7 +108,7 @@ declare namespace JXG {
     name: string;
     ancestors: { [id: string]: GeometryElement };
     descendants: { [id: string]: GeometryElement };
-    parents: Array<string | GeometryElement>;
+    parents: string[];
     childElements: { [id: string]: GeometryElement };
     isDraggable: boolean;
     lastDragTime: Date;
@@ -125,6 +125,7 @@ declare namespace JXG {
     getAttribute: (key: string) => any;
     setAttribute: (attrs: any) => void;
     setPosition: (method: number, coords: number[]) => JXG.Point;
+    getLabelAnchor: () => JXG.Coords;
     on: (event: string, handler: EventHandler) => void;
     _set: (key: string, value: string) => void;
   }

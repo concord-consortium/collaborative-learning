@@ -10,7 +10,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { JXGChange, ILinkProperties, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
@@ -25,7 +25,7 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
-import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineEquation,
+import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
@@ -61,6 +61,12 @@ interface IState extends SizeMeProps {
 interface JXGPtrEvent {
   evt: any;
   coords: JXG.Coords;
+}
+
+interface IDragPoint {
+  initial: JXG.Coords;
+  final?: JXG.Coords;
+  snapToGrid?: boolean;
 }
 
 interface IBoardContentMapEntry {
@@ -192,7 +198,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
-  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords, snapToGrid?: boolean }} = {};
+  private dragPts: { [id: string]: IDragPoint } = {};
   private isVertexDrag: boolean;
 
   private lastPasteId: string;
@@ -600,7 +606,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateComment(board, commentId, { text });
+      content.updateObjects(board, [commentId], { text });
     }
     this.setState({ selectedComment: undefined });
   }
@@ -961,7 +967,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isMovableLine(elt)) {
         this.handleCreateLine(elt as JXG.Line);
       }
-      else if (isComment(elt) || isMovableLineEquation(elt)) {
+      else if (isComment(elt) || isMovableLineLabel(elt)) {
         this.handleCreateText(elt as JXG.Text);
       }
       else if (isAxis(elt)) {
@@ -1097,20 +1103,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragText(evt: any, dragTarget: JXG.Text, dragEntry: IDragPoint) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
 
-     // only create a change object if there's actually a change
-    if (usrDiff[1] || usrDiff[2]) {
-      const id = dragTarget.id;
-      const dragStart = this.dragPts[id].initial;
-      if (dragStart) {
-        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
-        this.applyChange(() => content.updateComment(board, id, { position: newUsrCoords }));
-      }
-    }
+    // nothing to do if there's no change
+    if (!dragEntry.final) return;
+    if ((dragEntry.final.usrCoords[1] === dragEntry.initial.usrCoords[1]) &&
+        (dragEntry.final.usrCoords[2] === dragEntry.initial.usrCoords[2])) return;
+
+    const position = dragEntry.final.usrCoords.slice(1) as JXGCoordPair;
+    this.applyChange(() => content.updateObjects(board!, dragTarget.id, { position }));
   }
 
   private handleCreateBoard = (board: JXG.Board) => {
@@ -1188,7 +1192,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         || isVisibleMovableLine(elt)
         || isAxisLabel(elt)
         || isComment(elt)
-        || isMovableLineEquation(elt);
+        || isMovableLineLabel(elt);
     };
 
     // synchronize initial selection
@@ -1546,7 +1550,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const handlePointerUp = (evt: any) => {
       const { readOnly } = this.props;
       const { board } = this.state;
-      if (isMovableLineEquation(text) && board) {
+      if (isMovableLineLabel(text) && board) {
         // Extended clicks/drags don't open the movable line dialog
         const clickTimeThreshold = 500;
         if (evt.timeStamp - this.lastBoardDown.evt.timeStamp < clickTimeThreshold) {
@@ -1563,9 +1567,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       if (!this.props.readOnly) {
         dragEntry.final = copyCoords(text.coords);
-        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
-                                                     dragEntry.initial.usrCoords) as number[];
-        this.endDragComment(evt, text, usrDiff);
+        this.endDragText(evt, text, dragEntry);
       }
 
       delete this.dragPts[id];

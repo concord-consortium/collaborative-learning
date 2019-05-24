@@ -524,17 +524,6 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function updateComment(board: JXG.Board, commentId: string, properties: JXGProperties) {
-      const change: JXGChange = {
-        operation: "update",
-        target: "comment",
-        targetID: commentId,
-        properties
-      };
-      const comment = _applyChange(undefined, change);
-      return comment ? comment as JXG.Text : undefined;
-    }
-
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
@@ -960,7 +949,6 @@ export const GeometryContentModel = types
         applyChange: _applyChange,
         syncChange,
         addComment,
-        updateComment,
 
         suspendSync() {
           ++suspendCount;
