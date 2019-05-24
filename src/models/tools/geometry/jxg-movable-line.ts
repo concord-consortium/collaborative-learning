@@ -105,6 +105,16 @@ const pointSpecificProps = {
   name: "",
 };
 
+function findMovableLineRelative(obj: JXG.GeometryElement): JXG.Line | undefined {
+  if (isMovableLine(obj)) return obj as JXG.Line;
+  if (isMovableLineControlPoint(obj)) {
+    return find(obj.childElements, child => isMovableLine(child)) as JXG.Line | undefined;
+  }
+  if (isMovableLineEquation(obj)) {
+    return find(obj.ancestors, ancestor => isMovableLine(ancestor)) as JXG.Line | undefined;
+  }
+}
+
 export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
@@ -167,7 +177,28 @@ export const movableLineChangeAgent: JXGChangeAgent = {
   },
 
   // update can be handled generically
-  update: objectChangeAgent.update,
+  update: (board, change) => {
+    objectChangeAgent.update(board, change);
+
+    if (!change.targetID) return;
+    const ids = castArray(change.targetID);
+    ids.forEach((id) => {
+      const obj = board.objects[id] as JXG.GeometryElement;
+      if (!isMovableLineEquation(obj)) {
+        const line = findMovableLineRelative(obj);
+        const lineLabel = line && line.label;
+        if (!line || !lineLabel) return;
+        line.setAttribute({ withLabel: false });
+        line.setAttribute({ withLabel: true });
+        // const anchorPoint = line.getLabelAnchor();
+        // const [ , anchorX, anchorY] = anchorPoint.scrCoords;
+        // const [offsetX, offsetY] = lineLabel.getAttribute("offset");
+        // const labelPos = [anchorX + offsetX, anchorY + offsetY];
+        // lineLabel.setPosition(JXG.COORDS_BY_SCREEN, labelPos);
+      }
+    });
+    board.update();
+  },
 
   delete: (board, change) => {
     if (!change.targetID) return;

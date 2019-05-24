@@ -514,7 +514,7 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function updateMovableLineLabel(board: JXG.Board, labelId: string, properties: JXGProperties) {
+    function updateMovableLineLabel(board: JXG.Board | undefined, labelId: string, properties: JXGProperties) {
       const change: JXGChange = {
         operation: "update",
         target: "movableLine",

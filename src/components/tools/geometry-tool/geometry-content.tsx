@@ -10,7 +10,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
+import { JXGChange, ILinkProperties, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
@@ -1097,7 +1097,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private endDragText(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragText(evt: any, dragTarget: JXG.Text, usrDiff: number[], scrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
@@ -1111,21 +1111,23 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.endDragComment(evt, dragTarget, usrDiff);
         break;
       case "movableLine":
-        this.endDragMovableLineLabel(evt, dragTarget, usrDiff);
+        this.endDragMovableLineLabel(evt, dragTarget, scrDiff);
         break;
     }
   }
 
-  private endDragMovableLineLabel(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragMovableLineLabel(evt: any, dragTarget: JXG.Text, scrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
     const id = dragTarget.id;
     const dragStart = this.dragPts[id].initial;
-    const [ , xDiff, yDiff] = usrDiff;
-    if (dragStart && (xDiff || yDiff)) {
-      const [xOffset, yOffset] = dragTarget.getAttribute("offset") || [0, 0];
-      const offset = [xOffset + xDiff, yOffset + yDiff];
-      this.applyChange(() => content.updateMovableLineLabel(board!, id, { offset }));
+    const dragFinish = this.dragPts[id].final;
+    const [ , xDiff, yDiff] = scrDiff;
+    if (board && dragFinish && (xDiff || yDiff)) {
+      // const [xOffset, yOffset] = dragTarget.getAttribute("offset") || [0, 0];
+      // const offset = [xOffset + Math.round(xDiff), yOffset + Math.round(yDiff)];
+      const position: JXGCoordPair = [dragFinish.usrCoords[1], dragFinish.usrCoords[2]];
+      this.applyChange(() => content.updateMovableLineLabel(undefined, id, { position }));
     }
   }
 
@@ -1592,7 +1594,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         dragEntry.final = copyCoords(text.coords);
         const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                      dragEntry.initial.usrCoords) as number[];
-        this.endDragText(evt, text, usrDiff);
+        const scrDiff = JXG.Math.Statistics.subtract(dragEntry.final.scrCoords,
+                                                     dragEntry.initial.scrCoords) as number[];
+        this.endDragText(evt, text, usrDiff, scrDiff);
       }
 
       delete this.dragPts[id];
