@@ -3,6 +3,8 @@ import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from 
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
 
+export const isText = (v: any) => v instanceof JXG.Text;
+
 // Inexplicably, we occasionally encounter JSXGraph objects with null
 // transformations which cause JSXGraph to crash. Until we figure out
 // the root cause of this phenomenon, this utility eliminates the nulls.
@@ -32,11 +34,12 @@ export const objectChangeAgent: JXGChangeAgent = {
     if (!change.targetID || !change.properties) { return; }
     const ids = castArray(change.targetID);
     const props: JXGProperties[] = castArray(change.properties);
+    let hasSuspendedTextUpdates = false;
     ids.forEach((id, index) => {
       const obj = board.objects[id] as JXG.GeometryElement;
       const objProps = index < props.length ? props[index] : props[0];
       if (obj && objProps) {
-        const { position, ...others } = objProps;
+        const { position, text, ...others } = objProps;
         if (position != null) {
           validateTransformations(obj);
           if (isPositionGraphable(position)) {
@@ -47,13 +50,24 @@ export const objectChangeAgent: JXGChangeAgent = {
             obj.setAttribute({visible: false});
           }
         }
+        const textObj = isText(obj) ? obj as JXG.Text : undefined;
+        if (textObj) {
+          if (board.isSuspendedUpdate) hasSuspendedTextUpdates = true;
+          if (text != null) textObj.setText(text);
+        }
         if (size(others)) {
           obj.setAttribute(others);
         }
       }
     });
+    // Text coordinates are not updated until a redraw occurs. If redraws are
+    // suspended, and a text object (e.g. a comment or its anchor) has moved, the
+    // transform will be calculated from a stale position. We unsuspend updates to
+    // force a refresh on coordinate positions.
+    if (hasSuspendedTextUpdates) board.unsuspendUpdate();
     board.update();
-  },
+    if (hasSuspendedTextUpdates) board.suspendUpdate();
+},
 
   delete: (board, change) => {
     if (!change.targetID) { return; }
