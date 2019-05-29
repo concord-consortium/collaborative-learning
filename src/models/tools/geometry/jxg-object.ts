@@ -46,8 +46,10 @@ export const objectChangeAgent: JXGChangeAgent = {
         // suspended, and a text object (e.g. a comment or its anchor) has moved, the
         // transform will be calculated from a stale position. We unsuspend updates to
         // force a refresh on coordinate positions.
-        if (textObj && board.isSuspendedUpdate) hasSuspendedTextUpdates = true;
-        if (hasSuspendedTextUpdates) board.unsuspendUpdate();
+        if (textObj && board.isSuspendedUpdate) {
+          hasSuspendedTextUpdates = true;
+          board.unsuspendUpdate();
+        }
         if (position != null) {
           validateTransformations(obj);
           if (isPositionGraphable(position)) {
@@ -58,7 +60,6 @@ export const objectChangeAgent: JXGChangeAgent = {
             obj.setAttribute({visible: false});
           }
         }
-        if (hasSuspendedTextUpdates) board.suspendUpdate();
 
         if (textObj && (text != null)) {
           textObj.setText(text);
@@ -68,6 +69,7 @@ export const objectChangeAgent: JXGChangeAgent = {
         }
       }
     });
+    if (hasSuspendedTextUpdates) board.suspendUpdate();
     board.update();
 },
 
