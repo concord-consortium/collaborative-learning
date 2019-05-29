@@ -1,9 +1,18 @@
 import { sortByCreation, kReverse } from "./jxg-board";
 import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import { isComment } from "./jxg-comment";
 import { castArrayCopy } from "../../../utilities/js-utils";
-import { castArray, size } from "lodash";
+import { castArray, find, size } from "lodash";
 
 export const isText = (v: any) => v instanceof JXG.Text;
+
+const hasDraggableLabel = (obj: JXG.GeometryElement) => {
+  return obj.hasLabel && !!obj.label && !obj.label.getAttribute("fixed");
+};
+
+const hasDescendantDraggableText = (obj: JXG.GeometryElement) => {
+  return !!find(obj.descendants, descendant => isComment(descendant) || hasDraggableLabel(descendant));
+};
 
 // Inexplicably, we occasionally encounter JSXGraph objects with null
 // transformations which cause JSXGraph to crash. Until we figure out
@@ -37,6 +46,7 @@ export const objectChangeAgent: JXGChangeAgent = {
     let hasSuspendedTextUpdates = false;
     ids.forEach((id, index) => {
       const obj = board.objects[id] as JXG.GeometryElement;
+      const textObj = isText(obj) ? obj as JXG.Text : undefined;
       const objProps = index < props.length ? props[index] : props[0];
       if (obj && objProps) {
         const { position, text, ...others } = objProps;
@@ -49,11 +59,13 @@ export const objectChangeAgent: JXGChangeAgent = {
             obj.setPosition(JXG.COORDS_BY_USER, getGraphablePosition(position));
             obj.setAttribute({visible: false});
           }
+          if (board.isSuspendedUpdate) {
+            const hasTextDependency = !!textObj || hasDescendantDraggableText(obj);
+            if (hasTextDependency) hasSuspendedTextUpdates = true;
+          }
         }
-        const textObj = isText(obj) ? obj as JXG.Text : undefined;
-        if (textObj) {
-          if (board.isSuspendedUpdate) hasSuspendedTextUpdates = true;
-          if (text != null) textObj.setText(text);
+        if (textObj && (text != null)) {
+          textObj.setText(text);
         }
         if (size(others)) {
           obj.setAttribute(others);

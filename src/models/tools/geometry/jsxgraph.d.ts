@@ -106,6 +106,8 @@ declare namespace JXG {
     elType: string;
     type: number;
     name: string;
+    hasLabel: boolean;
+    label?: JXG.Text;
     ancestors: { [id: string]: GeometryElement };
     descendants: { [id: string]: GeometryElement };
     parents: string[];
@@ -148,7 +150,6 @@ declare namespace JXG {
     parentPolygon?: JXG.Polygon;
     getRise: () => number;
     getSlope: () => number;
-    label?: JXG.Text;
   }
 
   class Text extends CoordsElement {
