@@ -28,7 +28,7 @@ export const handleControlPointClick = (point: JXG.Point, content: GeometryConte
   }
 };
 
-export const isMovableLineEquation = (v: any) => {
+export const isMovableLineLabel = (v: any) => {
   return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
 };
 
@@ -105,6 +105,17 @@ const pointSpecificProps = {
   name: "",
 };
 
+// given a movable line or its label or one of its control points, return the line itself
+export function findMovableLineRelative(obj: JXG.GeometryElement): JXG.Line | undefined {
+  if (isMovableLine(obj)) return obj as JXG.Line;
+  if (isMovableLineControlPoint(obj)) {
+    return find(obj.childElements, child => isMovableLine(child)) as JXG.Line | undefined;
+  }
+  if (isMovableLineLabel(obj)) {
+    return find(obj.ancestors, ancestor => isMovableLine(ancestor)) as JXG.Line | undefined;
+  }
+}
+
 export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
@@ -154,7 +165,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
             anchorY: "bottom",
             fontSize: 15,
             offset: [25, 0],
-            clientType: kMovableLineType
+            clientType: kMovableLineType,
+            fixed: false
           },
           ...line,
           ...overrides
