@@ -1,6 +1,6 @@
 import { sortByCreation, kReverse } from "./jxg-board";
 import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
-import { isComment } from "./jxg-comment";
+import { isComment } from "./jxg-types";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, find, size } from "lodash";
 

@@ -7,10 +7,6 @@ import { isPolygon, isVisibleEdge } from "./jxg-polygon";
 import { values } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 
-export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
-
-export const isComment = (v: any) => isCommentType(v) && (v instanceof JXG.Text) && (v.elType === "text");
-
 const sharedProps = {
   strokeWidth: 1,
   clientType: "comment",

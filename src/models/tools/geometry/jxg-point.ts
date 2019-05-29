@@ -1,7 +1,7 @@
 import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
-import { isCommentType } from "./jxg-comment";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
+import { isCommentType } from "./jxg-types";
 import { castArray, values } from "lodash";
 import * as uuid from "uuid/v4";
 

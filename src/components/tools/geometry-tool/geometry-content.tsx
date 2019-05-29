@@ -9,12 +9,12 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
 import { JXGChange, ILinkProperties, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
-import { isComment } from "../../../models/tools/geometry/jxg-comment";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
+import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
