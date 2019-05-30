@@ -5,11 +5,11 @@ import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXG
   JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
-import { isComment } from "./jxg-comment";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
 import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
 import { isLinkedPoint } from "./jxg-table-link";
+import { isComment } from "./jxg-types";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -524,17 +524,6 @@ export const GeometryContentModel = types
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function updateComment(board: JXG.Board, commentId: string, properties: JXGProperties) {
-      const change: JXGChange = {
-        operation: "update",
-        target: "comment",
-        targetID: commentId,
-        properties
-      };
-      const comment = _applyChange(undefined, change);
-      return comment ? comment as JXG.Text : undefined;
-    }
-
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
       const change: JXGChange = {
         operation: "delete",
@@ -960,7 +949,6 @@ export const GeometryContentModel = types
         applyChange: _applyChange,
         syncChange,
         addComment,
-        updateComment,
 
         suspendSync() {
           ++suspendCount;
