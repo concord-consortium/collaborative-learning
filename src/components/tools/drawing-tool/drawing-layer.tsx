@@ -681,18 +681,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ));
 
     this.disposers.push(autorun(() => {
-      const drawingContent = this.props.model.content as DrawingContentModelType;
-      const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
-      const prevChanges = this.actionsCount;
-
-      if (currentChangesLength > prevChanges) {
-        for (let i = prevChanges; i < currentChangesLength; i++) {
-          const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
-          this.executeChange(change);
-        }
-        this.actionsCount = currentChangesLength;
-        this.forceUpdate();
-      }
+      this.syncChanges();
     }));
   }
 
@@ -704,6 +693,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
     const drawingContent = this.props.model.content as DrawingContentModelType;
+
+    this.syncChanges();
 
     const newSettings = this.toolbarSettings(drawingContent);
     const prevSettings = this.state.toolbarSettings;
@@ -1204,6 +1195,21 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         callback(object, id);
       }
     });
+  }
+
+  private syncChanges() {
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
+    const prevChanges = this.actionsCount;
+
+    if (currentChangesLength > prevChanges) {
+      for (let i = prevChanges; i < currentChangesLength; i++) {
+        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
+        this.executeChange(change);
+      }
+      this.actionsCount = currentChangesLength;
+      this.forceUpdate();
+    }
   }
 
   private toolbarSettings(drawingContent: DrawingContentModelType): ToolbarSettings {
