@@ -12,6 +12,7 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
+import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -627,6 +628,7 @@ interface DrawingLayerViewState {
   imageEntry?: ImageMapEntryType;
 }
 
+@observer
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
   public objects: ObjectMap;
   public currentTool: DrawingTool|null;
@@ -693,8 +695,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
     const drawingContent = this.props.model.content as DrawingContentModelType;
-
-    this.syncChanges();
 
     const newSettings = this.toolbarSettings(drawingContent);
     const prevSettings = this.state.toolbarSettings;
