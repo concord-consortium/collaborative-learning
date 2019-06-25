@@ -49,7 +49,7 @@ export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 // for create/board the board parameter is the ID of the DOM element
 // for all other changes it should be the board
 export type JXGCreateHandler = (board: JXG.Board|string, change: JXGChange) => JXGChangeResult;
-export type JXGUpdateHandler = (board: JXG.Board, change: JXGChange) => void;
+export type JXGUpdateHandler = (board: JXG.Board, change: JXGChange) => JXGChangeResult;
 export type JXGDeleteHandler = (board: JXG.Board, change: JXGChange) => void;
 
 export interface JXGChangeAgent {

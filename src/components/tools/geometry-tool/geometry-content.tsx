@@ -33,12 +33,14 @@ import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 import SingleStringDialog from "../../utilities/single-string-dialog";
+import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
+  onUpdateToolbar: () => void;
 }
 
 interface IState extends SizeMeProps {
@@ -49,7 +51,6 @@ interface IState extends SizeMeProps {
   isLoading?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
-  syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
@@ -108,7 +109,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   updateVertexAnglesFromObjects(changedElements);
   board.unsuspendUpdate();
 
-  return { newElements: newElements.length ? newElements : undefined, syncedChanges };
+  return { newElements: newElements.length ? newElements : undefined };
 }
 
 let sViewCount = 0;
@@ -126,7 +127,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const nextState: IState = {} as any;
 
-    const { readOnly, size } = nextProps;
+    const { size } = nextProps;
     const geometryContent = content as GeometryContentModelType;
     if (size && size.width && size.height && (!prevState.size ||
         ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
@@ -140,49 +141,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       nextState.scale = scale;
     }
 
-    if (content !== prevState.content) {
-      if (geometryContent.changes.length !== prevState.syncedChanges) {
-        // synchronize background image changes
-        let lastUrl;
-        for (let i = prevState.syncedChanges; i < geometryContent.changes.length; ++i) {
-          const jsonChange = geometryContent.changes[i];
-          const change = jsonChange && safeJsonParse(jsonChange);
-          const url = change && change.properties &&
-                        !Array.isArray(change.properties) &&
-                        change.properties.url;
-          if (url) lastUrl = url;
-        }
-        if (lastUrl) {
-          // signal update to be triggered in componentDidUpdate
-          nextState.imageContentUrl = lastUrl;
-        }
-        // If the incoming list of changes is shorter, an undo has occurred.
-        // In this case, clear the board and replay it.
-        if (prevState.syncedChanges > geometryContent.changes.length) {
-          const board = prevState.board;
-          board.suspendUpdate();
-          // Board initialization creates 2 objects: the info box and the grid.
-          // These won't be recreated if the board already exists so we don't delete them.
-          const kDefaultBoardObjects = 2;
-          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
-            board.removeObject(board.objectsList[i]);
-          }
-          board.unsuspendUpdate();
-        }
-        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
-                                ? 0
-                                : prevState.syncedChanges;
-        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
-      } else {
-        nextState.redoStack = [];
-      }
-      nextState.content = geometryContent;
-    }
     return nextState;
   }
 
   public state: IState = {
-          syncedChanges: 0,
           disableRotate: false,
           redoStack: [],
           axisSettingsOpen: false,
@@ -192,8 +154,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
+  private syncedChanges: number;
 
-  private disposeSelectionObserver: any;
+  private disposers: any[];
 
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
@@ -268,6 +231,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
+    this.syncedChanges = 0;
+    this.disposers = [];
 
     this.initializeContent();
 
@@ -324,6 +289,48 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
     }
+
+    this.disposers.push(autorun(() => {
+      const { model: { content }, scale, readOnly } = this.props;
+      const { board } = this.state;
+      const geometryContent = content as GeometryContentModelType;
+      if (geometryContent.changes.length !== this.syncedChanges && board) {
+        const nextState: IState = {} as any;
+
+        // synchronize background image changes
+        let lastUrl;
+        for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
+          const jsonChange = geometryContent.changes[i];
+          const change = jsonChange && safeJsonParse(jsonChange);
+          const url = change && change.properties &&
+                        !Array.isArray(change.properties) &&
+                        change.properties.url;
+          if (url) lastUrl = url;
+        }
+        if (lastUrl) {
+          // signal update to be triggered in componentDidUpdate
+          nextState.imageContentUrl = lastUrl;
+        }
+        // If the incoming list of changes is shorter, an undo has occurred.
+        // In this case, clear the board and replay it.
+        if (this.syncedChanges > geometryContent.changes.length) {
+          board.suspendUpdate();
+          // Board initialization creates 2 objects: the info box and the grid.
+          // These won't be recreated if the board already exists so we don't delete them.
+          const kDefaultBoardObjects = 2;
+          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
+            board.removeObject(board.objectsList[i]);
+          }
+          board.unsuspendUpdate();
+        }
+        const syncedChanges = this.syncedChanges > geometryContent.changes.length
+                                ? 0
+                                : this.syncedChanges;
+        assign(nextState, syncBoardChanges(board, geometryContent, syncedChanges, readOnly));
+        this.setState(nextState);
+        this.syncedChanges = geometryContent.changes.length;
+      }
+    }));
   }
 
   public componentDidUpdate() {
@@ -344,9 +351,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    if (this.disposeSelectionObserver) {
-      this.disposeSelectionObserver();
-    }
+    this.disposers.forEach(disposer => disposer());
     const board = this.state.board;
     if (board) {
       delete sBoardContentMetadataMap[this.elementId];
@@ -492,11 +497,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (imageUrl) {
           this.updateImageUrl(imageUrl);
         }
-        this.hackAxisHandlers(board);
+        this.setState({ board });
       }
-      const newState = assign({ syncedChanges: content.changes.length },
-                                board ? { board } : null);
-      this.setState(newState);
+      this.syncedChanges = content.changes.length;
     }
   }
 
@@ -508,15 +511,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return images.length > 0
             ? images[images.length - 1] as JXG.Image
             : undefined;
-  }
-
-  // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
-  // So, any time new axes could be created, we reattach the axis handlers
-  private hackAxisHandlers(board: JXG.Board) {
-    setTimeout(() => {
-      const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-      axes.forEach(this.handleCreateAxis);
-    });
   }
 
   private updateImageUrl(url: string) {
@@ -624,8 +618,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      this.hackAxisHandlers(board);
+      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -692,8 +688,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.UNDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -718,8 +712,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.REDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -941,11 +933,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.handleCreatePoint(pt);
         });
       });
-      setTimeout(() => {
-        const _tableContent = this.getTableContent(dragTileId);
-        const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-        _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
-      });
+
+      const _tableContent = this.getTableContent(dragTileId);
+      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+      _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
     }
   }
 
@@ -977,7 +968,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private applyChange(change: () => void) {
-    this.setState({ syncedChanges: this.state.syncedChanges + 1 }, change);
+    this.syncedChanges +=  1;
+    change();
+    this.setState({ redoStack: [] });
   }
 
   private applyChanges(changes: () => void) {
@@ -992,8 +985,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // update the model as a batch
     const changeCount = geometryContent.batchChangeCount;
-    this.setState({ syncedChanges: this.state.syncedChanges + changeCount },
-                  () => geometryContent.resumeSync());
+    this.syncedChanges += changeCount;
+    geometryContent.resumeSync();
   }
 
   private applyBatchChanges(changes: string[]) {
@@ -1205,11 +1198,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
 
     // synchronize selection changes
-    this.disposeSelectionObserver = content.metadata.selection.observe(change => {
+    this.disposers.push(content.metadata.selection.observe(change => {
       if (this.state.board) {
         setElementColor(this.state.board, change.name, (change as any).newValue.value);
       }
-    });
+    }));
 
     if (this.props.onSetBoard) {
       this.props.onSetBoard(board);
@@ -1244,6 +1237,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
+              this.props.onUpdateToolbar();
             }
           });
           this.lastPointDown = undefined;

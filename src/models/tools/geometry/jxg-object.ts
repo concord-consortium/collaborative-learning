@@ -71,7 +71,8 @@ export const objectChangeAgent: JXGChangeAgent = {
     });
     if (hasSuspendedTextUpdates) board.suspendUpdate();
     board.update();
-},
+    return undefined;
+  },
 
   delete: (board, change) => {
     if (!change.targetID) { return; }

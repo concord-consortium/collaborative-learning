@@ -15,6 +15,7 @@ import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
+import { autorun, IReactionDisposer } from "mobx";
 
 import "./table-tool.sass";
 
@@ -30,17 +31,13 @@ interface IProps {
 
 // all properties are optional
 interface IPartialState {
-  metadata?: TableMetadataModelType;
   dataSet?: IDataSet;
-  syncedChanges?: number;
-  prevContent?: TableContentModelType;
   autoSizeColumns?: boolean;
 }
 ​
 // some properties are required
 interface IState extends IPartialState {
   dataSet: IDataSet;
-  syncedChanges: number;
   showInvalidPasteAlert: boolean;
 }
 
@@ -50,45 +47,46 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public static tileHandlesSelection = true;
 
-  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
-    const { model: { content } } = props;
-    const tableContent = content as TableContentModelType;
-    const newState: IPartialState = {};
-    if (content !== state.prevContent) {
-      newState.prevContent = tableContent;
-      newState.metadata = tableContent.metadata;
-    }
-    if (state.syncedChanges < tableContent.changes.length) {
-      tableContent.applyChanges(state.dataSet, state.syncedChanges);
-      newState.syncedChanges = tableContent.changes.length;
-    }
-    return newState;
-  }
-
   public state: IState = {
                   dataSet: DataSet.create(),
-                  syncedChanges: 0,
                   showInvalidPasteAlert: false
                 };
 
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
+  private syncedChanges: number;
+  private disposers: IReactionDisposer[];
 
   private gridApi?: GridApi;
   private gridColumnApi?: ColumnApi;
 
   public componentDidMount() {
     this.initializeHotKeys();
+    this.syncedChanges = 0;
+    this.disposers = [];
 
     if (this.domRef.current) {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
+
+    this.disposers.push(autorun(() => {
+      const { model: { content } } = this.props;
+      const tableContent = content as TableContentModelType;
+      if (this.syncedChanges < tableContent.changes.length) {
+        tableContent.applyChanges(this.state.dataSet, this.syncedChanges);
+        this.syncedChanges = tableContent.changes.length;
+        // The state updates in applyChanges aren't picked up by React, so we force a render
+        this.forceUpdate();
+      }
+    }));
   }
 
   public componentWillUnmount() {
     if (this.domRef.current) {
       this.domRef.current.removeEventListener("mousedown", this.handleMouseDown);
     }
+
+    this.disposers.forEach(disposer => disposer());
   }
 
   public render() {
@@ -109,7 +107,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           dataSet={this.state.dataSet}
           expressions={metadata.expressions}
           rawExpressions={metadata.rawExpressions}
-          changeCount={this.state.syncedChanges}
+          changeCount={this.syncedChanges}
           autoSizeColumns={this.getContent().isImported}
           indexValueGetter={this.indexValueGetter}
           attrValueFormatter={this.attrValueFormatter}
@@ -247,7 +245,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private indexValueGetter = (params: ValueGetterParams) => {
-    const { metadata } = this.state;
+    const metadata = this.getContent().metadata;
     return metadata && metadata.isLinked && (params.data.id !== LOCAL_ROW_ID)
             ? getRowLabel(params.node.rowIndex)
             : "";
@@ -292,55 +290,36 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return this.getGeometryActionLinks(links, true);
   }
 
-  // XXX: After changing the content, it is destroyed by MST. We use a timeout between consecutive content updates
-  // in the hopes that the content will be re-created when execution resumes. However, in some cases the content
-  // is still undefined - this function lets us aggregate the resulting errors for monitoring.
-  // Ultimately, the content update problem must be resolved to prevent this from happening.
-  private assertValidContent = () => {
-    const content = this.getContent();
-    if (!content) {
-      const _Rollbar = (window as any).Rollbar;
-      _Rollbar.error("TableTool.assertValidContent: Invalid content after timeout");
-    }
-    return !!content;
-  }
-
   private handleSetAttributeName = (attributeId: string, name: string) => {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().setAttributeName(attributeId, name);
-    setTimeout(() => {
-      if (!this.assertValidContent()) return;
-      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
-      this.getContent().metadata.linkedGeometries.forEach(id => {
-        const geometryContent = this.getGeometryContent(id);
-        if (geometryContent) {
-          geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
-        }
-      });
+    const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+    this.getContent().metadata.linkedGeometries.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.updateAxisLabels(undefined, this.props.model.id, geomActionLinks);
+      }
     });
   }
 
   private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {
     this.getContent().setExpression(attributeId, expression, rawExpression);
-    setTimeout(() => {
-      if (!this.assertValidContent()) return;
-      const dataSet = this.state.dataSet;
-      const tableActionLinks = this.getTableActionLinks();
-      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
-      const ids: string[] = [];
-      const props: JXGProperties[] = [];
-      dataSet.cases.forEach(aCase => {
-        const caseId = aCase.__id__;
-        ids.push(caseId);
-        const position = this.getPositionOfPoint(caseId) as JXGCoordPair;
-        props.push({ position });
-      });
-      this.getContent().metadata.linkedGeometries.forEach(id => {
-        const geometryContent = this.getGeometryContent(id);
-        if (geometryContent) {
-          geometryContent.updateObjects(undefined, ids, props, geomActionLinks);
-        }
-      });
+    const dataSet = this.state.dataSet;
+    const tableActionLinks = this.getTableActionLinks();
+    const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
+    const ids: string[] = [];
+    const props: JXGProperties[] = [];
+    dataSet.cases.forEach(aCase => {
+      const caseId = aCase.__id__;
+      ids.push(caseId);
+      const position = this.getPositionOfPoint(caseId) as JXGCoordPair;
+      props.push({ position });
+    });
+    this.getContent().metadata.linkedGeometries.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.updateObjects(undefined, ids, props, geomActionLinks);
+      }
     });
   }
 
@@ -362,17 +341,14 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().addCanonicalCases(cases as ICaseCreation[], firstSelectedRowId, tableActionLinks);
-    setTimeout(() => {
-      if (!this.assertValidContent()) return;
-      const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
-      const props = cases.map(aCase => ({ id: aCase.__id__ }));
-      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
-      this.getContent().metadata.linkedGeometries.forEach(id => {
-        const geometryContent = this.getGeometryContent(id);
-        if (geometryContent) {
-          geometryContent.addPoints(undefined, parents, props, geomActionLinks);
-        }
-      });
+    const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
+    const props = cases.map(aCase => ({ id: aCase.__id__ }));
+    const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+    this.getContent().metadata.linkedGeometries.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.addPoints(undefined, parents, props, geomActionLinks);
+      }
     });
   }
 
@@ -380,32 +356,26 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const caseId = caseValues.__id__;
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().setCanonicalCaseValues([caseValues], tableActionLinks);
-    setTimeout(() => {
-      if (!this.assertValidContent()) return;
-      const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
-      this.getContent().metadata.linkedGeometries.forEach(id => {
-        const newPosition = this.getPositionOfPoint(caseId);
-        const position = newPosition as JXGCoordPair;
-        const geometryContent = this.getGeometryContent(id);
-        if (geometryContent) {
-          geometryContent.updateObjects(undefined, caseId, { position }, geomActionLinks);
-        }
-      });
+    const geomActionLinks = this.getGeometryActionLinks(tableActionLinks);
+    this.getContent().metadata.linkedGeometries.forEach(id => {
+      const newPosition = this.getPositionOfPoint(caseId);
+      const position = newPosition as JXGCoordPair;
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.updateObjects(undefined, caseId, { position }, geomActionLinks);
+      }
     });
   }
 
   private handleRemoveCases = (ids: string[]) => {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().removeCases(ids, tableActionLinks);
-    setTimeout(() => {
-      if (!this.assertValidContent()) return;
-      const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
-      this.getContent().metadata.linkedGeometries.forEach(id => {
-        const geometryContent = this.getGeometryContent(id);
-        if (geometryContent) {
-          geometryContent.removeObjects(undefined, ids, geomActionLinks);
-        }
-      });
+    const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+    this.getContent().metadata.linkedGeometries.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.removeObjects(undefined, ids, geomActionLinks);
+      }
     });
   }
 }

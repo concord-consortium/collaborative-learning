@@ -250,6 +250,9 @@ export const GeometryContentModel = types
   .views(self => ({
     hasDeletableSelection(board: JXG.Board) {
       return self.getDeletableSelectedIds(board).length > 0;
+    },
+    selectedObjects(board: JXG.Board) {
+      return self.selectedIds.map(id => board.objects[id]);
     }
   }))
   .actions(self => ({
@@ -262,9 +265,6 @@ export const GeometryContentModel = types
       if (self.isSelected(id)) {
         self.metadata.deselect(id);
       }
-    },
-    selectedObjects(board: JXG.Board) {
-      return self.selectedIds.map(id => board.objects[id]);
     }
   }))
   .actions(self => ({
@@ -406,7 +406,8 @@ export const GeometryContentModel = types
         targetID: board.id,
         properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
       };
-      _applyChange(undefined, change);
+      const axes = _applyChange(undefined, change);
+      return axes ? axes as any as JXG.Line[] : undefined;
     }
 
     function updateScale(board: JXG.Board, scale: number) {
