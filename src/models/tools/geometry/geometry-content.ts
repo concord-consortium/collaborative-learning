@@ -469,7 +469,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "image",
         parents: [url, coords, size],
-        properties: assign({ id: uuid() }, properties)
+        properties: assign({ id: uuid(), url }, properties)
       };
       const image = _applyChange(board, change);
       return image ? image as JXG.Image : undefined;
@@ -1096,7 +1096,7 @@ function preprocessImportFormat(snapshot: any) {
     const size = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit) as JXGCoordPair;
     const parents = [url, coords, size];
     const id = uniqueId();
-    const properties = { id, ..._properties };
+    const properties = { id, url, ..._properties };
     gImageMap.getImage(url);  // register with image map
     changes.push({ operation: "create", target: "image", parents, properties, ...others });
     return id;
