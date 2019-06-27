@@ -1,13 +1,12 @@
-import "@babel/polyfill";
+import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without this
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import * as React from "react";
-import Rete, { NodeEditor, Engine } from "rete";
+import Rete from "rete";
 import { Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ContextMenuPlugin from "rete-context-menu-plugin";
-import AreaPlugin from "rete-area-plugin";
 import { NodeData } from "rete/types/core/data";
 import { autorun } from "mobx";
 
@@ -19,6 +18,7 @@ interface IState {}
 
 const numSocket = new Rete.Socket("Number value");
 
+// cf. https://codesandbox.io/s/retejs-react-render-t899c
 class NumControl extends Rete.Control {
   private emitter: any;
   private component: any;
@@ -73,9 +73,7 @@ class NumComponent extends Rete.Component {
     const out1 = new Rete.Output("num", "Number", numSocket);
     const ctrl = new NumControl(this.editor, "num", node);
 
-    node.addControl(ctrl).addOutput(out1);
-
-    return new Promise(resolve => resolve(node)) as any;
+    return node.addControl(ctrl).addOutput(out1) as any;
   }
 
    public worker(node: NodeData, inputs: any, outputs: any) {
@@ -92,9 +90,7 @@ class SensorComponent extends Rete.Component {
     const out1 = new Rete.Output("num", "Number", numSocket);
     const ctrl = new NumControl(this.editor, "num", node, true);
 
-    node.addControl(ctrl).addOutput(out1);
-
-    return new Promise(resolve => resolve(node)) as any;
+    return node.addControl(ctrl).addOutput(out1) as any;
   }
 
    public worker(node: NodeData, inputs: any, outputs: any) {
@@ -115,13 +111,11 @@ class AddComponent extends Rete.Component {
     inp1.addControl(new NumControl(this.editor, "num1", node));
     inp2.addControl(new NumControl(this.editor, "num2", node));
 
-    node
+    return node
       .addInput(inp1)
       .addInput(inp2)
       .addControl(new NumControl(this.editor, "preview", node, true))
-      .addOutput(out);
-
-    return new Promise(resolve => resolve(node)) as any;
+      .addOutput(out) as any;
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
@@ -193,6 +187,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       );
 
+      // Can this be in a control with stores injected
       autorun(() => {
         const { thingStore } = this.stores;
 
@@ -206,6 +201,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         });
       });
 
+      // Can this auto-call processing and be in the sensor component instead of doing this n^2 loop
       autorun(() => {
         const { thingStore } = this.stores;
         let change = false;
