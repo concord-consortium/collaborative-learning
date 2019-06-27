@@ -2,13 +2,14 @@ import "@babel/polyfill";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import * as React from "react";
-import Rete, { NodeEditor } from "rete";
+import Rete, { NodeEditor, Engine } from "rete";
 import { Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ContextMenuPlugin from "rete-context-menu-plugin";
 import AreaPlugin from "rete-area-plugin";
 import { NodeData } from "rete/types/core/data";
+import { autorun } from "mobx";
 
 import "./dataflow-program.sass";
 
@@ -52,10 +53,14 @@ class NumControl extends Rete.Control {
     };
   }
 
-   public setValue = (val: number) => {
+  public setValue = (val: number) => {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
+  }
+
+  public getValue = () => {
+    return this.props.value;
   }
 }
 
@@ -67,6 +72,25 @@ class NumComponent extends Rete.Component {
    public builder(node: Node) {
     const out1 = new Rete.Output("num", "Number", numSocket);
     const ctrl = new NumControl(this.editor, "num", node);
+
+    node.addControl(ctrl).addOutput(out1);
+
+    return new Promise(resolve => resolve(node)) as any;
+  }
+
+   public worker(node: NodeData, inputs: any, outputs: any) {
+    outputs.num = node.data.num;
+  }
+}
+
+class SensorComponent extends Rete.Component {
+  constructor(name: string) {
+    super(name);
+  }
+
+   public builder(node: Node) {
+    const out1 = new Rete.Output("num", "Number", numSocket);
+    const ctrl = new NumControl(this.editor, "num", node, true);
 
     node.addControl(ctrl).addOutput(out1);
 
@@ -121,6 +145,7 @@ class AddComponent extends Rete.Component {
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
+  private registeredThings: string[] = [];
 
   public render() {
     return (
@@ -167,6 +192,45 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           await engine.process(editor.toJSON());
         }
       );
+
+      autorun(() => {
+        const { thingStore } = this.stores;
+
+        thingStore.things.forEach(thing => {
+          if (!this.registeredThings.includes(thing.thingArn)) {
+            this.registeredThings.push(thing.thingArn);
+            const newComponent = new SensorComponent(thing.thingName);
+            editor.register(newComponent);
+            engine.register(newComponent);
+          }
+        });
+      });
+
+      autorun(() => {
+        const { thingStore } = this.stores;
+        let change = false;
+
+        thingStore.things.forEach(thing => {
+          const thingValue = thing.value;
+          if (thingValue) {
+            const block = editor.nodes.find((n: Node) => n.name === thing.thingName);
+            if (block) {
+              const control = block.controls.get("num") as NumControl;
+              if (control && control.getValue() !== thingValue) {
+                control.setValue(thingValue);
+                change = true;
+              }
+            }
+          }
+        });
+
+        if (change) {
+          (async () => {
+            await engine.abort();
+            await engine.process(editor.toJSON());
+          })();
+        }
+      });
 
       editor.view.resize();
       (editor as any).trigger("process");
