@@ -36,6 +36,7 @@ describe("document model", () => {
         rowOrder: [],
         tileMap: {}
       },
+      changeCount: 0
     });
   });
 

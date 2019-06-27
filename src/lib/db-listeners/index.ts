@@ -220,8 +220,10 @@ export class DBListeners {
 
     const updateRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, key));
     docListener.modelDisposer = onSnapshot(content, (newContent) => {
+                                  document.incChangeCount();
                                   updateRef.update({
-                                    content: JSON.stringify(newContent)
+                                    content: JSON.stringify(newContent),
+                                    changeCount: document.changeCount
                                   });
                                 });
   }
