@@ -25,14 +25,22 @@ export class DeviceListComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderDevices() {
-    const { thingStore } = this.stores;
+    const { hubStore } = this.stores;
     const devices: JSX.Element[] = [];
-    thingStore.things.forEach((thing) => {
+    hubStore.hubs.forEach((hub) => {
+      const online = hub.online ? "Online" : "Offline";
       devices.push(
-        <div key={thing.thingArn}>
-          {`${thing.thingName}: ${thing.value != null ? thing.value  : "-"}`}
+        <div key={hub.hubArn}>
+          {`HUB: ${hub.hubDisplayedName} - ${online}`}
         </div>
       );
+      hub.hubChannels.forEach((ch) => {
+        devices.push(
+          <div key={ch.id}>
+            {` - ${ch.type}: ${ch.value}`}
+          </div>
+        );
+      });
     });
     return devices;
   }
