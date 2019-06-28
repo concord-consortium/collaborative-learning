@@ -420,7 +420,8 @@ export class DB {
             originDoc,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
-            content: content ? content : {}
+            content: content ? content : {},
+            changeCount: document.changeCount
           });
         })
         .then((document) => {

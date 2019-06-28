@@ -912,12 +912,9 @@ export const GeometryContentModel = types
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
             const change: JXGChange = safeJsonParse(jsonChange);
-            if (change && (change.operation === "create") && (change.target === "image")) {
-              return change.parents && change.parents[0] as string;
-            }
-            if (change && (change.operation === "update") && change.properties &&
-                !Array.isArray(change.properties) && change.properties.url) {
-              return change.properties.url;
+            const imageUrl = getImageUrl(change);
+            if (imageUrl) {
+              return imageUrl;
             }
           }
         }
@@ -1147,4 +1144,14 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
     return JSON.stringify(change);
   });
   return snapshot;
+}
+
+export function getImageUrl(change?: JXGChange) {
+  if (!change) return;
+
+  if (change.operation === "create" && change.target === "image" && change.parents) {
+    return change.parents[0] as string;
+  } else if (change.operation === "update" && change.properties && !Array.isArray(change.properties)) {
+    return change.properties.url;
+  }
 }

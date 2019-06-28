@@ -4,7 +4,7 @@ import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
-import { GeometryContentModelType, GeometryMetadataModelType, setElementColor
+import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl
         } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
@@ -186,7 +186,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                   imageContentUrl: undefined,
                   imageEntry: image
                 });
-                // update mst content if conversion occurred
+                // Update legacy Firestore URLs, if they exist
                 if (image.contentUrl && (url !== image.contentUrl)) {
                   this.getContent().updateImageUrl(url, image.contentUrl);
                 }
@@ -302,9 +302,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
           const jsonChange = geometryContent.changes[i];
           const change = jsonChange && safeJsonParse(jsonChange);
-          const url = change && change.properties &&
-                        !Array.isArray(change.properties) &&
-                        change.properties.url;
+          const url = getImageUrl(change);
           if (url) lastUrl = url;
         }
         if (lastUrl) {
