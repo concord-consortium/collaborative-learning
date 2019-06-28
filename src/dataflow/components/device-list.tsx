@@ -28,10 +28,10 @@ export class DeviceListComponent extends BaseComponent<IProps, IState> {
     const { hubStore } = this.stores;
     const devices: JSX.Element[] = [];
     hubStore.hubs.forEach((hub) => {
-      const online = hub.online ? "Online" : "Offline";
+      const online = hub.getOnlineStatus() ? "Online" : "Offline";
       devices.push(
-        <div key={hub.hubArn}>
-          {`HUB: ${hub.hubDisplayedName} - ${online}`}
+        <div key={hub.hubProviderId}>
+          {`HUB: ${hub.hubName} - ${online}`}
         </div>
       );
       hub.hubChannels.forEach((ch) => {

@@ -1,32 +1,31 @@
-import { types, SnapshotIn } from "mobx-state-tree";
+import { types, cast, SnapshotIn } from "mobx-state-tree";
 
-export const HubChannel = types.model({
+export const HubChannelModel = types.model({
   id: types.string,
   type: types.string,
   dir: types.string,
   model: types.string,
   units: types.string,
   value: types.string,
+  lastUpdateTime: types.number,
 });
-export type HubChannelType = typeof HubChannel.Type;
+export type HubChannelType = typeof HubChannelModel.Type;
 
 export const HubModel = types
-  .model("Thing", {
-    hubArn: types.string,
+  .model("Hub", {
+    hubProviderId: types.string,
+    hubId: types.string,
     hubName: types.string,
-    hubDisplayedName: types.string,
-    hubTypeName: types.maybe(types.string),
-    online: false,
-    hubChannels: types.array(HubChannel),
+    hubType: types.maybe(types.string),
+    hubChannels: types.array(HubChannelModel),
+    hubUpdateTime: types.number,
   })
   .actions(self => ({
     addHubChannel(channel: HubChannelType) {
       self.hubChannels.push(channel);
     },
-    removeHubChannel(index: number) {
-      if (index < self.hubChannels.length ) {
-        self.hubChannels.splice(index, 1);
-      }
+    removeHubChannel(id: string) {
+      self.hubChannels = cast(self.hubChannels.filter(ch => ch.id !== id));
     },
     removeAllHubChannels() {
       self.hubChannels = [] as any;
@@ -50,8 +49,19 @@ export const HubModel = types
       });
       return value;
     },
-    setOnlineStatus(value: boolean) {
-      self.online = value;
+    setHubUpdateTime(newTime: number) {
+      self.hubUpdateTime = newTime;
+    },
+    setHubChannelTime(id: string, newTime: number) {
+      self.hubChannels.forEach(ch => {
+        if (ch.id === id) {
+          ch.lastUpdateTime = newTime;
+        }
+      });
+    },
+    getOnlineStatus() {
+      // WTD this will need a more sophisticated notion of "online"
+      return (self.hubChannels.length > 0);
     },
   }));
 export type HubModelType = typeof HubModel.Type;
@@ -62,17 +72,17 @@ export const HubStore = types
     hubs: types.map(HubModel)
   })
   .views(self  => ({
-    getThing(hubArn: string) {
-      return self.hubs.get(hubArn);
+    getHub(hubProviderId: string) {
+      return self.hubs.get(hubProviderId);
     },
-    getHubByName(hubName: string): HubModelType | undefined {
+    getHubById(hubId: string): HubModelType | undefined {
       const hubArray = Array.from(self.hubs.values());
-      return (hubArray.find( hub => hub.hubName === hubName ));
+      return (hubArray.find( hub => hub.hubId === hubId ));
     },
   }))
   .actions(self => ({
     addHub(snapshot: HubSnapshotType) {
-      self.hubs.set(snapshot.hubArn, HubModel.create(snapshot));
+      self.hubs.set(snapshot.hubProviderId, HubModel.create(snapshot));
     }
   }));
 

@@ -1,7 +1,7 @@
 import { MqttClient, connect } from "mqtt";
 import { IStores } from "../models/stores/dataflow-stores";
 import { getSignedUrl } from "../utilities/aws";
-import { HubChannel } from "../models/stores/hub-store";
+import { HubChannelModel } from "../models/stores/hub-store";
 import * as AWS from "aws-sdk";
 
 const AWS_REGION = "us-east-1";
@@ -11,6 +11,22 @@ const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 const OWNER_ID = "123";
 // WTD This is for testing purposes only. Sensor send interval should be set by user.
 const SEND_INTERVAL = 2;
+
+export enum TopicType {
+  hubChannelInfo = "hubChannelInfo",
+  hubSensorValues = "hubSensorValues",
+  hubStatus = "hubStatus",
+  hubCommand = "hubCommand",
+  hubRelays = "hubRelays"
+}
+
+export const TopicInfo = {
+  [TopicType.hubChannelInfo]: { topicSuffix: "/devices" },
+  [TopicType.hubSensorValues]: { topicSuffix: "/sensors" },
+  [TopicType.hubStatus]: { topicSuffix: "/status" },
+  [TopicType.hubCommand]: { topicSuffix: "/command" },
+  [TopicType.hubRelays]: { topicSuffix: "/actuators" }
+};
 
 export class IoT {
   public stores: IStores;
@@ -68,99 +84,102 @@ export class IoT {
       if (data && data.things) {
         data.things.forEach(thing => {
           const { thingName, thingArn, thingTypeName } = thing;
-          if (thingName && thingArn && !hubStore.getThing(thingArn)) {
+          // use attribute name when available (some things may not include it)
+          const hubId = thingName ? thingName : "N/A";
+          const hubName = thing.attributes && thing.attributes.name ?
+                          thing.attributes.name :
+                          hubId;
+          const hubProviderId = thingArn;
+          const hubType = thingTypeName;
+          if (hubId && hubProviderId && !hubStore.getHub(hubProviderId)) {
             hubStore.addHub({
-              hubName: thingName,
-              hubArn: thingArn,
-              hubTypeName: thingTypeName ? thingTypeName : undefined,
-              // use attribute name when available (some things may not include it)
-              hubDisplayedName: thing.attributes && thing.attributes.name ?
-                                  thing.attributes.name :
-                                  thingName,
-              hubChannels: []
+              hubId,
+              hubProviderId,
+              hubType: hubType ? hubType : undefined,
+              hubName,
+              hubChannels: [],
+              hubUpdateTime: Date.now()
             });
             // subscribe to any necessary topics for the new thing
-            this.client.subscribe(this.constructDevicesTopic(OWNER_ID, thingName));
-            this.client.subscribe(this.constructSensorsTopic(OWNER_ID, thingName));
-            this.requestDeviceInfo(thingName);
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo));
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues));
+            this.requestHubChannelInfo(hubId);
           }
         });
       }
     });
   }
 
-  private constructDevicesTopic(ownerID: string, hubName: string) {
-    return (ownerID + "/hub/" + hubName + "/devices");
-  }
-  private constructSensorsTopic(ownerID: string, hubName: string) {
-    return (ownerID + "/hub/" + hubName + "/sensors");
-  }
-  private constructStatusTopic(ownerID: string, hubName: string) {
-    return (ownerID + "/hub/" + hubName + "/status");
-  }
-  private constructCommandTopic(ownerID: string, hubName: string) {
-    // use to tell a hub to send status, sensors, or devices topic messages
-    return (ownerID + "/hub/" + hubName + "/command");
-  }
-  private constructActuatorsTopic(ownerID: string, hubName: string) {
-    return (ownerID + "/hub/" + hubName + "/actuators");
+  private createTopic(ownerID: string, hubId: string, topicType: TopicType) {
+    return (ownerID + "/hub/" + hubId + TopicInfo[topicType].topicSuffix);
   }
 
-  private requestSensorInfo(hubName: string) {
+  private startSendingSensorValues(hubId: string) {
     const topicMessage = JSON.stringify({ command: "set_send_interval", send_interval: SEND_INTERVAL});
-    this.client.publish(this.constructCommandTopic(OWNER_ID, hubName), topicMessage);
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
 
   }
-  private requestDeviceInfo(hubName: string) {
+  private requestHubChannelInfo(hubId: string) {
     const topicMessage = JSON.stringify({ command: "req_devices"});
-    this.client.publish(this.constructCommandTopic(OWNER_ID, hubName), topicMessage);
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
   }
 
-  private processDevicesMessage(hubName: string, message: any) {
+  private processHubChannelInfoMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
-    const hub = hubStore.getHubByName(hubName);
+    const hub = hubStore.getHubById(hubId);
     if (hub !== undefined) {
-      hub.setOnlineStatus(true);
       const devices = Object.values(message);
       const deviceKeys = Object.keys(message);
-      hub.removeAllHubChannels();
+      let rids: string[] = [];
+      hub.hubChannels.forEach(ch => {
+        rids.push(ch.id);
+      });
       // hub may have 1 or more devices
       devices.forEach((device: any, index: number) => {
         // device may have 1 or more components (called "channels" in Dataflow)
         device.components.forEach((component: any) => {
           // add channels to hub (may be sensor or relay)
           const model = component.model ? component.model : "N/A";
-          const units = component.units ? component.units : "N/A";
-          // in some cases the component id is not in the message explicitly
-          // and needs to be constructed.
-          // component id has form "deviceid-componenttypeprefix" where
-          // componenttypeprefix is first 5 char of component type.
-          const id = component.id ?
-                     component.id :
-                     deviceKeys[index] + "-" + component.type.substring(0, 5);
+          const units = component.units ? component.units : "";
+          const id = this.constructHubChannelId(component.id, deviceKeys[index], component.type);
+          rids = rids.filter(rid => rid !== id);
           if (!hub.getHubChannel(id)) {
-            hub.addHubChannel(HubChannel.create({
+            hub.addHubChannel(HubChannelModel.create({
               id,
               type: component.type,
               dir: component.dir,
               model,
               units,
-              value: ""}));
+              value: "",
+              lastUpdateTime: Date.now()}));
           }
         });
       });
+      // remove unused channels
+      rids.forEach(id => {
+        hub.removeHubChannel(id);
+      });
     }
-    this.requestSensorInfo(hubName);
+    this.startSendingSensorValues(hubId);
   }
 
-  private processSensorsMessage(hubName: string, message: any) {
+  private constructHubChannelId(componentId: string, deviceId: string, type: string) {
+    // in some cases the component id is not in the message explicitly
+    // and needs to be constructed.
+    // component id has form "deviceid-componenttypeprefix" where
+    // componenttypeprefix is first 5 char of component type.
+    return (componentId ? componentId : deviceId + "-" + type.substring(0, 5));
+  }
+
+  private processSensorValuesMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
-    const hub = hubStore.getHubByName(hubName);
+    const hub = hubStore.getHubById(hubId);
+    const time = message.time ? message.time : Date.now();
     if (hub !== undefined) {
-      hub.setOnlineStatus(true);
       for (const key in message) {
         if (message.hasOwnProperty(key) && key !== "time") {
           hub.setHubChannelValue(key, message[key]);
+          hub.setHubChannelTime(key, time);
         }
       }
     }
@@ -179,9 +198,9 @@ export class IoT {
       const message = JSON.parse(rawMessage as any);
       const topicParts = topic.split("/");
       if (topicParts[3] === "devices") {
-        this.processDevicesMessage(topicParts[2], message);
+        this.processHubChannelInfoMessage(topicParts[2], message);
       } else if (topicParts[3] === "sensors") {
-        this.processSensorsMessage(topicParts[2], message);
+        this.processSensorValuesMessage(topicParts[2], message);
       }
     });
   }
