@@ -174,7 +174,7 @@ export class IoT {
   private processSensorValuesMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
-    const time = message.time ? message.time : Date.now();
+    const time = message.time ? parseFloat(message.time) * 1000 : Date.now();
     if (hub !== undefined) {
       for (const key in message) {
         if (message.hasOwnProperty(key) && key !== "time") {
