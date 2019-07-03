@@ -1,0 +1,37 @@
+@import ../../components/vars
+
+.hub-list
+  background-color: white
+  border: $border-width solid $border-color
+  width: 500px
+
+  .hub-list-title
+    padding: $padding
+    background-color: $color1-3
+    font-size: 18px
+    font-weight: bold
+
+  .hubs
+    background-color: $color3-4
+    display: flex
+    flex-direction: column
+
+    .hub
+      background-color: white
+      margin: $half-margin $margin $half-margin $margin
+      border: 1px solid $color3-4
+      box-shadow: 1px 1px
+
+      .label
+        margin: $quarter-padding $half-padding $quarter-padding $half-padding
+        &.name
+          font-size: 18px
+
+      .channel
+        background-color: $color3-1
+        margin: $half-padding
+        border: 1px solid $color3-7
+        overflow: hidden
+
+        .label
+          margin-bottom: $quarter-padding
