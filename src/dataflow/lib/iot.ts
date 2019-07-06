@@ -21,11 +21,11 @@ export enum TopicType {
 }
 
 export const TopicInfo = {
-  [TopicType.hubChannelInfo]: { topicSuffix: "/devices" },
-  [TopicType.hubSensorValues]: { topicSuffix: "/sensors" },
-  [TopicType.hubStatus]: { topicSuffix: "/status" },
-  [TopicType.hubCommand]: { topicSuffix: "/command" },
-  [TopicType.hubRelays]: { topicSuffix: "/actuators" }
+  [TopicType.hubChannelInfo]: { lealLevel: "devices" },
+  [TopicType.hubSensorValues]: { lealLevel: "sensors" },
+  [TopicType.hubStatus]: { lealLevel: "status" },
+  [TopicType.hubCommand]: { lealLevel: "command" },
+  [TopicType.hubRelays]: { lealLevel: "actuators" }
 };
 
 export class IoT {
@@ -85,10 +85,8 @@ export class IoT {
         data.things.forEach(thing => {
           const { thingName, thingArn, thingTypeName } = thing;
           // use attribute name when available (some things may not include it)
-          const hubId = thingName ? thingName : "N/A";
-          const hubName = thing.attributes && thing.attributes.name ?
-                          thing.attributes.name :
-                          hubId;
+          const hubId = thingName || "N/A";
+          const hubName = thing.attributes && thing.attributes.name || hubId;
           const hubProviderId = thingArn;
           const hubType = thingTypeName;
           if (hubId && hubProviderId && !hubStore.getHub(hubProviderId)) {
@@ -111,7 +109,7 @@ export class IoT {
   }
 
   private createTopic(ownerID: string, hubId: string, topicType: TopicType) {
-    return (ownerID + "/hub/" + hubId + TopicInfo[topicType].topicSuffix);
+    return (`${ownerID}/hub/${hubId}/${TopicInfo[topicType].lealLevel}`);
   }
 
   private startSendingSensorValues(hubId: string) {
@@ -127,7 +125,7 @@ export class IoT {
   private processHubChannelInfoMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
-    if (hub !== undefined) {
+    if (hub) {
       const devices = Object.values(message);
       const deviceKeys = Object.keys(message);
       let rids: string[] = [];
@@ -137,17 +135,17 @@ export class IoT {
       // hub may have 1 or more devices
       devices.forEach((device: any, index: number) => {
         // device may have 1 or more components (called "channels" in Dataflow)
-        device.components.forEach((component: any) => {
+        device.components.forEach((channel: any) => {
           // add channels to hub (may be sensor or relay)
-          const model = component.model ? component.model : "N/A";
-          const units = component.units ? component.units : "";
-          const id = this.constructHubChannelId(component.id, deviceKeys[index], component.type);
+          const model = channel.model || "N/A";
+          const units = channel.units || "";
+          const id = this.constructHubChannelId(channel.id, deviceKeys[index], channel.type);
           rids = rids.filter(rid => rid !== id);
           if (!hub.getHubChannel(id)) {
             hub.addHubChannel(HubChannelModel.create({
               id,
-              type: component.type,
-              dir: component.dir,
+              type: channel.type,
+              dir: channel.dir,
               model,
               units,
               value: "",
@@ -163,19 +161,20 @@ export class IoT {
     this.startSendingSensorValues(hubId);
   }
 
-  private constructHubChannelId(componentId: string, deviceId: string, type: string) {
+  private constructHubChannelId(channelId: string, deviceId: string, type: string) {
+    // channel id is equivalent to the component id in the hub message
     // in some cases the component id is not in the message explicitly
     // and needs to be constructed.
     // component id has form "deviceid-componenttypeprefix" where
     // componenttypeprefix is first 5 char of component type.
-    return (componentId ? componentId : deviceId + "-" + type.substring(0, 5));
+    return (channelId ? channelId : deviceId + "-" + type.substring(0, 5));
   }
 
   private processSensorValuesMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
     const time = message.time ? parseFloat(message.time) * 1000 : Date.now();
-    if (hub !== undefined) {
+    if (hub) {
       for (const key in message) {
         if (message.hasOwnProperty(key) && key !== "time") {
           hub.setHubChannelValue(key, message[key]);
@@ -196,12 +195,17 @@ export class IoT {
     this.client = connect(url);
     this.client.on("message", (topic, rawMessage) => {
       const message = JSON.parse(rawMessage as any);
-      const topicParts = topic.split("/");
-      if (topicParts[3] === "devices") {
-        this.processHubChannelInfoMessage(topicParts[2], message);
-      } else if (topicParts[3] === "sensors") {
-        this.processSensorValuesMessage(topicParts[2], message);
+      const { hubId, leafLevel } = this.parseTopic(topic);
+      if (leafLevel === "devices") {
+        this.processHubChannelInfoMessage(hubId, message);
+      } else if (leafLevel === "sensors") {
+        this.processSensorValuesMessage(hubId, message);
       }
     });
+  }
+
+  private parseTopic(topic: string) {
+    const topicParts = topic && topic.split("/");
+    return { ownerId: topicParts[0], hubId: topicParts[2], leafLevel: topicParts[3] };
   }
 }

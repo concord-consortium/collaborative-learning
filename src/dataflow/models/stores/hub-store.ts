@@ -20,6 +20,25 @@ export const HubModel = types
     hubChannels: types.array(HubChannelModel),
     hubUpdateTime: types.number,
   })
+  .views(self => ({
+    getHubChannel(id: string) {
+      return (self.hubChannels.find( ch => ch.id === id ));
+    },
+    getOnlineStatus() {
+      // WTD this will need a more sophisticated notion of "online"
+      return (self.hubChannels.length > 0);
+    },
+  }))
+  .views(self => ({
+    getHubChannelValue(id: string) {
+      let value = "";
+      const ch = self.getHubChannel(id);
+      if (ch) {
+        value = ch.value;
+      }
+      return value;
+    },
+  }))
   .actions(self => ({
     addHubChannel(channel: HubChannelType) {
       self.hubChannels.push(channel);
@@ -28,26 +47,13 @@ export const HubModel = types
       self.hubChannels = cast(self.hubChannels.filter(ch => ch.id !== id));
     },
     removeAllHubChannels() {
-      self.hubChannels = [] as any;
-    },
-    getHubChannel(id: string) {
-      return (self.hubChannels.find( ch => ch.id === id ));
+      self.hubChannels.clear();
     },
     setHubChannelValue(id: string, value: string) {
-      self.hubChannels.forEach(ch => {
-        if (ch.id === id) {
-          ch.value = value;
-        }
-      });
-    },
-    getHubChannelValue(id: string) {
-      let value = "";
-      self.hubChannels.forEach(ch => {
-        if (ch.id === id) {
-          value = ch.value;
-        }
-      });
-      return value;
+      const ch = self.getHubChannel(id);
+      if (ch) {
+        ch.value = value;
+      }
     },
     setHubUpdateTime(newTime: number) {
       self.hubUpdateTime = newTime;
@@ -58,10 +64,6 @@ export const HubModel = types
           ch.lastUpdateTime = newTime;
         }
       });
-    },
-    getOnlineStatus() {
-      // WTD this will need a more sophisticated notion of "online"
-      return (self.hubChannels.length > 0);
     },
   }));
 export type HubModelType = typeof HubModel.Type;
