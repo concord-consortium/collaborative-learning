@@ -21,11 +21,11 @@ export enum TopicType {
 }
 
 export const TopicInfo = {
-  [TopicType.hubChannelInfo]: { lealLevel: "devices" },
-  [TopicType.hubSensorValues]: { lealLevel: "sensors" },
-  [TopicType.hubStatus]: { lealLevel: "status" },
-  [TopicType.hubCommand]: { lealLevel: "command" },
-  [TopicType.hubRelays]: { lealLevel: "actuators" }
+  [TopicType.hubChannelInfo]: { leafLevel: "devices" },
+  [TopicType.hubSensorValues]: { leafLevel: "sensors" },
+  [TopicType.hubStatus]: { leafLevel: "status" },
+  [TopicType.hubCommand]: { leafLevel: "command" },
+  [TopicType.hubRelays]: { leafLevel: "actuators" }
 };
 
 export class IoT {
@@ -109,7 +109,7 @@ export class IoT {
   }
 
   private createTopic(ownerID: string, hubId: string, topicType: TopicType) {
-    return (`${ownerID}/hub/${hubId}/${TopicInfo[topicType].lealLevel}`);
+    return (`${ownerID}/hub/${hubId}/${TopicInfo[topicType].leafLevel}`);
   }
 
   private startSendingSensorValues(hubId: string) {
