@@ -1,12 +1,32 @@
 import { MqttClient, connect } from "mqtt";
 import { IStores } from "../models/stores/dataflow-stores";
 import { getSignedUrl } from "../utilities/aws";
+import { HubChannelModel } from "../models/stores/hub-store";
 import * as AWS from "aws-sdk";
 
 const AWS_REGION = "us-east-1";
 const COGNITO_POOL = "us-east-1:153d6337-3421-4c34-a21f-d1d2143a5091";
 const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
-const MQTT_TOPIC = "test_topic";
+// WTD This is for testing purposes only. Remove when we add users and hub owners.
+const OWNER_ID = "123";
+// WTD This is for testing purposes only. Sensor send interval should be set by user.
+const SEND_INTERVAL = 2;
+
+export enum TopicType {
+  hubChannelInfo = "hubChannelInfo",
+  hubSensorValues = "hubSensorValues",
+  hubStatus = "hubStatus",
+  hubCommand = "hubCommand",
+  hubRelays = "hubRelays"
+}
+
+export const TopicInfo = {
+  [TopicType.hubChannelInfo]: { leafLevel: "devices" },
+  [TopicType.hubSensorValues]: { leafLevel: "sensors" },
+  [TopicType.hubStatus]: { leafLevel: "status" },
+  [TopicType.hubCommand]: { leafLevel: "command" },
+  [TopicType.hubRelays]: { leafLevel: "actuators" }
+};
 
 export class IoT {
   public stores: IStores;
@@ -54,30 +74,117 @@ export class IoT {
       secretAccessKey,
       sessionToken
     });
-    this.updateThings();
-    this.thingListener = setInterval(this.updateThings, 5000);
+    this.updateHubs();
+    this.thingListener = setInterval(this.updateHubs, 5000);
   }
 
-  private updateThings = () => {
-    const  { thingStore } = this.stores;
+  private updateHubs = () => {
+    const  { hubStore } = this.stores;
     this.iotCore.listThings().promise().then(data => {
       if (data && data.things) {
         data.things.forEach(thing => {
           const { thingName, thingArn, thingTypeName } = thing;
-          if (thingName && thingArn && !thingStore.getThing(thingArn)) {
-            thingStore.addThing({
-              thingName,
-              thingArn,
-              thingTypeName: thingTypeName ? thingTypeName : undefined
+          // use attribute name when available (some things may not include it)
+          const hubId = thingName || "N/A";
+          const hubName = thing.attributes && thing.attributes.name || hubId;
+          const hubProviderId = thingArn;
+          const hubType = thingTypeName;
+          if (hubId && hubProviderId && !hubStore.getHub(hubProviderId)) {
+            hubStore.addHub({
+              hubId,
+              hubProviderId,
+              hubType: hubType ? hubType : undefined,
+              hubName,
+              hubChannels: [],
+              hubUpdateTime: Date.now()
             });
+            // subscribe to any necessary topics for the new thing
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo));
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues));
+            this.requestHubChannelInfo(hubId);
           }
         });
       }
     });
   }
 
+  private createTopic(ownerID: string, hubId: string, topicType: TopicType) {
+    return (`${ownerID}/hub/${hubId}/${TopicInfo[topicType].leafLevel}`);
+  }
+
+  private startSendingSensorValues(hubId: string) {
+    const topicMessage = JSON.stringify({ command: "set_send_interval", send_interval: SEND_INTERVAL});
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
+
+  }
+  private requestHubChannelInfo(hubId: string) {
+    const topicMessage = JSON.stringify({ command: "req_devices"});
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
+  }
+
+  private processHubChannelInfoMessage(hubId: string, message: any) {
+    const  { hubStore } = this.stores;
+    const hub = hubStore.getHubById(hubId);
+    if (hub) {
+      const devices = Object.values(message);
+      const deviceKeys = Object.keys(message);
+      let rids: string[] = [];
+      hub.hubChannels.forEach(ch => {
+        rids.push(ch.id);
+      });
+      // hub may have 1 or more devices
+      devices.forEach((device: any, index: number) => {
+        // device may have 1 or more components (called "channels" in Dataflow)
+        device.components.forEach((channel: any) => {
+          // add channels to hub (may be sensor or relay)
+          const model = channel.model || "N/A";
+          const units = channel.units || "";
+          const id = this.constructHubChannelId(channel.id, deviceKeys[index], channel.type);
+          rids = rids.filter(rid => rid !== id);
+          if (!hub.getHubChannel(id)) {
+            hub.addHubChannel(HubChannelModel.create({
+              id,
+              type: channel.type,
+              dir: channel.dir,
+              model,
+              units,
+              value: "",
+              lastUpdateTime: Date.now()}));
+          }
+        });
+      });
+      // remove unused channels
+      rids.forEach(id => {
+        hub.removeHubChannel(id);
+      });
+    }
+    this.startSendingSensorValues(hubId);
+  }
+
+  private constructHubChannelId(channelId: string, deviceId: string, type: string) {
+    // channel id is equivalent to the component id in the hub message
+    // in some cases the component id is not in the message explicitly
+    // and needs to be constructed.
+    // component id has form "deviceid-componenttypeprefix" where
+    // componenttypeprefix is first 5 char of component type.
+    return (channelId ? channelId : deviceId + "-" + type.substring(0, 5));
+  }
+
+  private processSensorValuesMessage(hubId: string, message: any) {
+    const  { hubStore } = this.stores;
+    const hub = hubStore.getHubById(hubId);
+    const time = message.time ? parseFloat(message.time) * 1000 : Date.now();
+    if (hub) {
+      for (const key in message) {
+        if (message.hasOwnProperty(key) && key !== "time") {
+          hub.setHubChannelValue(key, message[key]);
+          hub.setHubChannelTime(key, time);
+        }
+      }
+    }
+  }
+
   private startMqttClient(credentials: AWS.Credentials)  {
-    const  { thingStore } = this.stores;
     const { accessKeyId, secretAccessKey, sessionToken } = credentials;
 
     const url = getSignedUrl(AWS_IOT_ENDPOINT_HOST, AWS_REGION, {
@@ -86,16 +193,19 @@ export class IoT {
       sessionToken
     });
     this.client = connect(url);
-    this.client.subscribe(MQTT_TOPIC);
     this.client.on("message", (topic, rawMessage) => {
       const message = JSON.parse(rawMessage as any);
-      const { client: clientName, value } = message;
-      if (this.client && value) {
-        const thing = thingStore.things.get(clientName);
-        if (thing) {
-          thing.setValue(value);
-        }
+      const { hubId, leafLevel } = this.parseTopic(topic);
+      if (leafLevel === "devices") {
+        this.processHubChannelInfoMessage(hubId, message);
+      } else if (leafLevel === "sensors") {
+        this.processSensorValuesMessage(hubId, message);
       }
     });
+  }
+
+  private parseTopic(topic: string) {
+    const topicParts = topic && topic.split("/");
+    return { ownerId: topicParts[0], hubId: topicParts[2], leafLevel: topicParts[3] };
   }
 }

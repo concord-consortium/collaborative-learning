@@ -4,7 +4,7 @@ import { DataflowHeaderComponent } from "./dataflow-header";
 import { DataflowPanelType } from "./dataflow-types";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { DialogComponent } from "../../components/utilities/dialog";
-import { DeviceListComponent } from "./device-list";
+import { HubListComponent } from "./hub-list";
 
 import "./dataflow-app-content.sass";
 
@@ -56,7 +56,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
         return <div>DataFlow: Data Stories</div>;
       case "control-panels":
       default:
-        return <DeviceListComponent />;
+        return <HubListComponent />;
     }
   }
 

@@ -1,27 +1,27 @@
 import { IStores as IBaseStores, createStores as createBaseStores } from "../../../models/stores/stores";
-import { ThingStoreType, ThingStore } from "./thing-store";
+import { HubStoreType, HubStore } from "./hub-store";
 import { IoT } from "../../lib/iot";
 
 export interface IStores extends IBaseStores {
-  thingStore: ThingStoreType;
+  hubStore: HubStoreType;
   iot: IoT;
 }
 
 export interface ICreateStores {
-  thingStore?: ThingStoreType;
+  hubStore?: HubStoreType;
   iot?: IoT;
 }
 
 export function createStores(params?: ICreateStores): IStores {
   let baseParams;
   if (params) {
-    const { thingStore, iot, ...others } = params;
+    const { hubStore, iot, ...others } = params;
     baseParams = others;
   }
   const baseStore = createBaseStores(baseParams);
   return {
     ...baseStore,
-    thingStore: params && params.thingStore || ThingStore.create({}),
+    hubStore: params && params.hubStore || HubStore.create({}),
     iot: params && params.iot || new IoT()
   };
 }
