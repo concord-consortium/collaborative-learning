@@ -51,10 +51,8 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
   private renderPanel() {
     switch (this.state.panel) {
-      case "flow-creator":
+      case "workspace":
         return <DataflowProgram />;
-      case "data-stories":
-        return <div>DataFlow: Data Stories</div>;
       case "control-panels":
       default:
         return <HubListComponent />;
