@@ -1,13 +1,13 @@
 import * as React from "react";
 import Rete from "rete";
 import "./sensor-select-control.sass";
-import { NodeSensorInfo } from "../../../utilities/node";
+import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
 
 export class SensorSelectControl extends Rete.Control {
   private emitter: any;
   private component: any;
   private props: any;
-  constructor(emitter: any, key: string, node: any, sensorsArray: any, readonly = false) {
+  constructor(emitter: any, key: string, node: any, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -23,8 +23,7 @@ export class SensorSelectControl extends Rete.Control {
                                    value: any;
                                    onTypeChange: any;
                                    onSensorChange: any;
-                                   onChange: any;
-                                   sensorsArray: any;
+                                   channels: NodeChannelInfo[]
                                   }) => (
       <div className="sensor-box">
         <select
@@ -32,7 +31,7 @@ export class SensorSelectControl extends Rete.Control {
           value={compProps.type}
           onChange={handleChange(compProps.onTypeChange)}
           onPointerMove={handlePointerMove}>
-          {NodeSensorInfo.map((val: any, i: any) => (
+          {NodeSensorTypes.map((val: any, i: any) => (
             <option key={i} value={val.name}>
               {val.name}
             </option>
@@ -43,24 +42,21 @@ export class SensorSelectControl extends Rete.Control {
           onChange={handleChange(compProps.onSensorChange)}
           onPointerMove={handlePointerMove}>
           <option value="none">none</option>
-          {compProps.sensorsArray.filter((val: any) => (
-            val.search(compProps.type.slice(0, 5)) >= 0
+          {compProps.channels ? compProps.channels.filter((ch: NodeChannelInfo) => (
+            ch.type === compProps.type
           ))
-          .map((val: any, i: any) => (
-            <option key={i} value={val}>
-              {val}
+          .map((ch: NodeChannelInfo, i: any) => (
+            <option key={i} value={ch.hubId + "/" + ch.channelId}>
+              {ch.hubName + ":" + ch.type}
             </option>
-          ))}
+          )) : null}
         </select>
         <div className="value">
           <input
-            type={"text"}
             value={compProps.value}
-            onChange={handleChange(compProps.onChange)}
-            onPointerMove={handlePointerMove}
           />
           <label className="units">
-            {NodeSensorInfo.find((s: any) => s.name === compProps.type)!.units}
+            {NodeSensorTypes.find((s: any) => s.name === compProps.type)!.units}
           </label>
         </div>
       </div>
@@ -83,16 +79,12 @@ export class SensorSelectControl extends Rete.Control {
         this.setSensor(v);
         this.emitter.trigger("process");
       },
-      onChange: (v: any) => {
-        this.setSensorValue(v);
-        this.emitter.trigger("process");
-      },
-      sensorsArray
+      channels: []
     };
   }
 
-  public setSensorOptions = (sensors: any) => {
-    this.props.sensorsArray = sensors;
+  public setChannels = (channels: NodeChannelInfo[]) => {
+    this.props.channels = channels;
 
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();

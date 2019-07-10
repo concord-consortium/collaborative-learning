@@ -85,7 +85,7 @@ export const NodeOperationInfo = [
   }
 ];
 
-export const NodeSensorInfo = [
+export const NodeSensorTypes = [
   {
     name: "temperature",
     units: "°C",
@@ -115,3 +115,11 @@ export const NodeSensorInfo = [
     units: "PM2.5",
   },
 ];
+
+export interface NodeChannelInfo {
+  hubId: string;
+  hubName: string;
+  channelId: string;
+  type: string;
+  units: string;
+}

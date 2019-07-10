@@ -10,7 +10,7 @@ import ContextMenuPlugin from "rete-context-menu-plugin";
 import { autorun, observable } from "mobx";
 import "./dataflow-program.sass";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
-import { DropdownListControl } from "./nodes/controls/dropdown-list-control";
+import { RelaySelectControl } from "./nodes/controls/relay-select-control";
 import { NumReteNodeFactory } from "./nodes/factories/num-rete-node-factory";
 import { ArithmeticReteNodeFactory } from "./nodes/factories/arithmetic-rete-node-factory";
 import { UnaryArithmeticReteNodeFactory } from "./nodes/factories/unary-arithmetic-rete-node-factory";
@@ -18,6 +18,7 @@ import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory"
 import { ComparisonReteNodeFactory } from "./nodes/factories/comparison-rete-node-factory";
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
+import { NodeChannelInfo } from "../utilities/node";
 
 interface IProps extends IBaseProps {}
 
@@ -29,8 +30,7 @@ const numSocket = new Rete.Socket("Number value");
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
-  private hubSensorIds: string[] = [];
-  private hubRelayIds: string[] = ["none"];
+  private channels: NodeChannelInfo[] = [];
 
   public render() {
     return (
@@ -89,10 +89,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         // add the current set of sensors or relays to node controls
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-          sensorSelect.setSensorOptions(this.hubSensorIds);
+          sensorSelect.setChannels(this.channels);
         } else if (node.name === "Relay") {
-          const relayList = node.controls.get("relayList") as DropdownListControl;
-          relayList.setOptions(this.hubRelayIds);
+          const relayList = node.controls.get("relayList") as RelaySelectControl;
+          relayList.setChannels(this.channels);
         }
         return true;
       });
@@ -105,31 +105,31 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // Can this be in a control with stores injected?
       autorun(() => {
         const { hubStore } = this.stores;
-        let newSensor = false;
-        let newRelay = false;
+        let newChannel = false;
         hubStore.hubs.forEach(hub => {
           hub.hubChannels.forEach(ch => {
-            const hubChannelId = hub.hubName + "/" + ch.id;
-            if (ch.type !== "relay" && !this.hubSensorIds.includes(hubChannelId)) {
-              this.hubSensorIds.push(hubChannelId);
-              newSensor = true;
-            } else if (ch.type === "relay" && !this.hubRelayIds.includes(hubChannelId)) {
-              this.hubRelayIds.push(hubChannelId);
-              newRelay = true;
+            if (!this.channels.find( ci => ci.hubId === hub.hubId && ci.channelId === ch.id )) {
+              const nci: NodeChannelInfo = {hubId: hub.hubId,
+                                            hubName: hub.hubName,
+                                            channelId: ch.id,
+                                            type: ch.type,
+                                            units: ch.units};
+              this.channels.push(nci);
+              newChannel = true;
             }
           });
         });
         // update any existing blocks since we found a new sensor or relay
-        if (newSensor || newRelay) {
+        if (newChannel) {
           editor.nodes.forEach((n: Node) => {
             const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-            const relayList = n.controls.get("relayList") as DropdownListControl;
-            if (sensorSelect && newSensor) {
-              sensorSelect.setSensorOptions(this.hubSensorIds);
+            const relayList = n.controls.get("relayList") as RelaySelectControl;
+            if (sensorSelect) {
+              sensorSelect.setChannels(this.channels);
               (sensorSelect as any).update();
             }
-            if (relayList && newRelay) {
-              relayList.setOptions(this.hubRelayIds);
+            if (relayList) {
+              relayList.setChannels(this.channels);
               (relayList as any).update();
             }
           });
@@ -144,7 +144,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           hub.hubChannels.forEach(ch => {
             const chValue = Number.parseFloat(ch.value);
             if (!Number.isNaN(chValue) && ch.type !== "relay") {
-              const hubSensorId = hub.hubName + "/" + ch.id;
+              const hubSensorId = hub.hubId + "/" + ch.id;
               const nodes = editor.nodes.filter((n: Node) => n.data.sensor === hubSensorId);
               if (nodes) {
                 nodes.forEach((n: Node) => {

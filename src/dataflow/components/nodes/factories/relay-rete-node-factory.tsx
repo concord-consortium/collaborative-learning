@@ -2,7 +2,7 @@ import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
-import { DropdownListControl } from "../controls/dropdown-list-control";
+import { RelaySelectControl } from "../controls/relay-select-control";
 
 export class RelayReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
@@ -15,7 +15,7 @@ export class RelayReteNodeFactory extends Rete.Component {
     const inp1 = new Rete.Input("num1", "Number", this.numSocket);
     inp1.addControl(new NumControl(this.editor, "num1", node));
     return node
-      .addControl(new DropdownListControl(this.editor, "relayList", node, ["none"], true))
+      .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
       .addControl(new NumControl(this.editor, "preview", node, true))
       .addInput(inp1) as any;
   }
