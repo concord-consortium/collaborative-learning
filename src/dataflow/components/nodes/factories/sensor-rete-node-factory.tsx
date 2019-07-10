@@ -13,7 +13,7 @@ export class SensorReteNodeFactory extends Rete.Component {
   public builder(node: Node) {
     const out1 = new Rete.Output("num", "Number", this.numSocket);
     return node
-      .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, [], true))
+      .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
       .addOutput(out1) as any;
   }
 

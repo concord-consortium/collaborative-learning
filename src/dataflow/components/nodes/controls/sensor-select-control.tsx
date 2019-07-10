@@ -53,6 +53,7 @@ export class SensorSelectControl extends Rete.Control {
         </select>
         <div className="value">
           <input
+            readOnly={true}
             value={compProps.value}
           />
           <label className="units">
