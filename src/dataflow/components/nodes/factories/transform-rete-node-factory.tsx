@@ -3,12 +3,12 @@ import { Node, Socket, NodeEditor } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeOperationInfo } from "../../../utilities/node";
+import { NodeOperationTypes } from "../../../utilities/node";
 
-export class UnaryArithmeticReteNodeFactory extends Rete.Component {
+export class TransformReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
-    super("Unary Arithmetic");
+    super("Transform");
     this.numSocket = numSocket;
   }
 
@@ -18,28 +18,28 @@ export class UnaryArithmeticReteNodeFactory extends Rete.Component {
 
     inp1.addControl(new NumControl(this.editor, "num1", node));
 
-    const dropdownOptions = NodeOperationInfo
+    const dropdownOptions = NodeOperationTypes
       .filter((nodeOp) => {
-        return nodeOp.type === "unary arithmetic";
+        return nodeOp.type === "transform";
       }).map((nodeOp) => {
         return nodeOp.name;
       });
 
     return node
       .addInput(inp1)
-      .addControl(new DropdownListControl(this.editor, "unaryArithmeticOperator", node, dropdownOptions, true))
+      .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
       .addControl(new NumControl(this.editor, "preview", node, true))
       .addOutput(out) as any;
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    const unaryArithmeticOperator: any = node.data.unaryArithmeticOperator;
+    const transformOperator: any = node.data.transformOperator;
     let result = 0;
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
 
-    const nodeOperationInfo = NodeOperationInfo.find(op => op.name === unaryArithmeticOperator);
-    if (nodeOperationInfo) {
-      result = nodeOperationInfo.method(n1, 0);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === transformOperator);
+    if (nodeOperationTypes) {
+      result = nodeOperationTypes.method(n1, 0);
     }
 
     if (this.editor) {

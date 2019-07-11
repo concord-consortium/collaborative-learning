@@ -12,10 +12,9 @@ import "./dataflow-program.sass";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "./nodes/controls/relay-select-control";
 import { NumReteNodeFactory } from "./nodes/factories/num-rete-node-factory";
-import { ArithmeticReteNodeFactory } from "./nodes/factories/arithmetic-rete-node-factory";
-import { UnaryArithmeticReteNodeFactory } from "./nodes/factories/unary-arithmetic-rete-node-factory";
+import { MathReteNodeFactory } from "./nodes/factories/math-rete-node-factory";
+import { TransformReteNodeFactory } from "./nodes/factories/transform-rete-node-factory";
 import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory";
-import { ComparisonReteNodeFactory } from "./nodes/factories/comparison-rete-node-factory";
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { NodeChannelInfo } from "../utilities/node";
@@ -41,9 +40,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     (async () => {
       const components = [new NumReteNodeFactory(numSocket),
-        new ArithmeticReteNodeFactory(numSocket),
-        new UnaryArithmeticReteNodeFactory(numSocket),
-        new ComparisonReteNodeFactory(numSocket),
+        new MathReteNodeFactory(numSocket),
+        new TransformReteNodeFactory(numSocket),
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket)];

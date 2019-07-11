@@ -3,12 +3,12 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeOperationInfo } from "../../../utilities/node";
+import { NodeOperationTypes } from "../../../utilities/node";
 
-export class ArithmeticReteNodeFactory extends Rete.Component {
+export class MathReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
-    super("Arithmetic");
+    super("Math");
     this.numSocket = numSocket;
   }
 
@@ -20,9 +20,9 @@ export class ArithmeticReteNodeFactory extends Rete.Component {
     inp1.addControl(new NumControl(this.editor, "num1", node));
     inp2.addControl(new NumControl(this.editor, "num2", node));
 
-    const dropdownOptions = NodeOperationInfo
+    const dropdownOptions = NodeOperationTypes
       .filter((nodeOp) => {
-        return nodeOp.type === "arithmetic";
+        return nodeOp.type === "math";
       }).map((nodeOp) => {
         return nodeOp.name;
       });
@@ -30,20 +30,20 @@ export class ArithmeticReteNodeFactory extends Rete.Component {
     return node
       .addInput(inp1)
       .addInput(inp2)
-      .addControl(new DropdownListControl(this.editor, "arithmeticOperator", node, dropdownOptions, true))
+      .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
       .addControl(new NumControl(this.editor, "preview", node, true))
       .addOutput(out) as any;
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    const arithmeticOperator = node.data.arithmeticOperator;
+    const mathOperator = node.data.mathOperator;
     let result = 0;
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
-    const nodeOperationInfo = NodeOperationInfo.find(op => op.name === arithmeticOperator);
-    if (nodeOperationInfo) {
-      result = nodeOperationInfo.method(n1, n2);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
+    if (nodeOperationTypes) {
+      result = nodeOperationTypes.method(n1, n2);
     }
 
     if (this.editor) {

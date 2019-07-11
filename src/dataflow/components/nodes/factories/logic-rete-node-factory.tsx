@@ -3,7 +3,7 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeOperationInfo } from "../../../utilities/node";
+import { NodeOperationTypes } from "../../../utilities/node";
 
 export class LogicReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
@@ -20,7 +20,7 @@ export class LogicReteNodeFactory extends Rete.Component {
     inp1.addControl(new NumControl(this.editor, "num1", node));
     inp2.addControl(new NumControl(this.editor, "num2", node));
 
-    const dropdownOptions = NodeOperationInfo
+    const dropdownOptions = NodeOperationTypes
       .filter((nodeOp) => {
         return nodeOp.type === "logic";
       }).map((nodeOp) => {
@@ -41,9 +41,9 @@ export class LogicReteNodeFactory extends Rete.Component {
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2.length ? inputs.num2[0] : node.data.num2;
 
-    const nodeOperationInfo = NodeOperationInfo.find(op => op.name === logicOperator);
-    if (nodeOperationInfo) {
-      result = nodeOperationInfo.method(n1, n2);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === logicOperator);
+    if (nodeOperationTypes) {
+      result = nodeOperationTypes.method(n1, n2);
     }
 
     if (this.editor) {

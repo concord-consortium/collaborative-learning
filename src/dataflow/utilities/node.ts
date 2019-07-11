@@ -1,87 +1,88 @@
-export const NodeOperationInfo = [
+export const NodeOperationTypes = [
   {
     name: "add",
-    type: "arithmetic",
+    type: "math",
     method: (n1: number, n2: number) => n1 + n2
   },
   {
     name: "subtract",
-    type: "arithmetic",
+    type: "math",
     method: (n1: number, n2: number) => n1 - n2
   },
   {
     name: "multiply",
-    type: "arithmetic",
+    type: "math",
     method: (n1: number, n2: number) => n1 * n2
   },
   {
     name: "divide",
-    type: "arithmetic",
+    type: "math",
     method: (n1: number, n2: number) => n1 / n2
   },
   {
     name: "absolute value",
-    type: "unary arithmetic",
+    type: "transform",
     method: (n1: number, n2: number) => Math.abs(n1)
   },
   {
+    name: "negation",
+    type: "transform",
+    method: (n1: number, n2: number) => 0 - n1
+  },
+  {
     name: "not",
-    type: "unary arithmetic",
-    // this is the dataflow 2.0 implementation of "NOT" implemented in 2017
-    // ref: https://github.com/concord-consortium/flow-server/blob/master/static/flow/filters.js#L40
-    method: (n1: number, n2: number) => 1 - n1
+    type: "transform",
+    method: (n1: number, n2: number) => n1 ? 0 : 1
   },
   {
     name: "greater than",
-    type: "comparison",
+    type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2)
   },
   {
     name: "less than",
-    type: "comparison",
+    type: "logic",
     method: (n1: number, n2: number) => +(n1 < n2)
   },
   {
+    name: "greater than equal to",
+    type: "logic",
+    method: (n1: number, n2: number) => +(n1 >= n2)
+  },
+  {
+    name: "less than equal to",
+    type: "logic",
+    method: (n1: number, n2: number) => +(n1 <= n2)
+  },
+  {
     name: "equal",
-    type: "comparison",
+    type: "logic",
     method: (n1: number, n2: number) => +(n1 === n2)
   },
   {
     name: "not equal",
-    type: "comparison",
+    type: "logic",
     method: (n1: number, n2: number) => +(n1 !== n2)
   },
   {
     name: "and",
     type: "logic",
-    // this is the dataflow 2.0 implementation of "AND" implemented in 2017
-    // ref: https://github.com/concord-consortium/flow-server/blob/master/static/flow/filters.js#L28
-    // tslint:disable-next-line:no-bitwise
-    method: (n1: number, n2: number) => n1 & n2
+    method: (n1: number, n2: number) => n1 && n2 ? 1 : 0
   },
   {
     name: "or",
     type: "logic",
-    // this is the dataflow 2.0 implementation of "OR" implemented in 2017
-    // ref: https://github.com/concord-consortium/flow-server/blob/master/static/flow/filters.js#L32
-    // tslint:disable-next-line:no-bitwise
-    method: (n1: number, n2: number) => n1 | n2
+    method: (n1: number, n2: number) => n1 || n2 ? 1 : 0
   },
   {
     name: "nand",
     type: "logic",
-    // this is the dataflow 2.0 implementation of "NAND" implemented in 2017
-    // ref: https://github.com/concord-consortium/flow-server/blob/master/static/flow/filters.js#L44
-    // tslint:disable-next-line:no-bitwise
-    method: (n1: number, n2: number) => 1 - (n1 & n2)
+    method: (n1: number, n2: number) => +(!(n1 && n2 ? 1 : 0))
   },
   {
     name: "xor",
     type: "logic",
-    // this is the dataflow 2.0 implementation of "XOR" implemented in 2017
-    // ref: https://github.com/concord-consortium/flow-server/blob/master/static/flow/filters.js#L36
-    // tslint:disable-next-line:no-bitwise
-    method: (n1: number, n2: number) => n1 ^ n2
+    method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0))
   }
 ];
 

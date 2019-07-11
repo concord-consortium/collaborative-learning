@@ -54,6 +54,5 @@ export class DropdownListControl extends Rete.Control {
 
   public setOptions = (options: any) => {
     this.props.optionArray = options;
-    // problem, if called with event nodecreate, update doesn't exist
   }
 }
