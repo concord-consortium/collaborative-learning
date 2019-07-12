@@ -57,11 +57,28 @@ export class SensorSelectControl extends Rete.Control {
             value={compProps.value}
           />
           <label className="units">
-            {NodeSensorTypes.find((s: any) => s.name === compProps.type)!.units}
+            {displayedUnits(compProps.sensor, compProps.channels, compProps.type)}
           </label>
         </div>
       </div>
     );
+
+    const displayedUnits = (id: string, channels: NodeChannelInfo[], type: string) => {
+      let units = "";
+      const sensor = channels.find((ch: any) => ch.hubId + "/" + ch.channelId === id);
+      if (sensor && sensor.units) {
+        units = sensor.units;
+        units = units.replace(/_/g, "");
+        units = units.replace(/degrees/g, "°");
+        units = units.replace(/percent/g, "%");
+      } else {
+        const sensorType = NodeSensorTypes.find((s: any) => s.name === type);
+        if (sensorType && sensorType.units) {
+          units = sensorType.units;
+        }
+      }
+      return units;
+    };
 
     const initialSensor = "none";
     node.data[key] = 0;
