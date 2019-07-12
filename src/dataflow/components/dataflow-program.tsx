@@ -59,20 +59,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         engine.register(c);
       });
 
-      const n1 = await components[0].createNode({ num: 6 });
-      const n2 = await components[0].createNode({ num: 3 });
-      const math = await components[1].createNode();
+      const n1 = await components[4].createNode();
+      const n2 = await components[0].createNode({ num: 10 });
+      const logic = await components[3].createNode();
 
       n1.position = [80, 200];
       n2.position = [80, 400];
-      math.position = [500, 240];
+      logic.position = [500, 240];
 
       editor.addNode(n1);
       editor.addNode(n2);
-      editor.addNode(math);
+      editor.addNode(logic);
 
-      editor.connect(n1.outputs.get("num")!, math.inputs.get("num1")!);
-      editor.connect(n2.outputs.get("num")!, math.inputs.get("num2")!);
+      editor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
+      editor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
 
       (editor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
