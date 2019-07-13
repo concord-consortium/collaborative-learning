@@ -1,9 +1,10 @@
 import * as React from "react";
 import { inject, observer } from "mobx-react";
+import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
+import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl
         } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
@@ -145,6 +146,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public state: IState = {
+          size: { width: null, height: null },
           disableRotate: false,
           redoStack: [],
           axisSettingsOpen: false,

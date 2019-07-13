@@ -1,10 +1,10 @@
 import * as React from "react";
-import { SizeMe } from "react-sizeme";
+import { SizeMe, SizeMeProps } from "react-sizeme";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { GeometryToolbarView } from "./geometry-toolbar";
 import { GeometryContentComponent } from "./geometry-content";
-import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
+import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
 import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
