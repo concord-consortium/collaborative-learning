@@ -125,8 +125,8 @@
   "dependencies": {
     "@blueprintjs/core": "^3.17.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
-    "ag-grid-community": "~20.2.0",
-    "ag-grid-react": "~20.2.0",
+    "ag-grid-community": "^21.0.1",
+    "ag-grid-react": "^21.0.1",
     "classnames": "^2.2.6",
     "expr-eval": "^1.2.3",
     "file-saver": "^2.0.2",

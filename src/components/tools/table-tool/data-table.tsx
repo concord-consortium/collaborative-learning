@@ -4,11 +4,11 @@ import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-actio
 import { IMenuItemFlags, TableHeaderMenu } from "./table-header-menu";
 import { addAttributeToDataSet, addCanonicalCasesToDataSet,
          ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
-import { IAttribute, IValueType } from "../../../models/data/attribute";
+import { IAttribute } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
-import { CellEditingStartedEvent, CellEditingStoppedEvent, ColDef, Column,
-          ColumnApi, GridApi, GridCellDef, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
+import { CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column,
+          ColumnApi, GridApi, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
           TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams } from "ag-grid-community";
 import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
@@ -109,7 +109,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private checkForEnterAfterCellEditingStopped = false;
   private localRowChangeTimer?: any;
 
-  private prevEditCell?: GridCellDef;
+  private prevEditCell?: CellPosition;
   private editCellEvent?: CellEditingStartedEvent;
   private savedFocusedCell?: ICellIDs;
   private savedEditCell?: ICellIDs;
@@ -700,13 +700,13 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public handleTabToNextCell = (params: TabToNextCellParams) => {
-    this.prevEditCell = params.previousCellDef;
-    if (params.editing && !params.backwards && !params.nextCellDef) {
+    this.prevEditCell = params.previousCellPosition;
+    if (params.editing && !params.backwards && !params.nextCellPosition) {
       setTimeout(() => {
         setTimeout(this.startEditingFirstColumnOfNextRow);
       });
     }
-    return params.nextCellDef;
+    return params.nextCellPosition;
   }
 
   public handleKeyDownCapture = (e: KeyboardEvent) => {
