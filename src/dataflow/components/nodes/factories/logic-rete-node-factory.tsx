@@ -31,7 +31,7 @@ export class LogicReteNodeFactory extends Rete.Component {
       .addInput(inp1)
       .addInput(inp2)
       .addControl(new DropdownListControl(this.editor, "logicOperator", node, dropdownOptions, true))
-      .addControl(new NumControl(this.editor, "preview", node, true))
+      .addControl(new NumControl(this.editor, "nodeValue", node, true))
       .addOutput(out) as any;
   }
 
@@ -49,8 +49,8 @@ export class LogicReteNodeFactory extends Rete.Component {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-        const preview = _node.controls.get("preview") as NumControl;
-        preview && preview.setValue(result);
+        const nodeValue = _node.controls.get("nodeValue") as NumControl;
+        nodeValue && nodeValue.setValue(result);
       }
     }
 

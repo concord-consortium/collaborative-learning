@@ -28,7 +28,7 @@ export class TransformReteNodeFactory extends Rete.Component {
     return node
       .addInput(inp1)
       .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
-      .addControl(new NumControl(this.editor, "preview", node, true))
+      .addControl(new NumControl(this.editor, "nodeValue", node, true))
       .addOutput(out) as any;
   }
 
@@ -45,8 +45,8 @@ export class TransformReteNodeFactory extends Rete.Component {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-        const preview = _node.controls.get("preview") as NumControl;
-        preview && preview.setValue(result);
+        const nodeValue = _node.controls.get("nodeValue") as NumControl;
+        nodeValue && nodeValue.setValue(result);
       }
     }
 

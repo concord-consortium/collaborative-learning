@@ -16,7 +16,7 @@ export class RelayReteNodeFactory extends Rete.Component {
     inp1.addControl(new NumControl(this.editor, "num1", node));
     return node
       .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
-      .addControl(new NumControl(this.editor, "preview", node, true))
+      .addControl(new NumControl(this.editor, "nodeValue", node, true))
       .addInput(inp1) as any;
   }
 
@@ -27,8 +27,8 @@ export class RelayReteNodeFactory extends Rete.Component {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-        const preview = _node.controls.get("preview") as NumControl;
-        preview && preview.setValue(+result);
+        const nodeValue = _node.controls.get("nodeValue") as NumControl;
+        nodeValue && nodeValue.setValue(+result);
       }
     }
   }

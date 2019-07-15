@@ -18,6 +18,6 @@ export class SensorReteNodeFactory extends Rete.Component {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    outputs.num = node.data.sensorSelect;
+    outputs.num = node.data.nodeValue;
   }
 }

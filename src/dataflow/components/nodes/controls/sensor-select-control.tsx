@@ -80,9 +80,11 @@ export class SensorSelectControl extends Rete.Control {
       return units;
     };
 
-    const initialSensor = "none";
-    node.data[key] = 0;
     const initialType = "temperature";
+    const initialSensor = "none";
+    node.data.type = initialSensor;
+    node.data.sensor = initialType;
+    node.data.nodeValue = 0;
 
     this.props = {
       readonly,
@@ -124,13 +126,9 @@ export class SensorSelectControl extends Rete.Control {
     (this as any).update();
   }
 
-  public getSensor = () => {
-    return this.props.value;
-  }
-
   public setSensorValue = (val: any) => {
     this.props.value = val;
-    this.putData(this.key, val);
+    this.putData("nodeValue", val);
     (this as any).update();
   }
 
