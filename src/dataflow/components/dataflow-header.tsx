@@ -43,8 +43,7 @@ export class DataflowHeaderComponent extends BaseComponent<IProps, {}> {
         <div className="middle">
           <ButtonGroup>
             <PanelButton label="Control Panels" panel="control-panels" {...this.props} />
-            <PanelButton label="Data Flow Creator" panel="flow-creator" {...this.props} />
-            <PanelButton label="Data Stories" panel="data-stories" {...this.props} />
+            <PanelButton label="Workspace" panel="workspace" {...this.props} />
           </ButtonGroup>
         </div>
         <div className="right">

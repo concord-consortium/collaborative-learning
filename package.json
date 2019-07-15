@@ -123,6 +123,7 @@
     "xhr-mock": "^2.4.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.4.4",
     "@blueprintjs/core": "^3.15.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "ag-grid-community": "^20.2.0",
@@ -146,6 +147,11 @@
     "react-dom": "^16.8.6",
     "react-dom-factories": "^1.0.2",
     "react-sizeme": "^2.5.2",
+    "rete": "^1.4.0",
+    "rete-area-plugin": "^0.2.1",
+    "rete-connection-plugin": "^0.8.1",
+    "rete-context-menu-plugin": "^0.4.1",
+    "rete-react-render-plugin": "^0.2.0",
     "slate": "^0.44.13",
     "slate-plain-serializer": "^0.6.38",
     "slate-react": "^0.21.20",

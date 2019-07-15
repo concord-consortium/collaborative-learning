@@ -1,1 +1,1 @@
-export type DataflowPanelType = "control-panels" | "flow-creator" | "data-stories";
+export type DataflowPanelType = "control-panels" | "workspace";

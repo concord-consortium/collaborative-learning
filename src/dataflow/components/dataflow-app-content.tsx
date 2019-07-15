@@ -5,6 +5,7 @@ import { DataflowPanelType } from "./dataflow-types";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { HubListComponent } from "./hub-list";
+import { DataflowProgram } from "./dataflow-program";
 
 import "./dataflow-app-content.sass";
 
@@ -50,10 +51,8 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
   private renderPanel() {
     switch (this.state.panel) {
-      case "flow-creator":
-        return <div>DataFlow: Data Flow Creator</div>;
-      case "data-stories":
-        return <div>DataFlow: Data Stories</div>;
+      case "workspace":
+        return <DataflowProgram />;
       case "control-panels":
       default:
         return <HubListComponent />;
