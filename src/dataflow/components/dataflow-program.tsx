@@ -11,7 +11,7 @@ import { autorun, observable } from "mobx";
 import "./dataflow-program.sass";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "./nodes/controls/relay-select-control";
-import { NumReteNodeFactory } from "./nodes/factories/num-rete-node-factory";
+import { NumberReteNodeFactory } from "./nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "./nodes/factories/math-rete-node-factory";
 import { TransformReteNodeFactory } from "./nodes/factories/transform-rete-node-factory";
 import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory";
@@ -24,6 +24,7 @@ interface IProps extends IBaseProps {}
 interface IState {}
 
 const numSocket = new Rete.Socket("Number value");
+const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 
 @inject("stores")
 @observer
@@ -39,7 +40,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     (async () => {
-      const components = [new NumReteNodeFactory(numSocket),
+      const components = [new NumberReteNodeFactory(numSocket),
         new MathReteNodeFactory(numSocket),
         new TransformReteNodeFactory(numSocket),
         new LogicReteNodeFactory(numSocket),
@@ -47,12 +48,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new RelayReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
-      const editor = new Rete.NodeEditor("demo@0.1.0", this.toolDiv);
+      const editor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       editor.use(ConnectionPlugin);
       editor.use(ReactRenderPlugin);
       editor.use(ContextMenuPlugin);
 
-      const engine = new Rete.Engine("demo@0.1.0");
+      const engine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
       components.map(c => {
         editor.register(c);

@@ -45,12 +45,12 @@ export const NodeOperationTypes = [
     method: (n1: number, n2: number) => +(n1 < n2)
   },
   {
-    name: "greater than equal to",
+    name: "greater than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 >= n2)
   },
   {
-    name: "less than equal to",
+    name: "less than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 <= n2)
   },
@@ -96,11 +96,11 @@ export const NodeSensorTypes = [
     units: "%",
   },
   {
-    name: "CO2",
+    name: "CO₂",
     units: "PPM",
   },
   {
-    name: "O2",
+    name: "O₂",
     units: "%",
   },
   {

@@ -3,7 +3,7 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 
-export class NumReteNodeFactory extends Rete.Component {
+export class NumberReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
     super("Number");
