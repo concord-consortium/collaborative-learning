@@ -6,6 +6,7 @@ import { AppComponent } from "./components/app";
 import { createStores } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { createFromJson } from "./models/curriculum/unit";
+import * as dataflowUnit from "./curriculum/dataflow/dataflow.json";
 import * as movingStraightAheadUnit from "./curriculum/moving-straight-ahead/moving-straight-ahead.json";
 import * as stretchingAndShrinkingUnit from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
@@ -22,14 +23,18 @@ import "./components/utilities/blueprint";
 import "./index.sass";
 
 function getCurriculumJson() {
+  const unitMap: { [code: string]: any } = [];
+  let defaultUnit;
+  [dataflowUnit, movingStraightAheadUnit, stretchingAndShrinkingUnit]
+    .forEach(_unit => {
+      if (_unit && _unit.code) {
+        unitMap[_unit.code] = _unit;
+      }
+      // last unit becomes default if no unit param is specified
+      defaultUnit = _unit;
+    });
   const unitParam = (urlParams.unit || "").toLowerCase();
-  switch (unitParam) {
-    case "msa":
-      return movingStraightAheadUnit;
-    case "s&s":
-    default:
-      return stretchingAndShrinkingUnit;
-  }
+  return unitMap[unitParam] || defaultUnit;
 }
 
 const host = window.location.host.split(":")[0];
