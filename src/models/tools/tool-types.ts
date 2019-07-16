@@ -43,6 +43,15 @@ interface IToolMap {
   [id: string]: IAnyType;
 }
 
+export interface IToolButtonConfig {
+  name: string;
+  title: string;
+  iconId: string;
+  isTileTool?: boolean;
+}
+
+export type ToolbarConfig = IToolButtonConfig[];
+
 interface IPrivate {
   toolMap: IToolMap;
   metadataMap: IToolMap;

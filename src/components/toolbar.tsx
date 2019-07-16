@@ -4,97 +4,83 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
+import { IToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
 
 import "./toolbar.sass";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
+  toolbarConfig: ToolbarConfig;
   toolApiMap: IToolApiMap;
 }
+
+interface IButtonProps {
+  config: IToolButtonConfig;
+  onClick: (e: React.MouseEvent<HTMLDivElement>, name: string) => void;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, name: string) => void;
+  onShowDropHighlight: () => void;
+  onHideDropHighlight: () => void;
+}
+
+const ToolButtonComponent = (props: IButtonProps) => {
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    return props.onClick && props.onClick(e, props.config.name);
+  };
+
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    return props.onDragStart && props.onDragStart(e, props.config.name);
+  };
+
+  return (
+    <div className={`tool ${props.config.name}`} title={props.config.title || ""}
+        onClick={handleClick}
+        onDragStart={props.config.isTileTool ? handleDrag : undefined}
+        draggable={props.config.isTileTool || false}
+        onMouseEnter={props.config.isTileTool ? props.onShowDropHighlight : undefined}
+        onMouseLeave={props.config.isTileTool ? props.onHideDropHighlight : undefined}>
+      <svg className={`icon ${props.config.iconId}`}>
+        <use xlinkHref={`#${props.config.iconId}`} />
+      </svg>
+    </div>
+  );
+};
 
 @inject("stores")
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, {}> {
   public render() {
-    const handleClickTool = (tool: DocumentTool) => {
-      return (e: React.MouseEvent<HTMLDivElement>) => {
-        switch (tool) {
-          case "delete":
-            this.handleDelete();
-            break;
-          default:
-            this.handleAddToolTile(tool);
-            break;
-        }
-      };
+    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: DocumentTool) => {
+      switch (tool) {
+        case "select":
+          this.handleSelect();
+          break;
+        case "delete":
+          this.handleDelete();
+          break;
+        default:
+          this.handleAddToolTile(tool);
+          break;
+      }
     };
-    const handleDragTool = (tool: DocumentTool) => {
-      return (e: React.DragEvent<HTMLDivElement>) => {
-        this.handleDragNewToolTile(tool, e);
-      };
+    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: DocumentTool) => {
+      this.handleDragNewToolTile(tool, e);
+    };
+    const renderToolButtons = (toolbarConfig: ToolbarConfig) => {
+      return toolbarConfig.map(config => {
+        const buttonProps: IButtonProps = {
+          config,
+          onClick: handleClickTool,
+          onDragStart: handleDragTool,
+          onShowDropHighlight: this.showDropRowHighlight,
+          onHideDropHighlight: this.removeDropRowHighlight
+        };
+        return ToolButtonComponent(buttonProps);
+      });
     };
     return (
       <div className="toolbar">
-        <div className="tool select" title="Select" onClick={handleClickTool("select")}>
-          <svg className={`icon icon-select-tool`}>
-            <use xlinkHref={`#icon-select-tool`} />
-          </svg>
-        </div>
-        <div className="tool text" title="Text"
-            onClick={handleClickTool("text")}
-            onDragStart={handleDragTool("text")}
-            draggable={true}
-            onMouseEnter={this.showDropRowHighlight}
-            onMouseLeave={this.removeDropRowHighlight}>
-          <svg className={`icon icon-text-tool`}>
-            <use xlinkHref={`#icon-text-tool`} />
-          </svg>
-        </div>
-        <div className="tool table" title="Table"
-            onClick={handleClickTool("table")}
-            onDragStart={handleDragTool("table")}
-            draggable={true}
-            onMouseEnter={this.showDropRowHighlight}
-            onMouseLeave={this.removeDropRowHighlight}>
-          <svg className={`icon icon-table-tool`}>
-            <use xlinkHref={`#icon-table-tool`} />
-          </svg>
-        </div>
-        <div className="tool geometry" title="Geometry"
-            onClick={handleClickTool("geometry")}
-            onDragStart={handleDragTool("geometry")}
-            draggable={true}
-            onMouseEnter={this.showDropRowHighlight}
-            onMouseLeave={this.removeDropRowHighlight}>
-          <svg className={`icon icon-geometry-tool`}>
-            <use xlinkHref={`#icon-geometry-tool`} />
-          </svg>
-        </div>
-        <div className="tool image" title="Image"
-            onClick={handleClickTool("image")}
-            onDragStart={handleDragTool("image")}
-            draggable={true}
-            onMouseEnter={this.showDropRowHighlight}
-            onMouseLeave={this.removeDropRowHighlight}>
-        <svg className={`icon icon-image-tool`}>
-            <use xlinkHref={`#icon-image-tool`} />
-          </svg>
-        </div>
-        <div className="tool drawing" title="Drawing"
-            onClick={handleClickTool("drawing")}
-            onDragStart={handleDragTool("drawing")}
-            draggable={true}
-            onMouseEnter={this.showDropRowHighlight}
-            onMouseLeave={this.removeDropRowHighlight}>
-          <svg className={`icon icon-drawing-tool`}>
-            <use xlinkHref={`#icon-drawing-tool`} />
-          </svg>
-        </div>
-        <div className="tool delete" title="Delete" onClick={handleClickTool("delete")}>
-          <svg className={`icon icon-delete-tool`}>
-            <use xlinkHref={`#icon-delete-tool`} />
-          </svg>
-        </div>
+        {renderToolButtons(this.props.toolbarConfig)}
       </div>
     );
   }
@@ -116,6 +102,10 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }
+  }
+
+  private handleSelect() {
+    // nothing to do
   }
 
   private handleDelete() {
