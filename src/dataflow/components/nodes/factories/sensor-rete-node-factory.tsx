@@ -2,6 +2,7 @@ import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { SensorSelectControl } from "../controls/sensor-select-control";
+import { PlotControl } from "../controls/plot-control";
 
 export class SensorReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
@@ -14,6 +15,7 @@ export class SensorReteNodeFactory extends Rete.Component {
     const out1 = new Rete.Output("num", "Number", this.numSocket);
     return node
       .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
+      .addControl(new PlotControl(this.editor, "plot", node))
       .addOutput(out1) as any;
   }
 

@@ -2,8 +2,7 @@ import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without t
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import * as React from "react";
-import Rete from "rete";
-import { Node } from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ContextMenuPlugin from "rete-context-menu-plugin";
@@ -18,6 +17,7 @@ import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory"
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { NodeChannelInfo } from "../utilities/node";
+import { PlotControl } from "./nodes/controls/plot-control";
 
 interface IProps extends IBaseProps {}
 
@@ -25,12 +25,16 @@ interface IState {}
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
+export const MAX_NODE_VALUES = 16;
+const HEARTBEAT_INTERVAL = 1000;
 
 @inject("stores")
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
+  private intervalHandle: any;
+  private programEditor: NodeEditor;
 
   public render() {
     return (
@@ -48,15 +52,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new RelayReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
-      const editor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
-      editor.use(ConnectionPlugin);
-      editor.use(ReactRenderPlugin);
-      editor.use(ContextMenuPlugin);
+      this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
+      this.programEditor.use(ConnectionPlugin);
+      this.programEditor.use(ReactRenderPlugin);
+      this.programEditor.use(ContextMenuPlugin);
 
       const engine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
       components.map(c => {
-        editor.register(c);
+        this.programEditor.register(c);
         engine.register(c);
       });
 
@@ -64,26 +68,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const n2 = await components[0].createNode({ num: 10 });
       const logic = await components[3].createNode();
 
-      n1.position = [80, 200];
-      n2.position = [80, 400];
-      logic.position = [500, 240];
+      n1.position = [80, 80];
+      n2.position = [80, 440];
+      logic.position = [450, 200];
 
-      editor.addNode(n1);
-      editor.addNode(n2);
-      editor.addNode(logic);
+      this.programEditor.addNode(n1);
+      this.programEditor.addNode(n2);
+      this.programEditor.addNode(logic);
 
-      editor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
-      editor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
+      this.programEditor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
+      this.programEditor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
 
-      (editor as any).on(
+      (this.programEditor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
         async () => {
           await engine.abort();
-          await engine.process(editor.toJSON());
+          await engine.process(this.programEditor.toJSON());
         }
       );
 
-      editor.on("nodecreate", node => {
+      this.programEditor.on("nodecreate", node => {
         // trigger after each of the first six events
         // add the current set of sensors or relays to node controls
         if (node.name === "Sensor") {
@@ -97,7 +101,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       // remove rete double click zoom
-      editor.on("zoom", ({ source }) => {
+      this.programEditor.on("zoom", ({ source }) => {
         return source !== "dblclick";
       });
 
@@ -120,7 +124,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         });
         // update any existing blocks since we found a new sensor or relay
         if (newChannel) {
-          editor.nodes.forEach((n: Node) => {
+          this.programEditor.nodes.forEach((n: Node) => {
             const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
             const relayList = n.controls.get("relayList") as RelaySelectControl;
             if (sensorSelect) {
@@ -144,7 +148,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             const chValue = Number.parseFloat(ch.value);
             if (!Number.isNaN(chValue) && ch.type !== "relay") {
               const hubSensorId = hub.hubId + "/" + ch.id;
-              const nodes = editor.nodes.filter((n: Node) => n.data.sensor === hubSensorId);
+              const nodes = this.programEditor.nodes.filter((n: Node) => n.data.sensor === hubSensorId);
               if (nodes) {
                 nodes.forEach((n: Node) => {
                   const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
@@ -160,13 +164,43 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (change) {
           (async () => {
             await engine.abort();
-            await engine.process(editor.toJSON());
+            await engine.process(this.programEditor.toJSON());
           })();
         }
       });
 
-      editor.view.resize();
-      (editor as any).trigger("process");
+      this.programEditor.view.resize();
+      (this.programEditor as any).trigger("process");
+
+      this.intervalHandle = setInterval(this.heartBeat.bind(this), HEARTBEAT_INTERVAL);
+
     })();
+  }
+
+  public componentWillUnmount() {
+    clearInterval(this.intervalHandle);
+  }
+
+  private heartBeat() {
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.data.hasOwnProperty("nodeValue")) {
+        const val: any = n.data.nodeValue;
+        if (n.data.recentValues) {
+          const values: any = n.data.recentValues;
+          if (values.length > MAX_NODE_VALUES) {
+            values.shift();
+          }
+          values.push(val);
+          n.data.recentValues = values;
+        } else {
+          const values: number[] = [val];
+          n.data.recentValues = values;
+        }
+        const plotControl = n.controls.get("plot") as PlotControl;
+        if (plotControl) {
+          (plotControl as any).update();
+        }
+      }
+    });
   }
 }
