@@ -59,7 +59,7 @@ if (kEnableLivelinessChecking) {
   setLivelynessChecking("error");
 }
 
-setTitle(showDemoCreator, problem);
+setTitle(showDemoCreator, unit, problem);
 stores.ui.setShowDemoCreator(!!showDemoCreator);
 
 stores.supports.createFromUnit(unit, investigation, problem);
