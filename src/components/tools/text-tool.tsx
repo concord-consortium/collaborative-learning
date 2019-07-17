@@ -8,12 +8,12 @@ import { TextContentModelType } from "../../models/tools/text/text-content";
 import * as Immutable from "immutable";
 import { autorun, IReactionDisposer } from "mobx";
 
+import "./text-tool.sass";
+
 interface SlateChange {
   operations: Immutable.List<Operation>;
   value: Value;
 }
-
-import "./text-tool.sass";
 
 interface IProps {
   model: ToolTileModelType;
@@ -33,7 +33,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
-    const { content } = model;
+    const content = this.getContent();
     const { ui } = this.stores;
 
     // determine last focus state from list of operations
@@ -101,5 +101,9 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         onChange={this.onChange}
       />
     );
+  }
+
+  private getContent() {
+    return this.props.model.content as TextContentModelType;
   }
 }

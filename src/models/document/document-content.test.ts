@@ -21,7 +21,7 @@ describe("document-content model", () => {
     const textTile2 = documentContent.addTile("text");
 
     let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    let textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
 
@@ -33,13 +33,13 @@ describe("document-content model", () => {
     });
 
     const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
-    const imageTile1rowIndex1 = documentContent.rowOrder.findIndex(id => id === imageTile1rowId);
+    const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should have shifted down
     textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(2);
 
@@ -51,7 +51,7 @@ describe("document-content model", () => {
     });
 
     const rowId2 = documentContent.findRowContainingTile(imageTile2!.tileId);
-    const rowIndex2 = documentContent.rowOrder.findIndex(id => id === rowId2);
+    const rowIndex2 = documentContent.rowOrder.findIndex((id: string) => id === rowId2);
 
     expect(rowIndex2).toBe(3);
   });
@@ -61,7 +61,7 @@ describe("document-content model", () => {
     const textTile2 = documentContent.addTile("text");
 
     let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    let textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
 
@@ -72,13 +72,13 @@ describe("document-content model", () => {
     });
 
     const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
-    const imageTile1rowIndex1 = documentContent.rowOrder.findIndex(id => id === imageTile1rowId);
+    const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should still be on 1 as well
     textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
   });
@@ -94,7 +94,7 @@ describe("document-content model", () => {
     });
 
     const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const geometryRowIndex = documentContent.rowOrder.findIndex(id => id === geometryRowId);
+    const geometryRowIndex = documentContent.rowOrder.findIndex((id: string) => id === geometryRowId);
 
     expect(geometryRowIndex).toBe(1);
 
@@ -102,13 +102,13 @@ describe("document-content model", () => {
     expect(graphTileInfo!.additionalTileIds).toBeDefined();
 
     const sidecarRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const sidecarRowIndex = documentContent.rowOrder.findIndex(id => id === sidecarRowId);
+    const sidecarRowIndex = documentContent.rowOrder.findIndex((id: string) => id === sidecarRowId);
 
     expect(sidecarRowIndex).toBe(1);
 
     // text tile should be on 2
     const textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    const textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(2);
   });
@@ -124,7 +124,7 @@ describe("document-content model", () => {
     });
 
     const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const geometryRowIndex = documentContent.rowOrder.findIndex(id => id === geometryRowId);
+    const geometryRowIndex = documentContent.rowOrder.findIndex((id: string) => id === geometryRowId);
 
     expect(geometryRowIndex).toBe(1);
 
@@ -132,13 +132,13 @@ describe("document-content model", () => {
     expect(graphTileInfo!.additionalTileIds).toBeDefined();
 
     const sidecarRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const sidecarRowIndex = documentContent.rowOrder.findIndex(id => id === sidecarRowId);
+    const sidecarRowIndex = documentContent.rowOrder.findIndex((id: string) => id === sidecarRowId);
 
     expect(sidecarRowIndex).toBe(1);
 
     // original text tile should be on 1 as well
     const textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    const textTile2RowIndex1 = documentContent.rowOrder.findIndex(id => id === textTile2RowId);
+    const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
   });

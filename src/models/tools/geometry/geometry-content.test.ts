@@ -194,7 +194,7 @@ describe("GeometryContent", () => {
     content.selectObjects(poly!.id);
     expect(content.isSelected(poly!.id)).toBe(true);
     expect(content.hasSelection()).toBe(true);
-    let found = content.findObjects(board, obj => {
+    let found = content.findObjects(board, (obj: JXG.GeometryElement) => {
                   return obj.id === p1!.id;
                 });
     expect(found.length).toBe(1);
@@ -205,7 +205,7 @@ describe("GeometryContent", () => {
     content.selectObjects(p1!.id);
     content.deleteSelection(board);
     expect(content.hasSelection()).toBe(false);
-    found = content.findObjects(board, obj => {
+    found = content.findObjects(board, (obj: JXG.GeometryElement) => {
               return obj.id === p1!.id;
             });
     expect(found.length).toBe(0);
@@ -270,7 +270,7 @@ describe("GeometryContent", () => {
     content.applyChange(board, change2);
     expect(content.changes.length).toBe(3);
     const change = content.popChangeset();
-    expect(change && change.map(changeStr => JSON.parse(changeStr))).toEqual([change2]);
+    expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2]);
     expect(content.changes.length).toBe(2);
     expect(JSON.parse(content.changes[1])).toEqual(change1);
   });
@@ -289,7 +289,7 @@ describe("GeometryContent", () => {
     content.applyChange(board, change4);
     expect(content.changes.length).toBe(5);
     const change = content.popChangeset();
-    expect(change && change.map(changeStr => JSON.parse(changeStr))).toEqual([change2, change3, change4]);
+    expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2, change3, change4]);
     expect(content.changes.length).toBe(2);
     expect(JSON.parse(content.changes[1])).toEqual(change1);
   });

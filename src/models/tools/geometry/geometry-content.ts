@@ -1,8 +1,8 @@
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { ITableChange, ITableLinkProperties, kLabelAttrName, TableContentModelType } from "../table/table-content";
+import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
 import { applyChange, applyChanges } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
-  JXGUnsafeCoordPair } from "./jxg-changes";
+          JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
 import { isMovableLine } from "./jxg-movable-line";
@@ -15,8 +15,8 @@ import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import * as uuid from "uuid/v4";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { Logger, LogEventName } from "../../../lib/logger";
 import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
@@ -70,10 +70,15 @@ function defaultGeometryBoardChange(overrides?: JXGProperties) {
   return change;
 }
 
-export function defaultGeometryContent(overrides?: JXGProperties) {
+export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
   const change = defaultGeometryBoardChange(overrides);
   const changeJson = JSON.stringify(change);
   return GeometryContentModel.create({ changes: [changeJson] });
+}
+
+export function getGeometryContent(target: IAnyStateTreeNode, tileId: string): GeometryContentModelType | undefined {
+  const content = getTileContentById(target, tileId);
+  return content && content as GeometryContentModelType;
 }
 
 export interface IAxisLabels {
@@ -208,10 +213,6 @@ export const GeometryContentModel = types
     },
     get yAxisLabel() {
       return self.metadata.yAxisLabel;
-    },
-    getTableContent(tileId: string) {
-      const content = getTileContentById(self, tileId);
-      return content && content as TableContentModelType;
     }
   }))
   .views(self => ({
@@ -232,7 +233,7 @@ export const GeometryContentModel = types
       if (!lastChangeLinks) return true;
       const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
       const linkedTile = linkedTiles && linkedTiles[0];
-      const tableContent = linkedTile ? self.getTableContent(linkedTile) : undefined;
+      const tableContent = linkedTile ? getTableContent(self, linkedTile) : undefined;
       return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
     },
     canUndoLinkedChange(change: ITableChange) {
@@ -273,7 +274,7 @@ export const GeometryContentModel = types
     },
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(({ id: tableId }) => {
-        const tableContent = self.getTableContent(tableId);
+        const tableContent = getTableContent(self, tableId);
         tableContent && tableContent.removeGeometryLink(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
@@ -313,7 +314,7 @@ export const GeometryContentModel = types
           const xEntry = labels && labels.find(entry => entry.id === "xAxis");
           const yEntry = labels && labels.find(entry => entry.id === "yAxis");
           if (op === "create") {
-            const tableContent = self.getTableContent(tableId);
+            const tableContent = getTableContent(self, tableId);
             if (tableContent) {
               const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
               self.metadata.addTableLink(tableId, axes);
@@ -1133,7 +1134,7 @@ function preprocessImportFormat(snapshot: any) {
 
 export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
                                              idMap: { [id: string]: string }) {
-  snapshot.changes = snapshot.changes.map(changeJson => {
+  snapshot.changes = snapshot.changes.map((changeJson: any) => {
     const change: JXGChange = safeJsonParse(changeJson);
     if ((change.operation === "create") && (change.target === "tableLink")) {
       change.targetID = idMap[change.targetID as string];

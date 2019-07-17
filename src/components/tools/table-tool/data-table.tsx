@@ -268,7 +268,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     const expression = expressions && expressions.get(attribute.id);
     const editable = !readOnly && !expression;
 
-    function defaultAttrValueFormatter(params: ValueFormatterParams) {
+    const defaultAttrValueFormatter = (params: ValueFormatterParams) => {
       const colName = params.colDef.field || params.colDef.headerName || "";
       const colPlaces: { [key: string]: number } = {
               day: 0,
@@ -282,7 +282,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       return (places != null) && (typeof params.value === "number")
                 ? params.value.toFixed(places)
                 : params.value;
-    }
+    };
 
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",

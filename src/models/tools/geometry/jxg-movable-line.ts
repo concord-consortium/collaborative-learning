@@ -143,7 +143,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           ...pt2,
         }
       );
-      const overrides = {
+      const overrides: any = {
         name() {
           return this.getSlope && this.getRise && this.getSlope() !== Infinity
             ? this.getRise() >= 0
