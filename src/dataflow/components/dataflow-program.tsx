@@ -197,23 +197,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private heartBeat = () => {
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.data.hasOwnProperty("nodeValue")) {
-        const val: any = n.data.nodeValue;
-        if (n.data.recentValues) {
-          const values: any = n.data.recentValues;
-          if (values.length > MAX_NODE_VALUES) {
-            values.shift();
-          }
-          values.push(val);
-          n.data.recentValues = values;
-        } else {
-          const values: number[] = [val];
-          n.data.recentValues = values;
-        }
-        const plotControl = n.controls.get("plot") as PlotControl;
-        if (plotControl) {
-          (plotControl as any).update();
-        }
+        this.updateNodeRecentValues(n);
       }
     });
+  }
+
+  private updateNodeRecentValues = (n: Node) => {
+    const val: any = n.data.nodeValue;
+    if (n.data.recentValues) {
+      const values: any = n.data.recentValues;
+      if (values.length > MAX_NODE_VALUES) {
+        values.shift();
+      }
+      values.push(val);
+      n.data.recentValues = values;
+    } else {
+      const values: number[] = [val];
+      n.data.recentValues = values;
+    }
+    const plotControl = n.controls.get("plot") as PlotControl;
+    if (plotControl) {
+      (plotControl as any).update();
+    }
   }
 }

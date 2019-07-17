@@ -127,7 +127,6 @@
     "@babel/polyfill": "^7.4.4",
     "@blueprintjs/core": "^3.15.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
-    "@types/chart.js": "^2.7.55",
     "ag-grid-community": "^20.2.0",
     "ag-grid-react": "^20.2.0",
     "aws-sdk": "^2.441.0",
