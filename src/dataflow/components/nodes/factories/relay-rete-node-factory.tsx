@@ -3,6 +3,7 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { RelaySelectControl } from "../controls/relay-select-control";
+import { PlotControl } from "../controls/plot-control";
 
 export class RelayReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
@@ -17,6 +18,7 @@ export class RelayReteNodeFactory extends Rete.Component {
     return node
       .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
       .addControl(new NumControl(this.editor, "nodeValue", node, true))
+      .addControl(new PlotControl(this.editor, "plot", node))
       .addInput(inp1) as any;
   }
 
@@ -29,6 +31,7 @@ export class RelayReteNodeFactory extends Rete.Component {
       if (_node) {
         const nodeValue = _node.controls.get("nodeValue") as NumControl;
         nodeValue && nodeValue.setValue(+result);
+        this.editor.view.updateConnections( {node: _node} );
       }
     }
   }

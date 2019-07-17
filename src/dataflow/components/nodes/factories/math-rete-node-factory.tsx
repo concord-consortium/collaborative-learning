@@ -4,6 +4,7 @@ import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
+import { PlotControl } from "../controls/plot-control";
 
 export class MathReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
@@ -32,6 +33,7 @@ export class MathReteNodeFactory extends Rete.Component {
       .addInput(inp2)
       .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
       .addControl(new NumControl(this.editor, "nodeValue", node, true))
+      .addControl(new PlotControl(this.editor, "plot", node))
       .addOutput(out) as any;
   }
 
@@ -51,6 +53,7 @@ export class MathReteNodeFactory extends Rete.Component {
       if (_node) {
         const nodeValue = _node.controls.get("nodeValue") as NumControl;
         nodeValue && nodeValue.setValue(result);
+        this.editor.view.updateConnections( {node: _node} );
       }
     }
 
