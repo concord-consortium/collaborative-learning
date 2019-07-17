@@ -35,6 +35,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private channels: NodeChannelInfo[] = [];
   private intervalHandle: any;
   private programEditor: NodeEditor;
+  private programEngine: any;
 
   public render() {
     return (
@@ -43,6 +44,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
+    if (!this.programEditor && this.toolDiv) {
+      this.initProgramEditor();
+    }
+  }
+
+  public componentWillUnmount() {
+    clearInterval(this.intervalHandle);
+  }
+
+  public componentDidUpdate() {
+    if (!this.programEditor && this.toolDiv) {
+      this.initProgramEditor();
+    }
+  }
+
+  private initProgramEditor = () => {
     (async () => {
       const components = [new NumberReteNodeFactory(numSocket),
         new MathReteNodeFactory(numSocket),
@@ -57,11 +74,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.use(ReactRenderPlugin);
       this.programEditor.use(ContextMenuPlugin);
 
-      const engine = new Rete.Engine(RETE_APP_IDENTIFIER);
+      this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
       components.map(c => {
         this.programEditor.register(c);
-        engine.register(c);
+        this.programEngine.register(c);
       });
 
       const n1 = await components[4].createNode();
@@ -82,8 +99,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       (this.programEditor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
         async () => {
-          await engine.abort();
-          await engine.process(this.programEditor.toJSON());
+          await this.programEngine.abort();
+          await this.programEngine.process(this.programEditor.toJSON());
         }
       );
 
@@ -163,25 +180,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         });
         if (change) {
           (async () => {
-            await engine.abort();
-            await engine.process(this.programEditor.toJSON());
+            await this.programEngine.abort();
+            await this.programEngine.process(this.programEditor.toJSON());
           })();
         }
       });
 
       this.programEditor.view.resize();
-      (this.programEditor as any).trigger("process");
+      this.programEditor.trigger("process");
 
-      this.intervalHandle = setInterval(this.heartBeat.bind(this), HEARTBEAT_INTERVAL);
+      this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
     })();
   }
 
-  public componentWillUnmount() {
-    clearInterval(this.intervalHandle);
-  }
-
-  private heartBeat() {
+  private heartBeat = () => {
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.data.hasOwnProperty("nodeValue")) {
         const val: any = n.data.nodeValue;

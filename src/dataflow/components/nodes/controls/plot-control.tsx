@@ -1,10 +1,10 @@
 import * as React from "react";
 import Rete from "rete";
-import "./plot-control.sass";
 import { Line } from "react-chartjs-2";
 import { ChartOptions } from "chart.js";
 import { cloneDeep } from "lodash";
 import { MAX_NODE_VALUES } from "../../dataflow-program";
+import "./plot-control.sass";
 
 export class PlotControl extends Rete.Control {
   private emitter: any;

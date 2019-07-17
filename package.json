@@ -84,6 +84,7 @@
     "@types/slate-react": "0.20.3",
     "@types/superagent": "^3.8.7",
     "@types/uuid": "^3.4.4",
+    "@types/chart.js": "^2.7.55",		
     "autoprefixer": "^9.5.1",
     "babel-core": "^6.26.3",
     "babel-jest": "^24.7.1",
