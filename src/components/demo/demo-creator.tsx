@@ -24,18 +24,21 @@ interface IProblemOption {
 @inject("stores")
 @observer
 export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
-  private problems: IProblemOption[] = [];
+  private problemOptions: IProblemOption[] = [];
 
   public componentWillMount() {
     const { unit, demo } = this.stores;
+    const problemTitleTemplate = unit.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
 
     unit.investigations.forEach((investigation, iIndex) => {
       investigation.problems.forEach((problem, pIndex) => {
-        const title = `${investigation.title}: ${problem.title}: ${problem.subtitle}`;
+        const title = problemTitleTemplate
+                        .replace("%investigationTitle%", investigation.title)
+                        .replace("%problemTitle%", problem.fullTitle);
         const ordinal = `${iIndex + 1}.${pIndex + 1}`;
-        this.problems.push({investigation, problem, ordinal, title});
+        this.problemOptions.push({investigation, problem, ordinal, title});
         if (!demo.problemOrdinal) {
           demo.setProblemOrdinal(ordinal);
         }
@@ -48,9 +51,9 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
     const studentLinks: JSX.Element[] = [];
     const teacherLinks: JSX.Element[] = [];
     const classes: JSX.Element[] = [];
-    const selectedProblem = this.problems[demo.problemIndex];
+    const selectedProblem = this.problemOptions[demo.problemIndex];
 
-    const problems = this.problems.map((problem) => {
+    const problems = this.problemOptions.map((problem) => {
       return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
 

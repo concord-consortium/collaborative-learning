@@ -8,10 +8,11 @@ import { StampModel } from "../tools/drawing/drawing-content";
 
 export const UnitModel = types
   .model("Unit", {
+    code: "",
     title: types.string,
     subtitle: "",
     pageTitle: "",
-    code: "",
+    demoProblemTitle: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),

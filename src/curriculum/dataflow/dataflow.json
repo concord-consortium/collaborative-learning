@@ -1,8 +1,9 @@
 {
+  "code": "dataflow",
   "title": "Dataflow",
   "subtitle": "Computational Thinking in Biology",
   "pageTitle": "%unitTitle%",
-  "code": "dataflow",
+  "demoProblemTitle": "%investigationTitle%",
   "investigations": [
     {
       "description": "Dataflow Investigation",
