@@ -8,41 +8,42 @@ import { StampModel } from "../tools/drawing/drawing-content";
 
 export const UnitModel = types
   .model("Unit", {
+    code: "",
     title: types.string,
     subtitle: "",
-    code: "",
+    pageTitle: "",
+    demoProblemTitle: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
   })
-  .views(self => {
-    return {
-      getInvestigation(investigationOrdinal: number) {
-        return (investigationOrdinal > 0) && (investigationOrdinal <= self.investigations.length)
-                ? self.investigations[investigationOrdinal - 1]
-                : undefined;
-      }
-    };
-  })
-  .views(self => {
-    return {
-      // ordinalString: e.g. "2.1", "2.2", etc.
-      getProblem(ordinalString: string) {
-        const ordinals = ordinalString.split(".");
-        // if only one exists, investigation defaults to 1
-        // if neither exists, investigation defaults to 0
-        const investigationOrdinal = ordinals[1] ? +ordinals[0] : (+ordinals[0] ? 1 : 0);
-        // if only one exists, it corresponds to problem
-        const problemOrdinal = ordinals[1] ? +ordinals[1] : +ordinals[0];
-        const investigation = self.getInvestigation(investigationOrdinal);
-        return {
-          investigation,
-          problem:  investigation && investigation.getProblem(problemOrdinal)
-        };
-      }
-    };
-  });
+  .views(self => ({
+    get fullTitle() {
+      return `${self.title}${self.subtitle ? ": " + self.subtitle : ""}`;
+    },
+    getInvestigation(investigationOrdinal: number) {
+      return (investigationOrdinal > 0) && (investigationOrdinal <= self.investigations.length)
+              ? self.investigations[investigationOrdinal - 1]
+              : undefined;
+    }
+  }))
+  .views(self => ({
+    // ordinalString: e.g. "2.1", "2.2", etc.
+    getProblem(ordinalString: string) {
+      const ordinals = ordinalString.split(".");
+      // if only one exists, investigation defaults to 1
+      // if neither exists, investigation defaults to 0
+      const investigationOrdinal = ordinals[1] ? +ordinals[0] : (+ordinals[0] ? 1 : 0);
+      // if only one exists, it corresponds to problem
+      const problemOrdinal = ordinals[1] ? +ordinals[1] : +ordinals[0];
+      const investigation = self.getInvestigation(investigationOrdinal);
+      return {
+        investigation,
+        problem:  investigation && investigation.getProblem(problemOrdinal)
+      };
+    }
+  }));
 
 export type UnitModelType = typeof UnitModel.Type;
 

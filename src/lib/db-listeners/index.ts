@@ -196,18 +196,14 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    let initialLoad = true;
-    documentRef.on("value", (snapshot) => {
+    documentRef.once("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.db.parseDocumentContent(updatedDoc, initialLoad);
-        initialLoad = false;
-        if (updatedContent) {
-          const documentModel = documents.getDocument(documentKey);
-          if (documentModel) {
-            documentModel.setContent(DocumentContentModel.create(updatedContent));
-            this.monitorDocumentModel(documentModel);
-          }
+        const updatedContent = this.db.parseDocumentContent(updatedDoc);
+        const documentModel = documents.getDocument(documentKey);
+        if (documentModel) {
+          documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
+          this.monitorDocumentModel(documentModel);
         }
       }
     });
@@ -223,11 +219,13 @@ export class DBListeners {
     }
 
     const updateRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, key));
-    docListener.modelDisposer = (onSnapshot(content, (newContent) => {
-      updateRef.update({
-        content: JSON.stringify(newContent)
-      });
-    }));
+    docListener.modelDisposer = onSnapshot(content, (newContent) => {
+                                  document.incChangeCount();
+                                  updateRef.update({
+                                    content: JSON.stringify(newContent),
+                                    changeCount: document.changeCount
+                                  });
+                                });
   }
 
   private stopModelListeners() {

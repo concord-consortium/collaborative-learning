@@ -32,7 +32,8 @@ export const DocumentModel = types
     groupId: types.maybe(types.string),
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
-    originDoc: types.maybe(types.string)
+    originDoc: types.maybe(types.string),
+    changeCount: types.optional(types.number, 0)
   })
   .views(self => ({
     get isSection() {
@@ -96,6 +97,10 @@ export const DocumentModel = types
       if (userStar) {
         userStar.starred = !userStar.starred;
       }
+    },
+
+    incChangeCount() {
+      self.changeCount += 1;
     }
   }));
 

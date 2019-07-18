@@ -41,6 +41,7 @@ export const imageChangeAgent: JXGChangeAgent = {
     });
     // other properties can be handled generically
     objectChangeAgent.update(board, change);
+    return undefined;
   },
 
   // delete can be handled generically

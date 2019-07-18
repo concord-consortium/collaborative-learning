@@ -1,15 +1,11 @@
-import { JXGChangeAgent, JXGProperties, JXGCoordPair } from "./jxg-changes";
+import { JXGChangeAgent } from "./jxg-changes";
 import { isBoard } from "./jxg-board";
 import { isMovableLine } from "./jxg-movable-line";
-import { objectChangeAgent, isPositionGraphable } from "./jxg-object";
+import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
 import { isPolygon, isVisibleEdge } from "./jxg-polygon";
 import { values } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
-
-export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
-
-export const isComment = (v: any) => isCommentType(v) && (v instanceof JXG.Text) && (v.elType === "text");
 
 const sharedProps = {
   strokeWidth: 1,
@@ -79,6 +75,8 @@ export const commentChangeAgent: JXGChangeAgent = {
           return centroid[index];
         }
       };
+      // Comments on table-linked points will not copy to new documents because the anchor isn't copied
+      if (!_board.objects[commentProps.anchor]) return;
 
       const id = commentProps.id;
       const comment = _board.create("text", [0, -1, ""], commentProps);
@@ -100,31 +98,8 @@ export const commentChangeAgent: JXGChangeAgent = {
     }
   },
 
-  update: (board, change) => {
-    if (!change.targetID || !change.properties) { return; }
-    const id = change.targetID as string;
-    const obj = board.objects[id] as JXG.Text;
-    if (obj) {
-      const props = change.properties as JXGProperties;
-      const { text, position } = props;
-      if (text != null) {
-        obj.setText(text);
-        board.update();
-      }
-      if (position && isPositionGraphable(position)) {
-        // Element coordinates are not updated until a redraw occurs. So if redraws are suspended, and a comment or its
-        // anchor has moved, the transform will be calculated from a stale position. We unsuspend updates to force a
-        // refresh on coordinate positions.
-        const wasSuspended = board.isSuspendedUpdate;
-        if (wasSuspended) board.unsuspendUpdate();
-        obj.setPosition(JXG.COORDS_BY_USER, position as JXGCoordPair);
-        board.update();
-        if (wasSuspended) board.suspendUpdate();
-      }
-      // other properties can be handled generically
-      objectChangeAgent.update(board, change);
-    }
-  },
+  // update can be handled generically
+  update: objectChangeAgent.update,
 
   // delete can be handled generically
   delete: objectChangeAgent.delete

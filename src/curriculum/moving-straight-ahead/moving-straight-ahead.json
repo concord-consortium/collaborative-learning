@@ -1,7 +1,8 @@
 {
+  "code": "msa",
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
-  "code": "msa",
+  "pageTitle": "CLUE: %problemTitle%",
   "defaultStamps": [
     {
       "url": "assets/tools/drawing-tool/stamps/coin.png",

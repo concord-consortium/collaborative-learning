@@ -17,6 +17,7 @@ import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 import { TileCommentModelType } from "../models/tools/tile-comments";
+import { safeJsonParse } from "../utilities/js-utils";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -408,7 +409,7 @@ export class DB {
             throw new Error("Unable to open document");
           }
 
-          const content = this.parseDocumentContent(document, true);
+          const content = this.parseDocumentContent(document);
           return DocumentModel.create({
             type,
             title,
@@ -419,7 +420,8 @@ export class DB {
             originDoc,
             key: document.self.documentKey,
             createdAt: metadata.createdAt,
-            content: content ? content : {}
+            content: content ? content : {},
+            changeCount: document.changeCount
           });
         })
         .then((document) => {
@@ -572,12 +574,8 @@ export class DB {
     });
   }
 
-  public parseDocumentContent(document: DBDocument, deselect?: boolean): DocumentContentSnapshotType|undefined {
-    if (document.content == null) {
-      return undefined;
-    }
-
-    return JSON.parse(document.content);
+  public parseDocumentContent(document: DBDocument): DocumentContentSnapshotType|undefined {
+    return safeJsonParse(document.content);
   }
 
   public addImage(imageModel: ImageModelType) {

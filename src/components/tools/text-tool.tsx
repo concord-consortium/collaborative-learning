@@ -6,13 +6,14 @@ import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import * as Immutable from "immutable";
+import { autorun, IReactionDisposer } from "mobx";
+
+import "./text-tool.sass";
 
 interface SlateChange {
   operations: Immutable.List<Operation>;
   value: Value;
 }
-
-import "./text-tool.sass";
 
 interface IProps {
   model: ToolTileModelType;
@@ -20,31 +21,19 @@ interface IProps {
 }
 
 interface IState {
-  prevContent?: TextContentModelType;
   value?: Value;
 }
 ​
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<IProps, IState> {
-
-  public static getDerivedStateFromProps = (props: IProps, state: IState) => {
-    const { model: { content } } = props;
-    if (content === state.prevContent) { return null; }
-    const textContent = content as TextContentModelType;
-    const newState: IState = { prevContent: textContent };
-    const value = textContent.convertSlate(state.value);
-    if (value !== state.value) {
-      newState.value = value;
-    }
-    return newState;
-  }
-
   public state: IState = {};
+  private disposers: IReactionDisposer[];
+  private prevText: any;
 
   public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
-    const { content } = model;
+    const content = this.getContent();
     const { ui } = this.stores;
 
     // determine last focus state from list of operations
@@ -69,9 +58,33 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     if (content.type === "Text") {
       if (!readOnly) {
         content.setSlate(change.value);
+        this.setState({ value: change.value });
       }
-      this.setState({ value: change.value });
     }
+  }
+
+  public componentDidMount() {
+    const initialTextContent = this.props.model.content as TextContentModelType;
+    this.prevText = initialTextContent.text;
+    const initialValue = initialTextContent.asSlate();
+    this.setState({
+      value: initialValue
+    });
+
+    this.disposers = [];
+    if (this.props.readOnly) {
+      this.disposers.push(autorun(() => {
+        const textContent = this.props.model.content as TextContentModelType;
+        if (this.prevText !== textContent.text) {
+          this.setState({ value: textContent.asSlate() });
+          this.prevText = textContent.text;
+        }
+      }));
+    }
+  }
+
+  public componentWillUnmount() {
+    this.disposers.forEach(disposer => disposer());
   }
 
   public render() {
@@ -88,5 +101,9 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         onChange={this.onChange}
       />
     );
+  }
+
+  private getContent() {
+    return this.props.model.content as TextContentModelType;
   }
 }

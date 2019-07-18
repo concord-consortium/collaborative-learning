@@ -106,6 +106,9 @@ export const DocumentsModel = types
       else {
         const i = self.all.findIndex((currDoc) => currDoc.key === document.key);
         if (i !== -1) {
+          const oldDoc = self.all[i];
+          if (oldDoc && oldDoc.changeCount > document.changeCount) return;
+
           self.all[i] = document;
         }
       }

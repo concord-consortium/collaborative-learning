@@ -1,20 +1,22 @@
 import * as React from "react";
 import { inject, observer } from "mobx-react";
+import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { IGeometryProps, IActionHandlers, SizeMeProps } from "./geometry-shared";
-import { GeometryContentModelType, GeometryMetadataModelType, setElementColor
+import { getTableContent } from "../../../models/tools/table/table-content";
+import { IGeometryProps, IActionHandlers } from "./geometry-shared";
+import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl
         } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel, isBoard } from "../../../models/tools/geometry/jxg-board";
-import { JXGChange, ILinkProperties } from "../../../models/tools/geometry/jxg-changes";
-import { isComment } from "../../../models/tools/geometry/jxg-comment";
+import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { JXGChange, ILinkProperties, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
+import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
@@ -25,7 +27,7 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
-import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineEquation,
+import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
@@ -33,12 +35,14 @@ import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 import SingleStringDialog from "../../utilities/single-string-dialog";
+import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
 export interface IProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
+  onUpdateToolbar: () => void;
 }
 
 interface IState extends SizeMeProps {
@@ -49,7 +53,6 @@ interface IState extends SizeMeProps {
   isLoading?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
-  syncedChanges: number;
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
@@ -61,6 +64,12 @@ interface IState extends SizeMeProps {
 interface JXGPtrEvent {
   evt: any;
   coords: JXG.Coords;
+}
+
+interface IDragPoint {
+  initial: JXG.Coords;
+  final?: JXG.Coords;
+  snapToGrid?: boolean;
 }
 
 interface IBoardContentMapEntry {
@@ -102,7 +111,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   updateVertexAnglesFromObjects(changedElements);
   board.unsuspendUpdate();
 
-  return { newElements: newElements.length ? newElements : undefined, syncedChanges };
+  return { newElements: newElements.length ? newElements : undefined };
 }
 
 let sViewCount = 0;
@@ -120,7 +129,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const nextState: IState = {} as any;
 
-    const { readOnly, size } = nextProps;
+    const { size } = nextProps;
     const geometryContent = content as GeometryContentModelType;
     if (size && size.width && size.height && (!prevState.size ||
         ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
@@ -134,49 +143,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       nextState.scale = scale;
     }
 
-    if (content !== prevState.content) {
-      if (geometryContent.changes.length !== prevState.syncedChanges) {
-        // synchronize background image changes
-        let lastUrl;
-        for (let i = prevState.syncedChanges; i < geometryContent.changes.length; ++i) {
-          const jsonChange = geometryContent.changes[i];
-          const change = jsonChange && safeJsonParse(jsonChange);
-          const url = change && change.properties &&
-                        !Array.isArray(change.properties) &&
-                        change.properties.url;
-          if (url) lastUrl = url;
-        }
-        if (lastUrl) {
-          // signal update to be triggered in componentDidUpdate
-          nextState.imageContentUrl = lastUrl;
-        }
-        // If the incoming list of changes is shorter, an undo has occurred.
-        // In this case, clear the board and replay it.
-        if (prevState.syncedChanges > geometryContent.changes.length) {
-          const board = prevState.board;
-          board.suspendUpdate();
-          // Board initialization creates 2 objects: the info box and the grid.
-          // These won't be recreated if the board already exists so we don't delete them.
-          const kDefaultBoardObjects = 2;
-          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
-            board.removeObject(board.objectsList[i]);
-          }
-          board.unsuspendUpdate();
-        }
-        const syncedChanges = prevState.syncedChanges > geometryContent.changes.length
-                                ? 0
-                                : prevState.syncedChanges;
-        assign(nextState, syncBoardChanges(prevState.board, geometryContent, syncedChanges, readOnly));
-      } else {
-        nextState.redoStack = [];
-      }
-      nextState.content = geometryContent;
-    }
     return nextState;
   }
 
   public state: IState = {
-          syncedChanges: 0,
+          size: { width: null, height: null },
           disableRotate: false,
           redoStack: [],
           axisSettingsOpen: false,
@@ -186,13 +157,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
+  private syncedChanges: number;
 
-  private disposeSelectionObserver: any;
+  private disposers: any[];
 
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
   private lastSelectDown?: any;
-  private dragPts: { [id: string]: { initial: JXG.Coords, final?: JXG.Coords, snapToGrid?: boolean }} = {};
+  private dragPts: { [id: string]: IDragPoint } = {};
   private isVertexDrag: boolean;
 
   private lastPasteId: string;
@@ -217,7 +189,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                   imageContentUrl: undefined,
                   imageEntry: image
                 });
-                // update mst content if conversion occurred
+                // Update legacy Firestore URLs, if they exist
                 if (image.contentUrl && (url !== image.contentUrl)) {
                   this.getContent().updateImageUrl(url, image.contentUrl);
                 }
@@ -262,6 +234,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
+    this.syncedChanges = 0;
+    this.disposers = [];
 
     this.initializeContent();
 
@@ -318,6 +292,46 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
     }
+
+    this.disposers.push(autorun(() => {
+      const { model: { content }, scale, readOnly } = this.props;
+      const { board } = this.state;
+      const geometryContent = content as GeometryContentModelType;
+      if (geometryContent.changes.length !== this.syncedChanges && board) {
+        const nextState: IState = {} as any;
+
+        // synchronize background image changes
+        let lastUrl;
+        for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
+          const jsonChange = geometryContent.changes[i];
+          const change = jsonChange && safeJsonParse(jsonChange);
+          const url = getImageUrl(change);
+          if (url) lastUrl = url;
+        }
+        if (lastUrl) {
+          // signal update to be triggered in componentDidUpdate
+          nextState.imageContentUrl = lastUrl;
+        }
+        // If the incoming list of changes is shorter, an undo has occurred.
+        // In this case, clear the board and replay it.
+        if (this.syncedChanges > geometryContent.changes.length) {
+          board.suspendUpdate();
+          // Board initialization creates 2 objects: the info box and the grid.
+          // These won't be recreated if the board already exists so we don't delete them.
+          const kDefaultBoardObjects = 2;
+          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
+            board.removeObject(board.objectsList[i]);
+          }
+          board.unsuspendUpdate();
+        }
+        const syncedChanges = this.syncedChanges > geometryContent.changes.length
+                                ? 0
+                                : this.syncedChanges;
+        assign(nextState, syncBoardChanges(board, geometryContent, syncedChanges, readOnly));
+        this.setState(nextState);
+        this.syncedChanges = geometryContent.changes.length;
+      }
+    }));
   }
 
   public componentDidUpdate() {
@@ -338,9 +352,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    if (this.disposeSelectionObserver) {
-      this.disposeSelectionObserver();
-    }
+    this.disposers.forEach(disposer => disposer());
     const board = this.state.board;
     if (board) {
       delete sBoardContentMetadataMap[this.elementId];
@@ -428,7 +440,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board, disableRotate } = this.state;
     const selectedPolygon = board && !disableRotate && !this.props.readOnly
                               ? this.getContent().getOneSelectedPolygon(board) : undefined;
-    const rotatablePolygon = selectedPolygon && selectedPolygon.vertices.every(pt => !pt.getAttribute("fixed"))
+    const rotatablePolygon = selectedPolygon &&
+                              selectedPolygon.vertices.every((pt: JXG.Point) => !pt.getAttribute("fixed"))
                               ? selectedPolygon : undefined;
     return (
       <RotatePolygonIcon
@@ -470,7 +483,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getTableContent(tableId: string) {
-    return this.getContent().getTableContent(tableId);
+    return getTableContent(this.getContent(), tableId);
   }
 
   private initializeContent() {
@@ -486,11 +499,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (imageUrl) {
           this.updateImageUrl(imageUrl);
         }
-        this.hackAxisHandlers(board);
+        this.setState({ board });
       }
-      const newState = assign({ syncedChanges: content.changes.length },
-                                board ? { board } : null);
-      this.setState(newState);
+      this.syncedChanges = content.changes.length;
     }
   }
 
@@ -498,19 +509,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const board = _board || this.state.board;
     if (!board) return;
     const images = this.getContent()
-                      .findObjects(board, obj => obj.elType === "image");
+                      .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image");
     return images.length > 0
             ? images[images.length - 1] as JXG.Image
             : undefined;
-  }
-
-  // XXX: Hack - rescaling the board should return the new axes, but they are quickly destroyed and recreated
-  // So, any time new axes could be created, we reattach the axis handlers
-  private hackAxisHandlers(board: JXG.Board) {
-    setTimeout(() => {
-      const axes = board.objectsList.filter(el => isAxis(el)) as JXG.Line[];
-      axes.forEach(this.handleCreateAxis);
-    });
   }
 
   private updateImageUrl(url: string) {
@@ -580,7 +582,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (commentAnchor) {
         this.applyChange(() => {
             const elems = content.addComment(board, commentAnchor.id);
-            const comment = elems && elems.find(elem => isComment(elem)) as JXG.Text;
+            const comment = elems && elems.find((elem: JXG.GeometryElement) => isComment(elem)) as JXG.Text;
             if (comment) {
               this.handleCreateText(comment);
               this.setState({selectedComment: comment});
@@ -600,7 +602,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateComment(board, commentId, { text });
+      content.updateObjects(board, [commentId], { text });
     }
     this.setState({ selectedComment: undefined });
   }
@@ -618,8 +620,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      this.hackAxisHandlers(board);
+      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
     }
     this.setState({ axisSettingsOpen: false });
   }
@@ -686,8 +690,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.UNDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -712,8 +714,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             LogEventMethod.REDO);
         });
       }
-
-      this.hackAxisHandlers(board);
     }
 
     return true;
@@ -890,8 +890,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               const width = image.width! / kGeometryDefaultPixelsPerUnit;
               const height = image.height! / kGeometryDefaultPixelsPerUnit;
               const imageIds = geometryContent
-                                .findObjects(board, obj => obj.elType === "image")
-                                .map(obj => obj.id);
+                                .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
+                                .map((obj: JXG.GeometryElement) => obj.id);
               const contentUrl = image.contentUrl || url;
               this.applyChanges(() => {
                 if (imageIds.length) {
@@ -931,15 +931,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
         const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
-        pts.forEach(pt => {
+        pts.forEach((pt: JXG.Point) => {
           this.handleCreatePoint(pt);
         });
       });
-      setTimeout(() => {
-        const _tableContent = this.getTableContent(dragTileId);
-        const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-        _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
-      });
+
+      const _tableContent = this.getTableContent(dragTileId);
+      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+      _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
     }
   }
 
@@ -961,7 +960,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isMovableLine(elt)) {
         this.handleCreateLine(elt as JXG.Line);
       }
-      else if (isComment(elt) || isMovableLineEquation(elt)) {
+      else if (isComment(elt) || isMovableLineLabel(elt)) {
         this.handleCreateText(elt as JXG.Text);
       }
       else if (isAxis(elt)) {
@@ -971,7 +970,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private applyChange(change: () => void) {
-    this.setState({ syncedChanges: this.state.syncedChanges + 1 }, change);
+    this.syncedChanges +=  1;
+    change();
+    this.setState({ redoStack: [] });
   }
 
   private applyChanges(changes: () => void) {
@@ -986,8 +987,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // update the model as a batch
     const changeCount = geometryContent.batchChangeCount;
-    this.setState({ syncedChanges: this.state.syncedChanges + changeCount },
-                  () => geometryContent.resumeSync());
+    this.syncedChanges += changeCount;
+    geometryContent.resumeSync();
   }
 
   private applyBatchChanges(changes: string[]) {
@@ -1028,7 +1029,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board && !hasSelectionModifier(evt)) {
-      content.metadata.selection.forEach((isSelected, id) => {
+      content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         if (pt && isSelected && !pt.getAttribute("fixed")) {
@@ -1097,20 +1098,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private endDragComment(evt: any, dragTarget: JXG.Text, usrDiff: number[]) {
+  private endDragText(evt: any, dragTarget: JXG.Text, dragEntry: IDragPoint) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return;
 
-     // only create a change object if there's actually a change
-    if (usrDiff[1] || usrDiff[2]) {
-      const id = dragTarget.id;
-      const dragStart = this.dragPts[id].initial;
-      if (dragStart) {
-        const newUsrCoords = JXG.Math.Statistics.add(dragStart.usrCoords, usrDiff) as [number, number];
-        this.applyChange(() => content.updateComment(board, id, { position: newUsrCoords }));
-      }
-    }
+    // nothing to do if there's no change
+    if (!dragEntry.final) return;
+    if ((dragEntry.final.usrCoords[1] === dragEntry.initial.usrCoords[1]) &&
+        (dragEntry.final.usrCoords[2] === dragEntry.initial.usrCoords[2])) return;
+
+    const position = dragEntry.final.usrCoords.slice(1) as JXGCoordPair;
+    this.applyChange(() => content.updateObjects(board!, dragTarget.id, { position }));
   }
 
   private handleCreateBoard = (board: JXG.Board) => {
@@ -1188,24 +1187,24 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         || isVisibleMovableLine(elt)
         || isAxisLabel(elt)
         || isComment(elt)
-        || isMovableLineEquation(elt);
+        || isMovableLineLabel(elt);
     };
 
     // synchronize initial selection
     const content = this.getContent();
-    content.findObjects(board, elt => isPoint(elt))
-      .forEach(pt => {
+    content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
+      .forEach((pt: JXG.Point) => {
         if (content.isSelected(pt.id)) {
           setElementColor(board, pt.id, true);
         }
       });
 
     // synchronize selection changes
-    this.disposeSelectionObserver = content.metadata.selection.observe(change => {
+    this.disposers.push(content.metadata.selection.observe((change: any) => {
       if (this.state.board) {
         setElementColor(this.state.board, change.name, (change as any).newValue.value);
       }
-    });
+    }));
 
     if (this.props.onSetBoard) {
       this.props.onSetBoard(board);
@@ -1240,6 +1239,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
+              this.props.onUpdateToolbar();
             }
           });
           this.lastPointDown = undefined;
@@ -1529,13 +1529,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
           content.selectElement(text.id);
         }
-      } else if (isMovableLineEquation(text)) {
-        if (board) {
-          const parentLine = values(text.ancestors)[0] as JXG.Line;
-          if (parentLine && !readOnly) {
-            this.setState({selectedLine: parentLine});
-          }
-        }
       }
     };
 
@@ -1551,15 +1544,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerUp = (evt: any) => {
+      const { readOnly } = this.props;
+      const { board } = this.state;
+      if (isMovableLineLabel(text) && board) {
+        // Extended clicks/drags don't open the movable line dialog
+        const clickTimeThreshold = 500;
+        if (evt.timeStamp - this.lastBoardDown.evt.timeStamp < clickTimeThreshold) {
+          const parentLine = values(text.ancestors)[0] as JXG.Line;
+          if (parentLine && !readOnly) {
+            this.setState({selectedLine: parentLine});
+          }
+        }
+      }
+
       const id = text.id;
       const dragEntry = this.dragPts[id];
       if (!dragEntry) { return; }
 
       if (!this.props.readOnly) {
         dragEntry.final = copyCoords(text.coords);
-        const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
-                                                     dragEntry.initial.usrCoords) as number[];
-        this.endDragComment(evt, text, usrDiff);
+        this.endDragText(evt, text, dragEntry);
       }
 
       delete this.dragPts[id];

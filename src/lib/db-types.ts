@@ -103,6 +103,7 @@ export interface DBDocument {
     classHash: string;
   };
   content?: string;
+  changeCount?: number;
   type: DBDocumentType;
 }
 

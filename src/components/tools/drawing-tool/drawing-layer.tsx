@@ -11,7 +11,8 @@ import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, 
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";
-import { reaction, IReactionDisposer } from "mobx";
+import { reaction, IReactionDisposer, autorun } from "mobx";
+import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -622,12 +623,12 @@ interface DrawingLayerViewState {
   selectedObjects: DrawingObject[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObject|null;
-  actionsCount: number;
   isLoading: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
 }
 
+@observer
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
   public objects: ObjectMap;
   public currentTool: DrawingTool|null;
@@ -635,8 +636,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private svgRef: React.RefObject<{}>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
-  private disposeCurrentToolReaction: IReactionDisposer;
+  private disposers: IReactionDisposer[];
   private fetchingImages: string[] = [];
+  private actionsCount: number;
 
   constructor(props: DrawingLayerViewProps) {
     super(props);
@@ -647,7 +649,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
-      actionsCount: 0,
       isLoading: false
     };
 
@@ -673,27 +674,27 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidMount() {
     this._isMounted = true;
+    this.actionsCount  = 0;
+    this.disposers = [];
 
-    this.syncChanges();
-
-    this.disposeCurrentToolReaction = reaction(
+    this.disposers.push(reaction(
         () => this.getContent().metadata.selectedButton,
         selectedButton => this.syncCurrentTool(selectedButton)
-    );
+    ));
+
+    this.disposers.push(autorun(() => {
+      this.syncChanges();
+    }));
   }
 
   public componentWillUnmount() {
-    if (this.disposeCurrentToolReaction) {
-      this.disposeCurrentToolReaction();
-    }
+    this.disposers.forEach(disposer => disposer());
 
     this._isMounted = false;
   }
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps) {
     const drawingContent = this.props.model.content as DrawingContentModelType;
-
-    this.syncChanges();
 
     const newSettings = this.toolbarSettings(drawingContent);
     const prevSettings = this.state.toolbarSettings;
@@ -1186,20 +1187,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private syncChanges() {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
-    const prevChanges = this.state.actionsCount;
-
-    if (currentChangesLength > prevChanges) {
-      for (let i = prevChanges; i < currentChangesLength; i++) {
-        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
-        this.executeChange(change);
-      }
-      this.setState({actionsCount: currentChangesLength});
-    }
-  }
-
   private forEachObject(callback: (object: DrawingObject, key?: string) => void) {
     const {objects} = this.state;
     Object.keys(objects).forEach((id) => {
@@ -1208,6 +1195,21 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         callback(object, id);
       }
     });
+  }
+
+  private syncChanges() {
+    const drawingContent = this.props.model.content as DrawingContentModelType;
+    const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
+    const prevChanges = this.actionsCount;
+
+    if (currentChangesLength > prevChanges) {
+      for (let i = prevChanges; i < currentChangesLength; i++) {
+        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
+        this.executeChange(change);
+      }
+      this.actionsCount = currentChangesLength;
+      this.forceUpdate();
+    }
   }
 
   private toolbarSettings(drawingContent: DrawingContentModelType): ToolbarSettings {

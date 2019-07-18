@@ -1,5 +1,30 @@
 # Changelog
 
+## Version 0.7.1 - released May 29, 2019
+
+- Fixes listeners on loading empty document causing data loss
+- Adds movable equation labels to movable lines
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 496,642 bytes | 0% |
+| index.js | 4,046,632 bytes | 0% |
+
+## Version 0.7.0 - released May 22, 2019
+
+- Adds teacher document starring
+- #166111125: fixes line slope and intercept setting
+- Dependency and security updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 496,642 bytes | 2.1% |
+| index.js | 4,046,310 bytes | 0.8% |
+
 ## Version 0.6.0 - released March 27, 2019
 
 - Table equations + data generation!
