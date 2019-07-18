@@ -4,6 +4,7 @@ import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
+import { getTableContent } from "../../../models/tools/table/table-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl
         } from "../../../models/tools/geometry/geometry-content";
@@ -439,7 +440,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board, disableRotate } = this.state;
     const selectedPolygon = board && !disableRotate && !this.props.readOnly
                               ? this.getContent().getOneSelectedPolygon(board) : undefined;
-    const rotatablePolygon = selectedPolygon && selectedPolygon.vertices.every(pt => !pt.getAttribute("fixed"))
+    const rotatablePolygon = selectedPolygon &&
+                              selectedPolygon.vertices.every((pt: JXG.Point) => !pt.getAttribute("fixed"))
                               ? selectedPolygon : undefined;
     return (
       <RotatePolygonIcon
@@ -481,7 +483,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getTableContent(tableId: string) {
-    return this.getContent().getTableContent(tableId);
+    return getTableContent(this.getContent(), tableId);
   }
 
   private initializeContent() {
@@ -507,7 +509,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const board = _board || this.state.board;
     if (!board) return;
     const images = this.getContent()
-                      .findObjects(board, obj => obj.elType === "image");
+                      .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image");
     return images.length > 0
             ? images[images.length - 1] as JXG.Image
             : undefined;
@@ -580,7 +582,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (commentAnchor) {
         this.applyChange(() => {
             const elems = content.addComment(board, commentAnchor.id);
-            const comment = elems && elems.find(elem => isComment(elem)) as JXG.Text;
+            const comment = elems && elems.find((elem: JXG.GeometryElement) => isComment(elem)) as JXG.Text;
             if (comment) {
               this.handleCreateText(comment);
               this.setState({selectedComment: comment});
@@ -888,8 +890,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               const width = image.width! / kGeometryDefaultPixelsPerUnit;
               const height = image.height! / kGeometryDefaultPixelsPerUnit;
               const imageIds = geometryContent
-                                .findObjects(board, obj => obj.elType === "image")
-                                .map(obj => obj.id);
+                                .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
+                                .map((obj: JXG.GeometryElement) => obj.id);
               const contentUrl = image.contentUrl || url;
               this.applyChanges(() => {
                 if (imageIds.length) {
@@ -929,7 +931,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
         const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
-        pts.forEach(pt => {
+        pts.forEach((pt: JXG.Point) => {
           this.handleCreatePoint(pt);
         });
       });
@@ -1027,7 +1029,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board && !hasSelectionModifier(evt)) {
-      content.metadata.selection.forEach((isSelected, id) => {
+      content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
         if (pt && isSelected && !pt.getAttribute("fixed")) {
@@ -1190,15 +1192,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // synchronize initial selection
     const content = this.getContent();
-    content.findObjects(board, elt => isPoint(elt))
-      .forEach(pt => {
+    content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
+      .forEach((pt: JXG.Point) => {
         if (content.isSelected(pt.id)) {
           setElementColor(board, pt.id, true);
         }
       });
 
     // synchronize selection changes
-    this.disposers.push(content.metadata.selection.observe(change => {
+    this.disposers.push(content.metadata.selection.observe((change: any) => {
       if (this.state.board) {
         setElementColor(this.state.board, change.name, (change as any).newValue.value);
       }

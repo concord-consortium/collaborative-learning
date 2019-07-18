@@ -1,8 +1,8 @@
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
-import { GeometryContentModelType } from "../geometry/geometry-content";
+import { getGeometryContent } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -37,6 +37,11 @@ export function canonicalizeValue(value: number | string | undefined) {
 
 export function getRowLabel(index: number, prefix: string = "p") {
   return `${prefix}${index + 1}`;
+}
+
+export function getTableContent(target: IAnyStateTreeNode, tileId: string): TableContentModelType | undefined {
+  const content = getTileContentById(target, tileId);
+  return content && content as TableContentModelType;
 }
 
 export interface ITransferCase {
@@ -186,10 +191,6 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
-    getGeometryContent(tileId: string) {
-      const content = getTileContentById(self, tileId);
-      return content && content as GeometryContentModelType;
-    },
     getClientLinks(linkId: string, dataSet: IDataSet, addLabelMap: boolean): ITableLinkProperties {
       let labels: IRowLabel[] = [];
       if (addLabelMap && dataSet) {
@@ -235,7 +236,7 @@ export const TableContentModel = types
     },
     willRemoveFromDocument() {
       self.metadata.linkedGeometries.forEach(geometryId => {
-        const geometryContent = self.getGeometryContent(geometryId);
+        const geometryContent = getGeometryContent(self, geometryId);
         geometryContent && geometryContent.removeTableLink(undefined, self.metadata.id);
       });
       self.metadata.clearLinkedGeometries();
@@ -382,7 +383,7 @@ export const TableContentModel = types
           break;
         case "geometryLink":
           const geometryId = change.ids && change.ids as string;
-          const geometryContent = geometryId && self.getGeometryContent(geometryId);
+          const geometryContent = geometryId && getGeometryContent(self, geometryId);
           geometryContent && self.metadata.addLinkedGeometry(geometryId!);
           break;
       }

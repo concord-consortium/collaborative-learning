@@ -64,9 +64,9 @@ export const DocumentContentModel = types
         return contentId;
       },
       getTile(tileId: string) {
-        return self.tileMap.get(tileId);
+        return tileId ? self.tileMap.get(tileId) : undefined;
       },
-      getTileContent(tileId: string) {
+      getTileContent(tileId: string): ToolContentUnionType | undefined {
         const tile = self.tileMap.get(tileId);
         return tile && tile.content;
       },

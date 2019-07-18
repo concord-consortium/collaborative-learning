@@ -5,12 +5,12 @@ import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
-import { ColumnApi, GridApi, GridReadyEvent } from "ag-grid-community";
+import { ColumnApi, GridApi, GridReadyEvent, ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
-          TableContentModelType, TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
+          TableContentModelType } from "../../../models/tools/table/table-content";
+import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
 import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -260,7 +260,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private getGeometryContent(geometryId: string) {
-    return this.getContent().getGeometryContent(geometryId);
+    return getGeometryContent(this.getContent(), geometryId);
   }
 
   private getPositionOfPoint(caseId: string): JXGUnsafeCoordPair {
