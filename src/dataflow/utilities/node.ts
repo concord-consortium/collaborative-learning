@@ -123,4 +123,5 @@ export interface NodeChannelInfo {
   channelId: string;
   type: string;
   units: string;
+  value: number;
 }

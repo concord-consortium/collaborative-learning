@@ -133,27 +133,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                                             hubName: hub.hubName,
                                             channelId: ch.id,
                                             type: ch.type,
-                                            units: ch.units};
+                                            units: ch.units,
+                                            value: Number(ch.value)};
               this.channels.push(nci);
               newChannel = true;
             }
           });
         });
         // update any existing blocks since we found a new sensor or relay
-        if (newChannel) {
-          this.programEditor.nodes.forEach((n: Node) => {
-            const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-            const relayList = n.controls.get("relayList") as RelaySelectControl;
-            if (sensorSelect) {
-              sensorSelect.setChannels(this.channels);
-              (sensorSelect as any).update();
-            }
-            if (relayList) {
-              relayList.setChannels(this.channels);
-              (relayList as any).update();
-            }
-          });
-        }
+        this.updateChannelNodes(newChannel, newChannel);
       });
 
       // Can this auto-call processing and be in the sensor component instead of doing this n^2 loop
@@ -163,6 +151,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         hubStore.hubs.forEach(hub => {
           hub.hubChannels.forEach(ch => {
             const chValue = Number.parseFloat(ch.value);
+            const nci = this.channels.find(ci => ci.hubId === hub.hubId && ci.channelId === ch.id);
+            if (nci && !Number.isNaN(chValue)) {
+              nci.value = chValue;
+            }
             if (!Number.isNaN(chValue) && ch.type !== "relay") {
               const hubSensorId = hub.hubId + "/" + ch.id;
               const nodes = this.programEditor.nodes.filter((n: Node) => n.data.sensor === hubSensorId);
@@ -178,6 +170,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
           });
         });
+        this.updateChannelNodes(true, false);
         if (change) {
           (async () => {
             await this.programEngine.abort();
@@ -192,6 +185,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
     })();
+  }
+
+  private updateChannelNodes(updateSensor: boolean, updateRelay: boolean) {
+    this.programEditor.nodes.forEach((n: Node) => {
+      const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+      const relayList = n.controls.get("relayList") as RelaySelectControl;
+      if (sensorSelect && updateSensor) {
+        sensorSelect.setChannels(this.channels);
+        (sensorSelect as any).update();
+      }
+      if (relayList && updateRelay) {
+        relayList.setChannels(this.channels);
+        (relayList as any).update();
+      }
+    });
   }
 
   private heartBeat = () => {

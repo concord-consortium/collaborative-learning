@@ -119,7 +119,8 @@ export class SensorSelectControl extends Rete.Control {
   }
 
   public setSensor = (val: any) => {
-    this.setSensorValue(0);
+    const ch: NodeChannelInfo = this.props.channels.find((ci: any) => `${ci.hubId}/${ci.channelId}` === val);
+    ch ? this.setSensorValue(ch.value) : this.setSensorValue(0);
 
     this.props.sensor = val;
     this.putData("sensor", val);
