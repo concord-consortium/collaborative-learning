@@ -6,17 +6,61 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument, PublicationDocument } from "../../models/document/document";
+import { DocumentModelType, SectionDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { SectionType } from "../../models/curriculum/section";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
+import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
 export type WorkspaceSide = "primary" | "comparison";
+
+const toolbarConfig: ToolbarConfig = [
+  { // select tool
+    name: "select",
+    title: "Select",
+    iconId: "icon-select-tool"
+  },
+  { // text tool
+    name: "text",
+    title: "Text",
+    iconId: "icon-text-tool",
+    isTileTool: true
+  },
+  { // table tool
+    name: "table",
+    title: "Table",
+    iconId: "icon-table-tool",
+    isTileTool: true
+  },
+  { // geometry tool
+    name: "geometry",
+    title: "Geometry",
+    iconId: "icon-geometry-tool",
+    isTileTool: true
+  },
+  { // image tool
+    name: "image",
+    title: "Image",
+    iconId: "icon-image-tool",
+    isTileTool: true
+  },
+  { // drawing tool
+    name: "drawing",
+    title: "Drawing",
+    iconId: "icon-drawing-tool",
+    isTileTool: true
+  },
+  { // delete tool
+    name: "delete",
+    title: "Delete",
+    iconId: "icon-delete-tool"
+  }
+];
 
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
@@ -170,7 +214,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderToolbar() {
     return <ToolbarComponent key="toolbar" document={this.props.document}
-                              toolApiMap={this.toolApiMap} />;
+                              toolbarConfig={toolbarConfig} toolApiMap={this.toolApiMap} />;
   }
 
   private renderCanvas() {
