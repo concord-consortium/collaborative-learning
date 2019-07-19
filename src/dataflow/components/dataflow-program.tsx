@@ -217,6 +217,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     });
     if (processNeeded) {
+        // if we've updated values on 1 or more nodes (such as a generator),
+        // we need to abort any current processing and reprocess all
+        // nodes so current values are up to date
       (async () => {
         await this.programEngine.abort();
         await this.programEngine.process(this.programEditor.toJSON());
