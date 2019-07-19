@@ -249,8 +249,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateGeneratorNode = (n: Node) => {
     const generatorType = n.data.generatorType;
-    const frequency: any = n.data.frequency;
-    const amplitude: any = n.data.amplitude;
+    const frequency = Number(n.data.frequency);
+    const amplitude = Number(n.data.amplitude);
     let ticks: any = n.data.ticks || 0;
     const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
     if (nodeGeneratorType && frequency && amplitude) {
