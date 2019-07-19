@@ -117,6 +117,29 @@ export const NodeSensorTypes = [
   },
 ];
 
+export const NodeGeneratorTypes = [
+  {
+    name: "sine",
+    method: (t: number, p: number, a: number, v: number) => Math.round(Math.sin(t * Math.PI / p) * a * 100) / 100
+  },
+  {
+    name: "square",
+    method: (t: number, p: number, a: number, v: number) => t % p < p / 2 ? 1 * a : 0
+  },
+  {
+    name: "triangle",
+    method: (t: number, p: number, a: number, v: number) => (2 * a / p) * Math.abs(t % p - p / 2)
+  },
+  {
+    name: "random walk",
+    method: (t: number, p: number, a: number, v: number) => Math.random() > .5 ? v + 1 * a : v - 1 * a
+  },
+  {
+    name: "noise",
+    method: (t: number, p: number, a: number, v: number) => Math.random() * a
+  },
+];
+
 export interface NodeChannelInfo {
   hubId: string;
   hubName: string;

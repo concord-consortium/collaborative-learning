@@ -7,7 +7,6 @@ import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ContextMenuPlugin from "rete-context-menu-plugin";
 import { autorun, observable } from "mobx";
-import "./dataflow-program.sass";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "./nodes/controls/relay-select-control";
 import { NumberReteNodeFactory } from "./nodes/factories/number-rete-node-factory";
@@ -16,8 +15,11 @@ import { TransformReteNodeFactory } from "./nodes/factories/transform-rete-node-
 import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
-import { NodeChannelInfo } from "../utilities/node";
+import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
+import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
+import { NumControl } from "./nodes/controls/num-control";
+import "./dataflow-program.sass";
 
 interface IProps extends IBaseProps {}
 
@@ -66,7 +68,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new TransformReteNodeFactory(numSocket),
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
-        new RelayReteNodeFactory(numSocket)];
+        new RelayReteNodeFactory(numSocket),
+        new GeneratorReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
@@ -203,11 +206,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private heartBeat = () => {
+    let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Generator") {
+        processNeeded = true;
+        this.updateGeneratorNode(n);
+      }
       if (n.data.hasOwnProperty("nodeValue")) {
         this.updateNodeRecentValues(n);
       }
     });
+    if (processNeeded) {
+        // if we've updated values on 1 or more nodes (such as a generator),
+        // we need to abort any current processing and reprocess all
+        // nodes so current values are up to date
+      (async () => {
+        await this.programEngine.abort();
+        await this.programEngine.process(this.programEditor.toJSON());
+      })();
+    }
+
   }
 
   private updateNodeRecentValues = (n: Node) => {
@@ -228,4 +246,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       (plotControl as any).update();
     }
   }
+
+  private updateGeneratorNode = (n: Node) => {
+    const generatorType = n.data.generatorType;
+    const frequency = Number(n.data.frequency);
+    const amplitude = Number(n.data.amplitude);
+    let ticks: any = n.data.ticks || 0;
+    const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
+    if (nodeGeneratorType && frequency && amplitude) {
+      ticks = ticks + 1;
+      n.data.ticks = ticks;
+      const prevVal: any = n.data.nodeValue || 0;
+      const val = nodeGeneratorType.method(ticks, frequency, amplitude, prevVal);
+      const nodeValue = n.controls.get("nodeValue") as NumControl;
+      if (nodeValue) {
+        nodeValue.setValue(val);
+      }
+    }
+  }
+
 }
