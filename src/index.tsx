@@ -3,7 +3,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { AppComponent } from "./components/app";
-import { createStores } from "./models/stores/stores";
+import { createStores as createBaseStores } from "./models/stores/stores";
+import { createStores as createDataflowStores } from "./dataflow/models/stores/dataflow-stores";
 import { UserModel } from "./models/stores/user";
 import { createFromJson } from "./models/curriculum/unit";
 import * as dataflowUnit from "./curriculum/dataflow/dataflow.json";
@@ -48,6 +49,7 @@ const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
 const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                  unit.getProblem(DefaultProblemOrdinal);
 const showDemoCreator = urlParams.demo;
+const createStores = urlParams.dataflow !== undefined ? createDataflowStores : createBaseStores;
 const stores = createStores({ appMode, appVersion, user, problem, showDemoCreator, unit });
 stores.documents.setUnit(stores.unit);
 

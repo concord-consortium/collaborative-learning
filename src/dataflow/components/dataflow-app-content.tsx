@@ -3,9 +3,9 @@ import * as React from "react";
 import { DataflowHeaderComponent } from "./dataflow-header";
 import { DataflowPanelType } from "./dataflow-types";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
+import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { HubListComponent } from "./hub-list";
-import { DataflowProgram } from "./dataflow-program";
 
 import "./dataflow-app-content.sass";
 
@@ -37,7 +37,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
         <DataflowHeaderComponent
           current={this.state.panel}
           onPanelChange={this.handlePanelChange} />
-        <div className="single-workspace">
+        <div className="dataflow-panel">
           {this.renderPanel()}
         </div>
         <DialogComponent dialog={this.stores.ui.dialog} />
@@ -50,9 +50,10 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderPanel() {
+    const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     switch (this.state.panel) {
       case "workspace":
-        return <DataflowProgram />;
+        return <DocumentWorkspaceComponent isGhostUser={isGhostUser} />;
       case "control-panels":
       default:
         return <HubListComponent />;
