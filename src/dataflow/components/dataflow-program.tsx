@@ -249,15 +249,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateGeneratorNode = (n: Node) => {
     const generatorType = n.data.generatorType;
-    const frequency = Number(n.data.frequency);
+    const period = Number(n.data.period);
     const amplitude = Number(n.data.amplitude);
     let ticks: any = n.data.ticks || 0;
     const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
-    if (nodeGeneratorType && frequency && amplitude) {
+    if (nodeGeneratorType && period && amplitude) {
       ticks = ticks + 1;
       n.data.ticks = ticks;
       const prevVal: any = n.data.nodeValue || 0;
-      const val = nodeGeneratorType.method(ticks, frequency, amplitude, prevVal);
+      const val = nodeGeneratorType.method(ticks, period, amplitude, prevVal);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);

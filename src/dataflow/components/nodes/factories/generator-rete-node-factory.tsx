@@ -23,7 +23,7 @@ export class GeneratorReteNodeFactory extends Rete.Component {
     return node
       .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
       .addControl(new NumControl(this.editor, "amplitude", node, false, "amplitude", 1, .01))
-      .addControl(new NumControl(this.editor, "frequency", node, false, "frequency", 10, 1))
+      .addControl(new NumControl(this.editor, "period", node, false, "period", 10, 1))
       .addControl(new NumControl(this.editor, "nodeValue", node, true))
       .addControl(new PlotControl(this.editor, "plot", node))
       .addOutput(out) as any;
