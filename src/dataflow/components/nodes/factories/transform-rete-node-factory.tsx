@@ -2,6 +2,7 @@ import Rete from "rete";
 import { Node, Socket, NodeEditor } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
+import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
 import { PlotControl } from "../controls/plot-control";
@@ -23,13 +24,13 @@ export class TransformReteNodeFactory extends Rete.Component {
       .filter((nodeOp) => {
         return nodeOp.type === "transform";
       }).map((nodeOp) => {
-        return nodeOp.name;
+        return { name: nodeOp.name, icon: nodeOp.icon };
       });
 
     return node
       .addInput(inp1)
       .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
-      .addControl(new NumControl(this.editor, "nodeValue", node, true))
+      .addControl(new ValueControl(this.editor, "nodeValue", node))
       .addControl(new PlotControl(this.editor, "plot", node))
       .addOutput(out) as any;
   }
@@ -37,18 +38,21 @@ export class TransformReteNodeFactory extends Rete.Component {
   public worker(node: NodeData, inputs: any, outputs: any) {
     const transformOperator: any = node.data.transformOperator;
     let result = 0;
+    let resultSentence = "";
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === transformOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, 0);
-    }
+      resultSentence = nodeOperationTypes.numberSentence(n1, 0) + result;
+   }
 
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-        const nodeValue = _node.controls.get("nodeValue") as NumControl;
+        const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue && nodeValue.setValue(result);
+        nodeValue && nodeValue.setSentence(resultSentence);
         this.editor.view.updateConnections( {node: _node} );
       }
     }

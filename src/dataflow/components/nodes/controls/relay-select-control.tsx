@@ -1,7 +1,7 @@
 import * as React from "react";
 import Rete from "rete";
 import "./sensor-select-control.sass";
-import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
+import { NodeChannelInfo } from "../../../utilities/node";
 
 export class RelaySelectControl extends Rete.Control {
   private emitter: any;

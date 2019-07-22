@@ -2,6 +2,7 @@ import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
+import { ValueControl } from "../controls/value-control";
 import { PlotControl } from "../controls/plot-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeGeneratorTypes } from "../../../utilities/node";
@@ -17,14 +18,14 @@ export class GeneratorReteNodeFactory extends Rete.Component {
     const out = new Rete.Output("num", "Number", this.numSocket);
     const dropdownOptions = NodeGeneratorTypes
       .map((nodeOp) => {
-        return nodeOp.name;
+        return { name: nodeOp.name, icon: nodeOp.icon };
       });
 
     return node
       .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
       .addControl(new NumControl(this.editor, "amplitude", node, false, "amplitude", 1, .01))
       .addControl(new NumControl(this.editor, "period", node, false, "period", 10, 1))
-      .addControl(new NumControl(this.editor, "nodeValue", node, true))
+      .addControl(new ValueControl(this.editor, "nodeValue", node))
       .addControl(new PlotControl(this.editor, "plot", node))
       .addOutput(out) as any;
   }

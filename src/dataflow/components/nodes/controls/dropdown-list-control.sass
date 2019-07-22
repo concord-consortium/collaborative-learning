@@ -1,0 +1,58 @@
+.node-select
+  font-size: 13px
+  font-weight: bold
+  color: #2DA343
+  width: 184px
+  &.sensor, &.generatorType
+    color: #0592AF
+
+  .item
+    display: flex
+    align-items: center
+    height: 24px
+    background-color: white
+    &.top
+      padding: 0 6px 0 6px
+      margin-bottom: 5px
+      border-radius: 30px
+      border: 1px solid #999
+    &.selected
+      background-color: #2DA343
+      color: white
+      &.sensor, &.generatorType
+        background-color: #0592AF
+    &.selectable
+      &:hover
+        background-color: #2DA343
+        color: white
+        &.sensor, &.generatorType
+          background-color: #0592AF
+      &:hover .icon
+        fill: white
+
+    .label
+      vertical-align: middle
+
+    .icon
+      position: static
+      z-index: 0
+      width: 18px
+      height: 18px
+      margin: 0 4px 0 4px
+      &.top
+        margin: 0 2px 0 0
+      &.arrow
+        width: 6px
+        height: 6px
+        margin-left: auto
+
+  .option-list
+    position: absolute
+    z-index: 1
+    left: 18px
+    top: 106px
+    width: 182px
+    border: 1px solid #1E90FF
+    background-color: white
+
+

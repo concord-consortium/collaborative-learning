@@ -2,9 +2,20 @@
   width: 500px
   height: 500px
   background: white
-  
+
   .node .control input, .node .input-control input
     width: 140px
+
+  .node
+    &.sensor, &.number, &.generator
+      background-color: #0592AF
+      border-color: #C0E4EB
+    &.logic, &.math, &.transform
+      background-color: #2DA343
+      border-color: #CDE8D2
+    &.relay
+      background-color: #E16D2F
+      border-color: #E09E7D
 
   select, input
     width: 100%
@@ -15,12 +26,12 @@
     font-size: 110%
     width: 170px
 
-  svg 
+  svg
     width: 1px
     height: 1px
     position: absolute
     z-index: -1
-  
+
 // Connections are offset without this for some reason
 .flow-tool > div > div
     position: absolute
