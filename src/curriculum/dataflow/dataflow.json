@@ -4,6 +4,24 @@
   "subtitle": "Computational Thinking in Biology",
   "pageTitle": "%unitTitle%",
   "demoProblemTitle": "%investigationTitle%",
+  "toolbar": [
+    {
+      "name": "select",
+      "title": "Select",
+      "iconId": "icon-select-tool"
+    },
+    {
+      "name": "text",
+      "title": "Text",
+      "iconId": "icon-text-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "delete",
+      "title": "Delete",
+      "iconId": "icon-delete-tool"
+    }
+  ],
   "investigations": [
     {
       "description": "Dataflow Investigation",

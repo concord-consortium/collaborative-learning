@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
+import { getSnapshot } from "mobx-state-tree";
 import * as React from "react";
-
-import "./learning-log.sass";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
@@ -9,6 +8,8 @@ import { timeAgo, niceDateTime } from "../../utilities/time";
 import { DocumentComponent, WorkspaceSide } from "../document/document";
 import { DocumentModelType, DocumentDragKey, LearningLogDocument } from "../../models/document/document";
 import { LearningLogWorkspace } from "../../models/stores/workspace";
+
+import "./learning-log.sass";
 
 // cf. learning-log.sass: $list-item-scale
 const kLearningLogItemScale = 0.08;
@@ -32,7 +33,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments() {
-    const {ui, documents} = this.stores;
+    const {documents, ui, unit} = this.stores;
     const {learningLogWorkspace} = ui;
     const primaryWorkspace = learningLogWorkspace.primaryDocumentKey
                         ? documents.getDocument(learningLogWorkspace.primaryDocumentKey)
@@ -40,6 +41,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     const comparisonWorkspace = learningLogWorkspace.comparisonDocumentKey
                         ? documents.getDocument(learningLogWorkspace.comparisonDocumentKey)
                         : null;
+    const toolbar = unit && getSnapshot(unit.toolbar);
 
     if (!primaryWorkspace) {
       return (
@@ -59,6 +61,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
               <DocumentComponent
                 document={primaryWorkspace}
                 workspace={learningLogWorkspace}
+                toolbar={toolbar}
                 side="primary" />
           )}
           {this.renderWorkspace(
@@ -82,6 +85,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
                <DocumentComponent
                 document={primaryWorkspace}
                 workspace={learningLogWorkspace}
+                toolbar={toolbar}
                 side="primary"/>
           )}
         </div>
