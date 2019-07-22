@@ -7,10 +7,13 @@ export class SensorSelectControl extends Rete.Control {
   private emitter: any;
   private component: any;
   private props: any;
+  private node: any;
+
   constructor(emitter: any, key: string, node: any, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;
+    this.node = node;
 
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
@@ -80,10 +83,10 @@ export class SensorSelectControl extends Rete.Control {
       return units;
     };
 
-    const initialType = "temperature";
-    const initialSensor = "none";
-    node.data.type = initialSensor;
-    node.data.sensor = initialType;
+    const initialType = node.data.type || "temperature";
+    const initialSensor = node.data.sensor || "none";
+    node.data.type = initialType;
+    node.data.sensor = initialSensor;
     node.data.nodeValue = 0;
 
     this.props = {
@@ -105,7 +108,14 @@ export class SensorSelectControl extends Rete.Control {
 
   public setChannels = (channels: NodeChannelInfo[]) => {
     this.props.channels = channels;
-
+    if (this.node.data.sensor && this.node.data.sensor !== "none") {
+      if (!channels.find(ch => `${ch.hubId}/${ch.channelId}` === this.node.data.sensor)) {
+        this.props.value = 0;
+        this.putData("nodeValue", 0);
+        this.props.sensor = "none";
+        this.putData("sensor", "none");
+      }
+    }
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
   }
@@ -119,8 +129,7 @@ export class SensorSelectControl extends Rete.Control {
   }
 
   public setSensor = (val: any) => {
-    const ch: NodeChannelInfo = this.props.channels.find((ci: any) => `${ci.hubId}/${ci.channelId}` === val);
-    this.setSensorValue(ch ? ch.value : 0);
+    this.setSensorValue(0);
 
     this.props.sensor = val;
     this.putData("sensor", val);
