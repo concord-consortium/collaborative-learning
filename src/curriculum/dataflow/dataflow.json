@@ -17,6 +17,12 @@
       "isTileTool": true
     },
     {
+      "name": "dataflow",
+      "title": "Dataflow",
+      "iconId": "icon-drawing-tool",
+      "isTileTool": true
+    },
+    {
       "name": "delete",
       "title": "Delete",
       "iconId": "icon-delete-tool"

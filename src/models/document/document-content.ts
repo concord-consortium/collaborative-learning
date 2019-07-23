@@ -1,4 +1,5 @@
 import { types, getSnapshot, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
+import { defaultDataflowContent, kDataflowDefaultHeight } from "../../dataflow/models/tools/dataflow/dataflow-content";
 import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
 import { defaultGeometryContent, kGeometryDefaultHeight, GeometryContentModelType, mapTileIdsInGeometrySnapshot
         } from "../tools/geometry/geometry-content";
@@ -223,6 +224,10 @@ export const DocumentContentModel = types
       return self.addTileInNewRow(defaultDrawingContent({stamps: defaultStamps}),
                                   { rowHeight: kDrawingDefaultHeight });
     },
+    addDataflowTile() {
+      return self.addTileInNewRow(defaultDataflowContent(),
+                                    { rowHeight: kDataflowDefaultHeight });
+    },
     copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
       let snapshot;
       try {
@@ -372,6 +377,9 @@ export const DocumentContentModel = types
           break;
         case "drawing":
           tileInfo = self.addDrawingTile();
+          break;
+        case "dataflow":
+          tileInfo = self.addDataflowTile();
           break;
       }
 
