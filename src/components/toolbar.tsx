@@ -4,18 +4,18 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
-import { IToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
+import { ToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
 
 import "./toolbar.sass";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
-  toolbarConfig: ToolbarConfig;
+  config: ToolbarConfig;
   toolApiMap: IToolApiMap;
 }
 
 interface IButtonProps {
-  config: IToolButtonConfig;
+  config: ToolButtonConfig;
   onClick: (e: React.MouseEvent<HTMLDivElement>, name: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, name: string) => void;
   onShowDropHighlight: () => void;
@@ -80,7 +80,7 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
     };
     return (
       <div className="toolbar">
-        {renderToolButtons(this.props.toolbarConfig)}
+        {renderToolButtons(this.props.config)}
       </div>
     );
   }

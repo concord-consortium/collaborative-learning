@@ -1,4 +1,5 @@
 import { inject, observer } from "mobx-react";
+import { getSnapshot } from "mobx-state-tree";
 import * as React from "react";
 import { ClueHeaderComponent } from "./clue-header";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
@@ -41,11 +42,12 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments(isGhostUser: boolean) {
-    const {ui, documents} = this.stores;
+    const {documents, ui, unit} = this.stores;
     const {sectionWorkspace} = ui;
     const primaryDocument = this.getPrimaryDocument(sectionWorkspace.primaryDocumentKey);
     const comparisonDocument = sectionWorkspace.comparisonDocumentKey
                                && documents.getDocument(sectionWorkspace.comparisonDocumentKey);
+    const toolbar = unit && getSnapshot(unit.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -60,6 +62,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
             <DocumentComponent
               document={primaryDocument}
               workspace={sectionWorkspace}
+              toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
             />
@@ -78,15 +81,16 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
     }
     else {
       return this.renderDocument(
-               "single-workspace",
-               "primary",
-               <DocumentComponent
-                 document={primaryDocument}
-                 workspace={sectionWorkspace}
-                 side="primary"
-                 isGhostUser={isGhostUser}
-               />
-             );
+              "single-workspace",
+              "primary",
+              <DocumentComponent
+                document={primaryDocument}
+                workspace={sectionWorkspace}
+                toolbar={toolbar}
+                side="primary"
+                isGhostUser={isGhostUser}
+              />
+            );
     }
   }
 
