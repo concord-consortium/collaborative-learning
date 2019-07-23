@@ -55,7 +55,7 @@ export class RelaySelectControl extends Rete.Control {
     this.props.channels = channels;
 
     if (this.node.data[this.key] && this.node.data[this.key] !== "none") {
-      if (!channels.find(ch => `${ch.hubId}/${ch.channelId}` === this.node.data[this.key])) {
+      if (!channels.find(ch => ch.channelId === this.node.data[this.key])) {
         this.props.value = "none";
         this.putData(this.key, "none");
       }
