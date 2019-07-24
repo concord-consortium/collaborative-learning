@@ -18,6 +18,9 @@ interface IState {
 @inject("stores")
 @observer
 export default class DataflowToolComponent extends BaseComponent<IProps, IState> {
+
+  public static tileHandlesSelection = true;
+
   public state: IState = {};
 
   public render() {
