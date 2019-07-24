@@ -11,18 +11,20 @@
   width: 500px
   border: $border-width solid $border-color
   background-color: white
-  overflow: auto
 
   .hub-list-title
     padding: $padding
     background-color: $color1-3
     font-size: 18px
     font-weight: bold
+    height: 50px
 
   .hubs
-    background-color: $color3-4
     display: flex
     flex-direction: column
+    overflow: auto
+    height: calc(100% - 50px)
+    background-color: $color3-4
 
     .hub
       background-color: white
