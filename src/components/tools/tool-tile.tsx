@@ -2,12 +2,14 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { kDataflowToolID } from "../../dataflow/models/tools/dataflow/dataflow-content";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
 import { BaseComponent } from "../base";
+import DataflowToolComponent from "../../dataflow/components/tools/dataflow-tool";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
 import TableToolComponent from "./table-tool/table-tool";
 import TextToolComponent from "./text-tool";
@@ -74,6 +76,7 @@ interface IProps {
 }
 
 const kToolComponentMap: any = {
+        [kDataflowToolID]: DataflowToolComponent,
         [kDrawingToolID]: DrawingToolComponent,
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,

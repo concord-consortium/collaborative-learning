@@ -1,4 +1,6 @@
 import { IAnyType, Instance, SnapshotOut, types } from "mobx-state-tree";
+import { DataflowContentModel, DataflowContentModelType, kDataflowToolID
+        } from "../../dataflow/models/tools/dataflow/dataflow-content";
 import { kGeometryToolID, GeometryContentModel, GeometryContentModelType,
           GeometryMetadataModel, GeometryMetadataModelType } from "./geometry/geometry-content";
 import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
@@ -12,6 +14,7 @@ import { DrawingContentModelType, DrawingContentModel, kDrawingToolID,
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",
                               [
+                                kDataflowToolID,
                                 kGeometryToolID,
                                 kImageToolID,
                                 kTableToolID,
@@ -21,6 +24,7 @@ export const ToolTypeEnum = types.enumeration(
                               ]);
 export const ToolContentUnion = types.union(
                                   { dispatcher: toolFactory },
+                                  DataflowContentModel,
                                   GeometryContentModel,
                                   ImageContentModel,
                                   TableContentModel,
@@ -29,6 +33,7 @@ export const ToolContentUnion = types.union(
                                   UnknownContentModel);
 
 export type ToolContentUnionType = GeometryContentModelType |
+                                    DataflowContentModelType |
                                     ImageContentModelType |
                                     TableContentModelType |
                                     TextContentModelType |
@@ -62,6 +67,7 @@ interface IPrivate {
 
 export const _private: IPrivate = {
   toolMap: {
+    [kDataflowToolID]: DataflowContentModel,
     [kGeometryToolID]: GeometryContentModel,
     [kImageToolID]: ImageContentModel,
     [kTableToolID]: TableContentModel,

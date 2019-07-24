@@ -38,7 +38,7 @@ export class DataflowHeaderComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="dataflow-header">
         <div className="left">
-          DataFlow Application
+          Dataflow
         </div>
         <div className="middle">
           <ButtonGroup>

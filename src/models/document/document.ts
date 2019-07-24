@@ -15,7 +15,7 @@ export const DocumentTypeEnum = types.enumeration("type",
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
 export const DocumentToolEnum = types.enumeration("tool",
-                                  ["delete", "drawing", "geometry", "image", "select", "table", "text"]);
+                                  ["dataflow", "delete", "drawing", "geometry", "image", "select", "table", "text"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types
