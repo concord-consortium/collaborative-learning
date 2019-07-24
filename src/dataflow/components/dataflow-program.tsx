@@ -5,7 +5,6 @@ import * as React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
-import ContextMenuPlugin from "rete-context-menu-plugin";
 import { autorun, observable } from "mobx";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "./nodes/controls/relay-select-control";
@@ -20,6 +19,7 @@ import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import "./dataflow-program.sass";
 
 interface IProps extends IBaseProps {
@@ -42,9 +42,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
 
+  private components = [new NumberReteNodeFactory(numSocket),
+                        new MathReteNodeFactory(numSocket),
+                        new TransformReteNodeFactory(numSocket),
+                        new LogicReteNodeFactory(numSocket),
+                        new SensorReteNodeFactory(numSocket),
+                        new RelayReteNodeFactory(numSocket),
+                        new GeneratorReteNodeFactory(numSocket)];
+
   public render() {
     return (
-      <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+      <div className="editor-container">
+        <DataflowProgramToolbar
+          onNodeCreateClick={this.addNode}
+          onDeleteClick={this.deleteSelectedNodes}
+          onResetClick={this.resetNodes}
+          onClearClick={this.clearProgram}
+        />
+        <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+      </div>
     );
   }
 
@@ -66,23 +82,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private initProgramEditor = () => {
     (async () => {
-      const components = [new NumberReteNodeFactory(numSocket),
-        new MathReteNodeFactory(numSocket),
-        new TransformReteNodeFactory(numSocket),
-        new LogicReteNodeFactory(numSocket),
-        new SensorReteNodeFactory(numSocket),
-        new RelayReteNodeFactory(numSocket),
-        new GeneratorReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
-      this.programEditor.use(ContextMenuPlugin);
 
       this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
-      components.map(c => {
+      this.components.map(c => {
         this.programEditor.register(c);
         this.programEngine.register(c);
       });
@@ -90,9 +98,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
         const result = await this.programEditor.fromJSON(program);
-      }
-      else {
-        this.addDefaultProgram();
       }
 
       (this.programEditor as any).on(
@@ -161,24 +166,33 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
-  private async addDefaultProgram() {
-    const numberFactory = this.programEditor.components.get("Number") as NumberReteNodeFactory;
-    const logicFactory = this.programEditor.components.get("Logic") as LogicReteNodeFactory;
-    const sensorFactory = this.programEditor.components.get("Sensor") as SensorReteNodeFactory;
-    const n1 = await sensorFactory!.createNode();
-    const n2 = await numberFactory!.createNode({ num: 10 });
-    const logic = await logicFactory!.createNode();
+  private addNode = async (nodeType: string) => {
+    const nodeFactory = this.programEditor.components.get(nodeType) as any;
+    const n1 = await nodeFactory!.createNode();
 
-    n1.position = [80, 80];
-    n2.position = [80, 440];
-    logic.position = [450, 200];
-
+    const numNodes = this.programEditor.nodes.length;
+    n1.position = [100 + Math.floor(numNodes / 10) * 200 + numNodes % 10 * 15, 5 + numNodes % 10 * 15];
     this.programEditor.addNode(n1);
-    this.programEditor.addNode(n2);
-    this.programEditor.addNode(logic);
-
-    this.programEditor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
-    this.programEditor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
+  }
+  private clearProgram = () => {
+    this.programEditor.clear();
+  }
+  private deleteSelectedNodes = () => {
+    this.programEditor.selected.list.forEach((n: Node) => {
+      this.programEditor.removeNode(n);
+    });
+  }
+  private resetNodes = () => {
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.data.recentValues) {
+        let values: any = n.data.recentValues;
+        values = [];
+        n.data.recentValues = values;
+        if (n.data.ticks) {
+          n.data.ticks = 0;
+        }
+      }
+    });
   }
 
   private heartBeat = () => {
