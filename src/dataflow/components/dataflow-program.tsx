@@ -128,9 +128,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // Can this be in a control with stores injected?
       autorun(() => {
         const { hubStore } = this.stores;
-        let newChannel = false;
+        // remove any channels that are no longer active
+        this.channels = this.channels.filter(ch => {
+          const hub = hubStore.hubs.get(ch.hubId);
+          return hub && hub.hubChannels.find(hCh => hCh.id = ch.channelId);
+        });
+
         hubStore.hubs.forEach(hub => {
           hub.hubChannels.forEach(ch => {
+            // add channel if it is new
             if (!this.channels.find( ci => ci.hubId === hub.hubId && ci.channelId === ch.id )) {
               const nci: NodeChannelInfo = {hubId: hub.hubId,
                                             hubName: hub.hubName,
@@ -139,46 +145,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                                             units: ch.units,
                                             value: Number(ch.value)};
               this.channels.push(nci);
-              newChannel = true;
             }
-          });
-        });
-        // update any existing blocks since we found a new sensor or relay
-        this.updateChannelNodes(newChannel, newChannel);
-      });
-
-      // Can this auto-call processing and be in the sensor component instead of doing this n^2 loop
-      autorun(() => {
-        const { hubStore } = this.stores;
-        let change = false;
-        hubStore.hubs.forEach(hub => {
-          hub.hubChannels.forEach(ch => {
+            // store sensor value for channel
             const chValue = Number.parseFloat(ch.value);
-            const nci = this.channels.find(ci => ci.channelId === ch.id);
-            if (nci && Number.isFinite(chValue)) {
-              nci.value = chValue;
-            }
-            if (Number.isFinite(chValue) && ch.type !== "relay") {
-              const nodes = this.programEditor.nodes.filter((n: Node) => n.data.sensor === ch.id);
-              if (nodes) {
-                nodes.forEach((n: Node) => {
-                  const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-                  if (sensorSelect && sensorSelect.getSensorValue() !== chValue) {
-                    sensorSelect.setSensorValue(chValue);
-                    change = true;
-                  }
-                });
-              }
+            const chInfo = this.channels.find(ci => ci.channelId === ch.id);
+            if (chInfo && Number.isFinite(chValue)) {
+              chInfo.value = chValue;
             }
           });
         });
-        this.updateChannelNodes(true, false);
-        if (change) {
-          (async () => {
-            await this.programEngine.abort();
-            await this.programEngine.process(this.programEditor.toJSON());
-          })();
-        }
       });
 
       this.programEditor.view.resize();
@@ -189,27 +164,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
-  private updateChannelNodes(updateSensor: boolean, updateRelay: boolean) {
-    this.programEditor.nodes.forEach((n: Node) => {
-      const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-      const relayList = n.controls.get("relayList") as RelaySelectControl;
-      if (sensorSelect && updateSensor) {
-        sensorSelect.setChannels(this.channels);
-        (sensorSelect as any).update();
-      }
-      if (relayList && updateRelay) {
-        relayList.setChannels(this.channels);
-        (relayList as any).update();
-      }
-    });
-  }
-
   private heartBeat = () => {
+    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
+            Generator: this.updateGeneratorNode,
+            Sensor: (n: Node) => {
+                      this.updateNodeChannelInfo(n);
+                      this.updateNodeSensorValue(n);
+                    },
+            Relay: this.updateNodeChannelInfo
+          };
+
     let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
-      if (n.name === "Generator") {
+      const nodeProcess = nodeProcessMap[n.name];
+      if (nodeProcess) {
         processNeeded = true;
-        this.updateGeneratorNode(n);
+        nodeProcess(n);
       }
       if (n.data.hasOwnProperty("nodeValue")) {
         this.updateNodeRecentValues(n);
@@ -224,7 +194,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
+  }
 
+  private updateNodeChannelInfo(n: Node) {
+    const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+    const relayList = n.controls.get("relayList") as RelaySelectControl;
+    if (sensorSelect) {
+      sensorSelect.setChannels(this.channels);
+      (sensorSelect as any).update();
+    }
+    if (relayList) {
+      relayList.setChannels(this.channels);
+      (relayList as any).update();
+    }
+  }
+
+  private updateNodeSensorValue(n: Node) {
+    const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+    if (sensorSelect) {
+      const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+      if (chInfo && chInfo.value) {
+        sensorSelect.setSensorValue(chInfo.value);
+      }
+    }
   }
 
   private updateNodeRecentValues = (n: Node) => {
