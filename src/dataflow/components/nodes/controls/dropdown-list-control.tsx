@@ -1,5 +1,6 @@
 import * as React from "react";
 import Rete from "rete";
+import "./dropdown-list-control.sass";
 
 export class DropdownListControl extends Rete.Control {
   private emitter: any;
@@ -15,30 +16,86 @@ export class DropdownListControl extends Rete.Control {
     };
     const handlePointerMove = (e: any) => e.stopPropagation();
 
-    this.component = (compProps: { value: any; onChange: any; optionArray: any; }) => (
-      <select
-        value={compProps.value}
-        onChange={handleChange(compProps.onChange)}
-        onPointerMove={handlePointerMove}>
-        {compProps.optionArray.map((val: any, i: any) => (
-          <option key={i} value={val}>
-            {val}
-          </option>
-        ))}
-      </select>
+    this.component = (compProps: {
+                                    value: string;
+                                    onItemClick: () => void;
+                                    onListClick: () => void;
+                                    showList: boolean
+                                    optionArray: any;
+                                    listClass: string;
+                                  }) => (
+      <div>
+        { renderDropdownList(compProps.value,
+                             compProps.showList,
+                             compProps.onItemClick,
+                             compProps.onListClick,
+                             compProps.optionArray,
+                             compProps.listClass) }
+      </div>
     );
 
-    const initial = node.data[key] || optionArray[0];
+    const renderDropdownList = (val: string,
+                                showList: boolean,
+                                onItemClick: () => void,
+                                onListClick: any,
+                                options: any,
+                                listClass: string) => {
+      let icon = "";
+      const option = options.find((op: any) => op.name === val);
+      if (option && option.icon) {
+        icon = `#${option.icon}`;
+      }
+
+      return (
+        <div className={`node-select ${listClass}`}>
+          <div className="item top" onClick={handleChange(onItemClick)}>
+            <svg className="icon top">
+              <use xlinkHref={icon}/>
+            </svg>
+            <div className="label">{val}</div>
+            <svg className="icon arrow">
+              <use xlinkHref="#icon-down-arrow"/>
+            </svg>
+          </div>
+          {showList ?
+          <div className="option-list">
+            {options.map((ops: any, i: any) => (
+              <div
+                className={ops.name === val ? `item ${listClass} selected` : `item ${listClass} selectable`}
+                key={i}
+                onClick={onListClick(ops.name)}
+              >
+                <svg className="icon">
+                  <use xlinkHref={`#${ops.icon}`}/>
+                </svg>
+                <div className="label">{ops.name}</div>
+              </div>
+            ))}
+          </div>
+          : null }
+        </div>
+      );
+    };
+
+    const initial = node.data[key] || optionArray[0].name;
     node.data[key] = initial;
 
     this.props = {
       readonly,
       value: initial,
-      onChange: (v: any) => {
+      onItemClick: (v: any) => {
+        this.props.showList = !this.props.showList;
+        (this as any).update();
+      },
+      onListClick: (v: any) => () => {
+        this.props.showList = !this.props.showList;
+        (this as any).update();
         this.setValue(v);
         this.emitter.trigger("process");
       },
-      optionArray
+      showList: false,
+      optionArray,
+      listClass: key,
     };
   }
 

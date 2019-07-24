@@ -1,7 +1,8 @@
 import * as React from "react";
 import Rete from "rete";
-import "./sensor-select-control.sass";
 import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
+import "./sensor-select-control.sass";
+import "./value-control.sass";
 
 export class SensorSelectControl extends Rete.Control {
   private emitter: any;
@@ -21,50 +22,87 @@ export class SensorSelectControl extends Rete.Control {
     const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: {
-                                   type: any;
-                                   sensor: any;
-                                   value: any;
-                                   onTypeChange: any;
-                                   onSensorChange: any;
+                                   type: string;
+                                   sensor: string;
+                                   value: number;
+                                   onTypeChange: () => void;
+                                   onSensorChange: () => void;
+                                   onSensorClick: () => void;
+                                   onListClick: () => void;
+                                   showList: boolean
                                    channels: NodeChannelInfo[]
                                   }) => (
       <div className="sensor-box">
+        { renderSensorTypeList(compProps.type, compProps.showList, compProps.onSensorClick, compProps.onListClick) }
+        { renderSensorList(compProps.sensor, compProps.channels, compProps.type, compProps.onSensorChange)}
+        { renderSensorValue(compProps.value, compProps.sensor, compProps.channels, compProps.type)}
+      </div>
+    );
+
+    const renderSensorTypeList = (type: string, showList: boolean, onItemClick: any, onListClick: any) => {
+      let icon = "";
+      const sensorType = NodeSensorTypes.find((s: any) => s.name === type);
+      if (sensorType && sensorType.icon) {
+        icon = `#${sensorType.icon}`;
+      }
+      return (
+        <div className="node-select sensor">
+          <div className="item top" onClick={handleChange(onItemClick)}>
+            <svg className="icon top">
+              <use xlinkHref={icon}/>
+            </svg>
+            <div className="label">{type}</div>
+            <svg className="icon arrow">
+              <use xlinkHref="#icon-down-arrow"/>
+            </svg>
+          </div>
+          {showList ?
+          <div className="option-list">
+            {NodeSensorTypes.map((val: any, i: any) => (
+              <div
+              className={val.name === type ? "item sensor selected" : "item sensor selectable"}
+                key={i}
+                onClick={onListClick(val.name)}
+              >
+                <svg className="icon">
+                  <use xlinkHref={`#${val.icon}`}/>
+                </svg>
+                <div className="label">{val.name}</div>
+              </div>
+            ))}
+          </div>
+          : null }
+        </div>
+      );
+    };
+
+    const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
+      return (
         <select
-          className="type-dropdown"
-          value={compProps.type}
-          onChange={handleChange(compProps.onTypeChange)}
-          onPointerMove={handlePointerMove}>
-          {NodeSensorTypes.map((val: any, i: any) => (
-            <option key={i} value={val.type}>
-              {val.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={compProps.sensor}
-          onChange={handleChange(compProps.onSensorChange)}
+          className="sensor"
+          value={id}
+          onChange={handleChange(onSensorChange)}
           onPointerMove={handlePointerMove}>
           <option value="none">none</option>
-          {compProps.channels ? compProps.channels.filter((ch: NodeChannelInfo) => (
-            ch.type === compProps.type
+          {channels ? channels.filter((ch: NodeChannelInfo) => (
+            ch.type === type
           ))
           .map((ch: NodeChannelInfo, i: any) => (
-            <option key={i} value={ch.channelId}>
+            <option key={i} value={ch.channelId} className="sensor">
               {ch.hubName + ":" + ch.type}
             </option>
           )) : null}
         </select>
-        <div className="value">
-          <input
-            readOnly={true}
-            value={compProps.value}
-          />
-          <label className="units">
-            {displayedUnits(compProps.sensor, compProps.channels, compProps.type)}
-          </label>
+      );
+    };
+
+    const renderSensorValue = (value: number, id: string, channels: NodeChannelInfo[], type: string) => {
+      return (
+        <div className="value-container sensor-value">
+          {`${value} ${displayedUnits(id, channels, type)}`}
         </div>
-      </div>
-    );
+      );
+    };
 
     const displayedUnits = (id: string, channels: NodeChannelInfo[], type: string) => {
       let units = "";
@@ -102,6 +140,17 @@ export class SensorSelectControl extends Rete.Control {
         this.setSensor(v);
         this.emitter.trigger("process");
       },
+      onSensorClick: (v: any) => {
+        this.props.showList = !this.props.showList;
+        (this as any).update();
+      },
+      onListClick: (v: any) => () => {
+        this.props.showList = !this.props.showList;
+        (this as any).update();
+        this.setSensorType(v);
+        this.emitter.trigger("process");
+      },
+      showList: false,
       channels: []
     };
   }
