@@ -15,6 +15,7 @@ import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory"
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
+import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
@@ -26,7 +27,9 @@ interface IProps extends IBaseProps {
   program?: string;
 }
 
-interface IState {}
+interface IState {
+  disableDataStorage: boolean;
+}
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
@@ -42,6 +45,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
 
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      disableDataStorage: false
+    };
+  }
+
   public render() {
     return (
       <div className="editor-container">
@@ -50,6 +60,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onDeleteClick={this.deleteSelectedNodes}
           onResetClick={this.resetNodes}
           onClearClick={this.clearProgram}
+          isDataStorageDisabled={this.state.disableDataStorage}
         />
         <div className="flow-tool" ref={elt => this.toolDiv = elt} />
       </div>
@@ -80,8 +91,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket),
-        new GeneratorReteNodeFactory(numSocket)];
-
+        new GeneratorReteNodeFactory(numSocket),
+        new DataStorageReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
@@ -98,6 +109,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
         const result = await this.programEditor.fromJSON(program);
+        if (this.programEditor.nodes.filter(n => (n.name === "Data Storage")).length) {
+          this.setState({disableDataStorage: true});
+        }
       }
 
       (this.programEditor as any).on(
@@ -173,14 +187,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const numNodes = this.programEditor.nodes.length;
     n1.position = [100 + Math.floor(numNodes / 10) * 200 + numNodes % 10 * 15, 5 + numNodes % 10 * 15];
     this.programEditor.addNode(n1);
+    if (nodeType === "Data Storage") {
+      this.setState({disableDataStorage: true});
+    }
   }
   private clearProgram = () => {
     this.programEditor.clear();
+    this.setState({disableDataStorage: false});
   }
   private deleteSelectedNodes = () => {
     const selectedNodes = this.programEditor.selected.list.slice();
     this.programEditor.selected.clear();
     selectedNodes.forEach((n: Node) => {
+      if (n.name === "Data Storage") {
+        this.setState({disableDataStorage: false});
+      }
       this.programEditor.removeNode(n);
     });
   }
@@ -254,15 +275,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodeRecentValues = (n: Node) => {
     const val: any = n.data.nodeValue;
+    let recentVal: any = {};
+    const nodeValueKey = "nodeValue";
+    // Store recentValue as object with unique keys for each value stored in node
+    // Needed for node types such as data storage that require more than a single value
+    typeof val === "number" ?
+      recentVal[nodeValueKey] = { name: n.name, val }
+      : recentVal = val;
     if (n.data.recentValues) {
       const values: any = n.data.recentValues;
       if (values.length > MAX_NODE_VALUES) {
         values.shift();
       }
-      values.push(val);
+      values.push(recentVal);
       n.data.recentValues = values;
     } else {
-      const values: number[] = [val];
+      const values: any[] = [recentVal];
       n.data.recentValues = values;
     }
     const plotControl = n.controls.get("plot") as PlotControl;
