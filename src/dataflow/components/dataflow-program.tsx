@@ -165,20 +165,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private heartBeat = () => {
+    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
+            Generator: this.updateGeneratorNode,
+            Sensor: (n: Node) => {
+                      this.updateNodeChannelInfo(n);
+                      this.updateNodeSensorValue(n);
+                    },
+            Relay: this.updateNodeChannelInfo
+          };
+
     let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
-      if (n.name === "Generator") {
+      const nodeProcess = nodeProcessMap[n.name];
+      if (nodeProcess) {
         processNeeded = true;
-        this.updateGeneratorNode(n);
-      }
-      if (n.name === "Sensor") {
-        processNeeded = true;
-        this.updateNodeChannelInfo(n);
-        this.updateNodeSensorValue(n);
-      }
-      if (n.name === "Relay") {
-        processNeeded = true;
-        this.updateNodeChannelInfo(n);
+        nodeProcess(n);
       }
       if (n.data.hasOwnProperty("nodeValue")) {
         this.updateNodeRecentValues(n);
