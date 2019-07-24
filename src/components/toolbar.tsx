@@ -34,6 +34,7 @@ const ToolButtonComponent = (props: IButtonProps) => {
 
   return (
     <div className={`tool ${props.config.name}`} title={props.config.title || ""}
+        key={props.config.name}
         onClick={handleClick}
         onDragStart={props.config.isTileTool ? handleDrag : undefined}
         draggable={props.config.isTileTool || false}
