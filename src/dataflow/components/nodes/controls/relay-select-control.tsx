@@ -30,7 +30,7 @@ export class RelaySelectControl extends Rete.Control {
           ch.type === "relay"
         ))
         .map((ch: NodeChannelInfo, i: any) => (
-          <option key={i} value={ch.hubId + "/" + ch.channelId}>
+          <option key={i} value={ch.channelId}>
             {ch.hubName + ":" + ch.type}
           </option>
         )) : null}
