@@ -1,20 +1,30 @@
 @import ../../components/vars
 
 .hub-list
-  background-color: white
-  border: $border-width solid $border-color
+  position: absolute
+  top: $header-height + $half-nav-expanded-peek
+  bottom: $bottom-nav-contracted-height
+  left: 0
+  right: 0
+  margin-left: auto
+  margin-right: auto
   width: 500px
+  border: $border-width solid $border-color
+  background-color: white
 
   .hub-list-title
     padding: $padding
     background-color: $color1-3
     font-size: 18px
     font-weight: bold
+    height: 50px
 
   .hubs
-    background-color: $color3-4
     display: flex
     flex-direction: column
+    overflow: auto
+    height: calc(100% - 50px)
+    background-color: $color3-4
 
     .hub
       background-color: white
