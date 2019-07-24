@@ -1,9 +1,17 @@
 @import ../../components/vars
 
 .hub-list
-  background-color: white
-  border: $border-width solid $border-color
+  position: absolute
+  top: $header-height + $half-nav-expanded-peek
+  bottom: $bottom-nav-contracted-height
+  left: 0
+  right: 0
+  margin-left: auto
+  margin-right: auto
   width: 500px
+  border: $border-width solid $border-color
+  background-color: white
+  overflow: auto
 
   .hub-list-title
     padding: $padding
