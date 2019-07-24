@@ -13,13 +13,13 @@ export class ValueControl extends Rete.Control {
     this.emitter = emitter;
     this.key = key;
 
-    this.component = (compProps: { value: any; sentence: any }) => (
+    this.component = (compProps: { value: number; sentence: string }) => (
       <div className="value-container">
         {compProps.sentence ? compProps.sentence : compProps.value}
       </div>
     );
 
-    const initial = node.data[key] || "0";
+    const initial = node.data[key] || 0;
     node.data[key] = initial;
 
     this.props = {

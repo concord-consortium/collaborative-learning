@@ -17,12 +17,12 @@ export class DropdownListControl extends Rete.Control {
     const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: {
-                                    value: any;
-                                    onItemClick: any;
-                                    onListClick: any;
-                                    showList: any
+                                    value: string;
+                                    onItemClick: () => void;
+                                    onListClick: () => void;
+                                    showList: boolean
                                     optionArray: any;
-                                    listClass: any;
+                                    listClass: string;
                                   }) => (
       <div>
         { renderDropdownList(compProps.value,
@@ -36,10 +36,10 @@ export class DropdownListControl extends Rete.Control {
 
     const renderDropdownList = (val: string,
                                 showList: boolean,
-                                onItemClick: any,
+                                onItemClick: () => void,
                                 onListClick: any,
                                 options: any,
-                                listClass: any) => {
+                                listClass: string) => {
       let icon = "";
       const option = options.find((op: any) => op.name === val);
       if (option && option.icon) {

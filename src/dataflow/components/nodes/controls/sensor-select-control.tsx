@@ -22,14 +22,14 @@ export class SensorSelectControl extends Rete.Control {
     const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: {
-                                   type: any;
-                                   sensor: any;
-                                   value: any;
-                                   onTypeChange: any;
-                                   onSensorChange: any;
-                                   onSensorClick: any;
-                                   onListClick: any;
-                                   showList: any
+                                   type: string;
+                                   sensor: string;
+                                   value: number;
+                                   onTypeChange: () => void;
+                                   onSensorChange: () => void;
+                                   onSensorClick: () => void;
+                                   onListClick: () => void;
+                                   showList: boolean
                                    channels: NodeChannelInfo[]
                                   }) => (
       <div className="sensor-box">
