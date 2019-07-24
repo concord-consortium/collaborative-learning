@@ -154,13 +154,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         hubStore.hubs.forEach(hub => {
           hub.hubChannels.forEach(ch => {
             const chValue = Number.parseFloat(ch.value);
-            const nci = this.channels.find(ci => ci.hubId === hub.hubId && ci.channelId === ch.id);
+            const nci = this.channels.find(ci => ci.channelId === ch.id);
             if (nci && Number.isFinite(chValue)) {
               nci.value = chValue;
             }
             if (Number.isFinite(chValue) && ch.type !== "relay") {
-              const hubSensorId = hub.hubId + "/" + ch.id;
-              const nodes = this.programEditor.nodes.filter((n: Node) => n.data.sensor === hubSensorId);
+              const nodes = this.programEditor.nodes.filter((n: Node) => n.data.sensor === ch.id);
               if (nodes) {
                 nodes.forEach((n: Node) => {
                   const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;

@@ -89,30 +89,37 @@ export const NodeOperationTypes = [
 export const NodeSensorTypes = [
   {
     name: "temperature",
+    type: "temperature",
     units: "°C",
   },
   {
     name: "humidity",
+    type: "humidity",
     units: "%",
   },
   {
     name: "CO₂",
+    type: "CO2",
     units: "PPM",
   },
   {
     name: "O₂",
+    type: "O2",
     units: "%",
   },
   {
     name: "light",
+    type: "light",
     units: "lux",
   },
   {
     name: "soil moisture",
+    type: "soil-moisture",
     units: "",
   },
   {
     name: "particulates",
+    type: "particulates",
     units: "PM2.5",
   },
 ];
