@@ -79,6 +79,7 @@ export class SensorSelectControl extends Rete.Control {
     const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
       return (
         <select
+          className="sensor"
           value={id}
           onChange={handleChange(onSensorChange)}
           onPointerMove={handlePointerMove}>
@@ -87,7 +88,7 @@ export class SensorSelectControl extends Rete.Control {
             ch.type === type
           ))
           .map((ch: NodeChannelInfo, i: any) => (
-            <option key={i} value={ch.channelId}>
+            <option key={i} value={ch.channelId} className="sensor">
               {ch.hubName + ":" + ch.type}
             </option>
           )) : null}

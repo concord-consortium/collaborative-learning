@@ -34,7 +34,12 @@ export class DropdownListControl extends Rete.Control {
       </div>
     );
 
-    const renderDropdownList = (val: string, showList: boolean, onItemClick: any, onListClick: any, options: any, listClass: any) => {
+    const renderDropdownList = (val: string,
+                                showList: boolean,
+                                onItemClick: any,
+                                onListClick: any,
+                                options: any,
+                                listClass: any) => {
       let icon = "";
       const option = options.find((op: any) => op.name === val);
       if (option && option.icon) {
