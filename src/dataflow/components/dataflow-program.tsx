@@ -19,9 +19,12 @@ import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-
 import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
+import { safeJsonParse } from "../../utilities/js-utils";
 import "./dataflow-program.sass";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  program?: string;
+}
 
 interface IState {}
 
@@ -84,20 +87,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEngine.register(c);
       });
 
-      const n1 = await components[4].createNode();
-      const n2 = await components[0].createNode({ num: 10 });
-      const logic = await components[3].createNode();
-
-      n1.position = [80, 80];
-      n2.position = [80, 440];
-      logic.position = [450, 200];
-
-      this.programEditor.addNode(n1);
-      this.programEditor.addNode(n2);
-      this.programEditor.addNode(logic);
-
-      this.programEditor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
-      this.programEditor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
+      const program = this.props.program && safeJsonParse(this.props.program);
+      if (program) {
+        const result = await this.programEditor.fromJSON(program);
+      }
+      else {
+        this.addDefaultProgram();
+      }
 
       (this.programEditor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
@@ -163,6 +159,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
     })();
+  }
+
+  private async addDefaultProgram() {
+    const numberFactory = this.programEditor.components.get("Number") as NumberReteNodeFactory;
+    const logicFactory = this.programEditor.components.get("Logic") as LogicReteNodeFactory;
+    const sensorFactory = this.programEditor.components.get("Sensor") as SensorReteNodeFactory;
+    const n1 = await sensorFactory!.createNode();
+    const n2 = await numberFactory!.createNode({ num: 10 });
+    const logic = await logicFactory!.createNode();
+
+    n1.position = [80, 80];
+    n2.position = [80, 440];
+    logic.position = [450, 200];
+
+    this.programEditor.addNode(n1);
+    this.programEditor.addNode(n2);
+    this.programEditor.addNode(logic);
+
+    this.programEditor.connect(n1.outputs.get("num")!, logic.inputs.get("num1")!);
+    this.programEditor.connect(n2.outputs.get("num")!, logic.inputs.get("num2")!);
   }
 
   private heartBeat = () => {
