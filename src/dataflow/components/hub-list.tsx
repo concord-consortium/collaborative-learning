@@ -48,16 +48,19 @@ export class HubListComponent extends BaseComponent<IProps, IState> {
           "no channels available" }
         </div>
         { hub.hubChannels.map( (ch) => {
-            return this.renderHubChannel(ch);
+            let count = 0;
+            hub.hubChannels.forEach( c => { if (c.type === ch.type) count++; } );
+            return this.renderHubChannel(ch, count > 1);
           }) }
       </div>
     );
   }
 
-  private renderHubChannel(ch: HubChannelType) {
+  private renderHubChannel(ch: HubChannelType, showPlug: boolean) {
+    const plug = ch.plug > 0 && showPlug ? ` (plug ${ch.plug})` : "";
     return (
       <div className="channel" key={ch.id}>
-        <div className="label">{ `${ch.type}: ${ch.value} ${ch.units}` }</div>
+        <div className="label">{ `${ch.type}${plug}: ${ch.value} ${ch.units}` }</div>
       </div>
     );
   }

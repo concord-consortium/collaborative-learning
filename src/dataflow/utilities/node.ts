@@ -199,5 +199,6 @@ export interface NodeChannelInfo {
   channelId: string;
   type: string;
   units: string;
+  plug: number;
   value: number;
 }

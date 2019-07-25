@@ -8,6 +8,7 @@ export const HubChannelModel = types.model({
   units: types.string,
   value: types.string,
   lastUpdateTime: types.number,
+  plug: types.number,
 });
 export type HubChannelType = typeof HubChannelModel.Type;
 
