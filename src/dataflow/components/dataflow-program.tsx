@@ -143,6 +143,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                                             channelId: ch.id,
                                             type: ch.type,
                                             units: ch.units,
+                                            plug: ch.plug,
                                             value: Number(ch.value)};
               this.channels.push(nci);
             }

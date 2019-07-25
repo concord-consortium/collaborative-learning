@@ -41,7 +41,7 @@ export class SensorSelectControl extends Rete.Control {
 
     const renderSensorTypeList = (type: string, showList: boolean, onItemClick: any, onListClick: any) => {
       let icon = "";
-      const sensorType = NodeSensorTypes.find((s: any) => s.name === type);
+      const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
       if (sensorType && sensorType.icon) {
         icon = `#${sensorType.icon}`;
       }
@@ -62,7 +62,7 @@ export class SensorSelectControl extends Rete.Control {
               <div
               className={val.name === type ? "item sensor selected" : "item sensor selectable"}
                 key={i}
-                onClick={onListClick(val.name)}
+                onClick={onListClick(val.type)}
               >
                 <svg className="icon">
                   <use xlinkHref={`#${val.icon}`}/>
@@ -88,11 +88,19 @@ export class SensorSelectControl extends Rete.Control {
             ch.type === type
           ))
           .map((ch: NodeChannelInfo, i: any) => (
-            <option key={i} value={ch.channelId} className="sensor">
-              {ch.hubName + ":" + ch.type}
-            </option>
+            renderSensorOption(i, ch, channels)
           )) : null}
         </select>
+      );
+    };
+
+    const renderSensorOption = (i: number, ch: NodeChannelInfo, channels: NodeChannelInfo[]) => {
+      let count = 0;
+      channels.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
+      return (
+        <option key={i} value={ch.channelId} className="sensor">
+          {`${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`}
+        </option>
       );
     };
 

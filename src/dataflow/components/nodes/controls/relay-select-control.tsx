@@ -21,21 +21,37 @@ export class RelaySelectControl extends Rete.Control {
     const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: { value: any; onChange: any; channels: NodeChannelInfo[] }) => (
-      <select
-        value={compProps.value}
-        onChange={handleChange(compProps.onChange)}
+      <div>
+        { renderRelayList(compProps.value, compProps.channels, compProps.onChange) }
+      </div>
+    );
+
+    const renderRelayList = (id: string, channels: NodeChannelInfo[], onRelayChange: any) => {
+      return (
+        <select
+        value={id}
+        onChange={handleChange(onRelayChange)}
         onPointerMove={handlePointerMove}>
         <option value="none">none</option>
-        {compProps.channels ? compProps.channels.filter((ch: NodeChannelInfo) => (
+        {channels ? channels.filter((ch: NodeChannelInfo) => (
           ch.type === "relay"
         ))
-        .map((ch: NodeChannelInfo, i: any) => (
-          <option key={i} value={ch.channelId}>
-            {ch.hubName + ":" + ch.type}
-          </option>
+        .map((ch: NodeChannelInfo, i: number) => (
+          renderRelayOption(i, ch, channels)
         )) : null}
       </select>
-    );
+      );
+    };
+
+    const renderRelayOption = (i: number, ch: NodeChannelInfo, channels: NodeChannelInfo[]) => {
+      let count = 0;
+      channels.forEach( c => { if (c.type === "relay" && ch.hubId === c.hubId) count++; } );
+      return (
+        <option key={i} value={ch.channelId}>
+          {`${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`}
+        </option>
+      );
+    };
 
     const initial = node.data[key] || "none";
     node.data[key] = initial;

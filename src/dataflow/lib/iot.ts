@@ -139,6 +139,7 @@ export class IoT {
           // add channels to hub (may be sensor or relay)
           const model = channel.model || "N/A";
           const units = channel.units || "";
+          const plug = device.plug || 0;
           const id = this.constructHubChannelId(channel.id, deviceKeys[index], channel.type);
           rids = rids.filter(rid => rid !== id);
           if (!hub.getHubChannel(id)) {
@@ -149,7 +150,8 @@ export class IoT {
               model,
               units,
               value: "",
-              lastUpdateTime: Date.now()}));
+              lastUpdateTime: Date.now(),
+              plug}));
           }
         });
       });
