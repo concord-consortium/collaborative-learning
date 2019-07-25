@@ -19,52 +19,10 @@ import "./document.sass";
 
 export type WorkspaceSide = "primary" | "comparison";
 
-const toolbarConfig: ToolbarConfig = [
-  { // select tool
-    name: "select",
-    title: "Select",
-    iconId: "icon-select-tool"
-  },
-  { // text tool
-    name: "text",
-    title: "Text",
-    iconId: "icon-text-tool",
-    isTileTool: true
-  },
-  { // table tool
-    name: "table",
-    title: "Table",
-    iconId: "icon-table-tool",
-    isTileTool: true
-  },
-  { // geometry tool
-    name: "geometry",
-    title: "Geometry",
-    iconId: "icon-geometry-tool",
-    isTileTool: true
-  },
-  { // image tool
-    name: "image",
-    title: "Image",
-    iconId: "icon-image-tool",
-    isTileTool: true
-  },
-  { // drawing tool
-    name: "drawing",
-    title: "Drawing",
-    iconId: "icon-drawing-tool",
-    isTileTool: true
-  },
-  { // delete tool
-    name: "delete",
-    title: "Delete",
-    iconId: "icon-delete-tool"
-  }
-];
-
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
+  toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
   isGhostUser?: boolean;
@@ -104,11 +62,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {document, isGhostUser, readOnly} = this.props;
-    const isPublication = document.isPublished;
-    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
     return [
-        showToolbar ? this.renderToolbar() : null,
+        this.renderToolbar(),
         <div key="document" className="document">
           {this.renderTitleBar()}
           {this.renderCanvas()}
@@ -213,8 +168,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderToolbar() {
+    const {document, isGhostUser, readOnly} = this.props;
+    const isPublication = document.isPublished;
+    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
+    if (!showToolbar || !this.props.toolbar) return;
     return <ToolbarComponent key="toolbar" document={this.props.document}
-                              toolbarConfig={toolbarConfig} toolApiMap={this.toolApiMap} />;
+                              config={this.props.toolbar} toolApiMap={this.toolApiMap} />;
   }
 
   private renderCanvas() {

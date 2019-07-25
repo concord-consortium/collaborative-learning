@@ -1,10 +1,9 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
+import { UIDialogModelType } from "../../models/stores/ui";
 
 import "./dialog.sass";
-import { UIDialogModelType } from "../../models/stores/ui";
-import { onSnapshot } from "mobx-state-tree";
 
 interface IProps extends IBaseProps {
   dialog?: UIDialogModelType;
