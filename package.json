@@ -152,7 +152,7 @@
     "react-sizeme": "^2.6.7",
     "rete": "^1.4.0",
     "rete-area-plugin": "^0.2.1",
-    "rete-connection-plugin": "^0.8.1",
+    "rete-connection-plugin": "^0.8.2-rc.1",
     "rete-context-menu-plugin": "^0.4.1",
     "rete-react-render-plugin": "^0.2.0",
     "slate": "^0.44.13",
