@@ -1,1 +1,4 @@
-export type DataflowPanelType = "control-panels" | "workspace";
+export enum DataflowPanelType {
+  kControlPanelId = "control-panels",
+  kWorkspacePanelId = "workspace"
+}

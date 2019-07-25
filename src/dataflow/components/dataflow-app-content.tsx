@@ -19,7 +19,7 @@ interface IState {
 @observer
 export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
-  public state: IState = { panel: "control-panels" };
+  public state: IState = { panel: DataflowPanelType.kWorkspacePanelId };
 
   public componentWillMount() {
     const { iot } = this.stores;
@@ -52,9 +52,9 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
   private renderPanel() {
     const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     switch (this.state.panel) {
-      case "workspace":
+      case DataflowPanelType.kWorkspacePanelId:
         return <DocumentWorkspaceComponent isGhostUser={isGhostUser} />;
-      case "control-panels":
+      case DataflowPanelType.kControlPanelId:
       default:
         return <HubListComponent />;
     }
