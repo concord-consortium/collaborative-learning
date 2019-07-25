@@ -52,6 +52,54 @@
                       "type": "Text",
                       "text": "Some content (e.g. instructions)"
                     }
+                  },
+                  {
+                    "content": {
+                      "type": "Dataflow",
+                      "program": [
+                        {
+                          "id": "temp-id",
+                          "name": "Sensor",
+                          "data": { "type": "temperature" },
+                          "outputs": [{ "num": [{ "add-id": "num1" }] }],
+                          "position": [ 0, 0 ]
+                        },
+                        {
+                          "id": "two-id",
+                          "name": "Number",
+                          "data": { "nodeValue": 2 },
+                          "outputs": [{ "num": [{ "add-id": "num2" }] }],
+                          "position": [ 0, 240 ]
+                        },
+                        {
+                          "id": "add-id",
+                          "name": "Math",
+                          "data": { "mathOperator": "add" },
+                          "outputs": [{ "num": [{ "compare-id": "num1" }] }],
+                          "position": [ 250, 0 ]
+                        },
+                        {
+                          "id": "compare-id",
+                          "name": "Logic",
+                          "data": { "logicalOperator": "equals" },
+                          "inputs": [{ "num2": 5 }],
+                          "position": [ 500, 0 ]
+                        },
+                        {
+                          "id": "generator-id",
+                          "name": "Generator",
+                          "data": { "generatorType": "sine", "amplitude": 1, "period": 10 },
+                          "outputs": [{ "num": [{ "transform-id": "num1" }] }],
+                          "position": [ 250, 300 ]
+                        },
+                        {
+                          "id": "transform-id",
+                          "name": "Transform",
+                          "data": { "transformOperator": "absolute value" },
+                          "position": [ 500, 300 ]
+                        }
+                      ]
+                    }
                   }
                 ]
               }

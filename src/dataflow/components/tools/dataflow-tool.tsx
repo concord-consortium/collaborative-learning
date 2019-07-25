@@ -27,9 +27,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool ${editableClass}`;
+    const program = this.getContent().program;
     return (
       <div className={classes}>
-        <DataflowProgram />
+        <DataflowProgram program={program}/>
       </div>
     );
   }
