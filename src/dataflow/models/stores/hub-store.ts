@@ -20,6 +20,7 @@ export const HubModel = types
     hubType: types.maybe(types.string),
     hubChannels: types.array(HubChannelModel),
     hubUpdateTime: types.number,
+    hubGroups: types.array(types.string),
   })
   .views(self => ({
     getHubChannel(id: string) {
@@ -65,6 +66,9 @@ export const HubModel = types
           ch.lastUpdateTime = newTime;
         }
       });
+    },
+    addHubGroup(group: string) {
+      self.hubGroups.push(group);
     },
   }));
 export type HubModelType = typeof HubModel.Type;

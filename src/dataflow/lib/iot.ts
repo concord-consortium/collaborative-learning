@@ -102,6 +102,24 @@ export class IoT {
             this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo));
             this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues));
             this.requestHubChannelInfo(hubId);
+            this.requestThingGroups(hubId);
+          }
+        });
+      }
+    });
+  }
+
+  private requestThingGroups = (hubId: string) => {
+    const params: any = {
+      thingName: hubId
+    };
+    const  { hubStore } = this.stores;
+    const hub = hubStore.getHubById(hubId);
+    this.iotCore.listThingGroupsForThing(params).promise().then(data => {
+      if (data && data.thingGroups && hub) {
+        data.thingGroups.forEach(group => {
+          if (group.groupName && !hub.hubGroups.includes(group.groupName)) {
+            hub.addHubGroup(group.groupName);
           }
         });
       }
