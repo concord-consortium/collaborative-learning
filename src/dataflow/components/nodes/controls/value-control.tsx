@@ -1,5 +1,6 @@
 import * as React from "react";
 import Rete from "rete";
+import { roundNodeValue } from "../../../utilities/node";
 import "./value-control.sass";
 
 export class ValueControl extends Rete.Control {
@@ -15,7 +16,7 @@ export class ValueControl extends Rete.Control {
 
     this.component = (compProps: { value: number; sentence: string }) => (
       <div className="value-container">
-        {compProps.sentence ? compProps.sentence : compProps.value}
+        {compProps.sentence ? compProps.sentence : roundNodeValue(compProps.value)}
       </div>
     );
 

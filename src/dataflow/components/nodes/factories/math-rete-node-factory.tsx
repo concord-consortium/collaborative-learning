@@ -4,7 +4,7 @@ import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeOperationTypes } from "../../../utilities/node";
+import { NodeOperationTypes, roundNodeValue } from "../../../utilities/node";
 import { PlotControl } from "../controls/plot-control";
 
 export class MathReteNodeFactory extends Rete.Component {
@@ -47,7 +47,7 @@ export class MathReteNodeFactory extends Rete.Component {
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, n2);
-      resultSentence = nodeOperationTypes.numberSentence(n1, n2) + result;
+      resultSentence = nodeOperationTypes.numberSentence(n1, n2) + roundNodeValue(result);
     }
 
     if (this.editor) {

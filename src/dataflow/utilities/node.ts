@@ -202,3 +202,7 @@ export interface NodeChannelInfo {
   plug: number;
   value: number;
 }
+
+export const roundNodeValue = (n: number) => {
+  return Math.round(n * 1000) / 1000;
+};
