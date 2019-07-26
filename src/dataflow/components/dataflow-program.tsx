@@ -188,7 +188,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                       this.updateNodeChannelInfo(n);
                       this.updateNodeSensorValue(n);
                     },
-            Relay: this.updateNodeChannelInfo
+            Relay: (n: Node) => {
+                      this.updateNodeChannelInfo(n);
+                    },
           };
 
     let processNeeded = false;
