@@ -1,18 +1,16 @@
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "./dataflow-base";
-import { observer, inject } from "mobx-react";
 import { NodeTypes } from "../utilities/node";
 
 import "./dataflow-program-toolbar.sass";
 
-interface IProps extends IBaseProps {
+interface IProps {
   onNodeCreateClick: (type: string) => void;
   onDeleteClick: () => void;
   onResetClick: () => void;
   onClearClick: () => void;
 }
 
-export class DataflowProgramToolbar extends BaseComponent<IProps, {}> {
+export class DataflowProgramToolbar extends React.Component<IProps, {}> {
   constructor(props: IProps) {
     super(props);
   }
