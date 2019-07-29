@@ -42,14 +42,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
 
-  private components = [new NumberReteNodeFactory(numSocket),
-                        new MathReteNodeFactory(numSocket),
-                        new TransformReteNodeFactory(numSocket),
-                        new LogicReteNodeFactory(numSocket),
-                        new SensorReteNodeFactory(numSocket),
-                        new RelayReteNodeFactory(numSocket),
-                        new GeneratorReteNodeFactory(numSocket)];
-
   public render() {
     return (
       <div className="editor-container">
@@ -82,6 +74,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private initProgramEditor = () => {
     (async () => {
+      const components = [new NumberReteNodeFactory(numSocket),
+        new MathReteNodeFactory(numSocket),
+        new TransformReteNodeFactory(numSocket),
+        new LogicReteNodeFactory(numSocket),
+        new SensorReteNodeFactory(numSocket),
+        new RelayReteNodeFactory(numSocket),
+        new GeneratorReteNodeFactory(numSocket)];
+
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
@@ -90,7 +90,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
-      this.components.map(c => {
+      components.map(c => {
         this.programEditor.register(c);
         this.programEngine.register(c);
       });

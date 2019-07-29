@@ -11,16 +11,10 @@ interface IProps extends IBaseProps {
   onResetClick: () => void;
   onClearClick: () => void;
 }
-interface IState {}
 
-@inject("stores")
-@observer
-export class DataflowProgramToolbar extends BaseComponent<IProps, IState> {
+export class DataflowProgramToolbar extends BaseComponent<IProps, {}> {
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      showSettings: false,
-    };
   }
 
   public render() {
