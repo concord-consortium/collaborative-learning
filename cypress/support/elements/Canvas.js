@@ -232,6 +232,9 @@ class Canvas{
      getLeftSideWorkspaceTitle(){
          return cy.get('.left-workspace [data-test=document-title]')
      }
+     getRightSideDocumentContent(){
+         return cy.get('.right-workspace .document-content')
+     }
 }
 
 export default Canvas;

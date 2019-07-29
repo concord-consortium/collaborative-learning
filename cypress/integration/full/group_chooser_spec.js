@@ -1,4 +1,4 @@
-import Header from '../support/elements/Header'
+import Header from '../../support/elements/Header'
 
 const header = new Header;
 const baseUrl = `${Cypress.config("baseUrl")}`;
