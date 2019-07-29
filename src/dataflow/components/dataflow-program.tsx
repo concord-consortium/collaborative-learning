@@ -188,9 +188,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                       this.updateNodeChannelInfo(n);
                       this.updateNodeSensorValue(n);
                     },
-            Relay: (n: Node) => {
-                      this.updateNodeChannelInfo(n);
-                    },
+            Relay: this.updateNodeChannelInfo
           };
 
     let processNeeded = false;
@@ -215,7 +213,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private updateNodeChannelInfo(n: Node) {
+  private updateNodeChannelInfo = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
@@ -228,7 +226,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private updateNodeSensorValue(n: Node) {
+  private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
