@@ -1,3 +1,27 @@
+export const NodeTypes = [
+  {
+    name: "Number",
+  },
+  {
+    name: "Sensor",
+  },
+  {
+    name: "Generator",
+  },
+  {
+    name: "Math",
+  },
+  {
+    name: "Logic",
+  },
+  {
+    name: "Transform",
+  },
+  {
+    name: "Relay",
+  },
+];
+
 export const NodeOperationTypes = [
   {
     name: "add",

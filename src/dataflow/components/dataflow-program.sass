@@ -1,3 +1,5 @@
+@import ../../components/vars
+
 .flow-tool
   width: 500px
   height: 500px
@@ -16,6 +18,8 @@
     &.relay, &.data-storage
       background-color: #E16D2F
       border-color: #E09E7D
+    &.selected
+      border-color: $color2-4
 
   select, input
     width: 100%
@@ -39,3 +43,7 @@
 // Connections are offset without this for some reason
 .flow-tool > div > div
     position: absolute
+
+.editor-container
+  display: flex
+  flex-direction: row
