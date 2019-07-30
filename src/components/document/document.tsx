@@ -196,10 +196,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private render4UpCanvas() {
     const {isGhostUser, document} = this.props;
-    const {sectionWorkspace} = this.stores.ui;
+    const { groups } = this.stores;
+    const group = isGhostUser ? undefined : groups.groupForUser(document.uid);
+    const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
     return (
-      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser}
-                        toolApiInterface={this.toolApiInterface} />
+      <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
+                        sectionId={document.sectionId!} toolApiInterface={this.toolApiInterface} />
     );
   }
 
