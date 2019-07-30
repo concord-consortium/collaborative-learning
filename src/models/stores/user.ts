@@ -50,6 +50,12 @@ export const UserModel = types
     },
   }))
   .views((self) => ({
+    get isStudent() {
+      return self.type === "student";
+    },
+    get isTeacher() {
+      return self.type === "teacher";
+    },
     get initials() {
       return initials(self.name);
     }
