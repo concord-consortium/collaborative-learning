@@ -1,9 +1,9 @@
-import Header from '../support/elements/Header';
-import RightNav from '../support/elements/RightNav';
-import LeftNav from '../support/elements/LeftNav';
-import Canvas from '../support/elements/Canvas';
-import Workspace from '../support/elements/Workspace';
-import TeacherDashboard from '../support/elements/TeacherDashboard';
+import Header from '../../support/elements/Header';
+import RightNav from '../../support/elements/RightNav';
+import LeftNav from '../../support/elements/LeftNav';
+import Canvas from '../../support/elements/Canvas';
+import Workspace from '../../support/elements/Workspace';
+import TeacherDashboard from '../../support/elements/TeacherDashboard';
 
 let qaClass = 10,
     qaGroup10 = 10,
