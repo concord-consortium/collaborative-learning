@@ -178,7 +178,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   }
   private deleteSelectedNodes = () => {
-    const selectedNodes = this.programEditor.selected.list;
+    const selectedNodes = this.programEditor.selected.list.slice();
     this.programEditor.selected.clear();
     selectedNodes.forEach((n: Node) => {
       this.programEditor.removeNode(n);
