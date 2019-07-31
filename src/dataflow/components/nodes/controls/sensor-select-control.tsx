@@ -46,7 +46,7 @@ export class SensorSelectControl extends Rete.Control {
         icon = `#${sensorType.icon}`;
       }
       return (
-        <div className="node-select sensor">
+        <div className="node-select sensor-type">
           <div className="item top" onClick={handleChange(onItemClick)}>
             <svg className="icon top">
               <use xlinkHref={icon}/>
@@ -60,7 +60,7 @@ export class SensorSelectControl extends Rete.Control {
           <div className="option-list">
             {NodeSensorTypes.map((val: any, i: any) => (
               <div
-              className={val.name === type ? "item sensor selected" : "item sensor selectable"}
+              className={val.name === type ? "item sensor-type-option selected" : "item sensor-type-option selectable"}
                 key={i}
                 onClick={onListClick(val.type)}
               >
@@ -79,11 +79,11 @@ export class SensorSelectControl extends Rete.Control {
     const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
       return (
         <select
-          className="sensor"
+          className="sensor-select"
           value={id}
           onChange={handleChange(onSensorChange)}
           onPointerMove={handlePointerMove}>
-          <option value="none">none</option>
+          <option value="none" className="sensor-option">none</option>
           {channels ? channels.filter((ch: NodeChannelInfo) => (
             ch.type === type
           ))
@@ -98,7 +98,7 @@ export class SensorSelectControl extends Rete.Control {
       let count = 0;
       channels.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
       return (
-        <option key={i} value={ch.channelId} className="sensor">
+        <option key={i} value={ch.channelId} className="sensor-option">
           {`${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`}
         </option>
       );
