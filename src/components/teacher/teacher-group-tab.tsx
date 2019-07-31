@@ -5,6 +5,7 @@ import { GroupModelType } from "../../models/stores/groups";
 import { TeacherSupports } from "./teacher-supports";
 import { GroupAudienceModel } from "../../models/stores/supports";
 import { TeacherStudentTabComponent } from "./teacher-student-tab";
+import { TeacherGroupSixPack } from "./teacher-group-six-pack";
 
 import "./teacher-group-tab.sass";
 
@@ -25,6 +26,7 @@ export class TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     const selectedGroup = groups.getGroupById(selectedGroupId);
     return (
       <div className="teacher-group-tab">
+        <TeacherGroupSixPack />
         {this.renderGroups()}
         {selectedGroup ? this.renderGroup(selectedGroup) : null}
       </div>
