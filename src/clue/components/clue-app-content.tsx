@@ -65,6 +65,9 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
   }
 
   private handlePanelChange = (panelId: string) => {
+    const { ui } = this.stores;
+    ui.toggleLeftNav(false);
+    ui.toggleRightNav(false);
     this.setState({ current: panelId });
   }
 
