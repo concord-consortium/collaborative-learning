@@ -1,10 +1,10 @@
-import LearningLog from '../support/elements/LearningLog';
-import BottomNav from '../support/elements/BottomNav';
-import RightNav from '../support/elements/RightNav';
-import LeftNav from '../support/elements/LeftNav';
-import Canvas from '../support/elements/Canvas';
-import GraphToolTile from '../support/elements/GraphToolTile';
-import TextToolTile from '../support/elements/TextToolTile'
+import LearningLog from '../../support/elements/LearningLog';
+import BottomNav from '../../support/elements/BottomNav';
+import RightNav from '../../support/elements/RightNav';
+import LeftNav from '../../support/elements/LeftNav';
+import Canvas from '../../support/elements/Canvas';
+import GraphToolTile from '../../support/elements/GraphToolTile';
+import TextToolTile from '../../support/elements/TextToolTile'
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,

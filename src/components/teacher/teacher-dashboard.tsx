@@ -1,15 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { HeaderComponent } from "../header";
-import { TeacherGroupTabComponent } from "./teacher-group-tab";
-import { TeacherStudentTabComponent } from "./teacher-student-tab";
-
-import "./teacher-dashboard.sass";
 import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
+import { TeacherGroupTabComponent } from "./teacher-group-tab";
+import { TeacherStudentTabComponent } from "./teacher-student-tab";
 import { TeacherSupports } from "./teacher-supports";
 import { ClassAudienceModel } from "../../models/stores/supports";
+
+import "./teacher-dashboard.sass";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -43,7 +42,6 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className="teacher-dashboard">
-        <HeaderComponent isGhostUser={true} />
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
             <TeacherSupports
@@ -59,7 +57,6 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTabContents() {
-    const {activeRightNavTab} = this.stores.ui;
     switch (this.state.activeTab.type) {
       case "Groups":
         return (

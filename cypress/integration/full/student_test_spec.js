@@ -1,4 +1,4 @@
-import Header from '../support/elements/Header';
+import Header from '../../support/elements/Header';
 
 let student = '5',
     classroom = '5',
