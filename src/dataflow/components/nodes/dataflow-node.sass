@@ -1,0 +1,42 @@
+@import ../../../components/vars
+
+.node
+  min-width: 220px
+  &.sensor, &.number, &.generator
+    background-color: #0592AF
+    border-color: #C0E4EB
+  &.logic, &.math, &.transform
+    background-color: #2DA343
+    border-color: #CDE8D2
+  &.relay, &.data-storage
+    background-color: #E16D2F
+    border-color: #E09E7D
+  &.selected
+    border-color: $color2-4
+
+  .node-title
+    font-size: 13px
+    color: white
+    padding: 4px
+
+  .node-output
+    background-color: red
+    padding: 0
+    margin: 0
+    height: 0px
+
+  .control
+    padding: 2px 18px
+
+  select, input
+    width: 100%
+    border-radius: 30px
+    background-color: white
+    padding: 2px 6px
+    border: 1px solid #999
+    width: 170px
+    font-weight: bold
+    font-size: 13px
+    font-family: 'Lato', sans-serif
+    &.sensor
+      color: #0592AF

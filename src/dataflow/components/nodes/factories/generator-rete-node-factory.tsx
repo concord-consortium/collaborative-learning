@@ -1,17 +1,16 @@
 import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
+import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotControl } from "../controls/plot-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeGeneratorTypes } from "../../../utilities/node";
 
-export class GeneratorReteNodeFactory extends Rete.Component {
-  private numSocket: Socket;
+export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
-    super("Generator");
-    this.numSocket = numSocket;
+    super("Generator", numSocket);
   }
 
   public builder(node: Node) {

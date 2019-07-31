@@ -1,14 +1,13 @@
 import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
+import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { PlotControl } from "../controls/plot-control";
 
-export class NumberReteNodeFactory extends Rete.Component {
-  private numSocket: Socket;
+export class NumberReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
-    super("Number");
-    this.numSocket = numSocket;
+    super("Number", numSocket);
   }
 
   public builder(node: Node) {

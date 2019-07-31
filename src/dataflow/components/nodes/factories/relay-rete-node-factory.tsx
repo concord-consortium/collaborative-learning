@@ -1,16 +1,15 @@
 import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
+import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { RelaySelectControl } from "../controls/relay-select-control";
 import { PlotControl } from "../controls/plot-control";
 
-export class RelayReteNodeFactory extends Rete.Component {
-  private numSocket: Socket;
+export class RelayReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
-    super("Relay");
-    this.numSocket = numSocket;
+    super("Relay", numSocket);
   }
 
   public builder(node: Node) {
