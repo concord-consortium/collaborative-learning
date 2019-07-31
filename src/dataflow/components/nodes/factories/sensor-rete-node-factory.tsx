@@ -3,12 +3,15 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { PlotControl } from "../controls/plot-control";
+import { DataflowNode } from "../dataflow-node";
 
 export class SensorReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
     super("Sensor");
     this.numSocket = numSocket;
+    const data: any = this.data;
+    data.component = DataflowNode;
   }
 
   public builder(node: Node) {

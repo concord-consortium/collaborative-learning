@@ -1,17 +1,20 @@
 import Rete from "rete";
-import { Node, Socket, NodeEditor } from "rete";
+import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
 import { PlotControl } from "../controls/plot-control";
+import { DataflowNode } from "../dataflow-node";
 
 export class TransformReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
     super("Transform");
     this.numSocket = numSocket;
+    const data: any = this.data;
+    data.component = DataflowNode;
   }
 
   public builder(node: Node) {

@@ -6,12 +6,15 @@ import { ValueControl } from "../controls/value-control";
 import { PlotControl } from "../controls/plot-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeGeneratorTypes } from "../../../utilities/node";
+import { DataflowNode } from "../dataflow-node";
 
 export class GeneratorReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
     super("Generator");
     this.numSocket = numSocket;
+    const data: any = this.data;
+    data.component = DataflowNode;
   }
 
   public builder(node: Node) {

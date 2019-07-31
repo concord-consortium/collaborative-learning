@@ -6,12 +6,15 @@ import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
 import { PlotControl } from "../controls/plot-control";
+import { DataflowNode } from "../dataflow-node";
 
 export class LogicReteNodeFactory extends Rete.Component {
   private numSocket: Socket;
   constructor(numSocket: Socket) {
     super("Logic");
     this.numSocket = numSocket;
+    const data: any = this.data;
+    data.component = DataflowNode;
   }
 
   public builder(node: Node) {
