@@ -1,8 +1,8 @@
-import Canvas from '../support/elements/Canvas'
-import LeftNav from '../support/elements/LeftNav'
-import TableToolTile from '../support/elements/TableToolTile'
-import RightNav from '../support/elements/RightNav'
-import LearningLog from '../support/elements/LearningLog'
+import Canvas from '../../support/elements/Canvas'
+import LeftNav from '../../support/elements/LeftNav'
+import TableToolTile from '../../support/elements/TableToolTile'
+import RightNav from '../../support/elements/RightNav'
+import LearningLog from '../../support/elements/LearningLog'
 
 
 let canvas = new Canvas,

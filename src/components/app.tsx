@@ -133,13 +133,8 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       );
     }
 
-    if (!groups.groupForUser(user.id)) {
-      if (user.type === "teacher") {
-        return this.renderApp(<TeacherDashboardComponent />);
-      }
-      else {
-        return this.renderApp(<GroupChooserComponent />);
-      }
+    if (user.isStudent && !groups.groupForUser(user.id)) {
+      return this.renderApp(<GroupChooserComponent />);
     }
 
     return this.renderApp(<AppContentComponent />);

@@ -1,10 +1,10 @@
-import Workspace from '../support/elements/Workspace.js';
-import LeftNav from '../support/elements/LeftNav';
-import BottomNav from '../support/elements/BottomNav';
-import RightNav from '../support/elements/RightNav';
-import Canvas from '../support/elements/Canvas';
-import LearningLog from '../support/elements/LearningLog';
-import TextToolTile from '../support/elements/TextToolTile'
+import Workspace from '../../support/elements/Workspace.js';
+import LeftNav from '../../support/elements/LeftNav';
+import BottomNav from '../../support/elements/BottomNav';
+import RightNav from '../../support/elements/RightNav';
+import Canvas from '../../support/elements/Canvas';
+import LearningLog from '../../support/elements/LearningLog';
+import TextToolTile from '../../support/elements/TextToolTile'
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 const queryParam = `${Cypress.config("queryParams")}`

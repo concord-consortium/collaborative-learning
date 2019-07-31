@@ -1,5 +1,5 @@
-import LeftNav from '../support/elements/LeftNav.js'
-import Canvas from '../support/elements/Canvas.js'
+import LeftNav from '../../support/elements/LeftNav.js'
+import Canvas from '../../support/elements/Canvas.js'
 
 describe('Test Left tabs',function(){
     let leftNav = new LeftNav(),
