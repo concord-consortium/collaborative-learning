@@ -1,5 +1,7 @@
+import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
+import { FourUpComponent } from "../four-up";
 
 import "./teacher-group-six-pack.sass";
 
@@ -9,29 +11,51 @@ interface IProps extends IBaseProps {
 interface IState {
 }
 
+@inject("stores")
+@observer
 export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
 
   public render() {
     return (
       <div className="teacher-group-six-pack">
-        <div className="group-0-0">
-          top-left
+        {this.renderGroups()}
+      </div>
+    );
+  }
+
+  private renderGroups() {
+    const { groups } = this.stores;
+    const renders = [];
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 3; c++) {
+        const groupIndex = r * 2 + c;
+        if (groupIndex < groups.allGroups.length) {
+          renders.push(this.renderFourUp(groupIndex, r, c));
+        } else {
+          renders.push(this.renderEmptyFourUp(r, c));
+        }
+      }
+    }
+    return renders;
+  }
+
+  private renderFourUp(groupIndex: number, r: number, c: number) {
+    const { groups } = this.stores;
+    const group = groups.allGroups[groupIndex];
+    return (
+      <div className={`group-${r}-${c}`} key={`group-${r}-${c}`}>
+        {`Group ${group.id} - Students: ${group.users.map(u => u.initials).join(",")}`}
+        <div>
+          <FourUpComponent sectionId="introduction" groupId={group.id} isGhostUser={true} />
         </div>
-        <div className="group-0-1">
-          top-center
-        </div>
-        <div className="group-0-2">
-          top-right
-        </div>
-        <div className="group-1-0">
-          bottom-left
-        </div>
-        <div className="group-1-1">
-          bottom-center
-        </div>
-        <div className="group-1-2">
-          bottom-right
-        </div>
+      </div>
+    );
+  }
+
+  private renderEmptyFourUp(r: number, c: number) {
+    return (
+      <div className={`group-${r}-${c}`} key={`group-${r}-${c}`}>
+        No Group (r: {r}, c: {c}).
       </div>
     );
   }
