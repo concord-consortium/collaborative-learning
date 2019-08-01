@@ -11,11 +11,13 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
-    const out1 = new Rete.Output("num", "Number", this.numSocket);
-    return node
-      .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addOutput(out1) as any;
+    if (this.editor) {
+      const out1 = new Rete.Output("num", "Number", this.numSocket);
+      return node
+        .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addOutput(out1) as any;
+    }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {

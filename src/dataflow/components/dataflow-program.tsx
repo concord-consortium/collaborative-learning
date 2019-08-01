@@ -23,6 +23,15 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import "./dataflow-program.sass";
 
+interface NodeNameValuePair {
+  name: string;
+  val: number;
+}
+interface NodeValueMap {
+  [key: string]: NodeNameValuePair;
+}
+type NodeValue = number | NodeValueMap;
+
 interface IProps extends IBaseProps {
   program?: string;
 }
@@ -109,7 +118,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
         const result = await this.programEditor.fromJSON(program);
-        if (this.programEditor.nodes.filter(n => (n.name === "Data Storage")).length) {
+        if (this.getNodeCount("Data Storage")) {
           this.setState({disableDataStorage: true});
         }
       }
@@ -218,6 +227,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   }
 
+  private getNodeCount = (type?: string) => {
+    return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
+  }
+
   private heartBeat = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
             Generator: this.updateGeneratorNode,
@@ -274,24 +287,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateNodeRecentValues = (n: Node) => {
-    const val: any = n.data.nodeValue;
-    let recentVal: any = {};
+    const nodeValue: any = n.data.nodeValue;
+    let recentValue: NodeValue = {};
     const nodeValueKey = "nodeValue";
     // Store recentValue as object with unique keys for each value stored in node
     // Needed for node types such as data storage that require more than a single value
-    typeof val === "number" ?
-      recentVal[nodeValueKey] = { name: n.name, val }
-      : recentVal = val;
+    typeof nodeValue === "number" ?
+      recentValue[nodeValueKey] = { name: n.name, val: nodeValue }
+      : recentValue = nodeValue;
     if (n.data.recentValues) {
-      const values: any = n.data.recentValues;
-      if (values.length > MAX_NODE_VALUES) {
-        values.shift();
+      const recentValues: any = n.data.recentValues;
+      if (recentValues.length > MAX_NODE_VALUES) {
+        recentValues.shift();
       }
-      values.push(recentVal);
-      n.data.recentValues = values;
+      recentValues.push(recentValue);
+      n.data.recentValues = recentValues;
     } else {
-      const values: any[] = [recentVal];
-      n.data.recentValues = values;
+      const recentValues: NodeValue[] = [recentValue];
+      n.data.recentValues = recentValues;
     }
     const plotControl = n.controls.get("plot") as PlotControl;
     if (plotControl) {

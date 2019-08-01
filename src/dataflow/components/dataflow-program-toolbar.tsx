@@ -34,7 +34,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
     const handleAddNodeButtonClick = () => { this.props.onNodeCreateClick(nodeType); };
     return (
       <button
-        disabled={nodeType === "Data Storage" ? this.props.isDataStorageDisabled : false}
+        disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled}
         key={i}
         onClick={handleAddNodeButtonClick}
       >

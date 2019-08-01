@@ -1,15 +1,15 @@
 import * as React from "react";
-import Rete from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import { roundNodeValue } from "../../../utilities/node";
 import "./value-control.sass";
 
 export class ValueControl extends Rete.Control {
-  private emitter: any;
+  private emitter: NodeEditor;
   private component: any;
   private props: any;
-  constructor(emitter: any,
+  constructor(emitter: NodeEditor,
               key: string,
-              node: any) {
+              node: Node) {
     super(key);
     this.emitter = emitter;
     this.key = key;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import Rete from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../../dataflow-program";
@@ -7,13 +7,13 @@ import { NodePlotColors } from "../../../utilities/node";
 import "./plot-control.sass";
 
 export class PlotControl extends Rete.Control {
-  private emitter: any;
+  private emitter: NodeEditor;
   private component: any;
   private props: any;
-  private node: any;
+  private node: Node;
   private stepY = 5;
 
-  constructor(emitter: any, key: string, node: any) {
+  constructor(emitter: NodeEditor, key: string, node: Node) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -48,17 +48,15 @@ export class PlotControl extends Rete.Control {
       // determine how many datasets will be in graph
       const recentValuesKey = "recentValues";
       const recentValues: any = node.data[recentValuesKey];
-      const graphKeys: string[] = [];
+      let graphKeys: string[] = [];
       if (recentValues && recentValues.length) {
-        Object.keys(recentValues[recentValues.length - 1]).forEach((objKey: any) => {
-          graphKeys.push(objKey);
-        });
+        graphKeys = Object.keys(recentValues[recentValues.length - 1]);
       }
 
       let dsMax = 0;
       let dsMin = 0;
       if (graphKeys && graphKeys.length) {
-        graphKeys.forEach((graphKey: any, index: number) => {
+        graphKeys.forEach((graphKey, index: number) => {
           // set up a new dataset to be graphed
           const plotColor = NodePlotColors[index % NodePlotColors.length];
           const dataset: ChartDataSets = {
@@ -75,7 +73,7 @@ export class PlotControl extends Rete.Control {
           const chdata: any[] = [];
           recentValues.forEach((recVal: any) => {
             recVal[graphKey] ? chdata.push(recVal[graphKey].val) : chdata.push(Number.NaN);
-            if (chdata && chdata.length && !isNaN(chdata[chdata.length - 1])) {
+            if (chdata && chdata.length && isFinite(chdata[chdata.length - 1])) {
               dsMax = Math.max(dsMax, chdata[chdata.length - 1]);
               dsMin = Math.min(dsMin, chdata[chdata.length - 1]);
             }

@@ -5,23 +5,25 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { TextControl } from "../controls/text-control";
 import { PlotControl } from "../controls/plot-control";
-import * as uuid from "uuid/v4";
 
 export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
+  private inputCount = 1;
+
   constructor(numSocket: Socket) {
     super("Data Storage", numSocket);
   }
 
   public builder(node: Node) {
-    const inputUuid = uuid();
-    const inp = new Rete.Input("i-" + inputUuid, "sequence", this.numSocket);
-    inp.addControl(new TextControl(this.editor, "it-" + inputUuid, node, "", "my-sequence"));
+    if (this.editor) {
+      const inp = new Rete.Input("num" + this.inputCount, "sequence", this.numSocket);
+      inp.addControl(new TextControl(this.editor, "text" + this.inputCount, node, "", "my-sequence"));
 
-    return node
-      .addControl(new TextControl(this.editor, "dataset", node, "name", "my-dataset"))
-      .addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addInput(inp) as any;
+      return node
+        .addControl(new TextControl(this.editor, "dataset", node, "name", "my-dataset"))
+        .addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addInput(inp) as any;
+    }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
@@ -52,13 +54,8 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private addInputs(node: Node) {
-    const iterator = node.inputs.values();
-    let result = iterator.next();
-    let lastInput = result.value;
-    while (!result.done) {
-      lastInput = result.value;
-      result = iterator.next();
-    }
+    const lastKey = Array.from(node.inputs.keys())[node.inputs.size - 1];
+    const lastInput = node.inputs.get(lastKey);
     if (lastInput && lastInput.connections.length > 0) {
       // final input has a connection, add an additional input
         this.addInput(node);
@@ -66,36 +63,25 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private addInput(node: Node) {
-    const inputUuid = uuid();
-    const input = new Rete.Input("i-" + inputUuid, "sequence", this.numSocket);
-    input.addControl(new TextControl(this.editor,
-                                     "it-" + inputUuid,
-                                     node,
-                                     "",
-                                     "my-sequence"));
-    node.addInput(input);
-    node.update();
+    if (this.editor) {
+      this.inputCount++;
+      const input = new Rete.Input("num" + this.inputCount, "sequence", this.numSocket);
+      input.addControl(new TextControl(this.editor,
+                                       "text" + this.inputCount,
+                                       node,
+                                       "",
+                                       "my-sequence"));
+      node.addInput(input);
+      node.update();
+    }
   }
 
   private removeInputs(node: Node) {
-    const invalidInputs = [];
-    const iterator = node.inputs.values();
-    let result = iterator.next();
-    let invalidInput = "";
-    while (!result.done) {
-      if (invalidInput) {
-        invalidInputs.push(invalidInput);
-        invalidInput = "";
+    const lastKey = Array.from(node.inputs.keys())[node.inputs.size - 1];
+    node.inputs.forEach((input, key) => {
+      if (input.connections.length === 0 && key !== lastKey) {
+        this.removeInput(node, key);
       }
-      if (result.value && result.value.connections.length === 0) {
-        // we found an input with no connections
-        // if it isn't the last input, then remove it
-        invalidInput = result.value.key;
-      }
-      result = iterator.next();
-    }
-    invalidInputs.forEach((input) => {
-      this.removeInput(node, input);
     });
   }
 

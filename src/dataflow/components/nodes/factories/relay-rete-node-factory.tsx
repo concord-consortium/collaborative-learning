@@ -13,13 +13,15 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
-    const inp1 = new Rete.Input("num1", "Number", this.numSocket);
-    inp1.addControl(new NumControl(this.editor, "num1", node));
-    return node
-      .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
-      .addControl(new ValueControl(this.editor, "nodeValue", node))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addInput(inp1) as any;
+    if (this.editor) {
+      const inp1 = new Rete.Input("num1", "Number", this.numSocket);
+      inp1.addControl(new NumControl(this.editor, "num1", node));
+      return node
+        .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addInput(inp1) as any;
+    }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
