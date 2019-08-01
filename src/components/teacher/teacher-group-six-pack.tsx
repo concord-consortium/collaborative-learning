@@ -25,11 +25,14 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
 
   private renderGroups() {
     const { groups } = this.stores;
+    const numberOfGroups = groups.allGroups.length;
+    const rows = 2;
+    const columns = 3;
     const renders = [];
-    for (let r = 0; r < 2; r++) {
-      for (let c = 0; c < 3; c++) {
-        const groupIndex = r * 2 + c;
-        if (groupIndex < groups.allGroups.length) {
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < columns; c++) {
+        const groupIndex = r * columns + c;
+        if (groupIndex < numberOfGroups) {
           renders.push(this.renderFourUp(groupIndex, r, c));
         } else {
           renders.push(this.renderEmptyFourUp(r, c));
@@ -43,10 +46,12 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
     const { groups } = this.stores;
     const group = groups.allGroups[groupIndex];
     return (
-      <div className={`group-${r}-${c}`} key={`group-${r}-${c}`}>
-        {`Group ${group.id} - Students: ${group.users.map(u => u.initials).join(",")}`}
-        <div>
-          <FourUpComponent sectionId="introduction" groupId={group.id} isGhostUser={true} />
+      <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
+        {`Group ${group.id} (${r},${c},${groupIndex}) - Students: ${group.users.map(u => u.initials).join(",")}`}
+        <div className="teacher-group-canvas-container">
+          <div className="teacher-group-canvas">
+            <FourUpComponent sectionId="introduction" groupId={group.id} isGhostUser={true} />
+          </div>
         </div>
       </div>
     );
@@ -54,7 +59,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
 
   private renderEmptyFourUp(r: number, c: number) {
     return (
-      <div className={`group-${r}-${c}`} key={`group-${r}-${c}`}>
+      <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
         No Group (r: {r}, c: {c}).
       </div>
     );
