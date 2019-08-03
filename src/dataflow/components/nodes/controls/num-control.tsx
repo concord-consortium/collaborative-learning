@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useRef, useEffect } from "react";
 import Rete from "rete";
 import "./num-control.sass";
 
@@ -21,21 +22,29 @@ export class NumControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(+e.target.value); };
     };
-    const handlePointerMove = (e: any) => e.stopPropagation();
-    this.component = (compProps: { readonly: any, value: any; onChange: any; label: any}) => (
-      <div className="number-container">
-        { label
-          ? <label className="number-label">{compProps.label}</label>
-          : null
-        }
-        <input className="number-input"
-          type={readonly ? "text" : "number"}
-          value={compProps.value}
-          onChange={handleChange(compProps.onChange)}
-          onPointerMove={handlePointerMove}
-        />
-      </div>
-    );
+    const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
+    this.component = (compProps: { readonly: any, value: any; onChange: any; label: any}) => {
+      const inputRef = useRef<HTMLInputElement>(null);
+      useEffect(() => {
+        inputRef.current && inputRef.current.addEventListener("pointerdown", handlePointerDown);
+        return () => {
+          inputRef.current && inputRef.current.removeEventListener("pointerdown", handlePointerDown);
+        };
+      }, []);
+      return (
+        <div className="number-container">
+          { label
+            ? <label className="number-label">{compProps.label}</label>
+            : null
+          }
+          <input className="number-input"
+            ref={inputRef}
+            type={readonly ? "text" : "number"}
+            value={compProps.value}
+            onChange={handleChange(compProps.onChange)} />
+        </div>
+      );
+    };
 
     this.min = minVal;
     const initial = node.data[key] || initVal;
