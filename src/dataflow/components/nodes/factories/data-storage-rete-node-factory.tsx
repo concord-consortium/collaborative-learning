@@ -8,6 +8,8 @@ import { PlotControl } from "../controls/plot-control";
 
 export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   private inputCount = 1;
+  private inputPrefix = "num";
+  private textPrefix = "sequence";
 
   constructor(numSocket: Socket) {
     super("Data Storage", numSocket);
@@ -15,14 +17,28 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
 
   public builder(node: Node) {
     if (this.editor) {
-      const inp = new Rete.Input("num" + this.inputCount, "sequence", this.numSocket);
-      inp.addControl(new TextControl(this.editor, "text" + this.inputCount, node, "", "my-sequence"));
+      this.inputCount = 1;
+      node.addControl(new TextControl(this.editor, "datasetName", node, "name", "my-dataset"));
+      node.addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1));
+      node.addControl(new PlotControl(this.editor, "plot", node));
+      if (node.data.inputKeys) {
+        const keys: any = node.data.inputKeys;
+        keys.forEach((key: string) => {
+          const inp = new Rete.Input(key, "sequence", this.numSocket);
+          const keyNum = parseInt(key.substring(this.inputPrefix.length), 10);
+          this.inputCount = Math.max(this.inputCount, keyNum);
+          if (this.editor) {
+            inp.addControl(new TextControl(this.editor, this.textPrefix + this.inputCount, node, "", "my-sequence"));
+          }
+          node.addInput(inp);
+        });
+      } else {
+        const inp = new Rete.Input(this.inputPrefix + this.inputCount, "sequence", this.numSocket);
+        inp.addControl(new TextControl(this.editor, this.textPrefix + this.inputCount, node, "", "my-sequence"));
+        node.addInput(inp);
+      }
 
-      return node
-        .addControl(new TextControl(this.editor, "dataset", node, "name", "my-dataset"))
-        .addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1))
-        .addControl(new PlotControl(this.editor, "plot", node))
-        .addInput(inp) as any;
+      return node as any;
     }
   }
 
@@ -30,7 +46,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     const inputValues: any = {};
     const inputKeys: any = Object.keys(inputs);
     if (inputKeys) {
-      inputKeys.forEach((key: any) => {
+      inputKeys.forEach((key: string) => {
         if (inputs[key].length) {
           const inputValue = { name: "sequence", val: inputs[key][0] };
           inputValues[key] = inputValue;
@@ -58,20 +74,21 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     const lastInput = node.inputs.get(lastKey);
     if (lastInput && lastInput.connections.length > 0) {
       // final input has a connection, add an additional input
-        this.addInput(node);
+      this.addInput(node);
     }
   }
 
   private addInput(node: Node) {
     if (this.editor) {
       this.inputCount++;
-      const input = new Rete.Input("num" + this.inputCount, "sequence", this.numSocket);
+      const input = new Rete.Input(this.inputPrefix + this.inputCount, "sequence", this.numSocket);
       input.addControl(new TextControl(this.editor,
-                                       "text" + this.inputCount,
+                                       this.textPrefix + this.inputCount,
                                        node,
                                        "",
                                        "my-sequence"));
       node.addInput(input);
+      node.data.inputKeys = Array.from(node.inputs.keys());
       node.update();
     }
   }
@@ -91,6 +108,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
       input.connections.slice().map(this.editor.removeConnection.bind(this.editor));
       node.removeInput(input);
     }
+    node.data.inputKeys = Array.from(node.inputs.keys());
     node.update();
   }
 
