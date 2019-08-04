@@ -9,8 +9,7 @@ const COGNITO_POOL = "us-east-1:153d6337-3421-4c34-a21f-d1d2143a5091";
 const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 // WTD This is for testing purposes only. Remove when we add users and hub owners.
 const OWNER_ID = "123";
-// WTD This is for testing purposes only. Sensor send interval should be set by user.
-const SEND_INTERVAL = 2;
+const SEND_INTERVAL = 1;
 
 export enum TopicType {
   hubChannelInfo = "hubChannelInfo",
@@ -132,12 +131,12 @@ export class IoT {
 
   private startSendingSensorValues(hubId: string) {
     const topicMessage = JSON.stringify({ command: "set_send_interval", send_interval: SEND_INTERVAL});
-    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage, { qos: 1 });
 
   }
   private requestHubChannelInfo(hubId: string) {
     const topicMessage = JSON.stringify({ command: "req_devices"});
-    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage);
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage, { qos: 1 });
   }
 
   private processHubChannelInfoMessage(hubId: string, message: any) {
