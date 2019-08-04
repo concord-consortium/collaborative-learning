@@ -150,10 +150,10 @@ context('Test Canvas', function(){
                     // cy.get('#leftNavTab1').click();
                     // cy.get('#leftNavContainer1 > .left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
                     // cy.get('.single-workspace > .document > .titlebar > .title').should('contain','Initial');
-                    // cy.get('#rightNavTabMy\\ Work').click({force:true});
+                    // cy.get('#rightNavTab-my-work').click({force:true});
                     // cy.get('.list > .list-item[title*="Initial"]').click();
                     // cy.get('.single-workspace > .document > .titlebar > .title').should('contain', 'Initial');
-                    // cy.get('#rightNavTabMy\\ Work').click({force:true});
+                    // cy.get('#rightNavTab-my-work').click({force:true});
                     // cy.get('.list > .list-item[title*="Introduction"]').click();
                     // cy.get('.single-workspace > .document > .titlebar > .title').should('contain', 'Introduction');
 

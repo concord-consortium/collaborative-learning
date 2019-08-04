@@ -3,7 +3,7 @@ class RightNav{
         return cy.get('.right-nav .tab');
     }
     getMyWorkTab(){
-        return cy.get('#rightNavTabMy\\ Work.tab');
+        return cy.get('#rightNavTab-my-work.tab');
     }
     getRightNavExpandedSpace(){
         return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
@@ -31,7 +31,7 @@ class RightNav{
     }
 
     getClassWorkTab(){
-        return cy.get('#rightNavTabClass\\ Work.tab');
+        return cy.get('#rightNavTab-class-work.tab');
     }
 
     getClassWorkAreaCanvasItem(){
@@ -64,7 +64,7 @@ class RightNav{
     }
 
     getClassLogTab(){
-        return cy.get('#rightNavTabClass\\ Logs.tab');
+        return cy.get('#rightNavTab-class-logs.tab');
     }
 
     getClassLogAreaCanvasItem(){
