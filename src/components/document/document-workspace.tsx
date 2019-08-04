@@ -8,6 +8,7 @@ import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModelType, DocumentModel, SectionDocument } from "../../models/document/document";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
+import { RightNavTabSpec } from "../../models/view/right-nav";
 
 import "./document-workspace.sass";
 
@@ -28,13 +29,14 @@ const ghostSectionDocuments: GhostDocumentMap = {};
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   public render() {
+    const { unit } = this.stores;
     const isGhostUser = this.props.isGhostUser;
     return (
       <div className="document-workspace">
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />
         <BottomNavComponent />
-        <RightNavComponent isGhostUser={isGhostUser} />
+        <RightNavComponent tabs={unit.rightNavTabs} isGhostUser={isGhostUser} />
       </div>
     );
   }

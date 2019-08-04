@@ -2,6 +2,7 @@ import { types } from "mobx-state-tree";
 import { WorkspaceModel } from "./workspace";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { DocumentModelType } from "../document/document";
+import { ERightNavTab } from "../view/right-nav";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
 
@@ -26,7 +27,7 @@ export const UIModel = types
     bottomNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
-    activeRightNavTab: "My Work",
+    activeRightNavTab: ERightNavTab.kMyWork,
     selectedTileId: types.maybe(types.string),
     showDemo: false,
     showDemoCreator: false,
