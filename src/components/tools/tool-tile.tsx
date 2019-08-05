@@ -16,6 +16,7 @@ import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
+import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
 
@@ -182,6 +183,18 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    const target: HTMLElement | null = e.target as HTMLElement;
+    if (!target || target.querySelector(".disable-tile-drag")) {
+      e.preventDefault();
+      return;
+    }
+    if (target && target.querySelector(".disable-tile-content-drag")) {
+      const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
+      if (!eltTarget || !eltTarget.closest(".tool-tile-drag-handle")) {
+        e.preventDefault();
+        return;
+      }
+    }
     // set the drag data
     const { model, docId, height, scale } = this.props;
     const snapshot = cloneDeep(getSnapshot(model));
