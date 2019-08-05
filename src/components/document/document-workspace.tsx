@@ -28,13 +28,14 @@ const ghostSectionDocuments: GhostDocumentMap = {};
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   public render() {
+    const { unit } = this.stores;
     const isGhostUser = this.props.isGhostUser;
     return (
       <div className="document-workspace">
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />
         <BottomNavComponent />
-        <RightNavComponent isGhostUser={isGhostUser} />
+        <RightNavComponent tabs={unit.rightNavTabs} isGhostUser={isGhostUser} />
       </div>
     );
   }
@@ -93,9 +94,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
+    const { unit } = this.stores;
+    const hasRightNavTabs = unit.rightNavTabs && (unit.rightNavTabs.length > 0);
+    const style = hasRightNavTabs ? undefined : { right: 0 };
     return (
       <div
         className={className}
+        style={style}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop(side)}
         onClick={this.handleClick}
