@@ -15,7 +15,7 @@ import "./right-nav.sass";
 const kRightNavItemScale = 0.11;
 
 interface IProps extends IBaseProps {
-  tabs: RightNavTabSpec[];
+  tabs?: RightNavTabSpec[];
   isGhostUser: boolean;
 }
 
@@ -65,8 +65,9 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const tabSpecs = this.props.tabs
+    const tabSpecs = this.props.tabs && this.props.tabs
                       .filter(tabSpec => !(this.props.isGhostUser && tabSpec.hideGhostUser));
+    if (!tabSpecs || !tabSpecs.length) return null;
     return (
       <div className="right-nav">
         <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
