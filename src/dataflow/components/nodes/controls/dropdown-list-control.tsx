@@ -1,12 +1,12 @@
 import * as React from "react";
-import Rete from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import "./dropdown-list-control.sass";
 
 export class DropdownListControl extends Rete.Control {
-  private emitter: any;
+  private emitter: NodeEditor;
   private component: any;
   private props: any;
-  constructor(emitter: any, key: string, node: any, optionArray: any, readonly = false) {
+  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: any, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;

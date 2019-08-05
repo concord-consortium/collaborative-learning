@@ -14,24 +14,26 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
-    const inp1 = new Rete.Input("num1", "Number", this.numSocket);
-    const out = new Rete.Output("num", "Number", this.numSocket);
+    if (this.editor) {
+      const inp1 = new Rete.Input("num1", "Number", this.numSocket);
+      const out = new Rete.Output("num", "Number", this.numSocket);
 
-    inp1.addControl(new NumControl(this.editor, "num1", node));
+      inp1.addControl(new NumControl(this.editor, "num1", node));
 
-    const dropdownOptions = NodeOperationTypes
-      .filter((nodeOp) => {
-        return nodeOp.type === "transform";
-      }).map((nodeOp) => {
-        return { name: nodeOp.name, icon: nodeOp.icon };
-      });
+      const dropdownOptions = NodeOperationTypes
+        .filter((nodeOp) => {
+          return nodeOp.type === "transform";
+        }).map((nodeOp) => {
+          return { name: nodeOp.name, icon: nodeOp.icon };
+        });
 
-    return node
-      .addInput(inp1)
-      .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
-      .addControl(new ValueControl(this.editor, "nodeValue", node))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addOutput(out) as any;
+      return node
+        .addInput(inp1)
+        .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addOutput(out) as any;
+      }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {

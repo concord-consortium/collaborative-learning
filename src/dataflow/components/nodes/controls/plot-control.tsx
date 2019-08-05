@@ -1,19 +1,19 @@
 import * as React from "react";
-import Rete from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import { Line } from "react-chartjs-2";
-import { ChartOptions } from "chart.js";
-import { cloneDeep } from "lodash";
+import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../../dataflow-program";
+import { NodePlotColors } from "../../../utilities/node";
 import "./plot-control.sass";
 
 export class PlotControl extends Rete.Control {
-  private emitter: any;
+  private emitter: NodeEditor;
   private component: any;
   private props: any;
-  private node: any;
+  private node: Node;
   private stepY = 5;
 
-  constructor(emitter: any, key: string, node: any) {
+  constructor(emitter: NodeEditor, key: string, node: Node) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -43,29 +43,53 @@ export class PlotControl extends Rete.Control {
     );
 
     const lineData = () => {
-      const data = {
-        labels: Array.apply(null, {length: MAX_NODE_VALUES}).map(Number.call, Number),
-        datasets: [{
-          backgroundColor: "rgb(5, 146, 175)",
-          borderColor: "rgb(5, 146, 175)",
-          borderWidth: 2,
-          pointRadius: 2,
-          data: [0],
-          fill: false,
-        }]
-      };
-      const valKey = "recentValues";
-      const values: any = node.data[valKey];
-      if (values) {
-        const chdata: any[] = cloneDeep(values) as any[];
-        data.datasets[0].data = chdata;
-        const max = Math.max.apply(Math, chdata);
-        const min = Math.min.apply(Math, chdata);
-        const maxY = Math.ceil(max + 1);
-        const minY = Math.floor(min >= 1 || min < 0 ? min - 1 : min);
-        this.stepY = (maxY - minY) / 2;
+      const chartDataSets: ChartDataSets[] = [];
+
+      // determine how many datasets will be in graph
+      const recentValuesKey = "recentValues";
+      const recentValues: any = node.data[recentValuesKey];
+      let graphKeys: string[] = [];
+      if (recentValues && recentValues.length) {
+        graphKeys = Object.keys(recentValues[recentValues.length - 1]);
       }
-      return data;
+
+      let dsMax = 0;
+      let dsMin = 0;
+      if (graphKeys && graphKeys.length) {
+        graphKeys.forEach((graphKey, index: number) => {
+          // set up a new dataset to be graphed
+          const plotColor = NodePlotColors[index % NodePlotColors.length];
+          const dataset: ChartDataSets = {
+            backgroundColor: plotColor,
+            borderColor: plotColor,
+            borderWidth: 2,
+            pointRadius: 2,
+            data: [0],
+            fill: false,
+          };
+          chartDataSets.push(dataset);
+
+          // get all values for this key
+          const chdata: any[] = [];
+          recentValues.forEach((recVal: any) => {
+            recVal[graphKey] ? chdata.push(recVal[graphKey].val) : chdata.push(Number.NaN);
+            if (chdata && chdata.length && isFinite(chdata[chdata.length - 1])) {
+              dsMax = Math.max(dsMax, chdata[chdata.length - 1]);
+              dsMin = Math.min(dsMin, chdata[chdata.length - 1]);
+            }
+          });
+          // put values in dataset
+          chartDataSets[index].data = chdata;
+        });
+        this.stepY = (dsMax - dsMin) / 2;
+      }
+
+      const chartData: ChartData = {
+        labels: Array.apply(null, {length: MAX_NODE_VALUES}).map(Number.call, Number),
+        datasets: chartDataSets
+      };
+
+      return chartData;
     };
 
     const lineOptions = () => {

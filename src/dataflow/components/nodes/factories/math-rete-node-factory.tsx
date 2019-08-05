@@ -14,26 +14,28 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
-    const inp1 = new Rete.Input("num1", "Number", this.numSocket);
-    const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
-    const out = new Rete.Output("num", "Number", this.numSocket);
+    if (this.editor) {
+      const inp1 = new Rete.Input("num1", "Number", this.numSocket);
+      const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
+      const out = new Rete.Output("num", "Number", this.numSocket);
 
-    inp1.addControl(new NumControl(this.editor, "num1", node));
-    inp2.addControl(new NumControl(this.editor, "num2", node));
+      inp1.addControl(new NumControl(this.editor, "num1", node));
+      inp2.addControl(new NumControl(this.editor, "num2", node));
 
-    const dropdownOptions = NodeOperationTypes
-      .filter((nodeOp) => {
-        return nodeOp.type === "math";
-      }).map((nodeOp) => {
-        return { name: nodeOp.name, icon: nodeOp.icon };
-      });
-    return node
-      .addInput(inp1)
-      .addInput(inp2)
-      .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
-      .addControl(new ValueControl(this.editor, "nodeValue", node))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addOutput(out) as any;
+      const dropdownOptions = NodeOperationTypes
+        .filter((nodeOp) => {
+          return nodeOp.type === "math";
+        }).map((nodeOp) => {
+          return { name: nodeOp.name, icon: nodeOp.icon };
+        });
+      return node
+        .addInput(inp1)
+        .addInput(inp2)
+        .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addOutput(out) as any;
+    }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {

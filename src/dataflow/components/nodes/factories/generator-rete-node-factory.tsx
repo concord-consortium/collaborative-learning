@@ -14,19 +14,22 @@ export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
-    const out = new Rete.Output("num", "Number", this.numSocket);
-    const dropdownOptions = NodeGeneratorTypes
-      .map((nodeOp) => {
-        return { name: nodeOp.name, icon: nodeOp.icon };
-      });
+    if (this.editor) {
+      const out = new Rete.Output("num", "Number", this.numSocket);
+      const dropdownOptions = NodeGeneratorTypes
+        .map((nodeOp) => {
+          return { name: nodeOp.name, icon: nodeOp.icon };
+        });
 
-    return node
-      .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
-      .addControl(new NumControl(this.editor, "amplitude", node, false, "amplitude", 1, .01))
-      .addControl(new NumControl(this.editor, "period", node, false, "period", 10, 1))
-      .addControl(new ValueControl(this.editor, "nodeValue", node))
-      .addControl(new PlotControl(this.editor, "plot", node))
-      .addOutput(out) as any;
+      return node
+
+        .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
+        .addControl(new NumControl(this.editor, "amplitude", node, false, "amplitude", 1, .01))
+        .addControl(new NumControl(this.editor, "period", node, false, "period", 10, 1))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
+        .addControl(new PlotControl(this.editor, "plot", node))
+        .addOutput(out) as any;
+    }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {

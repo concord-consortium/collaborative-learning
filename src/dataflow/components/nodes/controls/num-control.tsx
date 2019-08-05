@@ -1,17 +1,17 @@
 import * as React from "react";
 import { useRef, useEffect } from "react";
-import Rete from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import "./num-control.sass";
 
 // cf. https://codesandbox.io/s/retejs-react-render-t899c
 export class NumControl extends Rete.Control {
-  private emitter: any;
+  private emitter: NodeEditor;
   private component: any;
   private props: any;
-  private min: any;
-  constructor(emitter: any,
+  private min: number | null;
+  constructor(emitter: NodeEditor,
               key: string,
-              node: any,
+              node: Node,
               readonly = false,
               label = "",
               initVal = 0,
@@ -23,7 +23,7 @@ export class NumControl extends Rete.Control {
       return (e: any) => { onChange(+e.target.value); };
     };
     const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
-    this.component = (compProps: { readonly: any, value: any; onChange: any; label: any}) => {
+    this.component = (compProps: { readonly: any, value: any; onChange: any; label: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useEffect(() => {
         inputRef.current && inputRef.current.addEventListener("pointerdown", handlePointerDown);

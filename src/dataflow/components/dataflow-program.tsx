@@ -15,6 +15,7 @@ import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory"
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
+import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
@@ -22,11 +23,22 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import "./dataflow-program.sass";
 
+interface NodeNameValuePair {
+  name: string;
+  val: number;
+}
+interface NodeValueMap {
+  [key: string]: NodeNameValuePair;
+}
+type NodeValue = number | NodeValueMap;
+
 interface IProps extends IBaseProps {
   program?: string;
 }
 
-interface IState {}
+interface IState {
+  disableDataStorage: boolean;
+}
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
@@ -42,6 +54,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
 
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      disableDataStorage: false
+    };
+  }
+
   public render() {
     return (
       <div className="editor-container">
@@ -50,6 +69,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onDeleteClick={this.deleteSelectedNodes}
           onResetClick={this.resetNodes}
           onClearClick={this.clearProgram}
+          isDataStorageDisabled={this.state.disableDataStorage}
         />
         <div className="flow-tool" ref={elt => this.toolDiv = elt} />
       </div>
@@ -80,8 +100,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket),
-        new GeneratorReteNodeFactory(numSocket)];
-
+        new GeneratorReteNodeFactory(numSocket),
+        new DataStorageReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
@@ -98,6 +118,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
         const result = await this.programEditor.fromJSON(program);
+        if (this.getNodeCount("Data Storage")) {
+          this.setState({disableDataStorage: true});
+        }
       }
 
       (this.programEditor as any).on(
@@ -173,14 +196,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const numNodes = this.programEditor.nodes.length;
     n1.position = [100 + Math.floor(numNodes / 10) * 200 + numNodes % 10 * 15, 5 + numNodes % 10 * 15];
     this.programEditor.addNode(n1);
+    if (nodeType === "Data Storage") {
+      this.setState({disableDataStorage: true});
+    }
   }
   private clearProgram = () => {
     this.programEditor.clear();
+    this.setState({disableDataStorage: false});
   }
   private deleteSelectedNodes = () => {
     const selectedNodes = this.programEditor.selected.list.slice();
     this.programEditor.selected.clear();
     selectedNodes.forEach((n: Node) => {
+      if (n.name === "Data Storage") {
+        this.setState({disableDataStorage: false});
+      }
       this.programEditor.removeNode(n);
     });
   }
@@ -195,6 +225,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       }
     });
+  }
+
+  private getNodeCount = (type?: string) => {
+    return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
   }
 
   private heartBeat = () => {
@@ -253,17 +287,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateNodeRecentValues = (n: Node) => {
-    const val: any = n.data.nodeValue;
+    const nodeValue: any = n.data.nodeValue;
+    let recentValue: NodeValue = {};
+    const nodeValueKey = "nodeValue";
+    // Store recentValue as object with unique keys for each value stored in node
+    // Needed for node types such as data storage that require more than a single value
+    typeof nodeValue === "number" ?
+      recentValue[nodeValueKey] = { name: n.name, val: nodeValue }
+      : recentValue = nodeValue;
     if (n.data.recentValues) {
-      const values: any = n.data.recentValues;
-      if (values.length > MAX_NODE_VALUES) {
-        values.shift();
+      const recentValues: any = n.data.recentValues;
+      if (recentValues.length > MAX_NODE_VALUES) {
+        recentValues.shift();
       }
-      values.push(val);
-      n.data.recentValues = values;
+      recentValues.push(recentValue);
+      n.data.recentValues = recentValues;
     } else {
-      const values: number[] = [val];
-      n.data.recentValues = values;
+      const recentValues: NodeValue[] = [recentValue];
+      n.data.recentValues = recentValues;
     }
     const plotControl = n.controls.get("plot") as PlotControl;
     if (plotControl) {
