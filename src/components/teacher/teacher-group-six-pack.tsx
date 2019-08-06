@@ -34,8 +34,6 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
         const groupIndex = r * columns + c;
         if (groupIndex < numberOfGroups) {
           renders.push(this.renderFourUp(groupIndex, r, c));
-        } else {
-          renders.push(this.renderEmptyFourUp(r, c));
         }
       }
     }
@@ -47,20 +45,14 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
     const group = groups.allGroups[groupIndex];
     return (
       <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
-        {`Group ${group.id} (${r},${c},${groupIndex}) - Students: ${group.users.map(u => u.initials).join(",")}`}
+        <div className="group-label">
+          Group {String(group.id)}
+        </div>
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent sectionId="introduction" groupId={group.id} isGhostUser={true} />
           </div>
         </div>
-      </div>
-    );
-  }
-
-  private renderEmptyFourUp(r: number, c: number) {
-    return (
-      <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
-        No Group (r: {r}, c: {c}).
       </div>
     );
   }
