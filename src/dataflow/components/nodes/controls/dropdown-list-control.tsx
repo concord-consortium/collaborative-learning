@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useRef, useEffect } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import "./dropdown-list-control.sass";
 
@@ -14,7 +15,7 @@ export class DropdownListControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerMove = (e: any) => e.stopPropagation();
+    const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
 
     this.component = (compProps: {
                                     value: string;
@@ -40,6 +41,13 @@ export class DropdownListControl extends Rete.Control {
                                 onListClick: any,
                                 options: any,
                                 listClass: string) => {
+      const divRef = useRef<HTMLDivElement>(null);
+      useEffect(() => {
+        divRef.current && divRef.current.addEventListener("pointerdown", handlePointerDown);
+        return () => {
+          divRef.current && divRef.current.removeEventListener("pointerdown", handlePointerDown);
+        };
+      }, []);
       let icon = "";
       const option = options.find((op: any) => op.name === val);
       if (option && option.icon) {
@@ -47,8 +55,8 @@ export class DropdownListControl extends Rete.Control {
       }
 
       return (
-        <div className={`node-select ${listClass}`}>
-          <div className="item top" onClick={handleChange(onItemClick)}>
+        <div className={`node-select ${listClass}`} ref={divRef}>
+          <div className="item top" onMouseDown={handleChange(onItemClick)}>
             <svg className="icon top">
               <use xlinkHref={icon}/>
             </svg>
@@ -63,7 +71,7 @@ export class DropdownListControl extends Rete.Control {
               <div
                 className={ops.name === val ? `item ${listClass} selected` : `item ${listClass} selectable`}
                 key={i}
-                onClick={onListClick(ops.name)}
+                onMouseDown={onListClick(ops.name)}
               >
                 <svg className="icon">
                   <use xlinkHref={`#${ops.icon}`}/>
