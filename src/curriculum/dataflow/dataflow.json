@@ -4,6 +4,17 @@
   "subtitle": "Computational Thinking in Biology",
   "pageTitle": "%unitTitle%",
   "demoProblemTitle": "%investigationTitle%",
+  "rightNavTabs": [
+    {
+      "tab": "my-work",
+      "label": "My Work",
+      "hideGhostUser": true
+    },
+    {
+      "tab": "class-work",
+      "label": "Shared Work"
+    }
+  ],
   "toolbar": [
     {
       "name": "select",
