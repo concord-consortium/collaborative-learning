@@ -37,7 +37,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const {supports} = this.stores;
+    const {supports, unit} = this.stores;
     const {activeTab} = this.state;
 
     return (
@@ -51,7 +51,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
           </div>
         </div>
         <BottomNavComponent />
-        <RightNavComponent isGhostUser={true} />
+        <RightNavComponent tabs={unit.rightNavTabs} isGhostUser={true} />
       </div>
     );
   }

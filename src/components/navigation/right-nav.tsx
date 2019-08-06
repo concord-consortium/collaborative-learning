@@ -1,28 +1,28 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import "./right-nav.sass";
 import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { MyWorkComponent } from "../thumbnail/my-work";
 import { ClassWorkComponent } from "../thumbnail/class-work";
 import { ClassLogsComponent } from "../thumbnail/class-logs";
+import { ERightNavTab, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
+import { map } from "lodash";
+import "./right-nav.sass";
+
+// cf. right-nav.sass: $list-item-scale
+const kRightNavItemScale = 0.11;
 
 interface IProps extends IBaseProps {
+  tabs?: RightNavTabSpec[];
   isGhostUser: boolean;
 }
 
 interface IState {
-  tabLoadAllowed: { [tab: string]: boolean };
+  tabLoadAllowed: RightNavTabMap<boolean>;
   navExpanding: boolean;
 }
-
-// cf. right-nav.sass: $list-item-scale
-const kRightNavItemScale = 0.11;
-const kMyWorkTab = "My Work";
-const kClassWorkTab = "Class Work";
-const kClassLogsTab = "Class Logs";
 
 @inject("stores")
 @observer
@@ -34,9 +34,9 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       tabLoadAllowed: {
-        kMyWorkTab: false,
-        kClassWorkTab: false,
-        kClassLogsTab: false
+        [ERightNavTab.kMyWork]: false,
+        [ERightNavTab.kClassWork]: false,
+        [ERightNavTab.kClassLogs]: false
       },
       navExpanding: false
     };
@@ -65,28 +65,27 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
-    const teacherTabs = [kClassWorkTab, kClassLogsTab];
-    const studentTabs = [kMyWorkTab].concat(teacherTabs);
-    const tabs = this.props.isGhostUser ? teacherTabs : studentTabs;
+    const tabSpecs = this.props.tabs && this.props.tabs
+                      .filter(tabSpec => !(this.props.isGhostUser && tabSpec.hideGhostUser));
+    if (!tabSpecs || !tabSpecs.length) return null;
     return (
       <div className="right-nav">
         <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
-          {tabs.map((tab) => {
+          {tabSpecs.map(spec => {
             return (
               <TabComponent
-                id={this.getTabId(tab)}
-                key={tab}
-                active={rightNavExpanded && (activeRightNavTab === tab)}
-                onClick={this.handleTabClick(tab)}
-              >
-                {tab}
+                id={this.getTabId(spec.tab)}
+                key={spec.tab}
+                active={rightNavExpanded && (activeRightNavTab === spec.tab)}
+                onClick={this.handleTabClick(spec.tab)} >
+                {spec.label}
               </TabComponent>
             );
           })}
         </TabSetComponent>
         <div
           className={`expanded-area${rightNavExpanded ? " expanded" : ""}`}
-          aria-labelledby={this.getTabId(activeRightNavTab)}
+          aria-labelledby={this.getTabId(activeRightNavTab as ERightNavTab)}
           aria-hidden={!rightNavExpanded}
           ref={this.expandedAreaRef}
         >
@@ -98,34 +97,33 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   private renderTabContents() {
     const {activeRightNavTab} = this.stores.ui;
+    const tabContents: RightNavTabMap<() => JSX.Element> = {
+            [ERightNavTab.kMyWork]: () => <MyWorkComponent scale={kRightNavItemScale}/>,
+            [ERightNavTab.kClassWork]: () => <ClassWorkComponent scale={kRightNavItemScale}/>,
+            [ERightNavTab.kClassLogs]: () => <ClassLogsComponent scale={kRightNavItemScale}/>
+          };
+    const tabContainers = map(ERightNavTab, (tab: ERightNavTab) => {
+            const enabledDisabledClass = activeRightNavTab === tab ? "enabled" : "disabled";
+            return (
+              this.state.tabLoadAllowed[tab]
+                ? <div className={"container " + enabledDisabledClass} key={tab}>
+                    {tabContents[tab]()}
+                  </div>
+                : this.renderLoadingText(tab)
+            );
+    });
+
     return (
       <div className="contents">
-        { this.state.tabLoadAllowed[kMyWorkTab]
-          ? <div className={"container " + (activeRightNavTab === kMyWorkTab ? "enabled" : "disabled")}>
-              <MyWorkComponent scale={kRightNavItemScale}/>
-            </div>
-          : this.renderLoadingText(kMyWorkTab)
-        }
-        { this.state.tabLoadAllowed[kClassWorkTab]
-          ? <div className={"container " + (activeRightNavTab === kClassWorkTab ? "enabled" : "disabled")}>
-              <ClassWorkComponent scale={kRightNavItemScale}/>
-          </div>
-          : this.renderLoadingText(kClassWorkTab)
-        }
-        { this.state.tabLoadAllowed[kClassLogsTab]
-          ? <div className={"container " + (activeRightNavTab === kClassLogsTab ? "enabled" : "disabled")}>
-              <ClassLogsComponent scale={kRightNavItemScale}/>
-            </div>
-          : this.renderLoadingText(kClassLogsTab)
-        }
+        {tabContainers}
       </div>
     );
   }
 
-  private renderLoadingText(tab: string) {
+  private renderLoadingText(tab: ERightNavTab) {
     const {activeRightNavTab} = this.stores.ui;
     return (
-      <div>
+      <div key={tab}>
         { tab === activeRightNavTab
           ? <div className="loading">loading...</div>
           : null
@@ -134,7 +132,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleTabClick = (tab: string) => {
+  private handleTabClick = (tab: ERightNavTab) => {
     const { ui } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
     return (e: React.MouseEvent<HTMLDivElement>) => {
@@ -153,14 +151,14 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     };
   }
 
-  private getTabId(tab: string) {
-    return `rightNavTab${tab}`;
+  private getTabId(tab: ERightNavTab) {
+    return `rightNavTab-${tab}`;
   }
 
   private updateComponentLoadAllowedState = () => {
     const { ui } = this.stores;
     const tabLoadAllowed = this.state.tabLoadAllowed;
-    tabLoadAllowed[ui.activeRightNavTab] = true;
+    tabLoadAllowed[ui.activeRightNavTab as ERightNavTab] = true;
     this.setState({ tabLoadAllowed });
   }
 

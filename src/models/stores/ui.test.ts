@@ -2,6 +2,7 @@ import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "../curriculum/section";
 import { SectionWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
+import { ERightNavTab } from "../view/right-nav";
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -26,7 +27,7 @@ describe("ui model", () => {
     expect(ui.bottomNavExpanded).toBe(false);
     expect(ui.error).toBe(null);
     expect(ui.activeSectionIndex).toBe(0);
-    expect(ui.activeRightNavTab).toBe("My Work");
+    expect(ui.activeRightNavTab).toBe(ERightNavTab.kMyWork);
     expect(ui.showDemoCreator).toBe(false);
     expect(ui.dialog).toBe(undefined);
   });

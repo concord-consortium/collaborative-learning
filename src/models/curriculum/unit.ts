@@ -6,6 +6,7 @@ import { SupportModel } from "./support";
 import { each, isObject } from "lodash";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { ToolButtonModel } from "../tools/tool-types";
+import { RightNavTabModel } from "../view/right-nav";
 
 export const UnitModel = types
   .model("Unit", {
@@ -17,6 +18,7 @@ export const UnitModel = types
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
+    rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel),
     defaultStamps: types.array(StampModel),
   })
