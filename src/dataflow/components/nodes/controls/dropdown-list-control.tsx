@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
+import { useStopEventPropagation } from "./custom-hooks";
 import "./dropdown-list-control.sass";
 
 export class DropdownListControl extends Rete.Control {
@@ -15,8 +16,6 @@ export class DropdownListControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
-
     this.component = (compProps: {
                                     value: string;
                                     onItemClick: () => void;
@@ -42,12 +41,7 @@ export class DropdownListControl extends Rete.Control {
                                 options: any,
                                 listClass: string) => {
       const divRef = useRef<HTMLDivElement>(null);
-      useEffect(() => {
-        divRef.current && divRef.current.addEventListener("pointerdown", handlePointerDown);
-        return () => {
-          divRef.current && divRef.current.removeEventListener("pointerdown", handlePointerDown);
-        };
-      }, []);
+      useStopEventPropagation(divRef, "pointerdown");
       let icon = "";
       const option = options.find((op: any) => op.name === val);
       if (option && option.icon) {

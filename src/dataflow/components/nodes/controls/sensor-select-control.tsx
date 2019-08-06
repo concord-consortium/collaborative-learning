@@ -1,7 +1,8 @@
 import * as React from "react";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
+import { useStopEventPropagation } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
@@ -20,7 +21,6 @@ export class SensorSelectControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
 
     this.component = (compProps: {
                                    type: string;
@@ -42,12 +42,7 @@ export class SensorSelectControl extends Rete.Control {
 
     const renderSensorTypeList = (type: string, showList: boolean, onItemClick: any, onListClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
-      useEffect(() => {
-        divRef.current && divRef.current.addEventListener("pointerdown", handlePointerDown);
-        return () => {
-          divRef.current && divRef.current.removeEventListener("pointerdown", handlePointerDown);
-        };
-      }, []);
+      useStopEventPropagation(divRef, "pointerdown");
       let icon = "";
       const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
       if (sensorType && sensorType.icon) {
@@ -86,12 +81,7 @@ export class SensorSelectControl extends Rete.Control {
 
     const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
       const selectRef = useRef<HTMLSelectElement>(null);
-      useEffect(() => {
-        selectRef.current && selectRef.current.addEventListener("pointerdown", handlePointerDown);
-        return () => {
-          selectRef.current && selectRef.current.removeEventListener("pointerdown", handlePointerDown);
-        };
-      }, []);
+      useStopEventPropagation(selectRef, "pointerdown");
       return (
         <select
           ref={selectRef}
