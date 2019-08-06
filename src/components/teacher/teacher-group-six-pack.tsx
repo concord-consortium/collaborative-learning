@@ -45,7 +45,9 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
     const group = groups.allGroups[groupIndex];
     return (
       <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
-        {`Group ${group.id} (${r},${c},${groupIndex}) - Students: ${group.users.map(u => u.initials).join(",")}`}
+        <div className="group-label">
+          Group {String(group.id)}
+        </div>
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent sectionId="introduction" groupId={group.id} isGhostUser={true} />

@@ -2,9 +2,10 @@
 
 .teacher-group-six-pack
   display: grid
+  margin: 13px;
   grid-template-columns: auto auto auto
   grid-template-rows: 1fr 1fr
-  grid-gap: 1px 1px
+  grid-gap: 6px
   justify-items: center
   color: black
 
@@ -18,14 +19,22 @@
     top: 0px
     bottom: 0px
     right: 0px
-    left: 0px
+    left: 5px
 
   .teacher-group
     background-color: $color1
-    border: 2px solid #FBF8E5
-    padding: 3px
-    height: 280px
-    width: 260px
+    border: $color1
+    border-radius: 20px 20px 0 0
+    padding: 0
+    height: 300px
+    width: 255px
+
+  .group-label
+    padding-left: 14px
+    padding-top: 13px
+    padding-bottom: 10px
+    margin-bottom: 7px
+    margin-left: 3px
 
   .group-0-0
     grid-row: 0 1;
