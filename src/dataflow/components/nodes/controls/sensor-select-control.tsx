@@ -1,6 +1,8 @@
 import * as React from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
+import { useStopEventPropagation } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
@@ -19,7 +21,6 @@ export class SensorSelectControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: {
                                    type: string;
@@ -40,14 +41,16 @@ export class SensorSelectControl extends Rete.Control {
     );
 
     const renderSensorTypeList = (type: string, showList: boolean, onItemClick: any, onListClick: any) => {
+      const divRef = useRef<HTMLDivElement>(null);
+      useStopEventPropagation(divRef, "pointerdown");
       let icon = "";
       const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
       if (sensorType && sensorType.icon) {
         icon = `#${sensorType.icon}`;
       }
       return (
-        <div className="node-select sensor-type">
-          <div className="item top" onClick={handleChange(onItemClick)}>
+        <div className="node-select sensor-type" ref={divRef}>
+          <div className="item top" onMouseDown={handleChange(onItemClick)}>
             <svg className="icon top">
               <use xlinkHref={icon}/>
             </svg>
@@ -62,7 +65,7 @@ export class SensorSelectControl extends Rete.Control {
               <div
               className={val.name === type ? "item sensor-type-option selected" : "item sensor-type-option selectable"}
                 key={i}
-                onClick={onListClick(val.type)}
+                onMouseDown={onListClick(val.type)}
               >
                 <svg className="icon">
                   <use xlinkHref={`#${val.icon}`}/>
@@ -77,12 +80,15 @@ export class SensorSelectControl extends Rete.Control {
     };
 
     const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
+      const selectRef = useRef<HTMLSelectElement>(null);
+      useStopEventPropagation(selectRef, "pointerdown");
       return (
         <select
+          ref={selectRef}
           className="sensor-select"
           value={id}
           onChange={handleChange(onSensorChange)}
-          onPointerMove={handlePointerMove}>
+        >
           <option value="none" className="sensor-option">none</option>
           {channels ? channels.filter((ch: NodeChannelInfo) => (
             ch.type === type

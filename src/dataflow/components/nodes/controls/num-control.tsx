@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
+import { useStopEventPropagation } from "./custom-hooks";
 import "./num-control.sass";
 
 // cf. https://codesandbox.io/s/retejs-react-render-t899c
@@ -22,15 +23,9 @@ export class NumControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(+e.target.value); };
     };
-    const handlePointerDown = (e: PointerEvent) => e.stopPropagation();
     this.component = (compProps: { readonly: any, value: any; onChange: any; label: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
-      useEffect(() => {
-        inputRef.current && inputRef.current.addEventListener("pointerdown", handlePointerDown);
-        return () => {
-          inputRef.current && inputRef.current.removeEventListener("pointerdown", handlePointerDown);
-        };
-      }, []);
+      useStopEventPropagation(inputRef, "pointerdown");
       return (
         <div className="number-container">
           { label

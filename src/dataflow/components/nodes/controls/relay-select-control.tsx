@@ -1,7 +1,9 @@
 import * as React from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import "./sensor-select-control.sass";
 import { NodeChannelInfo } from "../../../utilities/node";
+import { useStopEventPropagation } from "./custom-hooks";
+import "./sensor-select-control.sass";
 
 export class RelaySelectControl extends Rete.Control {
   private emitter: NodeEditor;
@@ -18,7 +20,6 @@ export class RelaySelectControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerMove = (e: any) => e.stopPropagation();
 
     this.component = (compProps: { value: any; onChange: any; channels: NodeChannelInfo[] }) => (
       <div>
@@ -27,11 +28,14 @@ export class RelaySelectControl extends Rete.Control {
     );
 
     const renderRelayList = (id: string, channels: NodeChannelInfo[], onRelayChange: any) => {
+      const selectRef = useRef<HTMLSelectElement>(null);
+      useStopEventPropagation(selectRef, "pointerdown");
       return (
         <select
-        value={id}
-        onChange={handleChange(onRelayChange)}
-        onPointerMove={handlePointerMove}>
+          ref={selectRef}
+          value={id}
+          onChange={handleChange(onRelayChange)}
+        >
         <option value="none">none</option>
         {channels ? channels.filter((ch: NodeChannelInfo) => (
           ch.type === "relay"

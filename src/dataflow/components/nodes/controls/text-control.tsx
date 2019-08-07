@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
+import { useStopEventPropagation } from "./custom-hooks";
 import "./text-control.sass";
 
 export class TextControl extends Rete.Control {
@@ -17,21 +19,25 @@ export class TextControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    const handlePointerMove = (e: any) => e.stopPropagation();
-    this.component = (compProps: { value: any; onChange: any; label: any}) => (
-      <div className="text-container">
-        { label
-          ? <label className="text-label">{compProps.label}</label>
-          : null
-        }
-        <input className="text-input"
-          type={"text"}
-          value={compProps.value}
-          onChange={handleChange(compProps.onChange)}
-          onPointerMove={handlePointerMove}
-        />
-      </div>
-    );
+    this.component = (compProps: { value: any; onChange: any; label: any}) => {
+      const inputRef = useRef<HTMLInputElement>(null);
+      useStopEventPropagation(inputRef, "pointerdown");
+      return (
+        <div className="text-container">
+          { label
+            ? <label className="text-label">{compProps.label}</label>
+            : null
+          }
+          <input
+            className="text-input"
+            ref={inputRef}
+            type={"text"}
+            value={compProps.value}
+            onChange={handleChange(compProps.onChange)}
+          />
+        </div>
+      );
+    };
 
     const initial = node.data[key] || initVal;
     node.data[key] = initial;
