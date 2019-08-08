@@ -16,7 +16,7 @@ import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factor
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes } from "../utilities/node";
+import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -61,7 +61,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       disableDataStorage: false,
-      programRunTime: ProgramRunTimes[3].val,
+      programRunTime: DEFAULT_PROGRAM_TIME,
       isProgramRunning: false
     };
   }
@@ -76,6 +76,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onStopProgramClick={this.stopProgram}
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
+            programDefaultRunTime={DEFAULT_PROGRAM_TIME}
             isRunEnabled={this.state.isProgramRunning}
           />
 

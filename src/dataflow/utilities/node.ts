@@ -245,6 +245,7 @@ export interface ProgramRunTime {
   text: string;
   val: number;
 }
+export const DEFAULT_PROGRAM_TIME = 600;
 export const ProgramRunTimes: ProgramRunTime[] = [
   {
     text: "30 Seconds",
