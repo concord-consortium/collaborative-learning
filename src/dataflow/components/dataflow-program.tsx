@@ -194,7 +194,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const n1 = await nodeFactory!.createNode();
 
     const numNodes = this.programEditor.nodes.length;
-    n1.position = [100 + Math.floor(numNodes / 10) * 200 + numNodes % 10 * 15, 5 + numNodes % 10 * 15];
+    n1.position = [95 + Math.floor((numNodes % 20) / 5) * 245 + Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
     this.programEditor.addNode(n1);
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
