@@ -287,7 +287,19 @@ export const ProgramRunTimes: ProgramRunTime[] = [
     val: 28800
   },
   {
-    text: "Until Stopped",
-    val: Infinity
+    text: "24 Hours",
+    val: 86400
+  },
+  {
+    text: "5 days",
+    val: 432000
+  },
+  {
+    text: "10 Days",
+    val: 864000
+  },
+  {
+    text: "30 Days",
+    val: 2592000
   },
 ];

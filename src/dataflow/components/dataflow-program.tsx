@@ -61,7 +61,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       disableDataStorage: false,
-      programRunTime: ProgramRunTimes[0].val,
+      programRunTime: ProgramRunTimes[3].val,
       isProgramRunning: false
     };
   }
@@ -75,6 +75,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onRunProgramClick={this.runProgram}
             onStopProgramClick={this.stopProgram}
             onProgramTimeSelectClick={this.setProgramRunTime}
+            programRunTimes={ProgramRunTimes}
             isRunEnabled={this.state.isProgramRunning}
           />
 
