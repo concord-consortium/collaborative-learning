@@ -3,6 +3,21 @@
   "title": "Stretching and Shrinking",
   "subtitle": "Understanding Similarity",
   "pageTitle": "CLUE: %problemTitle%",
+  "rightNavTabs": [
+    {
+      "tab": "my-work",
+      "label": "My Work",
+      "hideGhostUser": true
+    },
+    {
+      "tab": "class-work",
+      "label": "Class Work"
+    },
+    {
+      "tab": "class-logs",
+      "label": "Class Logs"
+    }
+  ],
   "toolbar": [
     {
       "name": "select",
