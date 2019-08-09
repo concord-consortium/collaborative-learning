@@ -1,11 +1,12 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import "./left-nav.sass";
 import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "../base";
+
+import "./left-nav.sass";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;
@@ -30,7 +31,6 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
     const { problem, ui } = this.stores;
     const { activeSectionIndex, leftNavExpanded } = ui;
     const { sections } = problem;
-    const activeSection = problem.getSectionByIndex(activeSectionIndex);
     const outerClassName = `left-nav${leftNavExpanded ? " expanded" : ""}`;
     const expandedAreaClassName = `expanded-area${leftNavExpanded ? " expanded" : ""}`;
     return (

@@ -1,5 +1,5 @@
-import { WorkspaceModel, WorkspaceModelType, SectionWorkspace } from "./workspace";
-import { DocumentModel, DocumentModelType, SectionDocument } from "../document/document";
+import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "./workspace";
+import { DocumentModel, DocumentModelType, ProblemDocument } from "../document/document";
 
 describe("workspaces model", () => {
   let workspace: WorkspaceModelType;
@@ -8,13 +8,13 @@ describe("workspaces model", () => {
 
   beforeEach(() => {
     workspace = WorkspaceModel.create({
-      type: SectionWorkspace,
+      type: ProblemWorkspace,
       mode: "1-up",
     });
 
     goodDoc = DocumentModel.create({
       uid: "2",
-      type: SectionDocument,
+      type: ProblemDocument,
       key: "test2",
       createdAt: 1,
       content: {}
@@ -22,7 +22,7 @@ describe("workspaces model", () => {
 
     badDoc = DocumentModel.create({
       uid: "3",
-      type: SectionDocument,
+      type: ProblemDocument,
       key: "test3",
       createdAt: 1,
       content: {}

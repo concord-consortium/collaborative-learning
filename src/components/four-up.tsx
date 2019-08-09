@@ -14,7 +14,6 @@ import "./four-up.sass";
 interface IProps extends IBaseProps {
   userId?: string;
   groupId?: string;
-  sectionId: string;
   isGhostUser?: boolean;
   toolApiInterface?: IToolApiInterface;
 }
@@ -73,11 +72,11 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
     };
 
     const { groups, documents } = this.stores;
-    const { userId, groupId, sectionId, isGhostUser, ...others } = this.props;
+    const { userId, groupId, isGhostUser, ...others } = this.props;
 
     const group = groups.getGroupById(groupId);
     const groupDocuments = group && groupId &&
-                           documents.getSectionDocumentsForGroup(sectionId, groupId) || [];
+                           documents.getProblemDocumentsForGroup(groupId) || [];
     const groupUsers: FourUpUser[] = group
       ? group.users
           .map((groupUser) => {

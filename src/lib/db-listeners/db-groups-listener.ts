@@ -1,7 +1,7 @@
 import { DB } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
 import * as firebase from "firebase/app";
-import { SectionDocument } from "../../models/document/document";
+import { ProblemDocument } from "../../models/document/document";
 import { map } from "lodash";
 
 export class DBGroupsListener {
@@ -95,8 +95,8 @@ export class DBGroupsListener {
       // otherwise set the groups
       this.db.stores.groups.updateFromDB(user.id, groups, this.db.stores.class);
 
-      documents.byType(SectionDocument).forEach((sectionDoc) => {
-        this.db.listeners.updateGroupUserSectionDocumentListeners(sectionDoc);
+      documents.byType(ProblemDocument).forEach((sectionDoc) => {
+        this.db.listeners.updateGroupUserProblemDocumentListeners(sectionDoc);
       });
     }
   }

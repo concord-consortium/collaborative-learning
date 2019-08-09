@@ -1,10 +1,10 @@
 import { DB } from "../db";
-import { DBOfferingUserSectionDocument, DBOfferingUser } from "../db-types";
+import { DBOfferingUserProblemDocument, DBOfferingUser } from "../db-types";
 import { forEach } from "lodash";
 
-export class DBSectionDocumentsListener {
+export class DBProblemDocumentsListener {
   private db: DB;
-  private sectionDocsRef: firebase.database.Reference | null  = null;
+  private problemDocsRef: firebase.database.Reference | null  = null;
 
   constructor(db: DB) {
     this.db = db;
@@ -24,12 +24,12 @@ export class DBSectionDocumentsListener {
 
     // student user - load documents for user and group
     return new Promise<void>((resolve, reject) => {
-      const sectionDocsRef = this.sectionDocsRef = this.db.firebase.ref(
-        this.db.firebase.getSectionDocumentPath(user));
+      const problemDocsRef = this.problemDocsRef = this.db.firebase.ref(
+        this.db.firebase.getProblemDocumentsPath(user));
       // use once() so we are ensured that documents are set before we resolve
-      sectionDocsRef.once("value", (snapshot) => {
-        this.handleLoadSectionDocuments(snapshot);
-        sectionDocsRef.on("child_added", this.handleSectionDocumentChildAdded);
+      problemDocsRef.once("value", (snapshot) => {
+        this.handleLoadProblemDocuments(snapshot);
+        problemDocsRef.on("child_added", this.handleProblemDocumentAdded);
       })
       .then(snapshot => {
         resolve();
@@ -39,8 +39,8 @@ export class DBSectionDocumentsListener {
   }
 
   public stop() {
-    if (this.sectionDocsRef) {
-      this.sectionDocsRef.off("child_added", this.handleSectionDocumentChildAdded);
+    if (this.problemDocsRef) {
+      this.problemDocsRef.off("child_added", this.handleProblemDocumentAdded);
     }
   }
 
@@ -51,7 +51,7 @@ export class DBSectionDocumentsListener {
       if (user) {
         forEach(user.sectionDocuments, sectionDoc => {
           if (sectionDoc && !documents.getDocument(sectionDoc.documentKey)) {
-            this.db.createDocumentFromSectionDocument(String(userId), sectionDoc)
+            this.db.createDocumentFromProblemDocument(String(userId), sectionDoc)
               .then(documents.add);
           }
         });
@@ -59,30 +59,29 @@ export class DBSectionDocumentsListener {
     });
   }
 
-  private handleLoadSectionDocuments = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLoadProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     const sectionDocuments = snapshot.val();
     if (sectionDocuments) {
       forEach(sectionDocuments, (sectionDoc) => {
-        this.handleSectionDocument(sectionDoc);
+        this.handleProblemDocument(sectionDoc);
       });
     }
   }
 
-  private handleSectionDocumentChildAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
-    this.handleSectionDocument(sectionDocument);
+  private handleProblemDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
+    const problemDocument: DBOfferingUserProblemDocument|null = snapshot.val();
+    this.handleProblemDocument(problemDocument);
   }
 
-  private handleSectionDocument(sectionDocument: DBOfferingUserSectionDocument|null) {
+  private handleProblemDocument(problemDocument: DBOfferingUserProblemDocument|null) {
     const {user, documents} = this.db.stores;
     // If a workspace has already been created, or is currently been created, then its listeners are already set
-    if (sectionDocument
-          && !documents.getDocument(sectionDocument.documentKey)
-          && this.db.creatingDocuments.indexOf(sectionDocument.self.sectionId) === -1) {
-      this.db.createDocumentFromSectionDocument(user.id, sectionDocument)
+    if (problemDocument
+          && !documents.getDocument(problemDocument.documentKey)) {
+      this.db.createDocumentFromProblemDocument(user.id, problemDocument)
         .then((document) => {
-          this.db.listeners.updateGroupUserSectionDocumentListeners(document);
-          this.db.listeners.monitorSectionDocumentVisibility(document);
+          this.db.listeners.updateGroupUserProblemDocumentListeners(document);
+          this.db.listeners.monitorDocumentVisibility(document);
           return document;
         })
         .then(documents.add);

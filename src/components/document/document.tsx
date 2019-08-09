@@ -6,11 +6,10 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { SectionType } from "../../models/curriculum/section";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
@@ -75,7 +74,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderTitleBar() {
     const { document, side, isGhostUser } = this.props;
     const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
-    if (document.isSection) {
+    if (document.isProblem) {
       return this.renderSectionTitleBar(hideButtons);
     }
     if (document.isLearningLog) {
@@ -86,7 +85,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderSectionTitleBar(hideButtons?: boolean) {
     const {problem, appMode, clipboard} = this.stores;
     const {workspace, document} = this.props;
-    const activeSection = problem.getSectionById(document.sectionId!);
     const show4up = !workspace.comparisonVisible;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <svg key="download" className={`action icon icon-download`}
@@ -97,7 +95,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="titlebar">
         <div className="title" data-test="document-title">
-          {activeSection ? `Section: ${activeSection.title}` : "Section"}
+          {null}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
@@ -178,7 +176,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderCanvas() {
     const { document, workspace, side, isGhostUser } = this.props;
-    const fourUp = (document.type === SectionDocument) &&
+    const fourUp = (document.type === ProblemDocument) &&
                     (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
     const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
     return (
@@ -201,14 +199,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
     return (
       <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
-                        sectionId={document.sectionId!} toolApiInterface={this.toolApiInterface} />
+                        toolApiInterface={this.toolApiInterface} />
     );
   }
 
   private renderStatusBar() {
     const {document} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (document.type === SectionDocument);
+    const showContents = isPrimary && (document.type === ProblemDocument);
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === PublicationDocument);
     const showComment = false;
@@ -404,11 +402,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const userId = user.id;
     const group = groups.groupForUser(userId);
     const groupId = group && group.id;
-    return this.stores.supports.getSupportsForUserProblem(
-      this.props.document.sectionId! as SectionType,
-      groupId,
-      userId
-    )
+    return this.stores.supports.getSupportsForUserProblem({ groupId, userId })
     .map((support, index) => {
       return {index, item: support};
     });

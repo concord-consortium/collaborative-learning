@@ -132,7 +132,11 @@ export class Firebase {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
-  public getSectionDocumentPath(user: UserModelType, sectionId?: string, userId?: string) {
+  public getProblemDocumentsPath(user: UserModelType, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/documents`;
+  }
+
+  public getSectionDocumentPathDEPRECATED(user: UserModelType, sectionId?: string, userId?: string) {
     const suffix = sectionId ? `/${sectionId}` : "";
     return `${this.getOfferingUserPath(user, userId)}/sectionDocuments${suffix}`;
   }

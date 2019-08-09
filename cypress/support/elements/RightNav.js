@@ -14,7 +14,7 @@ class RightNav{
     }
 
     openMyWorkAreaCanvasItem(title){
-        cy.get('[data-test=my-work-list-items][title*="'+title+'"] .scaled-list-item').click();
+        cy.get('[data-test=my-work-list-items] .scaled-list-item').click();
         // cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
         // cy.get('.my-work > .list > .list-item[title*="'+title+'"]').click();
     }

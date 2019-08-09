@@ -22,7 +22,7 @@ let tableToolTile = new TableToolTile;
 
 context('single student functional test',()=>{
     describe('Left nav tabs open and close',()=>{
-        it('will open canvases from left nav tabs', ()=>{
+        it.skip('will open canvases from left nav tabs', ()=>{
             let titleArr = [], i=0;
 
             leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
@@ -31,15 +31,15 @@ context('single student functional test',()=>{
                 for (i = 0; i < $tab.length - 1; i++) {
                     let title = $tab.text;
                     cy.get('#leftNavTab' + i).click({force:true});
-                        leftNav.getOpenToWorkspaceButton(i).should('contain', titleArr[i]).click({force: true});
-                            canvas.getCanvasTitle().should('contain', titleArr[i]);
+                    leftNav.getOpenToWorkspaceButton(i).should('contain', titleArr[i]).click({force: true});
+                    canvas.getCanvasTitle().should('contain', titleArr[i]);
                 }
             })
         })
     })
 
     describe('test header elements', function(){
-        it('verifies header title appears correctly', function(){
+        it.skip('verifies header title appears correctly', function(){
             leftNav.openToWorkspace('Introduction');
             canvas.getCanvasTitle().should('contain','Introduction');
         });
@@ -111,7 +111,7 @@ context('single student functional test',()=>{
     context('save and restore of canvas', function(){
         let canvas1='Initial Challenge';
         let canvas2='Introduction';
-        describe('verify that canvas is saved from various locations', function(){
+        describe.skip('verify that canvas is saved from various locations', function(){
             it('will restore from My Work tab', function() {
                 //TODO need to figure out why the page object commands do not work for opening Introduction canvas
 
@@ -135,7 +135,7 @@ context('single student functional test',()=>{
                 tableToolTile.getTableTile().should('exist');
             });
         });
-        describe('publish canvas', ()=>{
+        describe.skip('publish canvas', ()=>{
             it('verify restore of published canvas', ()=>{
                 canvas.publishCanvas();
                 leftNav.openToWorkspace(canvas1); //just to differentiate from right canvas when viewing published work
