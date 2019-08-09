@@ -75,8 +75,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           {this.renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="class" data-test="user-class">
-            {user.className}
+          <div className="class">
+            {this.renderClassPopover()}
           </div>
           <div className="name" title={userTitle} data-test="user-name">
             {user.name}
@@ -86,10 +86,34 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private renderProblemPopover() {
+  private renderClassPopover() {
+    // This rendering of the class popover & populating the class menu, see
+    // renderClassMenu(), are placeholders until there's a way to fetch a
+    // list of classes, and, we know a way to switch between them.
+    const { user } = this.stores;
     return (
-      <Popover className="problemMenu" content={this.renderProblemMenu()} position={Position.RIGHT_TOP}>
-        <Button text="3.3 Out of Reach" />
+      <Popover data-test="user-class" className="problemMenu"
+        content={this.renderClassMenu()} position={Position.RIGHT_TOP}>
+        <Button text={user.className} />
+      </Popover>
+    );
+  }
+
+  private renderClassMenu() {
+    const { user } = this.stores;
+    return (
+      <Menu>
+        <MenuItem text={user.className} />
+      </Menu>
+    );
+  }
+
+  private renderProblemPopover() {
+    const { problem } = this.stores;
+    return (
+      <Popover className="problemMenu" content={this.renderProblemMenu()}
+        position={Position.RIGHT_TOP}>
+        <Button text={problem.title} />
       </Popover>
     );
   }
