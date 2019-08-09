@@ -17,6 +17,7 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
+import { uploadProgram } from "../utilities/aws";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -212,6 +213,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private runProgram = () => {
+    const programData: any = this.generateProgramData();
+    uploadProgram(programData);
     this.setState({isProgramRunning: true});
   }
   private stopProgram = () => {
@@ -219,6 +222,36 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
   private setProgramRunTime = (time: number) => {
     this.setState({programRunTime: time});
+  }
+  private generateProgramData = () => {
+    let programName: any = "my-program";
+    const endTimePad = 24 * 60 * 60 * 1000;
+    const newTimestamp = Date.now() + endTimePad;
+    const hubs: string[] = [];
+    const sensors: string[] = [];
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Sensor" && n.data.sensor) {
+        const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+        if (chInfo) {
+          hubs.push(chInfo.hubId);
+          sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
+        }
+      } else if (n.name === "Data Storage" && n.data.datasetName) {
+        programName = n.data.datasetName;
+      }
+    });
+    const programData = {
+      program: {
+        endTime: newTimestamp,
+        hubs,
+        // tslint:disable-next-line:max-line-length
+        program: "\"{\"file_version\":\"0.1\",\"blocks\":[{\"type\":\"sensor\",\"source\":\"2711-tempe\",\"save\":true,\"label\":\"My temperature\"},{\"type\":\"sensor\",\"source\":\"2711-humid\",\"save\":true,\"label\":\"My humidity\"}]}\"",
+        programId: programName ? programName : "test",
+        runInterval: 2000,
+        sensors
+      }
+    };
+    return programData;
   }
 
   private addNode = async (nodeType: string) => {

@@ -50,3 +50,49 @@ export const getSignedUrl = (
     const requestUrl = protocol + "://" + host + uri + "?" + canonicalQuerystring;
     return requestUrl;
 };
+
+export function uploadProgram(programData: any): string {
+  let program = programData;
+  const endTimePad = 24 * 60 * 60 * 1000;
+  const newTimestamp = Date.now() + endTimePad;
+
+  if (!programData) {
+    program = {
+      program: {
+        endTime: newTimestamp,
+        hubs: [
+          "355aaff3-1b00-493a-b2ba-1df3673d7e73",
+          "290ef0eb-755d-464f-a956-7376eaad80cb"
+        ],
+        // tslint:disable-next-line:max-line-length
+        program: "\"{\"file_version\":\"0.1\",\"blocks\":[{\"type\":\"sensor\",\"source\":\"2711-tempe\",\"save\":true,\"label\":\"My temperature\"},{\"type\":\"sensor\",\"source\":\"2711-humid\",\"save\":true,\"label\":\"My humidity\"}]}\"",
+        programId: "test",
+        runInterval: 2000,
+        sensors: [
+          "355aaff3-1b00-493a-b2ba-1df3673d7e73_2711-humid",
+          "355aaff3-1b00-493a-b2ba-1df3673d7e73_2711-tempe",
+          "355aaff3-1b00-493a-b2ba-1df3673d7e73_2712-CO2",
+          "290ef0eb-755d-464f-a956-7376eaad80cb_6616-CO2",
+          "290ef0eb-755d-464f-a956-7376eaad80cb_C376-O2",
+          "290ef0eb-755d-464f-a956-7376eaad80cb_19B9-light"
+        ]
+      }
+    };
+  }
+  const lambda = new AWS.Lambda({region: "us-east-1", apiVersion: "2015-03-31"});
+  const params = {
+    FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:createDataflowProgram",
+    Payload: JSON.stringify(program),
+    InvocationType: "RequestResponse",
+    LogType: "Tail"
+  };
+  lambda.invoke(params, (error, data) => {
+    if (error) {
+      return("error " +  error);
+    }
+    if (data) {
+      return ("success " + data);
+    }
+  });
+  return "completed";
+}
