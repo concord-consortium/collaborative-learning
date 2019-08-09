@@ -1,9 +1,11 @@
-import { Button, ButtonGroup } from "@blueprintjs/core";
+import * as _ from "lodash";
+import { Button, ButtonGroup, Popover, Position, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
+import "./utilities/blueprint.sass";
 import "./app-header.sass";
 
 export interface IPanelSpec {
@@ -27,9 +29,13 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { showGroup } = this.props;
-    const {appMode, appVersion, db, user, problem, groups} = this.stores;
+    const { appMode, appVersion, db, user, problem, groups } = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
+
+    if (user.isTeacher) {
+      return this.renderTeacherHeader(userTitle);
+    }
 
     return (
       <div className="app-header">
@@ -53,6 +59,56 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private renderTeacherHeader(userTitle: string | undefined) {
+    const { investigation, user } = this.stores;
+    return (
+      <div className="app-header">
+        <div className="left">
+          <div className="problem" data-test="investigation-title">
+            {investigation.title}
+          </div>
+          <div>
+            {this.renderProblemPopover()}
+          </div>
+        </div>
+        <div className="middle">
+          {this.renderPanelButtons()}
+        </div>
+        <div className="right">
+          <div className="class" data-test="user-class">
+            {user.className}
+          </div>
+          <div className="name" title={userTitle} data-test="user-name">
+            {user.name}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderProblemPopover() {
+    return (
+      <Popover className="problemMenu" content={this.renderProblemMenu()} position={Position.RIGHT_TOP}>
+        <Button text="3.3 Out of Reach" />
+      </Popover>
+    );
+  }
+
+  private renderProblemMenu() {
+    const { unit } = this.stores;
+    const investigations = unit.investigations;
+    const problems: any[] = _.flatten(investigations.map(i => i.problems));
+    let key = 0;
+    const handleMenuItem = (e: React.MouseEvent) => {
+      console.log(`Got menu selection: ${(e.target as HTMLElement).innerText}`);
+    };
+    return (
+      <Menu>
+        {problems.map( p => <MenuItem key={key++} text={p.title} onClick={handleMenuItem} />)}
+      </Menu>
+    );
+  }
+
   private renderPanelButtons() {
     const { panels } = this.props;
     if (!panels || (panels.length < 2)) return;
@@ -69,8 +125,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
       const handlePanelChange = () => { onPanelChange && onPanelChange(panelId); };
       return (
         <Button active={current === panelId}
-                disabled={(current !== panelId) && !onPanelChange}
-                onClick={handlePanelChange}>
+          disabled={(current !== panelId) && !onPanelChange}
+          onClick={handlePanelChange}>
           {label}
         </Button>
       );
@@ -95,7 +151,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderGroup(group: GroupModelType) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const groupUsers = group.users.slice();
     const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
     // Put the main user first to match 4-up colors
@@ -122,7 +178,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   private renderGroupUser(groupUsers: GroupUserModelType[], index: number, direction: "nw" | "ne" | "se" | "sw") {
     if (groupUsers.length <= index) {
       return (
-        <div key={`empty-${index}`} className={`member empty ${direction}`}/>
+        <div key={`empty-${index}`} className={`member empty ${direction}`} />
       );
     }
 
@@ -141,8 +197,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    const {isGhostUser} = this.props;
-    const {ui, db, groups} = this.stores;
+    const { isGhostUser } = this.props;
+    const { ui, db, groups } = this.stores;
     ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
