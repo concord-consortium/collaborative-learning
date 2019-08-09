@@ -124,7 +124,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     const problems: any[] = _.flatten(investigations.map(i => i.problems));
     let key = 0;
     const handleMenuItem = (e: React.MouseEvent) => {
-      console.log(`Got menu selection: ${(e.target as HTMLElement).innerText}`);
+      // console.log(`Got menu selection: ${(e.target as HTMLElement).innerText}`);
     };
     return (
       <Menu>
