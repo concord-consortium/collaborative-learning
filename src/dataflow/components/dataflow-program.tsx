@@ -16,11 +16,12 @@ import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factor
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeGeneratorTypes } from "../utilities/node";
+import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
+import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 import "./dataflow-program.sass";
 
 interface NodeNameValuePair {
@@ -38,6 +39,8 @@ interface IProps extends IBaseProps {
 
 interface IState {
   disableDataStorage: boolean;
+  programRunTime: number;
+  isProgramRunning: boolean;
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -57,21 +60,40 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      disableDataStorage: false
+      disableDataStorage: false,
+      programRunTime: DEFAULT_PROGRAM_TIME,
+      isProgramRunning: false
     };
   }
 
   public render() {
     return (
-      <div className="editor-container">
-        <DataflowProgramToolbar
-          onNodeCreateClick={this.addNode}
-          onDeleteClick={this.deleteSelectedNodes}
-          onResetClick={this.resetNodes}
-          onClearClick={this.clearProgram}
-          isDataStorageDisabled={this.state.disableDataStorage}
-        />
-        <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+      <div className="program-editor-container">
+        <div className="vertical-container">
+
+          <DataflowProgramTopbar
+            onRunProgramClick={this.runProgram}
+            onStopProgramClick={this.stopProgram}
+            onProgramTimeSelectClick={this.setProgramRunTime}
+            programRunTimes={ProgramRunTimes}
+            programDefaultRunTime={DEFAULT_PROGRAM_TIME}
+            isRunEnabled={this.state.isProgramRunning}
+          />
+
+          <div className="horizontal-container">
+            <DataflowProgramToolbar
+              onNodeCreateClick={this.addNode}
+              onDeleteClick={this.deleteSelectedNodes}
+              onResetClick={this.resetNodes}
+              onClearClick={this.clearProgram}
+              isDataStorageDisabled={this.state.disableDataStorage}
+            />
+            <div className="full">
+              <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+            </div>
+          </div>
+        </div>
+
       </div>
     );
   }
@@ -189,12 +211,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
+  private runProgram = () => {
+    this.setState({isProgramRunning: true});
+  }
+  private stopProgram = () => {
+    this.setState({isProgramRunning: false});
+  }
+  private setProgramRunTime = (time: number) => {
+    this.setState({programRunTime: time});
+  }
+
   private addNode = async (nodeType: string) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
 
     const numNodes = this.programEditor.nodes.length;
-    n1.position = [95 + Math.floor((numNodes % 20) / 5) * 245 + Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
+    n1.position = [5 + Math.floor((numNodes % 20) / 5) * 245 + Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
     this.programEditor.addNode(n1);
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});

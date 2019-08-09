@@ -240,3 +240,67 @@ export const NodePlotColors = ["#0592AF", "#ebb93e", "#eb813e", "#df4a4a", "#e44
                                "#c60e0e", "#cc0860", "#b81da1", "#8d27ad", "#8b989f",
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",
                                "#5d6e77", "#31bc5a", "#0caadd"];
+
+export interface ProgramRunTime {
+  text: string;
+  val: number;
+}
+export const DEFAULT_PROGRAM_TIME = 600;
+export const ProgramRunTimes: ProgramRunTime[] = [
+  {
+    text: "30 Seconds",
+    val: 30
+  },
+  {
+    text: "1 Minute",
+    val: 60
+  },
+  {
+    text: "5 Minutes",
+    val: 300
+  },
+  {
+    text: "10 Minutes",
+    val: 600
+  },
+  {
+    text: "15 Minutes",
+    val: 900
+  },
+  {
+    text: "30 Minutes",
+    val: 1800
+  },
+  {
+    text: "1 Hour",
+    val: 3600
+  },
+  {
+    text: "2 Hours",
+    val: 7200
+  },
+  {
+    text: "4 Hours",
+    val: 14400
+  },
+  {
+    text: "8 Hours",
+    val: 28800
+  },
+  {
+    text: "24 Hours",
+    val: 86400
+  },
+  {
+    text: "5 days",
+    val: 432000
+  },
+  {
+    text: "10 Days",
+    val: 864000
+  },
+  {
+    text: "30 Days",
+    val: 2592000
+  },
+];
