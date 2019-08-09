@@ -4,6 +4,7 @@ import { BaseComponent } from "../../../components/base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
 import { DataflowProgram } from "../dataflow-program";
+import { SizeMe, SizeMeProps } from "react-sizeme";
 
 import "./dataflow-tool.sass";
 
@@ -30,7 +31,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const program = this.getContent().program;
     return (
       <div className={classes}>
-        <DataflowProgram program={program}/>
+        <SizeMe monitorHeight={true}>
+          {({ size }: SizeMeProps) => {
+            return (
+              <DataflowProgram
+                program={program}
+                size={size}
+              />
+            );
+          }}
+        </SizeMe>
       </div>
     );
   }

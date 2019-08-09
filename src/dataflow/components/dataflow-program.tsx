@@ -22,6 +22,7 @@ import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
+import { SizeMeProps } from "react-sizeme";
 import "./dataflow-program.sass";
 
 interface NodeNameValuePair {
@@ -33,7 +34,7 @@ interface NodeValueMap {
 }
 type NodeValue = number | NodeValueMap;
 
-interface IProps extends IBaseProps {
+interface IProps extends SizeMeProps {
   program?: string;
 }
 
@@ -108,7 +109,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     clearInterval(this.intervalHandle);
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.size !== prevProps.size) {
+      if (this.programEditor && this.programEditor.view) {
+        this.programEditor.view.resize();
+      }
+    }
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
     }
