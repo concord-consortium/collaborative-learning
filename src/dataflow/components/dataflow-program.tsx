@@ -225,6 +225,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
   private generateProgramData = () => {
     let programName: any = "my-program";
+    let interval: any =  1000;
     const endTimePad = 24 * 60 * 60 * 1000;
     const newTimestamp = Date.now() + endTimePad;
     const hubs: string[] = [];
@@ -236,18 +237,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           hubs.push(chInfo.hubId);
           sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
         }
-      } else if (n.name === "Data Storage" && n.data.datasetName) {
+      } else if (n.name === "Data Storage") {
         programName = n.data.datasetName;
+        interval = n.data.interval;
       }
     });
+    const program = this.programEditor.toJSON();
     const programData = {
       program: {
         endTime: newTimestamp,
         hubs,
-        // tslint:disable-next-line:max-line-length
-        program: "\"{\"file_version\":\"0.1\",\"blocks\":[{\"type\":\"sensor\",\"source\":\"2711-tempe\",\"save\":true,\"label\":\"My temperature\"},{\"type\":\"sensor\",\"source\":\"2711-humid\",\"save\":true,\"label\":\"My humidity\"}]}\"",
-        programId: programName ? programName : "test",
-        runInterval: 2000,
+        program: program,
+        programId: programName,
+        runInterval: interval * 1000,
         sensors
       }
     };
