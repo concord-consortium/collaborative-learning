@@ -50,3 +50,25 @@ export const getSignedUrl = (
     const requestUrl = protocol + "://" + host + uri + "?" + canonicalQuerystring;
     return requestUrl;
 };
+
+export function uploadProgram(programData: any): string {
+  if (!programData) {
+    return "failed";
+  }
+  const lambda = new AWS.Lambda({region: "us-east-1", apiVersion: "2015-03-31"});
+  const params = {
+    FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:createDataflowProgram",
+    Payload: JSON.stringify(programData),
+    InvocationType: "RequestResponse",
+    LogType: "Tail"
+  };
+  lambda.invoke(params, (error, data) => {
+    if (error) {
+      return("error " +  error);
+    }
+    if (data) {
+      return ("success " + data);
+    }
+  });
+  return "completed";
+}

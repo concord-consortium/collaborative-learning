@@ -1,0 +1,23 @@
+{
+  "create": {
+    "program": {
+      "endTime": 1565296993000,
+      "hubs": [
+        "355aaff3-1b00-493a-b2ba-1df3673d7e73",
+        "290ef0eb-755d-464f-a956-7376eaad80cb"
+      ],
+      "program": "\"{\"file_version\":\"0.1\",\"blocks\":[{\"type\":\"sensor\",\"source\":\"2711-tempe\",\"save\":true,\"label\":\"My temperature\"},{\"type\":\"sensor\",\"source\":\"2711-humid\",\"save\":true,\"label\":\"My humidity\"}]}\"",
+      "programId": "test-10",
+      "runInterval": 2000,
+      "sensors": [
+        "355aaff3-1b00-493a-b2ba-1df3673d7e73_2711-humid",
+        "355aaff3-1b00-493a-b2ba-1df3673d7e73_2711-tempe",
+        "355aaff3-1b00-493a-b2ba-1df3673d7e73_2712-CO2",
+        "290ef0eb-755d-464f-a956-7376eaad80cb_6616-CO2",
+        "290ef0eb-755d-464f-a956-7376eaad80cb_C376-O2",
+        "290ef0eb-755d-464f-a956-7376eaad80cb_19B9-light"
+      ]
+    }
+  },
+  "fetchResults": {}
+}

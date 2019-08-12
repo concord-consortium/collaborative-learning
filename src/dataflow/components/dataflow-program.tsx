@@ -17,6 +17,7 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
+import { uploadProgram } from "../utilities/aws";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -218,6 +219,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private runProgram = () => {
+    const programData: any = this.generateProgramData();
+    uploadProgram(programData);
     this.setState({isProgramRunning: true});
   }
   private stopProgram = () => {
@@ -225,6 +228,36 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
   private setProgramRunTime = (time: number) => {
     this.setState({programRunTime: time});
+  }
+  private generateProgramData = () => {
+    const programName = "dataflow-program-" + Date.now();
+    let interval: number =  1;
+    const newTimestamp = Date.now() + this.state.programRunTime;
+    const hubs: string[] = [];
+    const sensors: string[] = [];
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Sensor" && n.data.sensor) {
+        const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+        if (chInfo) {
+          hubs.push(chInfo.hubId);
+          sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
+        }
+      } else if (n.name === "Data Storage") {
+        interval = n.data.interval as number;
+      }
+    });
+    const program = this.programEditor.toJSON();
+    const programData = {
+      program: {
+        endTime: newTimestamp,
+        hubs,
+        program,
+        programId: programName,
+        runInterval: interval * 1000,
+        sensors
+      }
+    };
+    return programData;
   }
 
   private addNode = async (nodeType: string) => {
