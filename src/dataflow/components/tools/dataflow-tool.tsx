@@ -35,6 +35,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
           {({ size }: SizeMeProps) => {
             return (
               <DataflowProgram
+                onProgramChange={this.handleProgramChange}
                 program={program}
                 size={size}
               />
@@ -43,6 +44,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         </SizeMe>
       </div>
     );
+  }
+
+  private handleProgramChange = (program: any) => {
+    const content = this.getContent();
+    content.setProgram(program);
   }
 
   private getContent() {

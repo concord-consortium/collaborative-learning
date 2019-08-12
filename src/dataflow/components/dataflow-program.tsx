@@ -36,6 +36,7 @@ interface NodeValueMap {
 type NodeValue = number | NodeValueMap;
 
 interface IProps extends SizeMeProps {
+  onProgramChange: (program: any) => void;
   program?: string;
 }
 
@@ -157,6 +158,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         async () => {
           await this.programEngine.abort();
           await this.programEngine.process(this.programEditor.toJSON());
+          this.props.onProgramChange(this.programEditor.toJSON());
         }
       );
 

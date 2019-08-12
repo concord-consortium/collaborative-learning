@@ -19,6 +19,11 @@ export const DataflowContentModel = types
     isUserResizable() {
       return true;
     }
+  }))
+  .actions(self => ({
+    setProgram(program: any) {
+      self.program = JSON.stringify(program);
+    }
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
