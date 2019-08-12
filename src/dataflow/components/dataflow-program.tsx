@@ -224,7 +224,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({programRunTime: time});
   }
   private generateProgramData = () => {
-    let programName: any = "my-program";
+    const programName = "dataflow-program-" + Date.now();
     let interval: any =  1;
     const newTimestamp = Date.now() + this.state.programRunTime;
     const hubs: string[] = [];
@@ -237,7 +237,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
         }
       } else if (n.name === "Data Storage") {
-        programName = n.data.datasetName;
         interval = n.data.interval;
       }
     });
