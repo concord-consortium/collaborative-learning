@@ -53,8 +53,6 @@ export const getSignedUrl = (
 
 export function uploadProgram(programData: any): string {
   let program = programData;
-  const endTimePad = 24 * 60 * 60 * 1000;
-  const newTimestamp = Date.now() + endTimePad;
 
   if (programData) {
     return "failed";

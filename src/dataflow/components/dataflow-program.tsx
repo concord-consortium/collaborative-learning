@@ -225,7 +225,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
   private generateProgramData = () => {
     let programName: any = "my-program";
-    let interval: any =  1000;
+    let interval: any =  1;
     const endTimePad = 24 * 60 * 60 * 1000;
     const newTimestamp = Date.now() + endTimePad;
     const hubs: string[] = [];
