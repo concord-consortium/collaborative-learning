@@ -4,13 +4,13 @@ import { DB } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
-import { DBProblemDocumentsListener } from "./db-section-documents-listener";
+import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
 import { DocumentModelType, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { DBOfferingUserSectionDocumentDEPRECATED, DBDocument, DBDocumentMetadata } from "../db-types";
+import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
@@ -251,10 +251,10 @@ export class DBListeners {
 
   private handleGroupUserProblemDocRef(document: DocumentModelType) {
     return (snapshot: firebase.database.DataSnapshot|null) => {
-      const sectionDocument: DBOfferingUserSectionDocumentDEPRECATED = snapshot && snapshot.val();
-      if (sectionDocument) {
-        const groupUserId = sectionDocument.self.uid;
-        const docKey = sectionDocument.documentKey;
+      const problemDocument: DBOfferingUserProblemDocument = snapshot && snapshot.val();
+      if (problemDocument) {
+        const groupUserId = problemDocument.self.uid;
+        const docKey = problemDocument.documentKey;
         const mainUser = this.db.stores.user;
         const currentDocContentListener =
           this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId).docContentRef;
@@ -267,7 +267,7 @@ export class DBListeners {
         this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId)
           .docContentRef = groupUserDocRef;
         groupUserDocRef.on("value", (docContentSnapshot) => {
-          this.handleGroupUserDocRef(docContentSnapshot, sectionDocument);
+          this.handleGroupUserDocRef(docContentSnapshot, problemDocument);
         });
       }
     };
@@ -275,7 +275,7 @@ export class DBListeners {
 
   private handleGroupUserDocRef(
     snapshot: firebase.database.DataSnapshot|null,
-    sectionDocument: DBOfferingUserSectionDocumentDEPRECATED)
+    problemDocument: DBOfferingUserProblemDocument)
   {
     if (snapshot) {
       const rawGroupDoc: DBDocumentMetadata = snapshot.val();
@@ -288,10 +288,9 @@ export class DBListeners {
         this.db.openDocument({
           documentKey,
           type: ProblemDocument,
-          sectionId: sectionDocument.self.sectionId,
           userId: groupUserId,
           groupId: group && group.id,
-          visibility: sectionDocument.visibility
+          visibility: problemDocument.visibility
         }).then((groupUserDoc) => {
           this.db.stores.documents.update(groupUserDoc);
         });

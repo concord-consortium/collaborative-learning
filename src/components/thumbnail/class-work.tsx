@@ -179,7 +179,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.setState((state) => ({ showPublishedDocuments: !state.showStarredDocuments }));
+    this.setState((state) => ({ showPublishedDocuments: !state.showPublishedDocuments }));
   }
 
   private handleStarredSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
