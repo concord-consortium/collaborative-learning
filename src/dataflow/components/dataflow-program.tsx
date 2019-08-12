@@ -226,8 +226,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private generateProgramData = () => {
     let programName: any = "my-program";
     let interval: any =  1;
-    const endTimePad = 24 * 60 * 60 * 1000;
-    const newTimestamp = Date.now() + endTimePad;
+    const newTimestamp = Date.now() + this.state.programRunTime;
     const hubs: string[] = [];
     const sensors: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
