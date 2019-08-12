@@ -225,7 +225,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
-    let interval: any =  1;
+    let interval: number =  1;
     const newTimestamp = Date.now() + this.state.programRunTime;
     const hubs: string[] = [];
     const sensors: string[] = [];
@@ -237,7 +237,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
         }
       } else if (n.name === "Data Storage") {
-        interval = n.data.interval;
+        interval = n.data.interval as number;
       }
     });
     const program = this.programEditor.toJSON();
@@ -245,7 +245,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       program: {
         endTime: newTimestamp,
         hubs,
-        program: program,
+        program,
         programId: programName,
         runInterval: interval * 1000,
         sensors

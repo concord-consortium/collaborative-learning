@@ -52,15 +52,13 @@ export const getSignedUrl = (
 };
 
 export function uploadProgram(programData: any): string {
-  let program = programData;
-
-  if (programData) {
+  if (!programData) {
     return "failed";
   }
   const lambda = new AWS.Lambda({region: "us-east-1", apiVersion: "2015-03-31"});
   const params = {
     FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:createDataflowProgram",
-    Payload: JSON.stringify(program),
+    Payload: JSON.stringify(programData),
     InvocationType: "RequestResponse",
     LogType: "Tail"
   };
