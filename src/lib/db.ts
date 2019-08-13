@@ -5,7 +5,7 @@ import "firebase/storage";
 import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBOfferingUserSectionDocumentDEPRECATED, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
+  DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap} from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, ProblemDocument, LearningLogDocument, PublicationDocument,
@@ -218,15 +218,6 @@ export class DB {
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
-      const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
-
-      const newDocumentRef = problemDocumentsRef.push();
-      const newDocumentKey = newDocumentRef && newDocumentRef.key;
-      if (!newDocumentKey) {
-        reject("Error creating problem document for user!");
-        return;
-      }
-      this.creatingDocuments.push(newDocumentKey);
 
       return offeringUserRef.once("value")
         .then((snapshot) => {
@@ -257,15 +248,17 @@ export class DB {
                   visibility: "private",
                   documentKey: document.self.documentKey,
                 };
+                const newDocumentRef = this.firebase.ref(
+                                        this.firebase.getProblemDocumentPath(user, document.self.documentKey));
                 return newDocumentRef.set(newDocument).then(() => newDocument);
             });
         })
         .then((newDocument) => {
-          return this.openProblemDocument(newDocumentKey);
+          return this.openProblemDocument(newDocument.documentKey);
         })
         .then((newDocument) => {
           documents.add(newDocument);
-          this.creatingDocuments.splice(this.creatingDocuments.indexOf(newDocumentKey), 1);
+          this.creatingDocuments.splice(this.creatingDocuments.indexOf(newDocument.key), 1);
           return newDocument;
         })
         .then(resolve)

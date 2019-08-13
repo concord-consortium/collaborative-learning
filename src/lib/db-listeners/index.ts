@@ -156,7 +156,7 @@ export class DBListeners {
 
   public monitorDocumentVisibility = (document: DocumentModelType) => {
     const { user } = this.db.stores;
-    const updateRef = this.db.firebase.ref(this.db.firebase.getProblemDocumentsPath(user));
+    const updateRef = this.db.firebase.ref(this.db.firebase.getProblemDocumentPath(user, document.key));
     const disposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         visibility: newDocument.visibility

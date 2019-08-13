@@ -1,5 +1,5 @@
 import { DB } from "../db";
-import { DBOfferingUserProblemDocument, DBOfferingUser } from "../db-types";
+import { DBOfferingUserProblemDocument, DBOfferingUser, DBOfferingUserProblemDocumentMap } from "../db-types";
 import { forEach } from "lodash";
 
 export class DBProblemDocumentsListener {
@@ -60,10 +60,10 @@ export class DBProblemDocumentsListener {
   }
 
   private handleLoadProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
-    const sectionDocuments = snapshot.val();
-    if (sectionDocuments) {
-      forEach(sectionDocuments, (sectionDoc) => {
-        this.handleProblemDocument(sectionDoc);
+    const problemDocuments: DBOfferingUserProblemDocumentMap = snapshot.val();
+    if (problemDocuments) {
+      forEach(problemDocuments, (document) => {
+        this.handleProblemDocument(document);
       });
     }
   }

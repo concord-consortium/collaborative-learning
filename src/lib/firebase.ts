@@ -132,6 +132,10 @@ export class Firebase {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
+  public getProblemDocumentPath(user: UserModelType, documentKey: string, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/documents/${documentKey}`;
+  }
+
   public getProblemDocumentsPath(user: UserModelType, userId?: string) {
     return `${this.getOfferingUserPath(user, userId)}/documents`;
   }
