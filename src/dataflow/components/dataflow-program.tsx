@@ -85,6 +85,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
             isRunEnabled={this.state.isProgramRunning}
+            readOnly={this.props.readOnly || false}
           />
 
           <div className="horizontal-container">
