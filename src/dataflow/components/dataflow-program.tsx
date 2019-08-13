@@ -160,6 +160,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           this.setState({disableDataStorage: true});
         }
       }
+      const { area } = this.programEditor.view;
+      const { programZoom } = this.props;
+      if (programZoom) {
+        area.zoom(programZoom.scale, programZoom.dx, programZoom.dy, "wheel");
+      }
 
       (this.programEditor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
@@ -196,6 +201,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         return source !== "dblclick";
       });
 
+      this.programEditor.on("translated", node => {
+        const { transform } = this.programEditor.view.area;
+        this.props.onZoomChange(transform.x, transform.y, transform.k);
+      });
+
       // Can this be in a control with stores injected?
       autorun(() => {
         const { hubStore } = this.stores;
@@ -227,11 +237,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           });
         });
       });
-      const { area } = this.programEditor.view;
-      const { programZoom } = this.props;
-      if (programZoom) {
-        area.zoom(programZoom.scale, programZoom.dx, programZoom.dy, "wheel");
-      }
+
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
