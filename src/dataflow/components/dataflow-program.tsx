@@ -162,6 +162,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       );
 
+      this.programEditor.on("nodedraged", node => {
+        this.props.onProgramChange(this.programEditor.toJSON());
+      });
+
       this.programEditor.on("nodecreate", node => {
         // trigger after each of the first six events
         // add the current set of sensors or relays to node controls
