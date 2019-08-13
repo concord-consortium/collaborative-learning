@@ -13,7 +13,7 @@ class RightNav{
         return cy.get('[data-test=my-work-list-items]');
     }
 
-    openMyWorkAreaCanvasItem(title){
+    openMyWorkAreaCanvasItem(){
         cy.get('[data-test=my-work-list-items] .scaled-list-item').click();
         // cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
         // cy.get('.my-work > .list > .list-item[title*="'+title+'"]').click();
@@ -34,8 +34,8 @@ class RightNav{
         return cy.get('#rightNavTab-class-work.tab');
     }
 
-    getClassWorkAreaCanvasItem(){
-        return cy.get('[data-test=class-work-list-items]');
+    getClassWorkAreaCanvasItem(student){
+        return cy.get('[data-test=class-work-list-items] .scaled-list-item').parent().siblings('.info').contains(student);
         // return cy.get('.right-nav > .expanded-area.expanded > .contents > .class-work > .list > .list-item');
     }
 
@@ -44,9 +44,8 @@ class RightNav{
         // return cy.get('.right-nav > .expanded-area.expanded > .contents > .class-work > .list > .list-item');
     }
 
-    openClassWorkAreaCanvasItem(title){
-        cy.get('[data-test=class-work-section] .title').contains(title).click();
-        cy.get('[data-test=class-work-list-items] > .info').parent().click();
+    openClassWorkAreaCanvasItem(student){
+        this.getClassWorkAreaCanvasItem(student).parent().siblings('.scaled-list-item-container').click();
     }
 
     openClassWorkTab(){
