@@ -262,7 +262,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
     let interval: number =  1;
-    const newTimestamp = Date.now() + this.props.programRunTime;
+    const newTimestamp = Date.now() + (1000 * this.props.programRunTime);
+
     const hubs: string[] = [];
     const sensors: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
@@ -276,12 +277,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         interval = n.data.interval as number;
       }
     });
-    const program = this.programEditor.toJSON();
+    const rawProgram = this.programEditor.toJSON();
+    // strip out recentValues for each node - not needed on the server
+    const editedProgram = {
+      id: rawProgram.id,
+      nodes: Object.assign({}, rawProgram.nodes)
+    };
+    if (rawProgram.nodes) {
+      for (const node of Object.values(rawProgram.nodes)) {
+        const newNode = Object.assign({}, node);
+        const nodeData = Object.assign({}, node.data);
+        if (nodeData.recentValues) delete nodeData.recentValues;
+        newNode.data = nodeData;
+        editedProgram.nodes[newNode.id] = newNode;
+      }
+    }
+
     const programData = {
       program: {
         endTime: newTimestamp,
         hubs,
-        program,
+        program: editedProgram,
         programId: programName,
         runInterval: interval * 1000,
         sensors
