@@ -67,6 +67,12 @@
                   {
                     "content": {
                       "type": "Dataflow",
+                      "programRunTime": 600,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 1
+                      },
                       "program": [
                         {
                           "id": "temp-id",
