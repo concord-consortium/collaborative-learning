@@ -16,13 +16,14 @@ const ProgramZoom = types.model({
   scale: types.number,
 });
 export type ProgramZoomType = typeof ProgramZoom.Type;
+const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
 export const DataflowContentModel = types
   .model("DataflowTool", {
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
     program: "",
     programRunTime: DEFAULT_PROGRAM_TIME,
-    programZoom: types.optional(ProgramZoom, { dx: 0, dy: 0, scale: 1 }),
+    programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .preProcessSnapshot(snapshot => processImport(snapshot))
   .views(self => ({

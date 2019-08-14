@@ -40,7 +40,7 @@ interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
-  programRunTime?: number;
+  programRunTime: number;
   onProgramRunTimeChange: (programRunTime: number) => void;
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
@@ -84,7 +84,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
-            isRunEnabled={this.state.isProgramRunning}
+            isRunEnabled={!this.state.isProgramRunning}
             readOnly={this.props.readOnly || false}
           />
 
@@ -170,8 +170,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         "process nodecreated noderemoved connectioncreated connectionremoved",
         async () => {
           await this.programEngine.abort();
-          await this.programEngine.process(this.programEditor.toJSON());
-          this.props.onProgramChange(this.programEditor.toJSON());
+          const programJSON = this.programEditor.toJSON();
+          await this.programEngine.process(programJSON);
+          this.props.onProgramChange(programJSON);
         }
       );
 
@@ -194,11 +195,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
-        if (source !== "dblclick") {
+        const isDoubleClick = source === "dblclick";
+        if (!isDoubleClick) {
           const { transform } = this.programEditor.view.area;
           this.props.onZoomChange(transform.x, transform.y, transform.k);
         }
-        return source !== "dblclick";
+        return !isDoubleClick;
       });
 
       this.programEditor.on("translated", node => {
@@ -260,7 +262,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
     let interval: number =  1;
-    const newTimestamp = Date.now() + (this.props.programRunTime || DEFAULT_PROGRAM_TIME);
+    const newTimestamp = Date.now() + this.props.programRunTime;
     const hubs: string[] = [];
     const sensors: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
