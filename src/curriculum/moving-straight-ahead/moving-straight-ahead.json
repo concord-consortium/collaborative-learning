@@ -1,5 +1,6 @@
 {
   "code": "msa",
+  "abbrevTitle": "MSA",
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
   "pageTitle": "CLUE: %problemTitle%",
@@ -7,11 +8,35 @@
     {
       "tab": "my-work",
       "label": "My Work",
-      "hideGhostUser": true
+      "hideGhostUser": true,
+      "sections": [
+        {
+          "title": "Workspaces I've Created",
+          "type": "personal-documents"
+        },
+        {
+          "title": "%abbrevInvestigation%",
+          "type": "problem-documents"
+        },
+        {
+          "title": "Learning Logs",
+          "type": "learning-logs"
+        }
+      ]
     },
     {
       "tab": "class-work",
-      "label": "Class Work"
+      "label": "Class Work",
+      "sections": [
+        {
+          "title": "Published",
+          "type": "published-documents"
+        },
+        {
+          "title": "Starred",
+          "type": "starred-documents"
+        }
+      ]
     },
     {
       "tab": "class-logs",

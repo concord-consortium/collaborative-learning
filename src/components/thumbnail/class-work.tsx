@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
-import { CanvasComponent } from "../document/canvas";
+import { CollapsibleSectionHeader } from "./collapsible-section-header";
+import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
 import { UserStarModel } from "../../models/tools/user-star";
 
@@ -28,7 +29,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documents, problem } = this.stores;
+    const { documents } = this.stores;
     const publications: DocumentModelType[] = [];
     publications.push(...documents.getLatestPublications(this.stores.class));
 
@@ -43,48 +44,27 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private renderPublishedDocuments = (publications: DocumentModelType[]) => {
     const { user } = this.stores;
-    const icon: string = this.state.showPublishedDocuments ? "#icon-down-arrow" : "#icon-right-arrow";
+    const { scale } = this.props;
+    const sectionTitle = "Published";
+    const isExpanded = this.state.showPublishedDocuments;
     return (
       <div className="section published">
-        <div
-            className={"section-header " + (this.state.showPublishedDocuments ? "shown" : "hidden")}
-            data-test="class-work-section"
-            onClick={this.handlePublishedSectionClicked}
-        >
-          <svg className="icon">
-            <use xlinkHref={icon}/>
-          </svg>
-          <div className="title">Published</div>
-        </div>
+        <CollapsibleSectionHeader
+          sectionTitle={sectionTitle} dataTestName="class-work-section"
+          isExpanded={isExpanded} onClick={this.handlePublishedSectionClicked}/>
 
-        <div className={"list " + (this.state.showPublishedDocuments ? "shown" : "hidden")}>
+        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
           {publications.map((publication) => {
-            const pubUser = this.stores.class.getUserById(publication.uid);
-            const sectionTitle = "Published";
+            const captionText = this.getPublicationCaptionText(publication, sectionTitle);
+            const pubStar = !!publication.stars.find( star => star.uid === user.id && star.starred );
+            const onDocumentStarClick = user.type === "teacher" ? this.handleDocumentStarClick : undefined;
             return (
-              <div
-                className="list-item"
-                data-test="class-work-list-items"
-                key={publication.key}
-              >
-                <div
-                  className="scaled-list-item-container"
-                  onClick={this.handlePublicationClicked(publication)}
-                  onDragStart={this.handlePublicationDragStart(publication)}
-                  draggable={true}
-                >
-                  <div className="scaled-list-item">
-                    <CanvasComponent context="class-work" document={publication}
-                                      readOnly={true} scale={this.props.scale} />
-                  </div>
-                </div>
-                { user.type === "teacher"
-                    ? this.renderStarFooter(publication, sectionTitle, true)
-                    : <div className="info">
-                        <div>{(pubUser && pubUser.fullName) + ": " +  sectionTitle}</div>
-                      </div>
-                }
-              </div>
+              <ThumbnailDocumentItem
+                key={publication.key} dataTestName="class-work-list-items"
+                canvasContext="class-work" document={publication} scale={scale}
+                captionText={captionText}
+                onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart}
+                isStarred={pubStar} onDocumentStarClick={onDocumentStarClick} />
             );
           })}
           </div>
@@ -94,53 +74,31 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private renderStarredDocuments = (publications: DocumentModelType[]) => {
     const { user } = this.stores;
-    const icon: string = this.state.showStarredDocuments ? "#icon-down-arrow" : "#icon-right-arrow";
+    const { scale } = this.props;
+    const sectionTitle = "Starred";
+    const isExpanded = this.state.showStarredDocuments;
     return (
       <div className="section starred">
-        <div
-            className={"section-header " + (this.state.showStarredDocuments ? "shown" : "hidden")}
-            data-test="class-work-section"
-            onClick={this.handleStarredSectionClicked}
-        >
-          <svg className="icon">
-            <use xlinkHref={icon}/>
-          </svg>
-          <div className="title">Starred</div>
-        </div>
+        <CollapsibleSectionHeader
+          sectionTitle={sectionTitle} dataTestName="class-work-section"
+          isExpanded={isExpanded} onClick={this.handleStarredSectionClicked}/>
 
-        <div className={"list " + (this.state.showStarredDocuments ? "shown" : "hidden")}>
+        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
           {publications.map((publication) => {
-            const pubUser = this.stores.class.getUserById(publication.uid);
-            const sectionTitle = "Starred";
-            const pubStar = user.type === "teacher" ?
-                         publication.stars.find(star => star.uid === user.id && star.starred) :
-                         publication.stars.find(star => star.starred);
+            const captionText = this.getPublicationCaptionText(publication, sectionTitle);
+            const pubStar = user.type === "teacher"
+                              ? !!publication.stars.find(star => star.uid === user.id && star.starred)
+                              : !!publication.stars.find(star => star.starred);
+            const onDocumentStarClick = user.type === "teacher" ? this.handleDocumentStarClick : undefined;
             return (
-              pubStar ?
-              <div
-                className="list-item"
-                data-test="class-work-list-items"
-                key={publication.key}
-              >
-                <div
-                  className="scaled-list-item-container"
-                  onClick={this.handlePublicationClicked(publication)}
-                  onDragStart={this.handlePublicationDragStart(publication)}
-                  draggable={true}
-                >
-                  <div className="scaled-list-item">
-                    <CanvasComponent context="class-work" document={publication}
-                                      readOnly={true} scale={this.props.scale} />
-                  </div>
-                </div>
-                { user.type === "teacher" ?
-                  this.renderStarFooter(publication, sectionTitle, true)
-                  : <div className="info">
-                      <div>{(pubUser && pubUser.fullName) + ": " +  sectionTitle}</div>
-                    </div>
-                }
-              </div>
-              : null
+              pubStar
+                ? <ThumbnailDocumentItem
+                    key={publication.key} dataTestName="class-work-list-items"
+                    canvasContext="class-work" document={publication} scale={scale}
+                    captionText={captionText}
+                    onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart}
+                    isStarred={true} onDocumentStarClick={onDocumentStarClick} />
+                : null
             );
           })}
           </div>
@@ -148,34 +106,20 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderStarFooter = (publication: any, sectionTitle: string, starred: boolean) => {
+  private getPublicationCaptionText(publication: DocumentModelType, sectionTitle: string) {
     const pubUser = this.stores.class.getUserById(publication.uid);
-    const infoText = (pubUser && pubUser.fullName) + (sectionTitle.length ? (": " +  sectionTitle) : "");
-    return (
-      <div className="footer">
-        <div className="info">
-          <div>{infoText}</div>
-        </div>
-        <div className="icon-holder" onClick={this.handleStarClicked(publication)}>
-          <svg className={"icon-star " + (starred ? "starred" : "")} >
-            <use xlinkHref="#icon-star"/>
-          </svg>
-        </div>
-      </div>
-    );
+    const userName = pubUser && pubUser.fullName || "";
+    return userName + (sectionTitle.length ? (": " +  sectionTitle) : "");
   }
 
-  private handlePublicationClicked = (publication: DocumentModelType) => {
+  private handleDocumentClick = (publication: DocumentModelType) => {
     const {ui} = this.stores;
-    return (e: React.MouseEvent<HTMLDivElement>) => {
-      ui.rightNavDocumentSelected(publication);
-    };
+    ui.rightNavDocumentSelected(publication);
   }
 
-  private handlePublicationDragStart = (document: DocumentModelType) => {
-    return (e: React.DragEvent<HTMLDivElement>) => {
-      e.dataTransfer.setData(DocumentDragKey, document.key);
-    };
+  private handleDocumentDragStart =
+            (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
+    e.dataTransfer.setData(DocumentDragKey, document.key);
   }
 
   private handlePublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -186,7 +130,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     this.setState((state) => ({ showStarredDocuments: !state.showStarredDocuments }));
   }
 
-  private handleStarClicked = (publication: DocumentModelType) => {
+  private handleDocumentStarClick = (publication: DocumentModelType) => {
     return (e: React.MouseEvent<HTMLDivElement>) => {
       const { user } = this.stores;
       if (publication) {

@@ -101,6 +101,12 @@ $list-item-scale: 0.11
         .my-work, .class-logs, .class-work
           background-color: $color4-7
 
+        .my-work
+          .section-header
+            background-color: $color4
+            &:hover, &.expanded
+              background-color: $color4-5
+
         .header
           position: relative
           background-color: $color4-11
@@ -115,28 +121,6 @@ $list-item-scale: 0.11
           border-style: solid
           border-width: 2px 2px 0 2px
           border-color: $color4-10
-
-          .section-header
-            display: flex
-            flex-direction: row
-            padding: 6px
-            background-color: $color4
-            color: $font-2-color
-            &.shown
-              background-color: $color4-8
-            &:hover
-              background-color: $color4-9
-
-            .icon
-              height: 9px
-              width: 9px
-              fill: $font-2-color
-              margin: 4px 6px 0 0
-
-            .title
-              width: 100%
-              font-size: 12px
-              text-align: left
 
       .list
         top: 0

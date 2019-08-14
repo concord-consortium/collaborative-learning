@@ -1,6 +1,7 @@
 {
   "code": "dataflow",
   "title": "Dataflow",
+  "abbrevTitle": "Df",
   "subtitle": "Computational Thinking in Biology",
   "pageTitle": "%unitTitle%",
   "demoProblemTitle": "%investigationTitle%",
