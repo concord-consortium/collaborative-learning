@@ -24,6 +24,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 import { SizeMeProps } from "react-sizeme";
+import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import "./dataflow-program.sass";
 
 interface NodeNameValuePair {
@@ -36,12 +37,17 @@ interface NodeValueMap {
 type NodeValue = number | NodeValueMap;
 
 interface IProps extends SizeMeProps {
+  readOnly?: boolean;
   program?: string;
+  onProgramChange: (program: any) => void;
+  programRunTime: number;
+  onProgramRunTimeChange: (programRunTime: number) => void;
+  programZoom?: ProgramZoomType;
+  onZoomChange: (dx: number, dy: number, scale: number) => void;
 }
 
 interface IState {
   disableDataStorage: boolean;
-  programRunTime: number;
   isProgramRunning: boolean;
 }
 
@@ -63,7 +69,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       disableDataStorage: false,
-      programRunTime: DEFAULT_PROGRAM_TIME,
       isProgramRunning: false
     };
   }
@@ -78,18 +83,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onStopProgramClick={this.stopProgram}
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
-            programDefaultRunTime={DEFAULT_PROGRAM_TIME}
-            isRunEnabled={this.state.isProgramRunning}
+            programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
+            isRunEnabled={!this.state.isProgramRunning}
+            readOnly={this.props.readOnly || false}
           />
 
           <div className="horizontal-container">
-            <DataflowProgramToolbar
-              onNodeCreateClick={this.addNode}
-              onDeleteClick={this.deleteSelectedNodes}
-              onResetClick={this.resetNodes}
-              onClearClick={this.clearProgram}
-              isDataStorageDisabled={this.state.disableDataStorage}
-            />
+            { !this.props.readOnly ?
+              <DataflowProgramToolbar
+                onNodeCreateClick={this.addNode}
+                onDeleteClick={this.deleteSelectedNodes}
+                onResetClick={this.resetNodes}
+                onClearClick={this.clearProgram}
+                isDataStorageDisabled={this.state.disableDataStorage}
+              />
+              : null
+            }
             <div className="full">
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
             </div>
@@ -151,14 +160,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           this.setState({disableDataStorage: true});
         }
       }
+      const { area } = this.programEditor.view;
+      const { programZoom } = this.props;
+      if (programZoom) {
+        area.zoom(programZoom.scale, programZoom.dx, programZoom.dy, "wheel");
+      }
 
       (this.programEditor as any).on(
         "process nodecreated noderemoved connectioncreated connectionremoved",
         async () => {
           await this.programEngine.abort();
-          await this.programEngine.process(this.programEditor.toJSON());
+          const programJSON = this.programEditor.toJSON();
+          await this.programEngine.process(programJSON);
+          this.props.onProgramChange(programJSON);
         }
       );
+
+      this.programEditor.on("nodedraged", node => {
+        this.props.onProgramChange(this.programEditor.toJSON());
+      });
 
       this.programEditor.on("nodecreate", node => {
         // trigger after each of the first six events
@@ -175,7 +195,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
-        return source !== "dblclick";
+        const isDoubleClick = source === "dblclick";
+        if (!isDoubleClick) {
+          const { transform } = this.programEditor.view.area;
+          this.props.onZoomChange(transform.x, transform.y, transform.k);
+        }
+        return !isDoubleClick;
+      });
+
+      this.programEditor.on("translated", node => {
+        const { transform } = this.programEditor.view.area;
+        this.props.onZoomChange(transform.x, transform.y, transform.k);
       });
 
       // Can this be in a control with stores injected?
@@ -227,12 +257,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({isProgramRunning: false});
   }
   private setProgramRunTime = (time: number) => {
-    this.setState({programRunTime: time});
+    this.props.onProgramRunTimeChange(time);
   }
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
     let interval: number =  1;
-    const newTimestamp = Date.now() + this.state.programRunTime;
+    const newTimestamp = Date.now() + this.props.programRunTime;
     const hubs: string[] = [];
     const sensors: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {

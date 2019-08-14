@@ -10,6 +10,7 @@ interface TopbarProps {
   programDefaultRunTime: number;
   onProgramTimeSelectClick: (type: number) => void;
   isRunEnabled: boolean;
+  readOnly: boolean;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
@@ -21,7 +22,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       <div>Duration:</div>
       <select
         onChange={handleSelectChange}
-        disabled={props.isRunEnabled}
+        disabled={!props.isRunEnabled || props.readOnly}
         defaultValue={props.programDefaultRunTime.toString()}
       >
         { props.programRunTimes.map((rt: ProgramRunTime) => (
@@ -33,13 +34,13 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </select>
       <button
         onClick={props.onRunProgramClick}
-        disabled={props.isRunEnabled}
+        disabled={!props.isRunEnabled || props.readOnly}
       >
         Run
       </button>
       <button
         onClick={props.onStopProgramClick}
-        disabled={!props.isRunEnabled}
+        disabled={props.isRunEnabled || props.readOnly}
       >
         Stop
       </button>

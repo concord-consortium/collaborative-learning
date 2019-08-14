@@ -28,14 +28,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { readOnly } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const program = this.getContent().program;
+    const { program, programRunTime, programZoom } = this.getContent();
     return (
       <div className={classes}>
         <SizeMe monitorHeight={true}>
           {({ size }: SizeMeProps) => {
             return (
               <DataflowProgram
+                readOnly={readOnly}
                 program={program}
+                onProgramChange={this.handleProgramChange}
+                programRunTime={programRunTime}
+                onProgramRunTimeChange={this.handleProgramRunTimeChange}
+                programZoom={programZoom}
+                onZoomChange={this.handleProgramZoomChange}
                 size={size}
               />
             );
@@ -43,6 +49,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         </SizeMe>
       </div>
     );
+  }
+
+  private handleProgramChange = (program: any) => {
+    this.getContent().setProgram(program);
+  }
+
+  private handleProgramRunTimeChange = (program: any) => {
+    this.getContent().setProgramRunTime(program);
+  }
+
+  private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
+    this.getContent().setProgramZoom(dx, dy, scale);
   }
 
   private getContent() {

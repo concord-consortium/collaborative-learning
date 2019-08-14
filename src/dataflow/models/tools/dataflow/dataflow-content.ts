@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { each } from "lodash";
+import { DEFAULT_PROGRAM_TIME } from "../../../../dataflow/utilities/node";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -9,15 +10,38 @@ export function defaultDataflowContent(): DataflowContentModelType {
 
 export const kDataflowDefaultHeight = 480;
 
+const ProgramZoom = types.model({
+  dx: types.number,
+  dy: types.number,
+  scale: types.number,
+});
+export type ProgramZoomType = typeof ProgramZoom.Type;
+const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
+
 export const DataflowContentModel = types
   .model("DataflowTool", {
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
-    program: ""
+    program: "",
+    programRunTime: DEFAULT_PROGRAM_TIME,
+    programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .preProcessSnapshot(snapshot => processImport(snapshot))
   .views(self => ({
     isUserResizable() {
       return true;
+    }
+  }))
+  .actions(self => ({
+    setProgram(program: any) {
+      self.program = JSON.stringify(program);
+    },
+    setProgramRunTime(runTime: number) {
+      self.programRunTime = runTime;
+    },
+    setProgramZoom(dx: number, dy: number, scale: number) {
+      self.programZoom.dx = dx;
+      self.programZoom.dy = dy;
+      self.programZoom.scale = scale;
     }
   }));
 
