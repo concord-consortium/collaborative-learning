@@ -105,6 +105,13 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     const handleMenuItem = (e: React.MouseEvent) => {
       // console.log(`Got class menu selection: ${(e.target as HTMLElement).innerText}`);
     };
+    if (user.portalClasses.length <= 0) {
+      return (
+        <Menu>
+          <MenuItem key={key++} text={user.className} />
+        </Menu>
+      );
+    }
     return (
       <Menu>
         {user.portalClasses.map( c => <MenuItem key={key++} text={c.className} onClick={handleMenuItem} />)}
