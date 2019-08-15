@@ -262,26 +262,51 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
     let interval: number =  1;
-    const newTimestamp = Date.now() + this.props.programRunTime;
+    const newTimestamp = Date.now() + (1000 * this.props.programRunTime);
+
     const hubs: string[] = [];
     const sensors: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
         if (chInfo) {
-          hubs.push(chInfo.hubId);
-          sensors.push(`${chInfo.hubId}_${chInfo.channelId}`);
+          // only add hubs once
+          if (hubs.indexOf(chInfo.hubId) === -1) {
+            hubs.push(chInfo.hubId);
+          }
+          const sensorName = `${chInfo.hubId}_${chInfo.channelId}`;
+          // We don't need more than one of the same sensor in our dataset on the server
+          // sending a duplicate will error in the Lambda
+          if (sensors.indexOf(sensorName) === -1) {
+            sensors.push(sensorName);
+          }
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
       }
     });
-    const program = this.programEditor.toJSON();
+    const rawProgram = this.programEditor.toJSON();
+    // strip out recentValues for each node - not needed on the server
+    const editedProgram = {
+      id: rawProgram.id,
+      nodes: Object.assign({}, rawProgram.nodes)
+    };
+    if (rawProgram.nodes) {
+      for (const node of Object.values(rawProgram.nodes)) {
+        const newNode = Object.assign({}, node);
+        const nodeData = Object.assign({}, node.data);
+        if (nodeData.recentValues) delete nodeData.recentValues;
+        newNode.data = nodeData;
+        if (newNode.position) delete newNode.position;
+        editedProgram.nodes[newNode.id] = newNode;
+      }
+    }
+
     const programData = {
       program: {
         endTime: newTimestamp,
         hubs,
-        program,
+        program: editedProgram,
         programId: programName,
         runInterval: interval * 1000,
         sensors

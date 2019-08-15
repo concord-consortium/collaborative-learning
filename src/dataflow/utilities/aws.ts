@@ -1,4 +1,5 @@
 import * as AWS from "aws-sdk";
+import { NodeEditor } from "rete";
 
 const getUtils = () => {
   return (AWS as any).util;
@@ -51,14 +52,15 @@ export const getSignedUrl = (
     return requestUrl;
 };
 
-export function uploadProgram(programData: any): string {
+export function uploadProgram(programData: NodeEditor): string {
   if (!programData) {
     return "failed";
   }
+  const uploadableProgram = JSON.stringify(programData);
   const lambda = new AWS.Lambda({region: "us-east-1", apiVersion: "2015-03-31"});
   const params = {
     FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:createDataflowProgram",
-    Payload: JSON.stringify(programData),
+    Payload: uploadableProgram,
     InvocationType: "RequestResponse",
     LogType: "Tail"
   };
@@ -72,3 +74,28 @@ export function uploadProgram(programData: any): string {
   });
   return "completed";
 }
+
+export const fetchProgramData = (programId: string, time?: number) => {
+
+  const queryParams = { programId, time };
+  const lambda = new AWS.Lambda({ region: "us-east-1", apiVersion: "2015-03-31" });
+  const params = {
+    FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:fetchProgramData",
+    Payload: JSON.stringify(queryParams),
+    InvocationType: "RequestResponse",
+    LogType: "Tail"
+  };
+  return new Promise((resolve, reject) => {
+    if (!programId) {
+      reject ("no programId specified");
+    }
+    lambda.invoke(params, (error, data) => {
+      if (error) {
+        reject(error);
+      }
+      if (data) {
+        resolve(JSON.parse(data.Payload as string));
+      }
+    });
+  });
+};
