@@ -4,7 +4,6 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
-import { ProblemModelType } from "../models/curriculum/problem";
 
 const initials = require("initials");
 
@@ -53,6 +52,12 @@ export interface RawUser {
 
 export type AuthenticatedUser = StudentUser | TeacherUser;
 
+interface PortalClass {
+  className: string;
+  classHash: string;
+  classUri: string;
+}
+
 interface User {
   id: string;
   portal: string;
@@ -67,6 +72,7 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
+  portalClasses?: PortalClass[];
 }
 
 export interface StudentUser extends User {
@@ -392,32 +398,39 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
               .then((classInfo) => {
                 return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
-                    const uidAsString = `${portalJWT.uid}`;
-                    let authenticatedUser: AuthenticatedUser | undefined;
-                    if (portalJWT.user_type === "learner") {
-                      authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                    }
-                    else {
-                      authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                    }
-                    if (authenticatedUser) {
-                      authenticatedUser.portalJWT = portalJWT;
-                      authenticatedUser.rawPortalJWT = rawPortalJWT;
-                      authenticatedUser.firebaseJWT = firebaseJWT;
-                      authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                      authenticatedUser.id = uidAsString;
-                      authenticatedUser.portal = portal;
+                    return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
+                      .then((portalClasses) => {
 
-                      getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams).then((problemId) => {
+                        const uidAsString = `${portalJWT.uid}`;
+                        let authenticatedUser: AuthenticatedUser | undefined;
+                        if (portalJWT.user_type === "learner") {
+                          authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                        }
+                        else {
+                          authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
+                        }
+
                         if (authenticatedUser) {
-                          resolve({authenticatedUser, classInfo, problemId});
+                          authenticatedUser.portalJWT = portalJWT;
+                          authenticatedUser.rawPortalJWT = rawPortalJWT;
+                          authenticatedUser.firebaseJWT = firebaseJWT;
+                          authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                          authenticatedUser.id = uidAsString;
+                          authenticatedUser.portal = portal;
+                          authenticatedUser.portalClasses = portalClasses;
+
+                          getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
+                          .then((problemId) => {
+                            if (authenticatedUser) {
+                              resolve({authenticatedUser, classInfo, problemId});
+                            }
+                          });
+                        }
+                        else {
+                          reject("Current user not found in class roster");
                         }
                       });
-                    }
-                    else {
-                      reject("Current user not found in class roster");
-                    }
-                })
+                  })
                 .catch(reject);
               })
             );
@@ -431,6 +444,36 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         }
       })
       .catch(reject);
+  });
+};
+
+const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<PortalClass[]> => {
+  return new Promise<PortalClass[]>((resolve, reject) => {
+    if (userType === "teacher" && urlParams && urlParams.class) {
+      const url = urlParams.class.replace(/classes\/\d*$/, "classes/mine");
+      superagent
+      .get(url)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const portalClasses = res.body.classes.map( (rawPortalClass: any) => {
+            return (
+              {
+                className: rawPortalClass.name,
+                classHash: rawPortalClass.class_hash,
+                classUri: rawPortalClass.uri,
+              }
+            );
+          });
+          resolve(portalClasses);
+        }
+      });
+    }
+    else {
+      resolve(undefined);
+    }
   });
 };
 
