@@ -8,7 +8,7 @@
     "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
   },
   "branch": {
-    "baseUrl": "https://collaborative-learning.concord.org/branch/axis-rescaling",
+    "baseUrl": "https://collaborative-learning.concord.org/branch/problem-documents/",
     "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
   },
   "dev": {

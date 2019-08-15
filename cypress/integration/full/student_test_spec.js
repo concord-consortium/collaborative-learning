@@ -8,9 +8,7 @@ let student = '5',
 
 
 describe('Check header area for correctness', function(){
-
     const workspace = new Header();
-
     it('will verify if class name is correct', function(){
         workspace.getClassName().should('contain',''+'Class '+classroom);
     });
@@ -24,7 +22,8 @@ describe('Check header area for correctness', function(){
         workspace.getUserName().should('contain','Student '+student);
     });
 });
-describe('Students, class, group, problem combinations', function(){
+// TODO: Need to be written
+describe.skip('Students, class, group, problem combinations', function(){
     it('will test new student assigned to new class new group new problem', function(){
 
     });

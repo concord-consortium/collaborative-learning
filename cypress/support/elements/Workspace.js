@@ -13,16 +13,17 @@ class Workspace{
     }
 
     openAndPublishCanvases(){ //This can be used to setup in a lot of test where My Work and Class Work canvases are needed
-        this.leftnav.getLeftNavTabs().each(($tab,index,$tabList)=>{})
-            .then(($tabList)=>{
-                var i=0;
-                for (i=0;i<$tabList.length;i++){
-                    cy.get('#leftNavTab'+i).click({force:true});
-                    this.leftnav.getOpenToWorkspaceButton(i).click({force:true});
-                    this.canvas.publishCanvas();
-                }
-                // cy.get('#leftNavTab'+i).click({force:true}); //Close the last tab--leaving clean up to individual tests for now
-            });
+        this.canvas.publishCanvas();
+        // this.leftnav.getLeftNavTabs().each(($tab,index,$tabList)=>{})
+        //     .then(($tabList)=>{
+        //         var i=0;
+        //         for (i=0;i<$tabList.length;i++){
+        //             cy.get('#leftNavTab'+i).click({force:true});
+        //             this.leftnav.getOpenToWorkspaceButton(i).click({force:true});
+        //             this.canvas.publishCanvas();
+        //         }
+        //         // cy.get('#leftNavTab'+i).click({force:true}); //Close the last tab--leaving clean up to individual tests for now
+        //     });
     }
 
     leaveGroup(){

@@ -34,8 +34,8 @@ class RightNav{
         return cy.get('#rightNavTab-class-work.tab');
     }
 
-    getClassWorkAreaCanvasItem(student){
-        return cy.get('[data-test=class-work-list-items] .scaled-list-item').parent().siblings('.info').contains(student);
+    getClassWorkAreaCanvasItem(){
+        return cy.get('[data-test=class-work-list-items] .scaled-list-item');
         // return cy.get('.right-nav > .expanded-area.expanded > .contents > .class-work > .list > .list-item');
     }
 
@@ -45,7 +45,8 @@ class RightNav{
     }
 
     openClassWorkAreaCanvasItem(student){
-        this.getClassWorkAreaCanvasItem(student).parent().siblings('.scaled-list-item-container').click();
+        this.getClassWorkAreaCanvasItem(student).parent().siblings().click();
+        // return cy.get('[data-test=class-work-list-items] .scaled-list-item');
     }
 
     openClassWorkTab(){
