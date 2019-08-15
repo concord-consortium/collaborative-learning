@@ -72,28 +72,18 @@ context('Test the overall workspace', function(){
 
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.wait(1000);
-
-            leftNav.openToWorkspace(tab1);
-            canvas.getCanvasTitle()
-                .then(($titleLoc)=>{
-                let title = $titleLoc.text().replace(/[^\x00-\x7F]/g, "");
-                expect(title).to.contain(tab1);
-            });
+            
             canvas.addTextTile();
             textToolTile.enterText('This is the '+tab1+ ' in Problem '+problem1);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);
 
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem2);
             cy.wait(1000);
-            leftNav.openToWorkspace(tab1);
-            canvas.getCanvasTitle().should('contain',tab1);
             textToolTile.getTextTile().should('not.exist');
 
             //Shows student as disconnected and will not load the introduction canvas
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.wait(2000);
-            leftNav.openToWorkspace(tab1);
-            canvas.getCanvasTitle().should('contain',tab1);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);
             canvas.deleteTile('text')//clean up
         })
