@@ -297,6 +297,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const nodeData = Object.assign({}, node.data);
         if (nodeData.recentValues) delete nodeData.recentValues;
         newNode.data = nodeData;
+        if (newNode.position) delete newNode.position;
         editedProgram.nodes[newNode.id] = newNode;
       }
     }
