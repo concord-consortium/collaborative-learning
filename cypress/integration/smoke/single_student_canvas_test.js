@@ -1,14 +1,12 @@
 import LeftNav from '../../support/elements/LeftNav'
 import Canvas from '../../support/elements/Canvas'
 import RightNav from '../../support/elements/RightNav'
-import BottomNav from '../../support/elements/BottomNav';
 import LearningLog from '../../support/elements/LearningLog';
 import GraphToolTile from '../../support/elements/GraphToolTile'
 import ImageToolTile from '../../support/elements/ImageToolTile'
 import DrawToolTile from '../../support/elements/DrawToolTile'
 import TextToolTile from '../../support/elements/TextToolTile'
 import TableToolTile from '../../support/elements/TableToolTile'
-import { consoleTestResultHandler } from 'tslint/lib/test';
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;

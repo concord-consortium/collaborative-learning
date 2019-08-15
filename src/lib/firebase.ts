@@ -116,6 +116,11 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
   }
 
+  public getUserPersonalDocPath(user: UserModelType, documentKey?: string, userId?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user, userId)}/personalDocs${suffix}`;
+  }
+
   public getImagesPath(user: UserModelType) {
     return `${this.getClassPath(user)}/images`;
   }

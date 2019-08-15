@@ -41,6 +41,9 @@ export const DocumentModel = types
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === PublicationDocument);
     },
+    get isPersonal() {
+      return (self.type === PersonalDocument);
+    },
     get isLearningLog() {
       return (self.type === LearningLogDocument) || (self.type === LearningLogPublication);
     },

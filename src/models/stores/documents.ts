@@ -26,6 +26,18 @@ export const DocumentsModel = types
       byType,
       byTypeForUser,
 
+      getNextPersonalDocumentTitle() {
+        let maxUntitled = 0;
+        self.all.forEach(document => {
+          const match = /.*-([0-9]+)$/.exec(document.title || "");
+          if (match && match[1]) {
+            const suffix = parseInt(match[1], 10);
+            maxUntitled = Math.max(maxUntitled, suffix);
+          }
+        });
+        return `Untitled-${++maxUntitled}`;
+      },
+
       getProblemDocument(userId: string) {
         return self.all.find((document) => {
           return (document.type === ProblemDocument) && (document.uid === userId);

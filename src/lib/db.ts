@@ -5,13 +5,14 @@ import "firebase/storage";
 import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
+  DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata, DBPersonalDocumentMetadata,
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
-  DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap} from "./db-types";
-import { DocumentModelType, DocumentModel, DocumentType, ProblemDocument, LearningLogDocument, PublicationDocument,
-  LearningLogPublication } from "../models/document/document";
+  DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap, DBPersonalDocument } from "./db-types";
+import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
+        PublicationDocument, LearningLogPublication} from "../models/document/document";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
+import { DocumentsModel } from "../models/stores/documents";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
@@ -236,7 +237,7 @@ export class DB {
          })
         .then(() => {
           // create the new document
-          return this.createDocument(ProblemDocument)
+          return this.createDocument({ type: ProblemDocument })
             .then(({document, metadata}) => {
                 const newDocument = {
                   version: "1.0",
@@ -290,7 +291,8 @@ export class DB {
     });
   }
 
-  public createDocument(type: DBDocumentType, content?: string) {
+  public createDocument(params: { type: DBDocumentType, content?: string }) {
+    const { type, content } = params;
     const {user} = this.stores;
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
@@ -308,6 +310,9 @@ export class DB {
       let metadata: DBDocumentMetadata;
 
       switch (type) {
+        case PersonalDocument:
+          metadata = {version, self, createdAt, type};
+          break;
         case ProblemDocument:
           metadata = {version, self, createdAt, type, classHash, offeringId};
           break;
@@ -331,11 +336,43 @@ export class DB {
     });
   }
 
+  public createPersonalDocument(title?: string) {
+    const {documents, user} = this.stores;
+    const docTitle = title || documents.getNextPersonalDocumentTitle();
+
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      return this.createDocument({ type: PersonalDocument })
+        .then(({document, metadata}) => {
+          const {documentKey} = document.self;
+          const personalDoc: DBPersonalDocument = {
+            version: "1.0",
+            self: {
+              documentKey,
+              uid: user.id,
+              classHash: user.classHash
+            },
+            title: docTitle
+          };
+          return this.firebase.ref(this.firebase.getUserPersonalDocPath(user, documentKey)).set(personalDoc)
+                  .then(() => personalDoc);
+        })
+        .then(personalDoc => {
+          Logger.log(LogEventName.CREATE_PERSONAL_DOCUMENT, {
+            title: personalDoc.title
+          });
+
+          return this.createDocumentFromPersonalDocument(personalDoc);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
   public publishDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
     const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument(PublicationDocument, content).then(({document, metadata}) => {
+      this.createDocument({ type: PublicationDocument, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup.users
@@ -369,7 +406,7 @@ export class DB {
     const {user} = this.stores;
     const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument(LearningLogPublication, content).then(({document, metadata}) => {
+      this.createDocument({ type: LearningLogPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getClassPublicationsPath(user)).push();
         const publication: DBLearningLogPublication = {
           version: "1.0",
@@ -433,7 +470,7 @@ export class DB {
     const {user} = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument(LearningLogDocument)
+      return this.createDocument({ type: LearningLogDocument })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
@@ -520,6 +557,18 @@ export class DB {
         documentKey,
         visibility: problemDocument.visibility
       })
+      .then((document) => {
+        this.listeners.monitorDocumentModel(document);
+        this.listeners.monitorDocumentRef(document);
+        return document;
+      });
+  }
+
+  public createDocumentFromPersonalDocument(personalDocument: DBPersonalDocument) {
+    const {title, self: {uid, documentKey}} = personalDocument;
+    const group = this.stores.groups.groupForUser(uid);
+    const groupId = group && group.id;
+    return this.openDocument({type: PersonalDocument, userId: uid, documentKey, groupId, title})
       .then((document) => {
         this.listeners.monitorDocumentModel(document);
         this.listeners.monitorDocumentRef(document);

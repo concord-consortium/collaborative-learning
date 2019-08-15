@@ -1,11 +1,13 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { Icon } from "@blueprintjs/core";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { DocumentDragKey, ProblemDocument, DocumentModelType, PersonalDocument } from "../../models/document/document";
 import { NavTabSectionSpec, ENavTabSectionType } from "../../models/view/right-nav";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
+import { CanvasComponent } from "../document/canvas";
 
 interface IProps extends IBaseProps {
   scale: number;
@@ -94,6 +96,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
                 onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart} />
             );
           })}
+          <NewDocumentButtonComponent onClick={this.handleNewDocumentClick} />
         </div>
       </>
     );
@@ -133,6 +136,16 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
     this.setState(state => ({ showProblemDocuments: !state.showProblemDocuments }));
   }
 
+  private handleNewDocumentClick = async (event: React.MouseEvent<HTMLDivElement>) => {
+    const { db, ui } = this.stores;
+    const { problemWorkspace } = ui;
+    const newDocument = await db.createPersonalDocument();
+    if (newDocument) {
+      problemWorkspace.setAvailableDocument(newDocument);
+      ui.contractAll();
+    }
+  }
+
   private handleDocumentClick = (document: DocumentModelType) => {
     const {ui} = this.stores;
     const {problemWorkspace, learningLogWorkspace} = ui;
@@ -155,3 +168,25 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
     e.dataTransfer.setData(DocumentDragKey, document.key);
   }
 }
+
+interface INewDocumentButtonProps {
+  onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
+}
+
+const NewDocumentButtonComponent = ({ onClick }: INewDocumentButtonProps) => {
+  return (
+    <div className="list-item" data-test="my-work-new-document" >
+      <div
+        className="scaled-list-item-container new-document-button"
+        onClick={onClick} >
+        <div className="scaled-list-item">
+          <CanvasComponent context="my-work" readOnly={true} />
+        </div>
+        <div className="new-document-button-label">
+          <Icon className="new-document-button-icon" icon="add" iconSize={26} />
+          <label>New</label>
+        </div>
+      </div>
+    </div>
+  );
+};

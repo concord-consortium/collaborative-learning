@@ -4,6 +4,7 @@ import { DB } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
+import { DBPersonalDocumentsListener } from "./db-personal-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
@@ -46,6 +47,7 @@ export class DBListeners {
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
   private problemDocumentsListener: DBProblemDocumentsListener;
+  private personalDocumentsListener: DBPersonalDocumentsListener;
   private learningLogsListener: DBLearningLogsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
@@ -57,6 +59,7 @@ export class DBListeners {
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
     this.problemDocumentsListener = new DBProblemDocumentsListener(db);
+    this.personalDocumentsListener = new DBPersonalDocumentsListener(db);
     this.learningLogsListener = new DBLearningLogsListener(db);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
@@ -73,6 +76,9 @@ export class DBListeners {
         })
         .then(() => {
           return this.problemDocumentsListener.start();
+        })
+        .then(() => {
+          return this.personalDocumentsListener.start();
         })
         .then(() => {
           return this.learningLogsListener.start();
@@ -105,6 +111,7 @@ export class DBListeners {
 
     this.publicationListener.stop();
     this.learningLogsListener.stop();
+    this.personalDocumentsListener.stop();
     this.problemDocumentsListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
@@ -163,6 +170,26 @@ export class DBListeners {
       });
     }));
     this.documentModelDisposers[document.key] = disposer;
+  }
+
+  public monitorPersonalDocument = (personalDocument: DocumentModelType) => {
+    const { user } = this.db.stores;
+    const { key } = personalDocument;
+
+    const listener = this.getOrCreateModelListener(`personalDocument:${key}`);
+    if (listener.modelDisposer) {
+      listener.modelDisposer();
+    }
+
+    const updateRef = this.db.firebase.ref(this.db.firebase.getUserPersonalDocPath(user, key));
+    listener.modelDisposer = (onSnapshot(personalDocument, (newDocument) => {
+      updateRef.update({
+        title: newDocument.title,
+        // TODO: for future ordering story add original to model and update here
+      });
+    }));
+
+    return personalDocument;
   }
 
   public monitorLearningLogDocument = (learningLog: DocumentModelType) => {
