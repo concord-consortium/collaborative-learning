@@ -21,9 +21,17 @@ export class NumControl extends Rete.Control {
     this.emitter = emitter;
     this.key = key;
     const handleChange = (onChange: any) => {
-      return (e: any) => { onChange(+e.target.value); };
+      return (e: any) => { onChange(e.target.value); };
     };
-    this.component = (compProps: { readonly: any, value: any; onChange: any; label: string}) => {
+    const handleBlur = (onBlur: any) => {
+      return (e: any) => { onBlur(e.target.value); };
+    };
+    this.component = (compProps: { readonly: any,
+                                   value: any;
+                                   inputValue: any;
+                                   onChange: any;
+                                   onBlur: any;
+                                   label: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (
@@ -34,9 +42,10 @@ export class NumControl extends Rete.Control {
           }
           <input className="number-input"
             ref={inputRef}
-            type={readonly ? "text" : "number"}
-            value={compProps.value}
-            onChange={handleChange(compProps.onChange)} />
+            type={"text"}
+            value={compProps.inputValue}
+            onChange={handleChange(compProps.onChange)}
+            onBlur={handleBlur(compProps.onBlur)} />
         </div>
       );
     };
@@ -48,20 +57,39 @@ export class NumControl extends Rete.Control {
     this.props = {
       readonly,
       value: initial,
+      inputValue: initial,
       onChange: (v: any) => {
-        this.setValue(v);
-        this.emitter.trigger("process");
+        this.setInputValue(v);
+      },
+      onBlur: (v: any) => {
+        if (!isNaN(v)) {
+          this.setValue(Number(v));
+          this.emitter.trigger("process");
+        } else {
+          this.restoreValue();
+        }
       },
       label
     };
+  }
+
+  public setInputValue = (val: string) => {
+    this.props.inputValue = val;
+    (this as any).update();
   }
 
   public setValue = (val: number) => {
     if (this.min && val < this.min) {
       val = this.min;
     }
+    this.props.inputValue = val;
     this.props.value = val;
     this.putData(this.key, val);
+    (this as any).update();
+  }
+
+  public restoreValue = () => {
+    this.props.inputValue = this.props.value;
     (this as any).update();
   }
 
