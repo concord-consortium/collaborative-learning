@@ -17,7 +17,7 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
-import { uploadProgram } from "../utilities/aws";
+import { uploadProgram, fetchProgramData } from "../utilities/aws";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -341,15 +341,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   }
   private resetNodes = () => {
-    this.programEditor.nodes.forEach((n: Node) => {
-      if (n.data.recentValues) {
-        let values: any = n.data.recentValues;
-        values = [];
-        n.data.recentValues = values;
-        if (n.data.ticks) {
-          n.data.ticks = 0;
+    // TODO: Remove test data fetch - this is a PLACEHOLDER!
+    // Test for graphs - remove the two time parameters to fetch all rows, or adjust as required
+    fetchProgramData("dataflow-program-1565888617009", 1565888633071, 1565888713124).then((result) => {
+      this.programEditor.nodes.forEach((n: Node) => {
+        if (n.data.recentValues) {
+          let values: any = n.data.recentValues;
+          values = [];
+          n.data.recentValues = values;
+          if (n.data.ticks) {
+            n.data.ticks = 0;
+          }
         }
-      }
+      });
     });
   }
 
