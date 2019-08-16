@@ -103,7 +103,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     const { user } = this.stores;
     let key = 0;
     const handleMenuItem = (e: React.MouseEvent) => {
-      // console.log(`Got class menu selection: ${(e.target as HTMLElement).innerText}`);
+      // tslint:disable-next-line:no-console
+      console.log(`Class menu selection: ${(e.target as HTMLElement).innerText}`);
     };
     if (user.portalClasses.length <= 0) {
       return (
@@ -130,16 +131,28 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderProblemMenu() {
-    const { unit } = this.stores;
+    const { unit, user } = this.stores;
     const investigations = unit.investigations;
-    const problems: any[] = _.flatten(investigations.map(i => i.problems));
+    const menuList: string[] = [];
     let key = 0;
+    investigations.forEach( (investigation) => {
+      const problems = investigation.problems;
+      problems.forEach( (problem) => {
+        if (user.portalProblems.find( (pid) => pid === `${investigation.ordinal}.${problem.ordinal}`)) {
+          menuList.push(problem.title);
+        }
+        else {
+          menuList.push(problem.title + " -NA-");
+        }
+      });
+    });
     const handleMenuItem = (e: React.MouseEvent) => {
-      // console.log(`Got menu selection: ${(e.target as HTMLElement).innerText}`);
+      // tslint:disable-next-line:no-console
+      console.log(`Problem menu selection: ${(e.target as HTMLElement).innerText}`);
     };
     return (
       <Menu>
-        {problems.map( p => <MenuItem key={key++} text={p.title} onClick={handleMenuItem} />)}
+        {menuList.map( menuItem => <MenuItem key={key++} text={menuItem} onClick={handleMenuItem} />)}
       </Menu>
     );
   }

@@ -73,6 +73,7 @@ interface User {
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
   portalClasses?: PortalClass[];
+  portalProblems?: string[];
 }
 
 export interface StudentUser extends User {
@@ -400,35 +401,39 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
                     return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
                       .then((portalClasses) => {
+                        return getPortalActivities(portalJWT.user_type, portalJWT.uid,
+                            portalJWT.domain, rawPortalJWT, urlParams)
+                          .then((portalProblems) => {
+                            const uidAsString = `${portalJWT.uid}`;
+                            let authenticatedUser: AuthenticatedUser | undefined;
+                            if (portalJWT.user_type === "learner") {
+                              authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                            }
+                            else {
+                              authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
+                            }
 
-                        const uidAsString = `${portalJWT.uid}`;
-                        let authenticatedUser: AuthenticatedUser | undefined;
-                        if (portalJWT.user_type === "learner") {
-                          authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                        }
-                        else {
-                          authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                        }
-
-                        if (authenticatedUser) {
-                          authenticatedUser.portalJWT = portalJWT;
-                          authenticatedUser.rawPortalJWT = rawPortalJWT;
-                          authenticatedUser.firebaseJWT = firebaseJWT;
-                          authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                          authenticatedUser.id = uidAsString;
-                          authenticatedUser.portal = portal;
-                          authenticatedUser.portalClasses = portalClasses;
-
-                          getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
-                          .then((problemId) => {
                             if (authenticatedUser) {
-                              resolve({authenticatedUser, classInfo, problemId});
+                              authenticatedUser.portalJWT = portalJWT;
+                              authenticatedUser.rawPortalJWT = rawPortalJWT;
+                              authenticatedUser.firebaseJWT = firebaseJWT;
+                              authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                              authenticatedUser.id = uidAsString;
+                              authenticatedUser.portal = portal;
+                              authenticatedUser.portalClasses = portalClasses;
+                              authenticatedUser.portalProblems = portalProblems;
+
+                              getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
+                              .then((problemId) => {
+                                if (authenticatedUser) {
+                                  resolve({authenticatedUser, classInfo, problemId});
+                                }
+                              });
+                            }
+                            else {
+                              reject("Current user not found in class roster");
                             }
                           });
-                        }
-                        else {
-                          reject("Current user not found in class roster");
-                        }
                       });
                   })
                 .catch(reject);
@@ -444,6 +449,37 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         }
       })
       .catch(reject);
+  });
+};
+
+const getPortalActivities = (
+    userType: string,
+    userId: number,
+    domain: string,
+    rawPortalJWT: any,
+    urlParams?: QueryParams): Promise<string[] | undefined> => {
+  return new Promise<string[] | undefined>((resolve, reject) => {
+    if (userType === "teacher" && urlParams && urlParams.class) {
+      superagent
+      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const classId = (urlParams.class!).split("/classes/").pop();
+          const problemUrls: string[] = res.body
+            .filter( (activity: any) => `${activity.clazz_id}` === classId)
+            .map( (activityInClass: any) => activityInClass.activity_url )
+            .filter( (url: string) => /^https:\/\/collaborative-learning/.test(url))
+            .map( (activityUrl: any) => activityUrl.match(/\?problem=(.+)/)[1]);
+          resolve((problemUrls.length > 0) ? problemUrls : undefined);
+        }
+      });
+    }
+    else {
+      resolve(undefined);
+    }
   });
 };
 

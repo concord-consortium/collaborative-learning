@@ -24,7 +24,8 @@ export const UserModel = types
     latestGroupId: types.maybe(types.string),
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
-    portalClasses: types.array(PortalClass)
+    portalClasses: types.array(PortalClass),
+    portalProblems: types.array(types.string)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -58,6 +59,11 @@ export const UserModel = types
       if (user.portalClasses) {
         user.portalClasses.forEach( (portalClass) => {
           self.portalClasses.push(portalClass);
+        });
+      }
+      if (user.portalProblems) {
+        user.portalProblems.forEach ( (portalProblem) => {
+          self.portalProblems.push(portalProblem);
         });
       }
     },
