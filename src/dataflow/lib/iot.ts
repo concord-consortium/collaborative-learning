@@ -11,6 +11,8 @@ const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 const OWNER_ID = "123";
 const SEND_INTERVAL = 1;
 
+type RelayValue = 0 | 1;
+
 export enum TopicType {
   hubChannelInfo = "hubChannelInfo",
   hubSensorValues = "hubSensorValues",
@@ -98,8 +100,8 @@ export class IoT {
               hubUpdateTime: Date.now()
             });
             // subscribe to any necessary topics for the new thing
-            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo));
-            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues));
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo), { qos: 1 });
+            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues), { qos: 1 });
             this.requestHubChannelInfo(hubId);
             this.requestThingGroups(hubId);
           }
@@ -137,6 +139,12 @@ export class IoT {
   private requestHubChannelInfo(hubId: string) {
     const topicMessage = JSON.stringify({ command: "req_devices"});
     this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubCommand), topicMessage, { qos: 1 });
+  }
+
+  private controlRelay(hubId: string, relayId: string, value: RelayValue) {
+    const topicObj = { [relayId]: value };
+    const topicMessage = JSON.stringify(topicObj);
+    this.client.publish(this.createTopic(OWNER_ID, hubId, TopicType.hubRelays), topicMessage, { qos: 1 });
   }
 
   private processHubChannelInfoMessage(hubId: string, message: any) {
