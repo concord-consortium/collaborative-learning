@@ -75,9 +75,11 @@ export function uploadProgram(programData: NodeEditor): string {
   return "completed";
 }
 
-export const fetchProgramData = (programId: string, time?: number) => {
-
-  const queryParams = { programId, time };
+export const fetchProgramData = (programId: string, time?: number, endTime?: number) => {
+  // Omitting the time parameter returns all program data from the start
+  // Omitting the endTime returns all data from the start time and now
+  // time and endTime togethercan be passed to specify a range between the start time and endTime
+  const queryParams = { programId, time, endTime };
   const lambda = new AWS.Lambda({ region: "us-east-1", apiVersion: "2015-03-31" });
   const params = {
     FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:fetchProgramData",
