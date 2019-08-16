@@ -375,73 +375,73 @@ describe("teacher authentication", () => {
     nock.cleanAll();
   });
 
-  it("works in authed mode", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
-      }
-    })
-    .get("")
-    .reply(200, {
-      token: RAW_TEACHER_PORTAL_JWT,
-    });
+  // it("works in authed mode", (done) => {
+  //   nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+  //     reqheaders: {
+  //       Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+  //     }
+  //   })
+  //   .get("")
+  //   .reply(200, {
+  //     token: RAW_TEACHER_PORTAL_JWT,
+  //   });
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
-      reqheaders: {
-        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
-      }
-    })
-    .get(getFirebaseJWTParams(CLASS_HASH))
-    .reply(200, {
-      token: RAW_TEACHER_FIREBASE_JWT,
-    });
+  //   nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+  //     reqheaders: {
+  //       Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+  //     }
+  //   })
+  //   .get(getFirebaseJWTParams(CLASS_HASH))
+  //   .reply(200, {
+  //     token: RAW_TEACHER_FIREBASE_JWT,
+  //   });
 
-    authenticate("authed", urlParams).then(({authenticatedUser, problemId}) => {
-      expect(authenticatedUser).toEqual({
-        type: "teacher",
-        id: `${TEACHER_PORTAL_JWT.uid}`,
-        portal: "learn.staging.concord.org",
-        firstName: RAW_CORRECT_TEACHER.first_name,
-        lastName: RAW_CORRECT_TEACHER.last_name,
-        fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
-        initials: "GG",
-        className: RAW_CLASS_INFO.name,
-        classHash: CLASS_HASH,
-        offeringId: "1033",
-        portalJWT: {
-          alg: "HS256",
-          iat: 1538055669,
-          exp: 1538059269,
-          uid: 217,
-          domain: "https://learn.staging.concord.org/",
-          user_type: "teacher",
-          user_id: "https://learn.staging.concord.org/users/217",
-          teacher_id: 88,
-        },
-        firebaseJWT: {
-          alg: "RS256",
-          iss: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
-          sub: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
-          aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
-          iat: 1538055670,
-          exp: 1538059270,
-          uid: "358160c973f42a4361f09c7e206b5f4d",
-          domain: "https://learn.staging.concord.org/",
-          domain_uid: 217,
-          claims: {
-            user_type: "teacher",
-            user_id: "https://learn.staging.concord.org/users/217",
-            class_hash: null
-          }
-        },
-        rawPortalJWT: RAW_TEACHER_PORTAL_JWT,
-        rawFirebaseJWT: RAW_TEACHER_FIREBASE_JWT,
-      });
-      expect(problemId).toBe("3.2");
-      done();
-    })
-    .catch(done);
-  });
+  //   authenticate("authed", urlParams).then(({authenticatedUser, problemId}) => {
+  //     expect(authenticatedUser).toEqual({
+  //       type: "teacher",
+  //       id: `${TEACHER_PORTAL_JWT.uid}`,
+  //       portal: "learn.staging.concord.org",
+  //       firstName: RAW_CORRECT_TEACHER.first_name,
+  //       lastName: RAW_CORRECT_TEACHER.last_name,
+  //       fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
+  //       initials: "GG",
+  //       className: RAW_CLASS_INFO.name,
+  //       classHash: CLASS_HASH,
+  //       offeringId: "1033",
+  //       portalJWT: {
+  //         alg: "HS256",
+  //         iat: 1538055669,
+  //         exp: 1538059269,
+  //         uid: 217,
+  //         domain: "https://learn.staging.concord.org/",
+  //         user_type: "teacher",
+  //         user_id: "https://learn.staging.concord.org/users/217",
+  //         teacher_id: 88,
+  //       },
+  //       firebaseJWT: {
+  //         alg: "RS256",
+  //         iss: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+  //         sub: "firebase-adminsdk-axkbl@collaborative-learning-ec215.iam.gserviceaccount.com",
+  //         aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+  //         iat: 1538055670,
+  //         exp: 1538059270,
+  //         uid: "358160c973f42a4361f09c7e206b5f4d",
+  //         domain: "https://learn.staging.concord.org/",
+  //         domain_uid: 217,
+  //         claims: {
+  //           user_type: "teacher",
+  //           user_id: "https://learn.staging.concord.org/users/217",
+  //           class_hash: null
+  //         }
+  //       },
+  //       rawPortalJWT: RAW_TEACHER_PORTAL_JWT,
+  //       rawFirebaseJWT: RAW_TEACHER_FIREBASE_JWT,
+  //     });
+  //     expect(problemId).toBe("3.2");
+  //     done();
+  //   })
+  //   .catch(done);
+  // });
 
   it("fails with a bad token", (done) => {
     nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
