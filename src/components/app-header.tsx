@@ -87,19 +87,16 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderClassPopover() {
-    // This rendering of the class popover & populating the class menu, see
-    // renderClassMenu(), are placeholders until there's a way to fetch a
-    // list of classes, and, we know a way to switch between them.
     const { user } = this.stores;
     return (
       <Popover data-test="user-class" className="problemMenu"
-        content={this.renderClassMenu()} position={Position.RIGHT_TOP}>
+        content={this.renderClassMenu(user.className)} position={Position.RIGHT_TOP}>
         <Button text={user.className} />
       </Popover>
     );
   }
 
-  private renderClassMenu() {
+  private renderClassMenu(currentClassName: string) {
     const { user } = this.stores;
     let key = 0;
     const handleMenuItem = (e: React.MouseEvent) => {
@@ -107,15 +104,18 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
       console.log(`Class menu selection: ${(e.target as HTMLElement).innerText}`);
     };
     if (user.portalClasses.length <= 0) {
+      // If we don't have a list of classes, populate the menu with with this
+      // class, at least. Otherwise, it makes for an ugly, empty menu.
       return (
         <Menu>
-          <MenuItem key={key++} text={user.className} />
+          <MenuItem key={key++} text={user.className} active={true} />
         </Menu>
       );
     }
     return (
       <Menu>
-        {user.portalClasses.map( c => <MenuItem key={key++} text={c.className} onClick={handleMenuItem} />)}
+        {user.portalClasses.map( c => <MenuItem key={key++} text={c.className}
+        active={c.className === currentClassName} onClick={handleMenuItem} />)}
       </Menu>
     );
   }
@@ -123,14 +123,14 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   private renderProblemPopover() {
     const { problem } = this.stores;
     return (
-      <Popover className="problemMenu" content={this.renderProblemMenu()}
+      <Popover className="problemMenu" content={this.renderProblemMenu(problem.title)}
         position={Position.RIGHT_TOP}>
         <Button text={problem.title} />
       </Popover>
     );
   }
 
-  private renderProblemMenu() {
+  private renderProblemMenu(currentProblemTitle: string) {
     const { unit, user } = this.stores;
     const investigations = unit.investigations;
     const menuList: string[] = [];
@@ -149,10 +149,14 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     const handleMenuItem = (e: React.MouseEvent) => {
       // tslint:disable-next-line:no-console
       console.log(`Problem menu selection: ${(e.target as HTMLElement).innerText}`);
+      // tslint:disable-next-line:max-line-length
+      // const url = "http://localhost:8080/?class=https://learn.staging.concord.org/api/v1/classes/242&classOfferings=https://learn.staging.concord.org/api/v1/offerings&class_id=242&offering=https://learn.staging.concord.org/api/v1/offerings/1192&reportType=offering&token=42044e1062cdc2194c76cabfbd5f4cbd&username=DLoveT";
+      // window.location.replace(url); // Experiment to prove a page reload could work. And it does! --DAL
     };
     return (
       <Menu>
-        {menuList.map( menuItem => <MenuItem key={key++} text={menuItem} onClick={handleMenuItem} />)}
+        {menuList.map( menuItem => <MenuItem key={key++} text={menuItem} onClick={handleMenuItem}
+          disabled={menuItem.indexOf(" -NA-") !== -1} active={menuItem === currentProblemTitle} />)}
       </Menu>
     );
   }
