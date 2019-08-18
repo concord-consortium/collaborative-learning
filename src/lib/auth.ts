@@ -482,8 +482,7 @@ const getPortalProblems = (
               {
                 problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
                 switchUrlLocation:
-                  "http://localhost:8080/" +  // should be local-host or whatever we want as us.
-                  `?class=${urlParams.class}` +
+                  `/?class=${urlParams.class}` +
                   `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
                   `&reportType=${urlParams.reportType}` +
                   `&token=${urlParams.token}`
