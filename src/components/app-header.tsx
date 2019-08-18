@@ -155,8 +155,9 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     });
     const handleMenuItem = (link: string, isActive: boolean) => {
       return ( (e: React.MouseEvent<HTMLElement>) => {
+        const newLink = window.location.origin + link;
         if (link && link !== "" && ! isActive) {
-          window.location.replace(link);
+          window.location.replace(newLink);
         }
       });
     };
