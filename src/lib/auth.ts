@@ -482,7 +482,7 @@ const getPortalProblems = (
               {
                 problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
                 switchUrlLocation:
-                  `/?class=${urlParams.class}` +
+                  `?class=${urlParams.class}` +
                   `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
                   `&reportType=${urlParams.reportType}` +
                   `&token=${urlParams.token}`
