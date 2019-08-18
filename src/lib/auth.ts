@@ -58,6 +58,11 @@ interface PortalClass {
   classUri: string;
 }
 
+interface PortalProblem {
+  problemDesignator: string;   // Dot-separated ordinal values, like, "1.2".
+  switchUrlLocation: string;
+}
+
 interface User {
   id: string;
   portal: string;
@@ -73,7 +78,7 @@ interface User {
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
   portalClasses?: PortalClass[];
-  portalProblems?: string[];
+  portalProblems?: PortalProblem[];
 }
 
 export interface StudentUser extends User {
@@ -401,7 +406,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
                     return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
                       .then((portalClasses) => {
-                        return getPortalActivities(portalJWT.user_type, portalJWT.uid,
+                        return getPortalProblems(portalJWT.user_type, portalJWT.uid,
                             portalJWT.domain, rawPortalJWT, urlParams)
                           .then((portalProblems) => {
                             const uidAsString = `${portalJWT.uid}`;
@@ -452,13 +457,13 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   });
 };
 
-const getPortalActivities = (
+const getPortalProblems = (
     userType: string,
     userId: number,
     domain: string,
     rawPortalJWT: any,
-    urlParams?: QueryParams): Promise<string[] | undefined> => {
-  return new Promise<string[] | undefined>((resolve, reject) => {
+    urlParams?: QueryParams): Promise<PortalProblem[] | undefined> => {
+  return new Promise<PortalProblem[] | undefined>((resolve, reject) => {
     if (userType === "teacher" && urlParams && urlParams.class) {
       superagent
       .get(`${domain}api/v1/offerings/?user_id=${userId}`)
@@ -468,12 +473,24 @@ const getPortalActivities = (
           reject(getErrorMessage(err, res));
         } else {
           const classId = (urlParams.class!).split("/classes/").pop();
-          const problemUrls: string[] = res.body
-            .filter( (activity: any) => `${activity.clazz_id}` === classId)
-            .map( (activityInClass: any) => activityInClass.activity_url )
-            .filter( (url: string) => /^https:\/\/collaborative-learning/.test(url))
-            .map( (activityUrl: any) => activityUrl.match(/\?problem=(.+)/)[1]);
-          resolve((problemUrls.length > 0) ? problemUrls : undefined);
+          const problemsAssignedThisClass =
+            res.body.filter( (activity: any) =>
+              `${activity.clazz_id}` === classId &&
+              /^https:\/\/collaborative-learning/.test(activity.activity_url) );
+          const portalProblems: PortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
+            return (
+              {
+                problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
+                switchUrlLocation:
+                  "http://localhost:8080/" +  // should be local-host or whatever we want as us.
+                  `?class=${urlParams.class}` +
+                  `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
+                  `&reportType=${urlParams.reportType}` +
+                  `&token=${urlParams.token}`
+              }
+            );
+          });
+          resolve((portalProblems.length > 0) ? portalProblems : undefined);
         }
       });
     }

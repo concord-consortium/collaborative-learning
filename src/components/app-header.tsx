@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { Button, ButtonGroup, Popover, Position, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
+import { Button, ButtonGroup, Popover, Position, Menu, MenuItem } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
@@ -133,30 +133,45 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   private renderProblemMenu(currentProblemTitle: string) {
     const { unit, user } = this.stores;
     const investigations = unit.investigations;
-    const menuList: string[] = [];
+    interface IMenuListItem {
+      isAssigned: boolean;
+      title: string;
+      link: string;
+    }
+    const menuList: IMenuListItem[] = [];
     let key = 0;
     investigations.forEach( (investigation) => {
       const problems = investigation.problems;
       problems.forEach( (problem) => {
-        if (user.portalProblems.find( (pid) => pid === `${investigation.ordinal}.${problem.ordinal}`)) {
-          menuList.push(problem.title);
+        const portalProblem = user.portalProblems.find( (pid) =>
+          pid.problemDesignator === `${investigation.ordinal}.${problem.ordinal}`);
+        if (portalProblem) {
+          menuList.push({ isAssigned: true, title: problem.title, link: portalProblem.switchUrlLocation });
         }
         else {
-          menuList.push(problem.title + " -NA-");
+          menuList.push({ isAssigned: false, title: problem.title + " -NA-", link: ""});
         }
       });
     });
-    const handleMenuItem = (e: React.MouseEvent) => {
-      // tslint:disable-next-line:no-console
-      console.log(`Problem menu selection: ${(e.target as HTMLElement).innerText}`);
-      // tslint:disable-next-line:max-line-length
-      // const url = "http://localhost:8080/?class=https://learn.staging.concord.org/api/v1/classes/242&classOfferings=https://learn.staging.concord.org/api/v1/offerings&class_id=242&offering=https://learn.staging.concord.org/api/v1/offerings/1192&reportType=offering&token=42044e1062cdc2194c76cabfbd5f4cbd&username=DLoveT";
-      // window.location.replace(url); // Experiment to prove a page reload could work. And it does! --DAL
+    const handleMenuItem = (link: string, isActive: boolean) => {
+      return ( (e: React.MouseEvent<HTMLElement>) => {
+        if (link && link !== "" && ! isActive) {
+          window.location.replace(link);
+        }
+      });
     };
     return (
       <Menu>
-        {menuList.map( menuItem => <MenuItem key={key++} text={menuItem} onClick={handleMenuItem}
-          disabled={menuItem.indexOf(" -NA-") !== -1} active={menuItem === currentProblemTitle} />)}
+        {
+          menuList.map( menuItem =>
+            <MenuItem key={key++}
+                      text={menuItem.title}
+                      onClick={handleMenuItem(menuItem.link, menuItem.title === currentProblemTitle)}
+                      disabled={! menuItem.isAssigned}
+                      active={menuItem.title === currentProblemTitle}
+            />
+          )
+        }
       </Menu>
     );
   }

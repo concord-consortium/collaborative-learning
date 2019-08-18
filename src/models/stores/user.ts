@@ -12,6 +12,12 @@ export const PortalClass = types.model("PortalClass", {
 });
 export type IPortalClass = typeof PortalClass.Type;
 
+export const PortalProblem = types.model("PortalProblem", {
+  problemDesignator: "",
+  switchUrlLocation: ""
+});
+export type IPortalProblem = typeof PortalProblem.Type;
+
 export const UserModel = types
   .model("User", {
     authenticated: false,
@@ -25,7 +31,7 @@ export const UserModel = types
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClasses: types.array(PortalClass),
-    portalProblems: types.array(types.string)
+    portalProblems: types.array(PortalProblem)
   })
   .actions((self) => ({
     setName(name: string) {
