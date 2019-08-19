@@ -274,11 +274,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           if (hubs.indexOf(chInfo.hubId) === -1) {
             hubs.push(chInfo.hubId);
           }
-          const sensorName = `${chInfo.hubId}_${chInfo.channelId}`;
-          // We don't need more than one of the same sensor in our dataset on the server
-          // sending a duplicate will error in the Lambda
-          if (sensors.indexOf(sensorName) === -1) {
-            sensors.push(sensorName);
+          if (sensors.indexOf(chInfo.channelId) === -1) {
+            // only add sensors once
+            sensors.push(chInfo.channelId);
           }
         }
       } else if (n.name === "Data Storage") {
