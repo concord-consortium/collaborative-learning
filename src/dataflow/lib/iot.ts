@@ -204,7 +204,7 @@ export class IoT {
     if (hub) {
       for (const key in message) {
         if (message.hasOwnProperty(key) && key !== "time") {
-          hub.setHubChannelValue(key, message[key]);
+          hub.setHubChannelValue(key, String(message[key]));
           hub.setHubChannelTime(key, time);
         }
       }
