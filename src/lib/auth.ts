@@ -476,11 +476,12 @@ const getPortalProblems = (
           const problemsAssignedThisClass =
             res.body.filter( (activity: any) =>
               `${activity.clazz_id}` === classId &&
-              /^https:\/\/collaborative-learning/.test(activity.activity_url) );
+              /^https:\/\/collaborative-learning/.test(activity.activity_url) &&
+              activity.activity_url.match(/problem=(.+)/));
           const portalProblems: PortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
             return (
               {
-                problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
+                problemDesignator: activity.activity_url.match(/problem=(.+)/)[1],
                 switchUrlLocation:
                   `?class=${urlParams.class}` +
                   `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
