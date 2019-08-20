@@ -17,7 +17,7 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
-import { uploadProgram } from "../utilities/aws";
+import { uploadProgram, fetchProgramData } from "../utilities/aws";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -77,6 +77,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
+  private programId: string = "";
 
   constructor(props: IProps) {
     super(props);
@@ -417,6 +418,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeRecentValues(n);
       }
     });
+    this.updateGraphDataSet(this.programId);
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
         // we need to abort any current processing and reprocess all
@@ -476,39 +478,31 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (plotControl) {
       (plotControl as any).update();
     }
-
-    if (n.name === "Data Storage") {
-      this.updateGraphDataSet(n);
-    }
   }
 
-  private updateGraphDataSet = (n: Node) => {
-    const recentValuesKey = "recentValues";
-    const recentValues: any = n.data[recentValuesKey];
-    const graphKeys: string[] = [];
-    if (recentValues && recentValues.length) {
-      Object.keys(recentValues[recentValues.length - 1]).forEach((objKey: any) => {
-        graphKeys.push(objKey);
+  private updateGraphDataSet = (programId: string) => {
+    if (this.state.isProgramRunning) {
+      fetchProgramData(programId).then((result: any) => {
+        // make a new dataset
+        const graphDataSet: DataSet = { sequences: [] };
+        if (result.data) {
+          result.data.forEach((timeData: any) => {
+            timeData.values.forEach((value: any, i: number) => {
+              if (graphDataSet.sequences.length < (i + 1)) {
+                // WTD need to get the user-defined sequence name
+                const graphSequence: DataSequence = { name: timeData.blockIds[i], units: "my-units", data: []};
+                graphDataSet.sequences.push(graphSequence);
+              }
+              const pt: DataPoint = { x: 0, y: 0 };
+              pt.x = timeData.time;
+              pt.y = value;
+              graphDataSet.sequences[i].data.push(pt);
+            });
+          });
+          this.setState ({ graphDataSet });
+        }
       });
     }
-    // make a new dataset
-    const graphDataSet: DataSet = { sequences: [] };
-    if (graphKeys && graphKeys.length) {
-      graphKeys.forEach((graphKey: any) => {
-        // make a new sequence
-        const nameKey = graphKey.replace("num", "sequence");
-        const name: any = n.data[nameKey];
-        const graphSequence: DataSequence = { name, units: "my-units", data: []};
-        recentValues.forEach((recVal: any, i: number) => {
-          const pt: DataPoint = { x: 0, y: 0 };
-          pt.x = i;
-          pt.y = recVal[graphKey] ? recVal[graphKey].val : Number.NaN;
-          graphSequence.data.push(pt);
-        });
-        graphDataSet.sequences.push(graphSequence);
-      });
-    }
-    this.setState ({ graphDataSet });
   }
 
   private updateGeneratorNode = (n: Node) => {
