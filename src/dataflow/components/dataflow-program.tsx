@@ -23,6 +23,7 @@ import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
+import { DataflowProgramCover } from "./dataflow-program-cover";
 import { SizeMeProps } from "react-sizeme";
 import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import "./dataflow-program.sass";
@@ -40,6 +41,13 @@ interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
+  onSetProgramRunId: (id: string) => void;
+  programId: string;
+  onSetProgramStartTime: (time: number) => void;
+  programStartTime: number;
+  onSetProgramEndTime: (time: number) => void;
+  programEndTime: number;
+  onSetProgramStartEndTime: (startTime: number, endTime: number) => void;
   programRunTime: number;
   onProgramRunTimeChange: (programRunTime: number) => void;
   programZoom?: ProgramZoomType;
@@ -80,7 +88,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
           <DataflowProgramTopbar
             onRunProgramClick={this.runProgram}
-            onStopProgramClick={this.stopProgram}
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
@@ -94,11 +101,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 onNodeCreateClick={this.addNode}
                 onDeleteClick={this.deleteSelectedNodes}
                 isDataStorageDisabled={this.state.disableDataStorage}
+                disabled={this.state.isProgramRunning}
               />
               : null
             }
             <div className="full">
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+              { this.state.isProgramRunning ?
+                <DataflowProgramCover
+                  onStopProgramClick={this.stopProgram}
+                />
+                : null
+              }
             </div>
           </div>
         </div>
@@ -243,7 +257,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
+      const isProgramRunning = this.isProgramRunning();
+      this.setState({isProgramRunning});
     })();
+  }
+
+  private isProgramRunning = () => {
+    return (Boolean(this.props.programId) && this.props.programEndTime > Date.now());
   }
 
   private runProgram = () => {
@@ -252,6 +272,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({isProgramRunning: true});
   }
   private stopProgram = () => {
+    const programEndTime = Date.now();
+    this.props.onSetProgramEndTime(programEndTime);
     this.setState({isProgramRunning: false});
   }
   private setProgramRunTime = (time: number) => {
@@ -260,7 +282,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private generateProgramData = () => {
     const programName = "dataflow-program-" + Date.now();
     let interval: number =  1;
-    const newTimestamp = Date.now() + (1000 * this.props.programRunTime);
+    const programStartTime = Date.now();
+    const programEndTime = programStartTime + (1000 * this.props.programRunTime);
 
     const hubs: string[] = [];
     const sensors: string[] = [];
@@ -300,7 +323,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const programData = {
       program: {
-        endTime: newTimestamp,
+        endTime: programEndTime,
         hubs,
         program: editedProgram,
         programId: programName,
@@ -308,6 +331,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensors
       }
     };
+
+    this.props.onSetProgramRunId(programName);
+    this.props.onSetProgramStartEndTime(programStartTime, programEndTime);
+
     return programData;
   }
 
@@ -383,6 +410,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
+    this.updateRunState();
   }
 
   private updateNodeChannelInfo = (n: Node) => {
@@ -448,6 +476,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);
+      }
+    }
+  }
+
+  private updateRunState = () => {
+    if (this.state.isProgramRunning) {
+      if (Date.now() >= this.props.programEndTime) {
+        this.setState({isProgramRunning: false});
       }
     }
   }

@@ -7,6 +7,7 @@ interface IProps {
   onNodeCreateClick: (type: string) => void;
   onDeleteClick: () => void;
   isDataStorageDisabled: boolean;
+  disabled: boolean;
 }
 
 export class DataflowProgramToolbar extends React.Component<IProps, {}> {
@@ -30,7 +31,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
     const handleAddNodeButtonClick = () => { this.props.onNodeCreateClick(nodeType); };
     return (
       <button
-        disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled}
+        disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
         key={i}
         onClick={handleAddNodeButtonClick}
       >

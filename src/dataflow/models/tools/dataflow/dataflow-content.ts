@@ -22,6 +22,9 @@ export const DataflowContentModel = types
   .model("DataflowTool", {
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
     program: "",
+    programRunId: "",
+    programStartTime: 0,
+    programEndTime: 0,
     programRunTime: DEFAULT_PROGRAM_TIME,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
@@ -37,6 +40,19 @@ export const DataflowContentModel = types
     },
     setProgramRunTime(runTime: number) {
       self.programRunTime = runTime;
+    },
+    setProgramRunId(id: string) {
+      self.programRunId = id;
+    },
+    setProgramStartEndTime(startTime: number, endTime: number) {
+      self.programStartTime = startTime;
+      self.programEndTime = endTime;
+    },
+    setProgramStartTime(startTime: number) {
+      self.programStartTime = startTime;
+    },
+    setProgramEndTime(endTime: number) {
+      self.programEndTime = endTime;
     },
     setProgramZoom(dx: number, dy: number, scale: number) {
       self.programZoom.dx = dx;
