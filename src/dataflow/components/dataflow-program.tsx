@@ -116,7 +116,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
-              { this.state.isProgramRunning && false ?
+              { this.state.isProgramRunning ?
                 <DataflowProgramCover
                   onStopProgramClick={this.stopProgram}
                 />
