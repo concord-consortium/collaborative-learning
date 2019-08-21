@@ -267,6 +267,9 @@ export const ProgramRunTimes: ProgramRunTime[] = [
     text: "1 Hour",
     val: 3600
   },
+  // WTD disable these run times until we can enforce a minimum save-data interval
+  // otherwise we risk flooding the server with data while testing, demoing, etc.
+  /*
   {
     text: "1 Day",
     val: 86400
@@ -275,4 +278,5 @@ export const ProgramRunTimes: ProgramRunTime[] = [
     text: "30 Days",
     val: 2592000
   },
+  */
 ];
