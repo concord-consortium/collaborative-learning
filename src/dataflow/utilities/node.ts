@@ -209,11 +209,6 @@ export const NodeGeneratorTypes = [
     icon: "icon-triangle-generator"
   },
   {
-    name: "random walk",
-    method: (t: number, p: number, a: number, v: number) => Math.random() > .5 ? v + 1 * a : v - 1 * a,
-    icon: "icon-random-walk-generator"
-  },
-  {
     name: "noise",
     method: (t: number, p: number, a: number, v: number) => Math.random() * a,
     icon: "icon-noise-generator"
