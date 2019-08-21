@@ -43,7 +43,7 @@ interface IProps extends SizeMeProps {
   program?: string;
   onProgramChange: (program: any) => void;
   onSetProgramRunId: (id: string) => void;
-  programId: string;
+  programRunId: string;
   onSetProgramStartTime: (time: number) => void;
   programStartTime: number;
   onSetProgramEndTime: (time: number) => void;
@@ -77,7 +77,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
-  private programId: string = "";
 
   constructor(props: IProps) {
     super(props);
@@ -117,7 +116,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
-              { this.state.isProgramRunning ?
+              { this.state.isProgramRunning && false ?
                 <DataflowProgramCover
                   onStopProgramClick={this.stopProgram}
                 />
@@ -275,12 +274,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
       const isProgramRunning = this.isProgramRunning();
-      this.setState({isProgramRunning});
+      if (isProgramRunning) {
+        this.setState({isProgramRunning: true, showGraph: true});
+      }
     })();
   }
 
   private isProgramRunning = () => {
-    return (Boolean(this.props.programId) && this.props.programEndTime > Date.now());
+    return (Boolean(this.props.programRunId) && this.props.programEndTime > Date.now());
   }
 
   private runProgram = () => {
@@ -418,7 +419,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeRecentValues(n);
       }
     });
-    this.updateGraphDataSet(this.programId);
+    this.updateGraphDataSet();
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
         // we need to abort any current processing and reprocess all
@@ -480,9 +481,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private updateGraphDataSet = (programId: string) => {
-    if (this.state.isProgramRunning) {
-      fetchProgramData(programId).then((result: any) => {
+  private updateGraphDataSet = () => {
+    if (this.state.isProgramRunning && this.props.programRunId) {
+      fetchProgramData(this.props.programRunId).then((result: any) => {
         // make a new dataset
         const graphDataSet: DataSet = { sequences: [] };
         if (result.data) {
@@ -526,7 +527,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateRunState = () => {
     if (this.state.isProgramRunning) {
       if (Date.now() >= this.props.programEndTime) {
-        this.setState({isProgramRunning: false});
+        this.setState({isProgramRunning: false, showGraph: false});
       }
     }
   }
