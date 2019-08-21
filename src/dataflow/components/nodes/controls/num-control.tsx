@@ -26,6 +26,12 @@ export class NumControl extends Rete.Control {
     const handleBlur = (onBlur: any) => {
       return (e: any) => { onBlur(e.target.value); };
     };
+    const handleKeyPress = (e: any) => {
+      if (e.key === "Enter") {
+        e.currentTarget.blur();
+      }
+    };
+
     this.component = (compProps: { readonly: any,
                                    value: any;
                                    inputValue: any;
@@ -44,6 +50,7 @@ export class NumControl extends Rete.Control {
             ref={inputRef}
             type={"text"}
             value={compProps.inputValue}
+            onKeyPress={handleKeyPress}
             onChange={handleChange(compProps.onChange)}
             onBlur={handleBlur(compProps.onBlur)} />
         </div>
