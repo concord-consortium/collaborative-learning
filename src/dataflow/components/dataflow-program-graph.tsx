@@ -97,11 +97,12 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   private chartDataStacked() {
     const chartDataSets: ChartDataSets[] = this.chartDataSets();
     const stackedCharts: ChartData[] = [];
+    const numValues = chartDataSets && chartDataSets[0] && chartDataSets[0].data ? chartDataSets[0].data.length : 0;
     chartDataSets.forEach( (chartDataSet) => {
       const chartDataSetStacked: ChartDataSets[] = [];
       chartDataSetStacked.push(chartDataSet);
       const chartData: ChartData = {
-        labels: Array.apply(null, {length: MAX_NODE_VALUES}).map(Number.call, Number),
+        labels: Array.apply(null, {length: numValues}).map(Number.call, Number),
         datasets: chartDataSetStacked
       };
       stackedCharts.push(chartData);
@@ -111,8 +112,9 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
 
   private chartDataOverlapped() {
     const chartDataSets: ChartDataSets[] = this.chartDataSets();
+    const numValues = chartDataSets && chartDataSets[0] && chartDataSets[0].data ? chartDataSets[0].data.length : 0;
     const chartData: ChartData = {
-      labels: Array.apply(null, {length: MAX_NODE_VALUES}).map(Number.call, Number),
+      labels: Array.apply(null, {length: numValues}).map(Number.call, Number),
       datasets: chartDataSets
     };
     return chartData;
