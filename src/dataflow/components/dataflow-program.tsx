@@ -93,8 +93,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               <DataflowProgramToolbar
                 onNodeCreateClick={this.addNode}
                 onDeleteClick={this.deleteSelectedNodes}
-                onResetClick={this.resetNodes}
-                onClearClick={this.clearProgram}
                 isDataStorageDisabled={this.state.disableDataStorage}
               />
               : null

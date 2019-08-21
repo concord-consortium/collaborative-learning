@@ -6,8 +6,6 @@ import "./dataflow-program-toolbar.sass";
 interface IProps {
   onNodeCreateClick: (type: string) => void;
   onDeleteClick: () => void;
-  onResetClick: () => void;
-  onClearClick: () => void;
   isDataStorageDisabled: boolean;
 }
 
@@ -24,8 +22,6 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
           ))
         }
         <button onClick={this.props.onDeleteClick}>Delete</button>
-        <button onClick={this.props.onResetClick}>Reset</button>
-        <button onClick={this.props.onClearClick}>Clear</button>
       </div>
     );
   }
