@@ -110,7 +110,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return this.renderProblemTitleBar(hideButtons);
     }
     if (document.isPersonal) {
-      return this.renderPersonalDocumentTitleBar();
+      return this.renderPersonalDocumentTitleBar(hideButtons);
     }
     if (document.isLearningLog) {
       return this.renderLearningLogTitleBar(hideButtons);
@@ -164,11 +164,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderPersonalDocumentTitleBar() {
+  private renderPersonalDocumentTitleBar(hideButtons?: boolean) {
     const {document} = this.props;
     return (
       <div className="personal-document titlebar">
         <div className="title" data-test="personal-doc-title">{document.title}</div>
+        <div className="actions">
+          {!hideButtons &&
+            <div className="actions">
+              <PublishButton dataTestName="personal-document-publish-icon"
+              onClick={this.handlePublishPersonalDocument} />
+            </div>
+          }
+        </div>
       </div>
     );
   }
@@ -419,6 +427,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { db, ui } = this.stores;
     db.publishLearningLog(this.props.document)
       .then(() => ui.alert("Your document was published.", "Learning Log Published"));
+  }
+
+  private handlePublishPersonalDocument = () => {
+    const { db, ui } = this.stores;
+    db.publishDocument(this.props.document)
+      .then(() => ui.alert("Your document was published.", "Personal Document Published"));
   }
 
   private getSupportsWithIndices() {
