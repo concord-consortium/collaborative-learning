@@ -117,8 +117,7 @@ export class Logger {
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
     const parameters = {
       documentKey: document.key,
-      documentType: document.type,
-      section: document.sectionId
+      documentType: document.type
     };
     Logger.log(event, parameters);
   }
@@ -167,17 +166,6 @@ export class Logger {
   ): LogMessage {
     const {user, ui, documents} = this.stores;
 
-    // If params doesn't already specify a section, see if we know what section the user is in.
-    // Move section to top level
-    let section = parameters && parameters.section;
-    if (!section && ui.sectionWorkspace.primaryDocumentKey) {
-      const primaryDocument = documents.getDocument(ui.sectionWorkspace.primaryDocumentKey);
-      if (primaryDocument && primaryDocument.sectionId) {
-        section = primaryDocument.sectionId;
-      }
-    }
-    if (parameters) delete parameters.section;
-
     const logMessage: LogMessage = {
       application: applicationName,
       username:  user.id,
@@ -186,7 +174,6 @@ export class Logger {
       appMode: this.stores.appMode,
       investigation: this.investigationTitle,
       problem: this.problemTitle,
-      section,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
       event,
       method,
@@ -206,7 +193,6 @@ export class Logger {
       return {
         type: document.type,
         key: document.key,
-        section: document.sectionId,
         uid: document.uid
       };
     } else {

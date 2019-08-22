@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, DocumentType, SectionDocument } from "../document/document";
+import { DocumentModel, DocumentModelType, DocumentType, ProblemDocument } from "../document/document";
 import { ClassModelType } from "./class";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 
@@ -26,17 +26,15 @@ export const DocumentsModel = types
       byType,
       byTypeForUser,
 
-      getSectionDocument(userId: string, sectionId: string) {
+      getProblemDocument(userId: string) {
         return self.all.find((document) => {
-          return (document.type === SectionDocument) && (document.uid === userId) && (document.sectionId === sectionId);
+          return (document.type === ProblemDocument) && (document.uid === userId);
         });
       },
 
-      getSectionDocumentsForGroup(sectionId: string, groupId: string) {
+      getProblemDocumentsForGroup(groupId: string) {
         return self.all.filter((document) => {
-          return (document.type === SectionDocument) &&
-                 (document.sectionId === sectionId) &&
-                 (document.groupId === groupId);
+          return (document.type === ProblemDocument) && (document.groupId === groupId);
         });
       },
 
@@ -61,10 +59,9 @@ export const DocumentsModel = types
       },
 
       // Returns the most recently published docs for the given section per user, sorted by name
-      getLatestPublicationsForSection(sectionId: string, clazz: ClassModelType) {
+      getLatestPublications(clazz: ClassModelType) {
         const latestPublications: DocumentModelType[] = [];
         byType("publication")
-          .filter((publication) => publication.sectionId === sectionId)
           .forEach((publication) => {
             const uid = publication.uid;
             const latestIndex = latestPublications.findIndex((pub) => pub.uid === uid);

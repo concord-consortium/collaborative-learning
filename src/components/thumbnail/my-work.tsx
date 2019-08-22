@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
-import { DocumentDragKey, SectionDocument, DocumentModelType } from "../../models/document/document";
+import { DocumentDragKey, ProblemDocument, DocumentModelType } from "../../models/document/document";
 
 interface IProps extends IBaseProps {
   scale: number;
@@ -15,22 +15,17 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const {documents, user} = this.stores;
-    const sections = documents.byTypeForUser(SectionDocument, user.id);
-    if (sections.length === 0) {
-      return null;
-    }
+    const userDocs = documents.byTypeForUser(ProblemDocument, user.id);
+    if (userDocs.length === 0) return null;
     return (
       <div className="my-work">
         <div className="header">My Work</div>
         <div className="list">
-          {sections.map((document) => {
-            const section = this.stores.problem.getSectionById(document.sectionId!);
-            const title = section ? section.title : undefined;
+          {userDocs.map((document) => {
             return (
               <div
                 className="list-item"
-                key={document.sectionId}
-                title={title}
+                key={document.key}
                 data-test="my-work-list-items"
               >
                 <div
@@ -45,7 +40,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
                   </div>
                 </div>
                 <div className="info">
-                  {title}
+                  {null}
                 </div>
               </div>
             );
@@ -57,7 +52,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
 
   private handleDocumentClicked = (document: DocumentModelType) => {
     const {ui} = this.stores;
-    const {sectionWorkspace, learningLogWorkspace} = ui;
+    const {problemWorkspace, learningLogWorkspace} = ui;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (ui.bottomNavExpanded) {
         if (learningLogWorkspace.primaryDocumentKey) {
@@ -69,7 +64,7 @@ export class MyWorkComponent extends BaseComponent<IProps, {}> {
         }
       }
       else {
-        sectionWorkspace.setAvailableDocument(document);
+        problemWorkspace.setAvailableDocument(document);
         ui.contractAll();
       }
     };

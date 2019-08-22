@@ -22,27 +22,17 @@ let tableToolTile = new TableToolTile;
 
 context('single student functional test',()=>{
     describe('Left nav tabs open and close',()=>{
-        it('will open canvases from left nav tabs', ()=>{
-            let titleArr = [], i=0;
-
+        it('verify left nav tabs open and switch contents', ()=>{
             leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
-                titleArr.push($tab.text());
-            }).then(($tab)=> {
-                for (i = 0; i < $tab.length - 1; i++) {
-                    let title = $tab.text;
-                    cy.get('#leftNavTab' + i).click({force:true});
-                        leftNav.getOpenToWorkspaceButton(i).should('contain', titleArr[i]).click({force: true});
-                            canvas.getCanvasTitle().should('contain', titleArr[i]);
-                }
+                cy.get('#leftNavTab' + index).click({force:true});
+                cy.get('#leftNavTab' + index).should('have.class', 'active')
+                cy.log("i-after: "+index)
             })
+            cy.get('.left-nav .tab').last().click({force:true});//close left nav tabs
         })
     })
 
     describe('test header elements', function(){
-        it('verifies header title appears correctly', function(){
-            leftNav.openToWorkspace('Introduction');
-            canvas.getCanvasTitle().should('contain','Introduction');
-        });
         it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
             //1-up view has 4-up button visible and 1-up canvas
             canvas.getFourUpViewToggle().should('be.visible');
@@ -109,24 +99,20 @@ context('single student functional test',()=>{
         });
     });
     context('save and restore of canvas', function(){
-        let canvas1='Initial Challenge';
-        let canvas2='Introduction';
+        let canvas1='Document 1';
+        let canvas2='Document 2';
         describe('verify that canvas is saved from various locations', function(){
             it('will restore from My Work tab', function() {
-                //TODO need to figure out why the page object commands do not work for opening Introduction canvas
-
                 // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
-                leftNav.openToWorkspace(canvas1);
-                canvas.getCanvasTitle().should('contain',canvas1);
-                leftNav.openToWorkspace(canvas2);
-                canvas.getCanvasTitle().should('contain',canvas2);
+
                 rightNav.openMyWorkTab();
-                rightNav.openMyWorkAreaCanvasItem(canvas1);
-                canvas.getCanvasTitle().should('contain', canvas1);
+                rightNav.openMyWorkAreaCanvasItem();//canvas1);
+                //Keeping these lines for when students have more than one document
+                // canvas.getCanvasTitle().should('contain', canvas1);
                 // rightNav.closeMyWorkTab();
-                rightNav.openMyWorkTab();
-                rightNav.openMyWorkAreaCanvasItem(canvas2);
-                canvas.getCanvasTitle().should('contain', canvas2);
+                // rightNav.openMyWorkTab();
+                // rightNav.openMyWorkAreaCanvasItem(canvas2);
+                // canvas.getCanvasTitle().should('contain', canvas2);
 
                 textToolTile.getTextTile().should('exist');
                 graphToolTile.getGraphTile().first().should('exist');
@@ -136,16 +122,28 @@ context('single student functional test',()=>{
             });
         });
         describe('publish canvas', ()=>{
-            it('verify restore of published canvas', ()=>{
+            it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
                 canvas.publishCanvas();
-                leftNav.openToWorkspace(canvas1); //just to differentiate from right canvas when viewing published work
                 rightNav.openClassWorkTab()
-                rightNav.openClassWorkAreaCanvasItem(canvas2);
-                canvas.getRightSideDocumentContent().find('.text-tool').should('exist');
-                canvas.getRightSideDocumentContent().find('.geometry-content').should('exist');
-                canvas.getRightSideDocumentContent().find('.drawing-tool').should('exist');
-                canvas.getRightSideDocumentContent().find('.image-tool').should('exist');
-                canvas.getRightSideDocumentContent().find('.neo-codap-case-table').should('exist');
+                rightNav.openClassWorkSections();
+                rightNav.getAllClassWorkAreaCanvasItems().should('have.length',1)
+            })
+            it('verify student name appears under thumbnail',()=>{
+                cy.get('[data-test=user-name]').then(($el)=>{
+                    var user = $el.text();
+                    rightNav.getAllClassWorkAreaCanvasItems().first().find('.info div').should('contain',user);
+                })
+            } )
+            it('verify restore of published canvas', ()=>{
+                cy.get('[data-test=user-name]').then(($el)=>{
+                    var user = $el.text();
+                    rightNav.openClassWorkAreaCanvasItem(user);
+                })
+                // canvas.getRightSideDocumentContent().find('.text-tool').should('exist');
+                // canvas.getRightSideDocumentContent().find('.geometry-content').should('exist');
+                // canvas.getRightSideDocumentContent().find('.drawing-tool').should('exist');
+                // canvas.getRightSideDocumentContent().find('.image-tool').should('exist');
+                // canvas.getRightSideDocumentContent().find('.neo-codap-case-table').should('exist');
 
             })
         })

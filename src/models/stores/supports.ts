@@ -33,6 +33,12 @@ export enum SupportItemType {
 
 export type TeacherSupportSectionTarget = SectionType | AllSectionType;
 
+export interface ISupportTarget {
+  sectionId?: SectionType;
+  groupId?: string;
+  userId?: string;
+}
+
 export const ClassAudienceModel = types
   .model("ClassAudienceModel", {
     type: types.optional(types.literal(AudienceEnum.class), AudienceEnum.class),
@@ -85,13 +91,13 @@ export const TeacherSupportModel = types
           : allSectionInfo.title;
       },
 
-      showForUserProblem(section: SectionType, groupId?: string, userId?: string) {
+      showForUserProblem(target: ISupportTarget) {
         const isUndeleted = !self.deleted;
         const isForSection = self.type === SupportItemType.problem
-          || self.type === SupportItemType.section && self.sectionId === section;
+          || self.type === SupportItemType.section && self.sectionId === target.sectionId;
         const isForUser = self.audience.type === AudienceEnum.class
-          || self.audience.type === AudienceEnum.group && self.audience.identifier === groupId
-          || self.audience.type === AudienceEnum.user && self.audience.identifier === userId;
+          || self.audience.type === AudienceEnum.group && self.audience.identifier === target.groupId
+          || self.audience.type === AudienceEnum.user && self.audience.identifier === target.userId;
 
         return isUndeleted && isForSection && isForUser;
       }
@@ -138,16 +144,17 @@ export const SupportsModel = types
         .concat(self.userSupports);
     },
 
-    getSupportsForUserProblem(sectionId: SectionType, groupId?: string, userId?: string): SupportItemModelType[] {
-        const curricularSupports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
+    getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+        const { sectionId } = target;
+        const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
           return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
         });
 
         const teacherSupports = self.teacherSupports.filter(support => {
-          return support.showForUserProblem(sectionId, groupId, userId);
+          return support.showForUserProblem(target);
         });
 
-        return curricularSupports.concat(teacherSupports);
+        return supports.concat(teacherSupports);
     }
   }))
   .actions((self) => {

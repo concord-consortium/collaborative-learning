@@ -6,7 +6,7 @@ import { RightNavComponent } from "../../components/navigation/right-nav";
 import { BottomNavComponent } from "../../components/navigation/bottom-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentDragKey, DocumentModelType, DocumentModel, SectionDocument } from "../../models/document/document";
+import { DocumentDragKey, DocumentModelType, DocumentModel, ProblemDocument } from "../../models/document/document";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 
 import "./document-workspace.sass";
@@ -21,11 +21,15 @@ interface IProps extends IBaseProps {
 interface GhostDocumentMap {
   [key: string]: DocumentModelType;
 }
-const ghostSectionDocuments: GhostDocumentMap = {};
+const ghostProblemDocuments: GhostDocumentMap = {};
 
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
+
+  public componentDidMount() {
+    this.guaranteePrimaryDocument();
+  }
 
   public render() {
     const { unit } = this.stores;
@@ -40,19 +44,29 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private async guaranteePrimaryDocument() {
+    const { db, ui: { problemWorkspace } } = this.stores;
+    if (!problemWorkspace.primaryDocumentKey) {
+      const problemDocument = await db.guaranteeOpenProblemDocument();
+      if (problemDocument) {
+        problemWorkspace.setPrimaryDocument(problemDocument);
+      }
+    }
+  }
+
   private renderDocuments(isGhostUser: boolean) {
     const {documents, ui, unit} = this.stores;
-    const {sectionWorkspace} = ui;
-    const primaryDocument = this.getPrimaryDocument(sectionWorkspace.primaryDocumentKey);
-    const comparisonDocument = sectionWorkspace.comparisonDocumentKey
-                               && documents.getDocument(sectionWorkspace.comparisonDocumentKey);
+    const {problemWorkspace} = ui;
+    const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
+    const comparisonDocument = problemWorkspace.comparisonDocumentKey
+                               && documents.getDocument(problemWorkspace.comparisonDocumentKey);
     const toolbar = unit && getSnapshot(unit.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
-    if (sectionWorkspace.comparisonVisible) {
+    if (problemWorkspace.comparisonVisible) {
       return (
         <div onClick={this.handleClick}>
           {this.renderDocument(
@@ -60,7 +74,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
             "primary",
             <DocumentComponent
               document={primaryDocument}
-              workspace={sectionWorkspace}
+              workspace={problemWorkspace}
               toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
@@ -69,7 +83,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           {this.renderDocument("right-workspace", "comparison", comparisonDocument
               ? <DocumentComponent
                   document={comparisonDocument}
-                  workspace={sectionWorkspace}
+                  workspace={problemWorkspace}
                   readOnly={true}
                   side="comparison"
                   isGhostUser={isGhostUser}
@@ -84,7 +98,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               "primary",
               <DocumentComponent
                 document={primaryDocument}
-                workspace={sectionWorkspace}
+                workspace={problemWorkspace}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -132,15 +146,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleDrop = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
       const {ui, documents} = this.stores;
-      const {sectionWorkspace} = ui;
+      const {problemWorkspace} = ui;
       const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
       const document = documentKey ? documents.getDocument(documentKey) : null;
       if (document) {
         if (side === "primary") {
-          sectionWorkspace.setPrimaryDocument(document);
+          problemWorkspace.setPrimaryDocument(document);
         }
         else {
-          sectionWorkspace.setComparisonDocument(document);
+          problemWorkspace.setComparisonDocument(document);
         }
       }
     };
@@ -154,22 +168,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     if (documentKey) {
       const ghostSectionId = parseGhostSectionDocumentKey(documentKey);
       if (ghostSectionId) {
-        if (!ghostSectionDocuments[ghostSectionId]) {
+        if (!ghostProblemDocuments[ghostSectionId]) {
           // Ghosts don't store section documents in Firebase, so we create fake ones here for convenience
-          ghostSectionDocuments[ghostSectionId] = DocumentModel.create({
+          ghostProblemDocuments[ghostSectionId] = DocumentModel.create({
             uid: "ghost",
-            type: SectionDocument,
+            type: ProblemDocument,
             key: ghostSectionId,
-            sectionId: ghostSectionId,
             createdAt: 1,
             content: {},
           });
 
           // The creation of normal documents would start listeners for group documents in the same section
           // Since the creation of ghost documents is faked, listeners must be started manually here
-          this.stores.db.listeners.updateGroupUserSectionDocumentListeners(ghostSectionDocuments[ghostSectionId]);
+          this.stores.db.listeners.updateGroupUserProblemDocumentListeners(ghostProblemDocuments[ghostSectionId]);
         }
-        return ghostSectionDocuments[ghostSectionId];
+        return ghostProblemDocuments[ghostSectionId];
       }
       return this.stores.documents.getDocument(documentKey);
     }

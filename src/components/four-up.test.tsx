@@ -5,11 +5,11 @@ import { configure, mount } from "enzyme";
 
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
-import { DocumentModel, SectionDocument, DocumentModelType } from "../models/document/document";
+import { DocumentModel, ProblemDocument, DocumentModelType } from "../models/document/document";
 import { createStores } from "../models/stores/stores";
 import { CanvasComponent } from "./document/canvas";
 import { UserModel } from "../models/stores/user";
-import { WorkspaceModel, WorkspaceModelType, SectionWorkspace } from "../models/stores/workspace";
+import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "../models/stores/workspace";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
 configure({ adapter: new Adapter() });
@@ -20,12 +20,11 @@ describe("Four Up Component", () => {
 
   beforeEach(() => {
     document = DocumentModel.create({
-      type: SectionDocument,
+      type: ProblemDocument,
       title: "test",
       uid: "1",
       groupId: "1",
       key: "test",
-      sectionId: "introduction",
       createdAt: 1,
       content: {}
     }),
@@ -50,8 +49,7 @@ describe("Four Up Component", () => {
     });
 
     const stores = createStores({ groups, documents });
-    const comp = mount(<FourUpComponent userId={document.uid} groupId={document.groupId!}
-                                        sectionId={document.sectionId!} stores={stores}/>);
+    const comp = mount(<FourUpComponent userId={document.uid} groupId={document.groupId!} stores={stores}/>);
     expect(comp.find(CanvasComponent)).toHaveLength(4);
     expect(comp.find(".member")).toHaveLength(1);
   });
@@ -97,8 +95,7 @@ describe("Four Up Component", () => {
       documents
     });
 
-    const comp = mount(<FourUpComponent userId={user.id} groupId={group.id}
-                                        sectionId={document.sectionId!} stores={stores}/>);
+    const comp = mount(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.

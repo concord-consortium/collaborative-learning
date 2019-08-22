@@ -5,13 +5,14 @@ import { UserStarModel, UserStarModelType } from "../tools/user-star";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
 
-export const SectionDocument = "section";
+export const SectionDocumentDEPRECATED = "section";
+export const ProblemDocument = "problem";
 export const LearningLogDocument = "learningLog";
 export const PublicationDocument = "publication";
 export const LearningLogPublication = "learningLogPublication";
 
 export const DocumentTypeEnum = types.enumeration("type",
-  [SectionDocument, LearningLogDocument, PublicationDocument, LearningLogPublication]);
+  [ProblemDocument, SectionDocumentDEPRECATED, LearningLogDocument, PublicationDocument, LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
 export const DocumentToolEnum = types.enumeration("tool",
@@ -28,7 +29,6 @@ export const DocumentModel = types
     content: DocumentContentModel,
     comments: types.map(TileCommentsModel),
     stars: types.array(UserStarModel),
-    sectionId: types.maybe(types.string),
     groupId: types.maybe(types.string),
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
@@ -36,8 +36,8 @@ export const DocumentModel = types
     changeCount: types.optional(types.number, 0)
   })
   .views(self => ({
-    get isSection() {
-      return (self.type === SectionDocument) || (self.type === PublicationDocument);
+    get isProblem() {
+      return (self.type === ProblemDocument) || (self.type === PublicationDocument);
     },
     get isLearningLog() {
       return (self.type === LearningLogDocument) || (self.type === LearningLogPublication);
