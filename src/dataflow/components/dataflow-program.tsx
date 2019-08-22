@@ -27,6 +27,8 @@ import { DataflowProgramCover } from "./dataflow-program-cover";
 import { SizeMeProps } from "react-sizeme";
 import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./dataflow-program-graph";
+import { DataflowProgramZoom } from "./dataflow-program-zoom";
+
 import "./dataflow-program.sass";
 
 interface NodeNameValuePair {
@@ -116,6 +118,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+              { !this.props.readOnly ?
+                <DataflowProgramZoom
+                  onZoomInClick={this.zoomIn}
+                  onZoomOutClick={this.zoomOut}
+                  disabled={false}
+                />
+                : null
+              }
               { this.state.isProgramRunning ?
                 <DataflowProgramCover
                   onStopProgramClick={this.stopProgram}
@@ -223,12 +233,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
-        const isDoubleClick = source === "dblclick";
-        if (!isDoubleClick) {
-          const { transform } = this.programEditor.view.area;
-          this.props.onZoomChange(transform.x, transform.y, transform.k);
-        }
-        return !isDoubleClick;
+        return false;
       });
 
       this.programEditor.on("translated", node => {
@@ -530,6 +535,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.setState({isProgramRunning: false, showGraph: false});
       }
     }
+  }
+
+  private zoomIn = () => {
+    const { k } = this.programEditor.view.area.transform;
+    this.setZoom(k + .05);
+  }
+
+  private zoomOut = () => {
+    const { k } = this.programEditor.view.area.transform;
+    this.setZoom(k - .05);
+  }
+
+  private setZoom = (zoom: number) => {
+    this.programEditor.view.area.transform = {k: zoom, x: 0, y: 0};
+    this.programEditor.view.area.update();
+    const { transform } = this.programEditor.view.area;
+    this.props.onZoomChange(transform.x, transform.y, transform.k);
   }
 
 }
