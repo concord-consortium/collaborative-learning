@@ -75,6 +75,25 @@ export function uploadProgram(programData: NodeEditor): string {
   return "completed";
 }
 
+export function deleteProgram(endTime: number): string {
+  const lambda = new AWS.Lambda({region: "us-east-1", apiVersion: "2015-03-31"});
+  const params = {
+    FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:deleteDataflowProgram",
+    Payload: JSON.stringify({endTime}),
+    InvocationType: "RequestResponse",
+    LogType: "Tail"
+  };
+  lambda.invoke(params, (error, data) => {
+    if (error) {
+      return("error " +  error);
+    }
+    if (data) {
+      return ("success " + data);
+    }
+  });
+  return "completed";
+}
+
 export const fetchProgramData = (programId: string, time?: number, endTime?: number) => {
   // Omitting the time parameter returns all program data from the start
   // Omitting the endTime returns all data from the start time and now
