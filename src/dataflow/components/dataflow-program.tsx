@@ -17,7 +17,7 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
-import { uploadProgram, fetchProgramData } from "../utilities/aws";
+import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { PlotControl } from "./nodes/controls/plot-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -290,6 +290,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({isProgramRunning: true, showGraph: true});
   }
   private stopProgram = () => {
+    deleteProgram(this.props.programEndTime);
     const programEndTime = Date.now();
     this.props.onSetProgramEndTime(programEndTime);
     this.setState({isProgramRunning: false, showGraph: false});
