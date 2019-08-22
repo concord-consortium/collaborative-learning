@@ -39,7 +39,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 program={program}
                 onProgramChange={this.handleProgramChange}
                 onSetProgramRunId={this.handleSetProgramRunId}
-                programId={programRunId}
+                programRunId={programRunId}
                 onSetProgramStartTime={this.handleSetProgramStartTime}
                 programStartTime={programStartTime}
                 onSetProgramEndTime={this.handleSetProgramEndTime}

@@ -22,7 +22,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
             this.renderAddNodeButton(nt.name, i)
           ))
         }
-        <button onClick={this.props.onDeleteClick}>Delete</button>
+        <button onClick={this.props.onDeleteClick} disabled={this.props.disabled}>Delete</button>
       </div>
     );
   }

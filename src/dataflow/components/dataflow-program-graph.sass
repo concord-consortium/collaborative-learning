@@ -1,0 +1,33 @@
+@import ../../components/vars
+
+.program-graph
+  height: 100%
+  width: 50%
+  padding: 5px 5px 25px 5px
+  border: 2px solid $color7
+
+  .stacked-graph-container
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    height: 100%
+    width: 100%
+
+    .stacked-graph
+      flex: 1
+      width: 100%
+      margin: 5px
+
+  .overlapped-graph-container
+    height: 100%
+    width: 100%
+
+  .graph-button
+    position: absolute
+    bottom: 4px
+    width: 60px
+    &.layout
+      right: 69px
+    &.type
+      right: 4px
