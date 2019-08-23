@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { DocumentModel, SectionDocument, DocumentModelType } from "./document";
+import { DocumentModel, ProblemDocument, DocumentModelType } from "./document";
 import { DocumentContentModel } from "./document-content";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
@@ -9,7 +9,7 @@ describe("document model", () => {
 
   beforeEach(() => {
     document = DocumentModel.create({
-      type: SectionDocument,
+      type: ProblemDocument,
       uid: "1",
       key: "test",
       createdAt: 1,
@@ -20,12 +20,11 @@ describe("document model", () => {
 
   it("uses override values", () => {
     expect(getSnapshot(document)).toEqual({
-      type: SectionDocument,
+      type: ProblemDocument,
       uid: "1",
       key: "test",
       createdAt: 1,
       groupId: undefined,
-      sectionId: undefined,
       title: undefined,
       visibility: "public",
       groupUserConnections: {},

@@ -25,7 +25,6 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
 
 context('Teacher workspace',function(){ //does not have My Work tab and has Teacher in user name
     describe('Check header area for correctness', function(){
-
         it("setup", function(){ //need to setup two groups to verify teacher can switch groups
             cy.setupGroup(studentArr10, qaGroup10); //This publishes canvases to Class Work
             cy.setupGroup(studentArr20, qaGroup20); //This publishes canvases to Class Work
@@ -48,7 +47,6 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             teacherDashboard.getGroupName().should('contain',qaGroup20);
             teacherDashboard.getGroupName().contains(qaGroup10).click();
             teacherDashboard.joinGroup();
-
             header.getGroupName().should('contain','Group '+qaGroup10);
         });
         it('will verify teacher can switch groups', function(){
@@ -56,18 +54,16 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             teacherDashboard.getGroupName().should('contain',qaGroup10);
             teacherDashboard.getGroupName().should('contain',qaGroup20);
             teacherDashboard.getGroupName().contains(qaGroup20).click();
-
             teacherDashboard.joinGroup();
             header.getGroupName().should('contain','Group '+qaGroup20);
         })
     });
-
     describe('Check right nav for correctness', function(){
-       it('will verify that Class Work tab comes up and My Work tab is not visible', function(){
-           rightNav.getClassWorkTab().should('be.visible');
-           rightNav.getClassLogTab().should('be.visible');
-           rightNav.getMyWorkTab().should('not.be.visible');
-       })
+        it('will verify that Class Work tab comes up and My Work tab is not visible', function(){
+            rightNav.getClassWorkTab().should('be.visible');
+            rightNav.getClassLogTab().should('be.visible');
+            rightNav.getMyWorkTab().should('not.be.visible');
+        })
     });
 });
 

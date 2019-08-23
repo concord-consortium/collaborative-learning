@@ -32,7 +32,7 @@ export const UIModel = types
     showDemo: false,
     showDemoCreator: false,
     dialog: types.maybe(UIDialogModel),
-    sectionWorkspace: WorkspaceModel,
+    problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
   })
   .views((self) => ({
@@ -150,9 +150,9 @@ export const UIModel = types
         }
         // class work or log
         else if (document.isPublished) {
-          if (self.sectionWorkspace.primaryDocumentKey) {
-            self.sectionWorkspace.setComparisonDocument(document);
-            self.sectionWorkspace.toggleComparisonVisible({override: true});
+          if (self.problemWorkspace.primaryDocumentKey) {
+            self.problemWorkspace.setComparisonDocument(document);
+            self.problemWorkspace.toggleComparisonVisible({override: true});
           }
           else {
             alert("Please select a primary document first.", "Select Primary Document");
@@ -160,7 +160,7 @@ export const UIModel = types
         }
         // my work
         else {
-          self.sectionWorkspace.setAvailableDocument(document);
+          self.problemWorkspace.setAvailableDocument(document);
           contractAll();
         }
       }

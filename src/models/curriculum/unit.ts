@@ -11,6 +11,7 @@ import { RightNavTabModel } from "../view/right-nav";
 export const UnitModel = types
   .model("Unit", {
     code: "",
+    abbrevTitle: "",
     title: types.string,
     subtitle: "",
     pageTitle: "",

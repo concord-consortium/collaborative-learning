@@ -1,6 +1,6 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "../curriculum/section";
-import { SectionWorkspace, LearningLogWorkspace } from "./workspace";
+import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
 import { ERightNavTab } from "../view/right-nav";
 
@@ -9,8 +9,8 @@ describe("ui model", () => {
 
   beforeEach(() => {
     ui = UIModel.create({
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {
@@ -37,8 +37,8 @@ describe("ui model", () => {
       rightNavExpanded: true,
       showDemoCreator: true,
       error: "test",
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {

@@ -99,7 +99,7 @@ class GraphToolTile{
         cy.get('.geometry-tool .button.duplicate.enabled').click();
     }
     addMovableLine(){
-        cy.get('.geometry-tool .button.movable-line.enabled').click();
+        cy.get('.geometry-tool .button.movable-line.enabled').click({multiple: true});
     }
     addComment(){
         cy.get('.geometry-tool .button.comment.enabled').click();

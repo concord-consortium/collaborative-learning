@@ -3,10 +3,10 @@ import { DocumentModelType } from "../document/document";
 import { SectionModelType } from "../curriculum/section";
 import { LogEventName, Logger } from "../../lib/logger";
 
-export const SectionWorkspace = "section";
+export const ProblemWorkspace = "problem";
 export const LearningLogWorkspace = "learningLog";
 
-export const WorkspaceTypeEnum = types.enumeration("type", [SectionWorkspace, LearningLogWorkspace]);
+export const WorkspaceTypeEnum = types.enumeration("type", [ProblemWorkspace, LearningLogWorkspace]);
 export type WorkspaceType = typeof WorkspaceTypeEnum.Type;
 
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);

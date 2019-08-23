@@ -5,19 +5,20 @@ import "firebase/storage";
 import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBOfferingUserSectionDocument, DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata,
+  DBLearningLog, DBLearningLogPublication, DBPublicationDocumentMetadata, DBPersonalDocumentMetadata,
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
-  DBUserStar } from "./db-types";
-import { DocumentModelType, DocumentModel, DocumentType, SectionDocument, LearningLogDocument, PublicationDocument,
-  LearningLogPublication } from "../models/document/document";
+  DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap, DBPersonalDocument } from "./db-types";
+import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
+        PublicationDocument, LearningLogPublication} from "../models/document/document";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
+import { DocumentsModel } from "../models/stores/documents";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
-import { TileCommentModelType } from "../models/tools/tile-comments";
 import { safeJsonParse } from "../utilities/js-utils";
+import { find } from "lodash";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -199,13 +200,25 @@ export class DB {
     });
   }
 
-  public createSectionDocument(sectionId: string) {
-    return new Promise<DocumentModelType>((resolve, reject) => {
-      this.creatingDocuments.push(sectionId);
+  public async guaranteeOpenProblemDocument() {
+    const {user, documents} = this.stores;
+    const problemDocument = documents.getProblemDocument(user.id);
+    if (problemDocument) return problemDocument;
 
-      const {user, documents, ui} = this.stores;
+    const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
+    const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
+    const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
+                                                                problemDocumentsSnapshot.val();
+    const firstProblemDocument = find(problemDocuments, () => true);
+    if (firstProblemDocument) return this.openProblemDocument(firstProblemDocument.documentKey);
+
+    return this.createProblemDocument();
+  }
+
+  public createProblemDocument() {
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
-      const sectionDocumentRef = this.firebase.ref(this.firebase.getSectionDocumentPath(user, sectionId));
 
       return offeringUserRef.once("value")
         .then((snapshot) => {
@@ -223,74 +236,63 @@ export class DB {
           }
          })
         .then(() => {
-          // check if the section document exists
-          return sectionDocumentRef.once("value")
-            .then((snapshot) => {
-              return snapshot.val() as DBOfferingUserSectionDocument|null;
+          // create the new document
+          return this.createDocument({ type: ProblemDocument })
+            .then(({document, metadata}) => {
+                const newDocument = {
+                  version: "1.0",
+                  self: {
+                    classHash: user.classHash,
+                    offeringId: user.offeringId,
+                    uid: user.id
+                  },
+                  visibility: "private",
+                  documentKey: document.self.documentKey,
+                };
+                const newDocumentRef = this.firebase.ref(
+                                        this.firebase.getProblemDocumentPath(user, document.self.documentKey));
+                return newDocumentRef.set(newDocument).then(() => newDocument);
             });
         })
-        .then((sectionDocument) => {
-          if (sectionDocument) {
-            return sectionDocument;
-          }
-          else {
-            // create the document and section document
-            return this.createDocument(SectionDocument)
-              .then(({document, metadata}) => {
-                  sectionDocument = {
-                    version: "1.0",
-                    self: {
-                      classHash: user.classHash,
-                      offeringId: user.offeringId,
-                      uid: user.id,
-                      sectionId
-                    },
-                    visibility: "private",
-                    documentKey: document.self.documentKey,
-                  };
-                  return sectionDocumentRef.set(sectionDocument).then(() => sectionDocument!);
-              });
-          }
+        .then((newDocument) => {
+          return this.openProblemDocument(newDocument.documentKey);
         })
-        .then((sectionDocument) => {
-          return this.openSectionDocument(sectionDocument.self.sectionId);
-        })
-        .then((sectionDocument) => {
-          documents.add(sectionDocument);
-          this.creatingDocuments.splice(this.creatingDocuments.indexOf(sectionId), 1);
-          return sectionDocument;
+        .then((newDocument) => {
+          documents.add(newDocument);
+          this.creatingDocuments.splice(this.creatingDocuments.indexOf(newDocument.key), 1);
+          return newDocument;
         })
         .then(resolve)
         .catch(reject);
     });
   }
 
-  public openSectionDocument(sectionId: string) {
+  public openProblemDocument(documentKey?: string) {
     const { user } = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      const sectionDocumentRef = this.firebase.ref(this.firebase.getSectionDocumentPath(user, sectionId));
-      return sectionDocumentRef.once("value")
+      const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
+      return problemDocumentsRef.once("value")
         .then((snapshot) => {
-          const sectionDocument: DBOfferingUserSectionDocument|null = snapshot.val();
-          if (!sectionDocument) {
-            throw new Error("Unable to find document in db!");
-          }
-          return sectionDocument;
+          const problemDocuments: DBOfferingUserProblemDocumentMap|null = snapshot.val();
+          const found = find(problemDocuments, (document, key) => !documentKey || (key === documentKey));
+          if (!found) throw new Error(`Unable to find document ${documentKey} in db!`);
+          return found;
         })
-        .then((sectionDocument) => {
-          return this.createDocumentFromSectionDocument(user.id, sectionDocument);
+        .then((problemDocument) => {
+          return this.createDocumentFromProblemDocument(user.id, problemDocument);
         })
-        .then((sectionDocument) => {
-          this.listeners.updateGroupUserSectionDocumentListeners(sectionDocument);
-          this.listeners.monitorSectionDocumentVisibility(sectionDocument);
-          resolve(sectionDocument);
+        .then((problemDocument) => {
+          this.listeners.updateGroupUserProblemDocumentListeners(problemDocument);
+          this.listeners.monitorDocumentVisibility(problemDocument);
+          resolve(problemDocument);
         })
         .catch(reject);
     });
   }
 
-  public createDocument(type: DBDocumentType, content?: string) {
+  public createDocument(params: { type: DBDocumentType, content?: string }) {
+    const { type, content } = params;
     const {user} = this.stores;
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
@@ -308,7 +310,10 @@ export class DB {
       let metadata: DBDocumentMetadata;
 
       switch (type) {
-        case SectionDocument:
+        case PersonalDocument:
+          metadata = {version, self, createdAt, type};
+          break;
+        case ProblemDocument:
           metadata = {version, self, createdAt, type, classHash, offeringId};
           break;
         case LearningLogDocument:
@@ -331,11 +336,43 @@ export class DB {
     });
   }
 
+  public createPersonalDocument(title?: string) {
+    const {documents, user} = this.stores;
+    const docTitle = title || documents.getNextPersonalDocumentTitle();
+
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      return this.createDocument({ type: PersonalDocument })
+        .then(({document, metadata}) => {
+          const {documentKey} = document.self;
+          const personalDoc: DBPersonalDocument = {
+            version: "1.0",
+            self: {
+              documentKey,
+              uid: user.id,
+              classHash: user.classHash
+            },
+            title: docTitle
+          };
+          return this.firebase.ref(this.firebase.getUserPersonalDocPath(user, documentKey)).set(personalDoc)
+                  .then(() => personalDoc);
+        })
+        .then(personalDoc => {
+          Logger.log(LogEventName.CREATE_PERSONAL_DOCUMENT, {
+            title: personalDoc.title
+          });
+
+          return this.createDocumentFromPersonalDocument(personalDoc);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
   public publishDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
     const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument(PublicationDocument, content).then(({document, metadata}) => {
+      this.createDocument({ type: PublicationDocument, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup.users
@@ -353,7 +390,6 @@ export class DB {
           documentKey: document.self.documentKey,
           groupId: userGroup.id,
           userId: user.id,
-          sectionId: documentModel.sectionId!,
           groupUserConnections
         };
 
@@ -370,7 +406,7 @@ export class DB {
     const {user} = this.stores;
     const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument(LearningLogPublication, content).then(({document, metadata}) => {
+      this.createDocument({ type: LearningLogPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getClassPublicationsPath(user)).push();
         const publication: DBLearningLogPublication = {
           version: "1.0",
@@ -413,7 +449,6 @@ export class DB {
           return DocumentModel.create({
             type,
             title,
-            sectionId,
             groupId,
             visibility,
             uid: userId,
@@ -435,7 +470,7 @@ export class DB {
     const {user} = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument(LearningLogDocument)
+      return this.createDocument({ type: LearningLogDocument })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const learningLog: DBLearningLog = {
@@ -511,18 +546,29 @@ export class DB {
     });
   }
 
-  public createDocumentFromSectionDocument(userId: string, sectionDocument: DBOfferingUserSectionDocument) {
-    const {documentKey} = sectionDocument;
-    const {sectionId} = sectionDocument.self;
+  public createDocumentFromProblemDocument(userId: string,
+                                           problemDocument: DBOfferingUserProblemDocument) {
+    const {documentKey} = problemDocument;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
-        type: SectionDocument,
+        type: ProblemDocument,
         userId,
         groupId: group && group.id,
         documentKey,
-        sectionId,
-        visibility: sectionDocument.visibility
+        visibility: problemDocument.visibility
       })
+      .then((document) => {
+        this.listeners.monitorDocumentModel(document);
+        this.listeners.monitorDocumentRef(document);
+        return document;
+      });
+  }
+
+  public createDocumentFromPersonalDocument(personalDocument: DBPersonalDocument) {
+    const {title, self: {uid, documentKey}} = personalDocument;
+    const group = this.stores.groups.groupForUser(uid);
+    const groupId = group && group.id;
+    return this.openDocument({type: PersonalDocument, userId: uid, documentKey, groupId, title})
       .then((document) => {
         this.listeners.monitorDocumentModel(document);
         this.listeners.monitorDocumentRef(document);
@@ -553,8 +599,7 @@ export class DB {
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    const {user} = this.stores;
-    const {groupId, sectionId, groupUserConnections, userId, documentKey} = publication;
+    const {groupId, groupUserConnections, userId, documentKey} = publication;
 
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
@@ -568,7 +613,6 @@ export class DB {
       type: "publication",
       userId,
       groupId,
-      sectionId,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
     });

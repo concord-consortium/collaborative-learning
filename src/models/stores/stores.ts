@@ -8,7 +8,7 @@ import { UnitModelType, UnitModel } from "../curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
-import { LearningLogWorkspace, SectionWorkspace } from "./workspace";
+import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
@@ -55,8 +55,8 @@ export function createStores(params?: ICreateStores): IStores {
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
     ui: params && params.ui || UIModel.create({
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {

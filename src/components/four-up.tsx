@@ -6,22 +6,21 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
 import { CanvasComponent } from "./document/canvas";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
-import { WorkspaceModelType } from "../models/stores/workspace";
+import { GroupUserModelType } from "../models/stores/groups";
 import { IToolApiInterface } from "./tools/tool-tile";
 
 import "./four-up.sass";
 
 interface IProps extends IBaseProps {
-  document?: DocumentModelType;
-  workspace: WorkspaceModelType;
+  userId?: string;
+  groupId?: string;
   isGhostUser?: boolean;
   toolApiInterface?: IToolApiInterface;
 }
 
 interface FourUpUser {
-  doc: DocumentModelType|undefined;
-  initials: string;
-  name: string;
+  user: GroupUserModelType;
+  doc?: DocumentModelType;
 }
 
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
@@ -72,27 +71,31 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
-    const { groups, user, documents } = this.stores;
-    const { workspace, document, isGhostUser, ...others } = this.props;
+    const { groups, documents } = this.stores;
+    const { userId, groupId, isGhostUser, ...others } = this.props;
 
-    const group = groups.groupForUser(user.id);
-    const groupDocuments = group &&
-                           document &&
-                           documents.getSectionDocumentsForGroup(document.sectionId!, group.id);
+    const group = groups.getGroupById(groupId);
+    const groupDocuments = group && groupId &&
+                           documents.getProblemDocumentsForGroup(groupId) || [];
     const groupUsers: FourUpUser[] = group
       ? group.users
-          .filter((groupUser) => groupUser.id !== user.id)
           .map((groupUser) => {
             const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
               return groupDocument.uid === groupUser.id;
             });
             return {
+              user: groupUser,
               doc: groupUserDoc,
-              initials: groupUser.initials,
-              name: groupUser.name
+              initials: groupUser.initials
             };
           })
       : [];
+    // put the primary user's document first (i.e. in the upper-left corner)
+    groupUsers.sort((a, b) => {
+      if (a.user.id === userId) return -1;
+      if (b.user.id === userId) return 1;
+      return 0;
+    });
 
     const groupDoc = (index: number) => {
       return groupUsers[index] && groupUsers[index].doc;
@@ -104,15 +107,6 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       // Don't hide anything from ghost users, and treat unopened documents as private by default
       return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
     };
-
-    // If the user is real, their document should be displayed first
-    if (!isGhostUser) {
-      groupUsers.unshift({
-        doc: document,
-        initials: user.initials,
-        name: user.name
-      });
-    }
 
     const nwCanvas = (
       <CanvasComponent context="four-up-nw" scale={nwCell.scale}
@@ -142,25 +136,25 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
             {nwCanvas}
           </div>
-          {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
+          {groupUsers[0] && <div className="member">{groupUsers[0].user.initials}</div>}
         </div>
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
             {hideCanvas(1) ? this.renderUnshownMessage(groupUsers[1], "ne") : neCanvas}
           </div>
-          {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
+          {groupUsers[1] && <div className="member">{groupUsers[1].user.initials}</div>}
         </div>
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
             {hideCanvas(2) ? this.renderUnshownMessage(groupUsers[2], "se") : seCanvas}
           </div>
-          {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
+          {groupUsers[2] && <div className="member">{groupUsers[2].user.initials}</div>}
         </div>
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
             {hideCanvas(3) ? this.renderUnshownMessage(groupUsers[3], "sw") : swCanvas}
           </div>
-          {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
+          {groupUsers[3] && <div className="member">{groupUsers[3].user.initials}</div>}
         </div>
         <div
           className="horizontal splitter"
@@ -187,7 +181,7 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderUnshownMessage = (groupUser: FourUpUser, location: "ne" | "se" | "sw") => {
-    const groupUserName = groupUser ? groupUser.name : "User";
+    const groupUserName = groupUser ? groupUser.user.name : "User";
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>

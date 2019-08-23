@@ -4,13 +4,14 @@ import { DB } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
-import { DBSectionDocumentsListener } from "./db-section-documents-listener";
+import { DBPersonalDocumentsListener } from "./db-personal-docs-listener";
+import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
+import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
@@ -40,12 +41,13 @@ export class DBListeners {
   private db: DB;
 
   private modelListeners: ModelListeners = {};
-  private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
+  private groupUserProblemDocumentsListeners: UserSectionDocumentListeners = {};
   private documentModelDisposers: DocumentModelDisposers = {};
 
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
-  private sectionDocumentsListener: DBSectionDocumentsListener;
+  private problemDocumentsListener: DBProblemDocumentsListener;
+  private personalDocumentsListener: DBPersonalDocumentsListener;
   private learningLogsListener: DBLearningLogsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
@@ -56,7 +58,8 @@ export class DBListeners {
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
-    this.sectionDocumentsListener = new DBSectionDocumentsListener(db);
+    this.problemDocumentsListener = new DBProblemDocumentsListener(db);
+    this.personalDocumentsListener = new DBPersonalDocumentsListener(db);
     this.learningLogsListener = new DBLearningLogsListener(db);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
@@ -72,7 +75,10 @@ export class DBListeners {
           return this.groupsListener.start();
         })
         .then(() => {
-          return this.sectionDocumentsListener.start();
+          return this.problemDocumentsListener.start();
+        })
+        .then(() => {
+          return this.personalDocumentsListener.start();
         })
         .then(() => {
           return this.learningLogsListener.start();
@@ -105,7 +111,8 @@ export class DBListeners {
 
     this.publicationListener.stop();
     this.learningLogsListener.stop();
-    this.sectionDocumentsListener.stop();
+    this.personalDocumentsListener.stop();
+    this.problemDocumentsListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
   }
@@ -117,7 +124,7 @@ export class DBListeners {
     return this.modelListeners[uniqueKeyForModel];
   }
 
-  public updateGroupUserSectionDocumentListeners(document: DocumentModelType) {
+  public updateGroupUserProblemDocumentListeners(document: DocumentModelType) {
     const { user, groups } = this.db.stores;
     const userGroup = groups.groupForUser(user.id);
     const groupUsers = userGroup && userGroup.users;
@@ -126,43 +133,63 @@ export class DBListeners {
         if (groupUser.id === user.id) {
           return;
         }
-        const currentSectionDocsListener = this.getOrCreateGroupUserSectionDocumentListeners(document, groupUser.id)
+        const currentSectionDocsListener = this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
           .sectionDocsRef;
         if (currentSectionDocsListener) {
           currentSectionDocsListener.off();
         }
-        const groupUserSectionDocsRef = this.db.firebase.ref(
-          this.db.firebase.getSectionDocumentPath(user, document.sectionId, groupUser.id)
+        const groupUserDocsRef = this.db.firebase.ref(
+          this.db.firebase.getProblemDocumentsPath(user, groupUser.id)
         );
-        this.getOrCreateGroupUserSectionDocumentListeners(document, groupUser.id)
-          .sectionDocsRef = groupUserSectionDocsRef;
-        groupUserSectionDocsRef.on("value", this.handleGroupUserSectionDocRef(document));
+        this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
+          .sectionDocsRef = groupUserDocsRef;
+        groupUserDocsRef.on("value", this.handleGroupUserProblemDocRef(document));
       });
     }
   }
 
-  public getOrCreateGroupUserSectionDocumentListeners(document: DocumentModelType, userId: string) {
-    const sectionId = document.sectionId!;
-    if (!this.groupUserSectionDocumentsListeners[sectionId]) {
-      this.groupUserSectionDocumentsListeners[sectionId] = {};
+  public getOrCreateGroupUserProblemDocumentListeners(document: DocumentModelType, userId: string) {
+    const docKey = document.key;
+    if (!this.groupUserProblemDocumentsListeners[docKey]) {
+      this.groupUserProblemDocumentsListeners[docKey] = {};
     }
 
-    if (!this.groupUserSectionDocumentsListeners[sectionId][userId]) {
-      this.groupUserSectionDocumentsListeners[sectionId][userId] = {};
+    if (!this.groupUserProblemDocumentsListeners[docKey][userId]) {
+      this.groupUserProblemDocumentsListeners[docKey][userId] = {};
     }
 
-    return this.groupUserSectionDocumentsListeners[sectionId][userId];
+    return this.groupUserProblemDocumentsListeners[docKey][userId];
   }
 
-  public monitorSectionDocumentVisibility = (document: DocumentModelType) => {
+  public monitorDocumentVisibility = (document: DocumentModelType) => {
     const { user } = this.db.stores;
-    const updateRef = this.db.firebase.ref(this.db.firebase.getSectionDocumentPath(user, document.sectionId));
+    const updateRef = this.db.firebase.ref(this.db.firebase.getProblemDocumentPath(user, document.key));
     const disposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         visibility: newDocument.visibility
       });
     }));
-    this.documentModelDisposers[document.sectionId!] = disposer;
+    this.documentModelDisposers[document.key] = disposer;
+  }
+
+  public monitorPersonalDocument = (personalDocument: DocumentModelType) => {
+    const { user } = this.db.stores;
+    const { key } = personalDocument;
+
+    const listener = this.getOrCreateModelListener(`personalDocument:${key}`);
+    if (listener.modelDisposer) {
+      listener.modelDisposer();
+    }
+
+    const updateRef = this.db.firebase.ref(this.db.firebase.getUserPersonalDocPath(user, key));
+    listener.modelDisposer = (onSnapshot(personalDocument, (newDocument) => {
+      updateRef.update({
+        title: newDocument.title,
+        // TODO: for future ordering story add original to model and update here
+      });
+    }));
+
+    return personalDocument;
   }
 
   public monitorLearningLogDocument = (learningLog: DocumentModelType) => {
@@ -249,25 +276,25 @@ export class DBListeners {
     });
   }
 
-  private handleGroupUserSectionDocRef(document: DocumentModelType) {
+  private handleGroupUserProblemDocRef(document: DocumentModelType) {
     return (snapshot: firebase.database.DataSnapshot|null) => {
-      const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
-      if (sectionDocument) {
-        const groupUserId = sectionDocument.self.uid;
-        const docKey = sectionDocument.documentKey;
+      const problemDocument: DBOfferingUserProblemDocument = snapshot && snapshot.val();
+      if (problemDocument) {
+        const groupUserId = problemDocument.self.uid;
+        const docKey = problemDocument.documentKey;
         const mainUser = this.db.stores.user;
         const currentDocContentListener =
-          this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId).docContentRef;
+          this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId).docContentRef;
         if (currentDocContentListener) {
           currentDocContentListener.off();
         }
         const groupUserDocRef = this.db.firebase.ref(
           this.db.firebase.getUserDocumentPath(mainUser, docKey, groupUserId)
         );
-        this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId)
+        this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId)
           .docContentRef = groupUserDocRef;
         groupUserDocRef.on("value", (docContentSnapshot) => {
-          this.handleGroupUserDocRef(docContentSnapshot, sectionDocument);
+          this.handleGroupUserDocRef(docContentSnapshot, problemDocument);
         });
       }
     };
@@ -275,7 +302,7 @@ export class DBListeners {
 
   private handleGroupUserDocRef(
     snapshot: firebase.database.DataSnapshot|null,
-    sectionDocument: DBOfferingUserSectionDocument)
+    problemDocument: DBOfferingUserProblemDocument)
   {
     if (snapshot) {
       const rawGroupDoc: DBDocumentMetadata = snapshot.val();
@@ -287,11 +314,10 @@ export class DBListeners {
 
         this.db.openDocument({
           documentKey,
-          type: SectionDocument,
-          sectionId: sectionDocument.self.sectionId,
+          type: ProblemDocument,
           userId: groupUserId,
           groupId: group && group.id,
-          visibility: sectionDocument.visibility
+          visibility: problemDocument.visibility
         }).then((groupUserDoc) => {
           this.db.stores.documents.update(groupUserDoc);
         });

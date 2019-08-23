@@ -6,11 +6,10 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { SectionType } from "../../models/curriculum/section";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
@@ -32,6 +31,38 @@ interface IState {
   isCommentDialogOpen: boolean;
   commentTileId: string;
 }
+
+type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
+
+const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
+  return (
+    <svg key="download" className={`action icon icon-download`} onClick={onClick}>
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, dataTestName?: string }) => {
+  const dataTest = dataTestName || "publish-icon";
+  return (
+    <svg key="publish" className={`action icon icon-publish`}
+          data-test={dataTest} onClick={onClick} >
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
+  const visibility = isShared ? "public" : "private";
+  return (
+    <div key="share" className={`visibility action ${visibility}`}>
+      <svg id="currVis" className={`share icon icon-share`}
+            data-test="share-icon" onClick={onClick}>
+        <use xlinkHref={`#icon-share`} />
+      </svg>
+    </div>
+  );
+};
 
 @inject("stores")
 @observer
@@ -75,56 +106,41 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderTitleBar() {
     const { document, side, isGhostUser } = this.props;
     const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
-    if (document.isSection) {
-      return this.renderSectionTitleBar(hideButtons);
+    if (document.isProblem) {
+      return this.renderProblemTitleBar(hideButtons);
+    }
+    if (document.isPersonal) {
+      return this.renderPersonalDocumentTitleBar(hideButtons);
     }
     if (document.isLearningLog) {
       return this.renderLearningLogTitleBar(hideButtons);
     }
   }
 
-  private renderSectionTitleBar(hideButtons?: boolean) {
+  private renderProblemTitleBar(hideButtons?: boolean) {
     const {problem, appMode, clipboard} = this.stores;
-    const {workspace, document} = this.props;
-    const activeSection = problem.getSectionById(document.sectionId!);
+    const problemTitle = problem.title;
+    const {document: { visibility }, workspace} = this.props;
+    const isShared = visibility === "public";
     const show4up = !workspace.comparisonVisible;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <svg key="download" className={`action icon icon-download`}
-                                    onClick={this.handleDownloadTileJson}>
-                                <use xlinkHref={`#icon-publish`} />
-                              </svg>
+                            ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
       <div className="titlebar">
         <div className="title" data-test="document-title">
-          {activeSection ? `Section: ${activeSection.title}` : "Section"}
+          {problemTitle}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`action icon icon-publish`} data-test="publish-icon"
-                   onClick={this.handlePublishWorkspace}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>,
-              this.renderShare()
+              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
+              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
             {show4up ? this.renderMode() : null}
           </div>
         }
-      </div>
-    );
-  }
-
-  private renderShare() {
-    const {document} = this.props;
-    const currVis = document.visibility === "private" ? "private" : "public";
-    return (
-      <div key="share" className={`visibility action ${currVis}`}>
-        <svg id="currVis" className={`share icon icon-share`} data-test="share-icon"
-             onClick={this.handleToggleVisibility}>
-          <use xlinkHref={`#icon-share`} />
-        </svg>
       </div>
     );
   }
@@ -148,6 +164,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private renderPersonalDocumentTitleBar(hideButtons?: boolean) {
+    const {document} = this.props;
+    return (
+      <div className="personal-document titlebar">
+        <div className="title" data-test="personal-doc-title">{document.title}</div>
+        {/* This is an incomplete feature and will be addressed in a future PR */}
+        {/* <div className="actions">
+          {!hideButtons &&
+            <div className="actions">
+              <PublishButton dataTestName="personal-document-publish-icon"
+              onClick={this.handlePublishPersonalDocument} />
+            </div>
+          }
+        </div> */}
+      </div>
+    );
+  }
+
   private renderLearningLogTitleBar(hideButtons?: boolean) {
     const {document} = this.props;
     return (
@@ -155,10 +189,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <svg key="publish" className={`icon icon-publish`} data-test="learning-log-publish-icon"
-                   onClick={this.handlePublishLearningLog}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>
+              <PublishButton dataTestName="learning-log-publish-icon" onClick={this.handlePublishLearningLog} />
             </div>
           }
         </div>
@@ -178,7 +209,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderCanvas() {
     const { document, workspace, side, isGhostUser } = this.props;
-    const fourUp = (document.type === SectionDocument) &&
+    const fourUp = (document.type === ProblemDocument) &&
                     (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
     const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
     return (
@@ -196,9 +227,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private render4UpCanvas() {
     const {isGhostUser, document} = this.props;
-    const {sectionWorkspace} = this.stores.ui;
+    const { groups } = this.stores;
+    const group = isGhostUser ? undefined : groups.groupForUser(document.uid);
+    const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
     return (
-      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser}
+      <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
                         toolApiInterface={this.toolApiInterface} />
     );
   }
@@ -206,7 +239,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderStatusBar() {
     const {document} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (document.type === SectionDocument);
+    const showContents = isPrimary && (document.type === ProblemDocument);
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === PublicationDocument);
     const showComment = false;
@@ -397,16 +430,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       .then(() => ui.alert("Your document was published.", "Learning Log Published"));
   }
 
+  private handlePublishPersonalDocument = () => {
+    const { db, ui } = this.stores;
+    db.publishDocument(this.props.document)
+      .then(() => ui.alert("Your document was published.", "Personal Document Published"));
+  }
+
   private getSupportsWithIndices() {
     const { groups, user } = this.stores;
     const userId = user.id;
     const group = groups.groupForUser(userId);
     const groupId = group && group.id;
-    return this.stores.supports.getSupportsForUserProblem(
-      this.props.document.sectionId! as SectionType,
-      groupId,
-      userId
-    )
+    return this.stores.supports.getSupportsForUserProblem({ groupId, userId })
     .map((support, index) => {
       return {index, item: support};
     });
