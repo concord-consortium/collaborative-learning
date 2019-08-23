@@ -318,6 +318,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             sensors.push(chInfo.channelId);
           }
         }
+      } else if (n.name === "Relay" && n.data.relayList) {
+        const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
+        if (chInfo) {
+          if (hubs.indexOf(chInfo.hubId) === -1) {
+            hubs.push(chInfo.hubId);
+          }
+        }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
       }
