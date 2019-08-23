@@ -120,12 +120,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={this.props.readOnly}
+                  disabled={this.props.readOnly || this.state.isProgramRunning}
                 />
-                <DataflowProgramCover
-                  onStopProgramClick={this.stopProgram}
-                  runningProgram={this.state.isProgramRunning && !this.props.readOnly}
-                />
+                { (this.state.isProgramRunning || this.props.readOnly) &&
+                  <DataflowProgramCover
+                    onStopProgramClick={this.stopProgram}
+                    runningProgram={this.state.isProgramRunning && !this.props.readOnly}
+                  />
+                }
               }
             </div>
             {this.state.showGraph && <DataflowProgramGraph dataSet={this.state.graphDataSet}/>}
