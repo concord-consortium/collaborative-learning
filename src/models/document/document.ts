@@ -7,12 +7,14 @@ export const DocumentDragKey = "org.concord.clue.document.key";
 
 export const SectionDocumentDEPRECATED = "section";
 export const ProblemDocument = "problem";
+export const PersonalDocument = "personal";
 export const LearningLogDocument = "learningLog";
 export const PublicationDocument = "publication";
 export const LearningLogPublication = "learningLogPublication";
 
 export const DocumentTypeEnum = types.enumeration("type",
-  [ProblemDocument, SectionDocumentDEPRECATED, LearningLogDocument, PublicationDocument, LearningLogPublication]);
+              [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument,
+              LearningLogDocument, PublicationDocument, LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
 export const DocumentToolEnum = types.enumeration("tool",
@@ -38,6 +40,9 @@ export const DocumentModel = types
   .views(self => ({
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === PublicationDocument);
+    },
+    get isPersonal() {
+      return (self.type === PersonalDocument);
     },
     get isLearningLog() {
       return (self.type === LearningLogDocument) || (self.type === LearningLogPublication);

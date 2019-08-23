@@ -32,6 +32,38 @@ interface IState {
   commentTileId: string;
 }
 
+type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
+
+const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
+  return (
+    <svg key="download" className={`action icon icon-download`} onClick={onClick}>
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, dataTestName?: string }) => {
+  const dataTest = dataTestName || "publish-icon";
+  return (
+    <svg key="publish" className={`action icon icon-publish`}
+          data-test={dataTest} onClick={onClick} >
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
+  const visibility = isShared ? "public" : "private";
+  return (
+    <div key="share" className={`visibility action ${visibility}`}>
+      <svg id="currVis" className={`share icon icon-share`}
+            data-test="share-icon" onClick={onClick}>
+        <use xlinkHref={`#icon-share`} />
+      </svg>
+    </div>
+  );
+};
+
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
@@ -75,54 +107,40 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { document, side, isGhostUser } = this.props;
     const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
     if (document.isProblem) {
-      return this.renderSectionTitleBar(hideButtons);
+      return this.renderProblemTitleBar(hideButtons);
+    }
+    if (document.isPersonal) {
+      return this.renderPersonalDocumentTitleBar(hideButtons);
     }
     if (document.isLearningLog) {
       return this.renderLearningLogTitleBar(hideButtons);
     }
   }
 
-  private renderSectionTitleBar(hideButtons?: boolean) {
+  private renderProblemTitleBar(hideButtons?: boolean) {
     const {problem, appMode, clipboard} = this.stores;
-    const {workspace, document} = this.props;
+    const problemTitle = problem.title;
+    const {document: { visibility }, workspace} = this.props;
+    const isShared = visibility === "public";
     const show4up = !workspace.comparisonVisible;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <svg key="download" className={`action icon icon-download`}
-                                    onClick={this.handleDownloadTileJson}>
-                                <use xlinkHref={`#icon-publish`} />
-                              </svg>
+                            ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
       <div className="titlebar">
         <div className="title" data-test="document-title">
-          {null}
+          {problemTitle}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`action icon icon-publish`} data-test="publish-icon"
-                   onClick={this.handlePublishWorkspace}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>,
-              this.renderShare()
+              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
+              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
             {show4up ? this.renderMode() : null}
           </div>
         }
-      </div>
-    );
-  }
-
-  private renderShare() {
-    const {document} = this.props;
-    const currVis = document.visibility === "private" ? "private" : "public";
-    return (
-      <div key="share" className={`visibility action ${currVis}`}>
-        <svg id="currVis" className={`share icon icon-share`} data-test="share-icon"
-             onClick={this.handleToggleVisibility}>
-          <use xlinkHref={`#icon-share`} />
-        </svg>
       </div>
     );
   }
@@ -146,6 +164,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private renderPersonalDocumentTitleBar(hideButtons?: boolean) {
+    const {document} = this.props;
+    return (
+      <div className="personal-document titlebar">
+        <div className="title" data-test="personal-doc-title">{document.title}</div>
+        {/* This is an incomplete feature and will be addressed in a future PR */}
+        {/* <div className="actions">
+          {!hideButtons &&
+            <div className="actions">
+              <PublishButton dataTestName="personal-document-publish-icon"
+              onClick={this.handlePublishPersonalDocument} />
+            </div>
+          }
+        </div> */}
+      </div>
+    );
+  }
+
   private renderLearningLogTitleBar(hideButtons?: boolean) {
     const {document} = this.props;
     return (
@@ -153,10 +189,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <svg key="publish" className={`icon icon-publish`} data-test="learning-log-publish-icon"
-                   onClick={this.handlePublishLearningLog}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>
+              <PublishButton dataTestName="learning-log-publish-icon" onClick={this.handlePublishLearningLog} />
             </div>
           }
         </div>
@@ -395,6 +428,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { db, ui } = this.stores;
     db.publishLearningLog(this.props.document)
       .then(() => ui.alert("Your document was published.", "Learning Log Published"));
+  }
+
+  private handlePublishPersonalDocument = () => {
+    const { db, ui } = this.stores;
+    db.publishDocument(this.props.document)
+      .then(() => ui.alert("Your document was published.", "Personal Document Published"));
   }
 
   private getSupportsWithIndices() {

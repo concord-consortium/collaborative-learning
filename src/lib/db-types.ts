@@ -22,9 +22,11 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBDocumentType = "section" | "problem" | "learningLog" | "publication" | "learningLogPublication";
+export type DBDocumentType = "section" | "problem" | "personal" |
+                            "publication" | "learningLog" | "learningLogPublication";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
+                                 DBPersonalDocumentMetadata |
                                  DBLearningLogDocumentMetadata |
                                  DBPublicationDocumentMetadata |
                                  DBLearningLogPublicationMetadata;
@@ -50,6 +52,9 @@ export interface DBProblemDocumentMetadata extends DBBaseDocumentMetadata {
   classHash: string;
   offeringId: string;
 }
+export interface DBPersonalDocumentMetadata extends DBBaseDocumentMetadata {
+  type: "personal";
+}
 export interface DBLearningLogDocumentMetadata extends DBBaseDocumentMetadata {
   type: "learningLog";
 }
@@ -64,6 +69,16 @@ export interface DBLearningLogPublicationMetadata extends DBBaseDocumentMetadata
 
 export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
+}
+
+export interface DBPersonalDocument {
+  version: "1.0";
+  self: {
+    uid: string;
+    classHash: string;
+    documentKey: string;
+  };
+  title: string;
 }
 
 export interface DBPublication {
