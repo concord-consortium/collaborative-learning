@@ -101,32 +101,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             readOnly={this.props.readOnly || false}
         />
         <div className="toolbar-editor-container">
-          { !this.props.readOnly ?
-            <DataflowProgramToolbar
-              onNodeCreateClick={this.addNode}
-              onDeleteClick={this.deleteSelectedNodes}
-              isDataStorageDisabled={this.state.disableDataStorage}
-              disabled={this.state.isProgramRunning}
-            />
-            : null
-          }
+          <DataflowProgramToolbar
+            onNodeCreateClick={this.addNode}
+            onDeleteClick={this.deleteSelectedNodes}
+            isDataStorageDisabled={this.state.disableDataStorage}
+            disabled={this.props.readOnly || this.state.isProgramRunning}
+          />
           <div className="editor-graph-container">
             <div
               className={this.state.showGraph ? "editor half" : "editor full"}
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
-              { this.state.isProgramRunning ?
+              { (this.state.isProgramRunning || this.props.readOnly) &&
                 <DataflowProgramCover
                   onStopProgramClick={this.stopProgram}
+                  runningProgram={this.state.isProgramRunning && !this.props.readOnly}
                 />
-                : null
               }
             </div>
-            { this.state.showGraph
-              ? <DataflowProgramGraph dataSet={this.state.graphDataSet}/>
-              : null
-            }
+            {this.state.showGraph && <DataflowProgramGraph dataSet={this.state.graphDataSet}/>}
           </div>
         </div>
       </div>
