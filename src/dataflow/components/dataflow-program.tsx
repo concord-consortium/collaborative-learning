@@ -550,7 +550,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private setZoom = (zoom: number) => {
-    this.programEditor.view.area.transform = {k: zoom, x: 0, y: 0};
+    const currentTransform = this.programEditor.view.area.transform;
+    this.programEditor.view.area.transform = {k: zoom, x: currentTransform.x, y: currentTransform.y};
     this.programEditor.view.area.update();
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);
