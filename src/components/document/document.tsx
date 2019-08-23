@@ -169,14 +169,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="personal-document titlebar">
         <div className="title" data-test="personal-doc-title">{document.title}</div>
-        <div className="actions">
+        {/* This is an incomplete feature and will be addressed in a future PR */}
+        {/* <div className="actions">
           {!hideButtons &&
             <div className="actions">
               <PublishButton dataTestName="personal-document-publish-icon"
               onClick={this.handlePublishPersonalDocument} />
             </div>
           }
-        </div>
+        </div> */}
       </div>
     );
   }
