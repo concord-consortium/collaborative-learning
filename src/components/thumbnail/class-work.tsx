@@ -13,6 +13,7 @@ interface IProps extends IBaseProps {
 
 interface IState {
   showPublishedDocuments: boolean;
+  showPersonalPublished: boolean;
   showStarredDocuments: boolean;
 }
 
@@ -24,6 +25,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       showPublishedDocuments: false,
+      showPersonalPublished: false,
       showStarredDocuments: false
     };
   }
@@ -32,11 +34,13 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     const { documents } = this.stores;
     const publications: DocumentModelType[] = [];
     publications.push(...documents.getLatestPublications(this.stores.class));
+    const personalPublications = documents.getLatestPersonalPublications();
 
     return (
       <div className="class-work">
         <div className="header">Class Work</div>
         {this.renderPublishedDocuments(publications)}
+        {this.renderPublishedPersonalDocuments(personalPublications)}
         {this.renderStarredDocuments(publications)}
       </div>
     );
@@ -48,10 +52,40 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     const sectionTitle = "Published";
     const isExpanded = this.state.showPublishedDocuments;
     return (
-      <div className="section published">
+      <div className="section personal-published">
         <CollapsibleSectionHeader
           sectionTitle={sectionTitle} dataTestName="class-work-section"
           isExpanded={isExpanded} onClick={this.handlePublishedSectionClicked}/>
+
+        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
+          {publications.map((publication) => {
+            const captionText = this.getPublicationCaptionText(publication, sectionTitle);
+            const pubStar = !!publication.stars.find( star => star.uid === user.id && star.starred );
+            const onDocumentStarClick = user.type === "teacher" ? this.handleDocumentStarClick : undefined;
+            return (
+              <ThumbnailDocumentItem
+                key={publication.key} dataTestName="class-work-list-items"
+                canvasContext="class-work" document={publication} scale={scale}
+                captionText={captionText}
+                onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart}
+                isStarred={pubStar} onDocumentStarClick={onDocumentStarClick} />
+            );
+          })}
+          </div>
+      </div>
+    );
+  }
+
+  private renderPublishedPersonalDocuments = (publications: DocumentModelType[]) => {
+    const { user } = this.stores;
+    const { scale } = this.props;
+    const sectionTitle = "Published Personal Documents";
+    const isExpanded = this.state.showPersonalPublished;
+    return (
+      <div className="section published">
+        <CollapsibleSectionHeader
+          sectionTitle={sectionTitle} dataTestName="class-work-section"
+          isExpanded={isExpanded} onClick={this.handlePersonalPublishedSectionClicked}/>
 
         <div className={"list " + (isExpanded ? "shown" : "hidden")}>
           {publications.map((publication) => {
@@ -124,6 +158,10 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private handlePublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
     this.setState((state) => ({ showPublishedDocuments: !state.showPublishedDocuments }));
+  }
+
+  private handlePersonalPublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
+    this.setState((state) => ({ showPersonalPublished: !state.showPersonalPublished }));
   }
 
   private handleStarredSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {

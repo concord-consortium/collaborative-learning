@@ -1,9 +1,10 @@
 import { DB } from "../db";
-import { DBPersonalDocument } from "../db-types";
+import { DBPersonalDocument, DBOtherDocPublication } from "../db-types";
 
 export class DBPersonalDocumentsListener {
   private db: DB;
   private personalDocsRef: firebase.database.Reference | null  = null;
+  private publishedDocsRef: firebase.database.Reference | null  = null;
 
   constructor(db: DB) {
     this.db = db;
@@ -14,6 +15,10 @@ export class DBPersonalDocumentsListener {
     this.personalDocsRef.on("child_added", this.handlePersonalDocChildAdded);
     this.personalDocsRef.on("child_changed", this.handlePersonalDocChildChanged);
     this.personalDocsRef.on("child_removed", this.handlePersonalDocChildRemoved);
+
+    this.publishedDocsRef = this.db.firebase.ref(this.db.firebase
+      .getClassPersonalPublicationsPath(this.db.stores.user));
+    this.publishedDocsRef.on("child_added", this.handlePersonalDocPublished);
   }
 
   public stop() {
@@ -21,6 +26,9 @@ export class DBPersonalDocumentsListener {
       this.personalDocsRef.off("child_added", this.handlePersonalDocChildAdded);
       this.personalDocsRef.off("child_changed", this.handlePersonalDocChildChanged);
       this.personalDocsRef.off("child_removed", this.handlePersonalDocChildRemoved);
+    }
+    if (this.publishedDocsRef) {
+      this.publishedDocsRef.off("child_added", this.handlePersonalDocPublished);
     }
   }
 
@@ -30,6 +38,15 @@ export class DBPersonalDocumentsListener {
     if (dbDoc) {
       this.db.createDocumentFromPersonalDocument(dbDoc)
         .then(this.db.listeners.monitorPersonalDocument)
+        .then(documents.add);
+    }
+  }
+
+  private handlePersonalDocPublished = (snapshot: firebase.database.DataSnapshot) => {
+    const {documents} = this.db.stores;
+    const dbDoc: DBOtherDocPublication|null = snapshot.val();
+    if (dbDoc) {
+      this.db.createDocumentFromPublishedPersonalDoc(dbDoc)
         .then(documents.add);
     }
   }

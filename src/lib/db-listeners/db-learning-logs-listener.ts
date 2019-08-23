@@ -1,5 +1,5 @@
 import { DB } from "../db";
-import { DBLearningLog, DBLearningLogPublication } from "../db-types";
+import { DBLearningLog, DBOtherDocPublication } from "../db-types";
 
 export class DBLearningLogsListener {
   private db: DB;
@@ -43,7 +43,7 @@ export class DBLearningLogsListener {
 
   private handleLearningLogPublished = (snapshot: firebase.database.DataSnapshot) => {
     const {documents} = this.db.stores;
-    const learningLog: DBLearningLogPublication|null = snapshot.val();
+    const learningLog: DBOtherDocPublication|null = snapshot.val();
     if (learningLog) {
       this.db.createDocumentFromPublishedLog(learningLog)
         .then(documents.add);

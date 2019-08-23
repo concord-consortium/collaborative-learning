@@ -10,11 +10,13 @@ export const ProblemDocument = "problem";
 export const PersonalDocument = "personal";
 export const LearningLogDocument = "learningLog";
 export const PublicationDocument = "publication";
+export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 
 export const DocumentTypeEnum = types.enumeration("type",
               [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument,
-              LearningLogDocument, PublicationDocument, LearningLogPublication]);
+              LearningLogDocument, PublicationDocument, PersonalPublication,
+              LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 
 export const DocumentToolEnum = types.enumeration("tool",
@@ -42,13 +44,15 @@ export const DocumentModel = types
       return (self.type === ProblemDocument) || (self.type === PublicationDocument);
     },
     get isPersonal() {
-      return (self.type === PersonalDocument);
+      return (self.type === PersonalDocument || (self.type === PersonalPublication));
     },
     get isLearningLog() {
       return (self.type === LearningLogDocument) || (self.type === LearningLogPublication);
     },
     get isPublished() {
-      return (self.type === PublicationDocument) || (self.type === LearningLogPublication);
+      return (self.type === PublicationDocument)
+              || (self.type === LearningLogPublication)
+              || (self.type === PersonalPublication);
     }
   }))
   .actions((self) => ({

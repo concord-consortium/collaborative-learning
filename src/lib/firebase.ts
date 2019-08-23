@@ -88,6 +88,10 @@ export class Firebase {
     return `${this.getClassPath(user)}/publications`;
   }
 
+  public getClassPersonalPublicationsPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/personalPublications`;
+  }
+
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;

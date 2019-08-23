@@ -169,15 +169,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="personal-document titlebar">
         <div className="title" data-test="personal-doc-title">{document.title}</div>
-        {/* This is an incomplete feature and will be addressed in a future PR */}
-        {/* <div className="actions">
+        <div className="actions">
           {!hideButtons &&
             <div className="actions">
               <PublishButton dataTestName="personal-document-publish-icon"
-              onClick={this.handlePublishPersonalDocument} />
+              onClick={this.handlePublishOtherDocument} />
             </div>
           }
-        </div> */}
+        </div>
       </div>
     );
   }
@@ -189,7 +188,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="learning-log-publish-icon" onClick={this.handlePublishLearningLog} />
+              <PublishButton dataTestName="learning-log-publish-icon" onClick={this.handlePublishOtherDocument} />
             </div>
           }
         </div>
@@ -420,20 +419,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handlePublishWorkspace = () => {
     const { db, ui } = this.stores;
     // TODO: Disable publish button while publishing
-    db.publishDocument(this.props.document)
+    db.publishProblemDocument(this.props.document)
       .then(() => ui.alert("Your document was published.", "Document Published"));
   }
 
-  private handlePublishLearningLog = () => {
+  private handlePublishOtherDocument = () => {
     const { db, ui } = this.stores;
-    db.publishLearningLog(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Learning Log Published"));
-  }
-
-  private handlePublishPersonalDocument = () => {
-    const { db, ui } = this.stores;
-    db.publishDocument(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Personal Document Published"));
+    const documentType = this.props.document.type === "personal"
+                          ? "Personal Document"
+                          : "Learning Log";
+    db.publishOtherDocument(this.props.document)
+    .then(() => ui.alert("Your document was published.", `${documentType} Published`));
   }
 
   private getSupportsWithIndices() {

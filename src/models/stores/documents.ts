@@ -70,6 +70,26 @@ export const DocumentsModel = types
         });
       },
 
+      // Return the most recently published personal document per user, sorted by title
+      getLatestPersonalPublications() {
+        const latestPublications: DocumentModelType[] = [];
+        byType("personalPublication")
+          .forEach((publication) => {
+            const originDoc = publication.originDoc;
+            const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
+            if (latestIndex === -1) {
+              latestPublications.push(publication);
+            }
+            else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+              latestPublications[latestIndex] = publication;
+            }
+          });
+
+        return latestPublications.sort((pub1, pub2) => {
+          return (pub1.title || "").localeCompare(pub2.title || "");
+        });
+      },
+
       // Returns the most recently published docs for the given section per user, sorted by name
       getLatestPublications(clazz: ClassModelType) {
         const latestPublications: DocumentModelType[] = [];
