@@ -131,19 +131,17 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDocumentStarClick = (publication: DocumentModelType) => {
-    return (e: React.MouseEvent<HTMLDivElement>) => {
-      const { user } = this.stores;
-      if (publication) {
-        const userStar = publication.stars.find( star => star.uid === user.id );
-        if (!userStar) {
-          const newStar = UserStarModel.create({
-            uid: user.id,
-          });
-          publication.setUserStar(newStar);
-        } else {
-          publication.toggleUserStar(user.id);
-        }
+    const { user } = this.stores;
+    if (publication) {
+      const userStar = publication.stars.find( star => star.uid === user.id );
+      if (!userStar) {
+        const newStar = UserStarModel.create({
+          uid: user.id,
+        });
+        publication.setUserStar(newStar);
+      } else {
+        publication.toggleUserStar(user.id);
       }
-    };
+    }
   }
 }
