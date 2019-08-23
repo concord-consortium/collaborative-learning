@@ -195,7 +195,7 @@ export const NodeSensorTypes = [
 export const NodeGeneratorTypes = [
   {
     name: "sine",
-    method: (t: number, p: number, a: number, v: number) => Math.round(Math.sin(t * Math.PI / p) * a * 100) / 100,
+    method: (t: number, p: number, a: number, v: number) => Math.round(Math.sin(t * Math.PI / (p / 2)) * a * 100) / 100,
     icon: "icon-sine-generator"
   },
   {
