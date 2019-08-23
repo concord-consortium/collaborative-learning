@@ -69,6 +69,8 @@ const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 export const MAX_NODE_VALUES = 16;
 const HEARTBEAT_INTERVAL = 1000;
+const MAX_ZOOM = 2;
+const MIN_ZOOM = .1;
 
 @inject("stores")
 @observer
@@ -539,12 +541,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private zoomIn = () => {
     const { k } = this.programEditor.view.area.transform;
-    this.setZoom(k + .05);
+    this.setZoom(Math.min(MAX_ZOOM, k + .05));
   }
 
   private zoomOut = () => {
     const { k } = this.programEditor.view.area.transform;
-    this.setZoom(k - .05);
+    this.setZoom(Math.max(MIN_ZOOM, k - .05));
   }
 
   private setZoom = (zoom: number) => {
