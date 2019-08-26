@@ -81,7 +81,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
     const { documents, user } = this.stores;
     const userDocs = documents.byTypeForUser(PersonalDocument, user.id);
     return (
-      <>
+      <div key="my-work-personal-documents">
         <CollapsibleSectionHeader
           sectionTitle={sectionTitle} dataTestName="my-work-section"
           isExpanded={isExpanded} onClick={this.handlePersonalSectionHeaderClick}/>
@@ -98,7 +98,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
           })}
           <NewDocumentButtonComponent onClick={this.handleNewDocumentClick} />
         </div>
-      </>
+      </div>
     );
   }
 
@@ -108,7 +108,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
     const { documents, problem, user } = this.stores;
     const userDocs = documents.byTypeForUser(ProblemDocument, user.id);
     return (
-      <>
+      <div key="my-work-problem-documents">
         <CollapsibleSectionHeader
           sectionTitle={sectionTitle} dataTestName="my-work-section"
           isExpanded={isExpanded} onClick={this.handleProblemSectionHeaderClick}/>
@@ -124,7 +124,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
             );
           })}
         </div>
-      </>
+      </div>
     );
   }
 
