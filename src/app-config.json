@@ -1,0 +1,142 @@
+{
+  "pageTitle": "CLUE: %problemTitle%",
+  "units": {
+    "msa": "assets/curriculum/moving-straight-ahead/moving-straight-ahead.json",
+    "s+s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+  },
+  "defaultUnit": "s+s",
+  "rightNavTabs": [
+    {
+      "tab": "my-work",
+      "label": "My Work",
+      "hideGhostUser": true,
+      "sections": [
+        {
+          "title": "Workspaces I've Created",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "addDocument": true
+        },
+        {
+          "title": "%abbrevInvestigation%",
+          "type": "problem-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["problem"]
+        },
+        {
+          "title": "Learning Logs",
+          "type": "learning-logs",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["learningLog"],
+          "addDocument": true
+        }
+      ]
+    },
+    {
+      "tab": "class-work",
+      "label": "Class Work",
+      "sections": [
+        {
+          "className": "section personal published",
+          "title": "Published Personal Documents",
+          "type": "published-personal-documents",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["personalPublication"],
+          "showStars": true
+        },
+        {
+          "className": "section problem published",
+          "title": "Published Problem Documents",
+          "type": "published-problem-documents",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["publication"],
+          "showStars": true
+        },
+        {
+          "className": "section learning-log published",
+          "title": "Published Learning Logs",
+          "type": "published-learning-logs",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["learningLogPublication"],
+          "showStars": true
+        }
+      ]
+    },
+    {
+      "tab": "starred-work",
+      "label": "Starred",
+      "sections": [
+        {
+          "className": "section personal published starred",
+          "title": "Starred Personal Documents",
+          "type": "starred-personal-documents",
+          "documentTypes": ["personalPublication"],
+          "showStars": true
+        },
+        {
+          "className": "section problem published starred",
+          "title": "Starred Problem Documents",
+          "type": "starred-problem-documents",
+          "documentTypes": ["publication"],
+          "showStars": true
+        },
+        {
+          "className": "section learning-log published starred",
+          "title": "Starred Learning Logs",
+          "type": "starred-learning-logs",
+          "documentTypes": ["learningLogPublication"],
+          "showStars": true
+        }
+      ]
+    }
+  ],
+  "toolbar": [
+    {
+      "name": "select",
+      "title": "Select",
+      "iconId": "icon-select-tool"
+    },
+    {
+      "name": "text",
+      "title": "Text",
+      "iconId": "icon-text-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "table",
+      "title": "Table",
+      "iconId": "icon-table-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "geometry",
+      "title": "Geometry",
+      "iconId": "icon-geometry-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "image",
+      "title": "Image",
+      "iconId": "icon-image-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "drawing",
+      "title": "Drawing",
+      "iconId": "icon-drawing-tool",
+      "isTileTool": true
+    },
+    {
+      "name": "delete",
+      "title": "Delete",
+      "iconId": "icon-delete-tool"
+    }
+  ]
+}

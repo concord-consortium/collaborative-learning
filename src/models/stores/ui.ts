@@ -4,7 +4,7 @@ import { ToolTileModelType } from "../tools/tool-tile";
 import { DocumentModelType } from "../document/document";
 import { ERightNavTab } from "../view/right-nav";
 
-export type ToggleElement = "rightNavExpanded" | "leftNavExpanded" | "bottomNavExpanded";
+export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
@@ -24,7 +24,6 @@ export const UIModel = types
   .model("UI", {
     rightNavExpanded: false,
     leftNavExpanded: false,
-    bottomNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: ERightNavTab.kMyWork,
@@ -37,7 +36,7 @@ export const UIModel = types
   })
   .views((self) => ({
     get allContracted() {
-      return !self.rightNavExpanded && !self.leftNavExpanded && !self.bottomNavExpanded;
+      return !self.rightNavExpanded && !self.leftNavExpanded;
     },
     isSelectedTile(tile: ToolTileModelType) {
       return (tile.id === self.selectedTileId);
@@ -47,7 +46,6 @@ export const UIModel = types
     const contractAll = () => {
       self.rightNavExpanded = false;
       self.leftNavExpanded = false;
-      self.bottomNavExpanded = false;
     };
 
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
@@ -57,14 +55,9 @@ export const UIModel = types
         case "leftNavExpanded":
           self.leftNavExpanded = expanded;
           self.rightNavExpanded = false;
-          self.bottomNavExpanded = false;
           break;
         case "rightNavExpanded":
           self.rightNavExpanded = expanded;
-          self.leftNavExpanded = false;
-          break;
-        case "bottomNavExpanded":
-          self.bottomNavExpanded = expanded;
           self.leftNavExpanded = false;
           break;
       }
@@ -114,9 +107,6 @@ export const UIModel = types
       toggleRightNav(override?: boolean) {
         toggleWithOverride("rightNavExpanded", override);
       },
-      toggleBottomNav(override?: boolean) {
-        toggleWithOverride("bottomNavExpanded", override);
-      },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
       },
@@ -138,18 +128,8 @@ export const UIModel = types
       closeDialog,
 
       rightNavDocumentSelected(document: DocumentModelType) {
-        // learning log
-        if (self.bottomNavExpanded) {
-          if (self.learningLogWorkspace.primaryDocumentKey) {
-            self.learningLogWorkspace.setComparisonDocument(document);
-            self.learningLogWorkspace.toggleComparisonVisible({override: true});
-          }
-          else {
-            alert("Please select a Learning Log first.", "Select for Learning Log");
-          }
-        }
         // class work or log
-        else if (document.isPublished) {
+        if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {
             self.problemWorkspace.setComparisonDocument(document);
             self.problemWorkspace.toggleComparisonVisible({override: true});

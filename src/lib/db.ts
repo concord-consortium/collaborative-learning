@@ -343,7 +343,7 @@ export class DB {
 
   public createPersonalDocument(title?: string) {
     const {documents, user} = this.stores;
-    const docTitle = title || documents.getNextPersonalDocumentTitle();
+    const docTitle = title || documents.getNextPersonalDocumentTitle(user);
 
     return new Promise<DocumentModelType>((resolve, reject) => {
       return this.createDocument({ type: PersonalDocument })
@@ -475,8 +475,9 @@ export class DB {
     });
   }
 
-  public createLearningLogDocument(title: string) {
-    const {user, documents} = this.stores;
+  public createLearningLogDocument(title?: string) {
+    const {documents, user} = this.stores;
+    const docTitle: string = title || documents.getNextLearningLogTitle(user);
 
     return new Promise<DocumentModelType>((resolve, reject) => {
       return this.createDocument({ type: LearningLogDocument })
@@ -489,7 +490,7 @@ export class DB {
               uid: user.id,
               classHash: user.classHash
             },
-            title
+            title: docTitle
           };
           return this.firebase.ref(this.firebase.getLearningLogPath(user, documentKey)).set(learningLog)
                   .then(() => learningLog);

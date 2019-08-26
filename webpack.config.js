@@ -90,11 +90,6 @@ module.exports = (env, argv) => {
       new CopyWebpackPlugin([{
         from: 'src/assets',
         to: 'assets'
-      }]),
-      new CopyWebpackPlugin([{
-        from: 'src/curriculum',
-        ignore: ['**/*.json', '**/*.{ts,tsx}'],
-        to: 'assets/curriculum'
       }])
     ]
   };

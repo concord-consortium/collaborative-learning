@@ -3,7 +3,6 @@ import { getSnapshot } from "mobx-state-tree";
 import * as React from "react";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
-import { BottomNavComponent } from "../../components/navigation/bottom-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModelType, DocumentModel, ProblemDocument } from "../../models/document/document";
@@ -32,14 +31,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { unit } = this.stores;
+    const { appConfig } = this.stores;
     const isGhostUser = this.props.isGhostUser;
     return (
       <div className="document-workspace">
         {this.renderDocuments(isGhostUser)}
         <LeftNavComponent isGhostUser={isGhostUser} />
-        <BottomNavComponent />
-        <RightNavComponent tabs={unit.rightNavTabs} isGhostUser={isGhostUser} />
+        <RightNavComponent tabs={appConfig.rightNavTabs} isGhostUser={isGhostUser} />
       </div>
     );
   }
@@ -55,12 +53,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments(isGhostUser: boolean) {
-    const {documents, ui, unit} = this.stores;
+    const {appConfig, documents, ui} = this.stores;
     const {problemWorkspace} = ui;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = problemWorkspace.comparisonDocumentKey
                                && documents.getDocument(problemWorkspace.comparisonDocumentKey);
-    const toolbar = unit && getSnapshot(unit.toolbar);
+    const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -108,8 +106,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { unit } = this.stores;
-    const hasRightNavTabs = unit.rightNavTabs && (unit.rightNavTabs.length > 0);
+    const { appConfig } = this.stores;
+    const hasRightNavTabs = appConfig.rightNavTabs && (appConfig.rightNavTabs.length > 0);
     const style = hasRightNavTabs ? undefined : { right: 0 };
     return (
       <div

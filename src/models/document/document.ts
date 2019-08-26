@@ -13,10 +13,27 @@ export const PublicationDocument = "publication";
 export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 
+export function isProblemType(type: string) {
+  return [ProblemDocument, PublicationDocument].indexOf(type) >= 0;
+}
+export function isPersonalType(type: string) {
+  return [PersonalDocument, PersonalPublication].indexOf(type) >= 0;
+}
+export function isLearningLogType(type: string) {
+  return [LearningLogDocument, LearningLogPublication].indexOf(type) >= 0;
+}
+export function isUnpublishedType(type: string) {
+  return [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument, LearningLogDocument]
+          .indexOf(type) >= 0;
+}
+export function isPublishedType(type: string) {
+  return [PublicationDocument, PersonalPublication, LearningLogPublication].indexOf(type) >= 0;
+}
+
 export const DocumentTypeEnum = types.enumeration("type",
-              [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument,
-              LearningLogDocument, PublicationDocument, PersonalPublication,
-              LearningLogPublication]);
+              [SectionDocumentDEPRECATED,
+                ProblemDocument, PersonalDocument, LearningLogDocument,
+                PublicationDocument, PersonalPublication, LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;

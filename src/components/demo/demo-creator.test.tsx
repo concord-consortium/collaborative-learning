@@ -4,10 +4,9 @@ import * as React from "react";
 import { configure, mount, shallow } from "enzyme";
 import { DemoCreatorComponment } from "./demo-creator";
 import { createStores, IStores } from "../../models/stores/stores";
-import { logComponent } from "../../utilities/test-utils";
 import { DemoModel } from "../../models/stores/demo";
 
-import * as curriculumJson from "../../curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
+import * as curriculumJson from "../../assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { createFromJson } from "../../models/curriculum/unit";
 
 configure({ adapter: new Adapter() });

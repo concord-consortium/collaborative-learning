@@ -17,7 +17,7 @@ interface IState {
 
 @inject("stores")
 @observer
-export class ClassWorkComponent extends BaseComponent<IProps, IState> {
+export class StarredWorkComponent extends BaseComponent<IProps, IState> {
 
   public state = {
     showSection: new Map()
@@ -25,18 +25,18 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { appConfig: { rightNavTabs }, user } = this.stores;
-    const classWorkTab = rightNavTabs && rightNavTabs.find(tab => tab.tab === ERightNavTab.kClassWork);
-    if (!classWorkTab) return null;
+    const starredWorkTab = rightNavTabs && rightNavTabs.find(tab => tab.tab === ERightNavTab.kStarredWork);
+    if (!starredWorkTab) return null;
     const _handleDocumentStarClick = user.isTeacher
                                       ? this.handleDocumentStarClick
                                       : undefined;
     return (
-      <div className="class-work">
-        <div className="header">{classWorkTab.label}</div>
+      <div className="starred-work">
+        <div className="header">{starredWorkTab.label}</div>
 
-        {classWorkTab.sections.map(section => (
+        {starredWorkTab.sections.map(section => (
           <DocumentsSection
-            key={section.type} tab={classWorkTab.tab} section={section}
+            key={section.type} tab={starredWorkTab.tab} section={section}
             stores={this.stores} scale={this.props.scale}
             isExpanded={this.state.showSection.get(section.type)}
             onToggleExpansion={this.handleToggleExpansion}
@@ -47,12 +47,6 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
       </div>
     );
   }
-
-  // private getPublicationCaptionText(publication: DocumentModelType, sectionTitle: string) {
-  //   const pubUser = this.stores.class.getUserById(publication.uid);
-  //   const userName = pubUser && pubUser.fullName || "";
-  //   return userName + "\n" + (sectionTitle.length ? (sectionTitle) : "");
-  // }
 
   private handleToggleExpansion = (sectionType: ENavTabSectionType) => {
     const isExpanded = this.state.showSection.get(sectionType);

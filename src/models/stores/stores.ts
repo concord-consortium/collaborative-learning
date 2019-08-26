@@ -1,3 +1,4 @@
+import { AppConfigModelType, AppConfigModel } from "./app-config";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
@@ -16,6 +17,8 @@ export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 export interface IStores {
   appMode: AppMode;
   appVersion: string;
+  appConfig: AppConfigModelType;
+  unit: UnitModelType;
   problem: ProblemModelType;
   user: UserModelType;
   ui: UIModelType;
@@ -23,34 +26,20 @@ export interface IStores {
   class: ClassModelType;
   documents: DocumentsModelType;
   db: DB;
-  unit: UnitModelType;
   demo: DemoModelType;
   showDemoCreator: boolean;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
 }
 
-export interface ICreateStores {
-  appMode?: AppMode;
-  appVersion?: string;
-  problem?: ProblemModelType;
-  user?: UserModelType;
-  ui?: UIModelType;
-  groups?: GroupsModelType;
-  class?: ClassModelType;
-  documents?: DocumentsModelType;
-  db?: DB;
-  showDemoCreator?: boolean;
-  unit?: UnitModelType;
-  demo?: DemoModelType;
-  supports?: SupportsModelType;
-}
+type ICreateStores = Partial<IStores>;
 
 export function createStores(params?: ICreateStores): IStores {
   const user = params && params.user || UserModel.create({ id: "0" });
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
+    appConfig: params && params.appConfig || AppConfigModel.create(),
     // for ease of testing, we create a null problem if none is provided
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
