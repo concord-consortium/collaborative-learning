@@ -336,12 +336,13 @@ export class DB {
     });
   }
 
-  public createPersonalDocument(title?: string) {
+  public createPersonalDocument(title?: string, documentModel?: DocumentModelType) {
     const {documents, user} = this.stores;
     const docTitle = title || documents.getNextPersonalDocumentTitle();
+    const content = documentModel && documentModel.content.publish();
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument({ type: PersonalDocument })
+      return this.createDocument({ type: PersonalDocument, content })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const personalDoc: DBPersonalDocument = {

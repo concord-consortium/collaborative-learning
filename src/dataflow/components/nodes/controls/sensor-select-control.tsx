@@ -89,7 +89,11 @@ export class SensorSelectControl extends Rete.Control {
           value={id}
           onChange={handleChange(onSensorChange)}
         >
-          <option value="none" className="sensor-option">none</option>
+          <option value="none" className="sensor-option" disabled={true} hidden={true}>Choose sensor</option>
+          {
+            (id !== "none" && !channels.find((ch: any) => ch.channelId === id)) &&
+            <option value={id} className="sensor-option" disabled={true} hidden={true}>{"Searching for " + id}</option>
+          }
           {channels ? channels.filter((ch: NodeChannelInfo) => (
             ch.type === type
           ))
@@ -171,14 +175,6 @@ export class SensorSelectControl extends Rete.Control {
 
   public setChannels = (channels: NodeChannelInfo[]) => {
     this.props.channels = channels;
-    if (this.node.data.sensor && this.node.data.sensor !== "none") {
-      if (!channels.find(ch => ch.channelId === this.node.data.sensor)) {
-        this.props.value = 0;
-        this.putData("nodeValue", 0);
-        this.props.sensor = "none";
-        this.putData("sensor", "none");
-      }
-    }
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
   }

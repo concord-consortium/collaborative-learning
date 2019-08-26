@@ -43,11 +43,13 @@ type NodeValue = number | NodeValueMap;
 interface NodeSequenceNameMap {
   [key: number]: string;
 }
+type ProgramRunStates = "ready" | "active" | "complete";
 
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
+  onStartProgram: (title: string, id: string, startTime: number, endTime: number) => void;
   onSetProgramRunId: (id: string) => void;
   programRunId: string;
   onSetProgramStartTime: (time: number) => void;
@@ -63,7 +65,7 @@ interface IProps extends SizeMeProps {
 
 interface IState {
   disableDataStorage: boolean;
-  isProgramRunning: boolean;
+  programRunState: ProgramRunStates;
   graphDataSet: DataSet;
   showGraph: boolean;
   editorContainerWidth: number;
@@ -91,7 +93,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       disableDataStorage: false,
-      isProgramRunning: false,
+      programRunState: "ready",
       graphDataSet: { sequences: [] },
       showGraph: false,
       editorContainerWidth: 0
@@ -106,15 +108,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
-            isRunEnabled={!this.state.isProgramRunning}
-            readOnly={this.props.readOnly || false}
+            isRunEnabled={this.state.programRunState === "ready"}
+            readOnly={this.props.readOnly || this.state.programRunState !== "ready"}
         />
         <div className="toolbar-editor-container">
           <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onDeleteClick={this.deleteSelectedNodes}
             isDataStorageDisabled={this.state.disableDataStorage}
-            disabled={this.props.readOnly || this.state.isProgramRunning}
+            disabled={this.props.readOnly || this.state.programRunState !== "ready"}
           />
           <div className="editor-graph-container">
             <div
@@ -125,15 +127,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={this.props.readOnly || this.state.isProgramRunning}
+                  disabled={this.props.readOnly || this.state.programRunState !== "ready"}
                 />
-                { (this.state.isProgramRunning || this.props.readOnly) &&
+                { (this.state.programRunState !== "ready" || this.props.readOnly) &&
                   <DataflowProgramCover
                     onStopProgramClick={this.stopProgram}
-                    runningProgram={this.state.isProgramRunning && !this.props.readOnly}
+                    runningProgram={this.state.programRunState === "active" && !this.props.readOnly}
+                    sideBySide={this.state.programRunState !== "ready"}
                   />
                 }
-              }
             </div>
             {this.state.showGraph && <DataflowProgramGraph dataSet={this.state.graphDataSet}/>}
           </div>
@@ -277,36 +279,43 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
-      const isProgramRunning = this.isProgramRunning();
-      if (isProgramRunning) {
-        this.setState({isProgramRunning: true, showGraph: true});
+      const programRunState: ProgramRunStates = this.programRunState();
+      if (programRunState !== "ready") {
+        this.setState({programRunState, showGraph: true});
+        this.updateGraphDataSet();
         this.sequenceNames = this.getNodeSequenceNames();
       }
+
     })();
   }
 
-  private isProgramRunning = () => {
-    return (Boolean(this.props.programRunId) && this.props.programEndTime > Date.now());
+  private programRunState = () => {
+    if (this.props.programRunId) {
+      return (this.props.programEndTime > Date.now() ? "active" : "complete");
+    } else {
+      return "ready";
+    }
   }
 
   private runProgram = () => {
     const programData: any = this.generateProgramData();
     uploadProgram(programData);
-    this.setState({isProgramRunning: true, showGraph: true});
     this.sequenceNames = this.getNodeSequenceNames();
   }
   private stopProgram = () => {
     deleteProgram(this.props.programEndTime);
     const programEndTime = Date.now();
     this.props.onSetProgramEndTime(programEndTime);
-    this.setState({isProgramRunning: false, showGraph: false});
+    this.setState({programRunState: "complete"});
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
   }
   private generateProgramData = () => {
-    const programName = "dataflow-program-" + Date.now();
+    const dateTimeSuffix = Date.now();
+    const programName = "dataflow-program-" + dateTimeSuffix;
     let interval: number =  1;
+    let datasetName = "";
     const programStartTime = Date.now();
     const programEndTime = programStartTime + (1000 * this.props.programRunTime);
 
@@ -334,6 +343,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
+        datasetName = n.data.datasetName as string;
+        datasetName += "-" + dateTimeSuffix;
       }
     });
     const rawProgram = this.programEditor.toJSON();
@@ -364,8 +375,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     };
 
-    this.props.onSetProgramRunId(programName);
-    this.props.onSetProgramStartEndTime(programStartTime, programEndTime);
+    this.props.onStartProgram(datasetName, programName, programStartTime, programEndTime);
 
     return programData;
   }
@@ -433,7 +443,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeRecentValues(n);
       }
     });
-    this.updateGraphDataSet();
+    if (this.state.programRunState === "active" && this.props.programRunId) {
+      this.updateGraphDataSet();
+    }
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
         // we need to abort any current processing and reprocess all
@@ -461,7 +473,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-    if (sensorSelect) {
+    if (sensorSelect && (this.state.programRunState !== "complete")) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
@@ -514,28 +526,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateGraphDataSet = () => {
-    if (this.state.isProgramRunning && this.props.programRunId) {
-      fetchProgramData(this.props.programRunId).then((result: any) => {
-        // make a new dataset
-        const graphDataSet: DataSet = { sequences: [] };
-        if (result.data) {
-          result.data.forEach((timeData: any) => {
-            timeData.values.forEach((value: any, i: number) => {
-              if (graphDataSet.sequences.length < (i + 1)) {
-                const name = this.sequenceNames[timeData.blockIds[i]];
-                const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: []};
-                graphDataSet.sequences.push(graphSequence);
-              }
-              const pt: DataPoint = { x: 0, y: 0 };
-              pt.x = timeData.time;
-              pt.y = value;
-              graphDataSet.sequences[i].data.push(pt);
-            });
+    fetchProgramData(this.props.programRunId).then((result: any) => {
+      // make a new dataset
+      const graphDataSet: DataSet = { sequences: [] };
+      if (result.data) {
+        result.data.forEach((timeData: any) => {
+          timeData.values.forEach((value: any, i: number) => {
+            if (graphDataSet.sequences.length < (i + 1)) {
+              const name = this.sequenceNames[timeData.blockIds[i]];
+              const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: []};
+              graphDataSet.sequences.push(graphSequence);
+            }
+            const pt: DataPoint = { x: 0, y: 0 };
+            pt.x = timeData.time;
+            pt.y = value;
+            graphDataSet.sequences[i].data.push(pt);
           });
-          this.setState ({ graphDataSet });
-        }
-      });
-    }
+        });
+        this.setState ({ graphDataSet });
+      }
+    });
   }
 
   private updateGeneratorNode = (n: Node) => {
@@ -557,9 +567,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateRunState = () => {
-    if (this.state.isProgramRunning) {
+    if (this.state.programRunState === "active") {
       if (Date.now() >= this.props.programEndTime) {
-        this.setState({isProgramRunning: false, showGraph: false});
+        this.setState({programRunState: "complete"});
       }
     }
   }
