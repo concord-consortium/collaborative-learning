@@ -15,6 +15,7 @@ $button-relay: $relay-orange
 $button-data-storage: $data-storage-orange
 
 $button-hover: $gray-light-hover
+$button-click: $gray-light-click
 $button-node: $gray-mid
 $button-node-outline: $gray-light
 $button-label-text: $gray-text
@@ -36,8 +37,11 @@ $button-label-text: $gray-text
     border: 0
     &:hover
       background-color: $button-hover
+    &:active
+      background-color: $button-click
 
     .label
+      font-family: 'museo500', lato, sans-serif
       text-align: center
       height: 13px
       font-size: 11px
@@ -46,13 +50,12 @@ $button-label-text: $gray-text
       font-stretch: normal
       line-height: normal
       letter-spacing: normal
-      text-align: center
       color: $button-label-text
       white-space: nowrap
 
     .icon-block
       position: relative
-      margin: auto
+      margin: 3px auto
       width: 29px
       height: 15px
       border-radius: 2px
