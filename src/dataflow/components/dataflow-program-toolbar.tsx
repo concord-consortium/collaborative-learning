@@ -29,7 +29,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
 
   public renderAddNodeButton(nodeType: string, i: number) {
     const handleAddNodeButtonClick = () => { this.props.onNodeCreateClick(nodeType); };
-    const iconClass = "icon-block " + nodeType.toLowerCase();
+    const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
     const nodeIcons = [];
     switch (nodeType) {
       case "Number":
