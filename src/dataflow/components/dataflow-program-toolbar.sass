@@ -1,21 +1,23 @@
 @import ../../components/vars
+@import ./dataflow-colors
 
 $toolbar-width: 79px
 
-$toolbar-background: #eeeeee
+$toolbar-background: $gray-light
 
-$button-sensor: #1c5bdc
-$button-number: #0084de
-$button-math: #218e35
-$button-logic: #40ae0d
-$button-transform: #8abf00
-$button-relay: #ed6a08
-$button-data-storage: #f99809
+$button-sensor: $sensor-blue
+$button-number: $number-blue
+$button-generator: $generator-blue
+$button-math: $math-green
+$button-logic: $logic-green
+$button-transform: $transform-green
+$button-relay: $relay-orange
+$button-data-storage: $data-storage-orange
 
-$button-hover: #dddddd
-$button-node: #bcbcbc
-$button-node-outline: #eeeeee
-$button-label-text: #242424
+$button-hover: $gray-mid-hover
+$button-node: $gray-mid
+$button-node-outline: $gray-light
+$button-label-text: $gray-text
 
 .program-toolbar
   flex: 0 0 $toolbar-width
@@ -60,6 +62,8 @@ $button-label-text: #242424
         background-color: $button-sensor
       &.number
         background-color: $button-number
+      &.generator
+        background-color: $button-generator
       &.math
         background-color: $button-math
       &.logic
