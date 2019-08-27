@@ -132,8 +132,11 @@ export class PlotControl extends Rete.Control {
       return options;
     };
 
+    const initial = node.data[key] || false;
+    node.data[key] = initial;
+
     this.props = {
-      showgraph: false,
+      showgraph: initial,
       onGraphButtonClick: () => {
         this.setGraph();
         // needed to force connections to update
@@ -144,6 +147,7 @@ export class PlotControl extends Rete.Control {
 
   public setGraph = () => {
     this.props.showgraph = !this.props.showgraph;
+    this.putData(this.key, this.props.showgraph);
     (this as any).update();
   }
 
