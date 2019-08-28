@@ -40,6 +40,8 @@ interface NodeValueMap {
 }
 type NodeValue = number | NodeValueMap;
 
+type NodeSequenceNameMap = Map<number, string>;
+
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
@@ -77,7 +79,7 @@ const MIN_ZOOM = .1;
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
-  private sequenceNames: Map<number, string>;
+  private sequenceNames: NodeSequenceNameMap;
   private intervalHandle: any;
   private programEditor: NodeEditor;
   private programEngine: any;
@@ -493,7 +495,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private getNodeSequenceNames = () => {
     // returns a map of input block ids to user-specified sequence names
-    const sequenceNames: Map<number, string> = new Map<number, string>();
+    const sequenceNames: NodeSequenceNameMap = new Map<number, string>();
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Data Storage" && n.inputs) {
         Array.from(n.inputs.values()).forEach((inp: Input) => {
