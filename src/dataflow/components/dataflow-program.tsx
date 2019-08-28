@@ -43,7 +43,12 @@ type NodeValue = number | NodeValueMap;
 interface NodeSequenceNameMap {
   [key: number]: string;
 }
-type ProgramRunStates = "ready" | "active" | "complete";
+
+enum ProgramRunStates {
+  Ready,
+  Running,
+  Complete
+}
 
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
@@ -93,7 +98,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       disableDataStorage: false,
-      programRunState: "ready",
+      programRunState: ProgramRunStates.Ready,
       graphDataSet: { sequences: [] },
       showGraph: false,
       editorContainerWidth: 0
@@ -108,15 +113,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
-            isRunEnabled={this.state.programRunState === "ready"}
-            readOnly={this.props.readOnly || this.state.programRunState !== "ready"}
+            isRunEnabled={this.isReady()}
+            readOnly={this.props.readOnly || !this.isReady()}
         />
         <div className="toolbar-editor-container">
           <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onDeleteClick={this.deleteSelectedNodes}
             isDataStorageDisabled={this.state.disableDataStorage}
-            disabled={this.props.readOnly || this.state.programRunState !== "ready"}
+            disabled={this.props.readOnly || !this.isReady()}
           />
           <div className="editor-graph-container">
             <div
@@ -127,13 +132,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={this.props.readOnly || this.state.programRunState !== "ready"}
+                  disabled={this.props.readOnly || !this.isReady()}
                 />
-                { (this.state.programRunState !== "ready" || this.props.readOnly) &&
+                { (!this.isReady() || this.props.readOnly) &&
                   <DataflowProgramCover
                     onStopProgramClick={this.stopProgram}
-                    runningProgram={this.state.programRunState === "active" && !this.props.readOnly}
-                    sideBySide={this.state.programRunState !== "ready"}
+                    runningProgram={this.isRunning() && !this.props.readOnly}
+                    sideBySide={!this.isReady()}
                   />
                 }
             </div>
@@ -279,8 +284,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
-      const programRunState: ProgramRunStates = this.programRunState();
-      if (programRunState !== "ready") {
+      const programRunState: ProgramRunStates = this.getRunState();
+      if (programRunState !== ProgramRunStates.Ready) {
         this.setState({programRunState, showGraph: true});
         this.updateGraphDataSet();
         this.sequenceNames = this.getNodeSequenceNames();
@@ -289,12 +294,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
-  private programRunState = () => {
+  private getRunState = () => {
     if (this.props.programRunId) {
-      return (this.props.programEndTime > Date.now() ? "active" : "complete");
+      return (this.props.programEndTime > Date.now() ? ProgramRunStates.Running : ProgramRunStates.Complete);
     } else {
-      return "ready";
+      return ProgramRunStates.Ready;
     }
+  }
+
+  private isReady = () => {
+    return (this.state.programRunState === ProgramRunStates.Ready);
+  }
+
+  private isRunning = () => {
+    return (this.state.programRunState === ProgramRunStates.Running);
+  }
+
+  private isComplete = () => {
+    return (this.state.programRunState === ProgramRunStates.Complete);
   }
 
   private runProgram = () => {
@@ -306,7 +323,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     deleteProgram(this.props.programEndTime);
     const programEndTime = Date.now();
     this.props.onSetProgramEndTime(programEndTime);
-    this.setState({programRunState: "complete"});
+    this.setState({programRunState: ProgramRunStates.Complete});
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
@@ -342,8 +359,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
-        datasetName = n.data.datasetName as string;
-        datasetName += "-" + programStartTime;
+        datasetName = `${n.data.datasetName as string}-${programStartTime}`;
       }
     });
     const rawProgram = this.programEditor.toJSON();
@@ -442,7 +458,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeRecentValues(n);
       }
     });
-    if (this.state.programRunState === "active" && this.props.programRunId) {
+    if (this.isRunning() && this.props.programRunId) {
       this.updateGraphDataSet();
     }
     if (processNeeded) {
@@ -472,7 +488,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-    if (sensorSelect && (this.state.programRunState !== "complete")) {
+    if (sensorSelect && (!this.isComplete())) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
@@ -566,9 +582,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateRunState = () => {
-    if (this.state.programRunState === "active") {
+    if (this.isRunning()) {
       if (Date.now() >= this.props.programEndTime) {
-        this.setState({programRunState: "complete"});
+        this.setState({programRunState: ProgramRunStates.Complete});
       }
     }
   }

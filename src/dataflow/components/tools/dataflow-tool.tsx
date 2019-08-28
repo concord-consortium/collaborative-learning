@@ -74,8 +74,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         const programRunDocument = DocumentModel.create(primaryDocumentSnapshot);
         // find the program tile (should only be 1) and apply the program run info
         programRunDocument.content.tileMap.forEach(tile => {
-          const programContent = tile.content as DataflowContentModelType;
-          if (programContent.program) {
+          if (tile.content.type === "Dataflow") {
+            const programContent = tile.content as DataflowContentModelType;
             programContent.setProgramRunId(id);
             programContent.setProgramStartEndTime(startTime, endTime);
           }
