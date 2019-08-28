@@ -40,7 +40,9 @@ interface NodeValueMap {
 }
 type NodeValue = number | NodeValueMap;
 
-type NodeSequenceNameMap = Map<number, string>;
+interface NodeSequenceNameMap {
+  [key: number]: string;
+}
 
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
@@ -494,8 +496,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private getNodeSequenceNames = () => {
-    // returns a map of input block ids to user-specified sequence names
-    const sequenceNames: NodeSequenceNameMap = new Map<number, string>();
+    // returns a mapping of input block ids to user-specified sequence names
+    const sequenceNames: NodeSequenceNameMap = {};
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Data Storage" && n.inputs) {
         Array.from(n.inputs.values()).forEach((inp: Input) => {
@@ -503,7 +505,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                          inp.connections[0].output.node && inp.connections[0].output.node.id;
           const sequenceName: unknown = n.data[inp.key.replace("num", "sequence")];
           if (nodeId && typeof sequenceName === "string") {
-            sequenceNames.set(nodeId, sequenceName);
+            sequenceNames[nodeId] = sequenceName;
           }
         });
       }
@@ -520,7 +522,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           result.data.forEach((timeData: any) => {
             timeData.values.forEach((value: any, i: number) => {
               if (graphDataSet.sequences.length < (i + 1)) {
-                const name = this.sequenceNames.get(timeData.blockIds[i]);
+                const name = this.sequenceNames[timeData.blockIds[i]];
                 const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: []};
                 graphDataSet.sequences.push(graphSequence);
               }
