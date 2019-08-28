@@ -38,14 +38,13 @@ $button-label-text: $gray-text
     outline: 0
     &:hover:not([disabled])
       background-color: $button-hover
-    &:active
+    &:active:not([disabled])
       background-color: $button-click
     &:disabled
       opacity: 0.6
 
 
     .label
-      font-family: 'museo500', lato, sans-serif
       text-align: center
       height: 13px
       font-size: 11px
