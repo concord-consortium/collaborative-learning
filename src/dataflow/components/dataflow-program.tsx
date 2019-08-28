@@ -2,7 +2,7 @@ import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without t
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import * as React from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun, observable } from "mobx";
@@ -39,6 +39,10 @@ interface NodeValueMap {
   [key: string]: NodeNameValuePair;
 }
 type NodeValue = number | NodeValueMap;
+
+interface NodeSequenceNameMap {
+  [key: number]: string;
+}
 
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
@@ -77,6 +81,7 @@ const MIN_ZOOM = .1;
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
+  private sequenceNames: NodeSequenceNameMap;
   private intervalHandle: any;
   private programEditor: NodeEditor;
   private programEngine: any;
@@ -275,6 +280,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const isProgramRunning = this.isProgramRunning();
       if (isProgramRunning) {
         this.setState({isProgramRunning: true, showGraph: true});
+        this.sequenceNames = this.getNodeSequenceNames();
       }
     })();
   }
@@ -287,6 +293,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const programData: any = this.generateProgramData();
     uploadProgram(programData);
     this.setState({isProgramRunning: true, showGraph: true});
+    this.sequenceNames = this.getNodeSequenceNames();
   }
   private stopProgram = () => {
     deleteProgram(this.props.programEndTime);
@@ -488,6 +495,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
+  private getNodeSequenceNames = () => {
+    // returns a mapping of input block ids to user-specified sequence names
+    const sequenceNames: NodeSequenceNameMap = {};
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Data Storage" && n.inputs) {
+        Array.from(n.inputs.values()).forEach((inp: Input) => {
+          const nodeId = inp.connections && inp.connections[0] && inp.connections[0].output &&
+                         inp.connections[0].output.node && inp.connections[0].output.node.id;
+          const sequenceName: unknown = n.data[inp.key.replace("num", "sequence")];
+          if (nodeId && typeof sequenceName === "string") {
+            sequenceNames[nodeId] = sequenceName;
+          }
+        });
+      }
+    });
+    return sequenceNames;
+  }
+
   private updateGraphDataSet = () => {
     if (this.state.isProgramRunning && this.props.programRunId) {
       fetchProgramData(this.props.programRunId).then((result: any) => {
@@ -497,8 +522,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           result.data.forEach((timeData: any) => {
             timeData.values.forEach((value: any, i: number) => {
               if (graphDataSet.sequences.length < (i + 1)) {
-                // WTD need to get the user-defined sequence name
-                const graphSequence: DataSequence = { name: timeData.blockIds[i], units: "my-units", data: []};
+                const name = this.sequenceNames[timeData.blockIds[i]];
+                const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: []};
                 graphDataSet.sequences.push(graphSequence);
               }
               const pt: DataPoint = { x: 0, y: 0 };
