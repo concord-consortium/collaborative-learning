@@ -35,21 +35,21 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
       case "Number":
       case "Sensor":
       case "Generator":
-        nodeIcons.push(<div className="icon-node right mid" />);
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         break;
       case "Math":
       case "Logic":
-        nodeIcons.push(<div className="icon-node left top" />);
-        nodeIcons.push(<div className="icon-node right mid" />);
-        nodeIcons.push(<div className="icon-node left bottom" />);
+        nodeIcons.push(<div className="icon-node left top" key={"icon-node-l-t" + i}/>);
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
+        nodeIcons.push(<div className="icon-node left bottom" key={"icon-node-l-b" + i}/>);
         break;
       case "Transform":
-        nodeIcons.push(<div className="icon-node left mid" />);
-        nodeIcons.push(<div className="icon-node right mid" />);
+        nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         break;
       case "Relay":
       case "Data Storage":
-        nodeIcons.push(<div className="icon-node left mid" />);
+        nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         break;
     }
     return (
