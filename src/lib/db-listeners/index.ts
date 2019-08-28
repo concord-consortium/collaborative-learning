@@ -4,12 +4,12 @@ import { DB } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
-import { DBPersonalDocumentsListener } from "./db-personal-docs-listener";
+import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
-import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, ProblemDocument } from "../../models/document/document";
+import { DocumentModelType, LearningLogDocument, PersonalDocument, ProblemDocument
+        } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
@@ -47,8 +47,8 @@ export class DBListeners {
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
   private problemDocumentsListener: DBProblemDocumentsListener;
-  private personalDocumentsListener: DBPersonalDocumentsListener;
-  private learningLogsListener: DBLearningLogsListener;
+  private personalDocumentsListener: DBOtherDocumentsListener;
+  private learningLogsListener: DBOtherDocumentsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
@@ -59,8 +59,8 @@ export class DBListeners {
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
     this.problemDocumentsListener = new DBProblemDocumentsListener(db);
-    this.personalDocumentsListener = new DBPersonalDocumentsListener(db);
-    this.learningLogsListener = new DBLearningLogsListener(db);
+    this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
+    this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);

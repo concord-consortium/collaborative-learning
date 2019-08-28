@@ -77,7 +77,21 @@ export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
 
-export interface DBPersonalDocument {
+// section documents [deprecated] and problem documents
+export interface DBDocument {
+  version: "1.0";
+  self: {
+    uid: string;
+    documentKey: string;
+    classHash: string;
+  };
+  content?: string;
+  changeCount?: number;
+  type: DBDocumentType;
+}
+
+// personal documents and learning logs
+export interface DBOtherDocument {
   version: "1.0";
   self: {
     uid: string;
@@ -87,6 +101,7 @@ export interface DBPersonalDocument {
   title: string;
 }
 
+// published section documents [deprecated] and problem documents
 export interface DBPublication {
   version: "1.0";
   self: {
@@ -99,17 +114,8 @@ export interface DBPublication {
   groupUserConnections: DBGroupUserConnections;
 }
 
-export interface DBLearningLog {
-  version: "1.0";
-  self: {
-    uid: string;
-    classHash: string;
-    documentKey: string;
-  };
-  title: string;
-}
-
-export interface DBOtherDocPublication {
+// published personal documents and learning logs
+export interface DBOtherPublication {
   version: "1.0";
   self: {
     classHash: string;
@@ -118,18 +124,6 @@ export interface DBOtherDocPublication {
   title: string;
   uid: string;
   originDoc: string;
-}
-
-export interface DBDocument {
-  version: "1.0";
-  self: {
-    uid: string;
-    documentKey: string;
-    classHash: string;
-  };
-  content?: string;
-  changeCount?: number;
-  type: DBDocumentType;
 }
 
 export interface DBClass {

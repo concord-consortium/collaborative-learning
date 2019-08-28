@@ -18,6 +18,8 @@ export const DocumentTypeEnum = types.enumeration("type",
               LearningLogDocument, PublicationDocument, PersonalPublication,
               LearningLogPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
+export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
+export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
 
 export const DocumentToolEnum = types.enumeration("tool",
                                   ["delete", "drawing", "geometry", "image", "select", "table", "text"]);
