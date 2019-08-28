@@ -35,10 +35,14 @@ $button-label-text: $gray-text
     height: 40px
     background-color: $toolbar-background
     border: 0
-    &:hover
+    outline: 0
+    &:hover:not([disabled])
       background-color: $button-hover
     &:active
       background-color: $button-click
+    &:disabled
+      opacity: 0.6
+
 
     .label
       font-family: 'museo500', lato, sans-serif
