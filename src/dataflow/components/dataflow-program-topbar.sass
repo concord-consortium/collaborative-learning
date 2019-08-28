@@ -1,4 +1,9 @@
 @import ../../components/vars
+@import ./vars
+
+$topbar-height: 44px
+$topbar-color: $gray-light
+$duration-label-back: $gray-mid
 
 .program-editor-topbar
   display: flex
@@ -6,5 +11,51 @@
   align-items: center
   justify-content: center
   width: 100%
-  flex: 0 0 $dataflow-topbar-height
-  background-color: $color3-4
+  flex: 0 0 $topbar-height
+  background-color: $topbar-color
+  border: solid 2px #ffffff
+
+  .duration
+    position: relative
+    width: 152px
+
+    .label-back
+      width: 70px
+      height: 28px
+      border-radius: 3px
+      border-top-right-radius: 0px
+      border-bottom-right-radius: 0px
+      background-color: $duration-label-back
+      padding: 6px 3px 5px 9px
+      .label
+        width: 58px
+        height: 17px
+        font-size: 14px
+        font-weight: 500
+        font-style: normal
+        font-stretch: normal
+        line-height: normal
+        letter-spacing: normal
+        text-align: right
+        color: white
+
+    .duration-options-back
+      position: absolute
+      right: 0px
+      top: 0px
+      padding: 2px
+      width: 84px
+      height: 28px
+      border-radius: 14px
+      border-top-left-radius: 0px
+      border-bottom-left-radius: 0px
+      background-color: $duration-label-back
+
+      .duration-options select
+        position: relative
+        width: 80px
+        height: 24px
+        border-radius: 12px
+        background-color: #ffffff
+        font-size: 11px
+        outline: 0

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ProgramRunTime } from "../utilities/node";
+import { HTMLSelect } from "@blueprintjs/core";
 
 import "./dataflow-program-topbar.sass";
 
@@ -18,19 +19,27 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   };
   return (
     <div className="program-editor-topbar">
-      <div>Duration:</div>
-      <select
-        onChange={handleSelectChange}
-        disabled={!props.isRunEnabled || props.readOnly}
-        defaultValue={props.programDefaultRunTime.toString()}
-      >
-        { props.programRunTimes.map((rt: ProgramRunTime) => (
-            <option key={rt.text} value={rt.val}>
-              {rt.text}
-            </option>
-          ))
-        }
-      </select>
+      <div className="duration">
+        <div className="label-back">
+          <div className="label">Duration</div>
+        </div>
+        <div className="duration-options-back">
+          <div className="duration-options">
+            <HTMLSelect className="duration-select"
+              onChange={handleSelectChange}
+              disabled={!props.isRunEnabled || props.readOnly}
+              value={props.programDefaultRunTime.toString()}
+            >
+              { props.programRunTimes.map((rt: ProgramRunTime) => (
+                  <option key={rt.text} value={rt.val}>
+                    {rt.text}
+                  </option>
+                ))
+              }
+            </HTMLSelect>
+          </div>
+        </div>
+      </div>
       <button
         onClick={props.onRunProgramClick}
         disabled={!props.isRunEnabled || props.readOnly}
