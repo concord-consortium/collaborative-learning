@@ -5,10 +5,11 @@ import "./dataflow-program-cover.sass";
 interface CoverProps {
   onStopProgramClick: () => void;
   runningProgram: boolean;
+  sideBySide: boolean;
 }
 
 export const DataflowProgramCover = (props: CoverProps) => {
-  const coverClass = props.runningProgram ? "cover" : "cover full";
+  const coverClass = props.sideBySide ? "cover" : "cover full";
   return (
     <div className={coverClass}>
       { props.runningProgram &&
