@@ -1,6 +1,24 @@
 @import ../../components/vars
+@import ./vars
 
-$toolbar-width: 90px
+$toolbar-width: 83px
+
+$toolbar-background: $gray-light
+
+$button-sensor: $sensor-blue
+$button-number: $number-blue
+$button-generator: $generator-blue
+$button-math: $math-green
+$button-logic: $logic-green
+$button-transform: $transform-green
+$button-relay: $relay-orange
+$button-data-storage: $data-storage-orange
+
+$button-hover: $gray-light-hover
+$button-click: $gray-light-click
+$button-node: $gray-mid
+$button-node-outline: $gray-light
+$button-label-text: $gray-text
 
 .program-toolbar
   flex: 0 0 $toolbar-width
@@ -8,4 +26,76 @@ $toolbar-width: 90px
   flex-direction: column
   border: solid 2px white
   border-radius: 0 $half-border-radius 0 0
-  background-color: $color3-4
+  background-color: $gray-light
+
+  button
+    text-align: center
+    align-content: center
+    width: 79px
+    height: 40px
+    background-color: $toolbar-background
+    border: 0
+    outline: 0
+    &:hover:not([disabled])
+      background-color: $button-hover
+    &:active:not([disabled])
+      background-color: $button-click
+    &:disabled
+      opacity: 0.6
+
+    .label
+      text-align: center
+      height: 13px
+      font-size: 11px
+      font-weight: 500
+      font-style: normal
+      font-stretch: normal
+      line-height: normal
+      letter-spacing: normal
+      color: $button-label-text
+      white-space: nowrap
+
+    .icon-block
+      position: relative
+      margin: 3px auto
+      width: 29px
+      height: 15px
+      border-radius: 2px
+      background-color: $button-sensor
+
+      &.sensor
+        background-color: $button-sensor
+      &.number
+        background-color: $button-number
+      &.generator
+        background-color: $button-generator
+      &.math
+        background-color: $button-math
+      &.logic
+        background-color: $button-logic
+      &.transform
+        background-color: $button-transform
+      &.relay
+        background-color: $button-relay
+      &.data-storage
+        background-color: $button-data-storage
+
+      .icon-node
+        position: absolute
+        width: 8px
+        height: 8px
+        border: 1px solid $button-node-outline
+        background-color: $button-node
+        border-radius: 8px
+        &.left
+          left: 0px
+          margin-left: -4px
+        &.right
+          right: 0px
+          margin-right: -4px
+        &.top
+          top: 0px
+        &.mid
+          top: 4px
+        &.bottom
+          bottom: 0px

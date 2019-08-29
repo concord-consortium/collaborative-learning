@@ -29,13 +29,37 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
 
   public renderAddNodeButton(nodeType: string, i: number) {
     const handleAddNodeButtonClick = () => { this.props.onNodeCreateClick(nodeType); };
+    const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
+    const nodeIcons = [];
+    switch (nodeType) {
+      case "Number":
+      case "Sensor":
+      case "Generator":
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
+        break;
+      case "Math":
+      case "Logic":
+        nodeIcons.push(<div className="icon-node left top" key={"icon-node-l-t" + i}/>);
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
+        nodeIcons.push(<div className="icon-node left bottom" key={"icon-node-l-b" + i}/>);
+        break;
+      case "Transform":
+        nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
+        nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
+        break;
+      case "Relay":
+      case "Data Storage":
+        nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
+        break;
+    }
     return (
       <button
         disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
         key={i}
         onClick={handleAddNodeButtonClick}
       >
-        {nodeType}
+        <div className={iconClass}>{nodeIcons}</div>
+        <div className="label">{nodeType}</div>
       </button>
     );
   }

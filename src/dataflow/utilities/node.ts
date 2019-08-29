@@ -1,9 +1,9 @@
 export const NodeTypes = [
   {
-    name: "Number",
+    name: "Sensor",
   },
   {
-    name: "Sensor",
+    name: "Number",
   },
   {
     name: "Generator",
