@@ -1,6 +1,6 @@
 import { DB } from "../db";
 import { DBOtherDocument, DBOtherPublication } from "../db-types";
-import { LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalPublication
+import { LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
         } from "../../models/document/document";
 
 export class DBOtherDocumentsListener {
@@ -18,7 +18,7 @@ export class DBOtherDocumentsListener {
   }
 
   public start() {
-    if (this.documentType === "personal") {
+    if (this.documentType === PersonalDocument) {
       this.publicationType = PersonalPublication;
       this.documentsPath = this.db.firebase.getUserPersonalDocPath(this.db.stores.user);
       this.publicationsPath = this.db.firebase.getClassPersonalPublicationsPath(this.db.stores.user);
@@ -54,7 +54,9 @@ export class DBOtherDocumentsListener {
     const dbDoc: DBOtherDocument|null = snapshot.val();
     if (dbDoc) {
       this.db.createDocumentModelFromOtherDocument(dbDoc, this.documentType)
-        .then(this.db.listeners.monitorPersonalDocument)
+        .then(this.documentType === PersonalDocument
+                ? this.db.listeners.monitorPersonalDocument
+                : this.db.listeners.monitorLearningLogDocument)
         .then(documents.add);
     }
   }

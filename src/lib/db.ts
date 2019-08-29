@@ -476,7 +476,7 @@ export class DB {
   }
 
   public createLearningLogDocument(title: string) {
-    const {user} = this.stores;
+    const {user, documents} = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
       return this.createDocument({ type: LearningLogDocument })
@@ -498,8 +498,7 @@ export class DB {
           Logger.log(LogEventName.CREATE_LEARNING_LOG, {
             title: learningLog.title
           });
-
-          return this.createDocumentModelFromOtherDocument(learningLog, LearningLogDocument);
+          return documents.getDocument(learningLog.self.documentKey);
         })
         .then(resolve)
         .catch(reject);

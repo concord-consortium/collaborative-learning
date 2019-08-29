@@ -8,7 +8,7 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, LearningLogDocument, PersonalDocument, ProblemDocument
+import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
         } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
@@ -172,44 +172,38 @@ export class DBListeners {
     this.documentModelDisposers[document.key] = disposer;
   }
 
-  public monitorPersonalDocument = (personalDocument: DocumentModelType) => {
+  public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
     const { user } = this.db.stores;
-    const { key } = personalDocument;
+    const { key } = document;
 
-    const listener = this.getOrCreateModelListener(`personalDocument:${key}`);
+    const listenerKey = type === PersonalDocument
+                          ? `personalDocument:${key}`
+                          : `learningLogWorkspace:${key}`;
+    const listener = this.getOrCreateModelListener(listenerKey);
     if (listener.modelDisposer) {
       listener.modelDisposer();
     }
 
-    const updateRef = this.db.firebase.ref(this.db.firebase.getUserPersonalDocPath(user, key));
-    listener.modelDisposer = (onSnapshot(personalDocument, (newDocument) => {
+    const updatePath = type === PersonalDocument
+                        ? this.db.firebase.getUserPersonalDocPath(user, key)
+                        : this.db.firebase.getLearningLogPath(user, key);
+    const updateRef = this.db.firebase.ref(updatePath);
+    listener.modelDisposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         title: newDocument.title,
         // TODO: for future ordering story add original to model and update here
       });
     }));
 
-    return personalDocument;
+    return document;
   }
 
-  public monitorLearningLogDocument = (learningLog: DocumentModelType) => {
-    const { user } = this.db.stores;
-    const { key } = learningLog;
+  public monitorPersonalDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, PersonalDocument);
+  }
 
-    const listener = this.getOrCreateModelListener(`learningLogWorkspace:${key}`);
-    if (listener.modelDisposer) {
-      listener.modelDisposer();
-    }
-
-    const updateRef = this.db.firebase.ref(this.db.firebase.getLearningLogPath(user, key));
-    listener.modelDisposer = (onSnapshot(learningLog, (newLearningLog) => {
-      updateRef.update({
-        title: newLearningLog.title,
-        // TODO: for future ordering story add original to model and update here
-      });
-    }));
-
-    return learningLog;
+  public monitorLearningLogDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, LearningLogDocument);
   }
 
   public monitorDocumentRef = (document: DocumentModelType) => {
