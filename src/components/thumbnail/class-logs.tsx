@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
-import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
+import { DocumentModelType, DocumentDragKey, LearningLogPublication } from "../../models/document/document";
 
 interface IProps extends IBaseProps {
   scale: number;
@@ -15,7 +15,7 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { documents } = this.stores;
-    const publications = documents.getLatestOtherPublications("learningLogPublication");
+    const publications = documents.getLatestOtherPublications(LearningLogPublication);
 
     return (
       <div className="class-logs">
@@ -41,8 +41,8 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
                   </div>
                 </div>
                 <div className="info">
-                  <div>{publication.title}</div>
                   <div>{user && user.displayName}</div>
+                  <div>{publication.title}</div>
                 </div>
               </div>
             );
