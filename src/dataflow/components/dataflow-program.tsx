@@ -284,9 +284,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
 
-      const programRunState: ProgramRunStates = this.getRunState();
-      if (programRunState !== ProgramRunStates.Ready) {
-        this.setState({programRunState, showGraph: true});
+      if (this.getRunState() !== ProgramRunStates.Ready) {
+        this.setState({programRunState: this.getRunState(), showGraph: true});
         this.updateGraphDataSet();
         this.sequenceNames = this.getNodeSequenceNames();
       }
@@ -488,7 +487,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-    if (sensorSelect && (!this.isComplete())) {
+    if (sensorSelect && !this.isComplete()) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
