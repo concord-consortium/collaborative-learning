@@ -15,7 +15,7 @@ export class ClassLogsComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { documents } = this.stores;
-    const publications = documents.getLatestLogPublications();
+    const publications = documents.getLatestOtherPublications("learningLogPublication");
 
     return (
       <div className="class-logs">

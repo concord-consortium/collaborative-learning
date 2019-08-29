@@ -34,7 +34,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     const { documents } = this.stores;
     const publications: DocumentModelType[] = [];
     publications.push(...documents.getLatestPublications(this.stores.class));
-    const personalPublications = documents.getLatestPersonalPublications();
+    const personalPublications = documents.getLatestOtherPublications("personalPublication");
 
     return (
       <div className="class-work">

@@ -84,14 +84,17 @@ export class Firebase {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
+  // Published learning logs
   public getClassPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;
   }
 
+  // Published personal documents
   public getClassPersonalPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/personalPublications`;
   }
 
+  // All documents associated with this user
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
@@ -115,11 +118,13 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
+  // Unpublished learning log
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
   }
 
+  // Unpublished personal document
   public getUserPersonalDocPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/personalDocs${suffix}`;
@@ -141,14 +146,17 @@ export class Firebase {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
+  // Unpublished problem document
   public getProblemDocumentPath(user: UserModelType, documentKey: string, userId?: string) {
     return `${this.getOfferingUserPath(user, userId)}/documents/${documentKey}`;
   }
 
+  // Unpublished problem documents
   public getProblemDocumentsPath(user: UserModelType, userId?: string) {
     return `${this.getOfferingUserPath(user, userId)}/documents`;
   }
 
+  // Unpublished section documents [deprecated]
   public getSectionDocumentPathDEPRECATED(user: UserModelType, sectionId?: string, userId?: string) {
     const suffix = sectionId ? `/${sectionId}` : "";
     return `${this.getOfferingUserPath(user, userId)}/sectionDocuments${suffix}`;
@@ -166,6 +174,7 @@ export class Firebase {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
+  // Published section/problem documents
   public getPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;
   }

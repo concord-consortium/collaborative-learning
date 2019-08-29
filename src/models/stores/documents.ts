@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, DocumentType, ProblemDocument } from "../document/document";
+import { DocumentModel, DocumentModelType, DocumentType,
+         OtherPublicationType, ProblemDocument } from "../document/document";
 import { ClassModelType } from "./class";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 
@@ -49,31 +50,10 @@ export const DocumentsModel = types
           return (document.type === ProblemDocument) && (document.groupId === groupId);
         });
       },
-
-      // Returns the most recently published learning logs per user, sorted by title
-      getLatestLogPublications() {
+      // Return the most recently published personal document or learning log per user, sorted by title
+      getLatestOtherPublications(type: OtherPublicationType) {
         const latestPublications: DocumentModelType[] = [];
-        byType("learningLogPublication")
-          .forEach((publication) => {
-            const originDoc = publication.originDoc;
-            const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
-            if (latestIndex === -1) {
-              latestPublications.push(publication);
-            }
-            else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
-              latestPublications[latestIndex] = publication;
-            }
-          });
-
-        return latestPublications.sort((pub1, pub2) => {
-          return (pub1.title || "").localeCompare(pub2.title || "");
-        });
-      },
-
-      // Return the most recently published personal document per user, sorted by title
-      getLatestPersonalPublications() {
-        const latestPublications: DocumentModelType[] = [];
-        byType("personalPublication")
+        byType(type)
           .forEach((publication) => {
             const originDoc = publication.originDoc;
             const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);

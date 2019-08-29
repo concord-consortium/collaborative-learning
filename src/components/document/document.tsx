@@ -429,7 +429,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                           ? "Personal Document"
                           : "Learning Log";
     db.publishOtherDocument(this.props.document)
-    .then(() => ui.alert("Your document was published.", `${documentType} Published`));
+      .then(() => ui.alert("Your document was published.", `${documentType} Published`));
   }
 
   private getSupportsWithIndices() {

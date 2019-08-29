@@ -432,9 +432,7 @@ export class DB {
           .then(() => {
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
-          .catch(error => {
-            reject(error);
-          });
+          .catch(reject);
       });
     });
   }

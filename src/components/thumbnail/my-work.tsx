@@ -49,10 +49,6 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private getPersonalDocTitle = (document: DocumentModelType) => {
-    return document.title || "";
-  }
-
   private getSectionTitle(sectionSpec: NavTabSectionSpec) {
     if (sectionSpec.title === "%abbrevInvestigation%") {
       const { unit, problem } = this.stores;
@@ -92,12 +88,11 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
 
         <div className={"list " + (isExpanded ? "shown" : "hidden")}>
           {userDocs.map((document, index) => {
-            const docTitle = this.getPersonalDocTitle(document);
             return (
               <ThumbnailDocumentItem
                 key={document.key} dataTestName="my-work-list-items"
                 canvasContext="my-work" document={document} scale={this.props.scale}
-                captionText={docTitle}
+                captionText={document.title || "Untitled"}
                 onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart} />
             );
           })}
