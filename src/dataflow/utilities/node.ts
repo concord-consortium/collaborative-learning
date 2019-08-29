@@ -243,34 +243,34 @@ export interface ProgramRunTime {
 export const DEFAULT_PROGRAM_TIME = 600;
 export const ProgramRunTimes: ProgramRunTime[] = [
   {
-    text: "1 Minute",
+    text: "1 min",
     val: 60
   },
   {
-    text: "5 Minutes",
+    text: "5 mins",
     val: 300
   },
   {
-    text: "10 Minutes",
+    text: "10 mins",
     val: 600
   },
   {
-    text: "30 Minutes",
+    text: "30 mins",
     val: 1800
   },
   {
-    text: "1 Hour",
+    text: "1 hour",
     val: 3600
   },
   // WTD disable these run times until we can enforce a minimum save-data interval
   // otherwise we risk flooding the server with data while testing, demoing, etc.
   /*
   {
-    text: "1 Day",
+    text: "1 day",
     val: 86400
   },
   {
-    text: "30 Days",
+    text: "30 days",
     val: 2592000
   },
   */

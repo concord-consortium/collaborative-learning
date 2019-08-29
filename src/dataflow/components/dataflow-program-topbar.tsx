@@ -24,28 +24,36 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           <div className="label">Duration</div>
         </div>
         <div className="duration-options-back">
-          <div className="duration-options">
-            <HTMLSelect className="duration-select"
-              onChange={handleSelectChange}
-              disabled={!props.isRunEnabled || props.readOnly}
-              value={props.programDefaultRunTime.toString()}
-            >
-              { props.programRunTimes.map((rt: ProgramRunTime) => (
-                  <option key={rt.text} value={rt.val}>
-                    {rt.text}
-                  </option>
-                ))
-              }
-            </HTMLSelect>
-          </div>
+          <HTMLSelect className="duration-options"
+            onChange={handleSelectChange}
+            disabled={!props.isRunEnabled || props.readOnly}
+            value={props.programDefaultRunTime.toString()}
+          >
+            { props.programRunTimes.map((rt: ProgramRunTime) => (
+                <option key={rt.text} value={rt.val}>
+                  {rt.text}
+                </option>
+              ))
+            }
+          </HTMLSelect>
         </div>
       </div>
       <button
+        className="program-state-button"
         onClick={props.onRunProgramClick}
         disabled={!props.isRunEnabled || props.readOnly}
       >
-        Run
+        <div className="icon run" />
+        <div className="text">Run</div>
+      </button>
+      <button
+        className="program-state-button"
+        disabled={props.isRunEnabled || !props.readOnly}
+      >
+        <div className="icon stop" />
+        <div className="text">Stop</div>
       </button>
     </div>
   );
+
 };
