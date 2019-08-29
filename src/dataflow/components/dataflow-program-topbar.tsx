@@ -6,10 +6,12 @@ import "./dataflow-program-topbar.sass";
 
 interface TopbarProps {
   onRunProgramClick: () => void;
+  onStopProgramClick: () => void;
   programRunTimes: ProgramRunTime[];
   programDefaultRunTime: number;
   onProgramTimeSelectClick: (type: number) => void;
   isRunEnabled: boolean;
+  runningProgram: boolean;
   readOnly: boolean;
 }
 
@@ -48,7 +50,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </button>
       <button
         className="program-state-button"
-        disabled={props.isRunEnabled || !props.readOnly}
+        onClick={props.onStopProgramClick}
+        disabled={!props.runningProgram || !props.readOnly}
       >
         <div className="icon stop" />
         <div className="text">Stop</div>
