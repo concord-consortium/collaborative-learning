@@ -110,10 +110,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
             onRunProgramClick={this.runProgram}
+            onStopProgramClick={this.stopProgram}
             onProgramTimeSelectClick={this.setProgramRunTime}
             programRunTimes={ProgramRunTimes}
             programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
             isRunEnabled={this.isReady()}
+            runningProgram={this.isRunning() && !this.props.readOnly}
             readOnly={this.props.readOnly || !this.isReady()}
         />
         <div className="toolbar-editor-container">
@@ -136,8 +138,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 />
                 { (!this.isReady() || this.props.readOnly) &&
                   <DataflowProgramCover
-                    onStopProgramClick={this.stopProgram}
-                    runningProgram={this.isRunning() && !this.props.readOnly}
                     sideBySide={!this.isReady()}
                   />
                 }

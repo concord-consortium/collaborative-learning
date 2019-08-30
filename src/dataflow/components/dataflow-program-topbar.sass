@@ -1,4 +1,9 @@
 @import ../../components/vars
+@import ./vars
+
+$topbar-height: 44px
+$topbar-color: $gray-light
+$duration-label-back: $gray-mid
 
 .program-editor-topbar
   display: flex
@@ -6,5 +11,101 @@
   align-items: center
   justify-content: center
   width: 100%
-  flex: 0 0 $dataflow-topbar-height
-  background-color: $color3-4
+  flex: 0 0 $topbar-height
+  background-color: $topbar-color
+  border: solid 2px #ffffff
+
+  .duration
+    position: relative
+    width: 152px
+
+    .label-back
+      width: 70px
+      height: 28px
+      border-radius: 3px
+      border-top-right-radius: 0px
+      border-bottom-right-radius: 0px
+      background-color: $duration-label-back
+      padding: 6px 3px 5px 9px
+      .label
+        width: 58px
+        height: 17px
+        font-size: 14px
+        font-weight: 500
+        font-style: normal
+        font-stretch: normal
+        line-height: normal
+        letter-spacing: normal
+        text-align: right
+        color: white
+
+    .duration-options-back
+      position: absolute
+      right: 0px
+      top: 0px
+      padding: 2px
+      width: 84px
+      height: 28px
+      border-radius: 14px
+      border-top-left-radius: 0px
+      border-bottom-left-radius: 0px
+      background-color: $duration-label-back
+
+      .duration-options select
+        position: relative
+        width: 80px
+        height: 24px
+        border-radius: 12px
+        background-color: #ffffff
+        font-size: 11px
+        outline: 0
+        &:disabled
+          cursor: default
+
+      .duration-options span
+        top: 9px
+        width: 0
+        height: 0
+        border-left: 4px solid transparent
+        border-right: 4px solid transparent
+        border-top: 6px solid $duration-label-back
+
+        svg
+          display: none
+
+  .program-state-button
+    position: relative
+    width: 70px
+    height: 28px
+    border-radius: 3px
+    border: solid 2px $gray-mid
+    background-color: #ffffff
+    margin: 0px 0px 0px 8px
+    outline: 0
+    &:hover:not([disabled])
+      background-color: $gray-light-hover
+    &:active:not([disabled])
+      background-color: $gray-light-click
+    &:disabled
+      opacity: 0.6
+
+    .icon
+      position: absolute
+      left: 4px
+      top: 3px
+      width: 18px
+      height: 18px
+      &.run
+        background-image: url("../../assets/run.svg")
+      &.stop
+        background-image: url("../../assets/stop.svg")
+
+    .text
+      position: absolute
+      right: 0
+      top: 3px
+      width: 48px
+      height: 16px
+      font-size: 14px
+      text-align: center
+      color: $gray-text
