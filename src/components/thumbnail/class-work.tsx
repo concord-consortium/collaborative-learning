@@ -4,7 +4,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
+import { DocumentModelType, DocumentDragKey, PersonalPublication } from "../../models/document/document";
 import { UserStarModel } from "../../models/tools/user-star";
 
 interface IProps extends IBaseProps {
@@ -13,6 +13,7 @@ interface IProps extends IBaseProps {
 
 interface IState {
   showPublishedDocuments: boolean;
+  showPersonalPublished: boolean;
   showStarredDocuments: boolean;
 }
 
@@ -24,6 +25,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       showPublishedDocuments: false,
+      showPersonalPublished: false,
       showStarredDocuments: false
     };
   }
@@ -32,30 +34,62 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     const { documents } = this.stores;
     const publications: DocumentModelType[] = [];
     publications.push(...documents.getLatestPublications(this.stores.class));
+    const personalPublications = documents.getLatestOtherPublications(PersonalPublication);
 
     return (
       <div className="class-work">
         <div className="header">Class Work</div>
         {this.renderPublishedDocuments(publications)}
+        {this.renderPublishedPersonalDocuments(personalPublications)}
         {this.renderStarredDocuments(publications)}
       </div>
     );
   }
 
   private renderPublishedDocuments = (publications: DocumentModelType[]) => {
-    const { user } = this.stores;
+    const { problem, user } = this.stores;
     const { scale } = this.props;
-    const sectionTitle = "Published";
     const isExpanded = this.state.showPublishedDocuments;
     return (
-      <div className="section published">
+      <div className="section personal-published">
         <CollapsibleSectionHeader
-          sectionTitle={sectionTitle} dataTestName="class-work-section"
+          sectionTitle="Published"
+          dataTestName="class-work-section"
           isExpanded={isExpanded} onClick={this.handlePublishedSectionClicked}/>
 
         <div className={"list " + (isExpanded ? "shown" : "hidden")}>
           {publications.map((publication) => {
-            const captionText = this.getPublicationCaptionText(publication, sectionTitle);
+            const captionText = this.getPublicationCaptionText(publication, problem.title);
+            const pubStar = !!publication.stars.find( star => star.uid === user.id && star.starred );
+            const onDocumentStarClick = user.type === "teacher" ? this.handleDocumentStarClick : undefined;
+            return (
+              <ThumbnailDocumentItem
+                key={publication.key} dataTestName="class-work-list-items"
+                canvasContext="class-work" document={publication} scale={scale}
+                captionText={captionText}
+                onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart}
+                isStarred={pubStar} onDocumentStarClick={onDocumentStarClick} />
+            );
+          })}
+          </div>
+      </div>
+    );
+  }
+
+  private renderPublishedPersonalDocuments = (publications: DocumentModelType[]) => {
+    const { user } = this.stores;
+    const { scale } = this.props;
+    const isExpanded = this.state.showPersonalPublished;
+    return (
+      <div className="section published">
+        <CollapsibleSectionHeader
+          sectionTitle="Published Personal Documents"
+          dataTestName="class-work-section"
+          isExpanded={isExpanded} onClick={this.handlePersonalPublishedSectionClicked}/>
+
+        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
+          {publications.map((publication) => {
+            const captionText = this.getPublicationCaptionText(publication, (publication.title || "Untitled"));
             const pubStar = !!publication.stars.find( star => star.uid === user.id && star.starred );
             const onDocumentStarClick = user.type === "teacher" ? this.handleDocumentStarClick : undefined;
             return (
@@ -109,7 +143,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
   private getPublicationCaptionText(publication: DocumentModelType, sectionTitle: string) {
     const pubUser = this.stores.class.getUserById(publication.uid);
     const userName = pubUser && pubUser.fullName || "";
-    return userName + (sectionTitle.length ? (": " +  sectionTitle) : "");
+    return userName + "\n" + (sectionTitle.length ? (sectionTitle) : "");
   }
 
   private handleDocumentClick = (publication: DocumentModelType) => {
@@ -124,6 +158,10 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private handlePublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
     this.setState((state) => ({ showPublishedDocuments: !state.showPublishedDocuments }));
+  }
+
+  private handlePersonalPublishedSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {
+    this.setState((state) => ({ showPersonalPublished: !state.showPersonalPublished }));
   }
 
   private handleStarredSectionClicked = (e: React.MouseEvent<HTMLDivElement>) => {

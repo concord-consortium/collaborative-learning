@@ -92,7 +92,7 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
               <ThumbnailDocumentItem
                 key={document.key} dataTestName="my-work-list-items"
                 canvasContext="my-work" document={document} scale={this.props.scale}
-                captionText={`Untitled-${index + 1}`}
+                captionText={document.title || "Untitled"}
                 onDocumentClick={this.handleDocumentClick} onDocumentDragStart={this.handleDocumentDragStart} />
             );
           })}

@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, DocumentType, ProblemDocument } from "../document/document";
+import { DocumentModel, DocumentModelType, DocumentType,
+         OtherPublicationType, ProblemDocument } from "../document/document";
 import { ClassModelType } from "./class";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 
@@ -49,11 +50,10 @@ export const DocumentsModel = types
           return (document.type === ProblemDocument) && (document.groupId === groupId);
         });
       },
-
-      // Returns the most recently published learning logs per user, sorted by title
-      getLatestLogPublications() {
+      // Return the most recently published personal document or learning log per user, sorted by title
+      getLatestOtherPublications(type: OtherPublicationType) {
         const latestPublications: DocumentModelType[] = [];
-        byType("learningLogPublication")
+        byType(type)
           .forEach((publication) => {
             const originDoc = publication.originDoc;
             const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
