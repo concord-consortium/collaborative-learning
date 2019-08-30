@@ -5,6 +5,39 @@
   top: 45px
   left: 95px
   display: flex
-  flex-direction: row
+  flex-direction: column
   align-items: center
   justify-content: center
+
+  button
+    width: 26px
+    height: 26px
+    line-height: 17px
+    padding: 0
+    font-size: 30px
+    color: #969696
+    background-color: #FEFEFE
+    border: 2px solid #bcbcbc
+    border-radius: 3px 3px 0 0
+
+    &:nth-child(1)
+      border-radius: 3px 3px 0 0
+      border-bottom-width: 1px
+
+    &:nth-child(2)
+      border-radius: 0 0 3px 3px
+      border-top-width: 1px
+
+    &::before  /** hack for vertical text alignment */
+      content: ""
+      vertical-align: middle
+      line-height: 20px
+
+    &:hover
+      border-color: #a8a8a8
+      color: #838383
+    &:active
+      border-color: #838383
+      color: #838383
+    &:focus
+      outline: none
