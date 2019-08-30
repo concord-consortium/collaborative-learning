@@ -31,6 +31,7 @@ export const NavTabSectionModel =
     dataTestHeader: "section-header",
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
+    properties: types.array(types.string),
     showStars: false,
     addDocument: false
   });

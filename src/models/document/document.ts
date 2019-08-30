@@ -72,6 +72,15 @@ export const DocumentModel = types
       return (self.type === PublicationDocument)
               || (self.type === LearningLogPublication)
               || (self.type === PersonalPublication);
+    },
+    get isStarred() {
+      return !!self.stars.find(star => star.starred);
+    },
+    isStarredByUser(userId: string) {
+      return !!self.stars.find(star => star.uid === userId && star.starred);
+    },
+    getUserStarAtIndex(index: number) {
+      return self.stars[index];
     }
   }))
   .actions((self) => ({
@@ -101,13 +110,7 @@ export const DocumentModel = types
       self.comments.set(tileId, comments);
     },
 
-    setUserStar(star: UserStarModelType) {
-      if (!self.stars.find( docStar => docStar.uid === star.uid )) {
-        self.stars.push(star);
-      }
-    },
-
-    updateUserStar(newStar: UserStarModelType) {
+    setUserStar(newStar: UserStarModelType) {
       const starIndex = self.stars.findIndex(star => star.uid === newStar.uid);
       if (starIndex >= 0) {
         self.stars[starIndex] = newStar;
@@ -116,14 +119,13 @@ export const DocumentModel = types
       }
     },
 
-    getUserStarAtIndex(index: number) {
-      return self.stars[index];
-    },
-
     toggleUserStar(userId: string) {
       const userStar = self.stars.find(star => star.uid === userId);
       if (userStar) {
         userStar.starred = !userStar.starred;
+      }
+      else {
+        self.stars.push(UserStarModel.create({ uid: userId }));
       }
     },
 

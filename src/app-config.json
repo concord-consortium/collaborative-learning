@@ -78,6 +78,7 @@
           "title": "Starred Personal Documents",
           "type": "starred-personal-documents",
           "documentTypes": ["personalPublication"],
+          "properties": ["starred"],
           "showStars": true
         },
         {
@@ -85,6 +86,7 @@
           "title": "Starred Problem Documents",
           "type": "starred-problem-documents",
           "documentTypes": ["publication"],
+          "properties": ["starred"],
           "showStars": true
         },
         {
@@ -92,6 +94,7 @@
           "title": "Starred Learning Logs",
           "type": "starred-learning-logs",
           "documentTypes": ["learningLogPublication"],
+          "properties": ["starred"],
           "showStars": true
         }
       ]

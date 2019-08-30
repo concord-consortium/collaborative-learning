@@ -71,17 +71,7 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   private handleDocumentStarClick = (document: DocumentModelType) => {
     const { user } = this.stores;
-    if (document) {
-      const userStar = document.stars.find(star => star.uid === user.id);
-      if (!userStar) {
-        const newStar = UserStarModel.create({
-          uid: user.id
-        });
-        document.setUserStar(newStar);
-      } else {
-        document.toggleUserStar(user.id);
-      }
-    }
+    document && document.toggleUserStar(user.id);
   }
 
 }

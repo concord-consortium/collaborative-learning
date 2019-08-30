@@ -1,4 +1,5 @@
 import * as React from "react";
+import { observer } from "mobx-react";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType } from "../../models/document/document";
@@ -45,13 +46,13 @@ function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, do
   return `${namePrefix}${title}`;
 }
 
-export const DocumentsSection = ({ tab, section, stores, scale,
+export const DocumentsSection = observer(({ tab, section, stores, scale,
                                   isExpanded, onToggleExpansion,
                                   onDocumentClick, onDocumentDragStart,
                                   onNewDocumentClick, onDocumentStarClick }: IProps) => {
     const sectionTitle = getSectionTitle(section, stores);
     const { documents, user } = stores;
-    const sectionDocs: DocumentModelType[] = [];
+    let sectionDocs: DocumentModelType[] = [];
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -61,6 +62,11 @@ export const DocumentsSection = ({ tab, section, stores, scale,
         sectionDocs.push(...documents.byType(type as any));
       }
     });
+    // filter by additional properties
+    if (section.properties && section.properties.length) {
+      const filterStarred = section.properties.indexOf("starred") >= 0;
+      sectionDocs = sectionDocs.filter(doc => !filterStarred || doc.isStarred);
+    }
 
     function handleSectionHeaderClick() {
       onToggleExpansion && onToggleExpansion(section.type);
@@ -88,11 +94,15 @@ export const DocumentsSection = ({ tab, section, stores, scale,
               onDocumentStarClick && onDocumentStarClick(document);
             }
 
-            const isStarred = section.showStars
-                                ? user.isTeacher
-                                  ? !!document.stars.find(star => star.uid === user.id && star.starred)
-                                  : !!document.stars.find(star => star.starred)
-                                : false;
+            // pass function so logic stays here but access occurs from child
+            // so that mobx-react triggers child render not parent render.
+            const onIsStarred = () => {
+              return section.showStars
+                      ? user.isTeacher
+                        ? document.isStarredByUser(user.id)
+                        : document.isStarred
+                      : false;
+            };
             const _handleDocumentStarClick = section.showStars && user.isTeacher
                                               ? handleDocumentStarClick
                                               : undefined;
@@ -102,7 +112,7 @@ export const DocumentsSection = ({ tab, section, stores, scale,
                 canvasContext={tab} document={document} scale={scale}
                 captionText={getDocumentCaption(section, stores, document)}
                 onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                isStarred={isStarred} onDocumentStarClick={_handleDocumentStarClick} />
+                onIsStarred={onIsStarred} onDocumentStarClick={_handleDocumentStarClick} />
             );
           })}
           {section.addDocument
@@ -111,7 +121,7 @@ export const DocumentsSection = ({ tab, section, stores, scale,
         </div>
       </div>
     );
-  };
+  });
 
 interface INewDocumentButtonProps {
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;

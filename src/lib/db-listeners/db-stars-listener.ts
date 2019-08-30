@@ -33,12 +33,8 @@ export class DBStarsListener {
       if (docModel) {
         forEach(dbDocStars, (userStar, starKey) => {
           const { uid, starred } = userStar;
-          const starModel = UserStarModel.create({
-            key: starKey,
-            uid,
-            starred
-          });
-          docModel.updateUserStar(starModel);
+          const starModel = UserStarModel.create({ key: starKey, uid, starred });
+          docModel.setUserStar(starModel);
         });
       }
     }
