@@ -14,7 +14,8 @@ context('Test bottom tabs', function(){
         canvas = new Canvas,
         graphToolTile = new GraphToolTile,
         textToolTile = new TextToolTile;
-    describe('Test learning log interaction with main canvas', function(){
+    // TODO: Learning logs has changed with new feature changes.
+    describe.skip('Test learning log interaction with main canvas', function(){
         it('will verify restore of already open canvas in main workspace after opening learning log', function(){
                 //Add a text tool and text
                 canvas.addTextTile();
