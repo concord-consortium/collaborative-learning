@@ -168,6 +168,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     return (
       <div className="other-doc titlebar">
+        {
+          document.type === "learningLogPublication"
+          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
+          : <div className="title" data-test="personal-doc-title">{document.title}</div>
+        }
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
@@ -175,11 +180,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             </div>
           }
         </div>
-        {
-          document.type === "learningLogPublication"
-          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
-          : <div className="title" data-test="personal-doc-title">{document.title}</div>
-        }
       </div>
     );
   }
