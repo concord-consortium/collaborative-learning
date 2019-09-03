@@ -136,3 +136,43 @@ $node-inner-width: 140px
       box-sizing: border-box
       flex: 1
       border-radius: 3px
+
+    .hr
+      border: 1px solid
+      width: 70%
+      margin: 8px 0
+
+    .inputs-outputs
+      width: $node-width
+      max-height: 30px
+      display: flex
+      align-items: center
+      justify-content: space-between
+
+      .inputs,.outputs
+        display: flex
+        flex-direction: column
+        justify-content: center
+
+      .inputs
+        min-width: 9px
+
+      .socket
+        width: 20px
+        height: 20px
+        margin-top: 1px
+        margin-bottom: 1px
+        margin-right: 1px
+
+      .output-controls
+        display: flex
+        justify-content: space-evenly
+        min-width: 151px
+
+    .decorated-inputs
+      width: $node-width
+
+  svg
+    path.main-path
+      stroke: $gray-mid-click
+      stroke-dasharray: 5

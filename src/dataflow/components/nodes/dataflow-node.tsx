@@ -3,26 +3,35 @@ import { Node, Socket, Control } from "rete-react-render-plugin";
 import "./dataflow-node.sass";
 
 export class DataflowNode extends Node {
+
   public render() {
     const { node, bindSocket, bindControl } = this.props;
-    const { outputs, controls, inputs, selected } = this.state;
+    const { outputs, controls, inputs } = this.state;
+
+    const settingsControls = controls.filter(isSettingControl);
+    const outputControls = controls.filter(isOutputControl);
+    const deleteControls = controls.filter(isDeleteControl);
+    const deleteControl = deleteControls && deleteControls.length ? deleteControls[0] : null;
+
+    const undecoratedInputs = inputs.filter(isDecoratedInput(false));
+    const decoratedInputs = inputs.filter(isDecoratedInput(true));
 
     return (
-      <div className={`node ${selected} ${node.name.toLowerCase().replace(/ /g, "-")}`}>
-        <div className="node-title">
-          {node.name}
-        </div>
-        {outputs.map((output: any) => (
-          <div className="node-output output" key={output.key}>
-            <Socket
-              type="output"
-              socket={output.socket}
-              io={output}
-              innerRef={bindSocket}
-            />
+      <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")}`}>
+        <div className="top-bar">
+          <div className="node-title">
+            {node.name}
           </div>
-        ))}
-        {controls.map((control: any) => (
+          {deleteControl &&
+            <Control
+              className="control"
+              key={deleteControl.key}
+              control={deleteControl}
+              innerRef={bindControl}
+            />
+          }
+        </div>
+        {settingsControls.map((control: any) => (
           <Control
             className="control"
             key={control.key}
@@ -30,27 +39,81 @@ export class DataflowNode extends Node {
             innerRef={bindControl}
           />
         ))}
-        {inputs.map((input: any) => (
-          <div className="input" key={input.key}>
-            <Socket
-              type="input"
-              socket={input.socket}
-              io={input}
-              innerRef={bindSocket}
-            />
-            {(!input.showControl() && input.name !== "sequence") && (
-              <div className="input-title">{input.name}</div>
-            )}
-            {(input.showControl() || input.name === "sequence") && (
+        {settingsControls.length > 0 &&
+          <div className="hr control-color" />
+        }
+        <div className="inputs-outputs">
+          <div className="inputs">
+            {undecoratedInputs.map((input: any) => (
+              <div className="input" key={input.key}>
+                <Socket
+                  type="input"
+                  socket={input.socket}
+                  io={input}
+                  innerRef={bindSocket}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="output-controls">
+            {outputControls.map((control: any) => (
+              <Control
+                className="control"
+                key={control.key}
+                control={control}
+                innerRef={bindControl}
+              />
+            ))}
+          </div>
+          <div className="outputs">
+            {outputs.map((output: any) => (
+              <div className="node-output output" key={output.key}>
+                <Socket
+                  type="output"
+                  socket={output.socket}
+                  io={output}
+                  innerRef={bindSocket}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="decorated-inputs">
+          {decoratedInputs.map((input: any) => (
+            <div className="input" key={input.key}>
+              <Socket
+                type="input"
+                socket={input.socket}
+                io={input}
+                innerRef={bindSocket}
+              />
               <Control
                 className="input-control"
                 control={input.control}
+                key={input.control.key}
                 innerRef={bindControl}
               />
-            )}
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
+}
+
+// all controls that are not the readouts of data (outputs) or delete
+function isSettingControl(control: any) {
+  return control.key !== "plot" && control.key !== "nodeValue" && control.key !== "delete";
+}
+
+function isOutputControl(control: any) {
+  return control.key === "plot" || control.key === "nodeValue";
+}
+
+function isDeleteControl(control: any) {
+  return control.key === "delete";
+}
+
+function isDecoratedInput(isDecorated: boolean) {
+  return (input: any) => !!input.control === isDecorated;
 }
