@@ -30,119 +30,119 @@ export const NodeOperationTypes = [
     name: "add",
     type: "math",
     method: (n1: number, n2: number) => n1 + n2,
-    numberSentence: (n1: number, n2: number) => `${n1} + ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} + ${n2} = `,
     icon: "icon-add"
   },
   {
     name: "subtract",
     type: "math",
     method: (n1: number, n2: number) => n1 - n2,
-    numberSentence: (n1: number, n2: number) => `${n1} - ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} - ${n2} = `,
     icon: "icon-subtract"
   },
   {
     name: "multiply",
     type: "math",
     method: (n1: number, n2: number) => n1 * n2,
-    numberSentence: (n1: number, n2: number) => `${n1} * ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} * ${n2} = `,
     icon: "icon-multiply"
   },
   {
     name: "divide",
     type: "math",
     method: (n1: number, n2: number) => n1 / n2,
-    numberSentence: (n1: number, n2: number) => `${n1} / ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
     icon: "icon-divide"
   },
   {
     name: "absolute value",
     type: "transform",
     method: (n1: number, n2: number) => Math.abs(n1),
-    numberSentence: (n1: number, n2: number) => `|${n1}| = `,
+    numberSentence: (n1: string, n2: string) => `|${n1}| = `,
     icon: "icon-absolute-value"
   },
   {
     name: "negation",
     type: "transform",
     method: (n1: number, n2: number) => 0 - n1,
-    numberSentence: (n1: number, n2: number) => `-(${n1}) = `,
+    numberSentence: (n1: string, n2: string) => `-(${n1}) = `,
     icon: "icon-negation"
   },
   {
     name: "not",
     type: "transform",
     method: (n1: number, n2: number) => n1 ? 0 : 1,
-    numberSentence: (n1: number, n2: number) => `!${n1} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
     icon: "icon-not"
   },
   {
     name: "greater than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),
-    numberSentence: (n1: number, n2: number) => `${n1} > ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} > ${n2} ⇒ `,
     icon: "icon-greater-than"
   },
   {
     name: "less than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 < n2),
-    numberSentence: (n1: number, n2: number) => `${n1} < ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} < ${n2} ⇒ `,
     icon: "icon-less-than"
   },
   {
     name: "greater than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 >= n2),
-    numberSentence: (n1: number, n2: number) => `${n1} >= ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} >= ${n2} ⇒ `,
     icon: "icon-greater-than-or-equal-to"
   },
   {
     name: "less than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 <= n2),
-    numberSentence: (n1: number, n2: number) => `${n1} <= ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} <= ${n2} ⇒ `,
     icon: "icon-less-than-or-equal-to"
   },
   {
     name: "equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 === n2),
-    numberSentence: (n1: number, n2: number) => `${n1} == ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} == ${n2} ⇒ `,
     icon: "icon-equal"
   },
   {
     name: "not equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 !== n2),
-    numberSentence: (n1: number, n2: number) => `${n1} != ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} != ${n2} ⇒ `,
     icon: "icon-not-equal"
   },
   {
     name: "and",
     type: "logic",
     method: (n1: number, n2: number) => n1 && n2 ? 1 : 0,
-    numberSentence: (n1: number, n2: number) => `${n1} && ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} && ${n2} ⇒ `,
     icon: "icon-and"
   },
   {
     name: "or",
     type: "logic",
     method: (n1: number, n2: number) => n1 || n2 ? 1 : 0,
-    numberSentence: (n1: number, n2: number) => `${n1} || ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} || ${n2} ⇒ `,
     icon: "icon-or"
   },
   {
     name: "nand",
     type: "logic",
     method: (n1: number, n2: number) => +(!(n1 && n2 ? 1 : 0)),
-    numberSentence: (n1: number, n2: number) => `${n1} nand ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} nand ${n2} ⇒ `,
     icon: "icon-nand"
   },
   {
     name: "xor",
     type: "logic",
     method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0)),
-    numberSentence: (n1: number, n2: number) => `${n1} xor ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} xor ${n2} ⇒ `,
     icon: "icon-xor"
   }
 ];

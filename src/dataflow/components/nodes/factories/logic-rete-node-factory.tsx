@@ -45,7 +45,14 @@ export class LogicReteNodeFactory extends DataflowReteNodeFactory {
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === logicOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, n2);
-      resultSentence = nodeOperationTypes.numberSentence(n1, n2) + result;
+
+      if (isNaN(result)) {
+        result = 0;
+      }
+
+      const n1Str = n1 === undefined ? "___" : "" + n1;
+      const n2Str = n2 === undefined ? "___" : "" + n2;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + result;
     }
 
     if (this.editor) {

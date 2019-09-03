@@ -44,7 +44,13 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === transformOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, 0);
-      resultSentence = nodeOperationTypes.numberSentence(n1, 0) + result;
+
+      if (isNaN(result)) {
+        result = 0;
+      }
+
+      const n1Str = n1 === undefined ? "___" : "" + n1;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, "") + result;
    }
 
     if (this.editor) {
