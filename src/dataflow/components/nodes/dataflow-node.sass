@@ -1,43 +1,127 @@
 @import ../../../components/vars
+@import ../vars
+
+$node-width: 176px
+$node-inner-width: 140px
 
 .flow-tool
   .node
-    min-width: 220px
-    &.sensor, &.number, &.generator
-      background-color: #0592AF
-      border-color: #C0E4EB
-    &.logic, &.math, &.transform
-      background-color: #2DA343
-      border-color: #CDE8D2
-    &.relay, &.data-storage
-      background-color: #E16D2F
-      border-color: #E09E7D
-    &.selected
-      border-color: $color2-4
+    display: flex
+    flex-direction: column
+    align-items: center
+    width: $node-width
+    min-width: $node-width
+    padding-bottom: 8px
+    border-radius: 5px
+    font-size: 11px
 
-    .node-title
-      font-size: 13px
-      color: white
-      padding: 4px
+    &.sensor
+      background-color: $sensor-blue
+      border-color: $sensor-blue-outline
+      .main-color
+        color: $sensor-blue
+      .control-color
+        color: $sensor-blue-control
+      .control-color-hoverable:hover
+        color: $sensor-blue-node
+    &.number
+      background-color: $number-blue
+      border-color: $number-blue-outline
+      .main-color
+        color: $number-blue
+      .control-color
+        color: $number-blue-control
+      .control-color-hoverable:hover
+        color: $number-blue-node
+    &.generator
+      background-color: $generator-blue
+      border-color: $generator-blue-outline
+      .main-color
+        color: $generator-blue
+      .control-color
+        color: $generator-blue-control
+      .control-color-hoverable:hover
+        color: $generator-blue-node
+    &.math
+      background-color: $math-green
+      border-color: $math-green-outline
+      .main-color
+        color: $math-green
+      .control-color
+        color: $math-green-control
+      .control-color-hoverable:hover
+        color: $math-green-node
+    &.logic
+      background-color: $logic-green
+      border-color: $logic-green-outline
+      .main-color
+        color: $logic-green
+      .control-color
+        color: $logic-green-control
+      .control-color-hoverable:hover
+        color: $logic-green-node
+    &.transform
+      background-color: $transform-green
+      border-color: $transform-green-outline
+      .main-color
+        color: $transform-green
+      .control-color
+        color: $transform-green-control
+      .control-color-hoverable:hover
+        color: $transform-green-node
+    &.relay
+      background-color: $relay-orange
+      border-color: $relay-orange-outline
+      .main-color
+        color: $relay-orange
+      .control-color
+        color: $relay-orange-control
+      .control-color-hoverable:hover
+        color: $relay-orange-node
+    &.data-storage
+      background-color: $data-storage-orange
+      border-color: $data-storage-orange-outline
+      .main-color
+        color: $data-storage-orange
+      .control-color
+        color: $data-storage-orange-control
+      .control-color-hoverable:hover
+        color: $data-storage-orange-node
+
+    .top-bar
+      display: flex
+      width: $node-inner-width
+      padding: 4px 0 2px 0
+
+      .node-title
+        font-size: 12px
+        font-weight: 500
+        text-align: left
+        color: white
 
     .node-output
-      background-color: red
       padding: 0
       margin: 0
-      height: 0px
+      height: 20px
 
     .control
-      padding: 2px 18px
+      padding: 3px
+      max-width: $node-inner-width
 
     select, input
-      width: 100%
       border-radius: 30px
       background-color: white
       padding: 2px 6px
       border: 1px solid #999
-      width: 170px
       font-weight: bold
-      font-size: 13px
       font-family: 'Lato', sans-serif
       &.sensor
         color: #0592AF
+
+    input
+      min-width: 0
+      width: 100%
+      height: 24px
+      box-sizing: border-box
+      flex: 1
+      border-radius: 3px
