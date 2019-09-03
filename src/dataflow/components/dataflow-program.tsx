@@ -128,6 +128,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         <div className="toolbar-editor-container">
           { !this.isGraphOnly() && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
+            onResetClick={this.resetNodes}
+            onClearClick={this.clearProgram}
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
           /> }

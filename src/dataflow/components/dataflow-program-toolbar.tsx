@@ -1,26 +1,35 @@
 import * as React from "react";
+import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { NodeTypes } from "../utilities/node";
+import { inject, observer } from "mobx-react";
 
 import "./dataflow-program-toolbar.sass";
 
 interface IProps {
   onNodeCreateClick: (type: string) => void;
+  onClearClick: () => void;
+  onResetClick: () => void;
   isDataStorageDisabled: boolean;
   disabled: boolean;
 }
 
-export class DataflowProgramToolbar extends React.Component<IProps, {}> {
+@inject("stores")
+@observer
+export class DataflowProgramToolbar extends BaseComponent<IProps, {}> {
   constructor(props: IProps) {
     super(props);
   }
 
   public render() {
+    const {appMode} = this.stores;
     return (
       <div className="program-toolbar" data-test="program-toolbar">
         { NodeTypes.map((nt: any, i: any) => (
             this.renderAddNodeButton(nt.name, i)
           ))
         }
+        { appMode === "qa" && <button onClick={this.props.onClearClick}>Clear</button> }
+        { appMode === "qa" && <button onClick={this.props.onResetClick}>Reset</button> }
       </div>
     );
   }
