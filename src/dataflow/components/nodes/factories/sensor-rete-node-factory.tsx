@@ -3,7 +3,7 @@ import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { SensorSelectControl } from "../controls/sensor-select-control";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 import { SensorValueControl } from "../controls/sensor-value-control";
 
 export class SensorReteNodeFactory extends DataflowReteNodeFactory {
@@ -17,8 +17,8 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       return node
         .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
-        .addControl(new PlotControl(this.editor, "plot", node))
         .addControl(new SensorValueControl(this.editor, "nodeValue", node, true))
+        .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addOutput(out1) as any;
     }
   }

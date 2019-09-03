@@ -5,7 +5,7 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { RelaySelectControl } from "../controls/relay-select-control";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class RelayReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -20,7 +20,7 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
       return node
         .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new PlotControl(this.editor, "plot", node))
+        .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addInput(inp1) as any;
     }
   }

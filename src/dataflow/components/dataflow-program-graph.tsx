@@ -2,7 +2,7 @@ import * as React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "./dataflow-program";
-import { NodePlotColors } from "./../utilities/node";
+import { ChartPlotColors } from "./../utilities/node";
 import "./dataflow-program-graph.sass";
 
 export interface DataPoint {
@@ -125,7 +125,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     const {dataSet} = this.props;
     if (dataSet) {
       dataSet.sequences.forEach((seq: DataSequence, i: number) => {
-        const plotColor = NodePlotColors[i % NodePlotColors.length];
+        const plotColor = ChartPlotColors[i % ChartPlotColors.length];
         const chartDataSet: ChartDataSets = {
           label: seq.name,
           backgroundColor: plotColor,

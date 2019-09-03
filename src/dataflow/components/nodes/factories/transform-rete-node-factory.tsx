@@ -6,7 +6,7 @@ import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class TransformReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -30,7 +30,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(inp1)
         .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new PlotControl(this.editor, "plot", node))
+        .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addOutput(out) as any;
       }
   }

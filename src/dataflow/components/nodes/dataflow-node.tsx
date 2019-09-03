@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
+import { DataflowNodePlot } from "./dataflow-node-plot";
 import "./dataflow-node.sass";
 
 export class DataflowNode extends Node {
@@ -15,6 +16,9 @@ export class DataflowNode extends Node {
 
     const undecoratedInputs = inputs.filter(isDecoratedInput(false));
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
+
+    const plotButton = controls.find((c: any) => c.key === "plot");
+    const showPlot = plotButton ? plotButton.props.showgraph : false;
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")}`}>
@@ -96,6 +100,10 @@ export class DataflowNode extends Node {
             </div>
           ))}
         </div>
+        <DataflowNodePlot
+          display={showPlot}
+          data={node}
+        />
       </div>
     );
   }

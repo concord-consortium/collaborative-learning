@@ -18,7 +18,7 @@ import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
-import { PlotControl } from "./nodes/controls/plot-control";
+import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
@@ -507,9 +507,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const recentValues: NodeValue[] = [recentValue];
       n.data.recentValues = recentValues;
     }
-    const plotControl = n.controls.get("plot") as PlotControl;
+    const plotControl = n.controls.get("plot") as PlotButtonControl;
     if (plotControl) {
-      (plotControl as any).update();
+      (n as any).update();
     }
   }
 

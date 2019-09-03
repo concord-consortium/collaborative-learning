@@ -4,7 +4,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { TextControl } from "../controls/text-control";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   private inputCount = 1;
