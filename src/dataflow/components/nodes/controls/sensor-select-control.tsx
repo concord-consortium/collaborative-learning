@@ -27,20 +27,35 @@ export class SensorSelectControl extends Rete.Control {
                                    sensor: string;
                                    value: number;
                                    onTypeChange: () => void;
-                                   onSensorChange: () => void;
-                                   onSensorClick: () => void;
-                                   onListClick: () => void;
-                                   showList: boolean
+                                   onSensorDropdownClick: () => void;
+                                   onSensorOptionClick: () => void;
+                                   onTypeDropdownClick: () => void;
+                                   onTypeOptionClick: () => void;
+                                   showTypeList: boolean;
+                                   showSensorList: boolean;
                                    channels: NodeChannelInfo[]
                                   }) => (
       <div className="sensor-box">
-        { renderSensorTypeList(compProps.type, compProps.showList, compProps.onSensorClick, compProps.onListClick) }
-        { renderSensorList(compProps.sensor, compProps.channels, compProps.type, compProps.onSensorChange)}
-        { renderSensorValue(compProps.value, compProps.sensor, compProps.channels, compProps.type)}
+        { renderSensorTypeList(
+            compProps.type,
+            compProps.showTypeList,
+            compProps.onTypeDropdownClick,
+            compProps.onTypeOptionClick
+          )
+        }
+        { renderSensorList(
+            compProps.sensor,
+            compProps.showSensorList,
+            compProps.channels,
+            compProps.type,
+            compProps.onSensorDropdownClick,
+            compProps.onSensorOptionClick
+          )
+        }
       </div>
     );
 
-    const renderSensorTypeList = (type: string, showList: boolean, onItemClick: any, onListClick: any) => {
+    const renderSensorTypeList = (type: string, showList: boolean, onDropdownClick: any, onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
       let icon = "";
@@ -50,7 +65,7 @@ export class SensorSelectControl extends Rete.Control {
       }
       return (
         <div className="node-select sensor-type" ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onItemClick)}>
+          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             <svg className="icon top">
               <use xlinkHref={icon}/>
             </svg>
@@ -63,9 +78,13 @@ export class SensorSelectControl extends Rete.Control {
           <div className="option-list">
             {NodeSensorTypes.map((val: any, i: any) => (
               <div
-              className={val.name === type ? "item sensor-type-option selected" : "item sensor-type-option selectable"}
+                className={
+                  val.type === type
+                    ? "item sensor-type-option selected"
+                    : "item sensor-type-option selectable"
+                }
                 key={i}
-                onMouseDown={onListClick(val.type)}
+                onMouseDown={onListOptionClick(val.type)}
               >
                 <svg className="icon">
                   <use xlinkHref={`#${val.icon}`}/>
@@ -79,64 +98,57 @@ export class SensorSelectControl extends Rete.Control {
       );
     };
 
-    const renderSensorList = (id: string, channels: NodeChannelInfo[], type: string, onSensorChange: any) => {
-      const selectRef = useRef<HTMLSelectElement>(null);
-      useStopEventPropagation(selectRef, "pointerdown");
-      return (
-        <select
-          ref={selectRef}
-          className="sensor-select"
-          value={id}
-          onChange={handleChange(onSensorChange)}
-        >
-          <option value="none" className="sensor-option" disabled={true} hidden={true}>Choose sensor</option>
-          {
-            (id !== "none" && !channels.find((ch: any) => ch.channelId === id)) &&
-            <option value={id} className="sensor-option" disabled={true} hidden={true}>{"Searching for " + id}</option>
-          }
-          {channels ? channels.filter((ch: NodeChannelInfo) => (
-            ch.type === type
-          ))
-          .map((ch: NodeChannelInfo, i: any) => (
-            renderSensorOption(i, ch, channels)
-          )) : null}
-        </select>
-      );
-    };
+    const renderSensorList = (
+        id: string,
+        showList: boolean,
+        channels: NodeChannelInfo[],
+        type: string,
+        onDropdownClick: any,
+        onListOptionClick: any) => {
+      const divRef = useRef<HTMLDivElement>(null);
+      useStopEventPropagation(divRef, "pointerdown");
 
-    const renderSensorOption = (i: number, ch: NodeChannelInfo, channels: NodeChannelInfo[]) => {
-      let count = 0;
-      channels.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
-      return (
-        <option key={i} value={ch.channelId} className="sensor-option">
-          {`${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`}
-        </option>
-      );
-    };
+      const channelsForType = channels.filter((ch: NodeChannelInfo) => (ch.type === type));
+      const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
-    const renderSensorValue = (value: number, id: string, channels: NodeChannelInfo[], type: string) => {
+      const getChannelString = (ch?: NodeChannelInfo | "none") => {
+        if (!ch && (!id || id === "none") || ch === "none") return "none";
+        if (!ch) return "Searching for " + id;
+        let count = 0;
+        channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
+        return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
+      };
+
+      const options = ["none", ...channelsForType];
       return (
-        <div className="value-container sensor-value">
-          {`${value} ${displayedUnits(id, channels, type)}`}
+        <div className="node-select sensor-select" ref={divRef}>
+          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
+            <div className="label">{getChannelString(selectedChannel)}</div>
+            <svg className="icon arrow">
+              <use xlinkHref="#icon-down-arrow"/>
+            </svg>
+          </div>
+          {showList ?
+          <div className="option-list">
+            {options.map((ch: NodeChannelInfo, i: any) => (
+              <div
+                className={
+                  (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
+                    ? "item sensor-type-option selected"
+                    : "item sensor-type-option selectable"
+                }
+                key={i}
+                onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
+              >
+                <div className="label">
+                  { getChannelString(ch) }
+                </div>
+              </div>
+            ))}
+          </div>
+          : null }
         </div>
       );
-    };
-
-    const displayedUnits = (id: string, channels: NodeChannelInfo[], type: string) => {
-      let units = "";
-      const sensor = channels.find((ch: any) => ch.channelId === id);
-      if (sensor && sensor.units) {
-        units = sensor.units;
-        units = units.replace(/_/g, "");
-        units = units.replace(/degrees/g, "°");
-        units = units.replace(/percent/g, "%");
-      } else {
-        const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
-        if (sensorType && sensorType.units) {
-          units = sensorType.units;
-        }
-      }
-      return units;
     };
 
     const initialType = node.data.type || "temperature";
@@ -152,23 +164,35 @@ export class SensorSelectControl extends Rete.Control {
       value: 0,
       onTypeChange: (v: any) => {
         this.setSensorType(v);
+        this.setSensor(null);
         this.emitter.trigger("process");
       },
-      onSensorChange: (v: any) => {
-        this.setSensor(v);
-        this.emitter.trigger("process");
-      },
-      onSensorClick: (v: any) => {
-        this.props.showList = !this.props.showList;
+      onSensorDropdownClick: (v: any) => {
+        this.props.showSensorList = !this.props.showSensorList;
+        this.props.showTypeList = false;
         (this as any).update();
       },
-      onListClick: (v: any) => () => {
-        this.props.showList = !this.props.showList;
+      onTypeDropdownClick: (v: any) => {
+        this.props.showTypeList = !this.props.showTypeList;
+        this.props.showSensorList = false;
+        (this as any).update();
+      },
+      onTypeOptionClick: (v: any) => () => {
+        this.props.showTypeList = !this.props.showTypeList;
+        this.props.showSensorList = false;
         (this as any).update();
         this.setSensorType(v);
         this.emitter.trigger("process");
       },
-      showList: false,
+      onSensorOptionClick: (v: any) => () => {
+        this.props.showSensorList = !this.props.showSensorList;
+        this.props.showTypeList = false;
+        (this as any).update();
+        this.setSensor(v);
+        this.emitter.trigger("process");
+      },
+      showSensorList: false,
+      showTypeList: false,
       channels: []
     };
   }

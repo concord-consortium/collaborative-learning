@@ -21,39 +21,71 @@ export class RelaySelectControl extends Rete.Control {
       return (e: any) => { onChange(e.target.value); };
     };
 
-    this.component = (compProps: { value: any; onChange: any; channels: NodeChannelInfo[] }) => (
+    this.component = (compProps: {
+        value: string;
+        showList: boolean;
+        channels: NodeChannelInfo[]
+        onRelayDropdownClick: () => void;
+        onRelayOptionClick: () => void; }) => (
       <div>
-        { renderRelayList(compProps.value, compProps.channels, compProps.onChange) }
+        { renderRelayList(
+            compProps.value,
+            compProps.showList,
+            compProps.channels,
+            compProps.onRelayDropdownClick,
+            compProps.onRelayOptionClick) }
       </div>
     );
 
-    const renderRelayList = (id: string, channels: NodeChannelInfo[], onRelayChange: any) => {
-      const selectRef = useRef<HTMLSelectElement>(null);
-      useStopEventPropagation(selectRef, "pointerdown");
-      return (
-        <select
-          ref={selectRef}
-          value={id}
-          onChange={handleChange(onRelayChange)}
-        >
-        <option value="none">none</option>
-        {channels ? channels.filter((ch: NodeChannelInfo) => (
-          ch.type === "relay"
-        ))
-        .map((ch: NodeChannelInfo, i: number) => (
-          renderRelayOption(i, ch, channels)
-        )) : null}
-      </select>
-      );
-    };
+    const renderRelayList = (
+        id: string,
+        showList: boolean,
+        channels: NodeChannelInfo[],
+        onDropdownClick: any,
+        onListOptionClick: any) => {
+      const divRef = useRef<HTMLDivElement>(null);
+      useStopEventPropagation(divRef, "pointerdown");
 
-    const renderRelayOption = (i: number, ch: NodeChannelInfo, channels: NodeChannelInfo[]) => {
-      let count = 0;
-      channels.forEach( c => { if (c.type === "relay" && ch.hubId === c.hubId) count++; } );
+      const channelsForType = channels.filter((ch: NodeChannelInfo) => (ch.type === "relay"));
+      const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
+
+      const getChannelString = (ch?: NodeChannelInfo | "none") => {
+        if (!ch && (!id || id === "none") || ch === "none") return "none";
+        if (!ch) return "Searching for " + id;
+        let count = 0;
+        channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
+        return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
+      };
+
+      const options = ["none", ...channelsForType];
       return (
-        <option key={i} value={ch.channelId}>
-          {`${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`}
-        </option>
+        <div className="node-select sensor-select" ref={divRef}>
+          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
+            <div className="label">{getChannelString(selectedChannel)}</div>
+            <svg className="icon arrow">
+              <use xlinkHref="#icon-down-arrow"/>
+            </svg>
+          </div>
+          {showList ?
+          <div className="option-list">
+            {options.map((ch: NodeChannelInfo, i: any) => (
+              <div
+                className={
+                  (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
+                    ? "item sensor-type-option selected"
+                    : "item sensor-type-option selectable"
+                }
+                key={i}
+                onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
+              >
+                <div className="label">
+                  { getChannelString(ch) }
+                </div>
+              </div>
+            ))}
+          </div>
+          : null }
+        </div>
       );
     };
 
@@ -63,7 +95,14 @@ export class RelaySelectControl extends Rete.Control {
     this.props = {
       readonly,
       value: initial,
-      onChange: (v: any) => {
+      showList: false,
+      onRelayDropdownClick: () => {
+        this.props.showList = !this.props.showList;
+        (this as any).update();
+      },
+      onRelayOptionClick: (v: any) => () => {
+        this.props.showList = false;
+        (this as any).update();
         this.setValue(v);
         this.emitter.trigger("process");
       },
