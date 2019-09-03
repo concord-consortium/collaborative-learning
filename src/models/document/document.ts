@@ -125,7 +125,7 @@ export const DocumentModel = types
         userStar.starred = !userStar.starred;
       }
       else {
-        self.stars.push(UserStarModel.create({ uid: userId }));
+        self.stars.push(UserStarModel.create({ uid: userId, starred: true }));
       }
     },
 

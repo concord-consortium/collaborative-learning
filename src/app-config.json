@@ -42,16 +42,15 @@
       "sections": [
         {
           "className": "section personal published",
-          "title": "Published Personal Documents",
+          "title": "Published Personal",
           "type": "published-personal-documents",
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "showStars": true
+          "documentTypes": ["personalPublication"]
         },
         {
           "className": "section problem published",
-          "title": "Published Problem Documents",
+          "title": "Published",
           "type": "published-problem-documents",
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
@@ -60,40 +59,17 @@
         },
         {
           "className": "section learning-log published",
-          "title": "Published Learning Logs",
+          "title": "Published Logs",
           "type": "published-learning-logs",
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
-          "documentTypes": ["learningLogPublication"],
-          "showStars": true
-        }
-      ]
-    },
-    {
-      "tab": "starred-work",
-      "label": "Starred",
-      "sections": [
-        {
-          "className": "section personal published starred",
-          "title": "Starred Personal Documents",
-          "type": "starred-personal-documents",
-          "documentTypes": ["personalPublication"],
-          "properties": ["starred"],
-          "showStars": true
+          "documentTypes": ["learningLogPublication"]
         },
         {
           "className": "section problem published starred",
-          "title": "Starred Problem Documents",
+          "title": "Starred",
           "type": "starred-problem-documents",
           "documentTypes": ["publication"],
-          "properties": ["starred"],
-          "showStars": true
-        },
-        {
-          "className": "section learning-log published starred",
-          "title": "Starred Learning Logs",
-          "type": "starred-learning-logs",
-          "documentTypes": ["learningLogPublication"],
           "properties": ["starred"],
           "showStars": true
         }
