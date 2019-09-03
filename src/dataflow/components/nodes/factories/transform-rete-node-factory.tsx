@@ -6,7 +6,7 @@ import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes } from "../../../utilities/node";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class TransformReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -14,11 +14,10 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
-
-      inp1.addControl(new NumControl(this.editor, "num1", node));
 
       const dropdownOptions = NodeOperationTypes
         .filter((nodeOp) => {
@@ -31,7 +30,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(inp1)
         .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new PlotControl(this.editor, "plot", node))
+        .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addOutput(out) as any;
       }
   }
@@ -45,7 +44,13 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === transformOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, 0);
-      resultSentence = nodeOperationTypes.numberSentence(n1, 0) + result;
+
+      if (isNaN(result)) {
+        result = 0;
+      }
+
+      const n1Str = n1 === undefined ? "___" : "" + n1;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, "") + result;
    }
 
     if (this.editor) {

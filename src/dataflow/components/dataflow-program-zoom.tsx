@@ -12,16 +12,16 @@ export const DataflowProgramZoom = (props: ZoomProps) => {
   return (
     <div className="program-editor-zoom">
       <button
-        onClick={props.onZoomOutClick}
-        disabled={props.disabled}
-      >
-        -
-      </button>
-      <button
         onClick={props.onZoomInClick}
         disabled={props.disabled}
       >
         +
+      </button>
+      <button
+        onClick={props.onZoomOutClick}
+        disabled={props.disabled}
+      >
+        -
       </button>
     </div>
   );

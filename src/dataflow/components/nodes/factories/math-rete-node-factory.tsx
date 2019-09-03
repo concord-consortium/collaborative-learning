@@ -2,11 +2,10 @@ import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
-import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes, roundNodeValue } from "../../../utilities/node";
-import { PlotControl } from "../controls/plot-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class MathReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -14,13 +13,11 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
-
-      inp1.addControl(new NumControl(this.editor, "num1", node));
-      inp2.addControl(new NumControl(this.editor, "num2", node));
 
       const dropdownOptions = NodeOperationTypes
         .filter((nodeOp) => {
@@ -33,7 +30,7 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(inp2)
         .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new PlotControl(this.editor, "plot", node))
+        .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addOutput(out) as any;
     }
   }
@@ -48,7 +45,14 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
     if (nodeOperationTypes) {
       result = nodeOperationTypes.method(n1, n2);
-      resultSentence = nodeOperationTypes.numberSentence(n1, n2) + roundNodeValue(result);
+
+      if (isNaN(result)) {
+        result = 0;
+      }
+
+      const n1Str = n1 === undefined ? "___" : "" + n1;
+      const n2Str = n2 === undefined ? "___" : "" + n2;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + roundNodeValue(result);
     }
 
     if (this.editor) {

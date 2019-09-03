@@ -30,119 +30,119 @@ export const NodeOperationTypes = [
     name: "add",
     type: "math",
     method: (n1: number, n2: number) => n1 + n2,
-    numberSentence: (n1: number, n2: number) => `${n1} + ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} + ${n2} = `,
     icon: "icon-add"
   },
   {
     name: "subtract",
     type: "math",
     method: (n1: number, n2: number) => n1 - n2,
-    numberSentence: (n1: number, n2: number) => `${n1} - ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} - ${n2} = `,
     icon: "icon-subtract"
   },
   {
     name: "multiply",
     type: "math",
     method: (n1: number, n2: number) => n1 * n2,
-    numberSentence: (n1: number, n2: number) => `${n1} * ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} * ${n2} = `,
     icon: "icon-multiply"
   },
   {
     name: "divide",
     type: "math",
     method: (n1: number, n2: number) => n1 / n2,
-    numberSentence: (n1: number, n2: number) => `${n1} / ${n2} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
     icon: "icon-divide"
   },
   {
     name: "absolute value",
     type: "transform",
     method: (n1: number, n2: number) => Math.abs(n1),
-    numberSentence: (n1: number, n2: number) => `|${n1}| = `,
+    numberSentence: (n1: string, n2: string) => `|${n1}| = `,
     icon: "icon-absolute-value"
   },
   {
     name: "negation",
     type: "transform",
     method: (n1: number, n2: number) => 0 - n1,
-    numberSentence: (n1: number, n2: number) => `-(${n1}) = `,
+    numberSentence: (n1: string, n2: string) => `-(${n1}) = `,
     icon: "icon-negation"
   },
   {
     name: "not",
     type: "transform",
     method: (n1: number, n2: number) => n1 ? 0 : 1,
-    numberSentence: (n1: number, n2: number) => `!${n1} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
     icon: "icon-not"
   },
   {
     name: "greater than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),
-    numberSentence: (n1: number, n2: number) => `${n1} > ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} > ${n2} ⇒ `,
     icon: "icon-greater-than"
   },
   {
     name: "less than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 < n2),
-    numberSentence: (n1: number, n2: number) => `${n1} < ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} < ${n2} ⇒ `,
     icon: "icon-less-than"
   },
   {
     name: "greater than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 >= n2),
-    numberSentence: (n1: number, n2: number) => `${n1} >= ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} >= ${n2} ⇒ `,
     icon: "icon-greater-than-or-equal-to"
   },
   {
     name: "less than or equal to",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 <= n2),
-    numberSentence: (n1: number, n2: number) => `${n1} <= ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} <= ${n2} ⇒ `,
     icon: "icon-less-than-or-equal-to"
   },
   {
     name: "equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 === n2),
-    numberSentence: (n1: number, n2: number) => `${n1} == ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} == ${n2} ⇒ `,
     icon: "icon-equal"
   },
   {
     name: "not equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 !== n2),
-    numberSentence: (n1: number, n2: number) => `${n1} != ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} != ${n2} ⇒ `,
     icon: "icon-not-equal"
   },
   {
     name: "and",
     type: "logic",
     method: (n1: number, n2: number) => n1 && n2 ? 1 : 0,
-    numberSentence: (n1: number, n2: number) => `${n1} && ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} && ${n2} ⇒ `,
     icon: "icon-and"
   },
   {
     name: "or",
     type: "logic",
     method: (n1: number, n2: number) => n1 || n2 ? 1 : 0,
-    numberSentence: (n1: number, n2: number) => `${n1} || ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} || ${n2} ⇒ `,
     icon: "icon-or"
   },
   {
     name: "nand",
     type: "logic",
     method: (n1: number, n2: number) => +(!(n1 && n2 ? 1 : 0)),
-    numberSentence: (n1: number, n2: number) => `${n1} nand ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} nand ${n2} ⇒ `,
     icon: "icon-nand"
   },
   {
     name: "xor",
     type: "logic",
     method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0)),
-    numberSentence: (n1: number, n2: number) => `${n1} xor ${n2} ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} xor ${n2} ⇒ `,
     icon: "icon-xor"
   }
 ];
@@ -229,12 +229,13 @@ export const roundNodeValue = (n: number) => {
   return Math.round(n * 1000) / 1000;
 };
 
-export const NodePlotColors = ["#0592AF", "#ebb93e", "#eb813e", "#df4a4a", "#e4448c",
+export const ChartPlotColors = ["#0592AF", "#ebb93e", "#eb813e", "#df4a4a", "#e4448c",
                                "#d355c1", "#b05ecb", "#ffd56d", "#ffa56d", "#f57676",
                                "#fa73b0", "#eb80dc", "#cd88e4", "#d49600", "#d45200",
                                "#c60e0e", "#cc0860", "#b81da1", "#8d27ad", "#8b989f",
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",
                                "#5d6e77", "#31bc5a", "#0caadd"];
+export const NodePlotColor = "#969696";
 
 export interface ProgramRunTime {
   text: string;

@@ -1,10 +1,15 @@
+
+@import ../../vars
+
 .node-select
-  font-size: 13px
-  font-weight: bold
-  color: #2DA343
-  width: 184px
+  color: black
+  // color: #2DA343
+  width: 140px
+  height: 24px
+  box-sizing: border-box
   &.sensor-type, &.generatorType
-    color: #0592AF
+    // color: #0592AF
+    margin-bottom: 6px
 
   .item
     display: flex
@@ -32,6 +37,8 @@
 
     .label
       vertical-align: middle
+      overflow: hidden
+      white-space: nowrap
 
     .icon
       position: static
@@ -48,12 +55,34 @@
         margin-left: auto
 
   .option-list
-    position: absolute
-    z-index: 1
-    left: 18px
-    top: 52px
-    width: 182px
+    position: relative
+    z-index: 2
+    left: 0
+    top: -6px
+    width: 140px
     border: 1px solid #1E90FF
     background-color: white
 
+  &.sensor-select
+    .option-list
+      width: 212px
+      text-align: left
+      padding: 3px
 
+
+.node-select
+  &.sensor-type
+    .icon
+      color: $sensor-blue
+  &.generatorType
+    .icon
+      color: $generator-blue
+  &.mathOperator
+    .icon
+      color: $math-green
+  &.transformOperator
+    .icon
+      color: $transform-green
+  &.logicOperator
+    .icon
+      color: $logic-green

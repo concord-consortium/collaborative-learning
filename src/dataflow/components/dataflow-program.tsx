@@ -18,7 +18,7 @@ import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
-import { PlotControl } from "./nodes/controls/plot-control";
+import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
@@ -121,7 +121,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         <div className="toolbar-editor-container">
           <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
-            onDeleteClick={this.deleteSelectedNodes}
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
           />
@@ -216,6 +215,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           await this.programEngine.abort();
           const programJSON = this.programEditor.toJSON();
           await this.programEngine.process(programJSON);
+          if (!this.getNodeCount("Data Storage")) {
+            this.setState({disableDataStorage: false});
+          }
           this.props.onProgramChange(programJSON);
         }
       );
@@ -409,16 +411,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
   }
-  private deleteSelectedNodes = () => {
-    const selectedNodes = this.programEditor.selected.list.slice();
-    this.programEditor.selected.clear();
-    selectedNodes.forEach((n: Node) => {
-      if (n.name === "Data Storage") {
-        this.setState({disableDataStorage: false});
-      }
-      this.programEditor.removeNode(n);
-    });
-  }
   private resetNodes = () => {
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.data.recentValues) {
@@ -515,9 +507,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const recentValues: NodeValue[] = [recentValue];
       n.data.recentValues = recentValues;
     }
-    const plotControl = n.controls.get("plot") as PlotControl;
+    const plotControl = n.controls.get("plot") as PlotButtonControl;
     if (plotControl) {
-      (plotControl as any).update();
+      (n as any).update();
     }
   }
 

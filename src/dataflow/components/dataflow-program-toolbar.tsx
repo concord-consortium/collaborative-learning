@@ -5,7 +5,6 @@ import "./dataflow-program-toolbar.sass";
 
 interface IProps {
   onNodeCreateClick: (type: string) => void;
-  onDeleteClick: () => void;
   isDataStorageDisabled: boolean;
   disabled: boolean;
 }
@@ -22,7 +21,6 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
             this.renderAddNodeButton(nt.name, i)
           ))
         }
-        <button onClick={this.props.onDeleteClick} disabled={this.props.disabled}>Delete</button>
       </div>
     );
   }
