@@ -20,9 +20,6 @@ export class LogicReteNodeFactory extends DataflowReteNodeFactory {
       const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
-      inp1.addControl(new NumControl(this.editor, "num1", node));
-      inp2.addControl(new NumControl(this.editor, "num2", node));
-
       const dropdownOptions = NodeOperationTypes
         .filter((nodeOp) => {
           return nodeOp.type === "logic";

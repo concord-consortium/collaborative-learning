@@ -16,7 +16,7 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
-      inp1.addControl(new NumControl(this.editor, "num1", node));
+
       return node
         .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
         .addControl(new ValueControl(this.editor, "nodeValue", node))

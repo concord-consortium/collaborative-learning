@@ -21,7 +21,6 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
       this.inputCount = 1;
       node.addControl(new TextControl(this.editor, "datasetName", node, "name", "my-dataset"));
       node.addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1));
-      node.addControl(new PlotControl(this.editor, "plot", node));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
         keys.forEach((key: string) => {

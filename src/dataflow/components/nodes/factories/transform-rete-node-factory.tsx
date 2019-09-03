@@ -19,8 +19,6 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
-      inp1.addControl(new NumControl(this.editor, "num1", node));
-
       const dropdownOptions = NodeOperationTypes
         .filter((nodeOp) => {
           return nodeOp.type === "transform";
