@@ -65,16 +65,16 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           : this.renderOverlappedGraphs()
         }
         <button className="graph-button program" onClick={this.handleShowProgramClick}>
-          { this.props.programVisible ? "graph" : "program" }
+          { this.props.programVisible ? "Graph" : "Program" }
         </button>
         <button className="graph-button type" onClick={this.handleTypeClick}>
-          { this.state.scatter ? "line" : "scatter" }
+          { this.state.scatter ? "Line" : "Scatter" }
         </button>
         <button className="graph-button layout" onClick={this.handleLayoutClick}>
-          { this.state.stacked ? "overlap" : "stack" }
+          { this.state.stacked ? "Combined" : "Stacked" }
         </button>
         <button className="graph-button data" onClick={this.handleDataModeClick}>
-          { this.state.allData ? "current data" : "all data" }
+          { this.state.allData ? "Current Data" : "All Data" }
         </button>
       </div>
     );

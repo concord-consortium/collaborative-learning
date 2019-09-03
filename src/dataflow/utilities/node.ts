@@ -229,8 +229,8 @@ export const roundNodeValue = (n: number) => {
   return Math.round(n * 1000) / 1000;
 };
 
-export const ChartPlotColors = ["#0592AF", "#ebb93e", "#eb813e", "#df4a4a", "#e4448c",
-                               "#d355c1", "#b05ecb", "#ffd56d", "#ffa56d", "#f57676",
+export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff3d3d",
+                               "#49d381", "#b05ecb", "#ffd56d", "#ffa56d", "#f57676",
                                "#fa73b0", "#eb80dc", "#cd88e4", "#d49600", "#d45200",
                                "#c60e0e", "#cc0860", "#b81da1", "#8d27ad", "#8b989f",
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",

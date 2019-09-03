@@ -1,10 +1,10 @@
-@import ../../components/vars
+@import ./vars
 
 .program-graph
   height: 100%
   width: 50%
   padding: 5px 5px 25px 5px
-  border: 2px solid $color7
+  border: 2px solid $data-storage-orange
   &.full
     width: 100%
 
@@ -26,15 +26,29 @@
     width: 100%
 
   .graph-button
+    font-family: 'Ubuntu', sans-serif
     position: absolute
-    bottom: 4px
+    bottom: 6px
     width: 60px
+    background-color: $data-storage-orange
+    color: white
+    font-size: 12px
+    font-style: normal
+    height: 24px
+    border: 0
+    outline: 0
+    border-radius: 3px
     &.program
-      right: 4px
+      right: 5px
     &.type
-      right: 69px
+      right: 70px
     &.layout
-      right: 134px
+      width: 70px
+      right: 135px
     &.data
-      right: 199px
+      right: 210px
       width: 90px
+    &:hover
+      background-color: $data-storage-orange-node
+    &:active
+      background-color: $data-storage-orange-control
