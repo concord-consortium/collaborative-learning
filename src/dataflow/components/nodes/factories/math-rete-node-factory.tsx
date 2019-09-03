@@ -14,6 +14,7 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       const inp2 = new Rete.Input("num2", "Number2", this.numSocket);

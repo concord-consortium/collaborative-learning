@@ -14,6 +14,7 @@ export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const out = new Rete.Output("num", "Number", this.numSocket);
       const dropdownOptions = NodeGeneratorTypes

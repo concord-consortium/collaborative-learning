@@ -14,6 +14,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);

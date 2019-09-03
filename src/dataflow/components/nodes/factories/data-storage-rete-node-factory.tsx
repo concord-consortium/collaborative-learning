@@ -16,6 +16,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       this.inputCount = 1;
       node.addControl(new TextControl(this.editor, "datasetName", node, "name", "my-dataset"));

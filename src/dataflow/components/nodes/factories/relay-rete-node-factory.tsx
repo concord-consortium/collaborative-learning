@@ -13,6 +13,7 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
       inp1.addControl(new NumControl(this.editor, "num1", node));

@@ -11,6 +11,7 @@ export class NumberReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       const ctrl = new NumControl(this.editor, "nodeValue", node);

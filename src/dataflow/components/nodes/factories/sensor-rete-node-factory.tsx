@@ -12,6 +12,7 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public builder(node: Node) {
+    super.defaultBuilder(node);
     if (this.editor) {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       return node
