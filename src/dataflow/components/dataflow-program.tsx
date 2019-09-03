@@ -121,7 +121,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         <div className="toolbar-editor-container">
           <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
-            onDeleteClick={this.deleteSelectedNodes}
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
           />
@@ -216,6 +215,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           await this.programEngine.abort();
           const programJSON = this.programEditor.toJSON();
           await this.programEngine.process(programJSON);
+          if (!this.getNodeCount("Data Storage")) {
+            this.setState({disableDataStorage: false});
+          }
           this.props.onProgramChange(programJSON);
         }
       );
@@ -408,16 +410,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private clearProgram = () => {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
-  }
-  private deleteSelectedNodes = () => {
-    const selectedNodes = this.programEditor.selected.list.slice();
-    this.programEditor.selected.clear();
-    selectedNodes.forEach((n: Node) => {
-      if (n.name === "Data Storage") {
-        this.setState({disableDataStorage: false});
-      }
-      this.programEditor.removeNode(n);
-    });
   }
   private resetNodes = () => {
     this.programEditor.nodes.forEach((n: Node) => {
