@@ -5,6 +5,7 @@
     "s+s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
   "defaultUnit": "s+s",
+  "defaultDocumentType": "problem",
   "rightNavTabs": [
     {
       "tab": "my-work",

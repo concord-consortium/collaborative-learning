@@ -8,6 +8,7 @@ export const AppConfigModel = types
     demoProblemTitle: "",
     units: types.map(types.string),
     defaultUnit: "",
+    defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel)
   });

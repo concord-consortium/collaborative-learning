@@ -126,7 +126,7 @@ export class Firebase {
     return `${this.getUserPath(user)}/${dir}${key}`;
   }
 
-// Unpublished learning log
+  // Unpublished learning log
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;

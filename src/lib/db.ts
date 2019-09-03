@@ -8,13 +8,12 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
   DBPublicationDocumentMetadata,
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
-  DBOtherPublication, DBOtherDocument } from "./db-types";
+  DBOtherDocument, DBOtherDocumentMap, DBOtherPublication } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
       } from "../models/document/document";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
-import { DocumentsModel } from "../models/stores/documents";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
@@ -202,19 +201,36 @@ export class DB {
     });
   }
 
-  public async guaranteeOpenProblemDocument() {
+  public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument) {
     const {user, documents} = this.stores;
-    const problemDocument = documents.getProblemDocument(user.id);
-    if (problemDocument) return problemDocument;
 
-    const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
-    const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
-    const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
-                                                                problemDocumentsSnapshot.val();
-    const firstProblemDocument = find(problemDocuments, () => true);
-    if (firstProblemDocument) return this.openProblemDocument(firstProblemDocument.documentKey);
+    // problem document
+    if (documentType === ProblemDocument) {
+      const problemDocument = documents.getProblemDocument(user.id);
+      if (problemDocument) return problemDocument;
 
-    return this.createProblemDocument();
+      const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
+      const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
+      const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
+                                                                  problemDocumentsSnapshot.val();
+      const firstProblemDocument = find(problemDocuments, () => true);
+      return firstProblemDocument
+              ? this.openProblemDocument(firstProblemDocument.documentKey)
+              : this.createProblemDocument();
+    }
+
+    // personal document
+    const personalDocument = documents.getPersonalDocument(user.id);
+    if (personalDocument) return personalDocument;
+
+    const personalDocumentsRef = this.firebase.ref(this.firebase.getUserPersonalDocPath(user));
+    const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
+    const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
+                                                  personalDocumentsSnapshot.val();
+    const firstPersonalDocument = find(personalDocuments, () => true);
+    return firstPersonalDocument
+      ? this.openOtherDocument(PersonalDocument, firstPersonalDocument.self.documentKey)
+      : this.createPersonalDocument();
   }
 
   public createProblemDocument() {
@@ -488,21 +504,22 @@ export class DB {
     });
   }
 
-  public openLearningLogDocument(documentKey: string) {
+  public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
     const { user } = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      const learningLogRef = this.firebase.ref(this.firebase.getLearningLogPath(user, documentKey));
-      return learningLogRef.once("value")
+      const documentPath = this.firebase.getOtherDocumentPath(user, documentType, documentKey);
+      const documentRef = this.firebase.ref(documentPath);
+      return documentRef.once("value")
         .then((snapshot) => {
-          const learningLog: DBOtherDocument|null = snapshot.val();
-          if (!learningLog) {
-            throw new Error("Unable to find learning log in db!");
+          const document: DBOtherDocument|null = snapshot.val();
+          if (!document) {
+            throw new Error("Unable to find specified document!");
           }
-          return learningLog;
+          return document;
         })
-        .then((learningLog) => {
-          return this.createDocumentModelFromOtherDocument(learningLog, LearningLogDocument);
+        .then((document) => {
+          return this.createDocumentModelFromOtherDocument(document, documentType);
         })
         .then(resolve)
         .catch(reject);
