@@ -63,15 +63,21 @@ export class SensorSelectControl extends Rete.Control {
       if (sensorType && sensorType.icon) {
         icon = `#${sensorType.icon}`;
       }
+
       return (
         <div className="node-select sensor-type" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <svg className="icon top">
-              <use xlinkHref={icon}/>
-            </svg>
-            <div className="label">{type}</div>
-            <svg className="icon arrow">
-              <use xlinkHref="#icon-down-arrow"/>
+            { type === "none"
+              ? <div className="label">Select a sensor type</div>
+              : <div className="top-item-holder">
+                  <svg className="icon top">
+                    <use xlinkHref={icon}/>
+                  </svg>
+                  <div className="label">{type}</div>
+                </div>
+            }
+            <svg className="icon dropdown-caret">
+              <use xlinkHref="#icon-dropdown-caret"/>
             </svg>
           </div>
           {showList ?
@@ -108,25 +114,33 @@ export class SensorSelectControl extends Rete.Control {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
 
-      const channelsForType = channels.filter((ch: NodeChannelInfo) => (ch.type === type));
+      const channelsForType = channels.filter((ch: NodeChannelInfo) => {
+        return (ch.type === type || (type === "none") && ch.type !== "relay");
+      });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        if (!ch && (!id || id === "none") || ch === "none") return "none";
-        if (!ch) return "Searching for " + id;
+        if (!ch && (!id || id === "none")) return "Select a sensor";
+        if (ch === "none") return "None Available";
+        if (!ch) return "Finding " + id;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
       };
 
-      const options = ["none", ...channelsForType];
+      const options: any = [...channelsForType];
+      if (!options.length) {
+        options.push("none");
+      }
       return (
         <div className="node-select sensor-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             <div className="label">{getChannelString(selectedChannel)}</div>
-            <svg className="icon arrow">
-              <use xlinkHref="#icon-down-arrow"/>
-            </svg>
+            <div className="dropdown-caret-holder">
+              <svg className="icon dropdown-caret">
+                <use xlinkHref="#icon-dropdown-caret"/>
+              </svg>
+            </div>
           </div>
           {showList ?
           <div className="option-list">
@@ -151,7 +165,7 @@ export class SensorSelectControl extends Rete.Control {
       );
     };
 
-    const initialType = node.data.type || "temperature";
+    const initialType = node.data.type || "none";
     const initialSensor = node.data.sensor || "none";
     node.data.type = initialType;
     node.data.sensor = initialSensor;
@@ -214,6 +228,11 @@ export class SensorSelectControl extends Rete.Control {
   public setSensor = (val: any) => {
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
     this.setSensorValue(nch ? nch.value : 0);
+
+    if (nch && nch.type && this.getData("type") !== nch.type) {
+      this.props.type = nch.type;
+      this.putData("type", nch.type);
+    }
 
     this.props.sensor = val;
     this.putData("sensor", val);

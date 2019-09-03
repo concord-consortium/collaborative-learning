@@ -55,12 +55,12 @@ export class DropdownListControl extends Rete.Control {
               <use xlinkHref={icon}/>
             </svg>
             <div className="label">{val}</div>
-            <svg className="icon arrow">
-              <use xlinkHref="#icon-down-arrow"/>
+            <svg className="icon dropdown-caret">
+              <use xlinkHref="#icon-dropdown-caret"/>
             </svg>
           </div>
           {showList ?
-          <div className="option-list">
+          <div className={`option-list ${listClass}`}>
             {options.map((ops: any, i: any) => (
               <div
                 className={ops.name === val ? `item ${listClass} selected` : `item ${listClass} selectable`}

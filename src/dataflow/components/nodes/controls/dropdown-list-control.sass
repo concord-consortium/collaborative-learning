@@ -16,41 +16,66 @@
     align-items: center
     height: 24px
     background-color: white
+    padding: 0 0 0 4px
     &.top
       padding: 0 6px 0 6px
       margin-bottom: 5px
       border-radius: 30px
       border: 1px solid #999
     &.selected
-      background-color: #2DA343
-      color: white
-      &.sensor-type-option, &.generatorType
-        background-color: #0592AF
+      &.sensor-type-option
+        background-color: $sensor-blue-control
+      &.relay-type-option
+        background-color: $relay-orange-control
+      &.generatorType
+        background-color: $generator-blue-control
+      &.mathOperator
+        background-color: $math-green-control
+      &.logicOperator
+        background-color: $logic-green-control
+      &.transformOperator
+        background-color: $transform-green-control
     &.selectable
       &:hover
-        background-color: #2DA343
-        color: white
-        &.sensor-type-option, &.generatorType
-          background-color: #0592AF
+        &.sensor-type-option
+          background-color: $sensor-blue-outline
+        &.relay-type-option
+          background-color: $relay-orange-outline
+        &.generatorType
+          background-color: $generator-blue-outline
+        &.mathOperator
+          background-color: $math-green-outline
+        &.logicOperator
+          background-color: $logic-green-outline
+        &.transformOperator
+          background-color: $transform-green-outline
       &:hover .icon
         fill: white
+
+    .top-item-holder
+      display: flex
 
     .label
       vertical-align: middle
       overflow: hidden
       white-space: nowrap
+      margin-right: 2px;
+
+    .dropdown-caret-holder
+      margin-left: 2px
+      margin-left: auto
 
     .icon
       position: static
       z-index: 0
-      width: 18px
-      height: 18px
-      margin: 0 4px 0 4px
+      width: 14px
+      height: 14px
+      margin: 0 4px 0 0
       &.top
         margin: 0 2px 0 0
-      &.arrow
-        width: 6px
-        height: 6px
+      &.dropdown-caret
+        width: 7px
+        height: 5px
         margin-right: 0px
         margin-left: auto
 
@@ -62,27 +87,42 @@
     width: 140px
     border: 1px solid #1E90FF
     background-color: white
+    &.logicOperator
+      width: 160px
 
   &.sensor-select
     .option-list
       width: 212px
       text-align: left
-      padding: 3px
-
 
 .node-select
-  &.sensor-type
+  &.sensor-type, &.sensor-select
     .icon
       color: $sensor-blue
+      &.dropdown-caret
+        fill: $sensor-blue
   &.generatorType
     .icon
       color: $generator-blue
+      &.dropdown-caret
+        fill: $generator-blue
   &.mathOperator
     .icon
       color: $math-green
+      &.dropdown-caret
+        fill: $math-green
   &.transformOperator
     .icon
       color: $transform-green
+      &.dropdown-caret
+        fill: $transform-green
   &.logicOperator
     .icon
       color: $logic-green
+      &.dropdown-caret
+        fill: $logic-green
+  &.relay-select
+    .icon
+      color: $relay-orange
+      &.dropdown-caret
+        fill: $relay-orange
