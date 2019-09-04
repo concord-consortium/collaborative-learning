@@ -79,42 +79,42 @@
                       },
                       "program": [
                         {
-                          "id": "temp-id",
+                          "id": "1",
                           "name": "Sensor",
                           "data": { "type": "temperature" },
-                          "outputs": [{ "num": [{ "add-id": "num1" }] }],
+                          "outputs": [{ "num": [{ "3": "num1" }] }],
                           "position": [ 5, 0 ]
                         },
                         {
-                          "id": "two-id",
+                          "id": "2",
                           "name": "Number",
                           "data": { "nodeValue": 2 },
-                          "outputs": [{ "num": [{ "add-id": "num2" }] }],
+                          "outputs": [{ "num": [{ "3": "num2" }] }],
                           "position": [ 5, 160 ]
                         },
                         {
-                          "id": "add-id",
+                          "id": "3",
                           "name": "Math",
                           "data": { "mathOperator": "add" },
-                          "outputs": [{ "num": [{ "compare-id": "num1" }] }],
+                          "outputs": [{ "num": [{ "4": "num1" }] }],
                           "position": [ 250, 0 ]
                         },
                         {
-                          "id": "compare-id",
+                          "id": "4",
                           "name": "Logic",
                           "data": { "logicalOperator": "equals" },
                           "inputs": [{ "num2": 5 }],
                           "position": [ 500, 0 ]
                         },
                         {
-                          "id": "generator-id",
+                          "id": "5",
                           "name": "Generator",
                           "data": { "generatorType": "sine", "amplitude": 1, "period": 10 },
-                          "outputs": [{ "num": [{ "transform-id": "num1" }] }],
+                          "outputs": [{ "num": [{ "6": "num1" }] }],
                           "position": [ 5, 260 ]
                         },
                         {
-                          "id": "transform-id",
+                          "id": "6",
                           "name": "Transform",
                           "data": { "transformOperator": "absolute value" },
                           "position": [ 250, 270 ]
