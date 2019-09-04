@@ -59,6 +59,124 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private renderTeacherHeader(userTitle: string | undefined) {
+    const { investigation, user } = this.stores;
+    return (
+      <div className="app-header">
+        <div className="left">
+          <div className="problem" data-test="investigation-title">
+            {investigation.title}
+          </div>
+          <div>
+            {this.renderProblemPopover()}
+          </div>
+        </div>
+        <div className="middle">
+          {this.renderPanelButtons()}
+        </div>
+        <div className="right">
+          <div className="class" data-test="user-class">
+            {this.renderClassPopover()}
+          </div>
+          <div className="name" title={userTitle} data-test="user-name">
+            {user.name}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderClassPopover() {
+    const { user } = this.stores;
+    return (
+      <Popover className="problemMenu"
+        content={this.renderClassMenu(user.className)} position={Position.RIGHT_TOP}>
+        <Button text={user.className} />
+      </Popover>
+    );
+  }
+
+  private renderClassMenu(currentClassName: string) {
+    const { user } = this.stores;
+    let key = 0;
+    const handleMenuItem = (e: React.MouseEvent) => {
+      // tslint:disable-next-line:no-console
+      console.log(`Class menu selection: ${(e.target as HTMLElement).innerText}`);
+    };
+    if (user.portalClasses.length <= 0) {
+      // If we don't have a list of classes, populate the menu with with this
+      // class, at least. Otherwise, it makes for an ugly, empty menu.
+      return (
+        <Menu>
+          <MenuItem key={key++} text={user.className} active={true} />
+        </Menu>
+      );
+    }
+    return (
+      <Menu>
+        {user.portalClasses.map( c => <MenuItem key={key++} text={c.className}
+        active={c.className === currentClassName} onClick={handleMenuItem} />)}
+      </Menu>
+    );
+  }
+
+  private renderProblemPopover() {
+    const { problem } = this.stores;
+    return (
+      <Popover className="problemMenu" content={this.renderProblemMenu(problem.title)}
+        position={Position.RIGHT_TOP}>
+        <Button text={problem.title} />
+      </Popover>
+    );
+  }
+
+  private renderProblemMenu(currentProblemTitle: string) {
+    const { unit, user } = this.stores;
+    const investigations = unit.investigations;
+    interface IMenuListItem {
+      isAssigned: boolean;
+      title: string;
+      link: string;
+    }
+    const menuList: IMenuListItem[] = [];
+    let key = 0;
+    investigations.forEach( (investigation) => {
+      const problems = investigation.problems;
+      problems.forEach( (problem) => {
+        const portalProblem = user.portalProblems.find( (pid) =>
+          pid.problemDesignator === `${investigation.ordinal}.${problem.ordinal}`);
+        if (portalProblem) {
+          menuList.push({ isAssigned: true, title: problem.title, link: portalProblem.switchUrlLocation });
+        }
+        else {
+          menuList.push({ isAssigned: false, title: problem.title + " -NA-", link: ""});
+        }
+      });
+    });
+    const handleMenuItem = (link: string, isActive: boolean) => {
+      return ( (e: React.MouseEvent<HTMLElement>) => {
+        const newLink = window.location.origin + window.location.pathname + link;
+        if (link && link !== "" && ! isActive) {
+          window.location.replace(newLink);
+        }
+      });
+    };
+    return (
+      <Menu>
+        {
+          menuList.map( menuItem =>
+            <MenuItem key={key++}
+                      text={menuItem.title}
+                      onClick={handleMenuItem(menuItem.link, menuItem.title === currentProblemTitle)}
+                      disabled={! menuItem.isAssigned}
+                      active={menuItem.title === currentProblemTitle}
+            />
+          )
+        }
+      </Menu>
+    );
+  }
+
   private renderPanelButtons() {
     const { panels } = this.props;
     if (!panels || (panels.length < 2)) return;

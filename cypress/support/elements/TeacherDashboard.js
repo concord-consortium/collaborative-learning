@@ -6,10 +6,14 @@ class TeacherDashboard {
         return cy.get('#teacher-dashboard-groups');
     }
     getGroupList(){
-        return cy.get('.teacher-group-tab > .group-list')
+        return cy.get('.teacher-group-tab > .teacher-group-six-pack')
     }
     getGroupName(){
         return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-title');
+    }
+    // For the new ( 2019-09-06 ) 6-Pack Teacher Dashboard.
+    getGroupNameNew(){
+        return cy.get('.teacher-group-tab > .teacher-group-six-pack .group-label');
     }
     getStudentList(){
         return cy.get('.teacher-student-tab > .user-list')
