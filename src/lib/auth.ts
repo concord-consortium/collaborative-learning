@@ -4,6 +4,7 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
+import { IPortalClass, IPortalProblem } from "../models/stores/user";
 
 const initials = require("initials");
 
@@ -52,17 +53,6 @@ export interface RawUser {
 
 export type AuthenticatedUser = StudentUser | TeacherUser;
 
-interface PortalClass {
-  className: string;
-  classHash: string;
-  classUri: string;
-}
-
-interface PortalProblem {
-  problemDesignator: string;   // Dot-separated ordinal values, like, "1.2".
-  switchUrlLocation: string;
-}
-
 interface User {
   id: string;
   portal: string;
@@ -77,8 +67,8 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  portalClasses?: PortalClass[];
-  portalProblems?: PortalProblem[];
+  portalClasses?: IPortalClass[];
+  portalProblems?: IPortalProblem[];
 }
 
 export interface StudentUser extends User {
@@ -462,8 +452,8 @@ const getPortalProblems = (
     userId: number,
     domain: string,
     rawPortalJWT: any,
-    urlParams?: QueryParams): Promise<PortalProblem[] | undefined> => {
-  return new Promise<PortalProblem[] | undefined>((resolve, reject) => {
+    urlParams?: QueryParams): Promise<IPortalProblem[] | undefined> => {
+  return new Promise<IPortalProblem[] | undefined>((resolve, reject) => {
     if (userType === "teacher" && urlParams && urlParams.class) {
       superagent
       .get(`${domain}api/v1/offerings/?user_id=${userId}`)
@@ -477,7 +467,7 @@ const getPortalProblems = (
             res.body.filter( (activity: any) =>
               `${activity.clazz_id}` === classId &&
               /^https:\/\/collaborative-learning/.test(activity.activity_url) );
-          const portalProblems: PortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
+          const portalProblems: IPortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
             return (
               {
                 problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
@@ -499,8 +489,8 @@ const getPortalProblems = (
   });
 };
 
-const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<PortalClass[]> => {
-  return new Promise<PortalClass[]>((resolve, reject) => {
+const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<IPortalClass[]> => {
+  return new Promise<IPortalClass[]>((resolve, reject) => {
     if (userType === "teacher" && urlParams && urlParams.class) {
       const url = urlParams.class.replace(/classes\/\d*$/, "classes/mine");
       superagent
