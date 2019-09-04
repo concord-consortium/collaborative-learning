@@ -115,7 +115,7 @@ export class SensorSelectControl extends Rete.Control {
       useStopEventPropagation(divRef, "pointerdown");
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
-        return (ch.type === type || (type === "none") && ch.type !== "relay");
+        return (ch.type === type) || (type === "none" && ch.type !== "relay");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
