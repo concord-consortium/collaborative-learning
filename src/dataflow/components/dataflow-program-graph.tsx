@@ -27,7 +27,7 @@ interface IProps {
 interface IState {
   stacked: boolean;
   scatter: boolean;
-  allData: boolean;
+  fullRun: boolean;
 }
 
 export class DataflowProgramGraph extends React.Component<IProps, IState> {
@@ -36,7 +36,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     this.state = {
       stacked: true,
       scatter: true,
-      allData: true,
+      fullRun: true,
     };
   }
 
@@ -49,8 +49,8 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     this.setState({scatter});
   }
   public handleDataModeClick = () => {
-    const allData = !this.state.allData;
-    this.setState({allData});
+    const fullRun = !this.state.fullRun;
+    this.setState({fullRun});
   }
   public handleShowProgramClick = () => {
     this.props.onToggleShowProgram();
@@ -74,7 +74,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           { this.state.stacked ? "Combined" : "Stacked" }
         </button>
         <button className="graph-button data" onClick={this.handleDataModeClick}>
-          { this.state.allData ? "Current Data" : "All Data" }
+          { this.state.fullRun ? "All Data" : "Full Run" }
         </button>
       </div>
     );
@@ -181,9 +181,13 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     const {dataSet} = this.props;
     let dataMin = 0;
     let dataMax = 0;
-    if (this.state.allData) {
+    if (this.state.fullRun) {
       dataMin = this.props.dataSet ? this.props.dataSet.startTime : 0;
       dataMax = this.props.dataSet ? this.props.dataSet.endTime : 0;
+      // final point might be greater than end time
+      if (dataSet.sequences.length) {
+        dataMax = Math.max(dataMax, dataSet.sequences[0].data[dataSet.sequences[0].data.length - 1].x);
+      }
     } else {
       if (dataSet.sequences.length) {
         dataMin = dataSet.sequences[0].data[0].x;
