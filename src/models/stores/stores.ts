@@ -10,12 +10,14 @@ import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
 export interface IStores {
   appMode: AppMode;
   appVersion: string;
+  investigation: InvestigationModelType;
   problem: ProblemModelType;
   user: UserModelType;
   ui: UIModelType;
@@ -33,6 +35,7 @@ export interface IStores {
 export interface ICreateStores {
   appMode?: AppMode;
   appVersion?: string;
+  investigation?: InvestigationModelType;
   problem?: ProblemModelType;
   user?: UserModelType;
   ui?: UIModelType;
@@ -52,6 +55,8 @@ export function createStores(params?: ICreateStores): IStores {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
     // for ease of testing, we create a null problem if none is provided
+    investigation: params && params.investigation || InvestigationModel.create({
+      ordinal: 0, title: "Null Investigation"}),
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
     ui: params && params.ui || UIModel.create({
