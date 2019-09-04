@@ -7,8 +7,8 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, ProblemDocument
-       } from "../../models/document/document";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, PersonalDocument,
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -65,6 +65,14 @@ const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGCli
         <use xlinkHref={`#icon-share`} />
       </svg>
     </div>
+  );
+};
+
+const NewDocButton = ({ onClick }: { onClick: SVGClickHandler }) => {
+  return (
+    <svg key="new" className={`action icon icon-new`} onClick={onClick}>
+      <use xlinkHref={`#icon-new`} />
+    </svg>
   );
 };
 
@@ -194,6 +202,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
+              <NewDocButton key="new" onClick={this.handleNewDocumentClick} />
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishOtherDocument} />
             </div>
           }
@@ -419,6 +428,29 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       FileSaver.saveAs(blobJson, "tile-content.json");
     }
     clipboard.clear();
+  }
+
+  private handleNewDocumentClick = () => {
+    const documentType = this.props.document.isPersonal ? PersonalDocument : LearningLogDocument;
+    const docTypeString = this.props.document.isPersonal ? "Personal Document" : "Learning Log";
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, documentType);
+    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
+      .then((title: string) => {
+        this.handleNewDocumentOpen(title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleNewDocumentOpen = async (title: string) => {
+    const { db } = this.stores;
+    const docType = this.props.document.isPersonal;
+    const newDocument = await db.createOtherDocument((docType
+                        ? PersonalDocument
+                        : LearningLogDocument),
+                        {title});
+    if (newDocument) {
+      this.props.workspace.setAvailableDocument(newDocument);
+    }
   }
 
   private handlePublishWorkspace = () => {
