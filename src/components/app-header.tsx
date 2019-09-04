@@ -27,7 +27,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { showGroup } = this.props;
-    const {appMode, appVersion, db, user, problem, groups} = this.stores;
+    const { appMode, appVersion, db, user, problem, groups } = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
@@ -69,8 +69,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
       const handlePanelChange = () => { onPanelChange && onPanelChange(panelId); };
       return (
         <Button active={current === panelId}
-                disabled={(current !== panelId) && !onPanelChange}
-                onClick={handlePanelChange}>
+          disabled={(current !== panelId) && !onPanelChange}
+          onClick={handlePanelChange}>
           {label}
         </Button>
       );
@@ -95,7 +95,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderGroup(group: GroupModelType) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const groupUsers = group.users.slice();
     const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
     // Put the main user first to match 4-up colors
@@ -122,7 +122,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   private renderGroupUser(groupUsers: GroupUserModelType[], index: number, direction: "nw" | "ne" | "se" | "sw") {
     if (groupUsers.length <= index) {
       return (
-        <div key={`empty-${index}`} className={`member empty ${direction}`}/>
+        <div key={`empty-${index}`} className={`member empty ${direction}`} />
       );
     }
 
@@ -141,8 +141,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleResetGroup = () => {
-    const {isGhostUser} = this.props;
-    const {ui, db, groups} = this.stores;
+    const { isGhostUser } = this.props;
+    const { ui, db, groups } = this.stores;
     ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
