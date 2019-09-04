@@ -50,20 +50,24 @@ export class RelaySelectControl extends Rete.Control {
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        if (!ch && (!id || id === "none") || ch === "none") return "none";
+        if (!ch && (!id || id === "none")) return "Select a relay";
+        if (ch === "none") return "None Available";
         if (!ch) return "Searching for " + id;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
       };
 
-      const options = ["none", ...channelsForType];
+      const options: any = [...channelsForType];
+      if (!options.length) {
+        options.push("none");
+      }
       return (
-        <div className="node-select sensor-select" ref={divRef}>
+        <div className="node-select relay-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             <div className="label">{getChannelString(selectedChannel)}</div>
-            <svg className="icon arrow">
-              <use xlinkHref="#icon-down-arrow"/>
+            <svg className="icon dropdown-caret">
+              <use xlinkHref="#icon-dropdown-caret"/>
             </svg>
           </div>
           {showList ?
@@ -72,8 +76,8 @@ export class RelaySelectControl extends Rete.Control {
               <div
                 className={
                   (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
-                    ? "item sensor-type-option selected"
-                    : "item sensor-type-option selectable"
+                    ? "item relay-type-option selected"
+                    : "item relay-type-option selectable"
                 }
                 key={i}
                 onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
