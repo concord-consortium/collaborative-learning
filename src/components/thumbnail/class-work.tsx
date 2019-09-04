@@ -48,12 +48,6 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  // private getPublicationCaptionText(publication: DocumentModelType, sectionTitle: string) {
-  //   const pubUser = this.stores.class.getUserById(publication.uid);
-  //   const userName = pubUser && pubUser.fullName || "";
-  //   return userName + "\n" + (sectionTitle.length ? (sectionTitle) : "");
-  // }
-
   private handleToggleExpansion = (sectionType: ENavTabSectionType) => {
     const isExpanded = this.state.showSection.get(sectionType);
     this.state.showSection.set(sectionType, !isExpanded);

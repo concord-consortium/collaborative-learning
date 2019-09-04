@@ -51,7 +51,7 @@ const initializeApp = async () => {
   const unit = createFromJson(unitJson);
   const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
   const {investigation, problem} = unit.getProblem(problemOrdinal) ||
-                                  unit.getProblem(DefaultProblemOrdinal);
+                                   unit.getProblem(DefaultProblemOrdinal);
   const showDemoCreator = urlParams.demo;
   const stores = createStores({ appMode, appVersion, appConfig, user, problem, showDemoCreator, unit });
   stores.documents.setUnit(stores.unit);
