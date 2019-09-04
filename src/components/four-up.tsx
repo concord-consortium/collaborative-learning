@@ -16,6 +16,7 @@ interface IProps extends IBaseProps {
   groupId?: string;
   isGhostUser?: boolean;
   toolApiInterface?: IToolApiInterface;
+  sectionId?: string;
 }
 
 interface FourUpUser {
