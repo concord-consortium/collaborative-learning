@@ -191,6 +191,7 @@ export class DBListeners {
     listener.modelDisposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         title: newDocument.title,
+        properties: newDocument.properties
         // TODO: for future ordering story add original to model and update here
       });
     }));

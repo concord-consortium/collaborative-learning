@@ -90,6 +90,10 @@ export interface DBDocument {
   type: DBDocumentType;
 }
 
+export interface IOtherDocumentProperties {
+  [key: string]: string;
+}
+
 // personal documents and learning logs
 export interface DBOtherDocument {
   version: "1.0";
@@ -99,6 +103,7 @@ export interface DBOtherDocument {
     documentKey: string;
   };
   title: string;
+  properties?: IOtherDocumentProperties;
 }
 
 // published section documents [deprecated] and problem documents
@@ -122,6 +127,7 @@ export interface DBOtherPublication {
     documentKey: string;
   };
   title: string;
+  properties: IOtherDocumentProperties;
   uid: string;
   originDoc: string;
 }

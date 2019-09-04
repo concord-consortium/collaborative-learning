@@ -8,7 +8,7 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
   DBPublicationDocumentMetadata,
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
-  DBOtherDocument, DBOtherDocumentMap, DBOtherPublication } from "./db-types";
+  DBOtherDocument, DBOtherDocumentMap, IOtherDocumentProperties, DBOtherPublication } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
       } from "../models/document/document";
@@ -42,6 +42,12 @@ export interface GroupUsersMap {
 }
 
 export type DBClearLevel = "all" | "class" | "offering";
+
+export interface ICreateOtherDocumentProps {
+  title?: string;
+  properties?: IOtherDocumentProperties;
+  content?: DocumentContentModelType;
+}
 
 export interface OpenDocumentOptions {
   documentKey: string;
@@ -359,7 +365,7 @@ export class DB {
   }
 
   public createPersonalDocument(title?: string, content?: DocumentContentModelType) {
-    return this.createOtherDocument(PersonalDocument, title, content);
+    return this.createOtherDocument(PersonalDocument, { title, content });
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -414,6 +420,7 @@ export class DB {
           },
           uid: user.id,
           title: documentModel.title || "",
+          properties: documentModel.copyProperties(),
           originDoc: documentModel.key
         };
 
@@ -465,11 +472,12 @@ export class DB {
   }
 
   public createLearningLogDocument(title?: string) {
-    return this.createOtherDocument(LearningLogDocument, title);
+    return this.createOtherDocument(LearningLogDocument, { title });
   }
 
   // personal documents and learning logs
-  public createOtherDocument(documentType: OtherDocumentType, title?: string, content?: DocumentContentModelType) {
+  public createOtherDocument(documentType: OtherDocumentType, props: ICreateOtherDocumentProps = {}) {
+    const { title, properties, content } = props;
     const {documents, user} = this.stores;
     const docTitle: string = title || documents.getNextOtherDocumentTitle(user, documentType);
 
@@ -484,7 +492,8 @@ export class DB {
               uid: user.id,
               classHash: user.classHash
             },
-            title: docTitle
+            title: docTitle,
+            properties: properties || {}
           };
           return this.firebase.ref(this.firebase.getOtherDocumentPath(user, documentType, documentKey))
                   .set(newDocument)

@@ -26,6 +26,7 @@ describe("document model", () => {
       createdAt: 1,
       groupId: undefined,
       title: undefined,
+      properties: {},
       visibility: "public",
       groupUserConnections: {},
       comments: {},
@@ -37,6 +38,12 @@ describe("document model", () => {
       },
       changeCount: 0
     });
+  });
+
+  it("can set title", () => {
+    expect(document.title).toBeUndefined();
+    document.setTitle("FooTitle");
+    expect(document.title).toBe("FooTitle");
   });
 
   it("can set content", () => {
@@ -79,5 +86,14 @@ describe("document model", () => {
     expect(document.visibility).toBe("public");
     document.toggleVisibility("private");
     expect(document.visibility).toBe("private");
+  });
+
+  it("can set/get document properties", () => {
+    expect(document.getProperty("foo")).toBeUndefined();
+    document.setProperty("foo", "bar");
+    expect(document.getProperty("foo")).toBe("bar");
+    document.setProperties({ foo: undefined, bar: "baz" });
+    expect(document.getProperty("foo")).toBeUndefined();
+    expect(document.getProperty("bar")).toBe("baz");
   });
 });
