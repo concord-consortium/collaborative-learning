@@ -50,6 +50,12 @@ enum ProgramRunStates {
   Complete
 }
 
+enum ProgramDisplayStates {
+  Program,
+  Graph,
+  SideBySide
+}
+
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
@@ -71,8 +77,8 @@ interface IProps extends SizeMeProps {
 interface IState {
   disableDataStorage: boolean;
   programRunState: ProgramRunStates;
+  programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
-  showGraph: boolean;
   editorContainerWidth: number;
 }
 
@@ -99,13 +105,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.state = {
       disableDataStorage: false,
       programRunState: ProgramRunStates.Ready,
-      graphDataSet: { sequences: [] },
-      showGraph: false,
-      editorContainerWidth: 0
+      graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
+      editorContainerWidth: 0,
+      programDisplayState: ProgramDisplayStates.Program
     };
   }
 
   public render() {
+    const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
@@ -119,14 +126,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             readOnly={this.props.readOnly || !this.isReady()}
         />
         <div className="toolbar-editor-container">
-          <DataflowProgramToolbar
+          { !this.isGraphOnly() && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
-          />
+          /> }
           <div className="editor-graph-container">
             <div
-              className={this.state.showGraph ? "editor half" : "editor full"}
+              className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt} />
@@ -135,13 +142,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   onZoomOutClick={this.zoomOut}
                   disabled={this.props.readOnly || !this.isReady()}
                 />
-                { (!this.isReady() || this.props.readOnly) &&
-                  <DataflowProgramCover
-                    sideBySide={!this.isReady()}
-                  />
+                { (this.isSideBySide() || (!this.isReady() && this.isProgramOnly()) || this.props.readOnly) &&
+                  <DataflowProgramCover sideBySide={this.isSideBySide()}/>
                 }
             </div>
-            {this.state.showGraph && <DataflowProgramGraph dataSet={this.state.graphDataSet}/>}
+            {!this.isProgramOnly() &&
+              <DataflowProgramGraph
+                dataSet={this.state.graphDataSet}
+                onToggleShowProgram={this.toggleShowProgram}
+                programVisible={this.isSideBySide()}
+              />
+            }
           </div>
         </div>
       </div>
@@ -284,12 +295,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
-      this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
-
-      if (this.getRunState() !== ProgramRunStates.Ready) {
-        this.setState({programRunState: this.getRunState(), showGraph: true});
+      const programRunState: ProgramRunStates = this.getRunState();
+      if (programRunState !== ProgramRunStates.Ready) {
+        const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+        const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+        this.setState({ programRunState, programDisplayState });
         this.updateGraphDataSet();
         this.sequenceNames = this.getNodeSequenceNames();
+      }
+
+      if (!this.props.readOnly && !this.isComplete()) {
+        this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
     })();
@@ -313,6 +329,30 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private isComplete = () => {
     return (this.state.programRunState === ProgramRunStates.Complete);
+  }
+
+  private isProgramOnly = () => {
+    return (this.state.programDisplayState === ProgramDisplayStates.Program);
+  }
+
+  private isGraphOnly = () => {
+    return (this.state.programDisplayState === ProgramDisplayStates.Graph);
+  }
+
+  private isSideBySide = () => {
+    return (this.state.programDisplayState === ProgramDisplayStates.SideBySide);
+  }
+
+  private toggleShowProgram = () => {
+    const programDisplayState = this.state.programDisplayState === ProgramDisplayStates.SideBySide
+                                ? ProgramDisplayStates.Graph
+                                : ProgramDisplayStates.SideBySide;
+    this.setState({programDisplayState});
+    // process is needed or rete doesn't redrawn node connections when showing editor
+    (async () => {
+      await this.programEngine.abort();
+      await this.programEngine.process(this.programEditor.toJSON());
+    })();
   }
 
   private runProgram = () => {
@@ -534,13 +574,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateGraphDataSet = () => {
     fetchProgramData(this.props.programRunId).then((result: any) => {
       // make a new dataset
-      const graphDataSet: DataSet = { sequences: [] };
+      const graphDataSet: DataSet = { sequences: [],
+                                      startTime: this.props.programStartTime,
+                                      endTime: this.props.programEndTime };
       if (result.data) {
         result.data.forEach((timeData: any) => {
           timeData.values.forEach((value: any, i: number) => {
             if (graphDataSet.sequences.length < (i + 1)) {
               const name = this.sequenceNames[timeData.blockIds[i]];
-              const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: []};
+              const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: [] };
               graphDataSet.sequences.push(graphSequence);
             }
             const pt: DataPoint = { x: 0, y: 0 };

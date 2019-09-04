@@ -7,7 +7,7 @@ interface CoverProps {
 }
 
 export const DataflowProgramCover = (props: CoverProps) => {
-  const coverClass = props.sideBySide ? "cover" : "cover full";
+  const coverClass = `cover ${(!props.sideBySide && "full")}`;
   return (
     <div className={coverClass}/>
   );
