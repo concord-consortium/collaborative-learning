@@ -1,9 +1,11 @@
-import { Button, ButtonGroup } from "@blueprintjs/core";
+import * as _ from "lodash";
+import { Button, ButtonGroup, Popover, Position, Menu, MenuItem } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
+import "./utilities/blueprint.sass";
 import "./app-header.sass";
 
 export interface IPanelSpec {
@@ -30,6 +32,10 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
     const {appMode, appVersion, db, user, problem, groups} = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
+
+    if (user.isTeacher) {
+      return this.renderTeacherHeader(userTitle);
+    }
 
     return (
       <div className="app-header">

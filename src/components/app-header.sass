@@ -32,6 +32,10 @@ $member-size: 18px
     button
       // note: need focus/accessibility solution
       outline: none
+      background-color: $color1-4
+      border-radius: 5px
+      &:hover
+        background-color: $color1-3
 
   .right
     flex-grow: 0
@@ -104,3 +108,15 @@ $member-size: 18px
         padding: $half-padding $padding
         background-color: $color1-3
         font-weight: bold
+
+  .problemMenu
+    margin: 10px
+
+    button
+      outline: none
+      &:hover
+        background-color: $color1-3
+
+    .bp3-button
+      background-color: $color1-4
+      border-radius: 5px
