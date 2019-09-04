@@ -5,6 +5,19 @@ const initials = require("initials");
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
+export const PortalClass = types.model("PortalClass", {
+  className: "",
+  classHash: "",
+  classUri: ""
+});
+export type IPortalClass = typeof PortalClass.Type;
+
+export const PortalProblem = types.model("PortalProblem", {
+  problemDesignator: "",
+  switchUrlLocation: ""
+});
+export type IPortalProblem = typeof PortalProblem.Type;
+
 export const UserModel = types
   .model("User", {
     authenticated: false,
@@ -16,7 +29,9 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
-    loggingRemoteEndpoint: types.maybe(types.string)
+    loggingRemoteEndpoint: types.maybe(types.string),
+    portalClasses: types.array(PortalClass),
+    portalProblems: types.array(PortalProblem)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -46,6 +61,16 @@ export const UserModel = types
       self.offeringId = user.offeringId;
       if (user.firebaseJWT && (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl) {
         self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
+      }
+      if (user.portalClasses) {
+        user.portalClasses.forEach( (portalClass) => {
+          self.portalClasses.push(portalClass);
+        });
+      }
+      if (user.portalProblems) {
+        user.portalProblems.forEach ( (portalProblem) => {
+          self.portalProblems.push(portalProblem);
+        });
       }
     },
   }))
