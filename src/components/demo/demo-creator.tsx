@@ -27,8 +27,8 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
   private problemOptions: IProblemOption[] = [];
 
   public componentWillMount() {
-    const { unit, demo } = this.stores;
-    const problemTitleTemplate = unit.demoProblemTitle || "%investigationTitle%: %problemTitle%";
+    const { appConfig, unit, demo } = this.stores;
+    const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
 

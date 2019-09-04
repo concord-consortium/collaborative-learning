@@ -1,6 +1,7 @@
 import * as React from "react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
+import { observer } from "mobx-react";
 
 interface IProps {
   dataTestName: string;
@@ -8,14 +9,14 @@ interface IProps {
   document: DocumentModelType;
   scale: number;
   captionText: string;
-  isStarred?: boolean;
+  onIsStarred: () => boolean;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
 }
 
-export const ThumbnailDocumentItem = (props: IProps) => {
-  const { dataTestName, canvasContext, document, scale, captionText, isStarred,
+export const ThumbnailDocumentItem = observer((props: IProps) => {
+  const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick && onDocumentClick(document);
@@ -44,11 +45,11 @@ export const ThumbnailDocumentItem = (props: IProps) => {
         </div>
       </div>
 
-      <DocumentCaption captionText={captionText} isStarred={!!isStarred}
+      <DocumentCaption captionText={captionText} isStarred={onIsStarred()}
                         onStarClick={onDocumentStarClick ? handleDocumentStarClick : undefined} />
     </div>
   );
-};
+});
 
 /*
  * DocumentCaption

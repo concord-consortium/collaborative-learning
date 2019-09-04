@@ -6,7 +6,7 @@ import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { MyWorkComponent } from "../thumbnail/my-work";
 import { ClassWorkComponent } from "../thumbnail/class-work";
-import { ClassLogsComponent } from "../thumbnail/class-logs";
+import { StarredWorkComponent } from "../thumbnail/starred-work";
 import { ERightNavTab, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
 import { map } from "lodash";
 import "./right-nav.sass";
@@ -36,7 +36,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
       tabLoadAllowed: {
         [ERightNavTab.kMyWork]: false,
         [ERightNavTab.kClassWork]: false,
-        [ERightNavTab.kClassLogs]: false
+        [ERightNavTab.kStarredWork]: false
       },
       navExpanding: false
     };
@@ -100,7 +100,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     const tabContents: RightNavTabMap<() => JSX.Element> = {
             [ERightNavTab.kMyWork]: () => <MyWorkComponent scale={kRightNavItemScale}/>,
             [ERightNavTab.kClassWork]: () => <ClassWorkComponent scale={kRightNavItemScale}/>,
-            [ERightNavTab.kClassLogs]: () => <ClassLogsComponent scale={kRightNavItemScale}/>
+            [ERightNavTab.kStarredWork]: () => <StarredWorkComponent scale={kRightNavItemScale}/>
           };
     const tabContainers = map(ERightNavTab, (tab: ERightNavTab) => {
             const enabledDisabledClass = activeRightNavTab === tab ? "enabled" : "disabled";

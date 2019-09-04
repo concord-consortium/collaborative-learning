@@ -33,7 +33,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments() {
-    const {documents, ui, unit} = this.stores;
+    const {appConfig, documents, ui, unit} = this.stores;
     const {learningLogWorkspace} = ui;
     const primaryWorkspace = learningLogWorkspace.primaryDocumentKey
                         ? documents.getDocument(learningLogWorkspace.primaryDocumentKey)
@@ -41,7 +41,7 @@ export class LearningLogComponent extends BaseComponent<IProps, {}> {
     const comparisonWorkspace = learningLogWorkspace.comparisonDocumentKey
                         ? documents.getDocument(learningLogWorkspace.comparisonDocumentKey)
                         : null;
-    const toolbar = unit && getSnapshot(unit.toolbar);
+    const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 
     if (!primaryWorkspace) {
       return (

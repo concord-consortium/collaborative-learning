@@ -6,7 +6,8 @@ import { SupportItemModelType, SupportType } from "../../models/stores/supports"
 import { CanvasComponent } from "./canvas";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ProblemDocument, LearningLogDocument } from "../../models/document/document";
+import { DocumentModelType, ProblemDocument, LearningLogDocument, LearningLogPublication
+       } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -169,7 +170,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="other-doc titlebar">
         {
-          document.type === "learningLogPublication"
+          document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
           : <div className="title" data-test="personal-doc-title">{document.title}</div>
         }
