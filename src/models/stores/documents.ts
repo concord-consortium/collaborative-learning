@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, DocumentType, LearningLogDocument, LearningLogPublication,
-        PersonalDocument, ProblemDocument, OtherPublicationType, PersonalPublication } from "../document/document";
+        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument
+      } from "../document/document";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
@@ -116,6 +117,15 @@ export const DocumentsModel = types
           ? user1.lastName.localeCompare(user2.lastName)
           : user1.firstName.localeCompare(user2.firstName);
       });
+    }
+  }))
+  .views(self => ({
+    getNextOtherDocumentTitle(user: UserModelType, documentType: OtherDocumentType) {
+      switch (documentType) {
+        case PersonalDocument: return self.getNextPersonalDocumentTitle(user);
+        case LearningLogDocument: return self.getNextLearningLogTitle(user);
+      }
+      return "";
     }
   }))
   .actions((self) => {

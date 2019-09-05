@@ -342,35 +342,7 @@ export class DB {
   }
 
   public createPersonalDocument(title?: string) {
-    const {documents, user} = this.stores;
-    const docTitle = title || documents.getNextPersonalDocumentTitle(user);
-
-    return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument({ type: PersonalDocument })
-        .then(({document, metadata}) => {
-          const {documentKey} = document.self;
-          const personalDoc: DBOtherDocument = {
-            version: "1.0",
-            self: {
-              documentKey,
-              uid: user.id,
-              classHash: user.classHash
-            },
-            title: docTitle
-          };
-          return this.firebase.ref(this.firebase.getUserPersonalDocPath(user, documentKey)).set(personalDoc)
-                  .then(() => personalDoc);
-        })
-        .then(personalDoc => {
-          Logger.log(LogEventName.CREATE_PERSONAL_DOCUMENT, {
-            title: personalDoc.title
-          });
-
-          return this.createDocumentModelFromOtherDocument(personalDoc, PersonalDocument);
-        })
-        .then(resolve)
-        .catch(reject);
-    });
+    return this.createOtherDocument(PersonalDocument, title);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -476,14 +448,19 @@ export class DB {
   }
 
   public createLearningLogDocument(title?: string) {
+    return this.createOtherDocument(LearningLogDocument, title);
+  }
+
+  // personal documents and learning logs
+  public createOtherDocument(documentType: OtherDocumentType, title?: string) {
     const {documents, user} = this.stores;
-    const docTitle: string = title || documents.getNextLearningLogTitle(user);
+    const docTitle: string = title || documents.getNextOtherDocumentTitle(user, documentType);
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument({ type: LearningLogDocument })
+      return this.createDocument({ type: documentType })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
-          const learningLog: DBOtherDocument = {
+          const newDocument: DBOtherDocument = {
             version: "1.0",
             self: {
               documentKey,
@@ -492,14 +469,18 @@ export class DB {
             },
             title: docTitle
           };
-          return this.firebase.ref(this.firebase.getLearningLogPath(user, documentKey)).set(learningLog)
-                  .then(() => learningLog);
+          return this.firebase.ref(this.firebase.getOtherDocumentPath(user, documentType, documentKey))
+                  .set(newDocument)
+                  .then(() => newDocument);
         })
-        .then((learningLog) => {
-          Logger.log(LogEventName.CREATE_LEARNING_LOG, {
-            title: learningLog.title
+        .then((newDocument) => {
+          const logEventName = documentType === PersonalDocument
+                                ? LogEventName.CREATE_PERSONAL_DOCUMENT
+                                : LogEventName.CREATE_LEARNING_LOG;
+          Logger.log(logEventName, {
+            title: newDocument.title
           });
-          return documents.getDocument(learningLog.self.documentKey);
+          return documents.getDocument(newDocument.self.documentKey);
         })
         .then(resolve)
         .catch(reject);
