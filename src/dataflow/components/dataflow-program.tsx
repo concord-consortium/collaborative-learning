@@ -355,7 +355,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
+  private hasValidOutputNodes = () => {
+    const { ui } = this.stores;
+    if (!this.getNodeCount("Relay") && !this.getNodeCount("Data Storage")) {
+      ui.alert("Program must contain a Relay or Data Storage node before it can be run.", "No Program Output");
+      return false;
+    } else if (!this.getNodeCount("Relay") &&
+                this.programEditor.nodes.filter(n => (n.name === "Data Storage" && n.inputs.size <= 1)).length) {
+      ui.alert("Data Storage node needs data inputs before program can be run.", "Missing Data Storage Inputs");
+      return false;
+    }
+    return true;
+  }
+
   private runProgram = () => {
+    if (!this.hasValidOutputNodes()) {
+      return;
+    }
     const programData: any = this.generateProgramData();
     uploadProgram(programData);
     this.sequenceNames = this.getNodeSequenceNames();
@@ -370,6 +386,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramRunTimeChange(time);
   }
   private generateProgramData = () => {
+    const { ui } = this.stores;
+    let missingRelay = false;
+    let missingSensor = false;
     let interval: number =  1;
     let datasetName = "";
     const programStartTime = Date.now();
@@ -390,6 +409,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             // only add sensors once
             sensors.push(chInfo.channelId);
           }
+        } else if (!chInfo && n.data.sensor !== "none") {
+          missingSensor = true;
         }
       } else if (n.name === "Relay" && n.data.relayList) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
@@ -397,12 +418,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           if (hubs.indexOf(chInfo.hubId) === -1) {
             hubs.push(chInfo.hubId);
           }
+        } else if (!chInfo && n.data.relayList !== "none") {
+          missingRelay = true;
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
         datasetName = `${n.data.datasetName as string}-${programStartTime}`;
       }
     });
+
+    if (missingRelay) {
+      ui.alert("Selected relay cannot be found. Try plugging your relay in.", "Relay Not Found");
+      return;
+    } else if (missingSensor) {
+      ui.alert("Selected sensor cannot be found. Try plugging your sensor in.", "Sensor Not Found");
+      return;
+    }
+
     const rawProgram = this.programEditor.toJSON();
     // strip out recentValues for each node - not needed on the server
     const editedProgram = {
