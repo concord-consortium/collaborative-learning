@@ -73,19 +73,21 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           ? this.renderStackedGraphs()
           : this.renderOverlappedGraphs()
         }
-        <button className="graph-button export" onClick={this.handleExport}>export</button>
-        <button className="graph-button program" onClick={this.handleShowProgramClick}>
-          { this.props.programVisible ? "Graph" : "Program" }
-        </button>
-        <button className="graph-button type" onClick={this.handleTypeClick}>
-          { this.state.scatter ? "Line" : "Scatter" }
-        </button>
-        <button className="graph-button layout" onClick={this.handleLayoutClick}>
-          { this.state.stacked ? "Combined" : "Stacked" }
-        </button>
-        <button className="graph-button data" onClick={this.handleDataModeClick}>
-          { this.state.fullRun ? "All Data" : "Full Run" }
-        </button>
+        <div className="graph-buttons">
+          <button className="graph-button export" onClick={this.handleExport}>Export Data (csv)</button>
+          <button className="graph-button program" onClick={this.handleShowProgramClick}>
+            { this.props.programVisible ? "Graph" : "Program" }
+          </button>
+          <button className="graph-button type" onClick={this.handleTypeClick}>
+            { this.state.scatter ? "Line" : "Scatter" }
+          </button>
+          <button className="graph-button layout" onClick={this.handleLayoutClick}>
+            { this.state.stacked ? "Combined" : "Stacked" }
+          </button>
+          <button className="graph-button data" onClick={this.handleDataModeClick}>
+            { this.state.fullRun ? "All Data" : "Full Run" }
+          </button>
+        </div>
       </div>
     );
   }

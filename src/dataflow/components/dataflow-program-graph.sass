@@ -5,6 +5,8 @@
   width: 50%
   padding: 5px 5px 25px 5px
   border: 2px solid $data-storage-orange
+  position: relative
+
   &.full
     width: 100%
 
@@ -37,11 +39,17 @@
     height: 100%
     width: 100%
 
-  .graph-button
-    font-family: 'Ubuntu', sans-serif
+  .graph-buttons
     position: absolute
     bottom: 6px
-    width: 60px
+    display: flex
+    flex-direction: row
+    width: 100%
+    padding-right: 10px
+  .graph-button
+    margin-left: 2px
+    font-family: 'Ubuntu', sans-serif
+    min-width: 60px
     background-color: $data-storage-orange
     color: white
     font-size: 12px
@@ -51,18 +59,19 @@
     outline: 0
     border-radius: 3px
     &.program
-      right: 5px
-    &.type
-      right: 70px
-    &.layout
-      width: 70px
-      right: 135px
-    &.data
-      right: 210px
-      width: 90px
-    &.export
-      left: 5px
+      margin-left: auto
     &:hover
       background-color: $data-storage-orange-node
     &:active
       background-color: $data-storage-orange-control
+    &.export
+      margin-left: 0
+      border: 2px solid $gray-mid
+      color: $gray-text
+      background-color: #ffffff
+      &:hover
+        background-color: $gray-light-hover
+      &:active
+        background-color: $gray-light-click
+
+
