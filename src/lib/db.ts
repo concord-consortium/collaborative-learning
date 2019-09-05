@@ -13,7 +13,7 @@ import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, Probl
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
       } from "../models/document/document";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType } from "../models/document/document-content";
+import { DocumentContentSnapshotType, DocumentContentModelType } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
@@ -201,7 +201,8 @@ export class DB {
     });
   }
 
-  public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument) {
+  public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
+                                            defaultContent?: DocumentContentModelType) {
     const {user, documents} = this.stores;
 
     // problem document
@@ -216,7 +217,7 @@ export class DB {
       const firstProblemDocument = find(problemDocuments, () => true);
       return firstProblemDocument
               ? this.openProblemDocument(firstProblemDocument.documentKey)
-              : this.createProblemDocument();
+              : this.createProblemDocument(defaultContent);
     }
 
     // personal document
@@ -230,10 +231,10 @@ export class DB {
     const firstPersonalDocument = find(personalDocuments, () => true);
     return firstPersonalDocument
       ? this.openOtherDocument(PersonalDocument, firstPersonalDocument.self.documentKey)
-      : this.createPersonalDocument();
+      : this.createPersonalDocument("", defaultContent);
   }
 
-  public createProblemDocument() {
+  public createProblemDocument(content?: DocumentContentModelType) {
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
@@ -255,7 +256,7 @@ export class DB {
          })
         .then(() => {
           // create the new document
-          return this.createDocument({ type: ProblemDocument })
+          return this.createDocument({ type: ProblemDocument, content: JSON.stringify(content) })
             .then(({document, metadata}) => {
                 const newDocument = {
                   version: "1.0",
@@ -357,8 +358,8 @@ export class DB {
     });
   }
 
-  public createPersonalDocument(title?: string) {
-    return this.createOtherDocument(PersonalDocument, title);
+  public createPersonalDocument(title?: string, content?: DocumentContentModelType) {
+    return this.createOtherDocument(PersonalDocument, title, content);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -468,12 +469,12 @@ export class DB {
   }
 
   // personal documents and learning logs
-  public createOtherDocument(documentType: OtherDocumentType, title?: string) {
+  public createOtherDocument(documentType: OtherDocumentType, title?: string, content?: DocumentContentModelType) {
     const {documents, user} = this.stores;
     const docTitle: string = title || documents.getNextOtherDocumentTitle(user, documentType);
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      return this.createDocument({ type: documentType })
+      return this.createDocument({ type: documentType, content: JSON.stringify(content) })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {

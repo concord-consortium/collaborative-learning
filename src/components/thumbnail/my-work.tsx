@@ -50,10 +50,10 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleNewDocumentClick = async (sectionType: string, documentTypes: string[]) => {
-    const { db, ui } = this.stores;
+    const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
     const { problemWorkspace } = ui;
     const newDocument = sectionType === ENavTabSectionType.kPersonalDocuments
-                          ? await db.createPersonalDocument()
+                          ? await db.createPersonalDocument("", defaultDocumentContent)
                           : await db.createLearningLogDocument();
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);

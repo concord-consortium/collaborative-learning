@@ -43,11 +43,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private async guaranteePrimaryDocument() {
-    const { appConfig: { defaultDocumentType }, db, ui: { problemWorkspace } } = this.stores;
+    const { appConfig: { defaultDocumentType, defaultDocumentContent },
+            db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const problemDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType);
-      if (problemDocument) {
-        problemWorkspace.setPrimaryDocument(problemDocument);
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+      if (defaultDocument) {
+        problemWorkspace.setPrimaryDocument(defaultDocument);
       }
     }
   }
