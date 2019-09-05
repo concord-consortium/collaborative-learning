@@ -355,7 +355,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
-  private validOutputNodes = () => {
+  private hasValidOutputNodes = () => {
     const { ui } = this.stores;
     if (!this.getNodeCount("Relay") && !this.getNodeCount("Data Storage")) {
       ui.alert("Program must contain a Relay or Data Storage node before it can be run.", "No Program Output");
@@ -369,7 +369,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private runProgram = () => {
-    if (!this.validOutputNodes()) {
+    if (!this.hasValidOutputNodes()) {
       return;
     }
     const programData: any = this.generateProgramData();
