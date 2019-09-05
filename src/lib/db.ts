@@ -473,14 +473,15 @@ export class DB {
                   .set(newDocument)
                   .then(() => newDocument);
         })
-        .then((newDocument) => {
+        .then(async (newDocument) => {
           const logEventName = documentType === PersonalDocument
                                 ? LogEventName.CREATE_PERSONAL_DOCUMENT
                                 : LogEventName.CREATE_LEARNING_LOG;
           Logger.log(logEventName, {
             title: newDocument.title
           });
-          return documents.getDocument(newDocument.self.documentKey);
+          return documents.getDocument(newDocument.self.documentKey) ||
+                  await this.createDocumentModelFromOtherDocument(newDocument, documentType);
         })
         .then(resolve)
         .catch(reject);
