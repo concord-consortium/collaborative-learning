@@ -225,6 +225,10 @@ export interface DBOfferingGroupUser {
   disconnectedTimestamp?: number;
 }
 
+export interface DBOtherDocumentMap {
+  [key: string]: DBOtherDocument;
+}
+
 export interface DBImage {
   version: "1.0";
   self: {

@@ -40,6 +40,12 @@ export const DocumentsModel = types
       return `Untitled-${++maxUntitled}`;
     },
 
+    getPersonalDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === PersonalDocument) && (document.uid === userId);
+      });
+    },
+
     getProblemDocument(userId: string) {
       return self.all.find((document) => {
         return (document.type === ProblemDocument) && (document.uid === userId);
