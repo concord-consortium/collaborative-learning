@@ -1,8 +1,9 @@
 import * as firebase from "firebase/app";
+import { OtherDocumentType, PersonalDocument } from "../models/document/document";
+import { TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
-import { TeacherSupportSectionTarget, AudienceModelType, AudienceEnum } from "../models/stores/supports";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -118,7 +119,14 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
-  // Unpublished learning log
+  // Unpublished personal document/learning log
+  public getOtherDocumentPath(user: UserModelType, documentType: OtherDocumentType, documentKey?: string) {
+    const dir = documentType === PersonalDocument ? "personalDocs" : "learningLogs";
+    const key = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user)}/${dir}${key}`;
+  }
+
+// Unpublished learning log
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
