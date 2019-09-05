@@ -28,13 +28,27 @@
     border-top-right-radius: $border-radius
 
     .title
+      display: flex
       flex-grow: 1
+      justify-content: center
       text-align: center
       padding: $margin
       font-weight: bold
       white-space: nowrap
       overflow: hidden
       text-overflow: ellipsis
+
+      .actions-edit
+        flex-grow: 0
+        display: flex
+
+        .icon-edit
+          background-color: $color1-3
+          color: $color1-7
+          width: 36px
+          height: 34px
+          padding: $quarter-padding $quarter-padding ($padding * 1.5) $quarter-padding
+          cursor: pointer
 
     .actions
       flex-grow: 0

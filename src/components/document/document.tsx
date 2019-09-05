@@ -76,6 +76,14 @@ const NewDocButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
+const EditTitleButton = ({ onClick }: { onClick: SVGClickHandler }) => {
+  return (
+    <svg key="edit" className={`icon-edit`} onClick={onClick}>
+      <use xlinkHref={`#icon-edit`} />
+    </svg>
+  );
+};
+
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
@@ -196,8 +204,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className="other-doc titlebar">
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
-          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
-          : <div className="title" data-test="personal-doc-title">{document.title}</div>
+          ? <div className="title" data-test="learning-log-title">
+              <span className="title-info">Learning Log: {document.title}</span>
+              {
+                !hideButtons &&
+                <div className="actions-edit">
+                  <EditTitleButton key="edit" onClick={this.handleDocumentRename}/>
+                </div>
+              }
+            </div>
+          : <div className="title" data-test="personal-doc-title">
+              <span>{document.title}</span>
+              {
+                !hideButtons &&
+                <div className="actions-edit">
+                  <EditTitleButton key="edit" onClick={this.handleDocumentRename}/>
+                </div>
+              }
+            </div>
         }
         <div className="actions">
           {!hideButtons &&
@@ -451,6 +475,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (newDocument) {
       this.props.workspace.setAvailableDocument(newDocument);
     }
+  }
+
+  private handleDocumentRename = () => {
+    const { document } = this.props;
+    const docTypeString = document.isPersonal ? "Personal Document" : "Learning Log";
+    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Renaming ${docTypeString}`)
+      .then((title: string) => {
+        if (title !== document.title) {
+          document.setTitle(title);
+        }
+      });
   }
 
   private handlePublishWorkspace = () => {
