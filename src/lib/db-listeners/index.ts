@@ -4,12 +4,12 @@ import { DB } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
-import { DBPersonalDocumentsListener } from "./db-personal-docs-listener";
+import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
-import { DBLearningLogsListener } from "./db-learning-logs-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, ProblemDocument } from "../../models/document/document";
+import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+        } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
@@ -47,8 +47,8 @@ export class DBListeners {
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
   private problemDocumentsListener: DBProblemDocumentsListener;
-  private personalDocumentsListener: DBPersonalDocumentsListener;
-  private learningLogsListener: DBLearningLogsListener;
+  private personalDocumentsListener: DBOtherDocumentsListener;
+  private learningLogsListener: DBOtherDocumentsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
@@ -59,8 +59,8 @@ export class DBListeners {
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
     this.problemDocumentsListener = new DBProblemDocumentsListener(db);
-    this.personalDocumentsListener = new DBPersonalDocumentsListener(db);
-    this.learningLogsListener = new DBLearningLogsListener(db);
+    this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
+    this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
@@ -139,7 +139,7 @@ export class DBListeners {
           currentSectionDocsListener.off();
         }
         const groupUserDocsRef = this.db.firebase.ref(
-          this.db.firebase.getProblemDocumentsPath(user, groupUser.id)
+          this.db.firebase.getProblemDocumentPath(user, document.key, groupUser.id)
         );
         this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
           .sectionDocsRef = groupUserDocsRef;
@@ -172,44 +172,39 @@ export class DBListeners {
     this.documentModelDisposers[document.key] = disposer;
   }
 
-  public monitorPersonalDocument = (personalDocument: DocumentModelType) => {
+  public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
     const { user } = this.db.stores;
-    const { key } = personalDocument;
+    const { key } = document;
 
-    const listener = this.getOrCreateModelListener(`personalDocument:${key}`);
+    const listenerKey = type === PersonalDocument
+                          ? `personalDocument:${key}`
+                          : `learningLogWorkspace:${key}`;
+    const listener = this.getOrCreateModelListener(listenerKey);
     if (listener.modelDisposer) {
       listener.modelDisposer();
     }
 
-    const updateRef = this.db.firebase.ref(this.db.firebase.getUserPersonalDocPath(user, key));
-    listener.modelDisposer = (onSnapshot(personalDocument, (newDocument) => {
+    const updatePath = type === PersonalDocument
+                        ? this.db.firebase.getUserPersonalDocPath(user, key)
+                        : this.db.firebase.getLearningLogPath(user, key);
+    const updateRef = this.db.firebase.ref(updatePath);
+    listener.modelDisposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         title: newDocument.title,
+        properties: newDocument.properties
         // TODO: for future ordering story add original to model and update here
       });
     }));
 
-    return personalDocument;
+    return document;
   }
 
-  public monitorLearningLogDocument = (learningLog: DocumentModelType) => {
-    const { user } = this.db.stores;
-    const { key } = learningLog;
+  public monitorPersonalDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, PersonalDocument);
+  }
 
-    const listener = this.getOrCreateModelListener(`learningLogWorkspace:${key}`);
-    if (listener.modelDisposer) {
-      listener.modelDisposer();
-    }
-
-    const updateRef = this.db.firebase.ref(this.db.firebase.getLearningLogPath(user, key));
-    listener.modelDisposer = (onSnapshot(learningLog, (newLearningLog) => {
-      updateRef.update({
-        title: newLearningLog.title,
-        // TODO: for future ordering story add original to model and update here
-      });
-    }));
-
-    return learningLog;
+  public monitorLearningLogDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, LearningLogDocument);
   }
 
   public monitorDocumentRef = (document: DocumentModelType) => {

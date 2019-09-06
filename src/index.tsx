@@ -1,19 +1,15 @@
 import { Provider } from "mobx-react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
+import { appConfigSpec, createStores } from "./app-config";
 import { AppComponent } from "./components/app";
-import { createStores as createBaseStores } from "./models/stores/stores";
-import { createStores as createDataflowStores } from "./dataflow/models/stores/dataflow-stores";
+import { AppConfigModel } from "./models/stores/app-config-model";
 import { UserModel } from "./models/stores/user";
 import { createFromJson } from "./models/curriculum/unit";
-import * as dataflowUnit from "./curriculum/dataflow/dataflow.json";
-import * as movingStraightAheadUnit from "./curriculum/moving-straight-ahead/moving-straight-ahead.json";
-import * as stretchingAndShrinkingUnit from "./curriculum/stretching-and-shrinking/stretching-and-shrinking.json";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
-import { setTitle } from "./lib/misc";
+import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
 import * as PackageJson from "../package.json";
 import { setLivelynessChecking } from "mobx-state-tree";
@@ -23,52 +19,60 @@ const kEnableLivelinessChecking = false;
 import "./components/utilities/blueprint";
 import "./index.sass";
 
-function getCurriculumJson() {
-  const unitMap: { [code: string]: any } = [];
-  let defaultUnit;
-  [dataflowUnit, movingStraightAheadUnit, stretchingAndShrinkingUnit]
-    .forEach(_unit => {
-      if (_unit && _unit.code) {
-        unitMap[_unit.code] = _unit;
-      }
-      // last unit becomes default if no unit param is specified
-      defaultUnit = _unit;
-    });
-  const unitParam = (urlParams.unit || "").toLowerCase();
-  return unitMap[unitParam] || defaultUnit;
+const appConfig = AppConfigModel.create(appConfigSpec);
+
+function getUnitJson() {
+  const unitUrlParam = urlParams.unit && appConfig.units.get(urlParams.unit);
+  const urlParam = unitUrlParam || appConfig.defaultUnit && appConfig.units.get(appConfig.defaultUnit);
+  return fetch(urlParam!)
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+            else {
+              throw Error(`Request rejected with status ${response.status}`);
+            }
+          })
+          .catch(error => {
+            throw Error(`Request rejected with exception`);
+          });
 }
 
-const host = window.location.host.split(":")[0];
-const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
-const appVersion = PackageJson.version;
+const initializeApp = async () => {
+  const host = window.location.host.split(":")[0];
+  const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
+  const appVersion = PackageJson.version;
 
-const user = UserModel.create();
+  const user = UserModel.create();
 
-const unit = createFromJson(getCurriculumJson());
-const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
-const {investigation, problem} = unit.getProblem(problemOrdinal) ||
-                                 unit.getProblem(DefaultProblemOrdinal);
-const showDemoCreator = urlParams.demo;
-const createStores = urlParams.dataflow !== undefined ? createDataflowStores : createBaseStores;
-const stores = createStores({ appMode, appVersion, user, problem, showDemoCreator, unit });
-stores.documents.setUnit(stores.unit);
+  const unitJson = await getUnitJson();
+  const unit = createFromJson(unitJson);
+  const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
+  const {investigation, problem} = unit.getProblem(problemOrdinal) ||
+                                   unit.getProblem(DefaultProblemOrdinal);
+  const showDemoCreator = urlParams.demo;
+  const stores = createStores({ appMode, appVersion, appConfig, user, problem, showDemoCreator, unit });
+  stores.documents.setUnit(stores.unit);
 
-gImageMap.initialize(stores.db, user.id);
+  gImageMap.initialize(stores.db, user.id);
 
-Logger.initializeLogger(stores, investigation, problem);
+  Logger.initializeLogger(stores, investigation, problem);
 
-if (kEnableLivelinessChecking) {
-  setLivelynessChecking("error");
-}
+  if (kEnableLivelinessChecking) {
+    setLivelynessChecking("error");
+  }
 
-setTitle(showDemoCreator, unit, problem);
-stores.ui.setShowDemoCreator(!!showDemoCreator);
+  setPageTitle(stores);
+  stores.ui.setShowDemoCreator(!!showDemoCreator);
 
-stores.supports.createFromUnit(unit, investigation, problem);
+  stores.supports.createFromUnit(unit, investigation, problem);
 
-ReactDOM.render(
-  <Provider stores={stores}>
-    <AppComponent />
-  </Provider>,
-  document.getElementById("app")
-);
+  ReactDOM.render(
+    <Provider stores={stores}>
+      <AppComponent />
+    </Provider>,
+    document.getElementById("app")
+  );
+};
+
+initializeApp();

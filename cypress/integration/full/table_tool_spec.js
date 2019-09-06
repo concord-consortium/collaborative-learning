@@ -107,7 +107,8 @@ context('Table Tool Tile',function(){
             // need to verify that it is in the Class Work right nav
         });
     });
-    describe('table in learning logs', function(){
+    // TODO: Learning logs has changed with new feature changes.
+    describe.skip('table in learning logs', function(){
         it('will add a table in a learning log canvas', function(){
                 learningLog.createLearningLog('table LL');
                 learningLog.getLLTableTool().click();

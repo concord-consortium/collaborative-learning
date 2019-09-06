@@ -1,5 +1,6 @@
 import { createStores, AppMode } from "./stores";
 import { ProblemModel } from "../curriculum/problem";
+import { AppConfigModel } from "./app-config-model";
 import { UserModel } from "./user";
 import { DB } from "../../lib/db";
 
@@ -15,6 +16,7 @@ describe("stores object", () => {
   });
 
   it("supports passing in stores for testing", () => {
+    const appConfig = AppConfigModel.create({ defaultUnit: "foo" });
     const appMode: AppMode = "dev";
     const id = "1";
     const name = "Colonel Mustard";
@@ -23,7 +25,8 @@ describe("stores object", () => {
     const title = "Test Problem";
     const problem = ProblemModel.create({ ordinal: 1, title });
     const db = new DB();
-    const stores = createStores({ appMode, user, problem, db });
+    const stores = createStores({ appConfig, appMode, user, problem, db });
+    expect(stores.appConfig.defaultUnit).toBe("foo");
     expect(stores.appMode).toBe("dev");
     expect(stores.user.id).toBe(id);
     expect(stores.user.type).toBe(type);

@@ -2,6 +2,7 @@ import * as React from "react";
 import "./collapsible-section-header.sass";
 
 interface IProps {
+  className?: string;
   sectionTitle: string;
   dataTestName: string;
   isExpanded: boolean;
@@ -9,11 +10,11 @@ interface IProps {
 }
 
 export const CollapsibleSectionHeader = (props: IProps) => {
-  const { sectionTitle, dataTestName, isExpanded, onClick } = props;
+  const { className, sectionTitle, dataTestName, isExpanded, onClick } = props;
   const icon: string = isExpanded ? "#icon-down-arrow" : "#icon-right-arrow";
   return (
     <div
-      className={`section-header ${isExpanded ? "expanded" : "collapsed"}`}
+      className={`section-header ${className || ""} ${isExpanded ? "expanded" : "collapsed"}`}
       data-test={dataTestName}
       onClick={onClick} >
 

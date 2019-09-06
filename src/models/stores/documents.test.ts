@@ -185,7 +185,7 @@ describe("documents model", () => {
       documents.add(badPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(1);
       expect(latestPubs[0]).toBe(pub1);
     });
@@ -198,7 +198,7 @@ describe("documents model", () => {
       documents.add(newerPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(1);
       expect(latestPubs[0]).toBe(newerPub1);
     });
@@ -211,7 +211,7 @@ describe("documents model", () => {
       documents.add(pub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(2);
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub3);
