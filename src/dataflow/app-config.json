@@ -1,0 +1,76 @@
+{
+  "pageTitle": "%unitTitle%",
+  "demoProblemTitle": "%investigationTitle%",
+  "units": {
+    "dataflow": "assets/curriculum/dataflow/dataflow.json"
+  },
+  "defaultUnit": "dataflow",
+  "defaultDocumentType": "personal",
+  "defaultDocumentContent": {
+    "tiles": [
+      {
+        "layout": {
+          "height": 500
+        },
+        "content": {
+          "type": "Dataflow"
+        }
+      },
+      {
+        "content": {
+          "type": "Text"
+        }
+      }
+    ]
+  },
+  "rightNavTabs": [
+    {
+      "tab": "my-work",
+      "label": "My Work",
+      "hideGhostUser": true,
+      "sections": [
+        {
+          "title": "Programs",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["!dfRunId"],
+          "addDocument": true
+        },
+        {
+          "title": "Data",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["dfRunId"]
+        }
+      ]
+    },
+    {
+      "tab": "class-work",
+      "label": "Shared Work",
+      "sections": [
+        {
+          "className": "section personal published",
+          "title": "Programs",
+          "type": "published-personal-documents",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["personalPublication"],
+          "properties": ["!dfRunId"]
+        },
+        {
+          "className": "section personal published",
+          "title": "Data",
+          "type": "published-personal-documents",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["personalPublication"],
+          "properties": ["dfRunId"]
+        }
+      ]
+    }
+  ]
+}
