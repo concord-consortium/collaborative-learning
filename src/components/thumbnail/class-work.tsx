@@ -4,15 +4,14 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentsSection } from "./documents-section";
 import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
-import { UserStarModel } from "../../models/tools/user-star";
-import { ENavTabSectionType, ERightNavTab } from "../../models/view/right-nav";
+import { ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
 
 interface IProps extends IBaseProps {
   scale: number;
 }
 
 interface IState {
-  showSection: Map<ENavTabSectionType, boolean>;
+  showSection: Map<string, boolean>;
 }
 
 @inject("stores")
@@ -34,23 +33,27 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
       <div className="class-work">
         <div className="header">{classWorkTab.label}</div>
 
-        {classWorkTab.sections.map(section => (
-          <DocumentsSection
-            key={section.type} tab={classWorkTab.tab} section={section}
-            stores={this.stores} scale={this.props.scale}
-            isExpanded={this.state.showSection.get(section.type)}
-            onToggleExpansion={this.handleToggleExpansion}
-            onDocumentClick={this.handleDocumentClick}
-            onDocumentDragStart={this.handleDocumentDragStart}
-            onDocumentStarClick={_handleDocumentStarClick} />
-        ))}
+        {classWorkTab.sections.map(section => {
+          const sectionId = navTabSectionId(section);
+          return (
+            <DocumentsSection
+              key={sectionId} tab={classWorkTab.tab} section={section}
+              stores={this.stores} scale={this.props.scale}
+              isExpanded={this.state.showSection.get(sectionId)}
+              onToggleExpansion={this.handleToggleExpansion}
+              onDocumentClick={this.handleDocumentClick}
+              onDocumentDragStart={this.handleDocumentDragStart}
+              onDocumentStarClick={_handleDocumentStarClick} />
+          );
+        })}
       </div>
     );
   }
 
-  private handleToggleExpansion = (sectionType: ENavTabSectionType) => {
-    const isExpanded = this.state.showSection.get(sectionType);
-    this.state.showSection.set(sectionType, !isExpanded);
+  private handleToggleExpansion = (section: NavTabSectionModelType) => {
+    const sectionId = navTabSectionId(section);
+    const isExpanded = this.state.showSection.get(sectionId);
+    this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
   }
 

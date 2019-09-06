@@ -3,14 +3,15 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
-import { ENavTabSectionType, ERightNavTab } from "../../models/view/right-nav";
+import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType
+      } from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
 
 interface IProps extends IBaseProps {
   scale: number;
 }
 interface IState {
-  showSection: Map<ENavTabSectionType, boolean>;
+  showSection: Map<string, boolean>;
 }
 
 @inject("stores")
@@ -29,31 +30,35 @@ export class MyWorkComponent extends BaseComponent<IProps, IState> {
       <div className="my-work">
         <div className="header">{myWorkTab.label}</div>
 
-        {myWorkTab.sections.map(section => (
-          <DocumentsSection
-            key={section.type} tab={myWorkTab.tab} section={section}
-            stores={this.stores} scale={this.props.scale}
-            isExpanded={this.state.showSection.get(section.type)}
-            onToggleExpansion={this.handleToggleExpansion}
-            onNewDocumentClick={this.handleNewDocumentClick}
-            onDocumentClick={this.handleDocumentClick}
-            onDocumentDragStart={this.handleDocumentDragStart} />
-        ))}
+        {myWorkTab.sections.map(section => {
+          const sectionId = navTabSectionId(section);
+          return (
+            <DocumentsSection
+              key={sectionId} tab={myWorkTab.tab} section={section}
+              stores={this.stores} scale={this.props.scale}
+              isExpanded={this.state.showSection.get(sectionId)}
+              onToggleExpansion={this.handleToggleExpansion}
+              onNewDocumentClick={this.handleNewDocumentClick}
+              onDocumentClick={this.handleDocumentClick}
+              onDocumentDragStart={this.handleDocumentDragStart} />
+          );
+        })}
       </div>
     );
   }
 
-  private handleToggleExpansion = (sectionType: ENavTabSectionType) => {
-    const isExpanded = this.state.showSection.get(sectionType);
-    this.state.showSection.set(sectionType, !isExpanded);
+  private handleToggleExpansion = (section: NavTabSectionModelType) => {
+    const sectionId = navTabSectionId(section);
+    const isExpanded = this.state.showSection.get(sectionId);
+    this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
   }
 
-  private handleNewDocumentClick = async (sectionType: string, documentTypes: string[]) => {
+  private handleNewDocumentClick = async (section: NavTabSectionModelType) => {
     const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
     const { problemWorkspace } = ui;
-    const newDocument = sectionType === ENavTabSectionType.kPersonalDocuments
-                          ? await db.createPersonalDocument("", defaultDocumentContent)
+    const newDocument = section.type === ENavTabSectionType.kPersonalDocuments
+                          ? await db.createPersonalDocument({ content: defaultDocumentContent })
                           : await db.createLearningLogDocument();
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);

@@ -14,8 +14,8 @@ interface IProps {
   stores: IStores;
   scale: number;
   isExpanded: boolean;
-  onToggleExpansion: (sectionType: string) => void;
-  onNewDocumentClick?: (sectionType: string, documentTypes: string[]) => void;
+  onToggleExpansion: (section: NavTabSectionModelType) => void;
+  onNewDocumentClick?: (section: NavTabSectionModelType) => void;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
@@ -64,15 +64,28 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     });
     // filter by additional properties
     if (section.properties && section.properties.length) {
-      const filterStarred = section.properties.indexOf("starred") >= 0;
-      sectionDocs = sectionDocs.filter(doc => !filterStarred || doc.isStarred);
+      sectionDocs = sectionDocs.filter(doc => {
+        return section.properties.every(p => {
+          const match = /(!)?(.*)/.exec(p);
+          const property = match && match[2];
+          const wantsProperty = !(match && match[1]); // not negated => has property
+          if (property === "starred") {
+            return doc.isStarred === wantsProperty;
+          }
+          if (property) {
+            return !!doc.getProperty(property) === wantsProperty;
+          }
+          // ignore empty strings, etc.
+          return true;
+        });
+      });
     }
 
     function handleSectionHeaderClick() {
-      onToggleExpansion && onToggleExpansion(section.type);
+      onToggleExpansion && onToggleExpansion(section);
     }
     function handleNewDocumentClick() {
-      onNewDocumentClick && onNewDocumentClick(section.type, section.documentTypes);
+      onNewDocumentClick && onNewDocumentClick(section);
     }
 
     return (

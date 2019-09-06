@@ -1,8 +1,8 @@
 import { createStores, AppMode } from "./stores";
 import { ProblemModel } from "../curriculum/problem";
+import { AppConfigModel } from "./app-config-model";
 import { UserModel } from "./user";
 import { DB } from "../../lib/db";
-import { AppConfigModel } from "./app-config";
 
 describe("stores object", () => {
 

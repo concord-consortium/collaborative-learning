@@ -43,7 +43,7 @@ export interface GroupUsersMap {
 
 export type DBClearLevel = "all" | "class" | "offering";
 
-export interface ICreateOtherDocumentProps {
+export interface ICreateOtherDocumentParams {
   title?: string;
   properties?: IOtherDocumentProperties;
   content?: DocumentContentModelType;
@@ -57,6 +57,7 @@ export interface OpenDocumentOptions {
   sectionId?: string;
   visibility?: "public" | "private";
   title?: string;
+  properties?: IOtherDocumentProperties;
   groupUserConnections?: {};
   originDoc?: string;
 }
@@ -237,7 +238,7 @@ export class DB {
     const firstPersonalDocument = find(personalDocuments, () => true);
     return firstPersonalDocument
       ? this.openOtherDocument(PersonalDocument, firstPersonalDocument.self.documentKey)
-      : this.createPersonalDocument("", defaultContent);
+      : this.createPersonalDocument({ content: defaultContent });
   }
 
   public createProblemDocument(content?: DocumentContentModelType) {
@@ -364,8 +365,8 @@ export class DB {
     });
   }
 
-  public createPersonalDocument(title?: string, content?: DocumentContentModelType) {
-    return this.createOtherDocument(PersonalDocument, { title, content });
+  public createPersonalDocument(params: ICreateOtherDocumentParams) {
+    return this.createOtherDocument(PersonalDocument, params);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -434,7 +435,7 @@ export class DB {
   }
 
   public openDocument(options: OpenDocumentOptions) {
-    const {documentKey, type, title, userId, sectionId, groupId, visibility, originDoc} = options;
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -454,6 +455,7 @@ export class DB {
           return DocumentModel.create({
             type,
             title,
+            properties,
             groupId,
             visibility,
             uid: userId,
@@ -476,8 +478,8 @@ export class DB {
   }
 
   // personal documents and learning logs
-  public createOtherDocument(documentType: OtherDocumentType, props: ICreateOtherDocumentProps = {}) {
-    const { title, properties, content } = props;
+  public createOtherDocument(documentType: OtherDocumentType, params: ICreateOtherDocumentParams = {}) {
+    const { title, properties, content } = params;
     const {documents, user} = this.stores;
     const docTitle: string = title || documents.getNextOtherDocumentTitle(user, documentType);
 
@@ -582,12 +584,12 @@ export class DB {
       });
   }
 
-  // handles peersonal documents and learning logs
+  // handles personal documents and learning logs
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
-    const {title, self: {uid, documentKey}} = dbDocument;
+    const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title})
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties})
       .then((documentModel) => {
         this.listeners.monitorDocumentModel(documentModel);
         this.listeners.monitorDocumentRef(documentModel);

@@ -1,4 +1,5 @@
 {
+  "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
     "msa": "assets/curriculum/moving-straight-ahead/moving-straight-ahead.json",
