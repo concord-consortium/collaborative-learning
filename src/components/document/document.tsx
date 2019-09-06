@@ -4,9 +4,10 @@ import * as FileSaver from "file-saver";
 
 import { SupportItemModelType, SupportType } from "../../models/stores/supports";
 import { CanvasComponent } from "./canvas";
+import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ProblemDocument, LearningLogDocument, LearningLogPublication
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, ProblemDocument
        } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
@@ -29,6 +30,8 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
+  documentKey: string;
+  documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
   commentTileId: string;
 }
@@ -69,6 +72,17 @@ const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGCli
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
 
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    const { document } = nextProps;
+    const documentContext: IDocumentContext = {
+            getProperty: (key: string) => document.properties.get(key),
+            setProperties: (properties: ISetProperties) => document.setProperties(properties)
+          };
+    return document.key === prevState.documentKey
+            ? {}
+            : { documentKey: document.key, documentContext };
+  }
+
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
 
@@ -88,20 +102,23 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     };
 
     this.state = {
+      documentKey: props.document.key,
       isCommentDialogOpen: false,
       commentTileId: ""
     };
   }
 
   public render() {
-    return [
-        this.renderToolbar(),
+    return (
+      <DocumentContext.Provider value={this.state.documentContext}>
+        {this.renderToolbar()}
         <div key="document" className="document">
           {this.renderTitleBar()}
           {this.renderCanvas()}
           {this.renderStatusBar()}
         </div>
-    ];
+      </DocumentContext.Provider>
+    );
   }
 
   private renderTitleBar() {

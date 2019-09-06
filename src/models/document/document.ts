@@ -2,6 +2,8 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
+import { IOtherDocumentProperties } from "../../lib/db-types";
+import { forEach } from "lodash";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
 
@@ -46,9 +48,10 @@ export const DocumentModel = types
   .model("Document", {
     uid: types.string,
     type: DocumentTypeEnum,
-    title: types.maybe(types.string),
     key: types.string,
     createdAt: types.number,
+    title: types.maybe(types.string),
+    properties: types.map(types.string),
     content: DocumentContentModel,
     comments: types.map(TileCommentsModel),
     stars: types.array(UserStarModel),
@@ -73,6 +76,12 @@ export const DocumentModel = types
               || (self.type === LearningLogPublication)
               || (self.type === PersonalPublication);
     },
+    getProperty(key: string) {
+      return self.properties.get(key);
+    },
+    copyProperties(): IOtherDocumentProperties {
+      return self.properties.toJSON();
+    },
     get isStarred() {
       return !!self.stars.find(star => star.starred);
     },
@@ -84,18 +93,27 @@ export const DocumentModel = types
     }
   }))
   .actions((self) => ({
-    setContent(content: DocumentContentModelType) {
-      self.content = content;
-    },
-
     setTitle(title: string) {
       self.title = title;
     },
 
-    toggleVisibility(overide?: "public" | "private") {
-      self.visibility = typeof overide === "undefined"
-        ? (self.visibility === "public" ? "private" : "public")
-        : overide;
+    setProperty(key: string, value?: string) {
+      if (value == null) {
+        self.properties.delete(key);
+      }
+      else {
+        self.properties.set(key, value);
+      }
+    },
+
+    setContent(content: DocumentContentModelType) {
+      self.content = content;
+    },
+
+    toggleVisibility(visibility?: "public" | "private") {
+      self.visibility = !visibility
+                          ? (self.visibility === "public" ? "private" : "public")
+                          : visibility;
     },
 
     addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
@@ -132,7 +150,16 @@ export const DocumentModel = types
     incChangeCount() {
       self.changeCount += 1;
     }
+  }))
+  .actions(self => ({
+    setProperties(properties: ISetProperties) {
+      forEach(properties, (value, key) => self.setProperty(key, value));
+    }
   }));
+
+export interface ISetProperties {
+  [key: string]: string | undefined;
+}
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
 export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;
