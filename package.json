@@ -49,6 +49,7 @@
     "test:cypress": "cypress run --config video=false,defaultCommandTimeout=8000 --env testEnv=local",
     "test:cypress:open": "cypress open --env testEnv=local",
     "test:cypress:smoke": "cypress run --spec 'cypress/integration/smoke/single_student_canvas_test.js' --config video=false,defaultCommandTimeout=8000 --env testEnv=local",
+    "test:cypress:dataflow": "cypress run --spec 'cypress/integration/dataflow/**' --config video=false,defaultCommandTimeout=8000 --env testEnv=local-df",
     "test:full": "npm-run-all test test:cypress",
     "test:production": "cypress open --env testEnv=production",
     "test:master": "cypress open --env testEnv=master ",
