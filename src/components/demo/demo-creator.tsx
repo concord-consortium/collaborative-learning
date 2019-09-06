@@ -92,7 +92,7 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
 
   private createLink(userType: string, userIndex: number) {
     const { demo, unit } = this.stores;
-    const appStr = urlParams.dataflow !== undefined ? "&dataflow" : "";
+    const appStr = "";  // urlParams.dataflow !== undefined ? "&dataflow" : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // tslint:disable-next-line:max-line-length

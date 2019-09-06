@@ -57,7 +57,7 @@ export interface QueryParams {
   qaClear?: DBClearLevel;
 
   // Dataflow mode
-  dataflow?: boolean;
+  // dataflow?: boolean;
 }
 
 const params = parse(location.search);
@@ -77,7 +77,7 @@ export const DefaultUrlParams: QueryParams = {
   qaGroup: undefined,
   qaClear: undefined,
   testMigration: undefined,
-  dataflow: undefined,
+  // dataflow: undefined,
 };
                                                     // allows use of ?demo for url
 export const urlParams: QueryParams = { ...params, ...{ demo: typeof params.demo !== "undefined" } };
