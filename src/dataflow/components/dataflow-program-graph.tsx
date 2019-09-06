@@ -2,6 +2,7 @@ import * as React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { ChartPlotColors } from "./../utilities/node";
+import { exportCSV } from "../utilities/export";
 import "./dataflow-program-graph.sass";
 
 export interface DataPoint {
@@ -55,27 +56,38 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public handleShowProgramClick = () => {
     this.props.onToggleShowProgram();
   }
+  public handleExport = () => {
+    const {dataSet} = this.props;
+    exportCSV(dataSet.sequences);
+  }
 
   public render() {
+    const {dataSet} = this.props;
     const graphClass = `program-graph ${(!this.props.programVisible && "full")}`;
     return (
       <div className={graphClass} data-test="program-graph">
+        {dataSet.sequences.length === 0 &&
+          <div className="graph-loading" />
+        }
         { this.state.stacked
           ? this.renderStackedGraphs()
           : this.renderOverlappedGraphs()
         }
-        <button className="graph-button program" onClick={this.handleShowProgramClick}>
-          { this.props.programVisible ? "Graph" : "Program" }
-        </button>
-        <button className="graph-button type" onClick={this.handleTypeClick}>
-          { this.state.scatter ? "Line" : "Scatter" }
-        </button>
-        <button className="graph-button layout" onClick={this.handleLayoutClick}>
-          { this.state.stacked ? "Combined" : "Stacked" }
-        </button>
-        <button className="graph-button data" onClick={this.handleDataModeClick}>
-          { this.state.fullRun ? "All Data" : "Full Run" }
-        </button>
+        <div className="graph-buttons">
+          <button className="graph-button export" onClick={this.handleExport}>Export Data (csv)</button>
+          <button className="graph-button program" onClick={this.handleShowProgramClick}>
+            { this.props.programVisible ? "Graph" : "Program" }
+          </button>
+          <button className="graph-button type" onClick={this.handleTypeClick}>
+            { this.state.scatter ? "Line" : "Scatter" }
+          </button>
+          <button className="graph-button layout" onClick={this.handleLayoutClick}>
+            { this.state.stacked ? "Combined" : "Stacked" }
+          </button>
+          <button className="graph-button data" onClick={this.handleDataModeClick}>
+            { this.state.fullRun ? "All Data" : "Full Run" }
+          </button>
+        </div>
       </div>
     );
   }
