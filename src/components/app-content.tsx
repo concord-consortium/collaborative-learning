@@ -1,14 +1,13 @@
 import * as React from "react";
-import { IBaseProps } from "./base";
-import { ClueAppContentComponent } from "../clue/components/clue-app-content";
+import { AppContentComponent, IBaseProps } from "../app-config";
 
 import "./app-content.sass";
 
 interface IProps extends IBaseProps {}
-export const AppContentComponent: React.FC<IProps> = (props) => {
+export const AppContentContainerComponent: React.FC<IProps> = (props) => {
   return (
     <div className="app-content">
-      <ClueAppContentComponent {...props} />
+      <AppContentComponent {...props} />
     </div>
   );
 };

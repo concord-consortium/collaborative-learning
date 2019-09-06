@@ -1,11 +1,10 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { authenticate } from "../lib/auth";
-import { AppContentComponent } from "./app-content";
+import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
-import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
@@ -137,7 +136,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(<GroupChooserComponent />);
     }
 
-    return this.renderApp(<AppContentComponent />);
+    return this.renderApp(<AppContentContainerComponent />);
   }
 
   private renderApp(children: JSX.Element | JSX.Element[]) {
