@@ -15,14 +15,15 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+require('cypress-commands');
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-before(function(){
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+const baseUrl = `${Cypress.config("baseUrl")}`;
+const queryParams = `${Cypress.config("queryParams")}`;
 
+before(function(){
     cy.clearQAData('all');
     cy.visit(baseUrl+queryParams);
     cy.wait(2000);

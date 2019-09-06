@@ -53,7 +53,10 @@
     "test:production": "cypress open --env testEnv=production",
     "test:master": "cypress open --env testEnv=master ",
     "test:branch": "cypress open --env testEnv=branch",
-    "test:local": "cypress open --env testEnv=local"
+    "test:local": "cypress open --env testEnv=local",
+    "test:branch:dataflow": "cypress open --env testEnv=branch-df",
+    "test:branch:dataflow-all": "cypress run --env testEnv=branch-df --spec 'cypress/integration/dataflow/**' --config video=false,defaultCommandTimeout=8000",
+    "test:local:dataflow": "cypress open --env testEnv=local-df"
   },
   "repository": {
     "type": "git",
@@ -134,6 +137,7 @@
     "aws-sdk": "^2.505.0",
     "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
+    "cypress-commands": "^0.2.0",
     "expr-eval": "^1.2.3",
     "file-saver": "^2.0.2",
     "firebase": "^6.3.3",

@@ -19,6 +19,10 @@ class RightNav{
         // cy.get('[data-test=my-work-list-items][title*="'+title+'"]').click();
         // cy.get('.my-work > .list > .list-item[title*="'+title+'"]').click();
     }
+    openSavedProgramItem(title){
+        cy.get('[data-test=my-work-section]').contains("Df: Investigation ").click();
+        cy.get('[data-test="my-work-list-items"] .footer .info').contains(title).parent().parent().siblings(".scaled-list-item-container").click();
+    }
 
     openMyWorkTab(){
         this.getMyWorkTab().click({force:true});
