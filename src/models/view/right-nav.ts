@@ -2,8 +2,7 @@ import { types, SnapshotIn, Instance } from "mobx-state-tree";
 
 export enum ERightNavTab {
   kMyWork = "my-work",
-  kClassWork = "class-work",
-  kStarredWork = "starred-work"
+  kClassWork = "class-work"
 }
 
 // generic type which maps tab id to values of another type
@@ -47,3 +46,8 @@ export const RightNavTabModel =
   });
 export type RightNavTabSpec = SnapshotIn<typeof RightNavTabModel>;
 export type RightNavTabModelType = Instance<typeof RightNavTabModel>;
+
+export function navTabSectionId(section: NavTabSectionSpec) {
+  const title = section.title.toLowerCase().replace(" ", "-");
+  return `${section.type}-${title}`;
+}

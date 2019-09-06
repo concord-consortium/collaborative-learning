@@ -5,6 +5,7 @@ import { RightNavTabModel } from "../view/right-nav";
 
 export const AppConfigModel = types
   .model("User", {
+    appName: "",
     pageTitle: "",
     demoProblemTitle: "",
     units: types.map(types.string),

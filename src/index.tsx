@@ -1,11 +1,9 @@
 import { Provider } from "mobx-react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import * as appConfigJson from "./app-config.json";
+import { appConfigSpec, createStores } from "./app-config";
 import { AppComponent } from "./components/app";
-import { AppConfigModel, AppConfigSpec } from "./models/stores/app-config";
-import { createStores } from "./models/stores/stores";
+import { AppConfigModel } from "./models/stores/app-config-model";
 import { UserModel } from "./models/stores/user";
 import { createFromJson } from "./models/curriculum/unit";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
@@ -21,7 +19,7 @@ const kEnableLivelinessChecking = false;
 import "./components/utilities/blueprint";
 import "./index.sass";
 
-const appConfig = AppConfigModel.create(appConfigJson as AppConfigSpec);
+const appConfig = AppConfigModel.create(appConfigSpec);
 
 function getUnitJson() {
   const unitUrlParam = urlParams.unit && appConfig.units.get(urlParams.unit);

@@ -1,4 +1,4 @@
-import { AppConfigModelType, AppConfigModel } from "./app-config";
+import { AppConfigModelType, AppConfigModel } from "./app-config-model";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
