@@ -1,4 +1,5 @@
 @import ../../components/vars
+@import ./vars
 
 .dataflow-app-content
 
@@ -9,3 +10,54 @@
     right: 0
     bottom: 0
     opacity: 0
+
+  .app-header
+    height: 60px
+    border-radius: 3px
+    box-shadow: 0 2px 0 0 $gray-mid-click
+    background-color: #ffffff
+    .bp3-button-group
+      width: 260px
+      height: 30px
+      border-radius: 15px
+      background-color: $gray-mid
+      display: flex
+      justify-content: center
+      padding-top: 2px
+      .bp3-button:first-of-type
+        border-radius: 0px
+        border-top-left-radius: 12px
+        border-bottom-left-radius: 12px
+      .bp3-button
+        width: 127px
+        height: 24px
+        background-color: #ffffff
+        border-radius: 0px
+        border-top-right-radius: 12px
+        border-bottom-right-radius: 12px
+        padding: 0px
+        padding-top: 2px
+        padding-bottom: 4px
+        min-width: 0
+        min-height: 0
+        &.bp3-active
+          padding-top: 4px
+          padding-bottom: 2px
+          background-color: $gray-light
+        &:hover
+          background-color: $gray-light-hover
+        &:active
+          background-color: $gray-light-click
+
+        span
+          width: 94px
+          height: 16px
+          font-family: Ubuntu
+          font-size: 14px
+          font-weight: normal
+          font-style: normal
+          font-stretch: normal
+          line-height: normal
+          letter-spacing: normal
+          text-align: center
+          color: $gray-text
