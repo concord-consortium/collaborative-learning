@@ -139,7 +139,7 @@ export class DBListeners {
           currentSectionDocsListener.off();
         }
         const groupUserDocsRef = this.db.firebase.ref(
-          this.db.firebase.getProblemDocumentsPath(user, groupUser.id)
+          this.db.firebase.getProblemDocumentPath(user, document.key, groupUser.id)
         );
         this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
           .sectionDocsRef = groupUserDocsRef;
