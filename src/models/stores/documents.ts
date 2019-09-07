@@ -32,7 +32,8 @@ export const DocumentsModel = types
       self.byTypeForUser(PersonalDocument, user.id)
         .forEach(document => {
           const match = /.*-([0-9]+)$/.exec(document.title || "");
-          if (match && match[1]) {
+          // length check to bypass timestamps
+          if (match && match[1] && (match[1].length < 4)) {
             const suffix = parseInt(match[1], 10);
             maxUntitled = Math.max(maxUntitled, suffix);
           }
