@@ -6,3 +6,4 @@ export { createStores } from "./dataflow/models/stores/dataflow-stores";
 export { BaseComponent, IBaseProps } from "./dataflow/components/dataflow-base";
 import { DataflowAppContentComponent } from "./dataflow/components/dataflow-app-content";
 export const AppContentComponent = DataflowAppContentComponent;
+import "./dataflow/dataflow.sass";
