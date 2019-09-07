@@ -11,7 +11,9 @@ export const AppConfigModel = types
     units: types.map(types.string),
     defaultUnit: "",
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
+    defaultDocumentTitle: "Untitled",
     defaultDocumentContent: types.maybe(DocumentContentModel),
+    defaultLearningLogTitle: "UntitledLog",
     rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel)
   });

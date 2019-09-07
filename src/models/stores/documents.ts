@@ -27,17 +27,18 @@ export const DocumentsModel = types
     }
   }))
   .views(self => ({
-    getNextPersonalDocumentTitle(user: UserModelType) {
+    getNextPersonalDocumentTitle(user: UserModelType, base: string) {
       let maxUntitled = 0;
       self.byTypeForUser(PersonalDocument, user.id)
         .forEach(document => {
           const match = /.*-([0-9]+)$/.exec(document.title || "");
-          if (match && match[1]) {
+          // length check to skip timestamps
+          if (match && match[1] && (match[1].length < 4)) {
             const suffix = parseInt(match[1], 10);
             maxUntitled = Math.max(maxUntitled, suffix);
           }
         });
-      return `Untitled-${++maxUntitled}`;
+      return `${base}-${++maxUntitled}`;
     },
 
     getPersonalDocument(userId: string) {
@@ -58,17 +59,18 @@ export const DocumentsModel = types
       });
     },
 
-    getNextLearningLogTitle(user: UserModelType) {
+    getNextLearningLogTitle(user: UserModelType, base: string) {
       let maxUntitled = 0;
       self.byTypeForUser(LearningLogDocument, user.id)
         .forEach(document => {
           const match = /.*-([0-9]+)$/.exec(document.title || "");
-          if (match && match[1]) {
+          // length check to skip timestamps
+          if (match && match[1] && (match[1].length < 4)) {
             const suffix = parseInt(match[1], 10);
             maxUntitled = Math.max(maxUntitled, suffix);
           }
         });
-      return `UntitledLog-${++maxUntitled}`;
+      return `${base}-${++maxUntitled}`;
     },
 
     // Returns the most recently published personal documents or learning logs per user, sorted by title
@@ -126,10 +128,10 @@ export const DocumentsModel = types
     }
   }))
   .views(self => ({
-    getNextOtherDocumentTitle(user: UserModelType, documentType: OtherDocumentType) {
+    getNextOtherDocumentTitle(user: UserModelType, documentType: OtherDocumentType, base: string) {
       switch (documentType) {
-        case PersonalDocument: return self.getNextPersonalDocumentTitle(user);
-        case LearningLogDocument: return self.getNextLearningLogTitle(user);
+        case PersonalDocument: return self.getNextPersonalDocumentTitle(user, base);
+        case LearningLogDocument: return self.getNextLearningLogTitle(user, base);
       }
       return "";
     }
