@@ -1,1 +1,76 @@
+@import ./vars
 // application-specific styling goes here
+
+#app
+  background-color: $gray-mid !important
+
+.document-workspace
+  .single-workspace
+    left: 4px
+    right: 50px
+
+    .document
+      border-radius: 0px
+      border-top-left-radius: 3px
+      border-top-right-radius: 3px
+      border-width: 0px
+
+      .titlebar
+        background-color: #ffffff
+        .actions
+          .icon
+            background-color: #ffffff
+            color: $gray-mid-click
+
+      .canvas-area
+        border-top: 4px solid $gray-mid
+        bottom: 10px
+
+        .document-content
+          padding: 0px
+          .tile-row
+            .tool-tile.selected
+              border: 2px solid #ffffff
+              .tool-tile-drag-handle
+                display: none
+
+    .statusbar
+      display: none
+.left-nav
+  display: none
+
+.right-nav
+  position: fixed
+  width: 50px
+  top: 62px
+  right: 0px
+  height: 100vh
+  background-color: #ffffff
+
+  .expanded-area
+    right: -102px
+    width: 100px
+    top: 0px
+    border-radius: 0px
+    background-color: #ffffff
+    border: 0px
+    border-left: 1px solid $gray-mid
+    .contents
+      background-color: #ffffff
+  .tabs
+    right: 0px
+    top: 0px
+    width: 50px
+    border-radius: 0
+    z-index: 2
+    &.expanded
+      right: 100px
+
+    .tab
+      background-color: #ffffff
+      border: 0
+      box-shadow: none
+      border-radius: 0
+      &.active
+        background-color: #ffffff
+        border: 0
