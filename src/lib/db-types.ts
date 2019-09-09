@@ -22,13 +22,14 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBDocumentType = "section" | "problem" | "personal" |
-                            "publication" | "learningLog" | "learningLogPublication";
+export type DBDocumentType = "section" | "problem" | "personal" | "personalPublication" |
+                             "publication" | "learningLog" | "learningLogPublication";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
                                  DBLearningLogDocumentMetadata |
                                  DBPublicationDocumentMetadata |
+                                 DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata;
 
 export interface DBBaseDocumentMetadata {
@@ -63,6 +64,11 @@ export interface DBPublicationDocumentMetadata extends DBBaseDocumentMetadata {
   classHash: string;
   offeringId: string;
 }
+
+export interface DBPersonalPublicationMetadata extends DBBaseDocumentMetadata {
+  type: "personalPublication";
+}
+
 export interface DBLearningLogPublicationMetadata extends DBBaseDocumentMetadata {
   type: "learningLogPublication";
 }
@@ -71,7 +77,25 @@ export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
 
-export interface DBPersonalDocument {
+// section documents [deprecated] and problem documents
+export interface DBDocument {
+  version: "1.0";
+  self: {
+    uid: string;
+    documentKey: string;
+    classHash: string;
+  };
+  content?: string;
+  changeCount?: number;
+  type: DBDocumentType;
+}
+
+export interface IOtherDocumentProperties {
+  [key: string]: string;
+}
+
+// personal documents and learning logs
+export interface DBOtherDocument {
   version: "1.0";
   self: {
     uid: string;
@@ -79,8 +103,10 @@ export interface DBPersonalDocument {
     documentKey: string;
   };
   title: string;
+  properties?: IOtherDocumentProperties;
 }
 
+// published section documents [deprecated] and problem documents
 export interface DBPublication {
   version: "1.0";
   self: {
@@ -93,37 +119,17 @@ export interface DBPublication {
   groupUserConnections: DBGroupUserConnections;
 }
 
-export interface DBLearningLog {
-  version: "1.0";
-  self: {
-    uid: string;
-    classHash: string;
-    documentKey: string;
-  };
-  title: string;
-}
-
-export interface DBLearningLogPublication {
+// published personal documents and learning logs
+export interface DBOtherPublication {
   version: "1.0";
   self: {
     classHash: string;
     documentKey: string;
   };
   title: string;
+  properties: IOtherDocumentProperties;
   uid: string;
   originDoc: string;
-}
-
-export interface DBDocument {
-  version: "1.0";
-  self: {
-    uid: string;
-    documentKey: string;
-    classHash: string;
-  };
-  content?: string;
-  changeCount?: number;
-  type: DBDocumentType;
 }
 
 export interface DBClass {
@@ -223,6 +229,10 @@ export interface DBOfferingGroupUser {
   };
   connectedTimestamp: number;
   disconnectedTimestamp?: number;
+}
+
+export interface DBOtherDocumentMap {
+  [key: string]: DBOtherDocument;
 }
 
 export interface DBImage {

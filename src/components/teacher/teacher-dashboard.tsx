@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { BottomNavComponent } from "../navigation/bottom-nav";
 import { RightNavComponent } from "../navigation/right-nav";
 import { TeacherGroupTabComponent } from "./teacher-group-tab";
 import { TeacherStudentTabComponent } from "./teacher-student-tab";
@@ -37,7 +36,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const {supports, unit} = this.stores;
+    const {appConfig, supports} = this.stores;
     const {activeTab} = this.state;
 
     return (
@@ -50,8 +49,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
             {this.renderTabContents()}
           </div>
         </div>
-        <BottomNavComponent />
-        <RightNavComponent tabs={unit.rightNavTabs} isGhostUser={true} />
+        <RightNavComponent tabs={appConfig.rightNavTabs} isGhostUser={true} />
       </div>
     );
   }

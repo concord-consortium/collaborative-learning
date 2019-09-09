@@ -2,12 +2,13 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { BaseComponent } from "../../../components/base";
+import { ICreateOtherDocumentParams } from "../../../lib/db";
+import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
 import { DataflowProgram } from "../dataflow-program";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
-import { DocumentModel } from "../../../models/document/document";
 import "./dataflow-tool.sass";
 
 interface IProps {
@@ -68,12 +69,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     if (problemWorkspace.primaryDocumentKey) {
       const primaryDocument = documents.getDocument(problemWorkspace.primaryDocumentKey);
       if (primaryDocument) {
-        // get snapshot of DocumentModel
-        const primaryDocumentSnapshot = cloneDeep(getSnapshot(primaryDocument));
-        // make a new DocumentModel from the snapshot
-        const programRunDocument = DocumentModel.create(primaryDocumentSnapshot);
+        // get snapshot of DocumentContent
+        const contentSnapshot = cloneDeep(getSnapshot(primaryDocument.content));
+        // make a new DocumentContentModel from the snapshot
+        const documentContent = DocumentContentModel.create(contentSnapshot);
         // find the program tile (should only be 1) and apply the program run info
-        programRunDocument.content.tileMap.forEach(tile => {
+        documentContent.tileMap.forEach(tile => {
           if (tile.content.type === "Dataflow") {
             const programContent = tile.content as DataflowContentModelType;
             programContent.setProgramRunId(id);
@@ -81,7 +82,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
           }
         });
         // create and load the new document
-        const newPersonalDocument = await db.createPersonalDocument(title || id, programRunDocument);
+        const params: ICreateOtherDocumentParams = {
+                title: title || id,
+                properties: { dfRunId: id },
+                content: documentContent
+              };
+        const newPersonalDocument = await db.createPersonalDocument(params);
         if (newPersonalDocument) {
           problemWorkspace.setAvailableDocument(newPersonalDocument);
           ui.contractAll();

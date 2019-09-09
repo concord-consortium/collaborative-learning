@@ -1,12 +1,13 @@
-import { UnitModelType } from "../models/curriculum/unit";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { IStores } from "../models/stores/stores";
 import { Logger } from "./logger";
 
-export const setTitle = (showDemoCreator?: boolean, unit?: UnitModelType, problem?: ProblemModelType) => {
-  const pageTitleTemplate = unit && unit.pageTitle;
+export const setPageTitle = (stores: IStores, argProblem?: ProblemModelType) => {
+  const { appConfig, showDemoCreator, unit, problem: storeProblem } = stores;
+  const pageTitleTemplate = appConfig && appConfig.pageTitle;
   let pageTitle;
   if (pageTitleTemplate) {
+    const problem = argProblem || storeProblem;
     pageTitle = pageTitleTemplate
                   .replace("%unitTitle%", unit && unit.fullTitle || "")
                   .replace("%problemTitle%", problem && problem.fullTitle || "");
@@ -17,11 +18,11 @@ export const setTitle = (showDemoCreator?: boolean, unit?: UnitModelType, proble
 };
 
 export const updateProblem = (stores: IStores, problemId: string) => {
-  const {unit, showDemoCreator} = stores;
+  const {unit} = stores;
   const {investigation, problem} = unit.getProblem(problemId);
   if (investigation && problem) {
     Logger.updateProblem(investigation, problem);
-    setTitle(showDemoCreator, unit, problem);
+    setPageTitle(stores, problem);
     stores.supports.createFromUnit(unit, investigation, problem);
     stores.problem = problem;
   }

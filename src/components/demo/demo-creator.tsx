@@ -28,8 +28,8 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
   private problemOptions: IProblemOption[] = [];
 
   public componentWillMount() {
-    const { unit, demo } = this.stores;
-    const problemTitleTemplate = unit.demoProblemTitle || "%investigationTitle%: %problemTitle%";
+    const { appConfig, unit, demo } = this.stores;
+    const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
 
@@ -92,7 +92,7 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
 
   private createLink(userType: string, userIndex: number) {
     const { demo, unit } = this.stores;
-    const appStr = urlParams.dataflow !== undefined ? "&dataflow" : "";
+    const appStr = "";  // urlParams.dataflow !== undefined ? "&dataflow" : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // tslint:disable-next-line:max-line-length

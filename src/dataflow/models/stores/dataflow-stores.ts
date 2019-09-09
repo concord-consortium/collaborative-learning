@@ -7,10 +7,7 @@ export interface IStores extends IBaseStores {
   iot: IoT;
 }
 
-export interface ICreateStores {
-  hubStore?: HubStoreType;
-  iot?: IoT;
-}
+export type ICreateStores = Partial<IStores>;
 
 export function createStores(params?: ICreateStores): IStores {
   let baseParams;

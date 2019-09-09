@@ -4,9 +4,11 @@ import * as FileSaver from "file-saver";
 
 import { SupportItemModelType, SupportType } from "../../models/stores/supports";
 import { CanvasComponent } from "./canvas";
+import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ProblemDocument } from "../../models/document/document";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, ProblemDocument
+       } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -28,6 +30,8 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
+  documentKey: string;
+  documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
   commentTileId: string;
 }
@@ -68,6 +72,17 @@ const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGCli
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
 
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    const { document } = nextProps;
+    const documentContext: IDocumentContext = {
+            getProperty: (key: string) => document.properties.get(key),
+            setProperties: (properties: ISetProperties) => document.setProperties(properties)
+          };
+    return document.key === prevState.documentKey
+            ? {}
+            : { documentKey: document.key, documentContext };
+  }
+
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
 
@@ -87,20 +102,23 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     };
 
     this.state = {
+      documentKey: props.document.key,
       isCommentDialogOpen: false,
       commentTileId: ""
     };
   }
 
   public render() {
-    return [
-        this.renderToolbar(),
+    return (
+      <DocumentContext.Provider value={this.state.documentContext}>
+        {this.renderToolbar()}
         <div key="document" className="document">
           {this.renderTitleBar()}
           {this.renderCanvas()}
           {this.renderStatusBar()}
         </div>
-    ];
+      </DocumentContext.Provider>
+    );
   }
 
   private renderTitleBar() {
@@ -110,10 +128,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return this.renderProblemTitleBar(hideButtons);
     }
     if (document.isPersonal) {
-      return this.renderPersonalDocumentTitleBar(hideButtons);
+      return this.renderOtherDocumentTitleBar(hideButtons);
     }
     if (document.isLearningLog) {
-      return this.renderLearningLogTitleBar(hideButtons);
+      return this.renderOtherDocumentTitleBar(hideButtons);
     }
   }
 
@@ -164,36 +182,22 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderPersonalDocumentTitleBar(hideButtons?: boolean) {
+  private renderOtherDocumentTitleBar(hideButtons?: boolean) {
     const {document} = this.props;
     return (
-      <div className="personal-document titlebar">
-        <div className="title" data-test="personal-doc-title">{document.title}</div>
-        {/* This is an incomplete feature and will be addressed in a future PR */}
-        {/* <div className="actions">
-          {!hideButtons &&
-            <div className="actions">
-              <PublishButton dataTestName="personal-document-publish-icon"
-              onClick={this.handlePublishPersonalDocument} />
-            </div>
-          }
-        </div> */}
-      </div>
-    );
-  }
-
-  private renderLearningLogTitleBar(hideButtons?: boolean) {
-    const {document} = this.props;
-    return (
-      <div className="learning-log titlebar">
+      <div className="other-doc titlebar">
+        {
+          document.type === LearningLogDocument || document.type === LearningLogPublication
+          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
+          : <div className="title" data-test="personal-doc-title">{document.title}</div>
+        }
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="learning-log-publish-icon" onClick={this.handlePublishLearningLog} />
+              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishOtherDocument} />
             </div>
           }
         </div>
-        <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
       </div>
     );
   }
@@ -420,20 +424,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handlePublishWorkspace = () => {
     const { db, ui } = this.stores;
     // TODO: Disable publish button while publishing
-    db.publishDocument(this.props.document)
+    db.publishProblemDocument(this.props.document)
       .then(() => ui.alert("Your document was published.", "Document Published"));
   }
 
-  private handlePublishLearningLog = () => {
+  private handlePublishOtherDocument = () => {
     const { db, ui } = this.stores;
-    db.publishLearningLog(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Learning Log Published"));
-  }
-
-  private handlePublishPersonalDocument = () => {
-    const { db, ui } = this.stores;
-    db.publishDocument(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Personal Document Published"));
+    const documentType = this.props.document.type === "personal"
+                          ? "Personal Document"
+                          : "Learning Log";
+    db.publishOtherDocument(this.props.document)
+      .then(() => ui.alert("Your document was published.", `${documentType} Published`));
   }
 
   private getSupportsWithIndices() {
