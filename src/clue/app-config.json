@@ -7,6 +7,8 @@
   },
   "defaultUnit": "s+s",
   "defaultDocumentType": "problem",
+  "defaultDocumentTitle": "Untitled",
+  "defaultLearningLogTitle": "UntitledLog",
   "rightNavTabs": [
     {
       "tab": "my-work",
