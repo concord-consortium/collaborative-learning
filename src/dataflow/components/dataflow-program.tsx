@@ -375,6 +375,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const programData: any = this.generateProgramData();
     uploadProgram(programData);
     this.sequenceNames = this.getNodeSequenceNames();
+    this.setState({programRunState: ProgramRunStates.Running,
+                   programDisplayState: ProgramDisplayStates.Graph});
   }
   private stopProgram = () => {
     deleteProgram(this.props.programEndTime);
@@ -648,7 +650,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateRunState = () => {
     if (this.isRunning()) {
-      if (Date.now() >= this.props.programEndTime) {
+      if (this.props.programEndTime && (Date.now() >= this.props.programEndTime)) {
         this.setState({programRunState: ProgramRunStates.Complete});
       }
     }
