@@ -57,7 +57,7 @@
     border-left: 1px solid $gray-mid
     .contents
       padding: 0px
-      padding-top: 54px
+      padding-top: 60px
       border-radius: 0px
       background-color: #ffffff
       .container
@@ -113,24 +113,49 @@
               border: 2px solid $gray-light-click
               background-color: $gray-light-click
   .tabs
-    right: 0px
+    right: -50px
     top: 0px
-    width: 50px
+    width: 100px
     border-radius: 0
     z-index: 2
     flex-direction: row
-    &.expanded
-      right: 50px
-
+    background-color: $gray-light-click
     .tab
+      margin-right: 0px
+      margin-bottom: 0px
       background: #ffffff
       background-color: #ffffff
       border: 0
       box-shadow: none
       border-radius: 0
-      &.active
-        background-color: #ffffff
-        border: 0
+      margin-top: 6px
       &:hover
         background-color: $gray-light-hover
-        border: 0
+    &.expanded
+      right: 0px
+      .tab
+        border-bottom: 1px solid #ffffff
+        margin-top: 6px
+        margin-bottom: 2px
+        width: 49px
+        &.active
+          background: #ffffff
+          background-color: #ffffff
+          border: 0
+          border-bottom: 1px solid #ffffff
+          margin-top: 5px
+          margin-bottom: -1px
+        &:hover
+          background-color: $gray-light-hover
+          border: 0
+
+      #rightNavTab-my-work
+        border-top-right-radius: 3px
+        margin-right: 2px
+
+      #rightNavTab-class-work
+        border-top-left-radius: 3px
+
+.text-tool
+  &.editable
+    min-height: 50px
