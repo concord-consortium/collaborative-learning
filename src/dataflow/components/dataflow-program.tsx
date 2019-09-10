@@ -113,6 +113,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public render() {
     const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
+    const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
@@ -128,6 +129,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         <div className="toolbar-editor-container">
           { !this.isGraphOnly() && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
+            onResetClick={this.resetNodes}
+            onClearClick={this.clearProgram}
+            isTesting={isTesting}
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
           /> }

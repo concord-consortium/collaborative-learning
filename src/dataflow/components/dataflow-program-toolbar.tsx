@@ -5,6 +5,9 @@ import "./dataflow-program-toolbar.sass";
 
 interface IProps {
   onNodeCreateClick: (type: string) => void;
+  onClearClick: () => void;
+  onResetClick: () => void;
+  isTesting: boolean;
   isDataStorageDisabled: boolean;
   disabled: boolean;
 }
@@ -15,12 +18,15 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
   }
 
   public render() {
+    const { isTesting } = this.props;
     return (
       <div className="program-toolbar" data-test="program-toolbar">
         { NodeTypes.map((nt: any, i: any) => (
             this.renderAddNodeButton(nt.name, i)
           ))
         }
+        { isTesting && <button onClick={this.props.onClearClick}>Clear</button> }
+        { isTesting && <button onClick={this.props.onResetClick}>Reset</button> }
       </div>
     );
   }
