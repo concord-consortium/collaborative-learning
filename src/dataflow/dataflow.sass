@@ -56,32 +56,10 @@
     border: 0px
     border-left: 1px solid $gray-mid
     .contents
-      background-color: #ffffff
-  .tabs
-    right: 0px
-    top: 0px
-    width: 50px
-    border-radius: 0
-    z-index: 2
-    flex-direction: row
-    &.expanded
-      right: 50px
-
-    .tab
-      background-color: #ffffff
-      border: 0
-      box-shadow: none
-      border-radius: 0
-      &.active
-        background-color: #ffffff
-        border: 0
-      &:hover
-        background-color: $gray-light-hover
-  .expanded-area.expanded
-    .contents
       padding: 0px
       padding-top: 54px
       border-radius: 0px
+      background-color: #ffffff
       .container
         border-radius: 0px
         background-color: #ffffff
@@ -89,6 +67,33 @@
           background-color: #ffffff
           .header
             display: none
+          .section-header,
+          .section-header.expanded,
+          .section-header.collapsed
+            color: #ffffff
+            border-radius: 0px
+            background-color: $gray-mid
+            border-top: 1px solid white
+        .list
+          border-color: #ffffff
+          .list-item
+            background-color: #ffffff
+            border: 2px solid #ffffff
+            padding-bottom: 5px
+            margin-bottom: 5px
+            &:hover
+              border: 2px solid $gray-light-hover
+              background-color: $gray-light-hover
+            &:active
+              border: 2px solid $gray-light-click
+              background-color: $gray-light-click
+
+        .class-work
+          background-color: #ffffff
+          .header
+            display: none
+          .section.personal.published
+            border: 0px
           .section-header
             color: #ffffff
             border-radius: 0px
@@ -107,3 +112,25 @@
             &:active
               border: 2px solid $gray-light-click
               background-color: $gray-light-click
+  .tabs
+    right: 0px
+    top: 0px
+    width: 50px
+    border-radius: 0
+    z-index: 2
+    flex-direction: row
+    &.expanded
+      right: 50px
+
+    .tab
+      background: #ffffff
+      background-color: #ffffff
+      border: 0
+      box-shadow: none
+      border-radius: 0
+      &.active
+        background-color: #ffffff
+        border: 0
+      &:hover
+        background-color: $gray-light-hover
+        border: 0
