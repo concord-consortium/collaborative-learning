@@ -177,6 +177,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       } else if (this.props.size !== prevProps.size) {
         this.programEditor.view.resize();
       }
+
+      if (this.props.programRunId !== prevProps.programRunId) {
+        this.updateRunAndGraphStates();
+      }
     }
 
     if (!this.programEditor && this.toolDiv) {
@@ -295,20 +299,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
-      const programRunState: ProgramRunStates = this.getRunState();
-      if (programRunState !== ProgramRunStates.Ready) {
-        const hasDataStorage = this.getNodeCount("Data Storage") > 0;
-        const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
-        this.setState({ programRunState, programDisplayState });
-        this.updateGraphDataSet();
-        this.sequenceNames = this.getNodeSequenceNames();
-      }
+      this.updateRunAndGraphStates();
 
       if (!this.props.readOnly && !this.isComplete()) {
         this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
     })();
+  }
+
+  private updateRunAndGraphStates() {
+    const programRunState: ProgramRunStates = this.getRunState();
+    if (programRunState !== ProgramRunStates.Ready) {
+      const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+      const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+      this.setState({ programRunState, programDisplayState });
+      this.updateGraphDataSet();
+      this.sequenceNames = this.getNodeSequenceNames();
+    }
   }
 
   private getRunState = () => {
