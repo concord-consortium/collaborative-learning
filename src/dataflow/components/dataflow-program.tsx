@@ -57,6 +57,7 @@ enum ProgramDisplayStates {
 }
 
 interface IProps extends SizeMeProps {
+  modelId: string;
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
@@ -178,7 +179,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.view.resize();
       }
 
-      if (this.props.programRunId !== prevProps.programRunId) {
+      if ((this.props.modelId !== prevProps.modelId) ||
+          (this.props.programRunId !== prevProps.programRunId)) {
         this.updateRunAndGraphStates();
       }
     }
