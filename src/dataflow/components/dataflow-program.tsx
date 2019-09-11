@@ -117,6 +117,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     return (
       <div className="dataflow-program-container">
+        {this.isRunning() && <div className="running-indicator" />}
         <DataflowProgramTopbar
             onRunProgramClick={this.runProgram}
             onStopProgramClick={this.stopProgram}
