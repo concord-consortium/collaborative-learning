@@ -1,3 +1,4 @@
+// TODO FIXME: import lodash functions individually as required.
 import * as _ from "lodash";
 import { Button, ButtonGroup, Popover, Position, Menu, MenuItem } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";

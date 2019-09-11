@@ -463,6 +463,12 @@ const getPortalProblems = (
           reject(getErrorMessage(err, res));
         } else {
           const classId = (urlParams.class!).split("/classes/").pop();
+          /* NP: 2019-09-11
+          TODO: FIXME
+              We will want to handle assigning localhost CLUE activities.
+              So we will need a better way to distinguish CLUE assignments.
+              Extract a helper function isClueAssignment or something similar.
+          */
           const problemsAssignedThisClass =
             res.body.filter( (activity: any) =>
               `${activity.clazz_id}` === classId &&
@@ -489,6 +495,13 @@ const getPortalProblems = (
   });
 };
 
+/*
+TODO: FIXME
+  The ClassSwitcher will also need to add whatever problem the teacher was last
+  looking at in the problem switcher, so that when they switch classes they
+  want to be looking at the same problem if possible, otherwise view the first
+  assigned problem.
+*/
 const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<IPortalClass[]> => {
   return new Promise<IPortalClass[]>((resolve, reject) => {
     if (userType === "teacher" && urlParams && urlParams.class) {
