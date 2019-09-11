@@ -61,6 +61,8 @@ const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
 
 const OFFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
 const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/66";
+const CLASSES_MINE_PATH = "api/v1/classes/mine";
+const OFFERINGS_PATH = "api/v1/offerings/";
 
 const RAW_CORRECT_STUDENT: RawUser = {
   id: STUDENT_PORTAL_JWT.user_id,
@@ -396,11 +398,28 @@ describe("teacher authentication", () => {
       token: RAW_TEACHER_FIREBASE_JWT,
     });
 
+    nock((BASE_PORTAL_URL + CLASSES_MINE_PATH), {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+      }
+    })
+    .get("")
+    .reply(200, {classes: []});
+
+    nock((BASE_PORTAL_URL + OFFERINGS_PATH), {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
+      }
+    })
+    .get(/user_id/)
+    .reply(200, []);
+
     authenticate("authed", urlParams).then(({authenticatedUser, problemId}) => {
       expect(authenticatedUser).toEqual({
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
         portal: "learn.staging.concord.org",
+        portalClasses: [],
         firstName: RAW_CORRECT_TEACHER.first_name,
         lastName: RAW_CORRECT_TEACHER.last_name,
         fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
