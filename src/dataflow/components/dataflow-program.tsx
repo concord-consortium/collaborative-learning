@@ -57,6 +57,7 @@ enum ProgramDisplayStates {
 }
 
 interface IProps extends SizeMeProps {
+  modelId: string;
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
@@ -181,6 +182,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       } else if (this.props.size !== prevProps.size) {
         this.programEditor.view.resize();
       }
+
+      if ((this.props.modelId !== prevProps.modelId) ||
+          (this.props.programRunId !== prevProps.programRunId)) {
+        this.updateRunAndGraphStates();
+      }
     }
 
     if (!this.programEditor && this.toolDiv) {
@@ -299,20 +305,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
-      const programRunState: ProgramRunStates = this.getRunState();
-      if (programRunState !== ProgramRunStates.Ready) {
-        const hasDataStorage = this.getNodeCount("Data Storage") > 0;
-        const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
-        this.setState({ programRunState, programDisplayState });
-        this.updateGraphDataSet();
-        this.sequenceNames = this.getNodeSequenceNames();
-      }
+      this.updateRunAndGraphStates();
 
       if (!this.props.readOnly && !this.isComplete()) {
         this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
     })();
+  }
+
+  private updateRunAndGraphStates() {
+    const programRunState: ProgramRunStates = this.getRunState();
+    const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+    const programDisplayState = (programRunState !== ProgramRunStates.Ready) && hasDataStorage
+                                  ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+    this.setState({ programRunState, programDisplayState });
+    this.updateGraphDataSet();
+    this.sequenceNames = this.getNodeSequenceNames();
   }
 
   private getRunState = () => {
@@ -610,28 +619,32 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateGraphDataSet = () => {
-    fetchProgramData(this.props.programRunId).then((result: any) => {
-      // make a new dataset
-      const graphDataSet: DataSet = { sequences: [],
-                                      startTime: this.props.programStartTime,
-                                      endTime: this.props.programEndTime };
-      if (result.data) {
-        result.data.forEach((timeData: any) => {
-          timeData.values.forEach((value: any, i: number) => {
-            if (graphDataSet.sequences.length < (i + 1)) {
-              const name = this.sequenceNames[timeData.blockIds[i]];
-              const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: [] };
-              graphDataSet.sequences.push(graphSequence);
-            }
-            const pt: DataPoint = { x: 0, y: 0 };
-            pt.x = timeData.time;
-            pt.y = value;
-            graphDataSet.sequences[i].data.push(pt);
+    if (this.props.programRunId) {
+      fetchProgramData(this.props.programRunId).then((result: any) => {
+        // make a new dataset
+        const graphDataSet: DataSet = {
+          sequences: [],
+          startTime: this.props.programStartTime,
+          endTime: this.props.programEndTime
+        };
+        if (result.data) {
+          result.data.forEach((timeData: any) => {
+            timeData.values.forEach((value: any, i: number) => {
+              if (graphDataSet.sequences.length < (i + 1)) {
+                const name = this.sequenceNames[timeData.blockIds[i]];
+                const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: [] };
+                graphDataSet.sequences.push(graphSequence);
+              }
+              const pt: DataPoint = { x: 0, y: 0 };
+              pt.x = timeData.time;
+              pt.y = value;
+              graphDataSet.sequences[i].data.push(pt);
+            });
           });
-        });
-        this.setState ({ graphDataSet });
-      }
-    });
+          this.setState({ graphDataSet });
+        }
+      });
+    }
   }
 
   private updateGeneratorNode = (n: Node) => {
