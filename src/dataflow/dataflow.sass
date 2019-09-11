@@ -54,6 +54,9 @@
   right: 0px
   height: 100vh
   background-color: #ffffff
+  background-image: url("../assets/program-icon.svg")
+  background-position: 8px 8px
+  background-repeat: no-repeat
 
   .expanded-area
     right: -152px
@@ -70,7 +73,6 @@
       padding-bottom: 60px
       border-radius: 0px
       background-color: #ffffff
-      // here
       background-image: url("../assets/program-icon.svg")
       background-position: 8px 8px
       background-repeat: no-repeat
@@ -149,6 +151,7 @@
     z-index: 2
     flex-direction: row
     background-color: $gray-light-click
+    opacity: 0
 
     .tab
       margin-right: 0px
@@ -162,9 +165,11 @@
       margin-top: 0px
       transition: margin-top 0s
       &:hover
+        opacity: 1
         background-color: $gray-light-hover
     &.expanded
       right: -50px
+      opacity: 1
       .tab
         border-bottom: 1px solid #ffffff
         margin-top: 6px
