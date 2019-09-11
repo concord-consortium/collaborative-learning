@@ -312,13 +312,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateRunAndGraphStates() {
     const programRunState: ProgramRunStates = this.getRunState();
-    if (programRunState !== ProgramRunStates.Ready) {
-      const hasDataStorage = this.getNodeCount("Data Storage") > 0;
-      const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
-      this.setState({ programRunState, programDisplayState });
-      this.updateGraphDataSet();
-      this.sequenceNames = this.getNodeSequenceNames();
-    }
+    const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+    const programDisplayState = (programRunState !== ProgramRunStates.Ready) && hasDataStorage
+                                  ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+    this.setState({ programRunState, programDisplayState });
+    this.updateGraphDataSet();
+    this.sequenceNames = this.getNodeSequenceNames();
   }
 
   private getRunState = () => {
