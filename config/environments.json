@@ -11,11 +11,19 @@
     "baseUrl": "https://collaborative-learning.concord.org/branch/problem-documents/",
     "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
   },
+  "branch-df": {
+    "baseUrl": "https://collaborative-learning.concord.org/branch/qa-reset/",
+    "queryParams":"?appMode=qa&dataflow&fakeClass=1&fakeUser=student:8&unit=dataflow&problem=1.1&qaGroup=5"
+  },
   "dev": {
     "baseUrl": "dev baseUrl needs to be set in config/user-config.json (see config/user-config.sample.json)"
   },
   "local":{
     "baseUrl": "http://localhost:8080/",
     "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5"
+  },
+  "local-df":{
+    "baseUrl": "http://localhost:8080/",
+    "queryParams":"?appMode=qa&dataflow&fakeClass=1&fakeUser=student:8&unit=dataflow&problem=1.1&qaGroup=5"
   }
 }

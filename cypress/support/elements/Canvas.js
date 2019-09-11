@@ -137,6 +137,10 @@ class Canvas{
         return cy.get('.single-workspace .tool.select[title=Select]');
     }
 
+    addTile(tile){
+        cy.get('.single-workspace .tool.'+tile).click({force:true})
+    }
+
     addTextTile(){
         cy.get('.single-workspace .tool.text').click({force:true});
     }

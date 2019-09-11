@@ -1,5 +1,7 @@
 import * as React from "react";
+import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { NodeTypes } from "../utilities/node";
+import { inject, observer } from "mobx-react";
 
 import "./dataflow-program-toolbar.sass";
 
@@ -12,7 +14,9 @@ interface IProps {
   disabled: boolean;
 }
 
-export class DataflowProgramToolbar extends React.Component<IProps, {}> {
+@inject("stores")
+@observer
+export class DataflowProgramToolbar extends BaseComponent<IProps, {}> {
   constructor(props: IProps) {
     super(props);
   }
