@@ -94,10 +94,11 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
 
   private createLink(userType: string, userIndex: number) {
     const { demo, unit } = this.stores;
+    const demoNameParam = demo.name ? `&demoName=${demo.name}` : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // tslint:disable-next-line:max-line-length
-    const href = `?appMode=demo&demoName=${demo.name}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
+    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
     return (
       <li key={userIndex}>
         <a href={href} target="_blank">{userType} {userIndex}</a>

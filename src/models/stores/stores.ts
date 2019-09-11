@@ -38,10 +38,11 @@ type ICreateStores = Partial<IStores>;
 
 export function createStores(params?: ICreateStores): IStores {
   const user = params && params.user || UserModel.create({ id: "0" });
+  const appConfig = params && params.appConfig || AppConfigModel.create();
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
-    appConfig: params && params.appConfig || AppConfigModel.create(),
+    appConfig,
     // for testing, we create a null problem or investigation if none is provided
     investigation: params && params.investigation || InvestigationModel.create({
       ordinal: 0, title: "Null Investigation"}),
@@ -62,7 +63,7 @@ export function createStores(params?: ICreateStores): IStores {
     db: params && params.db || new DB(),
     documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
-    demo: params && params.demo || DemoModel.create({name: "Demo 1", class: {id: "0", name: "Null Class"}}),
+    demo: params && params.demo || DemoModel.create({name: appConfig.appName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create()

@@ -11,7 +11,7 @@ export const DemoModel = types
     class: DemoClassModel,
     problemOrdinal: types.maybeNull(types.string),
     problemIndex: 0,
-    name: types.string,
+    name: ""
   })
   .actions((self) => {
     return {
