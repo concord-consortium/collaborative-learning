@@ -7,6 +7,7 @@ import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-crea
 import { IPortalClass, IPortalProblem } from "../models/stores/user";
 
 import { uniqBy } from "lodash";
+import { string, number } from "mobx-state-tree/dist/internal";
 
 const initials = require("initials");
 
@@ -396,6 +397,8 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
               .then((classInfo) => {
                 return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
+                    getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
+                    .then(result => console.log(result));
                     return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
                       .then((portalClasses) => {
                         return getPortalProblems(portalJWT.user_type, portalJWT.uid,
@@ -449,6 +452,68 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
   });
 };
 
+interface IPortalReport {
+  url: string;
+  name: string;
+  id: number;
+}
+
+interface IPortalOffering {
+  clazz: string;
+  clazz_id: number;
+  activity: string;
+  activity_url: string;
+  external_reports: IPortalReport[];
+}
+
+const isClueAssignment = (offering: IPortalOffering) => {
+  const clueActivityUrlRegex = /collaborative-learning/;
+  const clueActivityNameRegex = /CLUE/;
+  const clueDashboardRegex = /CLUE Dashboard/;
+  const externalReports = offering.external_reports;
+  if (clueActivityUrlRegex.test(offering.activity_url)) {
+    return true;
+  }
+  if (clueActivityNameRegex.test(offering.activity)) {
+    return true;
+  }
+  if (externalReports && externalReports.length > 0) {
+    return externalReports.find((report) => clueDashboardRegex.test(report.name));
+  }
+  return false;
+};
+
+// NEW FUNCTION:
+const getPortalOfferings = (
+  userType: string,
+  userId: number,
+  domain: string,
+  rawPortalJWT: any) => {
+
+  return new Promise<IPortalOffering[]> ((resolve, reject) => {
+    // TODO: For now isolate this to the teachers view
+    if (userType === "teacher") {
+      superagent
+      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const thisUsersOfferings = res.body as IPortalOffering[];
+          const clueOfferings = thisUsersOfferings.filter(offering => isClueAssignment(offering));
+          debugger;
+          console.log("WE ARE IN THE FUNCTION");
+          resolve(clueOfferings);
+        }
+      });
+    }
+    else {
+      resolve([]);
+    }
+  });
+};
+
 const getPortalProblems = (
     userType: string,
     userId: number,
@@ -465,19 +530,6 @@ const getPortalProblems = (
           reject(getErrorMessage(err, res));
         } else {
           const classId = (urlParams.class!).split("/classes/").pop();
-          /* NP: 2019-09-11
-          TODO: FIXME
-              We will want to handle assigning localhost CLUE activities.
-              So we will need a better way to distinguish CLUE assignments.
-              Extract a helper function isClueAssignment or something similar.
-          */
-// NEW STUFF
-          const thisTeachersClasses: IPortalClass[] =
-            uniqBy(res.body.filter( (offering: any) =>
-              { 
-              return (/collaborative-learning/.test(offering.activity_url) );
-              }), (value:any) => { return value.clazz });
-// END NEW STUFF
           const problemsAssignedThisClass =
             res.body.filter( (activity: any) =>
               `${activity.clazz_id}` === classId &&
