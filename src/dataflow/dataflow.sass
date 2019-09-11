@@ -36,6 +36,8 @@
               border: 2px solid #ffffff
               .tool-tile-drag-handle
                 display: none
+                .running-indicator
+                  display: none
           .spacer
             height: 0px
             display:none
@@ -95,6 +97,17 @@
               border: 2px solid $gray-light-click
               background-color: $gray-light-click
 
+            .running-indicator
+              display: block
+              width: 130px
+              height: 130px
+              background: $badge-yellow
+              border-radius: 65px
+              border: 16px solid silver
+              z-index: 2
+              position: absolute
+              top: 50px
+              left: 40px
         .class-work
           background-color: #ffffff
           .header
