@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { DocumentContentModel } from "../document/document-content";
+import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
 
@@ -12,10 +12,18 @@ export const AppConfigModel = types
     defaultUnit: "",
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
-    defaultDocumentContent: types.maybe(DocumentContentModel),
+    // clients should use the defaultDocumentContent() method below
+    defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
     rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel)
-  });
+  })
+  .views(self => ({
+    get defaultDocumentContent(): DocumentContentModelType {
+      const template = self.defaultDocumentTemplate && self.defaultDocumentTemplate.publish();
+      const content = template && JSON.parse(template);
+      return DocumentContentModel.create(content);
+    }
+  }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;
 export type AppConfigSpec = SnapshotIn<typeof AppConfigModel>;
