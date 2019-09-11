@@ -46,9 +46,6 @@
         transform-origin: 50% 50%
         padding-bottom: 2px
 
-      .mode
-        border-top-right-radius: $border-radius
-
       .mode #nextMode
         display: none
 
@@ -74,7 +71,7 @@
         &:active .icon
           color: $color1-4
 
-      .icon,.icon-new
+      .icon
         box-sizing: content-box
         background-repeat: no-repeat
         background-color: $color1-3
@@ -100,6 +97,16 @@
         .new
           &:hover
             background-image: url("../../assets/icons/new-hover.svg")
+
+      .icon-publish
+        border-top-right-radius: $border-radius
+
+      .icon-new
+        border-top-left-radius: $border-radius
+        box-sizing: content-box
+        background-repeat: no-repeat
+        background-color: $color1-3
+        color: $color1-7
 
   .canvas-area
     position: absolute

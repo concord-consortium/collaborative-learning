@@ -163,9 +163,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
+              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />,
               show4up ? this.renderMode() : null,
-              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
+              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />
             ]}
           </div>
         }
@@ -457,7 +457,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const docType = this.props.document.isPersonal;
     const newDocument = await db.createOtherDocument((docType
                         ? PersonalDocument
-                        : LearningLogDocument),
+                        : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument)),
                         {title});
     if (newDocument) {
       this.props.workspace.setAvailableDocument(newDocument);
