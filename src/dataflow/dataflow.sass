@@ -6,14 +6,17 @@
 
 .document-workspace
   .single-workspace
-    left: 4px
+    left: 0px
     right: 50px
+    top: 60px
+    bottom: 0px
 
     .document
       border-radius: 0px
       border-top-left-radius: 3px
       border-top-right-radius: 3px
       border-width: 0px
+      margin: 10px
 
       .titlebar
         background-color: #ffffff
@@ -24,7 +27,7 @@
 
       .canvas-area
         border-top: 4px solid $gray-mid
-        bottom: 10px
+        bottom: 0px
 
         .document-content
           padding: 0px
@@ -33,6 +36,9 @@
               border: 2px solid #ffffff
               .tool-tile-drag-handle
                 display: none
+          .spacer
+            height: 0px
+            display:none
 
     .statusbar
       display: none
