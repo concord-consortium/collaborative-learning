@@ -16,7 +16,7 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
 
-import { IconButton } from "../../assets/icons";
+import { IconButton } from "../../assets/icon-button";
 
 import "./document.sass";
 
@@ -152,7 +152,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons &&
             <div className="actions">
               <IconButton icon="new" key="new" className="action icon-new"
-                          onClickButton={this.handleNewDocumentClick} />
+                          onClickButton={this.handleNewDocumentClick} url="assets/icons/new.svg"/>
             </div>
           }
         </div>

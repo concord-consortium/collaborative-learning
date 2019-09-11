@@ -71,7 +71,7 @@
         &:active .icon
           color: $color1-4
 
-      .icon
+      .icon,.icon-new
         box-sizing: content-box
         background-repeat: no-repeat
         background-color: $color1-3
@@ -90,23 +90,22 @@
           background-color: $color1-5
 
         &.new
-          background-image: url("../../assets/icons/new.svg")
-          width: 22px
-          height: 18px
-
-        .new
-          &:hover
-            background-image: url("../../assets/icons/new-hover.svg")
+          box-sizing: border-box
+          left: 50%
+          transform: translate(-50%, 0)
+          top: 0
+          bottom: 0
+          margin: auto
+          width: 30px
+          height: 28px
+          position: absolute
 
       .icon-publish
         border-top-right-radius: $border-radius
 
       .icon-new
         border-top-left-radius: $border-radius
-        box-sizing: content-box
-        background-repeat: no-repeat
-        background-color: $color1-3
-        color: $color1-7
+        position: relative
 
   .canvas-area
     position: absolute
