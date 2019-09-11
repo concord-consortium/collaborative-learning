@@ -6,6 +6,8 @@ import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utiliti
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
 import { IPortalClass, IPortalProblem } from "../models/stores/user";
 
+import { uniqBy } from "lodash";
+
 const initials = require("initials");
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
@@ -469,6 +471,13 @@ const getPortalProblems = (
               So we will need a better way to distinguish CLUE assignments.
               Extract a helper function isClueAssignment or something similar.
           */
+// NEW STUFF
+          const thisTeachersClasses: IPortalClass[] =
+            uniqBy(res.body.filter( (offering: any) =>
+              { 
+              return (/collaborative-learning/.test(offering.activity_url) );
+              }), (value:any) => { return value.clazz });
+// END NEW STUFF
           const problemsAssignedThisClass =
             res.body.filter( (activity: any) =>
               `${activity.clazz_id}` === classId &&
