@@ -16,6 +16,8 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
 
+import { IconButton } from "../../assets/icons";
+
 import "./document.sass";
 
 export type WorkspaceSide = "primary" | "comparison";
@@ -65,14 +67,6 @@ const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGCli
         <use xlinkHref={`#icon-share`} />
       </svg>
     </div>
-  );
-};
-
-const NewDocButton = ({ onClick }: { onClick: SVGClickHandler }) => {
-  return (
-    <svg key="new" className={`action icon icon-new`} onClick={onClick}>
-      <use xlinkHref={`#icon-new`} />
-    </svg>
   );
 };
 
@@ -154,6 +148,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             : undefined;
     return (
       <div className="titlebar">
+        <div className="actions" data-test="document-titlebar-actions">
+          {!hideButtons &&
+            <div className="actions">
+              <IconButton icon="new" key="new" className="action icon-new"
+                          onClickButton={this.handleNewDocumentClick} />
+            </div>
+          }
+        </div>
         <div className="title" data-test="document-title">
           {problemTitle}
         </div>
@@ -162,9 +164,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {[
               downloadButton,
               <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
+              show4up ? this.renderMode() : null,
               <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
-            {show4up ? this.renderMode() : null}
           </div>
         }
       </div>
@@ -194,6 +196,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     return (
       <div className="other-doc titlebar">
+        <div className="actions">
+          {!hideButtons &&
+            <div className="actions">
+              <IconButton icon="new" key="new" className="action icon-new"
+                          onClickButton={this.handleNewDocumentClick} />
+            </div>
+          }
+        </div>
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
@@ -202,7 +212,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <NewDocButton key="new" onClick={this.handleNewDocumentClick} />
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishOtherDocument} />
             </div>
           }
@@ -431,9 +440,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleNewDocumentClick = () => {
-    const documentType = this.props.document.isPersonal ? PersonalDocument : LearningLogDocument;
-    const docTypeString = this.props.document.isPersonal ? "Personal Document" : "Learning Log";
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, documentType);
+    const documentType = this.props.document.isPersonal ? PersonalDocument
+                          : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument);
+    const docTypeString = this.props.document.isPersonal ? "Personal Document"
+                          : (this.props.document.isLearningLog ? "Learning Log" : "Personal Document");
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, documentType, "Untitled");
     this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
       .then((title: string) => {
         this.handleNewDocumentOpen(title)

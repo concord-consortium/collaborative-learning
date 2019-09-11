@@ -74,7 +74,7 @@
         &:active .icon
           color: $color1-4
 
-      .icon
+      .icon,.icon-new
         box-sizing: content-box
         background-repeat: no-repeat
         background-color: $color1-3
@@ -91,6 +91,15 @@
 
         &:active
           background-color: $color1-5
+
+        &.new
+          background-image: url("../../assets/icons/new.svg")
+          width: 22px
+          height: 18px
+
+        .new
+          &:hover
+            background-image: url("../../assets/icons/new-hover.svg")
 
   .canvas-area
     position: absolute
