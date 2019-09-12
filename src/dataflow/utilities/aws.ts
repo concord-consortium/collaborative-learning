@@ -140,7 +140,7 @@ export const fetchProgramData = (programId: string, time?: number, endTime?: num
         }
         if (payload.data) {
           // Add latest data to cache
-          addDataPoint(programId, JSON.parse(data.Payload as string));
+          addDataPoints(programId, JSON.parse(data.Payload as string));
           result.count = allProgramsCache[programId].data ? allProgramsCache[programId].data.length : 0;
           result.data = allProgramsCache[programId].data;
         }
@@ -150,7 +150,7 @@ export const fetchProgramData = (programId: string, time?: number, endTime?: num
   });
 };
 
-const addDataPoint = (programId: string, payload: any) => {
+const addDataPoints = (programId: string, payload: any) => {
   let mostRecentTimestamp = 0;
   const dataPoints: ProgramDataPoint[] = [];
   for (const timeData of payload.data){
