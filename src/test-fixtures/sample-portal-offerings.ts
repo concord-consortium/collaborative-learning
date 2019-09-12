@@ -1,4 +1,4 @@
-const offerings = [
+export const TeacherOfferings = [
   {
     id: 1190,
     teacher: "Dave Love",

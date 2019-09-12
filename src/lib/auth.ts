@@ -1,13 +1,16 @@
 import * as jwt from "jsonwebtoken";
-import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
-import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
+import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { IPortalClass, IPortalProblem } from "../models/stores/user";
-
-import { uniqBy } from "lodash";
-import { string, number } from "mobx-state-tree/dist/internal";
+import { getErrorMessage } from "../utilities/super-agent-helpers";
+import {
+  getPortalOfferings,
+  getProblemIdForAuthenticatedUser,
+  getPortalClasses,
+  getPortalProblems
+} from "./portal-api";
 
 const initials = require("initials");
 
@@ -189,14 +192,6 @@ export interface PortalFirebaseTeacherJWT extends BasePortalFirebaseJWT {
 }
 
 export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacherJWT;
-
-export const getErrorMessage = (err: any, res: superagent.Response) => {
-  // The response should always be non-null, per the typedef and documentation:
-  // cf. https://visionmedia.github.io/superagent/#error-handling
-  // However, Rollbar has reported errors due to undefined responses
-  // Using err.status or err.response, per the above link, may be preferable here
-  return (res && res.body ? res.body.message : null) || err;
-};
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
@@ -449,170 +444,6 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         }
       })
       .catch(reject);
-  });
-};
-
-interface IPortalReport {
-  url: string;
-  name: string;
-  id: number;
-}
-
-interface IPortalOffering {
-  clazz: string;
-  clazz_id: number;
-  activity: string;
-  activity_url: string;
-  external_reports: IPortalReport[];
-}
-
-const isClueAssignment = (offering: IPortalOffering) => {
-  const clueActivityUrlRegex = /collaborative-learning/;
-  const clueActivityNameRegex = /CLUE/;
-  const clueDashboardRegex = /CLUE Dashboard/;
-  const externalReports = offering.external_reports;
-  if (clueActivityUrlRegex.test(offering.activity_url)) {
-    return true;
-  }
-  if (clueActivityNameRegex.test(offering.activity)) {
-    return true;
-  }
-  if (externalReports && externalReports.length > 0) {
-    return externalReports.find((report) => clueDashboardRegex.test(report.name));
-  }
-  return false;
-};
-
-// NEW FUNCTION:
-const getPortalOfferings = (
-  userType: string,
-  userId: number,
-  domain: string,
-  rawPortalJWT: any) => {
-
-  return new Promise<IPortalOffering[]> ((resolve, reject) => {
-    // TODO: For now isolate this to the teachers view
-    if (userType === "teacher") {
-      superagent
-      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const thisUsersOfferings = res.body as IPortalOffering[];
-          const clueOfferings = thisUsersOfferings.filter(offering => isClueAssignment(offering));
-          debugger;
-          console.log("WE ARE IN THE FUNCTION");
-          resolve(clueOfferings);
-        }
-      });
-    }
-    else {
-      resolve([]);
-    }
-  });
-};
-
-const getPortalProblems = (
-    userType: string,
-    userId: number,
-    domain: string,
-    rawPortalJWT: any,
-    urlParams?: QueryParams): Promise<IPortalProblem[] | undefined> => {
-  return new Promise<IPortalProblem[] | undefined>((resolve, reject) => {
-    if (userType === "teacher" && urlParams && urlParams.class) {
-      superagent
-      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const classId = (urlParams.class!).split("/classes/").pop();
-          const problemsAssignedThisClass =
-            res.body.filter( (activity: any) =>
-              `${activity.clazz_id}` === classId &&
-              /^https:\/\/collaborative-learning/.test(activity.activity_url) );
-          const portalProblems: IPortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
-            return (
-              {
-                problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
-                switchUrlLocation:
-                  `?class=${urlParams.class}` +
-                  `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
-                  `&reportType=${urlParams.reportType}` +
-                  `&token=${urlParams.token}`
-              }
-            );
-          });
-          resolve((portalProblems.length > 0) ? portalProblems : undefined);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
-  });
-};
-
-/*
-TODO: FIXME
-  The ClassSwitcher will also need to add whatever problem the teacher was last
-  looking at in the problem switcher, so that when they switch classes they
-  want to be looking at the same problem if possible, otherwise view the first
-  assigned problem.
-*/
-const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<IPortalClass[]> => {
-  return new Promise<IPortalClass[]>((resolve, reject) => {
-    if (userType === "teacher" && urlParams && urlParams.class) {
-      const url = urlParams.class.replace(/classes\/\d*$/, "classes/mine");
-      superagent
-      .get(url)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const portalClasses = res.body.classes.map( (rawPortalClass: any) => {
-            return (
-              {
-                className: rawPortalClass.name,
-                classHash: rawPortalClass.class_hash,
-                classUri: rawPortalClass.uri,
-              }
-            );
-          });
-          resolve(portalClasses);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
-  });
-};
-
-export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams?: QueryParams) => {
-  return new Promise<string|undefined>((resolve, reject) => {
-    if (urlParams && urlParams.offering) {
-      superagent
-      .get(urlParams.offering)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const activityUrl = ((res.body || {}).activity_url) || "";
-          const [ignore, query, ...rest] = activityUrl.split("?");
-          const params = queryString.parse(query);
-          resolve(params.problem as string);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
   });
 };
 
