@@ -48,6 +48,12 @@ To deploy a production release:
 1. Push production to GitHub
 1. Use https://github.com/concord-consortium/collaborative-learning/releases to create a new release tag
 
+### Debugging
+
+To enable per component debugging set the "debug" localstorage key with one or more of the following:
+
+- `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
+
 ### Testing
 
 Run `npm test` to run all Jest tests.
@@ -75,7 +81,7 @@ You can also temporarily overwrite any configuration option using env variables 
 ## Writing tests, workflow and patterns
 
 1. Tests should not depend on other tests.
-2. Take a look at `cypress/support/commands.js`. This file implements LARA-specific helpers that will make test 
+2. Take a look at `cypress/support/commands.js`. This file implements LARA-specific helpers that will make test
 implementation simpler. Existing commands at the moment:
 
     - setupGroup
