@@ -9,6 +9,7 @@
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",
   "defaultLearningLogTitle": "UntitledLog",
+  "showClassSwitcher": true,
   "rightNavTabs": [
     {
       "tab": "my-work",
