@@ -1,5 +1,3 @@
-// TODO FIXME: import lodash functions individually as required.
-import * as _ from "lodash";
 import { Button, ButtonGroup, Popover, Position, Menu, MenuItem } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
@@ -30,11 +28,11 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { showGroup } = this.props;
-    const {appMode, appVersion, db, user, problem, groups} = this.stores;
+    const {appConfig, appMode, appVersion, db, user, problem, groups} = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
-    if (user.isTeacher) {
+    if (user.isTeacher && appConfig.showClassSwitcher) {
       return this.renderTeacherHeader(userTitle);
     }
 

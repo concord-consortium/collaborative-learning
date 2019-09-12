@@ -148,9 +148,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderLoading() {
+    const { appConfig: { appName } } = this.stores;
     return (
       <div className="progress">
-        Loading CLUE ...
+        Loading {appName} ...
       </div>
     );
   }
