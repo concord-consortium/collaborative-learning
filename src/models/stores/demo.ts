@@ -10,7 +10,8 @@ export const DemoModel = types
   .model("Demo", {
     class: DemoClassModel,
     problemOrdinal: types.maybeNull(types.string),
-    problemIndex: 0
+    problemIndex: 0,
+    name: ""
   })
   .actions((self) => {
     return {
@@ -23,6 +24,9 @@ export const DemoModel = types
       setClass(id: string, name: string) {
         self.class.id = id;
         self.class.name = name;
+      },
+      setName(name: string) {
+        self.name = name;
       }
     };
   });

@@ -11,6 +11,7 @@ import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -19,6 +20,7 @@ export interface IStores {
   appVersion: string;
   appConfig: AppConfigModelType;
   unit: UnitModelType;
+  investigation: InvestigationModelType;
   problem: ProblemModelType;
   user: UserModelType;
   ui: UIModelType;
@@ -36,11 +38,14 @@ type ICreateStores = Partial<IStores>;
 
 export function createStores(params?: ICreateStores): IStores {
   const user = params && params.user || UserModel.create({ id: "0" });
+  const appConfig = params && params.appConfig || AppConfigModel.create();
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
-    appConfig: params && params.appConfig || AppConfigModel.create(),
-    // for ease of testing, we create a null problem if none is provided
+    appConfig,
+    // for testing, we create a null problem or investigation if none is provided
+    investigation: params && params.investigation || InvestigationModel.create({
+      ordinal: 0, title: "Null Investigation"}),
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
     ui: params && params.ui || UIModel.create({
@@ -58,7 +63,7 @@ export function createStores(params?: ICreateStores): IStores {
     db: params && params.db || new DB(),
     documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
-    demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
+    demo: params && params.demo || DemoModel.create({name: appConfig.appName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create()

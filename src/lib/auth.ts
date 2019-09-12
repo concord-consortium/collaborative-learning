@@ -4,7 +4,7 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
-import { ProblemModelType } from "../models/curriculum/problem";
+import { IPortalClass, IPortalProblem } from "../models/stores/user";
 
 const initials = require("initials");
 
@@ -67,6 +67,8 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
+  portalClasses?: IPortalClass[];
+  portalProblems?: IPortalProblem[];
 }
 
 export interface StudentUser extends User {
@@ -392,32 +394,43 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
               .then((classInfo) => {
                 return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
-                    const uidAsString = `${portalJWT.uid}`;
-                    let authenticatedUser: AuthenticatedUser | undefined;
-                    if (portalJWT.user_type === "learner") {
-                      authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                    }
-                    else {
-                      authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                    }
-                    if (authenticatedUser) {
-                      authenticatedUser.portalJWT = portalJWT;
-                      authenticatedUser.rawPortalJWT = rawPortalJWT;
-                      authenticatedUser.firebaseJWT = firebaseJWT;
-                      authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                      authenticatedUser.id = uidAsString;
-                      authenticatedUser.portal = portal;
+                    return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
+                      .then((portalClasses) => {
+                        return getPortalProblems(portalJWT.user_type, portalJWT.uid,
+                            portalJWT.domain, rawPortalJWT, urlParams)
+                          .then((portalProblems) => {
+                            const uidAsString = `${portalJWT.uid}`;
+                            let authenticatedUser: AuthenticatedUser | undefined;
+                            if (portalJWT.user_type === "learner") {
+                              authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                            }
+                            else {
+                              authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
+                            }
 
-                      getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams).then((problemId) => {
-                        if (authenticatedUser) {
-                          resolve({authenticatedUser, classInfo, problemId});
-                        }
+                            if (authenticatedUser) {
+                              authenticatedUser.portalJWT = portalJWT;
+                              authenticatedUser.rawPortalJWT = rawPortalJWT;
+                              authenticatedUser.firebaseJWT = firebaseJWT;
+                              authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                              authenticatedUser.id = uidAsString;
+                              authenticatedUser.portal = portal;
+                              authenticatedUser.portalClasses = portalClasses;
+                              authenticatedUser.portalProblems = portalProblems;
+
+                              getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
+                              .then((problemId) => {
+                                if (authenticatedUser) {
+                                  resolve({authenticatedUser, classInfo, problemId});
+                                }
+                              });
+                            }
+                            else {
+                              reject("Current user not found in class roster");
+                            }
+                          });
                       });
-                    }
-                    else {
-                      reject("Current user not found in class roster");
-                    }
-                })
+                  })
                 .catch(reject);
               })
             );
@@ -431,6 +444,91 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
         }
       })
       .catch(reject);
+  });
+};
+
+const getPortalProblems = (
+    userType: string,
+    userId: number,
+    domain: string,
+    rawPortalJWT: any,
+    urlParams?: QueryParams): Promise<IPortalProblem[] | undefined> => {
+  return new Promise<IPortalProblem[] | undefined>((resolve, reject) => {
+    if (userType === "teacher" && urlParams && urlParams.class) {
+      superagent
+      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const classId = (urlParams.class!).split("/classes/").pop();
+          /* NP: 2019-09-11
+          TODO: FIXME
+              We will want to handle assigning localhost CLUE activities.
+              So we will need a better way to distinguish CLUE assignments.
+              Extract a helper function isClueAssignment or something similar.
+          */
+          const problemsAssignedThisClass =
+            res.body.filter( (activity: any) =>
+              `${activity.clazz_id}` === classId &&
+              /^https:\/\/collaborative-learning/.test(activity.activity_url) );
+          const portalProblems: IPortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
+            return (
+              {
+                problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
+                switchUrlLocation:
+                  `?class=${urlParams.class}` +
+                  `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
+                  `&reportType=${urlParams.reportType}` +
+                  `&token=${urlParams.token}`
+              }
+            );
+          });
+          resolve((portalProblems.length > 0) ? portalProblems : undefined);
+        }
+      });
+    }
+    else {
+      resolve(undefined);
+    }
+  });
+};
+
+/*
+TODO: FIXME
+  The ClassSwitcher will also need to add whatever problem the teacher was last
+  looking at in the problem switcher, so that when they switch classes they
+  want to be looking at the same problem if possible, otherwise view the first
+  assigned problem.
+*/
+const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<IPortalClass[]> => {
+  return new Promise<IPortalClass[]>((resolve, reject) => {
+    if (userType === "teacher" && urlParams && urlParams.class) {
+      const url = urlParams.class.replace(/classes\/\d*$/, "classes/mine");
+      superagent
+      .get(url)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const portalClasses = res.body.classes.map( (rawPortalClass: any) => {
+            return (
+              {
+                className: rawPortalClass.name,
+                classHash: rawPortalClass.class_hash,
+                classUri: rawPortalClass.uri,
+              }
+            );
+          });
+          resolve(portalClasses);
+        }
+      });
+    }
+    else {
+      resolve(undefined);
+    }
   });
 };
 
