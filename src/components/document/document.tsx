@@ -7,14 +7,16 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, ProblemDocument
-       } from "../../models/document/document";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, PersonalDocument,
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
+
+import { IconButton } from "../utilities/icon-button";
 
 import "./document.sass";
 
@@ -146,6 +148,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             : undefined;
     return (
       <div className="titlebar">
+        <div className="actions" data-test="document-titlebar-actions">
+          {!hideButtons &&
+            <div className="actions">
+              <IconButton icon="new" key="new" className="action icon-new"
+                          onClickButton={this.handleNewDocumentClick} url="assets/icons/new.svg"/>
+            </div>
+          }
+        </div>
         <div className="title" data-test="document-title">
           {problemTitle}
         </div>
@@ -186,6 +196,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     return (
       <div className="other-doc titlebar">
+        <div className="actions" data-test="document-titlebar-actions">
+          {!hideButtons &&
+            <div className="actions">
+              <IconButton icon="new" key="new" className="action icon-new"
+                          onClickButton={this.handleNewDocumentClick} url="assets/icons/new.svg"/>
+            </div>
+          }
+        </div>
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
@@ -419,6 +437,31 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       FileSaver.saveAs(blobJson, "tile-content.json");
     }
     clipboard.clear();
+  }
+
+  private handleNewDocumentClick = () => {
+    const documentType = this.props.document.isPersonal ? PersonalDocument
+                          : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument);
+    const docTypeString = this.props.document.isPersonal ? "Personal Document"
+                          : (this.props.document.isLearningLog ? "Learning Log" : "Personal Document");
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, documentType, "Untitled");
+    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
+      .then((title: string) => {
+        this.handleNewDocumentOpen(title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleNewDocumentOpen = async (title: string) => {
+    const { db } = this.stores;
+    const docType = this.props.document.isPersonal;
+    const newDocument = await db.createOtherDocument((docType
+                        ? PersonalDocument
+                        : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument)),
+                        {title});
+    if (newDocument) {
+      this.props.workspace.setAvailableDocument(newDocument);
+    }
   }
 
   private handlePublishWorkspace = () => {
