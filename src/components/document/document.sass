@@ -97,10 +97,14 @@
         padding: 0
 
         &:hover
-          background-color: $color1-4
+          background-color: $color1
 
         &:active
-          background-color: $color1-5
+          background-color: $color1-4
+
+        &:focus
+          outline: none
+          outline-offset: 0
 
       .icon-new
         border-top-left-radius: $border-radius
@@ -109,15 +113,29 @@
         padding-top: 2px
         margin-left: 0
         position: relative
+        width: 40px
+        height: 36px
         cursor: pointer
 
         .new
+          background-image: url("../../assets/icons/new/new.svg")
           background-repeat: no-repeat
-          width: 36px
-          height: 34px
+          position: absolute
+          left: 15%
+          bottom: 10%
+          width: 30px
+          height: 26px
           padding: $half-padding
           padding-top: 2px
           cursor: pointer
+
+          &:hover
+            background-image: url("../../assets/icons/new/new-hover.svg")
+
+          &:active
+            background-image: url("../../assets/icons/new/new-active.svg")
+            transform-origin: center
+            transform: scale(.85)
 
   .canvas-area
     position: absolute

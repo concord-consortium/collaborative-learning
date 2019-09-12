@@ -58,6 +58,13 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, da
   );
 };
 
+const NewButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="new" key="new" className="action icon-new"
+                onClickButton={onClick} />
+  );
+};
+
 const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
   const visibility = isShared ? "public" : "private";
   return (
@@ -148,14 +155,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             : undefined;
     return (
       <div className="titlebar">
-        <div className="actions" data-test="document-titlebar-actions">
-          {!hideButtons &&
-            <div className="actions">
-              <IconButton icon="new" key="new" className="action icon-new"
-                          onClickButton={this.handleNewDocumentClick} url="assets/icons/new.svg"/>
-            </div>
-          }
-        </div>
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+          </div>
+        }
         <div className="title" data-test="document-title">
           {problemTitle}
         </div>
@@ -196,14 +200,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     return (
       <div className="other-doc titlebar">
-        <div className="actions" data-test="document-titlebar-actions">
-          {!hideButtons &&
-            <div className="actions">
-              <IconButton icon="new" key="new" className="action icon-new"
-                          onClickButton={this.handleNewDocumentClick} url="assets/icons/new.svg"/>
-            </div>
-          }
-        </div>
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+          </div>
+        }
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
@@ -440,11 +441,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleNewDocumentClick = () => {
-    const documentType = this.props.document.isPersonal ? PersonalDocument
-                          : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument);
-    const docTypeString = this.props.document.isPersonal ? "Personal Document"
-                          : (this.props.document.isLearningLog ? "Learning Log" : "Personal Document");
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, documentType, "Untitled");
+    const docType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const docTypeString = this.props.document.isLearningLog ? "Learning Log" : "Personal Document";
+    const { appConfig: { defaultDocumentTitle } } = this.stores;
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
     this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
       .then((title: string) => {
         this.handleNewDocumentOpen(title)
@@ -454,11 +454,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleNewDocumentOpen = async (title: string) => {
     const { db } = this.stores;
-    const docType = this.props.document.isPersonal;
-    const newDocument = await db.createOtherDocument((docType
-                        ? PersonalDocument
-                        : (this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument)),
-                        {title});
+    const newDocType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const newDocument = await db.createOtherDocument(newDocType, {title});
     if (newDocument) {
       this.props.workspace.setAvailableDocument(newDocument);
     }
