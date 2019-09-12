@@ -15,6 +15,7 @@ export const AppConfigModel = types
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
+    showClassSwitcher: false,
     rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel)
   })
