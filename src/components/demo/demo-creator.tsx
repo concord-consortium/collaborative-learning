@@ -26,7 +26,7 @@ interface IProblemOption {
 export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
   private problemOptions: IProblemOption[] = [];
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     const { appConfig, unit, demo } = this.stores;
     const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
