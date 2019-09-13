@@ -17,7 +17,6 @@ context('Transform block test',()=>{
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Transform')
         dfcanvas.openBlock('Math')

@@ -28,7 +28,6 @@ context('Sensor block tests',()=>{
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Sensor')
         dfcanvas.openBlock('Transform')
         dfblock.moveBlock('transform',0,255,5)

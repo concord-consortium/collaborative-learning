@@ -17,7 +17,6 @@ context('Number block test',()=>{
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Number')
         dfcanvas.scrollToTopOfTile();
     })

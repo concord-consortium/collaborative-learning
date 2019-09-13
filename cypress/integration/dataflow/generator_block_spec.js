@@ -18,7 +18,6 @@ context('Generator block tests',()=>{
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Generator')
         dfcanvas.openBlock('Transform')
         dfblock.moveBlock('transform',0,250,5)

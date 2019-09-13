@@ -21,7 +21,6 @@ context('block functionalites and relationships',()=>{
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Math');

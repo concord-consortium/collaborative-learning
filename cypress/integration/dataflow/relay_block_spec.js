@@ -19,7 +19,6 @@ context('Relay block tests',()=>{//Use number block and change the value manuall
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Relay')
         dfblock.moveBlock(testBlock,0,250,5)

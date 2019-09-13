@@ -17,7 +17,6 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
     before(()=>{
         header.switchWorkspace('Workspace');
         cy.wait(1000);
-        canvas.addTile('dataflow')
         dfcanvas.openBlock('Generator')
         dfcanvas.openBlock('Data Storage')
         dfblock.moveBlock(testBlock,0,250,5);
