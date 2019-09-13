@@ -18,10 +18,7 @@ export const emptyJson: ValueJSON = {
                   type: "paragraph",
                   nodes: [{
                     object: "text",
-                    leaves: [{
-                      object: "leaf",
-                      text: ""
-                    }]
+                    text: ""
                   }]
                 }]
               }
@@ -34,10 +31,7 @@ const errorJson: ValueJSON = {
             type: "paragraph",
             nodes: [{
               object: "text",
-              leaves: [{
-                object: "leaf",
-                text: "A slate error occurred"
-              }]
+              text: "A slate error occurred"
             }]
           }]
         }
