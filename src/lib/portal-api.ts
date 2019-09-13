@@ -3,7 +3,6 @@ import * as superagent from "superagent";
 import { IPortalClass, IPortalProblem } from "../models/stores/user";
 import * as queryString from "query-string";
 import { QueryParams } from "../utilities/url-params";
-import { number } from "prop-types";
 
 interface IPortalReport {
   url: string;
@@ -175,7 +174,7 @@ export interface IClueClassOfferings {
 }
 
 // TODO Better way to extract external report url.
-function getDashboardUrl(offering: IPortalOffering) {
+function getClueDashboardUrl(offering: IPortalOffering) {
   const report =  offering.external_report || offering.external_reports && offering.external_reports[0];
   return (report && report.url) || null;
 }
@@ -201,7 +200,7 @@ function getClueClassOfferings(portalOfferings: IPortalOffering[]): IClueClassOf
       result[offering.clazz].push({
         name: offering.activity,
         launchUrl: offering.activity_url,
-        dashboardUrl: getDashboardUrl(offering),
+        dashboardUrl: getClueDashboardUrl(offering),
         problemOrdinal: getProblemOrdinal(offering)
       });
     }
@@ -225,7 +224,7 @@ function getProblemLinkForClass(clueOfferings: IClueClassOfferings, className: s
 }
 
 export const PortalOfferingParser = {
-  getDashboardUrl,
+  getDashboardUrl: getClueDashboardUrl,
   getProblemOrdinal,
   getClueClassOfferings,
   getProblemLinkForClass

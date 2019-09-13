@@ -6,6 +6,7 @@ import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
+import { ClassMenuContainer } from "./class-menu-container";
 
 export interface IPanelSpec {
   panelId: string;
@@ -76,6 +77,9 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
         <div className="right">
           <div className="class" data-test="user-class">
             {this.renderClassPopover()}
+          </div>
+          <div className="class" data-test="user-class">
+            <ClassMenuContainer />
           </div>
           <div className="name" title={userTitle} data-test="user-name">
             {user.name}

@@ -394,6 +394,9 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
                     getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
                     .then(result => console.log(result));
+                    // TODO: Since this is no longer Authentication,
+                    // we could move the following data-loading Promises elsewhere,
+                    // perhaps chained in app.tsx line 23.
                     return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
                       .then((portalClasses) => {
                         return getPortalProblems(portalJWT.user_type, portalJWT.uid,

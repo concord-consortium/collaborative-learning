@@ -30,6 +30,7 @@ export const UserModel = types
     latestGroupId: types.maybe(types.string),
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
+    // TODO: PortalOfferings: (some type defined above)
     portalClasses: types.array(PortalClass),
     portalProblems: types.array(PortalProblem)
   })

@@ -35,6 +35,7 @@ describe("Portal Offerings", () => {
       getClueClassOfferings,
       getProblemLinkForClass
     } = PortalOfferingParser;
+
     const samplePortalOffering = {
       id: 1190,
       teacher: "Dave Love",
@@ -73,7 +74,7 @@ describe("Portal Offerings", () => {
     });
 
     describe("getClueClassOfferings", () => {
-      it("Should parse an array of one offering, and return a dictionary with one problem", () => {
+      it("Should parse an array of one Portal offering, and return a dictionary with one problem", () => {
         const clueClassOfferings = getClueClassOfferings([samplePortalOffering]);
         expect(clueClassOfferings).toHaveProperty("ClueClass1");
         expect(clueClassOfferings.ClueClass1.length).toBe(1);
@@ -81,18 +82,24 @@ describe("Portal Offerings", () => {
         expect(problem.name).toEqual("CLUE 1.2: Stretching a Figure - Comparing Similar Figures");
       });
 
-      it("should handle a large number of offerings", () => {
+      it("should work with multiple offerings recorded from portal api", () => {
         const clueClassOfferings = getClueClassOfferings(TeacherOfferings);
         expect(clueClassOfferings).toHaveProperty("ClueClass1");
         expect(clueClassOfferings).toHaveProperty("ClueClass2");
-        // This class doesn't have a clue assignment.
+        // This class "DavesTETester" doesn't have a clue assignment.
+        // Our list should not include assigments from that class.
         expect(clueClassOfferings).not.toHaveProperty("DavesTETester");
       });
     });
+
     describe("getProblemLinkForClass", () => {
       it("Should return links for the matching problems ...", () => {
+        // convert portal offerings to clue class problem list
         const clueClassOfferings = getClueClassOfferings(TeacherOfferings);
+
         let problemLink  = getProblemLinkForClass(clueClassOfferings, "ClueClass2", "1.2");
+        // This link actually goes to problem 1.1 -- because ClueClass2 doesn't incude
+        // problem 1.2 ... TBD this is what we want to do right?
         const expectedLink = "https://learn.staging.concord.org/portal/offerings/1191/external_report/14";
         expect(problemLink).toEqual(expectedLink);
         problemLink = getProblemLinkForClass(clueClassOfferings, "ClueClass5", "1.2");
