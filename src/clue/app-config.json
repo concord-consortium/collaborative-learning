@@ -21,8 +21,7 @@
           "type": "personal-documents",
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "addDocument": true
+          "documentTypes": ["personal"]
         },
         {
           "title": "%abbrevInvestigation%",
