@@ -7,14 +7,16 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, ProblemDocument
-       } from "../../models/document/document";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, PersonalDocument,
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import SingleStringDialog from "../utilities/single-string-dialog";
+
+import { IconButton } from "../utilities/icon-button";
 
 import "./document.sass";
 
@@ -53,6 +55,13 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, da
           data-test={dataTest} onClick={onClick} >
       <use xlinkHref={`#icon-publish`} />
     </svg>
+  );
+};
+
+const NewButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="new" key="new" className="action icon-new"
+                onClickButton={onClick} />
   );
 };
 
@@ -146,6 +155,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             : undefined;
     return (
       <div className="titlebar">
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+          </div>
+        }
         <div className="title" data-test="document-title">
           {problemTitle}
         </div>
@@ -186,6 +200,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {document} = this.props;
     return (
       <div className="other-doc titlebar">
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+          </div>
+        }
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
@@ -419,6 +438,27 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       FileSaver.saveAs(blobJson, "tile-content.json");
     }
     clipboard.clear();
+  }
+
+  private handleNewDocumentClick = () => {
+    const docType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const docTypeString = this.props.document.isLearningLog ? "Learning Log" : "Personal Document";
+    const { appConfig: { defaultDocumentTitle } } = this.stores;
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
+    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
+      .then((title: string) => {
+        this.handleNewDocumentOpen(title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleNewDocumentOpen = async (title: string) => {
+    const { db } = this.stores;
+    const newDocType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const newDocument = await db.createOtherDocument(newDocType, {title});
+    if (newDocument) {
+      this.props.workspace.setAvailableDocument(newDocument);
+    }
   }
 
   private handlePublishWorkspace = () => {
