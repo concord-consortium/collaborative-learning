@@ -20,7 +20,7 @@ export class DBProblemDocumentsListener {
         const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
           this.db.firebase.getOfferingUsersPath(user));
         // use once() so we are ensured that documents are set before we resolve
-        this.offeringUsersRef.once("value", (snapshot) => {
+        offeringUsersRef.once("value", (snapshot) => {
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
           offeringUsersRef.on("child_added", this.handleLoadOfferingUsersProblemDocuments);
         })
@@ -34,7 +34,7 @@ export class DBProblemDocumentsListener {
       const problemDocsRef = this.problemDocsRef = this.db.firebase.ref(
         this.db.firebase.getProblemDocumentsPath(user));
       // use once() so we are ensured that documents are set before we resolve
-      this.problemDocsRef.once("value", (snapshot) => {
+      problemDocsRef.once("value", (snapshot) => {
         this.handleLoadCurrentUserProblemDocuments(snapshot);
         problemDocsRef.on("child_added", this.handleCurrentUserProblemDocumentAdded);
       })
@@ -59,7 +59,8 @@ export class DBProblemDocumentsListener {
       if (user) {
         forEach(user.documents, document => {
           if (document && !documents.getDocument(document.documentKey)) {
-            this.db.createDocumentFromProblemDocument(String(userId), document, true)
+            const readOnly = true;
+            this.db.createDocumentFromProblemDocument(String(userId), document, readOnly)
               .then(documents.add);
           }
         });

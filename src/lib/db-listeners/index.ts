@@ -207,10 +207,15 @@ export class DBListeners {
     return this.monitorOtherDocument(document, LearningLogDocument);
   }
 
-  public monitorDocumentRef = (document: DocumentModelType, userId?: string) => {
+  public monitorDocument = (document: DocumentModelType, readOnly: boolean = false) => {
+    this.monitorDocumentRef(document, readOnly);
+    this.monitorDocumentModel(document, readOnly);
+  }
+
+  private monitorDocumentRef = (document: DocumentModelType, readOnly: boolean = false) => {
     const { user, documents } = this.db.stores;
     const documentKey = document.key;
-    const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, userId);
+    const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, document.uid);
     const documentRef = this.db.firebase.ref(documentPath);
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${documentKey}`);
@@ -219,20 +224,27 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    documentRef.on("value", (snapshot) => {
+    // for read only documents keep the local document in sync with Firebase but for editable documents
+    // just load it once and then sync local changes to Firebase
+    documentRef[readOnly ? "on" : "once"]("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
         const updatedContent = this.db.parseDocumentContent(updatedDoc);
         const documentModel = documents.getDocument(documentKey);
         if (documentModel) {
           documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
-          this.monitorDocumentModel(documentModel);
+          this.monitorDocumentModel(documentModel, readOnly);
         }
       }
     });
   }
 
-  public monitorDocumentModel = (document: DocumentModelType, userId?: string) => {
+  private monitorDocumentModel = (document: DocumentModelType, readOnly: boolean = false) => {
+    // readonly documents don't listen for local changes to the document
+    if (readOnly) {
+      return;
+    }
+
     const { user } = this.db.stores;
     const { key, content } = document;
 
@@ -241,7 +253,7 @@ export class DBListeners {
       docListener.modelDisposer();
     }
 
-    const updatePath = this.db.firebase.getUserDocumentPath(user, key, userId);
+    const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
     const updateRef = this.db.firebase.ref(updatePath);
     docListener.modelDisposer = onSnapshot(content, (newContent) => {
                                   document.incChangeCount();
