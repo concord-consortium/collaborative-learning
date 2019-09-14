@@ -20,7 +20,7 @@ interface IState {
 export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
-  public componentWillReceiveProps(nextProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if (nextProps.groupId !== this.props.groupId) {
       this.setState({selectedUserId: undefined});
     }
