@@ -5,7 +5,8 @@ import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentDragKey, DocumentModelType, DocumentModel, ProblemDocument } from "../../models/document/document";
+import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
+        PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 
 import "./document-workspace.sass";
@@ -74,6 +75,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
             <DocumentComponent
               document={primaryDocument}
               workspace={problemWorkspace}
+              onNewDocument={this.handleNewDocument}
               toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
@@ -98,6 +100,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               <DocumentComponent
                 document={primaryDocument}
                 workspace={problemWorkspace}
+                onNewDocument={this.handleNewDocument}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -161,6 +164,28 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     this.stores.ui.contractAll();
+  }
+
+  private handleNewDocument = (document: DocumentModelType) => {
+    const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const docTypeString = document.isLearningLog ? "Learning Log" : "Personal Document";
+    const { appConfig: { defaultDocumentTitle } } = this.stores;
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
+    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`, `Create ${docTypeString}`)
+      .then((title: string) => {
+        this.handleNewDocumentOpen(docType, title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
+    const { appConfig, db, ui: { problemWorkspace } } = this.stores;
+    const content = (type === PersonalDocument) && appConfig.defaultDocumentTemplate
+                      ? appConfig.defaultDocumentContent : undefined;
+    const newDocument = await db.createOtherDocument(type, {title, content});
+    if (newDocument) {
+      problemWorkspace.setAvailableDocument(newDocument);
+    }
   }
 
   private getPrimaryDocument(documentKey?: string) {
