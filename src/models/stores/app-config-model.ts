@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
+import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
+      } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
 
@@ -20,10 +21,8 @@ export const AppConfigModel = types
     toolbar: types.array(ToolButtonModel)
   })
   .views(self => ({
-    get defaultDocumentContent(): DocumentContentModelType {
-      const template = self.defaultDocumentTemplate && self.defaultDocumentTemplate.publish();
-      const content = template && JSON.parse(template);
-      return DocumentContentModel.create(content);
+    get defaultDocumentContent(): DocumentContentModelType | undefined {
+      return cloneContentWithUniqueIds(self.defaultDocumentTemplate);
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;
