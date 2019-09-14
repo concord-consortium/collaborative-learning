@@ -65,6 +65,13 @@ const NewButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+const EditButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="edit" key="edit" className="action icon-edit"
+                onClickButton={onClick} />
+  );
+};
+
 const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
   const visibility = isShared ? "public" : "private";
   return (
@@ -207,8 +214,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
-          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
-          : <div className="title" data-test="personal-doc-title">{document.title}</div>
+          ? <div className="title" data-test="learning-log-title">
+              <span className="title-info">Learning Log: {document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
+          : <div className="title" data-test="personal-doc-title">
+              <span>{document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
         }
         <div className="actions">
           {!hideButtons &&
@@ -459,6 +472,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (newDocument) {
       this.props.workspace.setAvailableDocument(newDocument);
     }
+  }
+
+  private handleDocumentRename = () => {
+    const { document } = this.props;
+    const docTypeString = document.isPersonal ? "Personal Document" : "Learning Log";
+    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Renaming ${docTypeString}`)
+      .then((title: string) => {
+        if (title !== document.title) {
+          document.setTitle(title);
+        }
+      });
   }
 
   private handlePublishWorkspace = () => {
