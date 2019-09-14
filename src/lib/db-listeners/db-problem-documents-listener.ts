@@ -5,6 +5,7 @@ import { forEach } from "lodash";
 export class DBProblemDocumentsListener {
   private db: DB;
   private problemDocsRef: firebase.database.Reference | null  = null;
+  private offeringUsersRef: firebase.database.Reference | null  = null;
 
   constructor(db: DB) {
     this.db = db;
@@ -15,11 +16,17 @@ export class DBProblemDocumentsListener {
 
     // teacher user - load documents for all users
     if (user.isTeacher) {
-      const offeringUsersRef = this.db.firebase.ref(this.db.firebase.getOfferingUsersPath(user));
-      offeringUsersRef.on("value", snapshot => {
-        this.handleLoadOfferingUsersDocuments(snapshot);
+      return new Promise<void>((resolve, reject) => {
+        const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
+          this.db.firebase.getOfferingUsersPath(user));
+        // use once() so we are ensured that documents are set before we resolve
+        this.offeringUsersRef.once("value", (snapshot) => {
+          this.handleLoadOfferingUsersProblemDocuments(snapshot);
+          offeringUsersRef.on("child_added", this.handleLoadOfferingUsersProblemDocuments);
+        })
+        .then(() => resolve())
+        .catch(reject);
       });
-      return;
     }
 
     // student user - load documents for user and group
@@ -27,31 +34,32 @@ export class DBProblemDocumentsListener {
       const problemDocsRef = this.problemDocsRef = this.db.firebase.ref(
         this.db.firebase.getProblemDocumentsPath(user));
       // use once() so we are ensured that documents are set before we resolve
-      problemDocsRef.once("value", (snapshot) => {
-        this.handleLoadProblemDocuments(snapshot);
-        problemDocsRef.on("child_added", this.handleProblemDocumentAdded);
+      this.problemDocsRef.once("value", (snapshot) => {
+        this.handleLoadCurrentUserProblemDocuments(snapshot);
+        problemDocsRef.on("child_added", this.handleCurrentUserProblemDocumentAdded);
       })
-      .then(snapshot => {
-        resolve();
-      })
+      .then(() => resolve())
       .catch(reject);
     });
   }
 
   public stop() {
     if (this.problemDocsRef) {
-      this.problemDocsRef.off("child_added", this.handleProblemDocumentAdded);
+      this.problemDocsRef.off("child_added", this.handleCurrentUserProblemDocumentAdded);
+    }
+    if (this.offeringUsersRef) {
+      this.offeringUsersRef.off("child_added", this.handleLoadOfferingUsersProblemDocuments);
     }
   }
 
-  private handleLoadOfferingUsersDocuments = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     const users = snapshot.val();
     const { documents } = this.db.stores;
     forEach(users, (user: DBOfferingUser, userId: number | string) => {
       if (user) {
-        forEach(user.sectionDocuments, sectionDoc => {
-          if (sectionDoc && !documents.getDocument(sectionDoc.documentKey)) {
-            this.db.createDocumentFromProblemDocument(String(userId), sectionDoc)
+        forEach(user.documents, document => {
+          if (document && !documents.getDocument(document.documentKey)) {
+            this.db.createDocumentFromProblemDocument(String(userId), document, true)
               .then(documents.add);
           }
         });
@@ -59,21 +67,21 @@ export class DBProblemDocumentsListener {
     });
   }
 
-  private handleLoadProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLoadCurrentUserProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     const problemDocuments: DBOfferingUserProblemDocumentMap = snapshot.val();
     if (problemDocuments) {
       forEach(problemDocuments, (document) => {
-        this.handleProblemDocument(document);
+        this.handleCurrentUserProblemDocument(document);
       });
     }
   }
 
-  private handleProblemDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
+  private handleCurrentUserProblemDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
     const problemDocument: DBOfferingUserProblemDocument|null = snapshot.val();
-    this.handleProblemDocument(problemDocument);
+    this.handleCurrentUserProblemDocument(problemDocument);
   }
 
-  private handleProblemDocument(problemDocument: DBOfferingUserProblemDocument|null) {
+  private handleCurrentUserProblemDocument(problemDocument: DBOfferingUserProblemDocument|null) {
     const {user, documents} = this.db.stores;
     // If a workspace has already been created, or is currently been created, then its listeners are already set
     if (problemDocument

@@ -570,7 +570,8 @@ export class DB {
   }
 
   public createDocumentFromProblemDocument(userId: string,
-                                           problemDocument: DBOfferingUserProblemDocument) {
+                                           problemDocument: DBOfferingUserProblemDocument,
+                                           readonly: boolean = false) {
     const {documentKey} = problemDocument;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
@@ -581,8 +582,10 @@ export class DB {
         visibility: problemDocument.visibility
       })
       .then((document) => {
-        this.listeners.monitorDocumentModel(document);
-        this.listeners.monitorDocumentRef(document);
+        if (!readonly) {
+          this.listeners.monitorDocumentModel(document, userId);
+        }
+        this.listeners.monitorDocumentRef(document, userId);
         return document;
       });
   }

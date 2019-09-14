@@ -23,10 +23,10 @@ export interface ModelListeners {
   };
 }
 
-export interface UserSectionDocumentListeners {
+export interface UserProblemDocumentListeners {
   [key /* sectionId */: string]: {
     [key /* userId */: string]: {
-      sectionDocsRef?: firebase.database.Reference;
+      problemDocsRef?: firebase.database.Reference;
       docContentRef?: firebase.database.Reference;
     };
   };
@@ -41,7 +41,7 @@ export class DBListeners {
   private db: DB;
 
   private modelListeners: ModelListeners = {};
-  private groupUserProblemDocumentsListeners: UserSectionDocumentListeners = {};
+  private groupUserProblemDocumentsListeners: UserProblemDocumentListeners = {};
   private documentModelDisposers: DocumentModelDisposers = {};
 
   private latestGroupIdListener: DBLatestGroupIdListener;
@@ -133,16 +133,16 @@ export class DBListeners {
         if (groupUser.id === user.id) {
           return;
         }
-        const currentSectionDocsListener = this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
-          .sectionDocsRef;
-        if (currentSectionDocsListener) {
-          currentSectionDocsListener.off();
+        const currentProblemDocsListener = this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
+          .problemDocsRef;
+        if (currentProblemDocsListener) {
+          currentProblemDocsListener.off();
         }
         const groupUserDocsRef = this.db.firebase.ref(
           this.db.firebase.getProblemDocumentPath(user, document.key, groupUser.id)
         );
         this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
-          .sectionDocsRef = groupUserDocsRef;
+          .problemDocsRef = groupUserDocsRef;
         groupUserDocsRef.on("value", this.handleGroupUserProblemDocRef(document));
       });
     }
@@ -207,10 +207,11 @@ export class DBListeners {
     return this.monitorOtherDocument(document, LearningLogDocument);
   }
 
-  public monitorDocumentRef = (document: DocumentModelType) => {
+  public monitorDocumentRef = (document: DocumentModelType, userId?: string) => {
     const { user, documents } = this.db.stores;
     const documentKey = document.key;
-    const documentRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, documentKey));
+    const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, userId);
+    const documentRef = this.db.firebase.ref(documentPath);
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${documentKey}`);
     if (docListener.ref) {
@@ -218,7 +219,7 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    documentRef.once("value", (snapshot) => {
+    documentRef.on("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
         const updatedContent = this.db.parseDocumentContent(updatedDoc);
@@ -231,7 +232,7 @@ export class DBListeners {
     });
   }
 
-  public monitorDocumentModel = (document: DocumentModelType) => {
+  public monitorDocumentModel = (document: DocumentModelType, userId?: string) => {
     const { user } = this.db.stores;
     const { key, content } = document;
 
@@ -240,7 +241,8 @@ export class DBListeners {
       docListener.modelDisposer();
     }
 
-    const updateRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, key));
+    const updatePath = this.db.firebase.getUserDocumentPath(user, key, userId);
+    const updateRef = this.db.firebase.ref(updatePath);
     docListener.modelDisposer = onSnapshot(content, (newContent) => {
                                   document.incChangeCount();
                                   updateRef.update({
