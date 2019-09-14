@@ -152,11 +152,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(hideButtons?: boolean) {
-    const {problem, appMode, clipboard} = this.stores;
+    const {problem, appMode, clipboard, user} = this.stores;
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
     const isShared = visibility === "public";
-    const show4up = !workspace.comparisonVisible;
+    const showShare = !user.isTeacher;
+    const show4up = !workspace.comparisonVisible && !user.isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
@@ -175,7 +176,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {[
               downloadButton,
               <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
-              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
+              showShare ? <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} /> : null
             ]}
             {show4up ? this.renderMode() : null}
           </div>
