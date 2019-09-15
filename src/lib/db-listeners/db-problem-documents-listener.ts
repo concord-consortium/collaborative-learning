@@ -86,7 +86,6 @@ export class DBProblemDocumentsListener {
     });
   }
 
-
   private handleLoadCurrentUserProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     const problemDocuments: DBOfferingUserProblemDocumentMap = snapshot.val();
     if (problemDocuments) {
