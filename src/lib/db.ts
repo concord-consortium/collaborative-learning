@@ -11,9 +11,10 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
   DBOtherDocument, DBOtherDocumentMap, IOtherDocumentProperties, DBOtherPublication } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
-      } from "../models/document/document";
+       } from "../models/document/document";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType } from "../models/document/document-content";
+import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+       } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
@@ -517,6 +518,15 @@ export class DB {
         .then(resolve)
         .catch(reject);
     });
+  }
+
+  public copyOtherDocument(document: DocumentModelType, newTitle?: string) {
+    const title = `${newTitle || document.title || this.stores.problem.title || "Untitled"}`;
+    const content = cloneContentWithUniqueIds(document.content);
+    if (document.type === ProblemDocument) {
+      return this.createPersonalDocument({ title, content });
+    }
+    return this.createOtherDocument(document.type as OtherDocumentType, { title, content });
   }
 
   public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {

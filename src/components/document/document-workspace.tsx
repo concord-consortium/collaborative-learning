@@ -76,6 +76,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               document={primaryDocument}
               workspace={problemWorkspace}
               onNewDocument={this.handleNewDocument}
+              onCopyDocument={this.handleCopyDocument}
               toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
@@ -101,6 +102,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                 document={primaryDocument}
                 workspace={problemWorkspace}
                 onNewDocument={this.handleNewDocument}
+                onCopyDocument={this.handleCopyDocument}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -185,6 +187,23 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);
+    }
+  }
+
+  private handleCopyDocument = (document: DocumentModelType) => {
+    this.stores.ui.prompt(`Give your workspace copy a new name:`,
+                          `Copy of ${document.title || this.stores.problem.title}`, `Copy Workspace`)
+      .then((title: string) => {
+        this.handleCopyDocumentOpen(document, title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
+    const { db, ui: { problemWorkspace } } = this.stores;
+    const copyDocument = await db.copyOtherDocument(document, title);
+    if (copyDocument) {
+      problemWorkspace.setAvailableDocument(copyDocument);
     }
   }
 
