@@ -33,6 +33,15 @@ $list-item-scale: 0.1
             position: absolute
             right: 50px
             filter: grayscale(1)
+        .title
+          #icon-edit
+            &.icon-edit
+              background-color: #ffffff
+              margin-left: 6px
+            .edit
+              background-color: #ffffff
+              filter: grayscale(1)
+              background-size: 120%
       .canvas-area
         border-top: 4px solid $gray-mid
         bottom: 0px
@@ -258,3 +267,10 @@ $list-item-scale: 0.1
 .text-tool
   &.editable
     min-height: 50px
+
+.dialog
+  .dialog-container
+    border: 4px solid $gray-mid
+    border-radius: 12px
+    .dialog-title
+      background-color: $gray-light
