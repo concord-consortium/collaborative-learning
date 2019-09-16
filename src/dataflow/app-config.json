@@ -37,8 +37,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["!dfRunId"],
-          "addDocument": true
+          "properties": ["!dfRunId"]
         },
         {
           "title": "Data",
