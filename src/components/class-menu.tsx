@@ -32,7 +32,6 @@ export class ClassMenu extends React.Component<IProps, {}> {
     let key = 0;
     const handleMenuItem = (link: string) => {
       return ( (e: React.MouseEvent<HTMLElement>) => {
-        console.log(`Class menu selection DL / NP:  ${link}`);
         if (link && link !== "" && ! isActive) {
           window.location.replace(link);
         }

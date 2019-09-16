@@ -424,7 +424,6 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                               authenticatedUser.portalProblems = portalProblems;
                               if (clueClassOfferings) {
                                 authenticatedUser.clueClassOfferings = clueClassOfferings;
-                                console.log(clueClassOfferings);
                               }
                               getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
                               .then((problemId) => {

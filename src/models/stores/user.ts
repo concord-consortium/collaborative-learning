@@ -20,7 +20,6 @@ export const ClueClassOffering = types.model("ClueClassOffering", {
 
 export type IClueClassOffering = typeof ClueClassOffering.Type;
 
-
 export const PortalProblem = types.model("PortalProblem", {
   problemDesignator: "",
   switchUrlLocation: ""

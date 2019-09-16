@@ -206,6 +206,7 @@ export function getProblemLinkForClass(clueOfferings: IClueClassOffering[], clas
       return problem;
     }
   }
+  // tslint:disable-next-line
   console.error(`class ${className} doesn't have Clue Problem offerings.`);
   return null;
 }

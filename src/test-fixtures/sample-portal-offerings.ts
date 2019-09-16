@@ -1,3 +1,4 @@
+/* tslint:disable max-line-length */
 export const TeacherOfferings = [
   {
     id: 1190,
@@ -529,4 +530,4 @@ export const TeacherOfferings = [
     ],
     students: []
   }
-]
+];
