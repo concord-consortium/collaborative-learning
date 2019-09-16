@@ -82,11 +82,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             programContent.setProgramStartEndTime(startTime, endTime);
           }
         });
+
         // create and load the new document
         const params: ICreateOtherDocumentParams = {
                 title: title || id,
                 properties: { dfRunId: id },
-                content: documentContent
+                content: JSON.parse(documentContent.publish())
               };
         const newPersonalDocument = await db.createPersonalDocument(params);
         if (newPersonalDocument) {

@@ -98,7 +98,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     qaClearError: undefined
   };
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     authAndConnect(this.stores, (qaCleared, qaClearError) => {
       this.setState({qaCleared, qaClearError});
     });
@@ -148,9 +148,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderLoading() {
+    const { appConfig: { appName } } = this.stores;
     return (
       <div className="progress">
-        Loading CLUE ...
+        Loading {appName} ...
       </div>
     );
   }

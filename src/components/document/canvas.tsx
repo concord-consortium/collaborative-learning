@@ -5,6 +5,7 @@ import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IToolApiInterface } from "../tools/tool-tile";
+import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
 
@@ -28,6 +29,7 @@ export class CanvasComponent extends React.Component<IProps, {}> {
       <div key="canvas" className="canvas" data-test="canvas">
         {this.renderContent()}
         {this.renderEditability()}
+        {this.renderDebugInfo()}
       </div>
     );
   }
@@ -58,6 +60,17 @@ export class CanvasComponent extends React.Component<IProps, {}> {
     }
     else {
       return null;
+    }
+  }
+
+  private renderDebugInfo() {
+    const { document } = this.props;
+    if (document && DEBUG_CANVAS) {
+      return (
+        <div className="canvas-debug">
+          <span style={{fontSize: "1.5em"}}>{document.key}</span>
+        </div>
+      );
     }
   }
 }

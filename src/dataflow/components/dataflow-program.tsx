@@ -318,7 +318,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const programRunState: ProgramRunStates = this.getRunState();
     const hasDataStorage = this.getNodeCount("Data Storage") > 0;
     const programDisplayState = (programRunState !== ProgramRunStates.Ready) && hasDataStorage
-                                  ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+                                  ? programRunState === ProgramRunStates.Running
+                                                        ? ProgramDisplayStates.SideBySide
+                                                        : ProgramDisplayStates.Graph
+                                  : ProgramDisplayStates.Program;
     this.setState({ programRunState, programDisplayState });
     this.updateGraphDataSet();
     this.sequenceNames = this.getNodeSequenceNames();
@@ -395,7 +398,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     deleteProgram(this.props.programEndTime);
     const programEndTime = Date.now();
     this.props.onSetProgramEndTime(programEndTime);
-    this.setState({programRunState: ProgramRunStates.Complete});
+    const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+    const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+    this.setState({programRunState: ProgramRunStates.Complete, programDisplayState});
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
@@ -668,7 +673,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateRunState = () => {
     if (this.isRunning()) {
       if (this.props.programEndTime && (Date.now() >= this.props.programEndTime)) {
-        this.setState({programRunState: ProgramRunStates.Complete});
+        const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+        const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
+        this.setState({programRunState: ProgramRunStates.Complete, programDisplayState});
       }
     }
   }

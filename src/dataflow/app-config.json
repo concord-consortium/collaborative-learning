@@ -1,4 +1,5 @@
 {
+  "appName": "Dataflow",
   "pageTitle": "%unitTitle%",
   "demoProblemTitle": "%investigationTitle%",
   "units": {
@@ -6,7 +7,8 @@
   },
   "defaultUnit": "dataflow",
   "defaultDocumentType": "personal",
-  "defaultDocumentContent": {
+  "defaultDocumentTitle": "Program",
+  "defaultDocumentTemplate": {
     "tiles": [
       {
         "layout": {

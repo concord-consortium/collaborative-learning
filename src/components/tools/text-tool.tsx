@@ -40,7 +40,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     let isFocused: boolean | undefined;
     change.operations.forEach(op => {
       if (op && op.type === "set_selection") {
-        isFocused = op.selection.get("isFocused");
+        isFocused = op.properties.isFocused;
       }
     });
 

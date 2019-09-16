@@ -480,8 +480,11 @@ export class DB {
   // personal documents and learning logs
   public createOtherDocument(documentType: OtherDocumentType, params: ICreateOtherDocumentParams = {}) {
     const { title, properties, content } = params;
-    const {documents, user} = this.stores;
-    const docTitle: string = title || documents.getNextOtherDocumentTitle(user, documentType);
+    const {appConfig, documents, user} = this.stores;
+    const baseTitle = documentType === PersonalDocument
+                        ? appConfig.defaultDocumentTitle
+                        : appConfig.defaultLearningLogTitle;
+    const docTitle = title || documents.getNextOtherDocumentTitle(user, documentType, baseTitle);
 
     return new Promise<DocumentModelType>((resolve, reject) => {
       return this.createDocument({ type: documentType, content: JSON.stringify(content) })

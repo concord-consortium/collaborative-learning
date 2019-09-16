@@ -32,7 +32,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  public componentWillReceiveProps(nextProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if (nextProps.dialog !== this.props.dialog) {
       this.setState({promptValue: nextProps.dialog && nextProps.dialog.defaultValue});
     }

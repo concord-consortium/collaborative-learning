@@ -28,6 +28,9 @@ export interface QueryParams {
   // If this exists then the demo ui is shown
   demo?: boolean;
 
+  // Optional name of the demo to use as a namespace under the demo key
+  demoName?: string;
+
   //
   // Portal external report auth parameters (classOfferings is ignored)
   //
@@ -69,6 +72,7 @@ export const DefaultUrlParams: QueryParams = {
   token: undefined,
   domain: undefined,
   demo: undefined,
+  demoName: undefined,
   class: undefined,
   offering: undefined,
   reportType: undefined,

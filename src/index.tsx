@@ -51,7 +51,7 @@ const initializeApp = async () => {
   const {investigation, problem} = unit.getProblem(problemOrdinal) ||
                                    unit.getProblem(DefaultProblemOrdinal);
   const showDemoCreator = urlParams.demo;
-  const stores = createStores({ appMode, appVersion, appConfig, user, problem, showDemoCreator, unit });
+  const stores = createStores({ appMode, appVersion, appConfig, user, problem, showDemoCreator, unit, investigation });
   stores.documents.setUnit(stores.unit);
 
   gImageMap.initialize(stores.db, user.id);

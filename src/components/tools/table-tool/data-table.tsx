@@ -774,7 +774,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
   }
 
-  public componentWillReceiveProps(nextProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     const { changeCount, dataSet } = nextProps;
     if (dataSet !== this.props.dataSet) {
       this.detachDataSet(this.props.dataSet);
