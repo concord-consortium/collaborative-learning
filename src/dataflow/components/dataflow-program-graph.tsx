@@ -213,6 +213,12 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
       legend: {
         display: true,
         position: "bottom",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 6,
+          fontSize: 12,
+          fontFamily: "'Ubuntu', 'Arial', sans-serif"
+        }
       },
       maintainAspectRatio: false,
       responsive: true,
@@ -248,7 +254,9 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           },
           scaleLabel: {
             display: true,
-            labelString: "Time"
+            labelString: "Time",
+            fontSize: 12,
+            fontFamily: "'Ubuntu', 'Arial', sans-serif"
           },
           gridLines: {
             display: true
