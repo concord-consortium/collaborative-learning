@@ -3,10 +3,11 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-import { IPortalClass, IPortalProblem } from "../models/stores/user";
+import { IPortalClass, IPortalProblem, IClueClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import {
   getPortalOfferings,
+  getClueClassOfferings,
   getProblemIdForAuthenticatedUser,
   getPortalClasses,
   getPortalProblems
@@ -75,6 +76,7 @@ interface User {
   rawFirebaseJWT?: string;
   portalClasses?: IPortalClass[];
   portalProblems?: IPortalProblem[];
+  clueClassOfferings?: IClueClassOffering[];
 }
 
 export interface StudentUser extends User {
@@ -377,7 +379,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
           const portal = parseUrl(basePortalUrl).host;
           let classInfoUrl: string | undefined;
           let offeringId: string | undefined;
-
+          let clueClassOfferings: any;
           if (portalJWT.user_type === "learner") {
             classInfoUrl = portalJWT.class_info_url;
             offeringId = `${portalJWT.offering_id}`;
@@ -393,7 +395,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                 return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
                   .then(([rawFirebaseJWT, firebaseJWT]) => {
                     getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
-                    .then(result => console.log(result));
+                    .then(result => clueClassOfferings = getClueClassOfferings(result));
                     // TODO: Since this is no longer Authentication,
                     // we could move the following data-loading Promises elsewhere,
                     // perhaps chained in app.tsx line 23.
@@ -420,7 +422,10 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                               authenticatedUser.portal = portal;
                               authenticatedUser.portalClasses = portalClasses;
                               authenticatedUser.portalProblems = portalProblems;
-
+                              if (clueClassOfferings) {
+                                authenticatedUser.clueClassOfferings = clueClassOfferings;
+                                console.log(clueClassOfferings);
+                              }
                               getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
                               .then((problemId) => {
                                 if (authenticatedUser) {

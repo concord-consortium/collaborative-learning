@@ -3,6 +3,7 @@ import * as superagent from "superagent";
 import { IPortalClass, IPortalProblem } from "../models/stores/user";
 import * as queryString from "query-string";
 import { QueryParams } from "../utilities/url-params";
+import { IClueClassOffering } from "../models/stores/user";
 
 interface IPortalReport {
   url: string;
@@ -153,6 +154,7 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
   });
 };
 
+// The portals native format of API returns
 interface IPortalOffering {
   clazz: string;
   clazz_id: number;
@@ -160,17 +162,6 @@ interface IPortalOffering {
   activity_url: string;
   external_report?: IPortalReport | null;
   external_reports?: IPortalReport[];
-}
-
-export interface IClueOffering {
-  name: string;
-  launchUrl: string;
-  problemOrdinal: string;
-  dashboardUrl: string | null;
-}
-
-export interface IClueClassOfferings {
-  [index: string]: IClueOffering[];
 }
 
 // TODO Better way to extract external report url.
@@ -190,17 +181,13 @@ function getProblemOrdinal(offering: IPortalOffering) {
   return defaultOrdinal;
 }
 
-function getClueClassOfferings(portalOfferings: IPortalOffering[]): IClueClassOfferings {
-  const result = {} as IClueClassOfferings;
+export function getClueClassOfferings(portalOfferings: IPortalOffering[]): IClueClassOffering[] {
+  const result = [] as IClueClassOffering[];
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering)) {
-      if (!result[offering.clazz]) {
-        result[offering.clazz] = [];
-      }
-      result[offering.clazz].push({
-        name: offering.activity,
-        launchUrl: offering.activity_url,
-        dashboardUrl: getClueDashboardUrl(offering),
+      result.push({
+        className: offering.clazz,
+        dashboardUrl: getClueDashboardUrl(offering) || "",
         problemOrdinal: getProblemOrdinal(offering)
       });
     }
@@ -209,14 +196,14 @@ function getClueClassOfferings(portalOfferings: IPortalOffering[]): IClueClassOf
   return result;
 }
 
-function getProblemLinkForClass(clueOfferings: IClueClassOfferings, className: string, problemOrdinal: string) {
-  const clazzProblems = clueOfferings[className];
+export function getProblemLinkForClass(clueOfferings: IClueClassOffering[], className: string, problemOrdinal: string) {
+  const clazzProblems = clueOfferings.filter( o => o.className === className);
   if (clazzProblems) {
-    const problem: IClueOffering | null  =
-      clazzProblems.find( (p: IClueOffering) =>  p.problemOrdinal === problemOrdinal)
+    const problem: IClueClassOffering | null  =
+      clazzProblems.find( (p: IClueClassOffering) =>  p.problemOrdinal === problemOrdinal)
       || clazzProblems[0];
     if (problem) {
-      return problem.dashboardUrl;
+      return problem;
     }
   }
   console.error(`class ${className} doesn't have Clue Problem offerings.`);

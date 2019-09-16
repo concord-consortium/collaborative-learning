@@ -28,10 +28,14 @@ export class ClassMenu extends React.Component<IProps, {}> {
 
   private renderClassMenu(currentClassName: string) {
     const { user } = this.props;
+    const isActive = false;
     let key = 0;
-    const handleMenuItem = (clazz: IMenuPortalClass) => {
+    const handleMenuItem = (link: string) => {
       return ( (e: React.MouseEvent<HTMLElement>) => {
-        console.log(`Class menu selection DL / NP:  ${clazz.className}`);
+        console.log(`Class menu selection DL / NP:  ${link}`);
+        if (link && link !== "" && ! isActive) {
+          window.location.replace(link);
+        }
       });
     };
     if (user.portalClasses.length <= 0) {
@@ -50,7 +54,7 @@ export class ClassMenu extends React.Component<IProps, {}> {
               key={key++}
               text={c.className}
               active={c.className === currentClassName}
-              onClick={handleMenuItem(c)}
+              onClick={handleMenuItem(c.link)}
             />
         )}
       </Menu>

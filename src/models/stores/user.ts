@@ -12,6 +12,15 @@ export const PortalClass = types.model("PortalClass", {
 });
 export type IPortalClass = typeof PortalClass.Type;
 
+export const ClueClassOffering = types.model("ClueClassOffering", {
+  className: "",
+  problemOrdinal: "",
+  dashboardUrl: ""
+});
+
+export type IClueClassOffering = typeof ClueClassOffering.Type;
+
+
 export const PortalProblem = types.model("PortalProblem", {
   problemDesignator: "",
   switchUrlLocation: ""
@@ -32,7 +41,8 @@ export const UserModel = types
     loggingRemoteEndpoint: types.maybe(types.string),
     // TODO: PortalOfferings: (some type defined above)
     portalClasses: types.array(PortalClass),
-    portalProblems: types.array(PortalProblem)
+    portalProblems: types.array(PortalProblem),
+    clueClassOfferings: types.array(ClueClassOffering)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -74,7 +84,12 @@ export const UserModel = types
           self.portalProblems.push(portalProblem);
         });
       }
-    },
+      if (user.clueClassOfferings) {
+        user.clueClassOfferings.forEach ((classOffering) => {
+          self.clueClassOfferings.push(classOffering);
+        });
+      }
+    }
   }))
   .views((self) => ({
     get isStudent() {
