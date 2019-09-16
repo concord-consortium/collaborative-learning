@@ -37,7 +37,7 @@ context('Workspace view',()=>{
         it('verify click on Workspace button shows the dataflow workspace',()=>{
             header.switchWorkspace('Workspace');
             cy.get('.single-workspace').should('be.visible')
-            leftNav.getLeftNavTabs().should('be.visible')
+            leftNav.getLeftNavTabs().should('not.exist')
             rightNav.getRightNavTabs().should('be.visible')
         })
     })
