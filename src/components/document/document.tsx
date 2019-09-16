@@ -7,7 +7,7 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, PersonalDocument,
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
          ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
@@ -25,6 +25,7 @@ export type WorkspaceSide = "primary" | "comparison";
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
+  onNewDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -454,24 +455,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleNewDocumentClick = () => {
-    const docType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const docTypeString = this.props.document.isLearningLog ? "Learning Log" : "Personal Document";
-    const { appConfig: { defaultDocumentTitle } } = this.stores;
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
-    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
-      .then((title: string) => {
-        this.handleNewDocumentOpen(title)
-        .catch(this.stores.ui.setError);
-      });
-  }
-
-  private handleNewDocumentOpen = async (title: string) => {
-    const { db } = this.stores;
-    const newDocType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const newDocument = await db.createOtherDocument(newDocType, {title});
-    if (newDocument) {
-      this.props.workspace.setAvailableDocument(newDocument);
-    }
+    const { document, onNewDocument } = this.props;
+    onNewDocument && onNewDocument(document);
   }
 
   private handleDocumentRename = () => {
