@@ -76,9 +76,6 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
         </div>
         <div className="right">
           <div className="class" data-test="user-class">
-            {this.renderClassPopover()}
-          </div>
-          <div className="class" data-test="user-class">
             <ClassMenuContainer />
           </div>
           <div className="name" title={userTitle} data-test="user-name">
@@ -86,40 +83,6 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           </div>
         </div>
       </div>
-    );
-  }
-
-  private renderClassPopover() {
-    const { user } = this.stores;
-    return (
-      <Popover className="problemMenu"
-        content={this.renderClassMenu(user.className)} position={Position.RIGHT_TOP}>
-        <Button text={user.className} />
-      </Popover>
-    );
-  }
-
-  private renderClassMenu(currentClassName: string) {
-    const { user } = this.stores;
-    let key = 0;
-    const handleMenuItem = (e: React.MouseEvent) => {
-      // tslint:disable-next-line:no-console
-      console.log(`Class menu selection: ${(e.target as HTMLElement).innerText}`);
-    };
-    if (user.portalClasses.length <= 0) {
-      // If we don't have a list of classes, populate the menu with with this
-      // class, at least. Otherwise, it makes for an ugly, empty menu.
-      return (
-        <Menu>
-          <MenuItem key={key++} text={user.className} active={true} />
-        </Menu>
-      );
-    }
-    return (
-      <Menu>
-        {user.portalClasses.map( c => <MenuItem key={key++} text={c.className}
-        active={c.className === currentClassName} onClick={handleMenuItem} />)}
-      </Menu>
     );
   }
 

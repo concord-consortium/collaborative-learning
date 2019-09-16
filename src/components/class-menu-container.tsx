@@ -4,54 +4,41 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { getProblemLinkForClass } from "../lib/portal-api";
-import { ClassMenu, IMenuUser } from "./class-menu";
+import { LinkSwitcherMenu  } from "./link-switcher-menu";
 
-interface IProps extends IBaseProps { }
+interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
 export class ClassMenuContainer extends BaseComponent <IProps, {}> {
   public render() {
-    return <ClassMenu user={this.getClueClasses()} />;
-    /*
-      ILinkItem {
-        title: "My First Class",
-        selected: true,           // (only one, highlighted)
-        url: "http://foo.com/",   // Where the link takes us
-        disabled: false           // link active?
-      }
-      <LinkSwitcher
-        buttonLabel={currentItemName: string}
-        links={linkArray: ILinkItem[]}
-      />
-    */
+    const {currentTitle, links} = this.getClueClasses();
+    const clickHandler = (url: string) => window.location.replace(url);
+    return <LinkSwitcherMenu
+      currentTitle={currentTitle}
+      links={links}
+      clickHandler={clickHandler}
+    />;
   }
+
   private getClueClasses() {
+    // TODO: We don't have unit names, which would be very helpful for switching
     const { user, investigation, problem, } = this.stores;
-    // TODO we don't have unit names :( console.log(unit);
-
     const problemId = `${investigation.ordinal}.${problem.ordinal}`;
-
     const classNames = uniq(user.clueClassOfferings.map(o => o.className));
 
     // Sample PortalClasses: [{ name: "clazz1", dashboardUrl: "learn.com/1", ordinal: "1.1" }]
-    const portalClasses = classNames.map(name => {
+    const classLinks = classNames.map(name => {
       const clazzProblem = getProblemLinkForClass(user.clueClassOfferings, name, problemId);
       if (clazzProblem) {
-        return {
-          className: name,
-          link: clazzProblem.dashboardUrl
-        };
+        return { title: name, link: clazzProblem.dashboardUrl };
+      } else {
+        return { title: name, link: "" };
       }
-      return {
-        className: name,
-        link: ""
-      };
     });
-    const renderResult: IMenuUser = {
-      className:  user.className,
-      portalClasses
+    return {
+      currentTitle:  user.className,
+      links: classLinks
     };
-    return renderResult;
   }
 }
