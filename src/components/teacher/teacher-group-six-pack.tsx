@@ -50,7 +50,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
         </div>
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
-            <FourUpComponent groupId={group.id} isGhostUser={true} />
+            <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
           </div>
         </div>
       </div>
