@@ -20,7 +20,7 @@ let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
 
 
-context('Test Canvas', function(){
+context.skip('Test Canvas', function(){
     //TODO: Tests to add to canvas:
     // 1. reorder tiles
     // 3. drag image from leftNav to canvas

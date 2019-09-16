@@ -1,7 +1,7 @@
 import LeftNav from '../../support/elements/LeftNav.js'
 import Canvas from '../../support/elements/Canvas.js'
 
-describe('Test Left tabs',function(){
+describe.skip('Test Left tabs',function(){
     let leftNav = new LeftNav(),
         canvas = new Canvas();
     // TODO: getOpenToWorkspaceButton() not being recognised

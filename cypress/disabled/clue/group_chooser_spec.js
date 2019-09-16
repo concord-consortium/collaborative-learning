@@ -3,7 +3,7 @@ import Header from '../../support/elements/Header'
 const header = new Header;
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
-describe('Test student join a group', function(){
+describe.skip('Test student join a group', function(){
     let student1 = '20',
         student2 = '21',
         student3 = '22',

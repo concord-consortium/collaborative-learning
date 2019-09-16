@@ -6,7 +6,7 @@ import Canvas from '../../support/elements/Canvas';
 import GraphToolTile from '../../support/elements/GraphToolTile';
 import TextToolTile from '../../support/elements/TextToolTile'
 
-context('Test bottom tabs', function(){
+context.skip('Test bottom tabs', function(){
     let learningLog = new LearningLog,
         bottomNav = new BottomNav,
         rightNav = new RightNav,

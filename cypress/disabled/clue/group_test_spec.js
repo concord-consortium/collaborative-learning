@@ -7,7 +7,7 @@ const canvas = new Canvas;
 const textToolTile = new TextToolTile;
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
-context('Test group functionalities', function(){
+context.skip('Test group functionalities', function(){
     let qaClass = 10,
         qaOffering = 10,
         qaGroup = 10,

@@ -7,7 +7,7 @@ let student = '5',
     problemSet = '2.1';
 
 
-describe('Check header area for correctness', function(){
+describe.skip('Check header area for correctness', function(){
     const workspace = new Header();
     it('will verify if class name is correct', function(){
         workspace.getClassName().should('contain',''+'Class '+classroom);

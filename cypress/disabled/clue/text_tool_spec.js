@@ -6,7 +6,7 @@ const leftNav = new LeftNav;
 const canvas = new Canvas;
 const textToolTile = new TextToolTile;
 
-context('Text tool tile functionalities', function(){
+context.skip('Text tool tile functionalities', function(){
     it('setup', function(){
         leftNav.openToWorkspace('Now What')
     })

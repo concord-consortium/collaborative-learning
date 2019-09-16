@@ -18,7 +18,7 @@ let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
 
-context('single student functional test',()=>{
+context.skip('single student functional test',()=>{
     describe('Left nav tabs open and close',()=>{
         it('verify left nav tabs open and switch contents', ()=>{
             leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{

@@ -16,7 +16,7 @@ let leftNav = new LeftNav,
     textToolTile = new TextToolTile;
 
 
-context('Test the overall workspace', function(){
+context.skip('Test the overall workspace', function(){
 
     describe('Desktop functionalities', function(){
         // TODO: Learning Log has changed with new feature changes.

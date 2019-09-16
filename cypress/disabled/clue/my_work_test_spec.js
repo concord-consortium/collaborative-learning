@@ -2,7 +2,7 @@ import Workspace from '../../support/elements/Workspace'
 import RightNav from '../../support/elements/RightNav'
 import Canvas from '../../support/elements/Canvas'
 
-describe('Test right nav tabs', function(){
+describe.skip('Test right nav tabs', function(){
 
     const workspace = new Workspace();
     const rightNav = new RightNav();

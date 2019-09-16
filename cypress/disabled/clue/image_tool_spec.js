@@ -8,7 +8,7 @@ const imageToolTile = new ImageToolTile;
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
 
-context('Test image functionalities', function(){
+context.skip('Test image functionalities', function(){
     describe('upload image', function(){
         // TODO: Write test.
         it.skip('click on upload file button with text field empty', function(){

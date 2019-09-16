@@ -22,7 +22,7 @@ let header = new Header,
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
-context('Teacher workspace',function(){ //does not have My Work tab and has Teacher in user name
+context.skip('Teacher workspace',function(){ //does not have My Work tab and has Teacher in user name
     describe('Check header area for correctness', function(){
         it("setup", function(){ //need to setup two groups to verify teacher can switch groups
             cy.setupGroup(studentArr10, qaGroup10); //This publishes canvases to Class Work

@@ -12,7 +12,7 @@ const rightNav = new RightNav;
 const learningLog = new LearningLog;
 const graphToolTile = new GraphToolTile;
 
-context('Test graph tool functionalities', function(){
+context.skip('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
         it('will add a point to the origin', function(){
             canvas.addGraphTile();

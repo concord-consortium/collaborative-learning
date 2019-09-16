@@ -10,7 +10,7 @@ let canvas = new Canvas,
     rightNav = new RightNav,
     learningLog = new LearningLog;
 
-context('Table Tool Tile',function(){
+context.skip('Table Tool Tile',function(){
     describe('test menu functions of table', function(){
         it('will add a table to canvas', function(){
             canvas.addTableTile();
