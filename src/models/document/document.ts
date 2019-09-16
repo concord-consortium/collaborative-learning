@@ -149,6 +149,10 @@ export const DocumentModel = types
 
     incChangeCount() {
       self.changeCount += 1;
+    },
+
+    setGroupId(groupId?: string) {
+      self.groupId = groupId;
     }
   }))
   .actions(self => ({

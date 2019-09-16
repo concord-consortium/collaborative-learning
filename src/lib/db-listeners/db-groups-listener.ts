@@ -95,8 +95,19 @@ export class DBGroupsListener {
       // otherwise set the groups
       this.db.stores.groups.updateFromDB(user.id, groups, this.db.stores.class);
 
-      documents.byType(ProblemDocument).forEach((sectionDoc) => {
-        this.db.listeners.updateGroupUserProblemDocumentListeners(sectionDoc);
+      // in teacher mode we listen to all documents and the document's group might change
+      // if a student changes groups so we need to gather the updated group id for each
+      // student and set it for the student's problem documents
+      const userGroupIds: any = {};
+      this.db.stores.groups.allGroups.forEach((group) => {
+        group.users.forEach((groupUser) => {
+          userGroupIds[groupUser.id] = group.id;
+        });
+      });
+
+      documents.byType(ProblemDocument).forEach((document) => {
+        document.setGroupId(userGroupIds[document.uid]);
+        this.db.listeners.updateGroupUserProblemDocumentListeners(document);
       });
     }
   }
