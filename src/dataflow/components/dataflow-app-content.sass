@@ -1,4 +1,5 @@
 @import ../../components/vars
+@import ../vars
 
 .dataflow-app-content
 
@@ -9,3 +10,68 @@
     right: 0
     bottom: 0
     opacity: 0
+
+  .app-header
+    height: 60px
+    border-radius: 3px
+    box-shadow: 0 2px 0 0 $gray-mid-click
+    background-color: #ffffff
+    .right
+      .user
+        padding-right: 40px
+        margin-right: 0
+        height: 40px
+        background-image: url("../../assets/headshot.svg")
+        background-size: contain
+        background-repeat: no-repeat
+        background-position-x: right
+        .name
+          background-color: #ffffff
+          padding-right: 5px
+
+    .bp3-button-group
+      width: 260px
+      height: 30px
+      border-radius: 15px
+      background-color: $gray-mid
+      display: flex
+      justify-content: center
+      .bp3-button:first-of-type
+        border-radius: 0px
+        border-top-left-radius: 13px
+        border-bottom-left-radius: 13px
+        margin-right: 1px
+      .bp3-button
+        width: 129px
+        height: 26px
+        background-color: #ffffff
+        border-radius: 0px
+        border-top-right-radius: 13px
+        border-bottom-right-radius: 13px
+        padding: 0px
+        margin: 0px
+        margin-top: 1px
+        margin-bottom: 2px
+        min-width: 0
+        min-height: 0
+        &.bp3-active
+          margin-top: 2px
+          margin-bottom: 1px
+          background-color: $gray-light
+        &:hover
+          background-color: $gray-light-hover
+        &:active
+          background-color: $gray-light-click
+
+        span
+          width: 94px
+          height: 16px
+          font-family: Ubuntu
+          font-size: 14px
+          font-weight: normal
+          font-style: normal
+          font-stretch: normal
+          line-height: normal
+          letter-spacing: normal
+          text-align: center
+          color: $gray-text

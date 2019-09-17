@@ -7,7 +7,7 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication, PersonalDocument,
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
          ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
@@ -25,6 +25,7 @@ export type WorkspaceSide = "primary" | "comparison";
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
+  onNewDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -61,6 +62,13 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, da
 const NewButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="new" key="new" className="action icon-new"
+                onClickButton={onClick} />
+  );
+};
+
+const EditButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="edit" key="edit" className="action icon-edit"
                 onClickButton={onClick} />
   );
 };
@@ -145,11 +153,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(hideButtons?: boolean) {
-    const {problem, appMode, clipboard} = this.stores;
+    const {problem, appMode, clipboard, user} = this.stores;
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
     const isShared = visibility === "public";
-    const show4up = !workspace.comparisonVisible;
+    const showShare = !user.isTeacher;
+    const show4up = !workspace.comparisonVisible && !user.isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
@@ -168,7 +177,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {[
               downloadButton,
               <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
-              <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
+              showShare ? <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} /> : null
             ]}
             {show4up ? this.renderMode() : null}
           </div>
@@ -207,8 +216,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
-          ? <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
-          : <div className="title" data-test="personal-doc-title">{document.title}</div>
+          ? <div className="title" data-test="learning-log-title">
+              <span className="title-info">Learning Log: {document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
+          : <div className="title" data-test="personal-doc-title">
+              <span>{document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
         }
         <div className="actions">
           {!hideButtons &&
@@ -441,24 +456,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleNewDocumentClick = () => {
-    const docType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const docTypeString = this.props.document.isLearningLog ? "Learning Log" : "Personal Document";
-    const { appConfig: { defaultDocumentTitle } } = this.stores;
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
-    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`)
-      .then((title: string) => {
-        this.handleNewDocumentOpen(title)
-        .catch(this.stores.ui.setError);
-      });
+    const { document, onNewDocument } = this.props;
+    onNewDocument && onNewDocument(document);
   }
 
-  private handleNewDocumentOpen = async (title: string) => {
-    const { db } = this.stores;
-    const newDocType = this.props.document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const newDocument = await db.createOtherDocument(newDocType, {title});
-    if (newDocument) {
-      this.props.workspace.setAvailableDocument(newDocument);
-    }
+  private handleDocumentRename = () => {
+    const { document } = this.props;
+    const docTypeString = document.isPersonal ? "Personal Document" : "Learning Log";
+    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Renaming ${docTypeString}`)
+      .then((title: string) => {
+        if (title !== document.title) {
+          document.setTitle(title);
+        }
+      });
   }
 
   private handlePublishWorkspace = () => {

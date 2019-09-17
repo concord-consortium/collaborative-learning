@@ -1,1 +1,276 @@
+@import ./vars
 // application-specific styling goes here
+$list-item-height: 480px
+$list-item-width: 720px
+$list-item-scale: 0.1
+
+#app
+  background-color: $gray-mid !important
+
+.document-workspace
+  .single-workspace
+    left: 0px
+    right: 50px
+    top: 60px
+    bottom: 0px
+
+    .document
+      border-radius: 0px
+      border-top-left-radius: 3px
+      border-top-right-radius: 3px
+      border-width: 0px
+      margin: 10px
+
+      .titlebar
+        background-color: #ffffff
+        .actions
+          .icon
+            background-color: #ffffff
+            color: $gray-mid-click
+          .icon-new
+            background-color: #ffffff
+            color: $gray-mid-click
+            position: absolute
+            right: 50px
+            filter: grayscale(1)
+        .title
+          #icon-edit
+            &.icon-edit
+              background-color: #ffffff
+              margin-left: 6px
+            .edit
+              background-color: #ffffff
+              filter: grayscale(1)
+              background-size: 120%
+      .canvas-area
+        border-top: 4px solid $gray-mid
+        bottom: 0px
+
+        .document-content
+          padding: 0px
+          .tile-row
+            .tool-tile.selected
+              border: 2px solid #ffffff
+              .tool-tile-drag-handle
+                display: none
+                .running-indicator
+                  display: none
+          .spacer
+            height: 0px
+            display:none
+
+    .statusbar
+      display: none
+.left-nav
+  display: none
+
+.right-nav
+  position: fixed
+  width: 50px
+  top: 62px
+  right: 0px
+  height: 100vh
+  background-color: #ffffff
+  background-image: url("../assets/program-icon.svg")
+  background-position: 10px 17px
+  background-repeat: no-repeat
+
+  .expanded-area
+    right: -100px
+    width: 150px
+    top: 0px
+    border-radius: 0px
+    background-color: #ffffff
+    border: 0px
+    border-left: 1px solid transparent
+
+    .contents
+      padding: 0px
+      padding-top: 58px
+      padding-bottom: 60px
+      border-radius: 0px
+      background-color: #ffffff
+      background-image: url("../assets/program-icon.svg")
+      background-position: 10px 17px
+      background-repeat: no-repeat
+      border-top: 2px solid white
+      ::-webkit-scrollbar
+        width: 2px
+      ::-webkit-scrollbar-thumb
+        background: rgba(240,240,240,0)
+        border-radius: 0
+        &:hover
+          background: $gray-mid
+
+      .loading
+        margin-left: 50px
+        border-left: 2px solid $gray-light-click
+        height: 100vh
+
+      .container
+        border-radius: 0px
+        background-color: #ffffff
+        width: 100px
+        margin-left: 50px
+        &.enabled
+          height: 100%
+          margin-left: 49px
+          border-left: 2px solid $gray-light-click
+          margin-top: -2px
+          border-top: 3px solid white
+
+        .list
+          background-color: $gray-light-2
+          border: 0px
+          border-left: 2px solid $gray-mid
+          border-right: 2px solid $gray-mid
+          margin-left: 2px
+          &.shown
+            padding-left: 5px
+            padding-right: 5px
+          .list-item
+            padding-bottom: 5px
+            margin-bottom: 5px
+            background-color: $gray-light-2
+            &:hover
+              background-color: $gray-light-hover
+            &:active
+              background-color: $gray-light-click
+
+            .scaled-list-item-container
+              padding: 1px
+              background-color: $gray-mid
+              width: 76px
+              height: 52px
+
+              .scaled-list-item
+                transform: scale($list-item-scale)
+                transform-origin: 0 0
+                height: $list-item-height
+                width: $list-item-width
+
+              .new-document-button-label
+                position: absolute
+                left: 0px
+                top: 8px
+                width: 100%
+                height: 100%
+                display: flex
+                flex-direction: column
+                align-items: center
+                color: $gray-mid
+            .footer
+              .info
+                margin-left: auto
+                margin-right: auto
+                div
+                  color: $gray-text
+
+            .running-indicator
+              display: block
+              width: 150px
+              height: 150px
+              background: $badge-yellow
+              opacity: 1
+              border-radius: 75px
+              border: 16px solid silver
+              z-index: 2
+              position: absolute
+              top: 50px
+        .my-work
+          background-color: #ffffff
+          margin-top: -1px
+          .header
+            display: none
+          .section-header,
+          .section-header.expanded,
+          .section-header.collapsed
+            color: #ffffff
+            border-radius: 0px
+            background-color: $gray-mid
+            border-top: 1px solid white
+            border-left: 2px solid white
+          .section-header
+            padding: 4px
+
+        .class-work
+          background-color: #ffffff
+          margin-top: -1px
+          .header
+            display: none
+          .section.personal.published
+            border: 0px
+          .section-header
+            color: #ffffff
+            border-radius: 0px
+            background-color: $gray-mid
+            border-top: 1px solid white
+            border-left: 2px solid white
+            padding: 4px
+
+  .tabs
+    right: -100px
+    top: 0px
+    width: 150px
+    border-radius: 0
+    z-index: 2
+    flex-direction: row
+    background-color: $gray-light-click
+    opacity: 0
+
+    .tab
+      margin-right: 0px
+      padding-left: 50px
+      margin-bottom: 0px
+      background: #ffffff
+      background-color: #ffffff
+      border: 0
+      box-shadow: none
+      border-radius: 0
+      margin-top: 0px
+      transition: margin-top 0s
+      &:hover
+        opacity: 1
+        background-color: $gray-light-hover
+    &.expanded
+      right: -50px
+      opacity: 1
+      .tab
+        border-bottom: 1px solid #ffffff
+        margin-top: 6px
+        margin-bottom: 2px
+        width: 49px
+        padding-left: 0px
+        text-align: center
+        padding: 6px
+        background-color: $gray-light-2
+        &.active
+          background: #ffffff
+          background-color: #ffffff
+          border: 0
+          border-bottom: 1px solid #ffffff
+          margin-top: 5px
+          margin-bottom: -1px
+        &:hover
+          background-color: $gray-light-hover
+          border: 0
+
+      #rightNavTab-my-work
+        border-top-right-radius: 3px
+        margin-right: 2px
+        border-left: 2px solid $gray-light-click
+        border-bottom-left-radius: 0px
+
+      #rightNavTab-class-work
+        border-top-left-radius: 3px
+
+.text-tool
+  &.editable
+    min-height: 50px
+
+.dialog
+  .dialog-container
+    border: 4px solid $gray-mid
+    border-radius: 12px
+    .dialog-title
+      background-color: $gray-light

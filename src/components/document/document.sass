@@ -35,6 +35,33 @@
       white-space: nowrap
       overflow: hidden
       text-overflow: ellipsis
+      display: flex
+      justify-content: center
+      align-items: center
+
+      .icon-edit
+        background-color: $color1-3
+        width: 9.9px
+        height: 10.1px
+        cursor: pointer
+        border: 0
+        padding: 0
+        margin-left: $half-margin
+        margin-bottom: $half-margin
+
+        &:focus
+          outline: none
+          outline-offset: 0
+
+        .edit
+          background-image: url("../../assets/icons/edit/edit.svg")
+          background-repeat: no-repeat
+          box-sizing: content-box
+          width: 17.8px
+          height: 18px
+
+          &:hover
+            background-image: url("../../assets/icons/edit/edit-hover.svg")
 
     .actions
       flex-grow: 0
