@@ -74,9 +74,15 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           : this.renderOverlappedGraphs()
         }
         <div className="graph-buttons">
-          <button className="graph-button program" onClick={this.handleShowProgramClick}>
-            { this.props.programVisible ? "Graph" : "Program" }
+          {this.props.programVisible ?
+            <button className="graph-button program split" onClick={this.handleShowProgramClick}>
+              Graph
           </button>
+            :
+            <button className="graph-button program" onClick={this.handleShowProgramClick}>
+              Program
+          </button>
+          }
           {this.props.programVisible ?
             <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
             :
