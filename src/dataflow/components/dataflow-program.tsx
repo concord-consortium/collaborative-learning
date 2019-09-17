@@ -118,16 +118,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
-        <DataflowProgramTopbar
-            onRunProgramClick={this.runProgram}
-            onStopProgramClick={this.stopProgram}
-            onProgramTimeSelectClick={this.setProgramRunTime}
-            programRunTimes={ProgramRunTimes}
-            programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
-            isRunEnabled={this.isReady()}
-            runningProgram={this.isRunning() && !this.props.readOnly}
-            readOnly={this.props.readOnly || !this.isReady()}
-        />
+        {!this.isComplete() && <DataflowProgramTopbar
+          onRunProgramClick={this.runProgram}
+          onStopProgramClick={this.stopProgram}
+          onProgramTimeSelectClick={this.setProgramRunTime}
+          programRunTimes={ProgramRunTimes}
+          programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
+          isRunEnabled={this.isReady()}
+          runningProgram={this.isRunning() && !this.props.readOnly}
+          readOnly={this.props.readOnly || !this.isReady()}
+        />}
         <div className="toolbar-editor-container">
           { !this.isGraphOnly() && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
