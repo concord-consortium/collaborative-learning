@@ -114,9 +114,9 @@ export interface DBPublication {
     offeringId: string;
   };
   documentKey: string;
-  groupId: string;
+  groupId?: string;
   userId: string;
-  groupUserConnections: DBGroupUserConnections;
+  groupUserConnections?: DBGroupUserConnections;
 }
 
 // published personal documents and learning logs

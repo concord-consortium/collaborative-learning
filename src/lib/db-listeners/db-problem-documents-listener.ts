@@ -76,10 +76,12 @@ export class DBProblemDocumentsListener {
   }
 
   private handleOfferingUser = (user: DBOfferingUser) => {
-    const { documents } = this.db.stores;
+    const { documents, user: currentUser } = this.db.stores;
     forEach(user.documents, document => {
       if (document && !documents.getDocument(document.documentKey)) {
-        const readOnly = true;
+        // current user's own document should be monitored for changes;
+        // all other users' documents can be monitored readOnly
+        const readOnly = user.self.uid !== currentUser.id;
         this.db.createDocumentFromProblemDocument(document.self.uid, document, readOnly)
           .then(documents.add);
       }
