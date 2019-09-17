@@ -94,11 +94,26 @@ export function deleteProgram(endTime: number): string {
   return "completed";
 }
 
+interface ProgramDataCache {
+  lastTimestamp: number;
+  data: ProgramDataPoint[];
+}
+
+interface ProgramDataPoint{
+  time: number;
+  values: number[];
+  blockIds: number[];
+}
+
+const allProgramsCache: {[programId: string]: ProgramDataCache} = {};
+
 export const fetchProgramData = (programId: string, time?: number, endTime?: number) => {
   // Omitting the time parameter returns all program data from the start
   // Omitting the endTime returns all data from the start time and now
   // time and endTime togethercan be passed to specify a range between the start time and endTime
-  const queryParams = { programId, time, endTime };
+  const cachedProgram = allProgramsCache[programId];
+  const startTime = time ? time : cachedProgram ? cachedProgram.lastTimestamp : undefined;
+  const queryParams = { programId, time: startTime, endTime };
   const lambda = new AWS.Lambda({ region: "us-east-1", apiVersion: "2015-03-31" });
   const params = {
     FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:fetchProgramData",
@@ -114,9 +129,49 @@ export const fetchProgramData = (programId: string, time?: number, endTime?: num
       if (error) {
         reject(error);
       }
-      if (data) {
-        resolve(JSON.parse(data.Payload as string));
+      if (data && data.Payload) {
+        const result: any = { count: 0 };
+        let payload: any;
+        try {
+          payload = JSON.parse(data.Payload as string);
+        } catch (e) {
+          // In case of strange messages in MQTT, handle a glitch gracefully
+          resolve(result);
+        }
+        if (payload.data) {
+          // Add latest data to cache
+          addDataPoints(programId, JSON.parse(data.Payload as string));
+          result.count = allProgramsCache[programId].data ? allProgramsCache[programId].data.length : 0;
+          result.data = allProgramsCache[programId].data;
+        }
+        resolve(result);
       }
     });
   });
+};
+
+const addDataPoints = (programId: string, payload: any) => {
+  let mostRecentTimestamp = 0;
+  const dataPoints: ProgramDataPoint[] = [];
+  for (const timeData of payload.data){
+    const p: ProgramDataPoint = {
+      time: timeData.time,
+      values: timeData.values,
+      blockIds: timeData.blockIds
+    };
+
+    mostRecentTimestamp = timeData.time > mostRecentTimestamp ? timeData.time : mostRecentTimestamp;
+    dataPoints.push(p);
+  }
+  if (!allProgramsCache || !allProgramsCache[programId]) {
+    allProgramsCache[programId] = { lastTimestamp: mostRecentTimestamp, data: dataPoints };
+  } else {
+    // append new points to existing set
+    for (const v of dataPoints) {
+      if (v.time > allProgramsCache[programId].lastTimestamp) {
+        allProgramsCache[programId].data.push(v);
+        allProgramsCache[programId].lastTimestamp = v.time;
+      }
+    }
+  }
 };
