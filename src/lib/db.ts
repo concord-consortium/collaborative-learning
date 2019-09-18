@@ -376,12 +376,13 @@ export class DB {
       this.createDocument({ type: PublicationDocument, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
-        const groupUserConnections: DBGroupUserConnections = userGroup.users
+        const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
           .reduce((allUsers: DBGroupUserConnections, groupUser) => {
             allUsers[groupUser.id] = groupUser.connected;
             return allUsers;
           }, {});
+        const groupProps = userGroup ? { groupId: userGroup.id, groupUserConnections } : {};
         const publication: DBPublication = {
           version: "1.0",
           self: {
@@ -389,9 +390,8 @@ export class DB {
             offeringId: user.offeringId,
           },
           documentKey: document.self.documentKey,
-          groupId: userGroup.id,
           userId: user.id,
-          groupUserConnections
+          ...groupProps
         };
 
         publicationRef.set(publication)
@@ -616,7 +616,9 @@ export class DB {
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
-        allUsers[groupUserId] = groupUserConnections[groupUserId];
+        if (groupUserConnections && groupUserConnections[groupUserId]) {
+          allUsers[groupUserId] = groupUserConnections[groupUserId];
+        }
         return allUsers;
       }, {} as DBGroupUserConnections);
 
