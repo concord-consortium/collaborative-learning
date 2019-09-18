@@ -157,7 +157,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 dataSet={this.state.graphDataSet}
                 onToggleShowProgram={this.toggleShowProgram}
                 programVisible={this.isSideBySide()}
-                readOnly={this.props.readOnly}
               />
             }
           </div>

@@ -3,7 +3,6 @@ import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { ChartPlotColors } from "./../utilities/node";
 import { exportCSV } from "../utilities/export";
-import * as html2canvas from "html2canvas";
 import "./dataflow-program-graph.sass";
 
 export interface DataPoint {
@@ -25,13 +24,11 @@ interface IProps {
   dataSet: DataSet;
   onToggleShowProgram: () => void;
   programVisible: boolean;
-  readOnly?: boolean;
 }
 interface IState {
   stacked: boolean;
   scatter: boolean;
   fullRun: boolean;
-  buttonImage?: string;
 }
 
 export class DataflowProgramGraph extends React.Component<IProps, IState> {
@@ -42,14 +39,6 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
       scatter: true,
       fullRun: true
     };
-  }
-  public componentDidUpdate(prevProps: IProps) {
-    const { readOnly } = this.props;
-    if (readOnly !== true) {
-      setTimeout(() => {
-        this.updateButtonImage();
-      }, 2000);
-    }
   }
   public handleLayoutClick = () => {
     const stacked = !this.state.stacked;
@@ -73,7 +62,6 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
 
   public render() {
     const {dataSet} = this.props;
-    const { buttonImage } = this.state;
     const graphClass = `program-graph ${(!this.props.programVisible && "full")}`;
     return (
       <div className={graphClass} data-test="program-graph">
@@ -87,11 +75,11 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         <div className="graph-buttons">
           {this.props.programVisible ?
             <button className="graph-button program split" onClick={this.handleShowProgramClick}>
-              {buttonImage ? <img src={buttonImage} width="100" /> : <span>Graph</span>}
+              <img src={"graph thing"} width="128" />
           </button>
             :
             <button className="graph-button program" onClick={this.handleShowProgramClick}>
-              {buttonImage ? <img src={buttonImage} width="100" /> : <span>Program</span>}
+              <img src={"program thing"} width="128" />
           </button>
           }
           {this.props.programVisible ?
@@ -286,21 +274,5 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
       },
     };
     return options;
-  }
-  private updateButtonImage() {
-    const { buttonImage } = this.state;
-    const { readOnly } = this.props;
-    if (buttonImage) return buttonImage;
-    else if (readOnly !== true) {
-      const graph = document.querySelector(".program-graph") as HTMLElement;
-      if (graph) {
-        // Need to use ts-ignore for call to html2canvas due to issue with html2canvas library in Typescript
-        // https://github.com/niklasvh/html2canvas/issues/1440
-        // @ts-ignore
-        html2canvas(graph, {scale: 0.1}).then(c => {
-          this.setState({ buttonImage: c.toDataURL() });
-        });
-      }
-    }
   }
 }
