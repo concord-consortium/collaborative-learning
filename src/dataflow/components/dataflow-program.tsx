@@ -115,6 +115,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public render() {
     const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
+    const style: React.CSSProperties = {};
+    const documentElts = document.getElementsByClassName("document-content");
+    const documentElt: HTMLInputElement = documentElts && (documentElts[0] as HTMLInputElement);
+    style.height = `${documentElt.clientHeight - 50}px`;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -142,7 +146,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+              <div className="flow-tool" ref={elt => this.toolDiv = elt} style={style}/>
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
@@ -180,8 +184,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (this.editorDomElement && this.state.editorContainerWidth !== this.editorDomElement.clientWidth) {
         this.setState({ editorContainerWidth: this.editorDomElement.clientWidth });
         this.programEditor.view.resize();
+        this.keepNodesInView();
       } else if (this.props.size !== prevProps.size) {
         this.programEditor.view.resize();
+        this.keepNodesInView();
       }
 
       if ((this.props.modelId !== prevProps.modelId) ||
@@ -372,6 +378,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
+  private keepNodesInView = () => {
+    const margin = 5;
+    const { k } = this.programEditor.view.area.transform;
+    let rightMostEdge = 0;
+    let bottomMostEdge = 0;
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeView = this.programEditor.view.nodes.get(n);
+      if (nodeView) {
+        rightMostEdge = Math.max (rightMostEdge, (nodeView.node.position[0] + nodeView.el.clientWidth) * k);
+        bottomMostEdge = Math.max (bottomMostEdge, (nodeView.node.position[1] + nodeView.el.clientHeight) * k);
+      }
+    });
+    const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rightMostEdge + margin),
+                             k * this.programEditor.view.container.clientHeight / ( bottomMostEdge + margin));
+    if (newZoom < k && rightMostEdge > 0 && newZoom > 0) {
+      const currentTransform = this.programEditor.view.area.transform;
+      this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
+      this.programEditor.view.area.update();
+    }
+  }
+
   private hasValidOutputNodes = () => {
     const { ui } = this.stores;
     if (!this.getNodeCount("Relay") && !this.getNodeCount("Data Storage")) {
@@ -494,7 +521,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const n1 = await nodeFactory!.createNode();
 
     const numNodes = this.programEditor.nodes.length;
-    n1.position = [5 + Math.floor((numNodes % 20) / 5) * 245 + Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
+    const { k } = this.programEditor.view.area.transform;
+    n1.position = [40 * (1 / k) + Math.floor((numNodes % 20) / 5) * 245 +
+                  Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
     this.programEditor.addNode(n1);
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
