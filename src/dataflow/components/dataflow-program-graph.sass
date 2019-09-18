@@ -59,9 +59,23 @@
     border: 0
     outline: 0
     border-radius: 3px
-    &.program.split
+    &.program
       position: absolute
+      width: 128px
+      height: 60px
+      background-image: url("../../assets/dataflow/both.png")
+      background-size: contain
+      background-repeat: no-repeat
+      background-position: center
+      border: 2px solid $data-storage-orange
+      margin-top: -35px
+      &:hover
+        filter: drop-shadow(2px 2px 2px $gray-mid)
+      &:active
+        filter: brightness(0.95)
+    &.program.split
       left: -100%
+      background-image: url("../../assets/dataflow/graph.png")
     &.data
       margin-left: auto
     &:hover

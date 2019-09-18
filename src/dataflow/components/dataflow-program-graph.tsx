@@ -74,13 +74,9 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         }
         <div className="graph-buttons">
           {this.props.programVisible ?
-            <button className="graph-button program split" onClick={this.handleShowProgramClick}>
-              <img src={"graph thing"} width="128" />
-          </button>
+            <button className="graph-button program split" onClick={this.handleShowProgramClick} />
             :
-            <button className="graph-button program" onClick={this.handleShowProgramClick}>
-              <img src={"program thing"} width="128" />
-          </button>
+            <button className="graph-button program" onClick={this.handleShowProgramClick} />
           }
           {this.props.programVisible ?
             <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
