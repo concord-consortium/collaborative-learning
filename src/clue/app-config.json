@@ -78,6 +78,41 @@
           "showStars": true
         }
       ]
+    },
+    {
+      "tab": "learning-log",
+      "label": "Learning Log",
+      "sections": [
+        {
+          "title": "Logs",
+          "type": "learning-logs",
+          "dataTestHeader": "learning-log-section",
+          "dataTestItem": "learning-log-list-items",
+          "documentTypes": ["learningLog"]
+        }
+      ]
+    },
+    {
+      "tab": "supports",
+      "label": "Supports",
+      "sections": [
+        {
+          "title": "Just-in-time Supports",
+          "type": "curricular-supports",
+          "dataTestHeader": "supports-section",
+          "dataTestItem": "supports-list-items",
+          "documentTypes": ["supportPublication"],
+          "properties": ["curricularSupport"]
+        },
+        {
+          "title": "Teacher Supports",
+          "type": "teacher-supports",
+          "dataTestHeader": "supports-section",
+          "dataTestItem": "supports-list-items",
+          "documentTypes": ["supportPublication"],
+          "properties": ["teacherSupport"]
+        }
+      ]
     }
   ],
   "toolbar": [

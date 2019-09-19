@@ -2,21 +2,22 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
+import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
+import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
-import { DocumentModelType, DocumentDragKey } from "../../models/document/document";
-import { ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
 
 interface IProps extends IBaseProps {
+  tabId: ERightNavTab;
+  className: string;
   scale: number;
 }
-
 interface IState {
   showSection: Map<string, boolean>;
 }
 
 @inject("stores")
 @observer
-export class ClassWorkComponent extends BaseComponent<IProps, IState> {
+export class RightNavTabContents extends BaseComponent<IProps, IState> {
 
   public state = {
     showSection: new Map()
@@ -24,23 +25,24 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { appConfig: { rightNavTabs }, user } = this.stores;
-    const classWorkTab = rightNavTabs && rightNavTabs.find(tab => tab.tab === ERightNavTab.kClassWork);
-    if (!classWorkTab) return null;
-    const _handleDocumentStarClick = user.isTeacher
-                                      ? this.handleDocumentStarClick
-                                      : undefined;
+    const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
+    if (!myTabSpec) return null;
     return (
-      <div className="class-work">
-        <div className="header">{classWorkTab.label}</div>
+      <div className={this.props.className}>
+        <div className="header">{myTabSpec.label}</div>
 
-        {classWorkTab.sections.map(section => {
+        {myTabSpec.sections.map(section => {
           const sectionId = navTabSectionId(section);
+          const _handleDocumentStarClick = section.showStars && user.isTeacher
+                                            ? this.handleDocumentStarClick
+                                            : undefined;
           return (
             <DocumentsSection
-              key={sectionId} tab={classWorkTab.tab} section={section}
+              key={sectionId} tab={myTabSpec.tab} section={section}
               stores={this.stores} scale={this.props.scale}
               isExpanded={this.state.showSection.get(sectionId)}
               onToggleExpansion={this.handleToggleExpansion}
+              onNewDocumentClick={this.handleNewDocumentClick}
               onDocumentClick={this.handleDocumentClick}
               onDocumentDragStart={this.handleDocumentDragStart}
               onDocumentStarClick={_handleDocumentStarClick} />
@@ -55,6 +57,18 @@ export class ClassWorkComponent extends BaseComponent<IProps, IState> {
     const isExpanded = this.state.showSection.get(sectionId);
     this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
+  }
+
+  private handleNewDocumentClick = async (section: NavTabSectionModelType) => {
+    const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
+    const { problemWorkspace } = ui;
+    const newDocument = section.type === ENavTabSectionType.kPersonalDocuments
+                          ? await db.createPersonalDocument({ content: defaultDocumentContent })
+                          : await db.createLearningLogDocument();
+    if (newDocument) {
+      problemWorkspace.setAvailableDocument(newDocument);
+      ui.contractAll();
+    }
   }
 
   private handleDocumentClick = (document: DocumentModelType) => {

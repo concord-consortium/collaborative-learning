@@ -22,15 +22,19 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBDocumentType = "section" | "problem" | "personal" | "personalPublication" |
-                             "publication" | "learningLog" | "learningLogPublication";
+export type DBDocumentType = "section" |
+                              "problem" | "publication" |
+                              "personal" | "personalPublication" |
+                              "learningLog" | "learningLogPublication" |
+                              "supportPublication";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
                                  DBLearningLogDocumentMetadata |
                                  DBPublicationDocumentMetadata |
                                  DBPersonalPublicationMetadata |
-                                 DBLearningLogPublicationMetadata;
+                                 DBLearningLogPublicationMetadata |
+                                 DBSupportPublicationMetadata;
 
 export interface DBBaseDocumentMetadata {
   version: "1.0";
@@ -71,6 +75,11 @@ export interface DBPersonalPublicationMetadata extends DBBaseDocumentMetadata {
 
 export interface DBLearningLogPublicationMetadata extends DBBaseDocumentMetadata {
   type: "learningLogPublication";
+}
+
+export interface DBSupportPublicationMetadata extends DBBaseDocumentMetadata {
+  type: "supportPublication";
+  supportPath: string;
 }
 
 export interface DBGroupUserConnections {
@@ -259,6 +268,7 @@ export interface DBSupport {
     key: string;
   };
   timestamp: number;
+  type: string;
   content: string;
   deleted: boolean;
 }

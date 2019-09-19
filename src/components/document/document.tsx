@@ -2,7 +2,6 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import * as FileSaver from "file-saver";
 
-import { SupportItemModelType, SupportType } from "../../models/stores/supports";
 import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
@@ -14,9 +13,8 @@ import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
-import SingleStringDialog from "../utilities/single-string-dialog";
-
 import { IconButton } from "../utilities/icon-button";
+import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
@@ -152,11 +150,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.isProblem) {
       return this.renderProblemTitleBar(hideButtons);
     }
-    if (document.isPersonal) {
+    if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(hideButtons);
     }
-    if (document.isLearningLog) {
-      return this.renderOtherDocumentTitleBar(hideButtons);
+    if (document.isSupport) {
+      return this.renderSupportTitleBar();
     }
   }
 
@@ -246,6 +244,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private renderSupportTitleBar() {
+    const { document } = this.props;
+    return (
+      <div className="titlebar">
+        <div className="title" data-test="document-title">
+          {document.getProperty("caption")}
+        </div>
+      </div>
+    );
+  }
+
   private renderToolbar() {
     const {document, isGhostUser, readOnly} = this.props;
     const isPublication = document.isPublished;
@@ -285,17 +294,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderStatusBar() {
-    const {document} = this.props;
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (document.type === ProblemDocument);
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === PublicationDocument);
     const showComment = false;
     return (
       <div className="statusbar">
         <div className="supports">
-          {showContents ? this.renderSupportIcons() : null}
-          {showContents ? this.renderVisibleSupports() : null}
+          {null}
         </div>
         <div className="actions">
           {isPrimary ? this.renderTwoUpButton() : null}
@@ -389,66 +395,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderSupportIcons() {
-    const supports = this.getSupportsWithIndices();
-    const anyActive = supports.some((support) => support.item.visible);
-    return (
-      <div className="supports-list">
-        {supports.map((support) => {
-          const {index, item} = support;
-          const visibility = !anyActive || item.visible ? "show" : "hide";
-          const audience = item.supportType === SupportType.teacher ? item.audience.type : "curricular";
-          return (
-            <svg
-              key={index}
-              onClick={this.handleToggleSupport(item)}
-              className={`icon ${this.getSupportName(index)} ${visibility}`}
-              data-test={`support-icon ${audience}`}
-            >
-              <use xlinkHref={`#${this.getSupportName(index)}`} />
-            </svg>
-          );
-        })}
-      </div>
-    );
-  }
-
-  private getSupportName(supportIndex: number) {
-    // There are currently 4 (0-based) support icons defined in index.html
-    const safeIndex = supportIndex % 4;
-    return `icon-support${safeIndex}`;
-  }
-
-  private renderVisibleSupports() {
-    const supports = this.getSupportsWithIndices().filter((supportWithIndex) => supportWithIndex.item.visible);
-    if (supports.length === 0) {
-      return null;
-    }
-    return (
-      <div className="visible-supports">
-        <div className="supports-list" data-test="supports-list">
-          {supports.map((support) => {
-            return (
-              <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
-                {support.item.text}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
   }
 
   private handleToggleVisibility = () => {
     this.props.document.toggleVisibility();
-  }
-
-  private handleToggleSupport = (support: SupportItemModelType) => {
-    return () => this.stores.supports.toggleSupport(support);
   }
 
   private handleToggleTwoUp = () => {
@@ -500,17 +452,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                           : "Learning Log";
     db.publishOtherDocument(this.props.document)
       .then(() => ui.alert("Your document was published.", `${documentType} Published`));
-  }
-
-  private getSupportsWithIndices() {
-    const { groups, user } = this.stores;
-    const userId = user.id;
-    const group = groups.groupForUser(userId);
-    const groupId = group && group.id;
-    return this.stores.supports.getSupportsForUserProblem({ groupId, userId })
-    .map((support, index) => {
-      return {index, item: support};
-    });
   }
 
   private isPrimary() {

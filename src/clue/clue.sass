@@ -1,16 +1,50 @@
 // application-specific styling goes here
+@import ../components/vars
+
+#rightNavTab-my-work, #rightNavTab-class-work
+  color: $terra-text
+  background-color: $terra-light-1
+  border-color: $terra
+  &:hover
+    background-color: $terra-dark-1
+    border-color: $terra-light-3
+  &.active
+    color: white
+    background-color: $terra-dark-2
+    border-color: $terra-light-3
+
+#rightNavTab-learning-log
+  color: $peacock-text
+  background-color: $peacock-light-1
+  border-color: $peacock
+  &:hover
+    background-color: $peacock-dark-1
+    border-color: $peacock-light-3
+  &.active
+    color: white
+    background-color: $peacock-dark-2
+    border-color: $peacock-light-3
+
+#rightNavTab-supports
+  color: $sky-text
+  background-color: $sky-light-1
+  border-color: $sky
+  &:hover
+    background-color: $sky-dark-1
+    border-color: $sky-light-3
+  &.active
+    color: white
+    background-color: $sky-dark-2
+    border-color: $sky-light-3
 
 .document
-    .titlebar
-        .actions
-            .icon-copy
-                margin-left: 5px
-
-                .copy
-                    background-image: url("../assets/icons/copy/copy.svg")
-
-                    &:hover
-                        background-image: url("../assets/icons/copy/copy-hover.svg")
-
-                    &:active
-                        background-image: url("../assets/icons/copy/copy-active.svg")
+  .titlebar
+    .actions
+      .icon-copy
+        margin-left: 5px
+        .copy
+          background-image: url("../assets/icons/copy/copy.svg")
+          &:hover
+            background-image: url("../assets/icons/copy/copy-hover.svg")
+          &:active
+            background-image: url("../assets/icons/copy/copy-active.svg")
