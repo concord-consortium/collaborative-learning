@@ -7,6 +7,7 @@ import { TeacherDashboardComponent } from "../../components/teacher/teacher-dash
 import { DialogComponent } from "../../components/utilities/dialog";
 
 import "./clue-app-content.sass";
+import { Logger, LogEventName } from "../../lib/logger";
 
 enum EPanelId {
   dashboard = "dashboard",
@@ -65,10 +66,19 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
   }
 
   private handlePanelChange = (panelId: string) => {
-    const { ui } = this.stores;
+    const { user, ui } = this.stores;
     ui.toggleLeftNav(false);
     ui.toggleRightNav(false);
     this.setState({ current: panelId });
-  }
 
+    // log teacher dashboard panel changes
+    if (user && user.isTeacher) {
+      if (panelId === EPanelId.workspace) {
+        Logger.log(LogEventName.DASHBOARD_TOGGLE_TO_WORKSPACE);
+      }
+      else if (panelId === EPanelId.dashboard) {
+        Logger.log(LogEventName.DASHBOARD_TOGGLE_TO_DASHBOARD);
+      }
+    }
+  }
 }
