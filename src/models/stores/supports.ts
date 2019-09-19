@@ -1,11 +1,13 @@
-import { types, Instance } from "mobx-state-tree";
-import { values } from "lodash";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { UnitModelType } from "../curriculum/unit";
-import { SupportModelType } from "../curriculum/support";
+import { SupportModel, SupportModelType, getDocumentContentForSupport } from "../curriculum/support";
 import { ProblemModelType } from "../curriculum/problem";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { Logger, LogEventName } from "../../lib/logger";
 import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../curriculum/section";
+import { DocumentModel, SupportPublication } from "../document/document";
+import { DocumentsModelType } from "./documents";
 
 export enum AudienceEnum {
   class = "class",
@@ -20,11 +22,11 @@ export const audienceInfo = {
 };
 
 export enum SupportType {
-    teacher = "teacher",
-    curricular = "curricular"
+  teacher = "teacher",
+  curricular = "curricular"
 }
 
-export enum SupportItemType {
+export enum SupportTarget {
   unit = "unit",
   investigation = "investigation",
   problem = "problem",
@@ -62,10 +64,10 @@ export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
     supportType: types.optional(types.literal(SupportType.teacher), SupportType.teacher),
     key: types.identifier,
-    text: types.string,
-    type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
+    support: SupportModel,
+    type: types.enumeration<SupportTarget>("SupportTarget", Object.values(SupportTarget)),
     visible: false,
-    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[])),
+    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", Object.values(SectionType))),
     audience: AudienceModel,
     authoredTime: types.number,
     deleted: false
@@ -80,35 +82,45 @@ export const TeacherSupportModel = types
   .views((self) => {
     return {
       get sectionTarget(): TeacherSupportSectionTarget {
-        return self.type === SupportItemType.section
+        return self.type === SupportTarget.section
           ? self.sectionId!
           : "all";
       },
 
       get sectionTargetDisplay(): string {
-        return self.type === SupportItemType.section
+        return self.type === SupportTarget.section
           ? sectionInfo[self.sectionId!].title
           : allSectionInfo.title;
       },
 
       showForUserProblem(target: ISupportTarget) {
         const isUndeleted = !self.deleted;
-        const isForSection = self.type === SupportItemType.problem
-          || self.type === SupportItemType.section && self.sectionId === target.sectionId;
+        const isForSection = self.type === SupportTarget.problem
+          || self.type === SupportTarget.section && self.sectionId === target.sectionId;
         const isForUser = self.audience.type === AudienceEnum.class
           || self.audience.type === AudienceEnum.group && self.audience.identifier === target.groupId
           || self.audience.type === AudienceEnum.user && self.audience.identifier === target.userId;
-
         return isUndeleted && isForSection && isForUser;
       }
     };
   });
 
+export interface ICreateFromUnitParams {
+  unit: UnitModelType;
+  investigation?: InvestigationModelType;
+  problem?: ProblemModelType;
+  documents?: DocumentsModelType;
+}
+
+export interface IAddSupportDocuments extends ICreateFromUnitParams {
+  supports: CurricularSupportModelType[];
+}
+
 export const CurricularSupportModel = types
   .model("CurricularSupportModel", {
     supportType: types.optional(types.literal(SupportType.curricular), SupportType.curricular),
-    text: types.string,
-    type: types.enumeration<SupportItemType>("SupportItemType", values(SupportItemType) as SupportItemType[]),
+    support: SupportModel,
+    type: types.enumeration<SupportTarget>("SupportItemType", Object.values(SupportTarget)),
     visible: false,
     sectionId: types.maybe(types.string)
   })
@@ -147,7 +159,7 @@ export const SupportsModel = types
     getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
         const { sectionId } = target;
         const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
-          return (support.type === SupportItemType.section) && (support.sectionId === sectionId);
+          return sectionId ? support.sectionId === sectionId : true;
         });
 
         const teacherSupports = self.teacherSupports.filter(support => {
@@ -159,26 +171,31 @@ export const SupportsModel = types
   }))
   .actions((self) => {
     return {
-      createFromUnit(unit: UnitModelType, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+      createFromUnit(params: ICreateFromUnitParams) {
+        const { unit, investigation, problem, documents } = params;
         const supports: CurricularSupportModelType[] = [];
-        const createItem = (type: SupportItemType, sectionId?: string) => {
+        const createItem = (type: SupportTarget, sectionId?: string) => {
           return (support: SupportModelType) => {
             supports.push(CurricularSupportModel.create({
-              text: support.text,
-              type: type as SupportItemType,
+              support: cloneDeep(support),
+              type: type as SupportTarget,
               sectionId
             }));
           };
         };
 
-        unit.supports.forEach(createItem(SupportItemType.unit));
-        investigation && investigation.supports.forEach(createItem(SupportItemType.investigation));
-        problem && problem.supports.forEach(createItem(SupportItemType.problem));
+        unit.supports.forEach(createItem(SupportTarget.unit));
+        investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
+        problem && problem.supports.forEach(createItem(SupportTarget.problem));
         problem && problem.sections.forEach((section) => {
-          section.supports.forEach(createItem(SupportItemType.section, section.id));
+          section.supports.forEach(createItem(SupportTarget.section, section.id));
         });
 
         self.curricularSupports.replace(supports);
+
+        if (documents) {
+          addVirtualSupportDocumentsToStore({ supports, ...params });
+        }
       },
 
       setAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
@@ -197,14 +214,14 @@ export const SupportsModel = types
           self.allSupports.forEach((supportItem: SupportItemModelType) => supportItem.setVisible(false));
       },
 
-      toggleSupport(support: SupportItemModelType) {
-        const visible = !support.visible;
-        self.allSupports.forEach((supportItem: SupportItemModelType) => {
-          supportItem.setVisible((support === supportItem) && visible);
+      toggleSupport(supportItem: SupportItemModelType) {
+        const visible = !supportItem.visible;
+        self.allSupports.forEach((_supportItem: SupportItemModelType) => {
+          _supportItem.setVisible((_supportItem === supportItem) && visible);
         });
         if (visible) {
           Logger.log(LogEventName.VIEW_SHOW_SUPPORT, {
-            text: support.text
+            text: supportItem.support.content
           });
         }
       }
@@ -215,3 +232,32 @@ export type CurricularSupportModelType = Instance<typeof CurricularSupportModel>
 export type TeacherSupportModelType = Instance<typeof TeacherSupportModel>;
 export type SupportItemModelType = Instance<typeof SupportItemModel>;
 export type SupportsModelType = Instance<typeof SupportsModel>;
+
+function addVirtualSupportDocumentsToStore(params: IAddSupportDocuments) {
+  const { supports, investigation, problem, documents } = params;
+  const investigationPart = investigation ? `${investigation.ordinal}` : "*";
+  const problemPart = problem ? `${problem.ordinal}` : "*";
+  let index = 0;
+  let lastSection: string | undefined;
+  supports.forEach(support => {
+    const supportSection = support.sectionId;
+    const sectionPart = supportSection && sectionInfo[supportSection as SectionType].title;
+    if (supportSection === lastSection) {
+      ++index;
+    }
+    else {
+      index = 1;
+      lastSection = supportSection;
+    }
+    const supportCaption = `${investigationPart}.${problemPart} ${sectionPart} Support ${index}`;
+    const document = DocumentModel.create({
+                      uid: "curriculum",
+                      type: SupportPublication,
+                      key: supportCaption,  // use the caption as unique ID since we don't have a firebase ID
+                      properties: { curricularSupport: "true", caption: supportCaption },
+                      createdAt: Date.now(),
+                      content: getSnapshot(getDocumentContentForSupport(support.support))
+                    });
+    documents && documents.add(document);
+  });
+}

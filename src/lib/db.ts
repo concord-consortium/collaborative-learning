@@ -12,6 +12,7 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
        } from "../models/document/document";
+import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
        } from "../models/document/document-content";
@@ -746,7 +747,8 @@ export class DB {
     });
   }
 
-  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
+  public createSupport(supportModel: SupportModelType,
+                       sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
       this.firebase.getSupportsPath(user, audience, sectionTarget)
@@ -762,7 +764,8 @@ export class DB {
         key: supportRef.key!
       },
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-      content,
+      type: supportModel.type,
+      content: supportModel.content,
       deleted: false
     };
     supportRef.set(support);

@@ -4,8 +4,7 @@ import * as React from "react";
 import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
-import { MyWorkComponent } from "../thumbnail/my-work";
-import { ClassWorkComponent } from "../thumbnail/class-work";
+import { RightNavTabContents } from "../thumbnail/right-nav-tab-contents";
 import { ERightNavTab, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
 import { map } from "lodash";
 import "./right-nav.sass";
@@ -13,13 +12,29 @@ import "./right-nav.sass";
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
 
+export const MyWorkComponent = () => {
+  return <RightNavTabContents tabId={ERightNavTab.kMyWork} className="my-work" scale={kRightNavItemScale} />;
+};
+
+export const ClassWorkComponent = () => {
+  return <RightNavTabContents tabId={ERightNavTab.kClassWork} className="class-work" scale={kRightNavItemScale} />;
+};
+
+export const LearningLogsComponent = () => {
+  return <RightNavTabContents tabId={ERightNavTab.kLearningLog} className="learning-log" scale={kRightNavItemScale} />;
+};
+
+export const SupportsComponent = () => {
+  return <RightNavTabContents tabId={ERightNavTab.kSupports} className="supports" scale={kRightNavItemScale} />;
+};
+
 interface IProps extends IBaseProps {
   tabs?: RightNavTabSpec[];
   isGhostUser: boolean;
 }
 
 interface IState {
-  tabLoadAllowed: RightNavTabMap<boolean>;
+  tabLoadAllowed: Partial< RightNavTabMap<boolean> >;
   navExpanding: boolean;
 }
 
@@ -32,10 +47,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      tabLoadAllowed: {
-        [ERightNavTab.kMyWork]: false,
-        [ERightNavTab.kClassWork]: false
-      },
+      tabLoadAllowed: {},
       navExpanding: false
     };
   }
@@ -96,8 +108,10 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private renderTabContents() {
     const {activeRightNavTab} = this.stores.ui;
     const tabContents: RightNavTabMap<() => JSX.Element> = {
-            [ERightNavTab.kMyWork]: () => <MyWorkComponent scale={kRightNavItemScale}/>,
-            [ERightNavTab.kClassWork]: () => <ClassWorkComponent scale={kRightNavItemScale}/>,
+            [ERightNavTab.kMyWork]: () => <MyWorkComponent />,
+            [ERightNavTab.kClassWork]: () => <ClassWorkComponent />,
+            [ERightNavTab.kLearningLog]: () => <LearningLogsComponent />,
+            [ERightNavTab.kSupports]: () => <SupportsComponent />,
           };
     const tabContainers = map(ERightNavTab, (tab: ERightNavTab) => {
             const enabledDisabledClass = activeRightNavTab === tab ? "enabled" : "disabled";
