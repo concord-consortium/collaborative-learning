@@ -26,6 +26,7 @@ interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
   onNewDocument?: (document: DocumentModelType) => void;
+  onCopyDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -69,6 +70,13 @@ const NewButton = ({ onClick }: { onClick: () => void }) => {
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
+                onClickButton={onClick} />
+  );
+};
+
+const CopyButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="copy" key="copy" className="action icon-copy"
                 onClickButton={onClick} />
   );
 };
@@ -167,6 +175,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
+            <CopyButton onClick={this.handleCopyDocumentClick} />
           </div>
         }
         <div className="title" data-test="document-title">
@@ -212,6 +221,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
+            <CopyButton onClick={this.handleCopyDocumentClick} />
           </div>
         }
         {
@@ -458,6 +468,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleNewDocumentClick = () => {
     const { document, onNewDocument } = this.props;
     onNewDocument && onNewDocument(document);
+  }
+
+  private handleCopyDocumentClick = () => {
+    const { document, onCopyDocument } = this.props;
+    onCopyDocument && onCopyDocument(document);
   }
 
   private handleDocumentRename = () => {
