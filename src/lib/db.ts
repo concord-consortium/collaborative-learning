@@ -520,13 +520,10 @@ export class DB {
     });
   }
 
-  public copyOtherDocument(document: DocumentModelType, newTitle?: string) {
-    const title = `${newTitle || document.title || this.stores.problem.title || "Untitled"}`;
+  public copyOtherDocument(document: DocumentModelType, title: string) {
     const content = cloneContentWithUniqueIds(document.content);
-    if (document.type === ProblemDocument) {
-      return this.createPersonalDocument({ title, content });
-    }
-    return this.createOtherDocument(document.type as OtherDocumentType, { title, content });
+    const copyType = document.type === ProblemDocument ? PersonalDocument : document.type as OtherDocumentType;
+    return this.createOtherDocument(copyType, { title, content });
   }
 
   public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
