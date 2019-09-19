@@ -115,10 +115,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public render() {
     const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
-    const style: React.CSSProperties = {};
-    const documentElts = document.getElementsByClassName("document-content");
-    const documentElt: HTMLInputElement = documentElts && (documentElts[0] as HTMLInputElement);
-    style.height = `${documentElt.clientHeight - 50}px`;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -146,7 +142,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt} style={style}/>
+              <div className="flow-tool" ref={elt => this.toolDiv = elt} style={this.getEditorStyle()}/>
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
@@ -199,6 +195,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
     }
+  }
+
+  private getEditorStyle = () => {
+    const style: React.CSSProperties = {};
+    const documentElts = document.getElementsByClassName("document-content");
+    const documentElt: HTMLInputElement = documentElts && (documentElts[0] as HTMLInputElement);
+    const topbarHeight = 50;
+    style.height = `${documentElt.clientHeight - topbarHeight}px`;
+    return style;
   }
 
   private initProgramEditor = () => {
