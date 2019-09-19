@@ -1,48 +1,39 @@
-import { DB } from "../db";
-import { DBOfferingUserProblemDocument,
-         DBOfferingUser,
-         DBOfferingUserProblemDocumentMap,
-         DBOfferingUserMap } from "../db-types";
+import { DB, Monitor } from "../db";
+import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { forEach } from "lodash";
+import { BaseListener } from "./base-listener";
 
-export class DBProblemDocumentsListener {
+export class DBProblemDocumentsListener extends BaseListener {
   private db: DB;
-  private problemDocsRef: firebase.database.Reference | null  = null;
   private offeringUsersRef: firebase.database.Reference | null  = null;
+  private onLoadOfferingUserChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
+  private onLoadOfferingUserChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
   constructor(db: DB) {
+    super("DBProblemDocumentsListener");
     this.db = db;
   }
 
   public start() {
     const { user } = this.db.stores;
 
-    // teacher user - load documents for all users
-    if (user.isTeacher) {
-      return new Promise<void>((resolve, reject) => {
-        const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
-          this.db.firebase.getOfferingUsersPath(user));
-        // use once() so we are ensured that documents are set before we resolve
-        offeringUsersRef.once("value", (snapshot) => {
-          this.handleLoadOfferingUsersProblemDocuments(snapshot);
-          // We have to listen to both events because of a race condition of the documents
-          // not being set when the child is added
-          offeringUsersRef.on("child_added", this.handleLoadOfferingUserAddedOrChanged);
-          offeringUsersRef.on("child_changed", this.handleLoadOfferingUserAddedOrChanged);
-        })
-        .then(() => resolve())
-        .catch(reject);
-      });
-    }
-
-    // student user - load documents for user and group
+    // both teachers and students listen to all problem documents
+    // but only teachers listen to all content.  students only listen
+    // to content of users in their group to reduce network traffic
     return new Promise<void>((resolve, reject) => {
-      const problemDocsRef = this.problemDocsRef = this.db.firebase.ref(
-        this.db.firebase.getProblemDocumentsPath(user));
+      const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
+        this.db.firebase.getOfferingUsersPath(user));
       // use once() so we are ensured that documents are set before we resolve
-      problemDocsRef.once("value", (snapshot) => {
-        this.handleLoadCurrentUserProblemDocuments(snapshot);
-        problemDocsRef.on("child_added", this.handleCurrentUserProblemDocumentAdded);
+      this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
+      offeringUsersRef.once("value", (snapshot) => {
+        this.handleLoadOfferingUsersProblemDocuments(snapshot);
+        // We have to listen to both events because of a race condition of the documents
+        // not being set when the child is added
+        this.debugLogHandlers("#start", "adding", ["child_added", "child_changed"], offeringUsersRef);
+        offeringUsersRef.on("child_added",
+          this.onLoadOfferingUserChildAdded = this.handleLoadOfferingUserAddedOrChanged("child_added"));
+        offeringUsersRef.on("child_changed",
+          this.onLoadOfferingUserChildChanged = this.handleLoadOfferingUserAddedOrChanged("child_changed"));
       })
       .then(() => resolve())
       .catch(reject);
@@ -50,17 +41,16 @@ export class DBProblemDocumentsListener {
   }
 
   public stop() {
-    if (this.problemDocsRef) {
-      this.problemDocsRef.off("child_added", this.handleCurrentUserProblemDocumentAdded);
-    }
     if (this.offeringUsersRef) {
-      this.offeringUsersRef.off("child_added", this.handleLoadOfferingUserAddedOrChanged);
-      this.offeringUsersRef.off("child_changed", this.handleLoadOfferingUserAddedOrChanged);
+      this.debugLogHandlers("#stop", "removing", ["child_added", "child_changed"], this.offeringUsersRef);
+      this.offeringUsersRef.off("child_added", this.onLoadOfferingUserChildAdded);
+      this.offeringUsersRef.off("child_changed", this.onLoadOfferingUserChildChanged);
     }
   }
 
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     const users: DBOfferingUserMap = snapshot.val();
+    this.debugLogSnapshot("#handleLoadOfferingUsersProblemDocuments", snapshot);
     forEach(users, (user: DBOfferingUser) => {
       if (user) {
         this.handleOfferingUser(user);
@@ -68,52 +58,35 @@ export class DBProblemDocumentsListener {
     });
   }
 
-  private handleLoadOfferingUserAddedOrChanged = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
     const user: DBOfferingUser = snapshot.val();
+    this.debugLogSnapshot(`#handleLoadOfferingUserAddedOrChanged (${eventType})`, snapshot);
     if (user) {
       this.handleOfferingUser(user);
     }
   }
 
   private handleOfferingUser = (user: DBOfferingUser) => {
-    const { documents, user: currentUser } = this.db.stores;
+    const { documents, user: currentUser, groups } = this.db.stores;
     forEach(user.documents, document => {
-      if (document && !documents.getDocument(document.documentKey)) {
-        // current user's own document should be monitored for changes;
-        // all other users' documents can be monitored readOnly
-        const readOnly = user.self.uid !== currentUser.id;
-        this.db.createDocumentFromProblemDocument(document.self.uid, document, readOnly)
+      const existingDoc = documents.getDocument(document.documentKey);
+      if (existingDoc) {
+        this.db.updateDocumentFromProblemDocument(existingDoc, document);
+      } else {
+        const isOwnDocument = user.self.uid === currentUser.id;
+        const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
+        const monitorRemote = currentUser.isTeacher || (!isOwnDocument && userInGroup);
+        const monitorLocal = isOwnDocument;
+        const monitor = monitorRemote ? Monitor.Remote : (monitorLocal ? Monitor.Local : Monitor.None);
+        this.db.createDocumentFromProblemDocument(document.self.uid, document, monitor)
+          .then((doc) => {
+            if (isOwnDocument) {
+              this.db.listeners.monitorDocumentVisibility(doc);
+            }
+            return doc;
+          })
           .then(documents.add);
       }
     });
-  }
-
-  private handleLoadCurrentUserProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
-    const problemDocuments: DBOfferingUserProblemDocumentMap = snapshot.val();
-    if (problemDocuments) {
-      forEach(problemDocuments, (document) => {
-        this.handleCurrentUserProblemDocument(document);
-      });
-    }
-  }
-
-  private handleCurrentUserProblemDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const problemDocument: DBOfferingUserProblemDocument|null = snapshot.val();
-    this.handleCurrentUserProblemDocument(problemDocument);
-  }
-
-  private handleCurrentUserProblemDocument(problemDocument: DBOfferingUserProblemDocument|null) {
-    const {user, documents} = this.db.stores;
-    // If a workspace has already been created, or is currently been created, then its listeners are already set
-    if (problemDocument
-          && !documents.getDocument(problemDocument.documentKey)) {
-      this.db.createDocumentFromProblemDocument(user.id, problemDocument)
-        .then((document) => {
-          this.db.listeners.updateGroupUserProblemDocumentListeners(document);
-          this.db.listeners.monitorDocumentVisibility(document);
-          return document;
-        })
-        .then(documents.add);
-    }
   }
 }

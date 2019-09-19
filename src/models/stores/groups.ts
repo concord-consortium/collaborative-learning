@@ -86,6 +86,14 @@ export const GroupsModel = types
         return self.allGroups.find(group => group.id === id);
       }
     };
+  })
+  .views((self) => {
+    return {
+      userInGroup(uid: string, groupId?: string) {
+        const groupUser = self.groupForUser(uid);
+        return !!(groupId && groupUser && (groupUser.id === groupId));
+      }
+    };
   });
 
 export type GroupUserModelType = typeof GroupUserModel.Type;
