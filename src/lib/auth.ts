@@ -3,15 +3,9 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-import { IPortalClass, IPortalProblem, IClueClassOffering } from "../models/stores/user";
+import { IClueClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
-import {
-  getPortalOfferings,
-  getClueClassOfferings,
-  getProblemIdForAuthenticatedUser,
-  getPortalClasses,
-  getPortalProblems
-} from "./portal-api";
+import { getPortalOfferings, getClueClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 
 const initials = require("initials");
 
@@ -74,8 +68,6 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  portalClasses?: IPortalClass[];
-  portalProblems?: IPortalProblem[];
   clueClassOfferings?: IClueClassOffering[];
 }
 
@@ -362,7 +354,6 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
       if (!urlParams.offering) {
         return reject("Missing offering parameter!");
       }
-
       const {protocol, host} = parseUrl(urlParams.class);
       basePortalUrl = `${protocol}//${host}/`;
     }
@@ -380,6 +371,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
           let classInfoUrl: string | undefined;
           let offeringId: string | undefined;
           let clueClassOfferings: any;
+
           if (portalJWT.user_type === "learner") {
             classInfoUrl = portalJWT.class_info_url;
             offeringId = `${portalJWT.offering_id}`;
@@ -391,66 +383,53 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
 
           if (classInfoUrl && offeringId) {
             return (getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
-              .then((classInfo) => {
-                return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
-                  .then(([rawFirebaseJWT, firebaseJWT]) => {
-                    getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
-                    .then(result => clueClassOfferings = getClueClassOfferings(result));
-                    // TODO: Since this is no longer Authentication,
-                    // we could move the following data-loading Promises elsewhere,
-                    // perhaps chained in app.tsx line 23.
-                    return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
-                      .then((portalClasses) => {
-                        return getPortalProblems(portalJWT.user_type, portalJWT.uid,
-                            portalJWT.domain, rawPortalJWT, urlParams)
-                          .then((portalProblems) => {
-                            const uidAsString = `${portalJWT.uid}`;
-                            let authenticatedUser: AuthenticatedUser | undefined;
-                            if (portalJWT.user_type === "learner") {
-                              authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                            }
-                            else {
-                              authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                            }
+            .then((classInfo) => {
+              return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
+              .then(([rawFirebaseJWT, firebaseJWT]) => {
+                getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
+                .then(result => {
+                  clueClassOfferings = getClueClassOfferings(result, urlParams);
+                  const uidAsString = `${portalJWT.uid}`;
+                  let authenticatedUser: AuthenticatedUser | undefined;
 
-                            if (authenticatedUser) {
-                              authenticatedUser.portalJWT = portalJWT;
-                              authenticatedUser.rawPortalJWT = rawPortalJWT;
-                              authenticatedUser.firebaseJWT = firebaseJWT;
-                              authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                              authenticatedUser.id = uidAsString;
-                              authenticatedUser.portal = portal;
-                              authenticatedUser.portalClasses = portalClasses;
-                              authenticatedUser.portalProblems = portalProblems;
-                              if (clueClassOfferings) {
-                                authenticatedUser.clueClassOfferings = clueClassOfferings;
-                              }
-                              getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
-                              .then((problemId) => {
-                                if (authenticatedUser) {
-                                  resolve({authenticatedUser, classInfo, problemId});
-                                }
-                              });
-                            }
-                            else {
-                              reject("Current user not found in class roster");
-                            }
-                          });
-                      });
-                  })
-                .catch(reject);
+                  if (portalJWT.user_type === "learner") {
+                    authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                  } else {
+                    authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
+                  }
+
+                  if (authenticatedUser) {
+                    authenticatedUser.portalJWT = portalJWT;
+                    authenticatedUser.rawPortalJWT = rawPortalJWT;
+                    authenticatedUser.firebaseJWT = firebaseJWT;
+                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                    authenticatedUser.id = uidAsString;
+                    authenticatedUser.portal = portal;
+                    if (clueClassOfferings) {
+                      authenticatedUser.clueClassOfferings = clueClassOfferings;
+                    }
+                    getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
+                    .then((problemId) => {
+                      if (authenticatedUser) {
+                        resolve({authenticatedUser, classInfo, problemId});
+                      }
+                    });
+                  } else {
+                    reject("Current user not found in class roster");
+                  }
+                });
               })
-            );
-          }
-          else {
-            reject("Unable to get classInfoUrl or offeringId");
-          }
+              .catch(reject);
+            })
+          );
+        } else {
+          reject("Unable to get classInfoUrl or offeringId");
         }
-        else {
-          reject("Only student and teacher logins are currently supported!");
-        }
-      })
-      .catch(reject);
+      } else {
+        reject("Only student and teacher logins are currently supported!");
+      }
+    })
+    .catch(reject);
   });
 };
 

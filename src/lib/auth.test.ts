@@ -428,7 +428,7 @@ describe("teacher authentication", () => {
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
         portal: "learn.staging.concord.org",
-        portalClasses: [],
+        clueClassOfferings: [],
         firstName: RAW_CORRECT_TEACHER.first_name,
         lastName: RAW_CORRECT_TEACHER.last_name,
         fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,

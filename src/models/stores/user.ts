@@ -5,26 +5,14 @@ const initials = require("initials");
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
-export const PortalClass = types.model("PortalClass", {
-  className: "",
-  classHash: "",
-  classUri: ""
-});
-export type IPortalClass = typeof PortalClass.Type;
-
 export const ClueClassOffering = types.model("ClueClassOffering", {
   className: "",
   problemOrdinal: "",
-  dashboardUrl: ""
+  offeringId: "",
+  location: ""
 });
 
 export type IClueClassOffering = typeof ClueClassOffering.Type;
-
-export const PortalProblem = types.model("PortalProblem", {
-  problemDesignator: "",
-  switchUrlLocation: ""
-});
-export type IPortalProblem = typeof PortalProblem.Type;
 
 export const UserModel = types
   .model("User", {
@@ -38,9 +26,6 @@ export const UserModel = types
     latestGroupId: types.maybe(types.string),
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
-    // TODO: PortalOfferings: (some type defined above)
-    portalClasses: types.array(PortalClass),
-    portalProblems: types.array(PortalProblem),
     clueClassOfferings: types.array(ClueClassOffering)
   })
   .actions((self) => ({
@@ -72,18 +57,8 @@ export const UserModel = types
       if (user.firebaseJWT && (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl) {
         self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
       }
-      // TODO: FIXME: Check if MST has a fromArray() function to avoid loops
-      if (user.portalClasses) {
-        user.portalClasses.forEach( (portalClass) => {
-          self.portalClasses.push(portalClass);
-        });
-      }
-      if (user.portalProblems) {
-        user.portalProblems.forEach ( (portalProblem) => {
-          self.portalProblems.push(portalProblem);
-        });
-      }
       if (user.clueClassOfferings) {
+        // TODO: See if MST has a fromArray() function instead of this loop.
         user.clueClassOfferings.forEach ((classOffering) => {
           self.clueClassOfferings.push(classOffering);
         });

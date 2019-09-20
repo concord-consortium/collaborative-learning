@@ -3,7 +3,7 @@ import * as React from "react";
 
 export interface IMenuLink {
   title: string;
-  link: string;
+  link?: string;
 }
 
 interface IProps {
@@ -11,6 +11,7 @@ interface IProps {
   links: IMenuLink[];
   clickHandler?: (link: string) => void;
 }
+
 interface ILinkProps {
   title: string;
   disabled?: boolean;
@@ -47,7 +48,7 @@ export class LinkSwitcherMenu extends React.Component<IProps, {}> {
           key={item.title}
           title={item.title}
           current={item.title === currentTitle}
-          disabled={false}
+          disabled={item.link === undefined}
           link={item.link}
           clickHandler={clickHandler}
         />
