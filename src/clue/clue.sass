@@ -39,12 +39,31 @@
 
 .document
   .titlebar
+    &.personal, &.personalPublication, &.problem, &.publication
+      background-color: $sage-light-1
+    &.learningLog, &.learningLogPublication
+      background-color: $peacock-light-1
+    &.supportPublication
+      background-color: $sky-light-1
     .actions
-      .icon-copy
-        margin-left: 5px
-        .copy
-          background-image: url("../assets/icons/copy/copy.svg")
-          &:hover
-            background-image: url("../assets/icons/copy/copy-hover.svg")
-          &:active
-            background-image: url("../assets/icons/copy/copy-active.svg")
+      .action.icon, .action.icon-button
+        background-color: inherit
+        .icon-copy
+          margin-left: 5px
+          .copy
+            background-image: url("../assets/icons/copy/copy.svg")
+            &:hover
+              background-image: url("../assets/icons/copy/copy-hover.svg")
+            &:active
+              background-image: url("../assets/icons/copy/copy-active.svg")
+  .statusbar
+    &.personal, &.personalPublication, &.problem, &.publication
+      background-color: $sage-light-1
+    &.learningLog, &.learningLogPublication
+      background-color: $peacock-light-1
+    &.supportPublication
+      background-color: $sky-light-1
+    .actions
+      .action
+        .icon
+          background-color: inherit
