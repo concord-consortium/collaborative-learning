@@ -386,22 +386,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private keepNodesInView = () => {
     const margin = 5;
     const { k } = this.programEditor.view.area.transform;
-    let rightMostEdge = 0;
-    let bottomMostEdge = 0;
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeView = this.programEditor.view.nodes.get(n);
-      if (nodeView) {
-        rightMostEdge = Math.max (rightMostEdge, (nodeView.node.position[0] + nodeView.el.clientWidth) * k);
-        bottomMostEdge = Math.max (bottomMostEdge, (nodeView.node.position[1] + nodeView.el.clientHeight) * k);
-      }
-    });
-    const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rightMostEdge + margin),
-                             k * this.programEditor.view.container.clientHeight / ( bottomMostEdge + margin));
-    if (newZoom < k && rightMostEdge > 0 && newZoom > 0) {
+    const rect = this.getBoundingRectOfNodes();
+    const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rect.right + margin),
+                             k * this.programEditor.view.container.clientHeight / ( rect.bottom + margin));
+    if (newZoom < k && rect.right > 0 && newZoom > 0) {
       const currentTransform = this.programEditor.view.area.transform;
       this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
       this.programEditor.view.area.update();
     }
+  }
+
+  private getBoundingRectOfNodes = () => {
+    const { k } = this.programEditor.view.area.transform;
+    const rect: ClientRect = {bottom: 0, top: 0, left: 0, right: 0, height: 0, width: 0};
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeView = this.programEditor.view.nodes.get(n);
+      if (nodeView) {
+        rect.right = Math.max (rect.right, (nodeView.node.position[0] + nodeView.el.clientWidth) * k);
+        rect.bottom = Math.max (rect.bottom, (nodeView.node.position[1] + nodeView.el.clientHeight) * k);
+      }
+    });
+    return rect;
   }
 
   private hasValidOutputNodes = () => {
