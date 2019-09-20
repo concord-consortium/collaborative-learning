@@ -11,9 +11,6 @@
   "defaultDocumentTemplate": {
     "tiles": [
       {
-        "layout": {
-          "height": 500
-        },
         "content": {
           "type": "Dataflow"
         }

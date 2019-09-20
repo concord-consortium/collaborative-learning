@@ -142,7 +142,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt} />
+              <div className="flow-tool" ref={elt => this.toolDiv = elt} style={this.getEditorStyle()}/>
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
@@ -180,8 +180,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (this.editorDomElement && this.state.editorContainerWidth !== this.editorDomElement.clientWidth) {
         this.setState({ editorContainerWidth: this.editorDomElement.clientWidth });
         this.programEditor.view.resize();
+        this.keepNodesInView();
       } else if (this.props.size !== prevProps.size) {
         this.programEditor.view.resize();
+        this.keepNodesInView();
       }
 
       if ((this.props.modelId !== prevProps.modelId) ||
@@ -193,6 +195,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
     }
+  }
+
+  private getEditorStyle = () => {
+    const style: React.CSSProperties = {};
+    const documentElt = document.querySelector(".document-content");
+    const titlebarElt = document.querySelector(".document .titlebar");
+    const editorHeight = documentElt && titlebarElt ? documentElt.clientHeight - titlebarElt.clientHeight : 500;
+    style.height = `${editorHeight}px`;
+    return style;
   }
 
   private initProgramEditor = () => {
@@ -372,6 +383,32 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     })();
   }
 
+  private keepNodesInView = () => {
+    const margin = 5;
+    const { k } = this.programEditor.view.area.transform;
+    const rect = this.getBoundingRectOfNodes();
+    const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rect.right + margin),
+                             k * this.programEditor.view.container.clientHeight / ( rect.bottom + margin));
+    if (newZoom < k && rect.right > 0 && newZoom > 0) {
+      const currentTransform = this.programEditor.view.area.transform;
+      this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
+      this.programEditor.view.area.update();
+    }
+  }
+
+  private getBoundingRectOfNodes = () => {
+    const { k } = this.programEditor.view.area.transform;
+    const rect: ClientRect = {bottom: 0, top: 0, left: 0, right: 0, height: 0, width: 0};
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeView = this.programEditor.view.nodes.get(n);
+      if (nodeView) {
+        rect.right = Math.max (rect.right, (nodeView.node.position[0] + nodeView.el.clientWidth) * k);
+        rect.bottom = Math.max (rect.bottom, (nodeView.node.position[1] + nodeView.el.clientHeight) * k);
+      }
+    });
+    return rect;
+  }
+
   private hasValidOutputNodes = () => {
     const { ui } = this.stores;
     if (!this.getNodeCount("Relay") && !this.getNodeCount("Data Storage")) {
@@ -492,14 +529,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private addNode = async (nodeType: string) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
-
-    const numNodes = this.programEditor.nodes.length;
-    n1.position = [5 + Math.floor((numNodes % 20) / 5) * 245 + Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
+    n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
     }
   }
+  private getNewNodePosition = () => {
+    const numNodes = this.programEditor.nodes.length;
+    const kNodesPerColumn = 5;
+    const kNodesPerRow = 4;
+    const kColumnWidth = 200;
+    const kRowHeight = 90;
+    const kLeftMargin = 40;
+    const kTopMargin = 5;
+    const kColumnOffset = 15;
+    const { k } = this.programEditor.view.area.transform;
+    const nodePos = [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
+                     * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
+                     kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
+    return nodePos;
+  }
+
   private clearProgram = () => {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
