@@ -530,16 +530,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private addNode = async (nodeType: string) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
-
-    const numNodes = this.programEditor.nodes.length;
-    const { k } = this.programEditor.view.area.transform;
-    n1.position = [40 * (1 / k) + Math.floor((numNodes % 20) / 5) * 245 +
-                  Math.floor(numNodes / 20) * 15, 5 + numNodes % 5 * 90];
+    n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
     }
   }
+  private getNewNodePosition = () => {
+    const numNodes = this.programEditor.nodes.length;
+    const kNodesPerColumn = 5;
+    const kNodesPerRow = 4;
+    const kColumnWidth = 200;
+    const kRowHeight = 90;
+    const kLeftMargin = 40;
+    const kTopMargin = 5;
+    const kColumnOffset = 15;
+    const { k } = this.programEditor.view.area.transform;
+    const nodePos = [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
+                     * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
+                     kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
+    return nodePos;
+  }
+
   private clearProgram = () => {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
