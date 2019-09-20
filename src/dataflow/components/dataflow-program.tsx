@@ -199,11 +199,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private getEditorStyle = () => {
     const style: React.CSSProperties = {};
-    const documentElts = document.getElementsByClassName("document-content");
-    const documentElt = documentElts && (documentElts[0]);
-    const titlebarElts = document.getElementsByClassName("other-doc titlebar");
-    const titlebarElt = titlebarElts && (titlebarElts[0]);
-    style.height = `${documentElt.clientHeight - titlebarElt.clientHeight}px`;
+    const documentElt = document.querySelector(".document-content");
+    const titlebarElt = document.querySelector(".document .titlebar");
+    const editorHeight = documentElt && titlebarElt ? documentElt.clientHeight - titlebarElt.clientHeight : 500;
+    style.height = `${editorHeight}px`;
     return style;
   }
 
