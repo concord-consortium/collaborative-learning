@@ -109,11 +109,11 @@ export function getClueClassOfferings(portalOfferings: IPortalOffering[], urlPar
     if (isClueAssignment(offering) && urlParams) {
       let newLocationUrl = "";
       if (urlParams && urlParams.class && urlParams.offering && urlParams.reportType && urlParams.token) {
-        newLocationUrl =  
+        newLocationUrl =
           `?class=${urlParams.class.replace(/\/classes\/.*$/, `/classes/${offering.clazz_id}`)}` +
           `&offering=${urlParams.offering.replace(/\/offerings\/.*$/, `/offerings/${offering.id}`)}` +
           `&reportType=${urlParams.reportType}` +
-          `&token=${urlParams.token}`
+          `&token=${urlParams.token}`;
       }
       result.push({
         className: offering.clazz,
