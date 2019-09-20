@@ -60,16 +60,34 @@
     outline: 0
     border-radius: 3px
     &.program
+      position: absolute
+      width: 128px
+      height: 60px
+      background-image: url("../../assets/dataflow/both.png")
+      background-size: contain
+      background-repeat: no-repeat
+      background-position: center
+      border: 2px solid $data-storage-orange
+      margin-top: -35px
+      &:hover
+        filter: drop-shadow(2px 2px 2px $gray-mid)
+      &:active
+        filter: brightness(0.95)
+    &.program.split
+      left: -100%
+      background-image: url("../../assets/dataflow/graph.png")
+    &.data
       margin-left: auto
     &:hover
       background-color: $data-storage-orange-node
     &:active
       background-color: $data-storage-orange-control
     &.export
-      margin-left: 0
       border: 2px solid $gray-mid
       color: $gray-text
       background-color: #ffffff
+      &.wide
+        margin-left: calc(50% - 100px)
       &:hover
         background-color: $gray-light-hover
       &:active

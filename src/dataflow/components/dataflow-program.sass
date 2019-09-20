@@ -1,5 +1,6 @@
-@import ../../components/vars
+@import ../vars
 
+$dataflow-topbar-height: 40px
 .flow-tool
   background: white
   font-family: 'Ubuntu', sans-serif
@@ -26,6 +27,8 @@
     flex-direction: row
     width: 100%
     height: calc(100% - #{$dataflow-topbar-height})
+    &.complete
+      height: 100%
 
   .editor-graph-container
     display: flex

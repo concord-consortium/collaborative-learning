@@ -37,10 +37,9 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     this.state = {
       stacked: true,
       scatter: true,
-      fullRun: true,
+      fullRun: true
     };
   }
-
   public handleLayoutClick = () => {
     const stacked = !this.state.stacked;
     this.setState({stacked});
@@ -74,18 +73,24 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           : this.renderOverlappedGraphs()
         }
         <div className="graph-buttons">
-          <button className="graph-button export" onClick={this.handleExport}>Export Data (csv)</button>
-          <button className="graph-button program" onClick={this.handleShowProgramClick}>
-            { this.props.programVisible ? "Graph" : "Program" }
-          </button>
-          <button className="graph-button type" onClick={this.handleTypeClick}>
-            { this.state.scatter ? "Line" : "Scatter" }
+          {this.props.programVisible ?
+            <button className="graph-button program split" onClick={this.handleShowProgramClick} />
+            :
+            <button className="graph-button program" onClick={this.handleShowProgramClick} />
+          }
+          {this.props.programVisible ?
+            <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
+            :
+            <button className="graph-button export wide" onClick={this.handleExport}>Export Data (csv)</button>
+          }
+          <button className="graph-button data" onClick={this.handleDataModeClick}>
+            { this.state.fullRun ? "All Data" : "Full Run" }
           </button>
           <button className="graph-button layout" onClick={this.handleLayoutClick}>
             { this.state.stacked ? "Combined" : "Stacked" }
           </button>
-          <button className="graph-button data" onClick={this.handleDataModeClick}>
-            { this.state.fullRun ? "All Data" : "Full Run" }
+          <button className="graph-button type" onClick={this.handleTypeClick}>
+            { this.state.scatter ? "Line" : "Scatter" }
           </button>
         </div>
       </div>
@@ -266,5 +271,4 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     };
     return options;
   }
-
 }

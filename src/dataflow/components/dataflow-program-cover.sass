@@ -1,4 +1,4 @@
-@import ../../components/vars
+@import ../vars
 
 .cover
   position: absolute
@@ -8,7 +8,9 @@
   display: flex
   align-items: center
   justify-content: center
-  top: 40px
+  top: 0px
+  &.running
+    top: $dataflow-topbar-height
   &.full
     width: 100%
 
