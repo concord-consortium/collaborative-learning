@@ -7,7 +7,7 @@ import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument } from "../../models/document/document";
+         ProblemDocument,  SupportPublication} from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -132,33 +132,34 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    const { document: { type } } = this.props;
     return (
       <DocumentContext.Provider value={this.state.documentContext}>
         {this.renderToolbar()}
         <div key="document" className="document">
-          {this.renderTitleBar()}
+          {this.renderTitleBar(type)}
           {this.renderCanvas()}
-          {this.renderStatusBar()}
+          {this.renderStatusBar(type)}
         </div>
       </DocumentContext.Provider>
     );
   }
 
-  private renderTitleBar() {
+  private renderTitleBar(type: string) {
     const { document, side, isGhostUser } = this.props;
     const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
     if (document.isProblem) {
-      return this.renderProblemTitleBar(hideButtons);
+      return this.renderProblemTitleBar(type, hideButtons);
     }
     if (document.isPersonal || document.isLearningLog) {
-      return this.renderOtherDocumentTitleBar(hideButtons);
+      return this.renderOtherDocumentTitleBar(type, hideButtons);
     }
     if (document.isSupport) {
-      return this.renderSupportTitleBar();
+      return this.renderSupportTitleBar(type);
     }
   }
 
-  private renderProblemTitleBar(hideButtons?: boolean) {
+  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user} = this.stores;
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
@@ -169,7 +170,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className="titlebar">
+      <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
@@ -212,10 +213,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderOtherDocumentTitleBar(hideButtons?: boolean) {
+  private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
     return (
-      <div className="other-doc titlebar">
+      <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
@@ -244,10 +245,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderSupportTitleBar() {
+  private renderSupportTitleBar(type: string) {
     const { document } = this.props;
     return (
-      <div className="titlebar">
+      <div className={`titlebar ${type}`}>
         <div className="title" data-test="document-title">
           {document.getProperty("caption")}
         </div>
@@ -293,13 +294,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderStatusBar() {
+  private renderStatusBar(type: string) {
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === PublicationDocument);
     const showComment = false;
     return (
-      <div className="statusbar">
+      <div className={`statusbar ${type}`}>
         <div className="supports">
           {null}
         </div>
