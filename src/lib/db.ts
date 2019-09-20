@@ -609,10 +609,10 @@ export class DB {
 
   // handles published personal documents and published learning logs
   public createDocumentModelFromOtherPublication(publication: DBOtherPublication, type: OtherPublicationType) {
-    const {title, uid, originDoc, self: {documentKey}} = publication;
+    const {title, properties, uid, originDoc, self: {documentKey}} = publication;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, originDoc})
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc})
       .then((document) => {
         return document;
       });
