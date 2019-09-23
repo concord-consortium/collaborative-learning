@@ -95,10 +95,10 @@ interface IPortalOffering {
 // end, e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
 function getProblemOrdinal(offering: IPortalOffering) {
   const defaultOrdinal = "x.x.x";
-  const query = offering.activity_url.split("?")[1];
-  if (query) {
-    const params = queryString.parse(query);
-    return (params.problem as string) || defaultOrdinal;
+  const problemRegEx = /problem=(\d\.\d)/;
+  const result = problemRegEx.exec(offering.activity_url); 
+  if (result && result[1]) {
+    return (result[1] as string) || defaultOrdinal;
   }
   return defaultOrdinal;
 }
