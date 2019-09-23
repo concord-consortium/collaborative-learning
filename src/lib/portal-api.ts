@@ -96,7 +96,7 @@ interface IPortalOffering {
 function getProblemOrdinal(offering: IPortalOffering) {
   const defaultOrdinal = "x.x.x";
   const problemRegEx = /problem=(\d\.\d)/;
-  const result = problemRegEx.exec(offering.activity_url); 
+  const result = problemRegEx.exec(offering.activity_url);
   if (result && result[1]) {
     return (result[1] as string) || defaultOrdinal;
   }
