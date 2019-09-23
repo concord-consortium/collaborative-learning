@@ -6,7 +6,8 @@ import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
-        PersonalDocument, ProblemDocument } from "../../models/document/document";
+         PersonalDocument, ProblemDocument, PublicationDocument, PersonalPublication, LearningLogPublication,
+         SupportPublication } from "../../models/document/document";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 
 import "./document-workspace.sass";
@@ -77,6 +78,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               workspace={problemWorkspace}
               onNewDocument={this.handleNewDocument}
               onCopyDocument={this.handleCopyDocument}
+              onDeleteDocument={this.handleDeleteDocument}
               toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
@@ -103,6 +105,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                 workspace={problemWorkspace}
                 onNewDocument={this.handleNewDocument}
                 onCopyDocument={this.handleCopyDocument}
+                onDeleteDocument={this.handleDeleteDocument}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -204,6 +207,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const copyDocument = await db.copyOtherDocument(document, title);
     if (copyDocument) {
       problemWorkspace.setAvailableDocument(copyDocument);
+    }
+  }
+
+  private handleDeleteDocument = (document: DocumentModelType) => {
+    this.stores.ui.confirm(`Delete this workspace?`, `Delete Workspace`)
+      .then((deleted: boolean) => {
+        const docType = document.type;
+        const invalidDocs = ProblemDocument || PublicationDocument || PersonalPublication ||
+                            LearningLogPublication || SupportPublication;
+        if (docType !== invalidDocs) {
+          document.setProperty("softDelete", "true");
+          this.handleDeleteOpenPrimaryDocument(deleted);
+        }
+      });
+  }
+
+  private handleDeleteOpenPrimaryDocument = async (softDelete: boolean) => {
+    const { appConfig: { defaultDocumentType, defaultDocumentContent },
+            db, ui: { problemWorkspace } } = this.stores;
+    const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+    if (softDelete === true) {
+      if (defaultDocument) {
+        problemWorkspace.setPrimaryDocument(defaultDocument);
+      }
     }
   }
 

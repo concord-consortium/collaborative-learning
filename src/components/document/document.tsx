@@ -25,6 +25,7 @@ interface IProps extends IBaseProps {
   document: DocumentModelType;
   onNewDocument?: (document: DocumentModelType) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
+  onDeleteDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -75,6 +76,13 @@ const EditButton = ({ onClick }: { onClick: () => void }) => {
 const CopyButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="copy" key="copy" className="action icon-copy"
+                onClickButton={onClick} />
+  );
+};
+
+const DeleteButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="delete" key="delete" className="action icon-delete"
                 onClickButton={onClick} />
   );
 };
@@ -221,6 +229,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
+            <DeleteButton onClick={this.handleDeleteDocumentClick} />
           </div>
         }
         {
@@ -426,6 +435,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleCopyDocumentClick = () => {
     const { document, onCopyDocument } = this.props;
     onCopyDocument && onCopyDocument(document);
+  }
+
+  private handleDeleteDocumentClick = () => {
+    const { document, onDeleteDocument } = this.props;
+    onDeleteDocument && onDeleteDocument(document);
   }
 
   private handleDocumentRename = () => {

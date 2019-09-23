@@ -48,14 +48,20 @@
     .actions
       .action.icon, .action.icon-button
         background-color: inherit
-        .icon-copy
+        .button-icon
           margin-left: 5px
-          .copy
-            background-image: url("../assets/icons/copy/copy.svg")
-            &:hover
-              background-image: url("../assets/icons/copy/copy-hover.svg")
-            &:active
-              background-image: url("../assets/icons/copy/copy-active.svg")
+        .button-icon.copy
+          background-image: url("../assets/icons/copy/copy.svg")
+          &:hover
+            background-image: url("../assets/icons/copy/copy-hover.svg")
+          &:active
+            background-image: url("../assets/icons/copy/copy-active.svg")
+        .button-icon.delete
+          background-image: url("../assets/icons/delete/delete.svg")
+          &:hover
+              background-image: url("../assets/icons/delete/delete-hover.svg")
+          &:active
+              background-image: url("../assets/icons/delete/delete-active.svg")
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1

@@ -116,13 +116,16 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
             const _handleDocumentStarClick = section.showStars && user.isTeacher
                                               ? handleDocumentStarClick
                                               : undefined;
+            const isSoftDeleted = document.getProperty("softDelete") === "true";
             return (
-              <ThumbnailDocumentItem
-                key={document.key} dataTestName={`${tab}-list-items`}
-                canvasContext={tab} document={document} scale={scale}
-                captionText={getDocumentCaption(section, stores, document)}
-                onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred} onDocumentStarClick={_handleDocumentStarClick} />
+              !isSoftDeleted
+                ? <ThumbnailDocumentItem
+                    key={document.key} dataTestName={`${tab}-list-items`}
+                    canvasContext={tab} document={document} scale={scale}
+                    captionText={getDocumentCaption(section, stores, document)}
+                    onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+                    onIsStarred={onIsStarred} onDocumentStarClick={_handleDocumentStarClick} />
+                : null
             );
           })}
           {section.addDocument
