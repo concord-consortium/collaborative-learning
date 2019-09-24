@@ -4,11 +4,15 @@ import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import "./dropdown-list-control.sass";
 
-interface ListOption {
+export interface ListOption {
   name: string;
   icon?: string;
   val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
 }
+
+type DisabledChecker = (opt: ListOption) => boolean;
+
+const optionValue = (opt: ListOption) => opt.hasOwnProperty("val") ? opt.val : opt.name;
 
 export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
@@ -30,6 +34,7 @@ export class DropdownListControl extends Rete.Control {
                                     optionArray: ListOption[];
                                     listClass: string;
                                     label: string;
+                                    isDisabled?: DisabledChecker;
                                   }) => (
       <div className="node-select-container">
         { label &&
@@ -40,7 +45,8 @@ export class DropdownListControl extends Rete.Control {
                              compProps.onItemClick,
                              compProps.onListClick,
                              compProps.optionArray,
-                             compProps.listClass) }
+                             compProps.listClass,
+                             compProps.isDisabled) }
       </div>
     );
 
@@ -49,10 +55,10 @@ export class DropdownListControl extends Rete.Control {
                                 onItemClick: () => void,
                                 onListClick: any,
                                 options: ListOption[],
-                                listClass: string) => {
+                                listClass: string,
+                                isDisabled?: DisabledChecker) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
-      const optionValue = (opt: ListOption) => opt.hasOwnProperty("val") ? opt.val : opt.name;
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option ? option.name : val;
       const icon = option && option.icon ? `#${option.icon}` : null;
@@ -72,20 +78,30 @@ export class DropdownListControl extends Rete.Control {
           </div>
           {showList ?
           <div className={`option-list ${listClass}`}>
-            {options.map((ops: any, i: any) => (
-              <div
-                className={ops.name === val ? `item ${listClass} selected` : `item ${listClass} selectable`}
-                key={i}
-                onMouseDown={onListClick(optionValue(ops))}
-              >
-                { ops.icon &&
-                <svg className="icon">
-                  <use xlinkHref={`#${ops.icon}`}/>
-                </svg>
-                }
-                <div className="label">{ops.name}</div>
-              </div>
-            ))}
+            {options.map((ops: any, i: any) => {
+              let className = `item ${listClass}`;
+              if (optionValue(ops) === val) {
+                className += " selected";
+              } else if (isDisabled && isDisabled(ops)) {
+                className += " disabled";
+              } else {
+                className += " selectable";
+              }
+              return (
+                <div
+                  className={className}
+                  key={i}
+                  onMouseDown={onListClick(optionValue(ops))}
+                >
+                  { ops.icon &&
+                  <svg className="icon">
+                    <use xlinkHref={`#${ops.icon}`}/>
+                  </svg>
+                  }
+                  <div className="label">{ops.name}</div>
+                </div>
+              );
+            })}
           </div>
           : null }
         </div>
@@ -111,7 +127,8 @@ export class DropdownListControl extends Rete.Control {
       showList: false,
       optionArray,
       listClass: key,
-      label
+      label,
+      isDisabled: null
     };
   }
 
@@ -123,6 +140,15 @@ export class DropdownListControl extends Rete.Control {
 
   public getValue = () => {
     return this.props.value;
+  }
+
+  /**
+   * Is passed a function that will check each list option to see if it should
+   * be disabled
+   */
+  public setDisabledFunction = (fn: DisabledChecker) => {
+    this.props.isDisabled = fn;
+    (this as any).update();
   }
 
   public setOptions = (options: any) => {
