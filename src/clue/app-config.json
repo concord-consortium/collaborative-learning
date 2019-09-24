@@ -21,7 +21,8 @@
           "type": "personal-documents",
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"]
+          "documentTypes": ["personal"],
+          "properties": ["!isDeleted"]
         },
         {
           "title": "%abbrevInvestigation%",
@@ -36,7 +37,8 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["learningLog"],
-          "addDocument": true
+          "addDocument": true,
+          "properties": ["!isDeleted"]
         }
       ]
     },
