@@ -310,10 +310,17 @@ export const getClassInfo = (params: GetClassInfoParams) => {
 };
 
 export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
+  interface IAuthenticateResponse {
+    authenticatedUser: AuthenticatedUser;
+    classInfo?: ClassInfo;
+    problemId?: string;
+    unitCode?: string;
+  }
   // tslint:disable-next-line:max-line-length
-  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo, problemId?: string}>((resolve, reject) => {
+  return new Promise<IAuthenticateResponse>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
+    // when launched as a report, the params will not contain the problemOrdinal
     const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
@@ -409,9 +416,9 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                       authenticatedUser.portalClassOfferings = portalClassOfferings;
                     }
                     getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
-                    .then((problemId) => {
+                    .then( ({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
                       if (authenticatedUser) {
-                        resolve({authenticatedUser, classInfo, problemId});
+                        resolve({authenticatedUser, classInfo, unitCode: newUnitCode, problemId: newProblemOrdinal});
                       }
                     });
                   } else {

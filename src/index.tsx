@@ -5,7 +5,7 @@ import { appConfigSpec, createStores } from "./app-config";
 import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { UserModel } from "./models/stores/user";
-import { createFromJson } from "./models/curriculum/unit";
+import { setUnitAndProblem } from "./models/curriculum/unit";
 import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
@@ -21,23 +21,6 @@ import "./index.sass";
 
 const appConfig = AppConfigModel.create(appConfigSpec);
 
-function getUnitJson() {
-  const unitUrlParam = urlParams.unit && appConfig.units.get(urlParams.unit);
-  const urlParam = unitUrlParam || appConfig.defaultUnit && appConfig.units.get(appConfig.defaultUnit);
-  return fetch(urlParam!)
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            }
-            else {
-              throw Error(`Request rejected with status ${response.status}`);
-            }
-          })
-          .catch(error => {
-            throw Error(`Request rejected with exception`);
-          });
-}
-
 const initializeApp = async () => {
   const host = window.location.host.split(":")[0];
   const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
@@ -45,18 +28,17 @@ const initializeApp = async () => {
 
   const user = UserModel.create();
 
-  const unitJson = await getUnitJson();
-  const unit = createFromJson(unitJson);
+  const unitId = urlParams.unit;
   const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
-  const {investigation, problem} = unit.getProblem(problemOrdinal) ||
-                                   unit.getProblem(DefaultProblemOrdinal);
   const showDemoCreator = urlParams.demo;
-  const stores = createStores({ appMode, appVersion, appConfig, user, problem, showDemoCreator, unit, investigation });
-  stores.documents.setUnit(stores.unit);
+
+  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator });
+
+  await setUnitAndProblem(stores, unitId, problemOrdinal);
 
   gImageMap.initialize(stores.db, user.id);
 
-  Logger.initializeLogger(stores, investigation, problem);
+  Logger.initializeLogger(stores, stores.investigation, stores.problem);
 
   if (kEnableLivelinessChecking) {
     setLivelynessChecking("error");

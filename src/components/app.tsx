@@ -8,7 +8,9 @@ import { DemoCreatorComponment } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
+import { setUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
+import { AppMode } from "../models/stores/stores";
 import "./app.sass";
 
 interface IProps extends IBaseProps {}
@@ -17,66 +19,78 @@ interface IState {
   qaClearError?: string;
 }
 
+function initRollbar(stores: IStores, problemId: string) {
+  const {user, problem, unit, appVersion} = stores;
+  if (typeof (window as any).Rollbar !== "undefined") {
+    const _Rollbar = (window as any).Rollbar;
+    if (_Rollbar.configure) {
+      const config = { payload: {
+              class: user.classHash,
+              offering: user.offeringId,
+              person: { id: user.id },
+              problemId: problemId || "",
+              problem: stores.problem.title,
+              role: user.type,
+              unit: unit.title,
+              version: appVersion
+            }};
+      _Rollbar.configure(config);
+    }
+  }
+}
+
+function resolveAppMode(
+  stores: IStores,
+  rawFirebaseJWT: string | undefined,
+  onQAClear?: (result: boolean, err?: string) => void) {
+  const { appMode, db, ui} = stores;
+  if (appMode === "authed")  {
+    if (rawFirebaseJWT) {
+      db.connect({appMode, stores, rawFirebaseJWT}).catch(ui.setError);
+    }
+    else {
+      ui.setError("No firebase token available to connect to db!");
+    }
+  }
+  else {
+    db.connect({appMode, stores})
+      .then(() => {
+        if (appMode === "qa") {
+          const {qaClear, qaGroup} = urlParams;
+          if (qaClear) {
+            const cleared = (err?: string) => {
+              if (onQAClear) {
+                onQAClear(!err, err);
+              }
+            };
+            db.clear(qaClear)
+              .then(() => cleared())
+              .catch(cleared);
+          }
+          else if (qaGroup) {
+            db.leaveGroup().then(() => db.joinGroup(qaGroup));
+          }
+        }
+      })
+      .catch(ui.setError);
+  }
+}
+
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appMode, user, db, ui} = stores;
+  const {appMode, user, ui} = stores;
 
   authenticate(appMode, urlParams)
-    .then(({authenticatedUser, classInfo, problemId}) => {
+    .then(({authenticatedUser, classInfo, problemId, unitCode}) => {
       user.setAuthenticatedUser(authenticatedUser);
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
       }
       if (problemId) {
-        updateProblem(stores, problemId);
-      }
-
-      if (typeof (window as any).Rollbar !== "undefined") {
-        const _Rollbar = (window as any).Rollbar;
-        if (_Rollbar.configure) {
-          const config = { payload: {
-                  class: authenticatedUser.classHash,
-                  offering: authenticatedUser.offeringId,
-                  person: { id: authenticatedUser.id },
-                  problemId: problemId || "",
-                  problem: stores.problem.title,
-                  role: authenticatedUser.type,
-                  unit: stores.unit.title,
-                  version: stores.appVersion
-                }};
-          _Rollbar.configure(config);
-        }
-      }
-
-      if (appMode === "authed")  {
-        const { rawFirebaseJWT } = authenticatedUser;
-        if (rawFirebaseJWT) {
-          db.connect({appMode, stores, rawFirebaseJWT}).catch(ui.setError);
-        }
-        else {
-          ui.setError("No firebase token available to connect to db!");
-        }
-      }
-      else {
-        db.connect({appMode, stores})
-          .then(() => {
-            if (appMode === "qa") {
-              const {qaClear, qaGroup} = urlParams;
-              if (qaClear) {
-                const cleared = (err?: string) => {
-                  if (onQAClear) {
-                    onQAClear(!err, err);
-                  }
-                };
-                db.clear(qaClear)
-                  .then(() => cleared())
-                  .catch(cleared);
-              }
-              else if (qaGroup) {
-                db.leaveGroup().then(() => db.joinGroup(qaGroup));
-              }
-            }
-          })
-          .catch(ui.setError);
+        setUnitAndProblem (stores, unitCode, problemId).then( () => {
+          updateProblem(stores, problemId);
+          initRollbar(stores, problemId);
+          resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
+        });
       }
     })
     .catch((error) => {

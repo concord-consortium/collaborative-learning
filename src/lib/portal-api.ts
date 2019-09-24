@@ -56,8 +56,12 @@ export const getPortalOfferings = (
   });
 };
 
+interface IUnitAndProblem {
+  unitCode: string;
+  problemOrdinal: string;
+}
 export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams?: QueryParams) => {
-  return new Promise<string|undefined>((resolve, reject) => {
+  return new Promise<IUnitAndProblem>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
       .get(urlParams.offering)
@@ -69,12 +73,25 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
           const activityUrl = ((res.body || {}).activity_url) || "";
           const [ , query, ...rest] = activityUrl.split("?");
           const params = queryString.parse(query);
-          resolve(params.problem as string);
+          let unitCode = params.unit as string;
+          let problemOrdinal = params.problem as string;
+          if (!unitCode) {
+            // tslint:disable-next-line
+            console.warn("Missing unitCode for problem, Using defalut: s+s");
+            unitCode = "s+s";
+          }
+          if (!problemOrdinal) {
+            // tslint:disable-next-line
+            console.warn("Missing problemOrdinal for problem, Using defalut: 1.1");
+            problemOrdinal = "1.1";
+          }
+          resolve({unitCode, problemOrdinal});
         }
       });
     }
     else {
-      resolve(undefined);
+      // TODO FIXME: Use default values for unitCode and problemOrdinal ?
+      resolve({ unitCode: "undefined", problemOrdinal: "undefined" });
     }
   });
 };
