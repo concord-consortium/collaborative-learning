@@ -16,7 +16,7 @@ import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factor
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME } from "../utilities/node";
+import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
@@ -30,6 +30,7 @@ import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./datafl
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
 
 import "./dataflow-program.sass";
+import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 
 interface NodeNameValuePair {
   name: string;
@@ -191,6 +192,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           (this.props.programRunId !== prevProps.programRunId)) {
         this.updateRunAndGraphStates();
       }
+      this.updateDisabledIntervals();
     }
 
     if (!this.programEditor && this.toolDiv) {
@@ -338,6 +340,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({ programRunState, programDisplayState });
     this.updateGraphDataSet();
     this.sequenceNames = this.getNodeSequenceNames();
+  }
+
+  private updateDisabledIntervals() {
+    const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
+    if (dataStorage) {
+      const intervalControl = dataStorage.controls.get("interval") as DropdownListControl;
+      intervalControl.setDisabledFunction((option: ListOption) => {
+        const interval = IntervalTimes.find(i => option.val === i.val);
+        if (interval && this.props.programRunTime > interval.maxProgramRunTime) {
+          return true;
+        }
+        return option.val! >= this.props.programRunTime;
+      });
+    }
   }
 
   private getRunState = () => {
