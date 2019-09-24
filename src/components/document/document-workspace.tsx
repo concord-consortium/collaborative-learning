@@ -217,7 +217,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         const invalidDocs = ProblemDocument || PublicationDocument || PersonalPublication ||
                             LearningLogPublication || SupportPublication;
         if (docType !== invalidDocs) {
-          document.setProperty("softDelete", "true");
+          document.setProperty("isDeleted", "true");
           this.handleDeleteOpenPrimaryDocument(deleted);
         }
       });
