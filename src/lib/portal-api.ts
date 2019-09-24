@@ -45,7 +45,7 @@ export const getPortalOfferings = (
           reject(getErrorMessage(err, res));
         } else {
           const thisUsersOfferings = res.body as IPortalOffering[];
-          const clueOfferings = thisUsersOfferings.filter(offering => isClueAssignment(offering));
+          const clueOfferings = thisUsersOfferings.filter(isClueAssignment);
           resolve(clueOfferings);
         }
       });
