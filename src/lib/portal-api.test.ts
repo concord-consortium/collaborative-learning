@@ -29,7 +29,7 @@ describe("Portal Offerings", () => {
   });
 
   describe("PortalOfferingParser", () => {
-    const { getProblemOrdinal, getClueClassOfferings } = PortalOfferingParser;
+    const { getProblemOrdinal, getPortalClassOfferings } = PortalOfferingParser;
 
     const samplePortalOffering = {
       id: 1190,

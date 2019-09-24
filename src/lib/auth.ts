@@ -3,9 +3,9 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-import { IClueClassOffering } from "../models/stores/user";
+import { IPortalClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
-import { getPortalOfferings, getClueClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
+import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 
 const initials = require("initials");
 
@@ -68,7 +68,7 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  clueClassOfferings?: IClueClassOffering[];
+  portalClassOfferings?: IPortalClassOffering[];
 }
 
 export interface StudentUser extends User {
@@ -370,7 +370,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
           const portal = parseUrl(basePortalUrl).host;
           let classInfoUrl: string | undefined;
           let offeringId: string | undefined;
-          let clueClassOfferings: any;
+          let portalClassOfferings: any;
 
           if (portalJWT.user_type === "learner") {
             classInfoUrl = portalJWT.class_info_url;
@@ -388,7 +388,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
               .then(([rawFirebaseJWT, firebaseJWT]) => {
                 getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
                 .then(result => {
-                  clueClassOfferings = getClueClassOfferings(result, urlParams);
+                  portalClassOfferings = getPortalClassOfferings(result, urlParams);
                   const uidAsString = `${portalJWT.uid}`;
                   let authenticatedUser: AuthenticatedUser | undefined;
 
@@ -405,8 +405,8 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                     authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
                     authenticatedUser.id = uidAsString;
                     authenticatedUser.portal = portal;
-                    if (clueClassOfferings) {
-                      authenticatedUser.clueClassOfferings = clueClassOfferings;
+                    if (portalClassOfferings) {
+                      authenticatedUser.portalClassOfferings = portalClassOfferings;
                     }
                     getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
                     .then((problemId) => {

@@ -272,9 +272,7 @@ describe("student authentication", () => {
         },
         rawPortalJWT: RAW_STUDENT_PORTAL_JWT,
         rawFirebaseJWT: RAW_STUDENT_FIREBASE_JWT,
-        clueClassOfferings: [],
-        portalClasses: undefined,
-        portalProblems: undefined
+        portalClassOfferings: []
       });
       done();
     })
@@ -428,7 +426,7 @@ describe("teacher authentication", () => {
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
         portal: "learn.staging.concord.org",
-        clueClassOfferings: [],
+        portalClassOfferings: [],
         firstName: RAW_CORRECT_TEACHER.first_name,
         lastName: RAW_CORRECT_TEACHER.last_name,
         fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,

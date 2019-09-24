@@ -10,12 +10,12 @@ interface IProps extends IBaseProps {}
 export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
   public render() {
     const { problem } = this.stores;
-    const clickHandler = (url: string) => { window.location.replace(url); };
+    const handleClick = (url: string) => { window.location.replace(url); };
     return (
       <LinkSwitcherMenu
         currentTitle={problem.title}
         links={this.getProblemMenuItems()}
-        clickHandler={clickHandler}
+        onClick={handleClick}
       />
     );
   }
@@ -30,7 +30,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
       investigation.problems.forEach ( (problem) => {
         // Find the link, if any, in the portal offerings...
         const problemOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
-        const portalOffering = user.clueClassOfferings.find( (offering) => {
+        const portalOffering = user.portalClassOfferings.find( (offering) => {
           return (
             offering.className === user.className &&
             offering.problemOrdinal === problemOrdinal

@@ -9,7 +9,7 @@ export interface IMenuLink {
 interface IProps {
   currentTitle: string;
   links: IMenuLink[];
-  clickHandler?: (link: string) => void;
+  onClick?: (link: string) => void;
 }
 
 interface ILinkProps {
@@ -17,14 +17,14 @@ interface ILinkProps {
   disabled?: boolean;
   current?: boolean;
   link?: string;
-  clickHandler?: (link: string) => void;
+  onClick?: (link: string) => void;
 }
 
 function LinkMenuItem(props: ILinkProps) {
-  const {title, disabled, current, link, clickHandler } = props;
-  const doClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disabled && clickHandler && link ) {
-      clickHandler(link);
+  const {title, disabled, current, link, onClick } = props;
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!disabled && onClick && link ) {
+      onClick(link);
     }
   };
 
@@ -33,7 +33,7 @@ function LinkMenuItem(props: ILinkProps) {
       key={title}
       text={title}
       active={current}
-      onClick={doClick}
+      onClick={handleClick}
       disabled={disabled}
     />
   );
@@ -41,7 +41,7 @@ function LinkMenuItem(props: ILinkProps) {
 
 export class LinkSwitcherMenu extends React.Component<IProps, {}> {
   public render() {
-    const { currentTitle, links, clickHandler} = this.props;
+    const { currentTitle, links, onClick } = this.props;
     const menuItems = links.map(item => {
       return (
         <LinkMenuItem
@@ -50,7 +50,7 @@ export class LinkSwitcherMenu extends React.Component<IProps, {}> {
           current={item.title === currentTitle}
           disabled={item.link === undefined}
           link={item.link}
-          clickHandler={clickHandler}
+          onClick={onClick}
         />
       );
     });

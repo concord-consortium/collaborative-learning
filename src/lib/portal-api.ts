@@ -2,7 +2,7 @@ import { getErrorMessage } from "../utilities/super-agent-helpers";
 import * as superagent from "superagent";
 import * as queryString from "query-string";
 import { QueryParams } from "../utilities/url-params";
-import { IClueClassOffering } from "../models/stores/user";
+import { IPortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
 
 interface IPortalReport {
@@ -67,7 +67,7 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
           reject(getErrorMessage(err, res));
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
-          const [ignore, query, ...rest] = activityUrl.split("?");
+          const [ , query, ...rest] = activityUrl.split("?");
           const params = queryString.parse(query);
           resolve(params.problem as string);
         }
@@ -103,8 +103,8 @@ function getProblemOrdinal(offering: IPortalOffering) {
   return defaultOrdinal;
 }
 
-export function getClueClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
-  const result = [] as IClueClassOffering[];
+export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
+  const result = [] as IPortalClassOffering[];
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering) && urlParams) {
       let newLocationUrl = "";
@@ -129,7 +129,7 @@ export function getClueClassOfferings(portalOfferings: IPortalOffering[], urlPar
 
 // Sorts the offerings by class name (alphabetically) and then by problem ordinal
 // within each class.
-function sortOfferings(offerings: IClueClassOffering[]) {
+function sortOfferings(offerings: IPortalClassOffering[]) {
   const sortedByOrdinals = offerings.sort( (a, b) => {
     return numericOrdinal(a) - numericOrdinal(b);
   });
@@ -138,13 +138,13 @@ function sortOfferings(offerings: IClueClassOffering[]) {
 
 // A quick hack to make it easy to compare ordinal values that are actually
 // strings composed of dot-separated numbers, like "2.11". This assumes there
-// are never more than 10,000 problems in an investigation.
-function numericOrdinal(offering: IClueClassOffering) {
+// are never more than 1,000 problems in an investigation.
+function numericOrdinal(offering: IPortalClassOffering) {
   const ord = offering.problemOrdinal.split(".");
-  return parseInt(ord[0], 10) * 10000 + parseInt(ord[1], 10);
+  return parseInt(ord[0], 10) * 1000 + parseInt(ord[1], 10);
 }
 
 export const PortalOfferingParser = {
   getProblemOrdinal,
-  getClueClassOfferings
+  getPortalClassOfferings
 };

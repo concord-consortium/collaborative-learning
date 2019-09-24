@@ -10,19 +10,19 @@ interface IProps extends IBaseProps {}
 @observer
 export class ClassMenuContainer extends BaseComponent <IProps, {}> {
   public render() {
-    const {currentTitle, links} = this.getClueClasses();
-    const clickHandler = (url: string) => { window.location.replace(url); };
+    const {currentTitle, links} = this.getPortalClasses();
+    const handleClick = (url: string) => { window.location.replace(url); };
     return <LinkSwitcherMenu
       currentTitle={currentTitle}
       links={links}
-      clickHandler={clickHandler}
+      onClick={handleClick}
     />;
   }
 
   private getCurrentProblemOrdinal() {
-    const { offeringId, clueClassOfferings } = this.stores.user;
+    const { offeringId, portalClassOfferings } = this.stores.user;
     if (offeringId) {
-      const currentOffering = clueClassOfferings.find( offering => {
+      const currentOffering = portalClassOfferings.find( offering => {
         return (offering.offeringId === offeringId);
       });
       if (currentOffering) {
@@ -34,10 +34,10 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     return "0.0";
   }
 
-  private getClueClasses() {
+  private getPortalClasses() {
     // TODO: We don't have unit names, which would be very helpful for switching
     const {user} = this.stores;
-    const classNames = uniq(user.clueClassOfferings.map(o => o.className));
+    const classNames = uniq(user.portalClassOfferings.map(o => o.className));
     const currentProblemOrdinal = this.getCurrentProblemOrdinal();
     const links: IMenuLink[] = [];
 
@@ -61,7 +61,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     // If not, we use the first one in the list of offerings for that class.
 
     classNames.forEach( (className) => {
-      const classLinks = user.clueClassOfferings.filter(o => o.className === className);
+      const classLinks = user.portalClassOfferings.filter(o => o.className === className);
       const matchingLink = classLinks.find( l => l.problemOrdinal === currentProblemOrdinal);
       if (matchingLink) {
         links.push( { title: className, link: matchingLink.location });
