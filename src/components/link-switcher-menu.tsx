@@ -4,12 +4,14 @@ import * as React from "react";
 export interface IMenuLink {
   title: string;
   link?: string;
+  enabled?: boolean;
+  extras?: any;
 }
 
 interface IProps {
   currentTitle: string;
   links: IMenuLink[];
-  onClick?: (link: string) => void;
+  onClick?: (link: string, extras?: any) => void;
 }
 
 interface ILinkProps {
@@ -17,14 +19,15 @@ interface ILinkProps {
   disabled?: boolean;
   current?: boolean;
   link?: string;
-  onClick?: (link: string) => void;
+  onClick?: (link?: string, extras?: any) => void;
+  extras?: any;
 }
 
 function LinkMenuItem(props: ILinkProps) {
-  const {title, disabled, current, link, onClick } = props;
+  const {title, disabled, current, link, onClick, extras } = props;
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disabled && onClick && link ) {
-      onClick(link);
+    if (!disabled && onClick) {
+      onClick(link, extras);
     }
   };
 
@@ -48,8 +51,9 @@ export class LinkSwitcherMenu extends React.Component<IProps, {}> {
           key={item.title}
           title={item.title}
           current={item.title === currentTitle}
-          disabled={item.link === undefined}
+          disabled={!item.enabled}
           link={item.link}
+          extras={item.extras}
           onClick={onClick}
         />
       );

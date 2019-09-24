@@ -64,9 +64,17 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
       const classLinks = user.portalClassOfferings.filter(o => o.className === className);
       const matchingLink = classLinks.find( l => l.problemOrdinal === currentProblemOrdinal);
       if (matchingLink) {
-        links.push( { title: className, link: matchingLink.location });
+        links.push({
+          title: className,
+          link: matchingLink.location,
+          enabled: true
+        });
       } else if (classLinks) {
-        links.push( { title: className, link: classLinks[0].location} );
+        links.push({
+          title: className,
+          link: classLinks[0].location,
+          enabled: true
+        });
       } else {
         // tslint:disable-next-line:no-console
         console.log(`Warning -- no problems assigned in this class ${className}`);
