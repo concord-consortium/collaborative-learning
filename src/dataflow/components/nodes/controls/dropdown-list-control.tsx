@@ -130,7 +130,6 @@ export class DropdownListControl extends Rete.Control {
       label,
       isDisabled: null
     };
-    this.ensureValueIsInBounds();
   }
 
   public setValue = (val: any) => {
