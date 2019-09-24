@@ -26,6 +26,7 @@ export const DataflowContentModel = types
     programStartTime: 0,
     programEndTime: 0,
     programRunTime: DEFAULT_PROGRAM_TIME,
+    programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .preProcessSnapshot(snapshot => processImport(snapshot))
@@ -44,6 +45,9 @@ export const DataflowContentModel = types
     setProgramRunId(id: string) {
       self.programRunId = id;
     },
+    setProgramComplete() {
+      self.programIsRunning = "";
+    },
     setProgramStartEndTime(startTime: number, endTime: number) {
       self.programStartTime = startTime;
       self.programEndTime = endTime;
@@ -58,6 +62,9 @@ export const DataflowContentModel = types
       self.programZoom.dx = dx;
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
+    },
+    setRunningStatus(endTime: number) {
+      endTime > Date.now() ? self.programIsRunning = "true" : self.programIsRunning = "";
     }
   }));
 

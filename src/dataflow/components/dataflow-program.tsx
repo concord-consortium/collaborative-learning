@@ -74,6 +74,9 @@ interface IProps extends SizeMeProps {
   onProgramRunTimeChange: (programRunTime: number) => void;
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
+  programIsRunning?: string;
+  onProgramComplete: () => void;
+  onCheckProgramRunState: (endTime: number) => void;
 }
 
 interface IState {
@@ -117,6 +120,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
+
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -170,6 +174,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
+    }
+    if (this.isComplete()) {
+      this.props.onProgramComplete();
     }
   }
 
@@ -322,7 +329,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.updateRunAndGraphStates();
 
-      if (!this.props.readOnly && !this.isComplete()) {
+      if (!this.props.readOnly && !this.isComplete() || this.props.programIsRunning === "true") {
         this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
@@ -744,7 +751,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (this.props.programEndTime && (Date.now() >= this.props.programEndTime)) {
         const hasDataStorage = this.getNodeCount("Data Storage") > 0;
         const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
-        this.setState({programRunState: ProgramRunStates.Complete, programDisplayState});
+        this.props.onCheckProgramRunState(this.props.programEndTime);
+        this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
+        clearInterval(this.intervalHandle);
       }
     }
   }
