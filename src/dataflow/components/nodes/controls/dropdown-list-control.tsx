@@ -4,11 +4,17 @@ import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import "./dropdown-list-control.sass";
 
+interface ListOption {
+  name: string;
+  icon?: string;
+  val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
+}
+
 export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
-  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: any, readonly = false, label = "") {
+  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: ListOption[], readonly = false, label = "") {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -17,11 +23,11 @@ export class DropdownListControl extends Rete.Control {
       return (e: any) => { onChange(e.target.value); };
     };
     this.component = (compProps: {
-                                    value: string;
+                                    value: string | number;
                                     onItemClick: () => void;
                                     onListClick: () => void;
                                     showList: boolean
-                                    optionArray: any;
+                                    optionArray: ListOption[];
                                     listClass: string;
                                     label: string;
                                   }) => (
@@ -38,27 +44,28 @@ export class DropdownListControl extends Rete.Control {
       </div>
     );
 
-    const renderDropdownList = (val: string,
+    const renderDropdownList = (val: string | number,
                                 showList: boolean,
                                 onItemClick: () => void,
                                 onListClick: any,
-                                options: any,
+                                options: ListOption[],
                                 listClass: string) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
-      let icon = "";
-      const option = options.find((op: any) => op.name === val);
-      if (option && option.icon) {
-        icon = `#${option.icon}`;
-      }
+      const optionValue = (opt: ListOption) => opt.hasOwnProperty("val") ? opt.val : opt.name;
+      const option = options.find((opt) => optionValue(opt) === val);
+      const name = option ? option.name : val;
+      const icon = option && option.icon ? `#${option.icon}` : null;
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onItemClick)}>
+            { icon &&
             <svg className="icon top">
               <use xlinkHref={icon}/>
             </svg>
-            <div className="label">{val}</div>
+            }
+            <div className="label">{name}</div>
             <svg className="icon dropdown-caret">
               <use xlinkHref="#icon-dropdown-caret"/>
             </svg>
@@ -69,11 +76,13 @@ export class DropdownListControl extends Rete.Control {
               <div
                 className={ops.name === val ? `item ${listClass} selected` : `item ${listClass} selectable`}
                 key={i}
-                onMouseDown={onListClick(ops.name)}
+                onMouseDown={onListClick(optionValue(ops))}
               >
+                { ops.icon &&
                 <svg className="icon">
                   <use xlinkHref={`#${ops.icon}`}/>
                 </svg>
+                }
                 <div className="label">{ops.name}</div>
               </div>
             ))}
