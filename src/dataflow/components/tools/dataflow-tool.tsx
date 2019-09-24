@@ -10,6 +10,7 @@ import { DataflowProgram } from "../dataflow-program";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import "./dataflow-tool.sass";
+import { IOtherDocumentProperties } from "../../../lib/db-types";
 
 interface IProps {
   model: ToolTileModelType;
@@ -63,7 +64,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     );
   }
 
-  private handleStartProgram = async (title: string, id: string, startTime: number, endTime: number) => {
+  private handleStartProgram = async (datasetName: string, id: string, startTime: number, endTime: number) => {
     const {documents, db, ui} = this.stores;
     const {problemWorkspace} = ui;
     // get the currently loaded document, we're going to spawn a new document based on it
@@ -82,11 +83,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             programContent.setProgramStartEndTime(startTime, endTime);
           }
         });
-
+        const properties: IOtherDocumentProperties = { dfRunId: id };
+        if (datasetName.length > 0) {
+          const dataProp = "dfHasData";
+          properties[dataProp] = "true";
+        }
         // create and load the new document
         const params: ICreateOtherDocumentParams = {
-                title: title || id,
-                properties: { dfRunId: id },
+                title: datasetName || `${primaryDocument.title}-${Date.now()}` ,
+                properties,
                 content: JSON.parse(documentContent.publish())
               };
         const newPersonalDocument = await db.createPersonalDocument(params);
