@@ -276,3 +276,38 @@ export const ProgramRunTimes: ProgramRunTime[] = [
   },
   */
 ];
+
+export const IntervalTimes: ProgramRunTime[] = [
+  {
+    text: "1 second",
+    val: 1
+  },
+  {
+    text: "5 seconds",
+    val: 5
+  },
+  {
+    text: "10 seconds",
+    val: 10
+  },
+  {
+    text: "15 seconds",
+    val: 15
+  },
+  {
+    text: "1 minute",
+    val: 60
+  },
+  {
+    text: "5 minutes",
+    val: 300
+  },
+  {
+    text: "10 minutes",
+    val: 600
+  },
+  {
+    text: "1 hour",
+    val: 3600
+  }
+];
