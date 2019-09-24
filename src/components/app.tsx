@@ -89,8 +89,12 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         setUnitAndProblem (stores, unitCode, problemId).then( () => {
           updateProblem(stores, problemId);
           initRollbar(stores, problemId);
-          resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
+          resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
         });
+        // updateProblem(stores, problemId);
+      } else {
+        initRollbar(stores, "undefined");
+        resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
       }
     })
     .catch((error) => {
