@@ -8,7 +8,7 @@ export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
-  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: any, readonly = false) {
+  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: any, readonly = false, label = "") {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -23,8 +23,12 @@ export class DropdownListControl extends Rete.Control {
                                     showList: boolean
                                     optionArray: any;
                                     listClass: string;
+                                    label: string;
                                   }) => (
-      <div>
+      <div className="node-select-container">
+        { label &&
+        <div className="node-select-label">{label}</div>
+        }
         { renderDropdownList(compProps.value,
                              compProps.showList,
                              compProps.onItemClick,
@@ -98,6 +102,7 @@ export class DropdownListControl extends Rete.Control {
       showList: false,
       optionArray,
       listClass: key,
+      label
     };
   }
 
