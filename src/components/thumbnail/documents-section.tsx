@@ -50,7 +50,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     const sectionTitle = getSectionTitle(section, stores);
     const { documents, user } = stores;
     let sectionDocs: DocumentModelType[] = [];
-    const publishedDocs: { [originDoc: string]: DocumentModelType } = {};
+    const publishedDocs: { [source: string]: DocumentModelType } = {};
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -61,10 +61,15 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
         documents
           .byType(type as any)
           .forEach(doc => {
-            if (doc.originDoc) {
-              const entry = publishedDocs[doc.originDoc];
+            // personal documents and learning logs have originDocs.
+            // problem documents only have the uids of their creator,
+            // but as long as we're scoped to a single problem, there
+            // shouldn't be published documents from other problems.
+            const source = doc.originDoc || doc.uid;
+            if (source) {
+              const entry = publishedDocs[source];
               if (!entry || (entry.createdAt < doc.createdAt)) {
-                publishedDocs[doc.originDoc] = doc;
+                publishedDocs[source] = doc;
               }
             }
           });
