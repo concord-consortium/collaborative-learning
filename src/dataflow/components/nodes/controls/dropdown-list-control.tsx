@@ -130,6 +130,7 @@ export class DropdownListControl extends Rete.Control {
       label,
       isDisabled: null
     };
+    this.ensureValueIsInBounds();
   }
 
   public setValue = (val: any) => {
@@ -148,10 +149,48 @@ export class DropdownListControl extends Rete.Control {
    */
   public setDisabledFunction = (fn: DisabledChecker) => {
     this.props.isDisabled = fn;
+    this.ensureValueIsInBounds();
     (this as any).update();
   }
 
   public setOptions = (options: any) => {
     this.props.optionArray = options;
+  }
+
+  /**
+   * This is called both when we load (in case the options have changed, and the user
+   * has a value that is no longer valid) and every time the isDisabled function changes.
+   * If the control has a value that is no longer valid, we pick the best option: if the
+   * values are numeric, we pick the closest enabled option. Otherwise, we pick the
+   * first enabled option.
+   */
+  private ensureValueIsInBounds = () => {
+    const { optionArray, value } = this.props;
+    const enabledOptions: ListOption[] = optionArray.filter( (opt: ListOption) => (
+      !this.props.isDisabled || !this.props.isDisabled(opt)
+    ));
+    if (enabledOptions.find(opt => optionValue(opt) === value)) {
+      return;
+    }
+    // our value is not valid and we need to pick a new one
+    if (typeof(value) === "number") {
+      let smallestDiff = Infinity;
+      let closestOption;
+      enabledOptions.forEach(opt => {
+        const optionVal = optionValue(opt);
+        if (typeof(optionVal) !== "number") return;
+        const diff = Math.abs(optionVal - value);
+        if (diff < smallestDiff) {
+          smallestDiff = diff;
+          closestOption = opt;
+        }
+      });
+      if (closestOption) {
+        this.setValue(optionValue(closestOption));
+        return;
+      }
+    }
+    this.setValue(optionValue(enabledOptions[0]));
+    return;
   }
 }
