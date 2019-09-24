@@ -212,25 +212,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleDeleteDocument = (document: DocumentModelType) => {
     this.stores.ui.confirm(`Delete this workspace?`, `Delete Workspace`)
-      .then((deleted: boolean) => {
+      .then((confirmDelete: boolean) => {
         const docType = document.type;
-        const invalidDocs = ProblemDocument || PublicationDocument || PersonalPublication ||
-                            LearningLogPublication || SupportPublication;
-        if (docType !== invalidDocs) {
+        if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
           document.setProperty("isDeleted", "true");
-          this.handleDeleteOpenPrimaryDocument(deleted);
+          this.handleDeleteOpenPrimaryDocument();
         }
       });
   }
 
-  private handleDeleteOpenPrimaryDocument = async (softDelete: boolean) => {
+  private handleDeleteOpenPrimaryDocument = async () => {
     const { appConfig: { defaultDocumentType, defaultDocumentContent },
             db, ui: { problemWorkspace } } = this.stores;
     const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
-    if (softDelete === true) {
-      if (defaultDocument) {
-        problemWorkspace.setPrimaryDocument(defaultDocument);
-      }
+    if (defaultDocument) {
+      problemWorkspace.setPrimaryDocument(defaultDocument);
     }
   }
 
