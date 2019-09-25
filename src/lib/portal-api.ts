@@ -120,6 +120,16 @@ function getProblemOrdinal(offering: IPortalOffering) {
   return defaultOrdinal;
 }
 
+function getUnitCode(offering: IPortalOffering) {
+  const defaultUnit = "s+s";
+  const problemRegEx = /unit=([^$|&]*)/;
+  const result = problemRegEx.exec(offering.activity_url);
+  if (result && result[1]) {
+    return (result[1] as string) || defaultUnit;
+  }
+  return defaultUnit;
+}
+
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
   const result = [] as IPortalClassOffering[];
   const addOffering = (offering: IPortalOffering) => {
@@ -135,6 +145,7 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlP
       result.push({
         className: offering.clazz,
         problemOrdinal: getProblemOrdinal(offering),
+        unitCode: getUnitCode(offering),
         offeringId: `${offering.id}`,
         location: newLocationUrl
       });

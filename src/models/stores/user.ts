@@ -8,6 +8,7 @@ export type UserType = typeof UserTypeEnum.Type;
 export const PortalClassOffering = types.model("PortalClassOffering", {
   className: "",
   problemOrdinal: "",
+  unitCode: "",
   offeringId: "",
   location: ""
 });
