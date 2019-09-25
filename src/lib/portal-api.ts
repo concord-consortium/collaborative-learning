@@ -4,6 +4,7 @@ import * as queryString from "query-string";
 import { QueryParams } from "../utilities/url-params";
 import { IPortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
+import { parseUrl } from "query-string";
 
 interface IPortalReport {
   url: string;
@@ -112,22 +113,16 @@ interface IPortalOffering {
 // end, e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
 function getProblemOrdinal(offering: IPortalOffering) {
   const defaultOrdinal = "x.x.x";
-  const problemRegEx = /problem=(\d\.\d)/;
-  const result = problemRegEx.exec(offering.activity_url);
-  if (result && result[1]) {
-    return (result[1] as string) || defaultOrdinal;
-  }
-  return defaultOrdinal;
+  const queryParams = parseUrl(offering.activity_url);
+  const result = queryParams.query.problem as string;
+  return (result || defaultOrdinal);
 }
 
 function getUnitCode(offering: IPortalOffering) {
   const defaultUnit = "s+s";
-  const problemRegEx = /unit=([^$|&]*)/;
-  const result = problemRegEx.exec(offering.activity_url);
-  if (result && result[1]) {
-    return (result[1] as string) || defaultUnit;
-  }
-  return defaultUnit;
+  const queryParams = parseUrl(offering.activity_url);
+  const result = queryParams.query.unit as string;
+  return (result || defaultUnit);
 }
 
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
