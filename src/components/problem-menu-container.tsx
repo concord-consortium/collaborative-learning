@@ -45,7 +45,8 @@ export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
         const portalOffering = user.portalClassOfferings.find( (offering) => {
           return (
             offering.className === user.className &&
-            offering.problemOrdinal === problemOrdinal
+            offering.problemOrdinal === problemOrdinal &&
+            offering.unitCode === unitCode
           );
         });
         links.push( {

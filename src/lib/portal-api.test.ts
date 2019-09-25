@@ -29,7 +29,7 @@ describe("Portal Offerings", () => {
   });
 
   describe("PortalOfferingParser", () => {
-    const { getProblemOrdinal, getPortalClassOfferings } = PortalOfferingParser;
+    const { getProblemOrdinal, getUnitCode } = PortalOfferingParser;
 
     const samplePortalOffering = {
       id: 1190,
@@ -37,13 +37,20 @@ describe("Portal Offerings", () => {
       clazz: "ClueClass1",
       clazz_id: 242,
       activity: "CLUE 1.2: Stretching a Figure - Comparing Similar Figures",
-      activity_url: "https://collaborative-learning.concord.org/branch/master/?problem=1.2"
+      activity_url: "https://collaborative-learning.concord.org/branch/master/?problem=1.2&unit=foo"
     };
 
     describe("getProblemOrdinal", () => {
       it("should return a problemOrdinal", () => {
-        const ordinal = getProblemOrdinal(samplePortalOffering);
+        const ordinal = getProblemOrdinal(samplePortalOffering.activity_url);
         expect(ordinal).toEqual("1.2");
+      });
+    });
+
+    describe("getUnitCode", () => {
+      it("should return a unit code for problem", () => {
+        const unitCode = getUnitCode(samplePortalOffering.activity_url);
+        expect(unitCode).toEqual("foo");
       });
     });
 

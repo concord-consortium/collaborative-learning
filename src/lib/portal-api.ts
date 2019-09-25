@@ -72,21 +72,9 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
           reject(getErrorMessage(err, res));
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
-          const [ , query, ...rest] = activityUrl.split("?");
-          const params = queryString.parse(query);
-          let unitCode = params.unit as string;
-          let problemOrdinal = params.problem as string;
-          if (!unitCode) {
-            // tslint:disable-next-line
-            console.warn("Missing unitCode for problem, Using defalut: s+s");
-            unitCode = "s+s";
-          }
-          if (!problemOrdinal) {
-            // tslint:disable-next-line
-            console.warn("Missing problemOrdinal for problem, Using defalut: 1.1");
-            problemOrdinal = "1.1";
-          }
-          resolve({unitCode, problemOrdinal});
+          resolve({
+            unitCode: getUnitCode(activityUrl),
+            problemOrdinal: getProblemOrdinal(activityUrl)});
         }
       });
     }
@@ -113,20 +101,30 @@ interface IPortalOffering {
 // end.
 
 // For problems... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
-function getProblemOrdinal(offering: IPortalOffering) {
+function getProblemOrdinal(url: string) {
   const defaultOrdinal = "x.x.x";
-  const queryParams = parseUrl(offering.activity_url);
-  const result = queryParams.query.problem as string;
-  return (result || defaultOrdinal);
+  const queryParams = parseUrl(url);
+  const problemOrdinal = queryParams.query.problem as string;
+  if (! problemOrdinal) {
+    // tslint:disable-next-line
+    console.warn(`Missing problemOrdinal. Using default: ${defaultOrdinal}`);
+    return (defaultOrdinal);
+  }
+  return (problemOrdinal);
 }
 
 // For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
 // for the "Stretching and Shrinking" unit.
-function getUnitCode(offering: IPortalOffering) {
+function getUnitCode(url: string) {
   const defaultUnit = "s+s";
-  const queryParams = parseUrl(offering.activity_url);
-  const result = queryParams.query.unit as string;
-  return (result || defaultUnit);
+  const queryParams = parseUrl(url);
+  const unit = queryParams.query.unit as string;
+  if (! unit) {
+    // tslint:disable-next-line
+    console.warn(`Missing unitCode. Using default: ${defaultUnit}`);
+    return (defaultUnit);
+  }
+  return (unit);
 }
 
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
@@ -143,8 +141,8 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlP
       }
       result.push({
         className: offering.clazz,
-        problemOrdinal: getProblemOrdinal(offering),
-        unitCode: getUnitCode(offering),
+        problemOrdinal: getProblemOrdinal(offering.activity_url),
+        unitCode: getUnitCode(offering.activity_url),
         offeringId: `${offering.id}`,
         location: newLocationUrl
       });
@@ -173,5 +171,6 @@ function numericOrdinal(offering: IPortalClassOffering) {
 
 export const PortalOfferingParser = {
   getProblemOrdinal,
+  getUnitCode,
   getPortalClassOfferings
 };
