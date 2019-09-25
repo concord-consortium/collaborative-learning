@@ -23,6 +23,7 @@ interface LogMessage {
   investigation?: string;
   problem?: string;
   section?: string;
+  group?: string;
   time: number;
   event: string;
   method: string;
@@ -198,6 +199,10 @@ export class Logger {
 
     if (user.loggingRemoteEndpoint) {
       logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
+    }
+
+    if (user.isStudent) {
+      logMessage.group = user.latestGroupId;
     }
 
     return logMessage;
