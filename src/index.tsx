@@ -46,8 +46,12 @@ const initializeApp = async () => {
 
   setPageTitle(stores);
   stores.ui.setShowDemoCreator(!!showDemoCreator);
-
-  stores.supports.createFromUnit({unit, investigation, problem, documents: stores.documents});
+  stores.supports.createFromUnit({
+    unit: stores.unit,
+    investigation: stores.investigation,
+    problem: stores.problem,
+    documents: stores.documents
+  });
 
   ReactDOM.render(
     <Provider stores={stores}>
