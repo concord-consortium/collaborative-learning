@@ -45,9 +45,6 @@ export const DataflowContentModel = types
     setProgramRunId(id: string) {
       self.programRunId = id;
     },
-    setProgramComplete() {
-      self.programIsRunning = "";
-    },
     setProgramStartEndTime(startTime: number, endTime: number) {
       self.programStartTime = startTime;
       self.programEndTime = endTime;

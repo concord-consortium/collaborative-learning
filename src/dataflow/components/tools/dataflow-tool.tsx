@@ -47,7 +47,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 onStartProgram={this.handleStartProgram}
                 onSetProgramRunId={this.handleSetProgramRunId}
                 programRunId={programRunId}
-                onProgramComplete={this.handleProgramComplete}
                 programIsRunning={programIsRunning}
                 onCheckProgramRunState={this.handleCheckProgramRunState}
                 onSetProgramStartTime={this.handleSetProgramStartTime}
@@ -138,9 +137,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
     this.getContent().setProgramZoom(dx, dy, scale);
   }
-  private handleProgramComplete = () => {
-    this.getContent().setProgramComplete();
-  }
+
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }

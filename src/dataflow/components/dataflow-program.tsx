@@ -75,7 +75,6 @@ interface IProps extends SizeMeProps {
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   programIsRunning?: string;
-  onProgramComplete: () => void;
   onCheckProgramRunState: (endTime: number) => void;
 }
 
@@ -176,7 +175,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.initProgramEditor();
     }
     if (this.isComplete()) {
-      this.props.onProgramComplete();
+      this.props.onCheckProgramRunState(this.props.programEndTime);
     }
   }
 
@@ -462,7 +461,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onSetProgramEndTime(programEndTime);
     const hasDataStorage = this.getNodeCount("Data Storage") > 0;
     const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
-    this.setState({programRunState: ProgramRunStates.Complete, programDisplayState});
+    this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
+    this.props.onCheckProgramRunState(programEndTime);
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
