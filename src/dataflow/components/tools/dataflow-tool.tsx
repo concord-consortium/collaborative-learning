@@ -85,8 +85,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         });
         const properties: IOtherDocumentProperties = { dfRunId: id };
         if (datasetName.length > 0) {
-          const dataProp = "dfHasData";
-          properties[dataProp] = "true";
+          properties.dfHasData = "true";
         }
         // create and load the new document
         const params: ICreateOtherDocumentParams = {
