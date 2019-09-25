@@ -110,7 +110,9 @@ interface IPortalOffering {
 
 // Extracts the problem ordinal from the activity_url. An activity_url is part
 // of what the portal returns as an offering and has the problem ordinal at the
-// end, e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
+// end.
+
+// For problems... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
 function getProblemOrdinal(offering: IPortalOffering) {
   const defaultOrdinal = "x.x.x";
   const queryParams = parseUrl(offering.activity_url);
@@ -118,6 +120,8 @@ function getProblemOrdinal(offering: IPortalOffering) {
   return (result || defaultOrdinal);
 }
 
+// For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
+// for the "Stretching and Shrinking" unit.
 function getUnitCode(offering: IPortalOffering) {
   const defaultUnit = "s+s";
   const queryParams = parseUrl(offering.activity_url);
