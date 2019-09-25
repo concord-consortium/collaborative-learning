@@ -9,6 +9,26 @@
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",
   "defaultLearningLogTitle": "UntitledLog",
+  "documentLabels": {
+    "personal": {
+      "labels": {
+        "1": "Extra Workspace",
+        "n": "Extra Workspaces"
+      }
+    },
+    "problem": {
+      "labels": {
+        "1": "Problem Workspace",
+        "n": "Problem Workspaces"
+      }
+    },
+    "learningLog": {
+      "labels": {
+        "1": "Learning Log",
+        "n": "Learning Logs"
+      }
+    }
+  },
   "showClassSwitcher": true,
   "rightNavTabs": [
     {
@@ -17,28 +37,19 @@
       "hideGhostUser": true,
       "sections": [
         {
-          "title": "Workspaces I've Created",
+          "title": "Extra Workspaces",
           "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
+          "dataTestHeader": "my-work-section-workspaces",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
           "properties": ["!isDeleted"]
         },
         {
-          "title": "%abbrevInvestigation%",
+          "title": "Problem Workspaces",
           "type": "problem-documents",
-          "dataTestHeader": "my-work-section",
+          "dataTestHeader": "my-work-section-investigations",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["problem"]
-        },
-        {
-          "title": "Learning Logs",
-          "type": "learning-logs",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["learningLog"],
-          "addDocument": true,
-          "properties": ["!isDeleted"]
         }
       ]
     },
@@ -48,26 +59,26 @@
       "sections": [
         {
           "className": "section personal published",
-          "title": "Published Personal",
+          "title": "Extra Workspaces",
           "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
+          "dataTestHeader": "class-work-section-personal",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["personalPublication"]
         },
         {
           "className": "section problem published",
-          "title": "Published",
+          "title": "Problem Workspaces",
           "type": "published-problem-documents",
-          "dataTestHeader": "class-work-section",
+          "dataTestHeader": "class-work-section-published",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["publication"],
           "showStars": true
         },
         {
           "className": "section learning-log published",
-          "title": "Published Logs",
+          "title": "Learning Logs",
           "type": "published-learning-logs",
-          "dataTestHeader": "class-work-section",
+          "dataTestHeader": "class-work-section-learning-log",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["learningLogPublication"]
         },
@@ -75,6 +86,7 @@
           "className": "section problem published starred",
           "title": "Starred",
           "type": "starred-problem-documents",
+          "dataTestHeader": "class-work-section-starred",
           "documentTypes": ["publication"],
           "properties": ["starred"],
           "showStars": true
@@ -90,7 +102,9 @@
           "type": "learning-logs",
           "dataTestHeader": "learning-log-section",
           "dataTestItem": "learning-log-list-items",
-          "documentTypes": ["learningLog"]
+          "documentTypes": ["learningLog"],
+          "addDocument": true,
+          "properties": ["!isDeleted"]
         }
       ]
     },
@@ -99,9 +113,9 @@
       "label": "Supports",
       "sections": [
         {
-          "title": "Just-in-time Supports",
+          "title": "Problem Supports",
           "type": "curricular-supports",
-          "dataTestHeader": "supports-section",
+          "dataTestHeader": "supports-section-jit",
           "dataTestItem": "supports-list-items",
           "documentTypes": ["supportPublication"],
           "properties": ["curricularSupport"]
@@ -109,7 +123,7 @@
         {
           "title": "Teacher Supports",
           "type": "teacher-supports",
-          "dataTestHeader": "supports-section",
+          "dataTestHeader": "supports-section-teacher-supports",
           "dataTestItem": "supports-list-items",
           "documentTypes": ["supportPublication"],
           "properties": ["teacherSupport"]

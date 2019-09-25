@@ -133,17 +133,6 @@
               "supports": [
                 {"text": "What information does the walking rate provide?"}
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -355,19 +344,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ]
-              }
             }
           ],
           "supports": []
@@ -466,17 +442,6 @@
                   "text": "How is the constant rate of change represented in a context? Table? Graph? Equation?"
                 }
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -640,17 +605,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -777,17 +731,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -986,17 +929,6 @@
               "supports": [
                 { "text": "Would it help to look at examples where you used a table, graph, or equation to answer a question?" }
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1108,17 +1040,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1390,17 +1311,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1511,17 +1421,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1602,17 +1501,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1704,17 +1592,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -1834,17 +1711,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -2076,17 +1942,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []
@@ -2210,17 +2065,6 @@
                 }]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": ""
-                  }
-                }]
-              }
             }
           ],
           "supports": []

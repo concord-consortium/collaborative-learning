@@ -8,8 +8,7 @@ export enum SectionType {
   initialChallenge = "initialChallenge",
   whatIf = "whatIf",
   nowWhatDoYouKnow = "nowWhatDoYouKnow",
-  didYouKnow = "didYouKnow",
-  extraWorkspace = "extraWorkspace"
+  didYouKnow = "didYouKnow"
 }
 
 // TODO: figure out way to add SectionType as the index type to this const
@@ -18,8 +17,7 @@ export const sectionInfo = {
   [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
   [SectionType.whatIf]: { title: "What if...?", abbrev: "W?" },
   [SectionType.nowWhatDoYouKnow]: { title: "Now What Do You Know?", abbrev: "N?" },
-  [SectionType.didYouKnow]: { title: "Did You Know?", abbrev: "D?" },
-  [SectionType.extraWorkspace]: { title: "Extra Workspace", abbrev: "Ex" }
+  [SectionType.didYouKnow]: { title: "Did You Know?", abbrev: "D?" }
 };
 
 export type AllSectionType = "all";
