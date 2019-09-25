@@ -55,15 +55,17 @@ export class Firebase {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode, user } = this.db.stores;
     const { demoName } = urlParams;
+
     const parts = [];
     if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
+      if ((appMode === "dev") || (appMode === "test")) {
         parts.push(this.userId);
       }
-      else if (appMode === "demo") {
+
+      else if ((appMode === "demo") || (appMode === "qa")) {
         const slug = demoName && demoName.length > 0 ? this.escapeKey(demoName) : "";
         if (slug.length > 0) {
           parts.push(slug);
