@@ -34,7 +34,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["!dfRunId"]
+          "properties": ["!dfHasData"]
         },
         {
           "title": "Data",
@@ -42,7 +42,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["dfRunId"]
+          "properties": ["dfHasData"]
         }
       ]
     },
@@ -57,7 +57,7 @@
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["personalPublication"],
-          "properties": ["!dfRunId"]
+          "properties": ["!dfHasData"]
         },
         {
           "className": "section personal published",
@@ -66,7 +66,7 @@
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["personalPublication"],
-          "properties": ["dfRunId"]
+          "properties": ["dfHasData"]
         }
       ]
     }
