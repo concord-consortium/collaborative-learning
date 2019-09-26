@@ -6,7 +6,7 @@ import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { UserModel } from "./models/stores/user";
 import { setUnitAndProblem } from "./models/curriculum/unit";
-import { urlParams, DefaultProblemOrdinal } from "./utilities/url-params";
+import { urlParams } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
@@ -29,7 +29,7 @@ const initializeApp = async () => {
   const user = UserModel.create();
 
   const unitId = urlParams.unit;
-  const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
+  const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
 
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator });

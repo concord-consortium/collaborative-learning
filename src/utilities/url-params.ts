@@ -2,8 +2,6 @@ import { parse } from "query-string";
 import { AppMode } from "../models/stores/stores";
 import { DBClearLevel } from "../lib/db";
 
-export const DefaultProblemOrdinal = "1.1";
-
 export interface QueryParams {
   // appMode is "authed", "test" or "dev" with the default of dev
   appMode?: AppMode;

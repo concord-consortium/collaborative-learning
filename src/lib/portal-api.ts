@@ -1,10 +1,10 @@
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import * as superagent from "superagent";
-import * as queryString from "query-string";
 import { QueryParams } from "../utilities/url-params";
 import { IPortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
 import { parseUrl } from "query-string";
+import * as appConfigJson from "../clue/app-config.json";
 
 interface IPortalReport {
   url: string;
@@ -79,8 +79,10 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
       });
     }
     else {
-      // TODO FIXME: Use default values for unitCode and problemOrdinal ?
-      resolve({ unitCode: "undefined", problemOrdinal: "undefined" });
+      resolve({
+        unitCode: appConfigJson.defaultUnit,
+        problemOrdinal: appConfigJson.defaultProblemOrdinal
+      });
     }
   });
 };
@@ -102,7 +104,7 @@ interface IPortalOffering {
 
 // For problems... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
 function getProblemOrdinal(url: string) {
-  const defaultOrdinal = "x.x.x";
+  const defaultOrdinal = appConfigJson.defaultProblemOrdinal;
   const queryParams = parseUrl(url);
   const problemOrdinal = queryParams.query.problem as string;
   if (! problemOrdinal) {
@@ -116,7 +118,7 @@ function getProblemOrdinal(url: string) {
 // For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
 // for the "Stretching and Shrinking" unit.
 function getUnitCode(url: string) {
-  const defaultUnit = "s+s";
+  const defaultUnit = appConfigJson.defaultUnit;
   const queryParams = parseUrl(url);
   const unit = queryParams.query.unit as string;
   if (! unit) {

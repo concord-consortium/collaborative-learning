@@ -1,11 +1,12 @@
 import * as jwt from "jsonwebtoken";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
+import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { IPortalClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
+import * as appConfigJson from "../clue/app-config.json";
 
 const initials = require("initials");
 
@@ -321,7 +322,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
     // when launched as a report, the params will not contain the problemOrdinal
-    const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
+    const problemOrdinal = urlParams.problem || appConfigJson.defaultProblemOrdinal;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 

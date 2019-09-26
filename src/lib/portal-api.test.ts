@@ -1,6 +1,7 @@
 import { getPortalOfferings, PortalOfferingParser } from "./portal-api";
 import * as nock from "nock";
 import { TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
+import * as appConfigJson from "../clue/app-config.json";
 
 const userType = "teacher";
 const userID = 22;
@@ -10,8 +11,8 @@ const fakeJWT = {};
 describe("Portal Offerings", () => {
   beforeEach(() => {
     nock(/superfake/)
-    .get(/\/api\/v1\/offerings\/\?user_id=22/)
-    .reply(200, TeacherOfferings);
+      .get(/\/api\/v1\/offerings\/\?user_id=22/)
+      .reply(200, TeacherOfferings);
   });
 
   afterEach(() => nock.cleanAll());
@@ -53,26 +54,35 @@ describe("Portal Offerings", () => {
         expect(unitCode).toEqual("foo");
       });
     });
+  });
 
-    // TODO: Fix this!
-    // describe("getClueClassOfferings", () => {
-    //   it("Should parse an array of one Portal offering, and return a Array of one problem", () => {
-    //     const clueClassOfferings = getClueClassOfferings([samplePortalOffering]);
-    //     // expect(clueClassOfferings.length).toBe(1);   // TODO: Why isn't this 1?
-    //     const problem = clueClassOfferings[0];
-    //     expect(problem.className).toEqual("ClueClass1");
-    //   });
+  describe("PortalOfferingParserWithDefaults", () => {
+    const { getProblemOrdinal, getUnitCode } = PortalOfferingParser;
 
-    //   it("should work with multiple offerings recorded from portal api", () => {
-    //     const clueClassOfferings = getClueClassOfferings(TeacherOfferings);
-    //     expect(clueClassOfferings.length).toEqual(3);
-    //     expect(clueClassOfferings[0].className).toEqual("ClueClass1");
-    //     expect(clueClassOfferings[1].className).toEqual("ClueClass1");
-    //     expect(clueClassOfferings[2].className).toEqual("ClueClass2");
-    //     // The class "DavesTETester" doesn't have a clue assignment.
-    //     // Our list should not include assigments from that class.
-    //   });
-    // });
+    const samplePortalOffering = {
+      id: 1190,
+      teacher: "Dave Love",
+      clazz: "ClueClass1",
+      clazz_id: 242,
+      activity: "CLUE 1.2: Stretching a Figure - Comparing Similar Figures",
+      activity_url: "https://collaborative-learning.concord.org/branch/master/"
+    };
 
+    const defaultOrdinal = appConfigJson.defaultProblemOrdinal;
+    const defaultUnit = appConfigJson.defaultUnit;
+
+    describe("getProblemOrdinal", () => {
+      it(`should default to '${defaultOrdinal}'`, () => {
+        const ordinal = getProblemOrdinal(samplePortalOffering.activity_url);
+        expect(ordinal).toEqual(defaultOrdinal);
+      });
+    });
+
+    describe("getUnitCode", () => {
+      it(`should default to '${defaultUnit}'`, () => {
+        const unitCode = getUnitCode(samplePortalOffering.activity_url);
+        expect(unitCode).toEqual(defaultUnit);
+      });
+    });
   });
 });

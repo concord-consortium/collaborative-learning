@@ -7,7 +7,8 @@ import { each, isObject } from "lodash";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { IStores } from "../stores/stores";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { DefaultProblemOrdinal } from "../../utilities/url-params";
+import * as appConfigJson from "../../clue/app-config.json";
+
 export const UnitModel = types
   .model("Unit", {
     code: "",
@@ -100,12 +101,10 @@ function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType )
           });
 }
 
-export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal: string) => {
+export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
   const unit = createFromJson(unitJson);
-
-  const {investigation, problem} = unit.getProblem(problemOrdinal) ||
-                                   unit.getProblem(DefaultProblemOrdinal);
+  const {investigation, problem} = unit.getProblem(problemOrdinal || appConfigJson.defaultProblemOrdinal);
 
   if (unit) {
     stores.unit = unit;
