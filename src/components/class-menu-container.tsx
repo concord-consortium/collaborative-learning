@@ -35,7 +35,6 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
   }
 
   private getPortalClasses() {
-    // TODO: We don't have unit names, which would be very helpful for switching
     const {user} = this.stores;
     const classNames = uniq(user.portalClassOfferings.map(o => o.className));
     const currentProblemOrdinal = this.getCurrentProblemOrdinal();

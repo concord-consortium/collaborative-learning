@@ -373,19 +373,10 @@ describe("teacher authentication", () => {
     .get("")
     .reply(200, PARTIAL_RAW_OFFERING_INFO);
 
-    /*
-    FIXME TODO:  I can't get nock to match this request:
-        Nock: No match for request {
-      "method": "GET",
-      "url": "https://learn.staging.concord.org/api/v1/offerings/?user_id=217"
-    }
-    One thing to do is to remove fetching portal data (classes etc) from the
-    auth.ts method.  Move that out into app.ts so we can test in isolation.
-    The above request is made to fetch offerings.
-    */
     nock("https://learn.staging.concord.org/")
     .get(/\/offerings\/\?user_id=.*/)
     .reply(200, []);
+
   });
 
   afterEach(() => {
