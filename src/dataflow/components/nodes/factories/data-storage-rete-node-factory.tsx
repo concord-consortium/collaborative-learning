@@ -5,6 +5,8 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { TextControl } from "../controls/text-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { DropdownListControl } from "../controls/dropdown-list-control";
+import { IntervalTimes } from "../../../utilities/node";
 
 export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   private inputCount = 1;
@@ -20,7 +22,10 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       this.inputCount = 1;
       node.addControl(new TextControl(this.editor, "datasetName", node, "name", "my-dataset"));
-      node.addControl(new NumControl(this.editor, "interval", node, false, "interval", 1, 1));
+      const intervalTimeOptions = IntervalTimes.map(option => ({
+        name: option.text, val: option.val
+      }));
+      node.addControl(new DropdownListControl(this.editor, "interval", node, intervalTimeOptions, true, "interval"));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
         keys.forEach((key: string) => {
