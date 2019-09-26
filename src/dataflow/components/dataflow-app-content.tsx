@@ -47,6 +47,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
     const currentPanelSpec = panels.find(spec => spec.panelId === this.state.current);
     const currentPanelContent = currentPanelSpec && currentPanelSpec.content;
     const runningProgramIndicator = this.userHasRunningPrograms();
+    // use CSS class to switch icon in the right menu to indicate if a program is running
     const dfContainerClass = `dataflow-app-content${runningProgramIndicator}`;
 
     return (
@@ -79,7 +80,14 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
         if (tile.content.type === "Dataflow") {
           const programContent = tile.content as DataflowContentModelType;
           if (programContent.programIsRunning === "true") {
-            isRunning = true;
+            // If a program was left running on the server but the application was closed, firebase won't
+            // know that the program has completed until the next time we look. So if we find programs
+            // that were previously running, double-check their run state by comparing end times.
+            if (programContent.programEndTime < Date.now()) {
+              programContent.setRunningStatus(programContent.programEndTime);
+            } else {
+              isRunning = true;
+            }
           }
         }
       });
