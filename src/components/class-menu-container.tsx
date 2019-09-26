@@ -3,7 +3,7 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LinkSwitcherMenu, IMenuLink  } from "./link-switcher-menu";
-
+import * as appConfigJson from "../clue/app-config.json";
 interface IProps extends IBaseProps {}
 
 @inject("stores")
@@ -31,7 +31,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     }
     // tslint:disable-next-line:no-console
     console.log(`Warning -- current offering not found. (Maybe in demo mode?)`);
-    return "0.0";
+    return appConfigJson.defaultProblemOrdinal;
   }
 
   private getPortalClasses() {
