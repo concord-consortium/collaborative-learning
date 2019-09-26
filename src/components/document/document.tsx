@@ -445,9 +445,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleDocumentRename = () => {
     const { document } = this.props;
     const { appConfig } = this.stores;
-    const docTypeString = document.isPersonal
-                          ? appConfig.getDocumentLabel("personal", "1")
-                          : appConfig.getDocumentLabel("learningLog", "1");
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
     this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Rename ${docTypeString}`)
       .then((title: string) => {
         if (title !== document.title) {
@@ -459,20 +457,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handlePublishWorkspace = () => {
     const { document } = this.props;
     const { db, ui, appConfig } = this.stores;
-    const docTypeString = document.isLearningLog
-                          ? appConfig.getDocumentLabel("learningLog", "1")
-                          : (document.isProblem ? appConfig.getDocumentLabel("problem", "1")
-                                                : appConfig.getDocumentLabel("personal", "1"));
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
     // TODO: Disable publish button while publishing
-    db.publishProblemDocument(this.props.document)
+    db.publishProblemDocument(document)
       .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
   }
 
   private handlePublishOtherDocument = () => {
     const { db, ui, appConfig } = this.stores;
-    const docTypeString = this.props.document.type === "personal"
-                          ? appConfig.getDocumentLabel("personal", "1")
-                          : appConfig.getDocumentLabel("learningLog", "1");
+    const docTypeString = appConfig.getDocumentLabel(this.props.document.type, 1);
     db.publishOtherDocument(this.props.document)
       .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
   }

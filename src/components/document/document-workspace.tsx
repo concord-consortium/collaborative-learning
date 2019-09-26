@@ -174,9 +174,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleNewDocument = (document: DocumentModelType) => {
     const { appConfig, user } = this.stores;
     const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const docTypeString = document.isLearningLog
-                          ? appConfig.getDocumentLabel("learningLog", "1")
-                          : appConfig.getDocumentLabel("personal", "1");
+    const docTypeString = appConfig.getDocumentLabel(docType, 1);
     const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, appConfig.defaultDocumentTitle);
     this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`, `Create ${docTypeString}`)
       .then((title: string) => {
@@ -197,10 +195,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleCopyDocument = (document: DocumentModelType) => {
     const { appConfig } = this.stores;
-    const docTypeString = document.isLearningLog
-                          ? appConfig.getDocumentLabel("learningLog", "1")
-                          : (document.isProblem ? appConfig.getDocumentLabel("problem", "1")
-                                                : appConfig.getDocumentLabel("personal", "1"));
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
     this.stores.ui.prompt(`Give your ${docTypeString} copy a new name:`,
                           `Copy of ${document.title || this.stores.problem.title}`, `Copy ${docTypeString}`)
       .then((title: string) => {
@@ -219,9 +214,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleDeleteDocument = (document: DocumentModelType) => {
     const { appConfig } = this.stores;
-    const docTypeString = document.isLearningLog
-                          ? appConfig.getDocumentLabel("learningLog", "1")
-                          : appConfig.getDocumentLabel("personal", "1");
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
     this.stores.ui.confirm(`Delete this ${docTypeString}? ${document.title}`, `Delete ${docTypeString}`)
       .then((confirmDelete: boolean) => {
         const docType = document.type;

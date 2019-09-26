@@ -3,27 +3,25 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
+import undefined = require("firebase/empty-import");
 
 export const DocumentLabelModel = types
   .model("DocumentLabel", {
     labels: types.map(types.string)
   })
   .views(self => ({
-    getUpperLabel(num?: string) {
-      return num === "1"
-             ? self.labels.get("1")
-             : self.labels.get("n");
-    },
-    getLowerLabel(num?: string) {
-      const singularLabel = self.labels.get("1");
-      const pluralLabel = self.labels.get("n");
-      return num === "1"
-             ? singularLabel ? singularLabel.toLowerCase() : ""
-             : pluralLabel ? pluralLabel.toLowerCase() : "";
+    getUpperLabel(num?: number) {
+      const numLabel = num != null ? self.labels.get(String(num)) : "";
+      return numLabel || self.labels.get("n") || "";
     }
   }))
   .views(self => ({
-    getLabel(num?: string, lowerCase?: boolean) {
+    getLowerLabel(num?: number) {
+      return self.getUpperLabel(num).toLowerCase();
+    }
+  }))
+  .views(self => ({
+    getLabel(num?: number, lowerCase?: boolean) {
       return lowerCase
               ? self.getLowerLabel(num)
               : self.getUpperLabel(num);
@@ -50,7 +48,7 @@ export const AppConfigModel = types
     get defaultDocumentContent(): DocumentContentModelType | undefined {
       return cloneContentWithUniqueIds(self.defaultDocumentTemplate);
     },
-    getDocumentLabel(docType: string, num?: string, lowerCase?: boolean) {
+    getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase);
     }
