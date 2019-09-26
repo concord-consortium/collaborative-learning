@@ -444,8 +444,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleDocumentRename = () => {
     const { document } = this.props;
-    const docTypeString = document.isPersonal ? "Personal Document" : "Learning Log";
-    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Renaming ${docTypeString}`)
+    const { appConfig } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
+    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Rename ${docTypeString}`)
       .then((title: string) => {
         if (title !== document.title) {
           document.setTitle(title);
@@ -454,19 +455,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePublishWorkspace = () => {
-    const { db, ui } = this.stores;
+    const { document } = this.props;
+    const { db, ui, appConfig } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
     // TODO: Disable publish button while publishing
-    db.publishProblemDocument(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Document Published"));
+    db.publishProblemDocument(document)
+      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
   }
 
   private handlePublishOtherDocument = () => {
-    const { db, ui } = this.stores;
-    const documentType = this.props.document.type === "personal"
-                          ? "Personal Document"
-                          : "Learning Log";
+    const { db, ui, appConfig } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(this.props.document.type, 1);
     db.publishOtherDocument(this.props.document)
-      .then(() => ui.alert("Your document was published.", `${documentType} Published`));
+      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
   }
 
   private isPrimary() {

@@ -209,20 +209,6 @@
                 ],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -338,20 +324,6 @@
                   "text": "Have you considered how points, angles, side lengths, and area change?"
                 }
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -544,20 +516,6 @@
                 ]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ]
         },
@@ -811,20 +769,6 @@
                 ]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": [ ]
@@ -1037,20 +981,6 @@
                   "text": "How can you use the rule to predict the length of a corresponding side of the image?"
                 }
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -1551,20 +1481,6 @@
                   "text": "How can you find the scale factor if you used coordinate graphs to make similar figures?"
                 }
               ]
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -2005,20 +1921,6 @@
                 ],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -2245,20 +2147,6 @@
                 ]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -2361,20 +2249,6 @@
                 ]
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ]
         },
@@ -2565,19 +2439,6 @@
                   }
                 ]
               }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ]
         }, {
@@ -2684,19 +2545,6 @@
                     }
                   }
                 ]
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
               }
             }
           ],
@@ -2823,19 +2671,6 @@
                     }
                   }
                 ]
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
               }
             }
           ]

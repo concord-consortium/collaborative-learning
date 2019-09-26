@@ -46,13 +46,6 @@
                 "tiles": [],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -90,20 +83,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -141,13 +120,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         },
@@ -209,13 +181,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -253,13 +218,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -297,13 +255,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -364,13 +315,6 @@
                 "tiles": [],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -408,13 +352,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -452,13 +389,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         },
@@ -507,12 +437,6 @@
               "content": {
                 "tiles": []
               }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         }, {
@@ -541,12 +465,6 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
               }
             }
           ],
@@ -577,12 +495,6 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
               }
             }
           ]
