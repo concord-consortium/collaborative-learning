@@ -1,0 +1,9 @@
+<svg width="35" height="25" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>Layer 1</title>
+  <rect stroke="#cdcdcd" id="svg_1" height="25" width="30" y="0" x="5" stroke-width="4" fill="#ffffff"/>
+  <line stroke="#ffffff" stroke-width="6" x1="2" y1="0" x2="2" y2="25"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_2" y2="5" x2="35" y1="5" x1="5" fill-opacity="null" stroke-width="1" stroke="#cdcdcd" fill="none"/>
+  <circle stroke="#cdcdcd" id="circle" r="6" stroke-width="2" fill="#ffff00" cx="7" cy="12" />
+ </g>
+</svg>
