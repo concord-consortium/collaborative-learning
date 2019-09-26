@@ -59,10 +59,7 @@ export const UserModel = types
         self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
       }
       if (user.portalClassOfferings) {
-        // TODO: See if MST has a fromArray() function instead of this loop.
-        user.portalClassOfferings.forEach ((classOffering) => {
-          self.portalClassOfferings.push(classOffering);
-        });
+        self.portalClassOfferings.replace(user.portalClassOfferings);
       }
     }
   }))
