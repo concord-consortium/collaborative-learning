@@ -80,9 +80,10 @@ export class DropdownListControl extends Rete.Control {
           <div className={`option-list ${listClass}`}>
             {options.map((ops: any, i: any) => {
               let className = `item ${listClass}`;
+              const disabled = isDisabled && isDisabled(ops);
               if (optionValue(ops) === val) {
                 className += " selected";
-              } else if (isDisabled && isDisabled(ops)) {
+              } else if (disabled) {
                 className += " disabled";
               } else {
                 className += " selectable";
@@ -91,7 +92,7 @@ export class DropdownListControl extends Rete.Control {
                 <div
                   className={className}
                   key={i}
-                  onMouseDown={onListClick(optionValue(ops))}
+                  onMouseDown={!disabled ? onListClick(optionValue(ops)) : null}
                 >
                   { ops.icon &&
                   <svg className="icon">
