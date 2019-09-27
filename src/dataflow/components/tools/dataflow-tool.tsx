@@ -32,7 +32,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programRunId, programStartTime, programEndTime, programRunTime, programZoom } = this.getContent();
+    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programRunTime, programZoom }
+      = this.getContent();
     return (
       <div className={classes}>
         <SizeMe monitorHeight={true}>
@@ -46,6 +47,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 onStartProgram={this.handleStartProgram}
                 onSetProgramRunId={this.handleSetProgramRunId}
                 programRunId={programRunId}
+                programIsRunning={programIsRunning}
+                onCheckProgramRunState={this.handleCheckProgramRunState}
                 onSetProgramStartTime={this.handleSetProgramStartTime}
                 programStartTime={programStartTime}
                 onSetProgramEndTime={this.handleSetProgramEndTime}
@@ -81,6 +84,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             const programContent = tile.content as DataflowContentModelType;
             programContent.setProgramRunId(id);
             programContent.setProgramStartEndTime(startTime, endTime);
+            programContent.setRunningStatus(endTime);
           }
         });
         const properties: IOtherDocumentProperties = { dfRunId: id };
@@ -113,13 +117,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   private handleSetProgramStartTime = (time: number) => {
     this.getContent().setProgramStartTime(time);
   }
-
+  private handleCheckProgramRunState = (endTime: number) => {
+    this.getContent().setRunningStatus(endTime);
+  }
   private handleSetProgramEndTime = (time: number) => {
     this.getContent().setProgramEndTime(time);
+    this.getContent().setRunningStatus(time);
   }
 
   private handleSetProgramStartEndTime = (startTime: number, endTime: number) => {
     this.getContent().setProgramStartEndTime(startTime, endTime);
+    this.getContent().setRunningStatus(endTime);
   }
 
   private handleProgramRunTimeChange = (program: any) => {
