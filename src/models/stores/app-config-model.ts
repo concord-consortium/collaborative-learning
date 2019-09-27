@@ -33,6 +33,7 @@ export const AppConfigModel = types
     pageTitle: "",
     demoProblemTitle: "",
     units: types.map(types.string),
+    defaultProblemOrdinal: "",
     defaultUnit: "",
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",

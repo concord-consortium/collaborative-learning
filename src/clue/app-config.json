@@ -5,6 +5,7 @@
     "msa": "assets/curriculum/moving-straight-ahead/moving-straight-ahead.json",
     "s+s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
+  "defaultProblemOrdinal": "1.1",
   "defaultUnit": "s+s",
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",

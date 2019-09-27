@@ -4,5 +4,16 @@
     "esversion": 6,
     "node": true
   },
-  "typescript.tsdk": "./node_modules/typescript/lib"
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "search.exclude": {
+    "**/coverage": true,
+    "**/dist": true
+  },
+  "files.watcherExclude": {
+    "**/dist/**": true
+  },
+  "files.exclude": {
+    "**/dist": true,
+    "**/node_modules": true
+  }
 }

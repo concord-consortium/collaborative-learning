@@ -272,6 +272,7 @@ describe("student authentication", () => {
         },
         rawPortalJWT: RAW_STUDENT_PORTAL_JWT,
         rawFirebaseJWT: RAW_STUDENT_FIREBASE_JWT,
+        portalClassOfferings: []
       });
       done();
     })
@@ -371,6 +372,11 @@ describe("teacher authentication", () => {
     })
     .get("")
     .reply(200, PARTIAL_RAW_OFFERING_INFO);
+
+    nock("https://learn.staging.concord.org/")
+    .get(/\/offerings\/\?user_id=.*/)
+    .reply(200, []);
+
   });
 
   afterEach(() => {
@@ -406,20 +412,12 @@ describe("teacher authentication", () => {
     .get("")
     .reply(200, {classes: []});
 
-    nock((BASE_PORTAL_URL + OFFERINGS_PATH), {
-      reqheaders: {
-        Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
-      }
-    })
-    .get(/user_id/)
-    .reply(200, []);
-
     authenticate("authed", urlParams).then(({authenticatedUser, problemId}) => {
       expect(authenticatedUser).toEqual({
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
         portal: "learn.staging.concord.org",
-        portalClasses: [],
+        portalClassOfferings: [],
         firstName: RAW_CORRECT_TEACHER.first_name,
         lastName: RAW_CORRECT_TEACHER.last_name,
         fullName: `${RAW_CORRECT_TEACHER.first_name} ${RAW_CORRECT_TEACHER.last_name}`,
