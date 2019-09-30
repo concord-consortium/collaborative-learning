@@ -28,12 +28,13 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="teacher-group-tab">
         <TeacherGroupSixPack page={ this.state.page }/>
-        <SixPackRightControls />
-        <Pager
-          currentPage={this.state.page}
-          numPages={this.numPages}
-          setPage={this.setPage}
-        />
+        <SixPackRightControls>
+          <Pager
+            currentPage={this.state.page}
+            numPages={this.numPages}
+            setPage={this.setPage}
+          />
+        </SixPackRightControls>
       </div>
     );
   }

@@ -24,15 +24,13 @@ export class SixPackRightControls extends React.Component<IProps, IState> {
       <div className="sixpack-right-controls">
         <div className="top-controls">
           <ButtonGroup vertical={true} className="smaller">
-            <Button
-              className={liveClasses}
-              onClick={this.setLive}
-            >Live<br/>View</Button>
-            <Button
-              className={pubClasses}
-              onClick={this.setPub}
-            >Pub.<br/>View</Button>
+            <Button className={liveClasses} onClick={this.setLive}>Live</Button>
+            <Button className={pubClasses} onClick={this.setPub}>Pub</Button>
           </ButtonGroup>
+        </div>
+        <div className="bottom-controls">
+          <div className="section-progress"> Progress </div>
+          <div> {this.props.children} </div>
         </div>
       </div>
     );
