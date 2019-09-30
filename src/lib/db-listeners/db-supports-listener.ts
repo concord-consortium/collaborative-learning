@@ -1,6 +1,7 @@
 import { DB } from "../db";
 import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
-  AudienceModelType, GroupAudienceModel, UserAudienceModel} from "../../models/stores/supports";
+        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore
+      } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
@@ -43,7 +44,8 @@ export class DBSupportsListener {
           Object.keys(newSupports).forEach((key) => {
             const dbSupport: DBSupport = newSupports[key];
             const audience = ClassAudienceModel.create();
-            teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
+            const supportModel = this.createSupportModel(sectionTarget, dbSupport, audience);
+            supportModel && teacherSupports.push(supportModel);
           });
         });
       } else {
@@ -56,26 +58,34 @@ export class DBSupportsListener {
               const audience = audienceType === AudienceEnum.group
                 ? GroupAudienceModel.create({identifier: audienceId})
                 : UserAudienceModel.create({identifier: audienceId});
-              teacherSupports.push(this.createSupportModel(sectionTarget, dbSupport, audience));
+              const supportModel = this.createSupportModel(sectionTarget, dbSupport, audience);
+              supportModel && teacherSupports.push(supportModel);
             });
           });
         });
       }
 
       supports.setAuthoredSupports(teacherSupports, audienceType);
+
+      const { unit, investigation, problem, documents } = this.db.stores;
+      addSupportDocumentsToStore({ unit, investigation, problem, documents, supports: teacherSupports, db: this.db });
     }
   }
 
-  private createSupportModel(sectionTarget: string, dbSupport: DBSupport, audience: AudienceModelType) {
+  private createSupportModel(sectionTarget: string | undefined, dbSupport: DBSupport, audience: AudienceModelType) {
+    if (!dbSupport || !dbSupport.content) return;
     const supportContentType: ESupportType = (dbSupport.type as ESupportType) || ESupportType.text;
     const supportModel = SupportModel.create({ type: supportContentType, content: dbSupport.content });
+    if (!supportModel) return;
     return TeacherSupportModel.create({
       key: dbSupport.self.key,
       support: supportModel,
-      type: sectionTarget === "all" ? SupportTarget.problem : SupportTarget.section,
-      sectionId: sectionTarget === "all" ? undefined : sectionTarget as SectionType,
+      type: !sectionTarget || sectionTarget === "all" ? SupportTarget.problem : SupportTarget.section,
+      sectionId: !sectionTarget || sectionTarget === "all" ? undefined : sectionTarget as SectionType,
       audience,
       authoredTime: dbSupport.timestamp,
+      originDoc: dbSupport.type === ESupportType.publication ? dbSupport.originDoc : undefined,
+      caption: dbSupport.properties && dbSupport.properties.caption,
       deleted: dbSupport.deleted
     });
   }

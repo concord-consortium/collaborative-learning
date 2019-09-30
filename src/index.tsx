@@ -28,7 +28,7 @@ const initializeApp = async () => {
 
   const user = UserModel.create();
 
-  const unitId = urlParams.unit;
+  const unitId = urlParams.unit || appConfigSpec.defaultUnit;
   const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
 
@@ -50,7 +50,8 @@ const initializeApp = async () => {
     unit: stores.unit,
     investigation: stores.investigation,
     problem: stores.problem,
-    documents: stores.documents
+    documents: stores.documents,
+    db: stores.db
   });
 
   ReactDOM.render(

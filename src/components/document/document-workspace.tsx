@@ -5,9 +5,10 @@ import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
+import { SectionType, getSectionAbbrev } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
-         PersonalDocument, ProblemDocument, PublicationDocument, PersonalPublication, LearningLogPublication,
-         SupportPublication } from "../../models/document/document";
+         PersonalDocument, ProblemDocument } from "../../models/document/document";
+import { AudienceModelType, ClassAudienceModel, TeacherSupportSectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 
 import "./document-workspace.sass";
@@ -106,6 +107,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                 onNewDocument={this.handleNewDocument}
                 onCopyDocument={this.handleCopyDocument}
                 onDeleteDocument={this.handleDeleteDocument}
+                onPublishSupport={this.handlePublishSupport}
+                onPublishDocument={this.handlePublishDocument}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -232,6 +235,38 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     if (defaultDocument) {
       problemWorkspace.setPrimaryDocument(defaultDocument);
     }
+  }
+
+  private getProblemBaseTitle(title: string) {
+    const match = /[\d.]*[\s]*(.+)/.exec(title);
+    return match && match[1] ? match[1] : title;
+  }
+
+  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: TeacherSupportSectionTarget) {
+    return document.type === ProblemDocument
+            ? this.getProblemBaseTitle(this.stores.problem.title)
+            : document.title;
+  }
+
+  private handlePublishSupport = async (document: DocumentModelType) => {
+    const { db, ui } = this.stores;
+    const audience: AudienceModelType = ClassAudienceModel.create();
+    const sectionTarget: TeacherSupportSectionTarget = SectionType.all;
+    const caption = this.getSupportDocumentBaseCaption(document, sectionTarget) || "Untitled";
+    // TODO: Disable publish button while publishing
+    db.publishDocumentAsSupport(document, audience, sectionTarget, caption)
+      .then(() => ui.alert("Your support was published.", "Support Published"));
+  }
+
+  private handlePublishDocument = (document: DocumentModelType) => {
+    const { appConfig, db, ui } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
+    // TODO: Disable publish button while publishing
+    const dbPublishDocumentFunc = document.type === ProblemDocument
+                                    ? db.publishProblemDocument
+                                    : db.publishOtherDocument;
+    dbPublishDocumentFunc.call(db, document)
+      .then(() => ui.alert(`Your ${docTypeString.toLowerCase()} was published.`, `${docTypeString} Published`));
   }
 
   private getPrimaryDocument(documentKey?: string) {

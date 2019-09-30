@@ -2,7 +2,7 @@ import * as React from "react";
 import { observer } from "mobx-react";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, PublicationDocument, SupportPublication
+import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import { NavTabSectionModelType } from "../../models/view/right-nav";
