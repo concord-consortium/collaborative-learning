@@ -28,7 +28,7 @@ const initializeApp = async () => {
 
   const user = UserModel.create();
 
-  const unitId = urlParams.unit;
+  const unitId = urlParams.unit || appConfigSpec.defaultUnit;
   const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
 
