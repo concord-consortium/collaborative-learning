@@ -1,0 +1,38 @@
+@import ../../components/vars
+
+.right-controls-test-container
+  display: grid
+  grid-template-columns: 1fr 80px
+  height: 100vh;
+.sixpack-right-controls
+  padding: 10px
+  display: flex
+  flex-direction: column
+  align-items: center
+  right: 0px
+  margin: 10px
+  margin-right: 0px
+  background-color: #c9dab7
+  border: #c9dab7
+  button
+    font-size: 10pt
+    outline: none
+    background-color: $color1-4
+    border-radius: 5px
+    &.selected
+      color: white
+    &:hover
+        background-color: $color1-3
+    &.live
+      background-color: link
+      &.selected
+        background-color: red
+        &:hover
+          background-color: black
+    &.pub
+      background-color: gray
+      &.selected
+        background-color: black
+        &:hover
+          background-color: black
+
