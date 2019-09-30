@@ -4,6 +4,7 @@ import { TeacherSupportSectionTarget, AudienceModelType } from "../models/stores
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
+import { Logger, LogEventName } from "../lib/logger";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -298,8 +299,16 @@ export class Firebase {
   }
 
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
-    if (snapshot && snapshot.val()) {
-      return userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+    if (snapshot) {
+      const connected = snapshot.val();
+      if (connected) {
+        userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+      }
+      else {
+        // since the Logger currenly had no retry this won't be logged on a general network
+        // disconnect but might be helpful to know if only Firebase disconnected
+        Logger.log(LogEventName.INTERNAL_FIREBASE_DISCONNECTED);
+      }
     }
   }
 

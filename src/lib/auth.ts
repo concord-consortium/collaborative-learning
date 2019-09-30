@@ -7,6 +7,7 @@ import { IPortalClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import * as appConfigJson from "../clue/app-config.json";
+import { Logger, LogEventName } from "../lib/logger";
 
 const initials = require("initials");
 
@@ -419,6 +420,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                     getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
                     .then( ({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
                       if (authenticatedUser) {
+                        Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
                         resolve({authenticatedUser, classInfo, unitCode: newUnitCode, problemId: newProblemOrdinal});
                       }
                     });

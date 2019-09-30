@@ -63,6 +63,10 @@ export enum LogEventName {
   TILE_UNDO,
   TILE_REDO,
 
+  // the followng are for potential debugging purposes and are all marked "internal"
+  INTERNAL_AUTHENTICATED,
+  INTERNAL_FIREBASE_DISCONNECTED,
+
   // the following TODOs are to be done when the functionality is added to the app
   DASHBOARD_SWITCH_CLASS,  // TODO: add logEvent call when functionality added
   DASHBOARD_SWITCH_PROBLEM,  // TODO: add logEvent call when functionality added
