@@ -21,7 +21,7 @@ export class ProgressWidget extends React.Component<IProps, IState> {
       ? "section-section selected"
       : "section-section";
     return(
-      <div className="section-section">
+      <div className="section-section" key={progressItem.label}>
         <div className="section-circle">{progressItem.label}</div>
         <div className="section-progress">
           <div className="section-current">{progressItem.completed}</div>
@@ -36,7 +36,7 @@ export class ProgressWidget extends React.Component<IProps, IState> {
     const { items } = this.props;
     return(
       <div className="section-progress">
-        <div> Progress </div>
+        <div className="label"> Progress </div>
         { items.map(i => this.renderItem(i)) }
       </div>
     );

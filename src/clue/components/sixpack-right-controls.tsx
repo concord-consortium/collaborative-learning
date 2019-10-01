@@ -61,7 +61,9 @@ export class SixPackRightControls extends React.Component<IProps, IState> {
         </div>
         <div className="bottom-controls">
           <ProgressWidget items={progressItems} />
-          <div> {this.props.children} </div>
+        </div>
+        <div className="pager-controls">
+          {this.props.children}
         </div>
       </div>
     );

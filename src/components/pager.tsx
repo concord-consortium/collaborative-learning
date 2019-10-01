@@ -18,21 +18,28 @@ export function Pager(props: IPagerProps) {
   const handleNextPage = () => setPage(nextPage);
   const disablePrevious = currentPage <= prevPage;
   const disableNext = currentPage >= nextPage;
+  let previousClasses = "previous-page-button pager-button";
+  let nextClasses = "next-page-button  pager-button";
+
+  nextClasses = disableNext
+    ? `${nextClasses} disabled`
+    : nextClasses;
+
+  previousClasses = disablePrevious
+    ? `${previousClasses} disabled`
+    : previousClasses;
 
   return (
-    <div className="pager">
-      <div className="toggle-group">
-        <div className="previous-page-button toggle-button" onClick={handlePreviousPage} >
-        </div>
-        <div className="next-page-button toggle-button" onClick={handleNextPage} >
-
-        </div>
+      <div className="pager-group">
+        <div
+          className={previousClasses}
+          onClick={handlePreviousPage}
+        />
+        <div
+          className={nextClasses}
+          onClick={handleNextPage}
+        />
       </div>
+    );
 
-      {/* <ButtonGroup className="pager-group" vertical={true}>
-          <Button className="previous-page-button" onClick={handlePreviousPage} disabled={disablePrevious} />
-          <Button className="next-page-button" onClick={handleNextPage} disabled={disableNext} />
-      </ButtonGroup> */}
-    </div>
-  );
 }
