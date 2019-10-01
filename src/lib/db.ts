@@ -398,6 +398,7 @@ export class DB {
 
         publicationRef.set(publication)
           .then(() => {
+            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);
@@ -429,6 +430,7 @@ export class DB {
 
         publicationRef.set(publication)
           .then(() => {
+            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);

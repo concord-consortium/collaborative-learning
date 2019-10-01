@@ -63,6 +63,8 @@ export enum LogEventName {
   TILE_UNDO,
   TILE_REDO,
 
+  PUBLISH_DOCUMENT,
+
   // the followng are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_FIREBASE_DISCONNECTED,
