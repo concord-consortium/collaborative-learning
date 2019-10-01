@@ -190,20 +190,31 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         }
       }
       else {
-        this.handleImageDrop(e);
+        // try to get the row it was dropped on
+        let rowNode = e.target as HTMLElement | null;
+        while (rowNode && (rowNode.className !== "tile-row")) {
+          rowNode = rowNode.parentNode as HTMLElement | null;
+        }
+        const rowId = (rowNode && rowNode.dataset && rowNode.dataset.rowId) || undefined;
+        this.handleImageDrop(e, rowId);
       }
     };
   }
 
-  private handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
     const {ui} = this.stores;
     this.imageDragDrop.drop(e)
       .then((dropUrl) => {
         const {problemWorkspace} = ui;
         const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
         if (primaryDocument) {
-          primaryDocument.addTile("image", {
-            imageTileUrl: dropUrl
+          const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
+          primaryDocument.content.addTile("image", {
+            imageTileUrl: dropUrl,
+            insertRowInfo: {
+              // insert the tile after the row it was dropped on
+              rowInsertIndex: (rowIndex ? rowIndex + 1 : 0)
+            }
           });
         }
       })

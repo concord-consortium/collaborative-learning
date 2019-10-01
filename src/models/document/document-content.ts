@@ -80,6 +80,9 @@ export const DocumentContentModel = types
       getRowByIndex(index: number) {
         return self.rowMap.get(self.rowOrder[index]);
       },
+      getRowIndex(rowId: string) {
+        return self.rowOrder.findIndex(_rowId => _rowId === rowId);
+      },
       findRowContainingTile(tileId: string) {
         return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
       },
@@ -340,7 +343,7 @@ export const DocumentContentModel = types
     moveTile(tileId: string, rowInfo: IDropRowInfo) {
       const srcRowId = self.findRowContainingTile(tileId);
       if (!srcRowId) return;
-      const srcRowIndex = self.rowOrder.findIndex(rowId => rowId === srcRowId);
+      const srcRowIndex = self.getRowIndex(srcRowId);
       const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
       if ((rowDropIndex != null) && (rowDropLocation === "left")) {
         self.moveTileToRow(tileId, rowDropIndex, 0);
