@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button, ButtonGroup } from "@blueprintjs/core";
+import { FLEX_EXPANDER } from "@blueprintjs/core/lib/esm/common/classes";
 
 interface IPagerProps {
   numPages: number;
@@ -15,9 +16,15 @@ export function Pager(props: IPagerProps) {
   const handleNextPage = () => setPage(nextPage);
   const disablePrevious = currentPage <= prevPage;
   const disableNext = currentPage >= nextPage;
+
+  const style: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column"
+  };
+
   return (
     <div className="pager">
-      <ButtonGroup>
+      <ButtonGroup style={style}>
         <Button onClick={handlePreviousPage} disabled={disablePrevious}>«</Button>
         <Button onClick={handleNextPage} disabled={disableNext}>»</Button>
       </ButtonGroup>
