@@ -22,11 +22,23 @@ export function Pager(props: IPagerProps) {
     flexDirection: "column"
   };
 
+  const upStyle: React.CSSProperties = {
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundImage: `url("../../assets/icons/pager/up.svg")`
+  };
+
+  const downStyle: React.CSSProperties = {
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundImage: `url("../../assets/icons/pager/down.svg")`
+  };
+
   return (
     <div className="pager">
       <ButtonGroup style={style}>
-        <Button onClick={handlePreviousPage} disabled={disablePrevious}>«</Button>
-        <Button onClick={handleNextPage} disabled={disableNext}>»</Button>
+          <Button style={upStyle} onClick={handlePreviousPage} disabled={disablePrevious} />
+          <Button style={downStyle} onClick={handleNextPage} disabled={disableNext} />
       </ButtonGroup>
     </div>
   );
