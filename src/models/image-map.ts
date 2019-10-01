@@ -190,7 +190,7 @@ export const externalUrlImagesHandler: IImageHandler = {
   priority: 1,
 
   match(url: string) {
-    return url ? /^https?:\/\//.test(url) : false;
+    return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
   store(url: string, db: DB, userId: string) {

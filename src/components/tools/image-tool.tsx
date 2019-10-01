@@ -7,6 +7,7 @@ import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { debounce } from "lodash";
 const placeholderImage = require("../../assets/image_placeholder.png");
 import { autorun, IReactionDisposer } from "mobx";
+import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./image-tool.sass";
 
@@ -58,6 +59,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
                 });
               });
           }, 100);
+  private imageDragDrop: ImageDragDrop;
+
+  public componentWillMount() {
+    this.imageDragDrop = new ImageDragDrop({
+      isAcceptableImageDrag: this.isAcceptableImageDrag
+    });
+  }
 
   public componentDidMount() {
     this._isMounted = true;
@@ -227,9 +235,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
-    const hasUriList = e.dataTransfer.types.indexOf("text/uri-list") >= 0;
     // image drop area is central 80% in each dimension
-    if (!readOnly && hasUriList) {
+    if (!readOnly) {
       const kImgDropMarginPct = 0.1;
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
@@ -245,24 +252,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const isAcceptableDrag = this.isAcceptableImageDrag(e);
-    if (isAcceptableDrag) {
-      e.dataTransfer.dropEffect = "copy";
-      e.preventDefault();
-    }
+    this.imageDragDrop.dragOver(e);
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (this.isAcceptableImageDrag(e)) {
-      const uriList = e.dataTransfer.getData("text/uri-list");
-      const uriArray = uriList && uriList.split(/[\r\n]+/);
-      const dropUrl = uriArray && uriArray[0];
-      if (dropUrl) {
+    this.imageDragDrop.drop(e)
+      .then((dropUrl) => {
         this.setState({ isEditing: false });
         this.storeNewImageUrl(dropUrl);
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
+      })
+      .catch((err) => {
+        this.stores.ui.alert(err.toString());
+      });
   }
 }

@@ -15,7 +15,7 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { IDropRowInfo } from "../../components/document/document-content";
-import { DocumentTool } from "./document";
+import { DocumentTool, IDocumentAddTileOptions } from "./document";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -28,6 +28,10 @@ export interface INewRowTile {
   rowId: string;
   tileId: string;
   additionalTileIds?: string[];
+}
+
+export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions {
+  insertRowInfo?: IDropRowInfo;
 }
 
 export const DocumentContentModel = types
@@ -214,8 +218,8 @@ export const DocumentContentModel = types
     addTextTile(initialText?: string) {
       return self.addTileInNewRow(defaultTextContent(initialText));
     },
-    addImageTile() {
-      return self.addTileInNewRow(defaultImageContent());
+    addImageTile(url?: string) {
+      return self.addTileInNewRow(defaultImageContent(url));
     },
     addDrawingTile() {
       let defaultStamps: StampModelType[];
@@ -360,7 +364,8 @@ export const DocumentContentModel = types
     }
   }))
   .actions((self) => ({
-    addTile(tool: DocumentTool, addSidecarNotes?: boolean, insertRowInfo?: IDropRowInfo) {
+    addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+      const {addSidecarNotes, insertRowInfo} = options || {};
       let tileInfo;
       switch (tool) {
         case "text":
@@ -373,7 +378,7 @@ export const DocumentContentModel = types
           tileInfo = self.addGeometryTile(addSidecarNotes);
           break;
         case "image":
-          tileInfo = self.addImageTile();
+          tileInfo = self.addImageTile(options && options.imageTileUrl);
           break;
         case "drawing":
           tileInfo = self.addDrawingTile();
