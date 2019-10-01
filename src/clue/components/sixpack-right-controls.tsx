@@ -1,6 +1,8 @@
 import * as React from "react";
-import { Button, ButtonGroup } from "@blueprintjs/core";
+import { ToggleGroup } from "../../components/toggle-group";
+
 import "./sixpack-right-controls.sass";
+import { ProgressWidget, IProgressItem } from "./progress-widget";
 
 type LiveOrPub = "live" | "pub";
 interface IProps {}
@@ -18,18 +20,47 @@ export class SixPackRightControls extends React.Component<IProps, IState> {
 
   public render() {
     const { mode } = this.state;
-    const liveClasses = mode === "live" ? "live selected" : "live";
-    const pubClasses = mode === "pub" ? "pub selected" : "pub";
+    const live = mode === "live";
+    const pub  = mode === "pub";
+    const modeOptions = [{
+        label: "Current Work",
+        selected: live,
+        onClick: () => this.setState({mode: "live"})
+      },
+      {
+        label: "Published Work",
+        selected: pub,
+        onClick: () => this.setState({mode: "pub"})
+      }
+    ];
+    const progressItems: IProgressItem[] = [
+      {
+        label: "IN",
+        completed: 12,
+        total: 24,
+        selected: false
+      },
+      {
+        label: "MA",
+        completed: 12,
+        total: 20,
+        selected: true
+      },
+      {
+        label: "HI",
+        completed: 2,
+        total: 14,
+        selected: false
+      }
+
+    ];
     return(
       <div className="sixpack-right-controls">
         <div className="top-controls">
-          <ButtonGroup vertical={true} className="smaller">
-            <Button className={liveClasses} onClick={this.setLive}>Live</Button>
-            <Button className={pubClasses} onClick={this.setPub}>Pub</Button>
-          </ButtonGroup>
+          <ToggleGroup options={modeOptions} orientation="vertical"/>
         </div>
         <div className="bottom-controls">
-          <div className="section-progress"> Progress </div>
+          <ProgressWidget items={progressItems} />
           <div> {this.props.children} </div>
         </div>
       </div>

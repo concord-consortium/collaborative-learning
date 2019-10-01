@@ -1,0 +1,40 @@
+@import ../../components/vars
+
+.section-progress
+  flex-direction: column
+  align-items: center
+  justify-content: stretch
+  text-align: center
+
+  .section-section
+    width: 80px
+    height: 50px
+    display: flex
+    flex-direction: row
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 0.7em
+    margin-top: 0.7em
+    .section-progress
+      font-size: 12pt
+      line-height: 14pt
+      color: white
+      text-align: center
+    .section-circle
+      font-size: 18pt
+      width: 40px
+      height: 40px
+      border-radius: 20px
+      background: $golden-light-1
+      color: $golden-text
+      border: 3px solid white
+      display: flex
+      justify-content: center
+      align-items: center
+      &.slected
+        color: white
+        background-color: $golden-dark-5
+      &:hover
+        color: white
+        background-color: $golden-dark-5
+
