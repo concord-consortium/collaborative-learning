@@ -1,11 +1,31 @@
+@import ./vars
 
-  .pager
-    height: 55px
-    background-color: $color1-2
+.pager
+  height: 95px
+  width: 90px
+  background-color: $color1-2
+
+  .pager-group
+    display: flex
+    flex-direction: column
+    align-items: stretch
+    justify-content: center
+    margin: 5px
+    padding: 5px
 
     button
-      outline: none
+      width: 70x
+      height: 40px
       background-color: $color1-4
-      border-radius: 5px
+      background-repeat: no-repeat
+      background-position: center
+      &.previous-page-button
+        background-image: url("../assets/icons/pager/up.svg")
+        &:disabled
+          background-image: url("../assets/icons/pager/up.svg")
+      &.next-page-button
+        background-image: url("../assets/icons/pager/down.svg")
+        &:disabled
+          background-image: url("../assets/icons/pager/down.svg")
       &:hover
         background-color: $color1-3

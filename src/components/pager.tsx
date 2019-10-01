@@ -2,6 +2,8 @@ import * as React from "react";
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import { FLEX_EXPANDER } from "@blueprintjs/core/lib/esm/common/classes";
 
+import "./pager.sass";
+
 interface IPagerProps {
   numPages: number;
   currentPage: number;
@@ -17,29 +19,20 @@ export function Pager(props: IPagerProps) {
   const disablePrevious = currentPage <= prevPage;
   const disableNext = currentPage >= nextPage;
 
-  const style: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column"
-  };
-
-  const upStyle: React.CSSProperties = {
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "center",
-    backgroundImage: `url("../../assets/icons/pager/up.svg")`
-  };
-
-  const downStyle: React.CSSProperties = {
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "center",
-    backgroundImage: `url("../../assets/icons/pager/down.svg")`
-  };
-
   return (
     <div className="pager">
-      <ButtonGroup style={style}>
-          <Button style={upStyle} onClick={handlePreviousPage} disabled={disablePrevious} />
-          <Button style={downStyle} onClick={handleNextPage} disabled={disableNext} />
-      </ButtonGroup>
+      <div className="toggle-group">
+        <div className="previous-page-button toggle-button" onClick={handlePreviousPage} >
+        </div>
+        <div className="next-page-button toggle-button" onClick={handleNextPage} >
+
+        </div>
+      </div>
+
+      {/* <ButtonGroup className="pager-group" vertical={true}>
+          <Button className="previous-page-button" onClick={handlePreviousPage} disabled={disablePrevious} />
+          <Button className="next-page-button" onClick={handleNextPage} disabled={disableNext} />
+      </ButtonGroup> */}
     </div>
   );
 }
