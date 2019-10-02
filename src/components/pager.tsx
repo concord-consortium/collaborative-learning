@@ -29,6 +29,11 @@ export function Pager(props: IPagerProps) {
     ? `${previousClasses} disabled`
     : previousClasses;
 
+  if (numPages <= 1) {
+    previousClasses = `${previousClasses} invisible`;
+    nextClasses = `${nextClasses} invisible`;
+  }
+
   return (
       <div className="pager-group">
         <div
