@@ -7,7 +7,10 @@ import { ERightNavTab } from "../view/right-nav";
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
+export const PanelTypeEnum = types.enumeration("panelType", ["dashboard", "workspace", "dashboardFourUp"]);
+
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
+export type PanelType = typeof PanelTypeEnum.Type;
 
 let dialogResolver: ((value?: string | PromiseLike<string> | boolean | PromiseLike<boolean> | undefined) => void) |
                     undefined;
@@ -33,6 +36,7 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
+    currentPanel: "dashboard"
   })
   .views((self) => ({
     get allContracted() {
@@ -101,6 +105,9 @@ export const UIModel = types
       confirm,
       resolveDialog,
 
+      setCurrentPanel(panelId: PanelType) {
+        self.currentPanel = panelId;
+      },
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },

@@ -4,14 +4,16 @@ import { AppHeaderComponent, IPanelGroupSpec } from "../../components/app-header
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { TeacherDashboardComponent } from "../../components/teacher/teacher-dashboard";
+import { TeacherDashboardFourUpComponent } from "../../components/teacher/teacher-dashboard-four-up";
 import { DialogComponent } from "../../components/utilities/dialog";
-
+import { PanelType } from "../../models/stores/ui";
 import "./clue-app-content.sass";
 import { Logger, LogEventName } from "../../lib/logger";
 
 enum EPanelId {
   dashboard = "dashboard",
-  workspace = "workspace"
+  workspace = "workspace",
+  dashboardFourUp = "dashboardFourUp"
 }
 
 interface IProps extends IBaseProps {}
@@ -35,7 +37,8 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { user } = this.stores;
+    const { user, ui } = this.stores;
+    const { currentPanel } = ui;
     const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
 
     const panels: IPanelGroupSpec = [{
@@ -49,15 +52,20 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
         label: "Dashboard",
         content: <TeacherDashboardComponent />
       });
+      panels.unshift({
+        panelId: EPanelId.dashboardFourUp,
+        label: "",
+        content: <TeacherDashboardFourUpComponent />
+      });
     }
 
-    const currentPanelSpec = panels.find(spec => spec.panelId === this.state.current);
+    const currentPanelSpec = panels.find(spec => spec.panelId === currentPanel);
     const currentPanelContent = currentPanelSpec && currentPanelSpec.content;
 
     return (
       <div className="clue-app-content">
         <AppHeaderComponent isGhostUser={isGhostUser} panels={panels}
-                            current={this.state.current} onPanelChange={this.handlePanelChange}
+                            current={currentPanel} onPanelChange={this.handlePanelChange}
                             showGroup={true} />
         {currentPanelContent}
         <DialogComponent dialog={this.stores.ui.dialog} />
@@ -65,12 +73,12 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handlePanelChange = (panelId: string) => {
+  private handlePanelChange = (panelId: PanelType) => {
     const { user, ui } = this.stores;
     ui.toggleLeftNav(false);
     ui.toggleRightNav(false);
-    this.setState({ current: panelId });
-
+    // this.setState({ current: panelId });
+    ui.setCurrentPanel(panelId);
     // log teacher dashboard panel changes
     if (user && user.isTeacher) {
       if (panelId === EPanelId.workspace) {

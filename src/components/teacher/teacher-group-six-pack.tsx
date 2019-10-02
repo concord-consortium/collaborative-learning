@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
-
+import { IconButton } from "../utilities/icon-button";
+import { PanelType, PanelTypeEnum } from "../../models/stores/ui";
 import "./teacher-group-six-pack.sass";
 
 interface IProps extends IBaseProps {
@@ -44,13 +45,38 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
   }
 
   private renderFourUp(groupIndex: number, r: number, c: number) {
-    const { groups } = this.stores;
+    const { groups, ui, user } = this.stores;
     const group = groups.allGroups[groupIndex];
+
+    interface IGroupRecord {
+      id: string;
+    }
+    interface IGroupHeaderProps {
+      group: IGroupRecord;
+    }
+    const TeacherGroupHeader = (props: IGroupHeaderProps) => {
+      const { group: g} = props;
+      const clickHandler = () => {
+        console.log("click");
+        // ui.set
+        groups.ghostGroup(user.id, g.id);
+        ui.setCurrentPanel("dashboardFourUp");
+      };
+      return(
+        <div className="group-header">
+          <div className="group-label">Group {String(g.id)}</div>
+          <IconButton
+            icon="expand-group-view"
+            key="expand-group-view"
+            className="action icon-expand-group-view"
+            onClickButton={clickHandler} />
+        </div>
+      );
+    };
+
     return (
       <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
-        <div className="group-label">
-          Group {String(group.id)}
-        </div>
+        <TeacherGroupHeader group={ group } />
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
