@@ -34,11 +34,14 @@ export interface IStores {
   clipboard: ClipboardModelType;
 }
 
-type ICreateStores = Partial<IStores>;
+interface ICreateStores extends Partial<IStores> {
+  demoName?: string;
+}
 
 export function createStores(params?: ICreateStores): IStores {
   const user = params && params.user || UserModel.create({ id: "0" });
   const appConfig = params && params.appConfig || AppConfigModel.create();
+  const demoName = params && params.demoName || appConfig.appName;
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
@@ -63,7 +66,7 @@ export function createStores(params?: ICreateStores): IStores {
     db: params && params.db || new DB(),
     documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
-    demo: params && params.demo || DemoModel.create({name: appConfig.appName, class: {id: "0", name: "Null Class"}}),
+    demo: params && params.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create()

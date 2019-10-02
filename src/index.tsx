@@ -31,8 +31,9 @@ const initializeApp = async () => {
   const unitId = urlParams.unit || appConfigSpec.defaultUnit;
   const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
+  const demoName = urlParams.demoName;
 
-  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator });
+  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName });
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 
