@@ -10,6 +10,7 @@ const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 // WTD This is for testing purposes only. Remove when we add users and hub owners.
 const OWNER_ID = "123";
 const SEND_INTERVAL = 1;
+const MAX_HUBS = 200;
 
 type RelayValue = 0 | 1;
 
@@ -81,7 +82,8 @@ export class IoT {
 
   private updateHubs = () => {
     const  { hubStore } = this.stores;
-    this.iotCore.listThings().promise().then(data => {
+    const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS }
+    this.iotCore.listThings(requestParams).promise().then(data => {
       if (data && data.things) {
         data.things.forEach(thing => {
           const { thingName, thingArn, thingTypeName } = thing;
