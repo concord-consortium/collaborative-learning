@@ -77,9 +77,9 @@ function resolveAppMode(
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appMode, user, ui} = stores;
+  const {appConfig, appMode, user, ui} = stores;
 
-  authenticate(appMode, urlParams)
+  authenticate(appMode, appConfig, urlParams)
     .then(({authenticatedUser, classInfo, problemId, unitCode}) => {
       user.setAuthenticatedUser(authenticatedUser);
       if (classInfo) {

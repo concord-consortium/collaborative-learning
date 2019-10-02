@@ -62,11 +62,10 @@ export class Firebase {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      if ((appMode === "dev") || (appMode === "test")) {
+      if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
         parts.push(this.userId);
       }
-
-      else if ((appMode === "demo") || (appMode === "qa")) {
+      else if (appMode === "demo") {
         const slug = demoName && demoName.length > 0 ? this.escapeKey(demoName) : "";
         if (slug.length > 0) {
           parts.push(slug);
