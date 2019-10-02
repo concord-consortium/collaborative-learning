@@ -99,17 +99,6 @@ export class DB {
 
       this.stores = options.stores;
 
-      if (options.appMode === "authed") {
-        firebase.auth()
-          .signInWithCustomToken(options.rawFirebaseJWT)
-          .catch(reject);
-      }
-      else {
-        firebase.auth()
-          .signInAnonymously()
-          .catch(reject);
-      }
-
       firebase.auth().onAuthStateChanged((firebaseUser) => {
         if (firebaseUser) {
           this.appMode = options.appMode;
@@ -118,6 +107,17 @@ export class DB {
           this.listeners.start().then(resolve).catch(reject);
         }
       });
+
+      if (options.appMode === "authed") {
+        return firebase.auth()
+          .signInWithCustomToken(options.rawFirebaseJWT)
+          .catch(reject);
+      }
+      else {
+        return firebase.auth()
+          .signInAnonymously()
+          .catch(reject);
+      }
     });
   }
 
