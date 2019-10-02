@@ -465,6 +465,7 @@ export class DB {
 
           supportRef.set(support)
             .then(() => {
+              Logger.logDocumentEvent(LogEventName.PUBLISH_SUPPORT, documentModel);
               resolve({document, metadata: metadata as DBSupportPublicationMetadata});
             })
             .catch(reject);

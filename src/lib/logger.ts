@@ -64,6 +64,7 @@ export enum LogEventName {
   TILE_REDO,
 
   PUBLISH_DOCUMENT,
+  PUBLISH_SUPPORT,
 
   // the followng are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
