@@ -1,8 +1,10 @@
+import { inject } from "mobx-react";
 import * as React from "react";
 import { ToggleGroup } from "../../components/toggle-group";
 
 import "./sixpack-right-controls.sass";
 import { ProgressWidget, IProgressItem } from "./progress-widget";
+import { BaseComponent } from "../../components/base";
 
 type LiveOrPub = "live" | "pub";
 interface IProps {}
@@ -10,7 +12,8 @@ interface IState {
   mode: LiveOrPub;
 }
 
-export class SixPackRightControls extends React.Component<IProps, IState> {
+@inject("stores")
+export class SixPackRightControls extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -33,6 +36,10 @@ export class SixPackRightControls extends React.Component<IProps, IState> {
         onClick: () => this.setState({mode: "pub"})
       }
     ];
+    const { problem } = this.stores;
+    const { sections } = problem;
+    const sectionList = sections.map(s => s.abbrev);
+    console.log(`section initials: ${JSON.stringify(sectionList, null, " ")}`);
     const progressItems: IProgressItem[] = [
       {
         label: "IN",
