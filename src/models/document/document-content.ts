@@ -381,7 +381,7 @@ export const DocumentContentModel = types
           tileInfo = self.addGeometryTile(addSidecarNotes);
           break;
         case "image":
-          tileInfo = self.addImageTile(options && options.imageTileUrl);
+          tileInfo = self.addImageTile(options && options.imageUrl);
           break;
         case "drawing":
           tileInfo = self.addDrawingTile();

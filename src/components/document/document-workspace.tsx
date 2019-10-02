@@ -158,9 +158,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     // make sure we have a primary document to drop onto
-    const {ui: {problemWorkspace}} = this.stores;
-    const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
-    return !!primaryDocument;
+    return !!this.getPrimaryDocument(this.stores.ui.problemWorkspace.primaryDocumentKey);
   }
 
   private handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
@@ -210,10 +208,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         if (primaryDocument) {
           const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
           primaryDocument.content.addTile("image", {
-            imageTileUrl: dropUrl,
+            imageUrl: dropUrl,
             insertRowInfo: {
-              // insert the tile after the row it was dropped on
-              rowInsertIndex: (rowIndex ? rowIndex + 1 : 0)
+              // insert the tile after the row it was dropped on otherwise add to end of document
+              rowInsertIndex: (rowIndex ? rowIndex + 1 : primaryDocument.content.rowOrder.length)
             }
           });
         }

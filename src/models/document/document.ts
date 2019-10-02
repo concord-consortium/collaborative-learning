@@ -44,7 +44,7 @@ export type OtherPublicationType = typeof PersonalPublication | typeof LearningL
 
 export interface IDocumentAddTileOptions {
   addSidecarNotes?: boolean;
-  imageTileUrl?: string;
+  imageUrl?: string;
 }
 
 export const DocumentToolEnum = types.enumeration("tool",
