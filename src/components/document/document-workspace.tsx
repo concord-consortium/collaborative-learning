@@ -43,15 +43,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   public render() {
     const { appConfig } = this.stores;
     const isGhostUser = this.props.isGhostUser;
+    // NOTE: the drag handlers are in three different divs because we cannot overlay
+    // the renderDocuments() div otherwise the Cypress tests will fail because none
+    // of the html elements in the documents will be visible to it.  The first div acts
+    // as a handler for the background and the left and right nav then delegate dragging
+    // and dropping to the same functions
     return (
-      <div
-        className="document-workspace"
-        onDragOver={this.handleDragOverWorkspace}
-        onDrop={this.handleImageDrop}
-      >
+      <div className="document-workspace">
+        <div
+          className="drag-handler"
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
         {this.renderDocuments(isGhostUser)}
-        <LeftNavComponent isGhostUser={isGhostUser} />
-        <RightNavComponent tabs={appConfig.rightNavTabs} isGhostUser={isGhostUser} />
+        <LeftNavComponent
+          isGhostUser={isGhostUser}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
+        <RightNavComponent
+          tabs={appConfig.rightNavTabs}
+          isGhostUser={isGhostUser}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
       </div>
     );
   }
