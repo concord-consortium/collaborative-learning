@@ -1,6 +1,4 @@
 import * as React from "react";
-import { Button, ButtonGroup } from "@blueprintjs/core";
-import { FLEX_EXPANDER } from "@blueprintjs/core/lib/esm/common/classes";
 
 import "./pager.sass";
 
