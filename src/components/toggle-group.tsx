@@ -19,12 +19,12 @@ interface IState {}
 
 export class ToggleGroup extends React.Component<IProps, IState> {
 
-  public renderOption(option: IToggleChoice) {
+  public renderOption(option: IToggleChoice, index: number) {
     const className = option.selected
       ? "toggle-button selected"
       : "toggle-button";
     return(
-      <div className={className} onClick={option.onClick}>
+      <div className={className} onClick={option.onClick} key={index}>
         {option.label}
       </div>
     );
@@ -34,7 +34,7 @@ export class ToggleGroup extends React.Component<IProps, IState> {
     const { options } = this.props;
     return(
       <div className="toggle-group">
-        { options.map(o => this.renderOption(o)) }
+        { options.map( (opt, idx) => this.renderOption(opt, idx)) }
       </div>
     );
   }
