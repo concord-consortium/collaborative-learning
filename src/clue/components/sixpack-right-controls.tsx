@@ -38,29 +38,16 @@ export class SixPackRightControls extends BaseComponent<IProps, IState> {
     ];
     const { problem } = this.stores;
     const { sections } = problem;
-    const sectionList = sections.map(s => s.abbrev);
-    console.log(`section initials: ${JSON.stringify(sectionList, null, " ")}`);
-    const progressItems: IProgressItem[] = [
-      {
-        label: "IN",
-        completed: 12,
-        total: 24,
+    const makeProgressItem = (s: string) => {
+      return {
+        label: s,
+        completed: Math.floor(Math.random() * 12) + 1,
+        total: 12,
         selected: false
-      },
-      {
-        label: "MA",
-        completed: 12,
-        total: 20,
-        selected: true
-      },
-      {
-        label: "HI",
-        completed: 2,
-        total: 14,
-        selected: false
-      }
+      };
+    };
 
-    ];
+    const progressItems = sections.map(s => makeProgressItem(s.abbrev));
     return(
       <div className="sixpack-right-controls">
         <div className="top-controls">
