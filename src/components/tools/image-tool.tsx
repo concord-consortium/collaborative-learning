@@ -104,8 +104,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
 
     const contentUrl = this.getContent().url;
-    const isExternalUrl = gImageMap.isExternalUrl(contentUrl);
-    const editableUrl = isExternalUrl ? contentUrl : undefined;
+    const isEditableUrl = gImageMap.isExternalUrl(contentUrl) && !gImageMap.isDataImageUrl(contentUrl);
+    const editableUrl = isEditableUrl ? contentUrl : undefined;
 
     // Include states for selected and editing separately to clean up UI a little
     const editableClass = readOnly ? "read-only" : "editable";

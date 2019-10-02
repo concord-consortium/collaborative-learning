@@ -49,6 +49,9 @@ export const ImageMapModel = types
       return (index >= 0) &&
               (self.handlers[index].name === kExternalUrlHandlerName);
     },
+    isDataImageUrl(url: string) {
+      return /data:image\//.test(url);
+    },
     isPlaceholder(url: string) {
       return url === placeholderImage;
     },
