@@ -82,7 +82,7 @@ export class IoT {
 
   private updateHubs = () => {
     const  { hubStore } = this.stores;
-    const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS }
+    const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS };
     this.iotCore.listThings(requestParams).promise().then(data => {
       if (data && data.things) {
         data.things.forEach(thing => {
