@@ -12,6 +12,11 @@ export class ImageDragDrop {
   }
 
   public dragOver(e: React.DragEvent<HTMLDivElement>) {
+    // the cypress tests generate drag events without the dataTransfer element of the event
+    if (this.hasMissingDataTransfer(e)) {
+      return false;
+    }
+
     const isAcceptableDrag = this.checkForAcceptableImageDrag(e);
     if (isAcceptableDrag) {
       e.dataTransfer.dropEffect = "copy";
@@ -23,6 +28,11 @@ export class ImageDragDrop {
 
   public drop(e: React.DragEvent<HTMLDivElement>) {
     return new Promise<string>((resolve, reject) => {
+      // the cypress tests generate drag events without the dataTransfer element of the event
+      if (this.hasMissingDataTransfer(e)) {
+        return;
+      }
+
       if (this.checkForAcceptableImageDrag(e)) {
         e.preventDefault();
         e.stopPropagation();
@@ -82,5 +92,9 @@ export class ImageDragDrop {
 
   private hasFileList(e: React.DragEvent<HTMLDivElement>) {
     return e.dataTransfer.types.indexOf("Files") >= 0;
+  }
+
+  private hasMissingDataTransfer(e: React.DragEvent<HTMLDivElement>) {
+    return !e.dataTransfer;
   }
 }
