@@ -29,7 +29,7 @@ const ghostProblemDocuments: GhostDocumentMap = {};
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   public componentDidMount() {
-    this.guaranteePrimaryDocument();
+    this.guaranteeInitialDocuments();
   }
 
   public render() {
@@ -44,8 +44,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private async guaranteePrimaryDocument() {
-    const { appConfig: { defaultDocumentType, defaultDocumentContent },
+  private async guaranteeInitialDocuments() {
+    const { appConfig: { defaultDocumentType, defaultDocumentContent,
+                         defaultLearningLogDocument, defaultInitialLearningLogTitle },
             db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
@@ -53,6 +54,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }
     }
+    // Guarantee the user starts with one learning log
+    defaultLearningLogDocument && await db.guaranteeLearningLog(defaultInitialLearningLogTitle);
   }
 
   private renderDocuments(isGhostUser: boolean) {
@@ -174,8 +177,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleNewDocument = (document: DocumentModelType) => {
     const { appConfig, user } = this.stores;
     const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
+    const defaultDocTitle = document.isLearningLog
+                            ? appConfig.defaultLearningLogTitle
+                            : appConfig.defaultDocumentTitle;
     const docTypeString = appConfig.getDocumentLabel(docType, 1);
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, appConfig.defaultDocumentTitle);
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
     this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`, `Create ${docTypeString}`)
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
