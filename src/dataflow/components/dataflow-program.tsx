@@ -76,6 +76,7 @@ interface IProps extends SizeMeProps {
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   programIsRunning?: string;
   onCheckProgramRunState: (endTime: number) => void;
+  tileHeight?: number;
 }
 
 interface IState {
@@ -142,12 +143,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={this.props.readOnly || !this.isReady()}
           /> }
-          <div className="editor-graph-container">
+          <div className="editor-graph-container" style={this.getEditorStyle()}>
             <div
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt} style={this.getEditorStyle()}/>
+              <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
@@ -209,9 +210,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private getEditorStyle = () => {
     const style: React.CSSProperties = {};
     const documentElt = document.querySelector(".document-content");
-    const titlebarElt = document.querySelector(".document .titlebar");
-    const editorHeight = documentElt && titlebarElt ? documentElt.clientHeight - titlebarElt.clientHeight : 500;
-    style.height = `${editorHeight}px`;
+    const kBottomResizeHandleHeight = 10;
+    const kTextTileHeight = 60;
+    const kProgramTopbarHeight = 44;
+    const topbarHeight = this.isComplete() ? 0 : kProgramTopbarHeight;
+    const editorHeight = documentElt
+                         ? documentElt.clientHeight - topbarHeight - kTextTileHeight - kBottomResizeHandleHeight
+                         : 500;
+    if (!this.props.tileHeight) {
+      style.height = `${editorHeight}px`;
+    }
     return style;
   }
 
