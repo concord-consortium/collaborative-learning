@@ -89,6 +89,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { model, readOnly } = this.props;
+    const { unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `text-tool ${editableClass}`;
     if (!this.state.value) { return null; }
@@ -96,6 +97,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       <Editor
         key={model.id}
         className={classes}
+        placeholder={placeholderText}
         readOnly={readOnly}
         value={this.state.value}
         onChange={this.onChange}

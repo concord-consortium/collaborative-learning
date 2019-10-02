@@ -15,6 +15,7 @@ export const UnitModel = types
     abbrevTitle: "",
     title: types.string,
     subtitle: "",
+    placeholderText: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
