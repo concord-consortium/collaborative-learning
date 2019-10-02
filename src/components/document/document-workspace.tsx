@@ -217,16 +217,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
     const {ui} = this.stores;
     this.imageDragDrop.drop(e)
-      .then((dropUrl) => {
-        const {problemWorkspace} = ui;
-        const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
+      .then((imageUrl) => {
+        const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
         if (primaryDocument) {
+          // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
+          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
           primaryDocument.content.addTile("image", {
-            imageUrl: dropUrl,
+            imageUrl,
             insertRowInfo: {
-              // insert the tile after the row it was dropped on otherwise add to end of document
-              rowInsertIndex: (rowIndex ? rowIndex + 1 : primaryDocument.content.rowOrder.length)
+              rowInsertIndex
             }
           });
         }
