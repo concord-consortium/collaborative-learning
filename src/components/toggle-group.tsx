@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import "./toggle-group.sass";
 
 type orientation = "horizontal" | "vertical";
