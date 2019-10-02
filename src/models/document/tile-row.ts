@@ -24,6 +24,8 @@ export const TileRowModel = types
   .model("TileRow", {
     id: types.optional(types.identifier, () => uuid()),
     height: types.maybe(types.number),
+    isSectionHeader: false,
+    sectionId: types.maybe(types.string),
     tiles: types.array(TileLayoutModel)
   })
   .views(self => ({
@@ -56,6 +58,10 @@ export const TileRowModel = types
     // undefined height == default to content height
     setRowHeight(height?: number) {
       self.height = height;
+    },
+    setSectionHeader(sectionId: string) {
+      self.isSectionHeader = true;
+      self.sectionId = sectionId;
     },
     insertTileInRow(tile: ToolTileModelType, tileIndex?: number) {
       const dstTileIndex = (tileIndex != null) && (tileIndex >= 0) && (tileIndex < self.tiles.length)

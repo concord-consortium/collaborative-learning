@@ -7,7 +7,7 @@ import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTil
         } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { createToolTileModelFromContent, ToolTileModel, ToolTileSnapshotOutType } from "../tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
@@ -16,6 +16,7 @@ import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { IDropRowInfo } from "../../components/document/document-content";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 export interface NewRowOptions {
   rowHeight?: number;
@@ -90,6 +91,24 @@ export const DocumentContentModel = types
         const row = self.rowMap.get(rowId);
         return row ? row.tiles.length : 0;
       },
+      getRowsInSection(sectionId: string): TileRowModelType[] {
+        let sectionRowIndex: number | undefined;
+        let nextSectionRowIndex: number | undefined;
+        self.rowOrder.forEach((rowId, i) => {
+          const row = self.rowMap.get(rowId);
+          if (row && (sectionRowIndex == null) && (sectionId === row.sectionId)) {
+            sectionRowIndex = i;
+          }
+          else if (row && (sectionRowIndex != null) && (nextSectionRowIndex == null) && row.isSectionHeader) {
+            nextSectionRowIndex = i;
+          }
+        });
+        if (sectionRowIndex == null) return [];
+        if (nextSectionRowIndex == null) nextSectionRowIndex = self.rowOrder.length;
+        const rows = self.rowOrder.map(rowId => self.rowMap.get(rowId));
+        const rowsInSection = rows.filter((row, i) => !!row && (i > sectionRowIndex!) && (i < nextSectionRowIndex!));
+        return rowsInSection as TileRowModelType[];
+      },
       getLastVisibleRow() {
         // returns last visible row or last row
         const lastVisibleRowId = self.visibleRows.length
@@ -144,6 +163,16 @@ export const DocumentContentModel = types
     };
   })
   .views(self => ({
+    getTilesInSection(sectionId: string) {
+      const tiles: ToolTileModelType[] = [];
+      const rows = self.getRowsInSection(sectionId);
+      rows.forEach(row => {
+        row.tiles
+          .map(tileLayout => self.tileMap.get(tileLayout.tileId))
+          .forEach(tile => tile && !tile.isPlaceholder && tiles.push(tile));
+      });
+      return tiles;
+    },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());
     }
@@ -236,13 +265,7 @@ export const DocumentContentModel = types
                                   { rowHeight: kDrawingDefaultHeight });
     },
     copyTileIntoRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
-      let snapshot;
-      try {
-        snapshot = JSON.parse(serializedTile);
-      }
-      catch (e) {
-        snapshot = null;
-      }
+      const snapshot = safeJsonParse(serializedTile);
       if (snapshot) {
         const newRowOptions: NewRowOptions = {
           rowIndex,
