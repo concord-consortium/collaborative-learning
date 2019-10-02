@@ -23,7 +23,7 @@ export const updateProblem = (stores: IStores, problemId: string) => {
   if (investigation && problem) {
     Logger.updateProblem(investigation, problem);
     setPageTitle(stores, problem);
-    stores.supports.createFromUnit(unit, investigation, problem);
+    stores.supports.createFromUnit({unit, investigation, problem, documents: stores.documents});
     stores.problem = problem;
   }
 };

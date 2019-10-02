@@ -6,7 +6,8 @@ import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
-        PersonalDocument, ProblemDocument } from "../../models/document/document";
+         PersonalDocument, ProblemDocument, PublicationDocument, PersonalPublication, LearningLogPublication,
+         SupportPublication } from "../../models/document/document";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 
 import "./document-workspace.sass";
@@ -76,6 +77,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               document={primaryDocument}
               workspace={problemWorkspace}
               onNewDocument={this.handleNewDocument}
+              onCopyDocument={this.handleCopyDocument}
+              onDeleteDocument={this.handleDeleteDocument}
               toolbar={toolbar}
               side="primary"
               isGhostUser={isGhostUser}
@@ -101,6 +104,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                 document={primaryDocument}
                 workspace={problemWorkspace}
                 onNewDocument={this.handleNewDocument}
+                onCopyDocument={this.handleCopyDocument}
+                onDeleteDocument={this.handleDeleteDocument}
                 toolbar={toolbar}
                 side="primary"
                 isGhostUser={isGhostUser}
@@ -167,10 +172,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleNewDocument = (document: DocumentModelType) => {
+    const { appConfig, user } = this.stores;
     const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const docTypeString = document.isLearningLog ? "Learning Log" : "Personal Document";
-    const { appConfig: { defaultDocumentTitle } } = this.stores;
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(this.stores.user, docType, defaultDocumentTitle);
+    const docTypeString = appConfig.getDocumentLabel(docType, 1);
+    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, appConfig.defaultDocumentTitle);
     this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`, `Create ${docTypeString}`)
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
@@ -185,6 +190,47 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);
+    }
+  }
+
+  private handleCopyDocument = (document: DocumentModelType) => {
+    const { appConfig } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
+    this.stores.ui.prompt(`Give your ${docTypeString} copy a new name:`,
+                          `Copy of ${document.title || this.stores.problem.title}`, `Copy ${docTypeString}`)
+      .then((title: string) => {
+        this.handleCopyDocumentOpen(document, title)
+        .catch(this.stores.ui.setError);
+      });
+  }
+
+  private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
+    const { db, ui: { problemWorkspace } } = this.stores;
+    const copyDocument = await db.copyOtherDocument(document, title);
+    if (copyDocument) {
+      problemWorkspace.setAvailableDocument(copyDocument);
+    }
+  }
+
+  private handleDeleteDocument = (document: DocumentModelType) => {
+    const { appConfig } = this.stores;
+    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
+    this.stores.ui.confirm(`Delete this ${docTypeString}? ${document.title}`, `Delete ${docTypeString}`)
+      .then((confirmDelete: boolean) => {
+        const docType = document.type;
+        if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
+          document.setProperty("isDeleted", "true");
+          this.handleDeleteOpenPrimaryDocument();
+        }
+      });
+  }
+
+  private handleDeleteOpenPrimaryDocument = async () => {
+    const { appConfig: { defaultDocumentType, defaultDocumentContent },
+            db, ui: { problemWorkspace } } = this.stores;
+    const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+    if (defaultDocument) {
+      problemWorkspace.setPrimaryDocument(defaultDocument);
     }
   }
 

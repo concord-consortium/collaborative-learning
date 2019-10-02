@@ -2,12 +2,14 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 
-import "./teacher-support.sass";
 import { niceDate } from "../../utilities/time";
 import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType,
   audienceInfo } from "../../models/stores/supports";
 import { sectionInfo, allSectionInfo } from "../../models/curriculum/section";
+import { createTextSupport } from "../../models/curriculum/support";
+
+import "./teacher-support.sass";
 
 interface IProps extends IBaseProps {
   support?: TeacherSupportModelType;
@@ -69,13 +71,13 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderExistingSupport(support: TeacherSupportModelType) {
+  private renderExistingSupport(teacherSupport: TeacherSupportModelType) {
     const { time } = this.props;
-    const { text, sectionTargetDisplay } = support;
+    const { support, sectionTargetDisplay } = teacherSupport;
 
     return (
       <div className="teacher-support" data-test="teacher-support">
-        <svg className={`icon icon-delete-tool`} onClick={this.handleDelete(support)}>
+        <svg className={`icon icon-delete-tool`} onClick={this.handleDelete(teacherSupport)}>
           <use xlinkHref={`#icon-delete-tool`} />
         </svg>
         <div className="date">{niceDate(time)}</div>
@@ -83,7 +85,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
           { sectionTargetDisplay }
         </div>
         <div className="content">
-          { text }
+          { support.content }
         </div>
       </div>
     );
@@ -95,7 +97,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     const content = this.inputElem && this.inputElem.value;
     const sectionTarget = this.sectionElem && this.sectionElem.value;
     if (this.inputElem && content && sectionTarget) {
-      db.createSupport(content, sectionTarget as TeacherSupportSectionTarget, audience);
+      db.createSupport(createTextSupport(content), sectionTarget as TeacherSupportSectionTarget, audience);
       this.inputElem.value = "";
     }
   }

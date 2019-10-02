@@ -8,6 +8,7 @@ import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 import { ITableChange } from "../models/tools/table/table-content";
+import { DEBUG_LOGGER } from "../lib/debug";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -22,6 +23,7 @@ interface LogMessage {
   investigation?: string;
   problem?: string;
   section?: string;
+  group?: string;
   time: number;
   event: string;
   method: string;
@@ -60,12 +62,32 @@ export enum LogEventName {
 
   TILE_UNDO,
   TILE_REDO,
+
+  PUBLISH_DOCUMENT,
+
+  // the followng are for potential debugging purposes and are all marked "internal"
+  INTERNAL_AUTHENTICATED,
+  INTERNAL_FIREBASE_DISCONNECTED,
+
+  // the following TODOs are to be done when the functionality is added to the app
+  DASHBOARD_SWITCH_CLASS,  // TODO: add logEvent call when functionality added
+  DASHBOARD_SWITCH_PROBLEM,  // TODO: add logEvent call when functionality added
+  DASHBOARD_CLICK_ON_GROUP,  // TODO: decide if this is needed, currently there is no way to select a group
+  DASHBOARD_DESELECT_STUDENT,
+  DASHBOARD_SELECT_STUDENT,
+  DASHBOARD_TOGGLE_TO_WORKSPACE,
+  DASHBOARD_TOGGLE_TO_DASHBOARD,
+  DASHBOARD_TURN_METRICS_ON,  // TODO: add logEvent call when functionality added
 }
 
 type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+    if (DEBUG_LOGGER) {
+      // tslint:disable-next-line:no-console
+      console.log("Logger#initializeLogger called.");
+    }
     this._instance = new Logger(stores, investigation, problem);
   }
 
@@ -185,6 +207,10 @@ export class Logger {
       logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
     }
 
+    if (user.isStudent) {
+      logMessage.group = user.latestGroupId;
+    }
+
     return logMessage;
   }
 
@@ -205,6 +231,10 @@ export class Logger {
 }
 
 function sendToLoggingService(data: LogMessage) {
+  if (DEBUG_LOGGER) {
+    // tslint:disable-next-line:no-console
+    console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
+  }
   const request = new XMLHttpRequest();
   request.open("POST", logManagerUrl, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");

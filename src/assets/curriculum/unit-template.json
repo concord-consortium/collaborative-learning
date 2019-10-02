@@ -1,6 +1,7 @@
 {
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
+  "placeholderText": "Enter notes here",
   "lookingAhead": {
     "tiles": []
   },
@@ -46,13 +47,6 @@
                 "tiles": [],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -90,20 +84,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ""
-                    }
-                  }
-                ],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -141,13 +121,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         },
@@ -209,13 +182,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -253,13 +219,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -297,13 +256,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -364,13 +316,6 @@
                 "tiles": [],
                 "supports": []
               }
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -408,13 +353,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ],
           "supports": []
@@ -452,13 +390,6 @@
                 "tiles": []
               },
               "supports": []
-            },
-            {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         },
@@ -507,12 +438,6 @@
               "content": {
                 "tiles": []
               }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
-              }
             }
           ]
         }, {
@@ -541,12 +466,6 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
               }
             }
           ],
@@ -577,12 +496,6 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": []
-              }
-            }, {
-              "type": "extraWorkspace",
-              "content": {
-                "tiles": [],
-                "supports": []
               }
             }
           ]

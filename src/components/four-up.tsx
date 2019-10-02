@@ -11,6 +11,7 @@ import { IToolApiInterface } from "./tools/tool-tile";
 import { FourUpOverlayComponent } from "./four-up-overlay";
 
 import "./four-up.sass";
+import { Logger, LogEventName } from "../lib/logger";
 
 interface IProps extends IBaseProps {
   userId?: string;
@@ -29,6 +30,10 @@ interface FourUpUser {
   doc?: DocumentModelType;
 }
 
+interface ContextUserMap {
+  [key: string]: FourUpUser | undefined;
+}
+
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
 export const BORDER_SIZE = 4;
 
@@ -37,6 +42,7 @@ export const BORDER_SIZE = 4;
 export class FourUpComponent extends BaseComponent<IProps, IState> {
   private grid: FourUpGridModelType;
   private container: HTMLDivElement | null;
+  private userByContext: ContextUserMap = {};
 
   constructor(props: IProps) {
     super(props);
@@ -108,6 +114,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       if (b.user.id === userId) return 1;
       return 0;
     });
+
+    // save reference to use for logger in #handleOverlayClicked
+    this.userByContext = {
+      "four-up-nw": groupUsers[0],
+      "four-up-ne": groupUsers[1],
+      "four-up-se": groupUsers[2],
+      "four-up-sw": groupUsers[3],
+    };
 
     const groupDoc = (index: number) => {
       return groupUsers[index] && groupUsers[index].doc;
@@ -316,7 +330,13 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleOverlayClicked = (context: string) => {
+    const { groupId } = this.props;
+    const groupUser = this.userByContext[context];
     const toggledContext = context === this.state.toggledContext ? null : context;
     this.setState({toggledContext});
+    if (groupUser) {
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      Logger.log(event, {groupId, studentId: groupUser.user.id});
+    }
   }
 }

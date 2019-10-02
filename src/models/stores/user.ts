@@ -5,18 +5,15 @@ const initials = require("initials");
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
-export const PortalClass = types.model("PortalClass", {
+export const PortalClassOffering = types.model("PortalClassOffering", {
   className: "",
-  classHash: "",
-  classUri: ""
+  problemOrdinal: "",
+  unitCode: "",
+  offeringId: "",
+  location: ""
 });
-export type IPortalClass = typeof PortalClass.Type;
 
-export const PortalProblem = types.model("PortalProblem", {
-  problemDesignator: "",
-  switchUrlLocation: ""
-});
-export type IPortalProblem = typeof PortalProblem.Type;
+export type IPortalClassOffering = typeof PortalClassOffering.Type;
 
 export const UserModel = types
   .model("User", {
@@ -30,8 +27,7 @@ export const UserModel = types
     latestGroupId: types.maybe(types.string),
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
-    portalClasses: types.array(PortalClass),
-    portalProblems: types.array(PortalProblem)
+    portalClassOfferings: types.array(PortalClassOffering)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -62,18 +58,10 @@ export const UserModel = types
       if (user.firebaseJWT && (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl) {
         self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
       }
-      // TODO: FIXME: Check if MST has a fromArray() function to avoid loops
-      if (user.portalClasses) {
-        user.portalClasses.forEach( (portalClass) => {
-          self.portalClasses.push(portalClass);
-        });
+      if (user.portalClassOfferings) {
+        self.portalClassOfferings.replace(user.portalClassOfferings);
       }
-      if (user.portalProblems) {
-        user.portalProblems.forEach ( (portalProblem) => {
-          self.portalProblems.push(portalProblem);
-        });
-      }
-    },
+    }
   }))
   .views((self) => ({
     get isStudent() {

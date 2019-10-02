@@ -2,7 +2,9 @@ import { types, SnapshotIn, Instance } from "mobx-state-tree";
 
 export enum ERightNavTab {
   kMyWork = "my-work",
-  kClassWork = "class-work"
+  kClassWork = "class-work",
+  kLearningLog = "learning-log",
+  kSupports = "supports"
 }
 
 // generic type which maps tab id to values of another type
@@ -19,7 +21,9 @@ export enum ENavTabSectionType {
   kPublishedLearningLogs = "published-learning-logs",
   kStarredPersonalDocuments = "starred-personal-documents",
   kStarredProblemDocuments = "starred-problem-documents",
-  kStarredLearingLogs = "starred-learning-logs"
+  kStarredLearingLogs = "starred-learning-logs",
+  kCurricularSupports = "curricular-supports",
+  kTeacherSupports = "teacher-supports"
 }
 
 export const NavTabSectionModel =
