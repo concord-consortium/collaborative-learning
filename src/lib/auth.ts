@@ -3,10 +3,10 @@ import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
-import * as appConfigJson from "../clue/app-config.json";
 import { Logger, LogEventName } from "../lib/logger";
 
 const initials = require("initials");
@@ -311,7 +311,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
+export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
   interface IAuthenticateResponse {
     authenticatedUser: AuthenticatedUser;
     classInfo?: ClassInfo;
@@ -323,7 +323,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
     // when launched as a report, the params will not contain the problemOrdinal
-    const problemOrdinal = urlParams.problem || appConfigJson.defaultProblemOrdinal;
+    const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
@@ -397,7 +397,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
               .then(([rawFirebaseJWT, firebaseJWT]) => {
                 getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
                 .then(result => {
-                  portalClassOfferings = getPortalClassOfferings(result, urlParams);
+                  portalClassOfferings = getPortalClassOfferings(result, appConfig, urlParams);
                   const uidAsString = `${portalJWT.uid}`;
                   let authenticatedUser: AuthenticatedUser | undefined;
 
@@ -417,7 +417,7 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
                     if (portalClassOfferings) {
                       authenticatedUser.portalClassOfferings = portalClassOfferings;
                     }
-                    getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
+                    getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams)
                     .then( ({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
                       if (authenticatedUser) {
                         Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});

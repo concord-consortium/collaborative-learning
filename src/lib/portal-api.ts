@@ -1,10 +1,10 @@
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import * as superagent from "superagent";
 import { QueryParams } from "../utilities/url-params";
+import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
 import { parseUrl } from "query-string";
-import * as appConfigJson from "../clue/app-config.json";
 
 interface IPortalReport {
   url: string;
@@ -61,7 +61,8 @@ interface IUnitAndProblem {
   unitCode: string;
   problemOrdinal: string;
 }
-export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams?: QueryParams) => {
+export const getProblemIdForAuthenticatedUser =
+              (rawPortalJWT: string, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
   return new Promise<IUnitAndProblem>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
@@ -73,15 +74,16 @@ export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
           resolve({
-            unitCode: getUnitCode(activityUrl),
-            problemOrdinal: getProblemOrdinal(activityUrl)});
+            unitCode: getUnitCode(activityUrl) || appConfig.defaultUnit,
+            problemOrdinal: getProblemOrdinal(activityUrl) || appConfig.defaultProblemOrdinal
+          });
         }
       });
     }
     else {
       resolve({
-        unitCode: appConfigJson.defaultUnit,
-        problemOrdinal: appConfigJson.defaultProblemOrdinal
+        unitCode: appConfig.defaultUnit,
+        problemOrdinal: appConfig.defaultProblemOrdinal
       });
     }
   });
@@ -104,32 +106,24 @@ interface IPortalOffering {
 
 // For problems... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
 function getProblemOrdinal(url: string) {
-  const defaultOrdinal = appConfigJson.defaultProblemOrdinal;
   const queryParams = parseUrl(url);
-  const problemOrdinal = queryParams.query.problem as string;
-  if (! problemOrdinal) {
-    // tslint:disable-next-line
-    console.warn(`Missing problemOrdinal. Using default: ${defaultOrdinal}`);
-    return (defaultOrdinal);
-  }
-  return (problemOrdinal);
+  return queryParams.query.problem
+          ? queryParams.query.problem as string
+          : undefined;
 }
 
 // For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
 // for the "Stretching and Shrinking" unit.
 function getUnitCode(url: string) {
-  const defaultUnit = appConfigJson.defaultUnit;
   const queryParams = parseUrl(url);
-  const unit = queryParams.query.unit as string;
-  if (! unit) {
-    // tslint:disable-next-line
-    console.warn(`Missing unitCode. Using default: ${defaultUnit}`);
-    return (defaultUnit);
-  }
-  return (unit);
+  return queryParams.query.unit
+          ? queryParams.query.unit as string
+          : undefined;
 }
 
-export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlParams?: QueryParams) {
+export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
+                                        appConfig: AppConfigModelType,
+                                        urlParams?: QueryParams) {
   const result = [] as IPortalClassOffering[];
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering) && urlParams) {
@@ -143,8 +137,8 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[], urlP
       }
       result.push({
         className: offering.clazz,
-        problemOrdinal: getProblemOrdinal(offering.activity_url),
-        unitCode: getUnitCode(offering.activity_url),
+        problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
+        unitCode: getUnitCode(offering.activity_url) || appConfig.defaultUnit,
         offeringId: `${offering.id}`,
         location: newLocationUrl
       });
