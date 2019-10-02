@@ -57,6 +57,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
     const TeacherGroupHeader = (props: IGroupHeaderProps) => {
       const { group: g} = props;
       const clickHandler = () => {
+        // tslint:disable-next-line
         console.log("click");
         // ui.set
         groups.ghostGroup(user.id, g.id);

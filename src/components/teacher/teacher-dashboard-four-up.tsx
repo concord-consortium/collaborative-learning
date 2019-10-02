@@ -13,6 +13,7 @@ export class TeacherDashboardFourUpComponent extends BaseComponent<IProps, IStat
   public render() {
     const { groups } = this.stores;
     const { ghostGroupId } = groups;
+    // tslint:disable-next-line
     console.log(ghostGroupId);
     return (
       <div className="teacher-dashboard-four-up">
