@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, DocumentType, LearningLogDocument, LearningLogPublication,
-        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument
+        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument,
+        PublicationDocument
       } from "../document/document";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
@@ -56,6 +57,12 @@ export const DocumentsModel = types
     getProblemDocumentsForGroup(groupId: string) {
       return self.all.filter((document) => {
         return (document.type === ProblemDocument) && (document.groupId === groupId);
+      });
+    },
+
+    getLastPublishedProblemDocumentsForGroup(groupId: string) {
+      return self.all.filter((document) => {
+        return (document.type === PublicationDocument) && (document.groupId === groupId);
       });
     },
 

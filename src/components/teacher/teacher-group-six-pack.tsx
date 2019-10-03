@@ -4,12 +4,12 @@ import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
 
 import "./teacher-group-six-pack.sass";
+import { DocumentViewMode } from "./teacher-group-tab";
 
 interface IProps extends IBaseProps {
   page: number;
+  documentViewMode: DocumentViewMode;
 }
-
-interface IState { }
 
 const ROWS = 2;
 const COLUMNS = 3;
@@ -17,7 +17,7 @@ export const GROUPS_PER_PAGE = ROWS * COLUMNS;
 
 @inject("stores")
 @observer
-export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
+export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
 
   public render() {
     return (
@@ -44,6 +44,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
   }
 
   private renderFourUp(groupIndex: number, r: number, c: number) {
+    const { documentViewMode } = this.props;
     const { groups } = this.stores;
     const group = groups.allGroups[groupIndex];
     return (
@@ -53,7 +54,12 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
         </div>
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
-            <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
+            <FourUpComponent
+              groupId={group.id}
+              isGhostUser={true}
+              toggleable={true}
+              documentViewMode={documentViewMode}
+            />
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   editabilityLocation?: EditabilityLocation;
   toolApiInterface?: IToolApiInterface;
+  overlayMessage?: string;
 }
 
 @observer
@@ -30,6 +31,7 @@ export class CanvasComponent extends React.Component<IProps, {}> {
         {this.renderContent()}
         {this.renderEditability()}
         {this.renderDebugInfo()}
+        {this.renderOverlayMessage()}
       </div>
     );
   }
@@ -69,6 +71,17 @@ export class CanvasComponent extends React.Component<IProps, {}> {
       return (
         <div className="canvas-debug">
           <span style={{fontSize: "1.5em"}}>{document.key}</span>
+        </div>
+      );
+    }
+  }
+
+  private renderOverlayMessage() {
+    const { overlayMessage } = this.props;
+    if (overlayMessage) {
+      return (
+        <div className="canvas-overlay-message">
+          <span style={{fontSize: "1.5em"}}>{overlayMessage}</span>
         </div>
       );
     }

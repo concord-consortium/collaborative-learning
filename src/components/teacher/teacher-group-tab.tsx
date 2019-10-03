@@ -6,11 +6,17 @@ import { SixPackRightControls } from "../../clue/components/sixpack-right-contro
 import { Pager } from "../pager";
 import "./teacher-group-tab.sass";
 
+export enum DocumentViewMode {
+  Live,
+  Published
+}
+
 interface IProps extends IBaseProps {}
 
 interface IState {
   selectedGroupId?: string;
   page: number;
+  documentViewMode: DocumentViewMode;
 }
 
 @inject("stores")
@@ -20,15 +26,20 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      page: 0
+      page: 0,
+      documentViewMode: DocumentViewMode.Live
     };
   }
 
   public render() {
+    const {page, documentViewMode} = this.state;
     return (
       <div className="teacher-group-tab">
-        <TeacherGroupSixPack page={ this.state.page }/>
-        <SixPackRightControls>
+        <TeacherGroupSixPack page={page} documentViewMode={documentViewMode} />
+        <SixPackRightControls
+          documentViewMode={documentViewMode}
+          setDocumentViewMode={this.handleSetDocumentViewMode}
+        >
           <Pager
             currentPage={this.state.page}
             numPages={this.numPages}
@@ -38,9 +49,12 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
       </div>
     );
   }
+
   private setPage = (nextPage: number) => this.setState({page: nextPage});
+
   private get numPages(){
     return Math.ceil(this.stores.groups.allGroups.length / GROUPS_PER_PAGE);
   }
 
+  private handleSetDocumentViewMode = (documentViewMode: DocumentViewMode) => this.setState({documentViewMode});
 }

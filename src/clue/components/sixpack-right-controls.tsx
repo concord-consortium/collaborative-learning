@@ -5,35 +5,30 @@ import { ToggleGroup } from "../../components/toggle-group";
 import "./sixpack-right-controls.sass";
 import { ProgressWidget, IProgressItem } from "./progress-widget";
 import { BaseComponent } from "../../components/base";
+import { DocumentViewMode } from "../../components/teacher/teacher-group-tab";
 
-type LiveOrPub = "live" | "pub";
-interface IProps {}
-interface IState {
-  mode: LiveOrPub;
+interface IProps {
+  documentViewMode: DocumentViewMode;
+  setDocumentViewMode: (documentViewMode: DocumentViewMode) => void;
 }
 
 @inject("stores")
-export class SixPackRightControls extends BaseComponent<IProps, IState> {
+export class SixPackRightControls extends BaseComponent<IProps, {}> {
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      mode: "live"
-    };
   }
 
   public render() {
-    const { mode } = this.state;
-    const live = mode === "live";
-    const pub  = mode === "pub";
+    const { documentViewMode, setDocumentViewMode } = this.props;
     const modeOptions = [{
         label: "Current Work",
-        selected: live,
-        onClick: () => this.setState({mode: "live"})
+        selected: documentViewMode === DocumentViewMode.Live,
+        onClick: () => setDocumentViewMode(DocumentViewMode.Live)
       },
       {
         label: "Published Work",
-        selected: pub,
-        onClick: () => this.setState({mode: "pub"})
+        selected: documentViewMode === DocumentViewMode.Published,
+        onClick: () => setDocumentViewMode(DocumentViewMode.Published)
       }
     ];
     const { problem } = this.stores;
@@ -62,6 +57,4 @@ export class SixPackRightControls extends BaseComponent<IProps, IState> {
       </div>
     );
   }
-  private setLive = () => this.setState({mode: "live"});
-  private setPub = () => this.setState({mode: "pub"});
 }
