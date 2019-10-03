@@ -5,6 +5,7 @@
   "units": {
     "dataflow": "assets/curriculum/dataflow/dataflow.json"
   },
+  "defaultProblemOrdinal": "1",
   "defaultUnit": "dataflow",
   "defaultDocumentType": "personal",
   "defaultDocumentTitle": "Program",
