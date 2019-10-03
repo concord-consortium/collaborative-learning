@@ -318,7 +318,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderStatusBar(type: string) {
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    // const showComment = !isPrimary && (document.type === ProblemPublication);
     const showComment = false;
     return (
       <div className={`statusbar ${type}`}>
