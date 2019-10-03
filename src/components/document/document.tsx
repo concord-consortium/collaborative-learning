@@ -49,13 +49,10 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, dataTestName?: string }) => {
-  const dataTest = dataTestName || "publish-icon";
+const PublishButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <svg key="publish" className={`action icon icon-publish`}
-          data-test={dataTest} onClick={onClick} >
-      <use xlinkHref={`#icon-publish`} />
-    </svg>
+    <IconButton icon="publish" key="publish-key" className="action icon-publish"
+                onClickButton={onClick} />
   );
 };
 
@@ -246,7 +243,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishOtherDocument} />
+              <PublishButton onClick={this.handlePublishOtherDocument} />
             </div>
           }
         </div>

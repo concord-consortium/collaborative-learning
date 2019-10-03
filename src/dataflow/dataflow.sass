@@ -27,12 +27,42 @@ $list-item-scale: 0.1
           .icon
             background-color: #ffffff
             color: $gray-mid-click
+          .icon-button
+            background-color: #ffffff
+            &:hover
+              background-color: #ffffff
+            &:active
+              background-color: #ffffff
           .icon-new
             background-color: #ffffff
             color: $gray-mid-click
             position: absolute
             right: 50px
             filter: grayscale(1)
+          .icon-publish
+            margin-left: 0
+            .publish
+              background-image: url("../assets/icons/publish/publish.svg")
+              &:hover
+                background-image: url("../assets/icons/publish/publish-hover.svg")
+              &:active
+                background-image: url("../assets/icons/publish/publish-active.svg")
+          .icon-copy
+            margin-left: 0
+            .copy
+              background-image: url("../assets/icons/copy/copy.svg")
+              &:hover
+                background-image: url("../assets/icons/copy/copy-hover.svg")
+              &:active
+                background-image: url("../assets/icons/copy/copy-active.svg")
+          .icon-delete
+            margin-left: 0
+            .delete
+              background-image: url("../assets/icons/delete/delete.svg")
+              &:hover
+                background-image: url("../assets/icons/delete/delete-hover.svg")
+              &:active
+                background-image: url("../assets/icons/delete/delete-active.svg")
         .title
           #icon-edit
             &.icon-edit
