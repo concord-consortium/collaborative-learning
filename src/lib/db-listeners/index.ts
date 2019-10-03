@@ -1,6 +1,6 @@
 import { onSnapshot } from "mobx-state-tree";
 
-import { DB } from "../db";
+import { DB, Monitor } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
@@ -15,12 +15,13 @@ import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from ".
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
+import { BaseListener } from "./base-listener";
 
 export interface ModelListeners {
   [key /* unique Key */: string]: {
     ref?: firebase.database.Reference;
     modelDisposer?: IDisposer;
-  };
+  } | undefined;
 }
 
 export interface UserProblemDocumentListeners {
@@ -36,12 +37,11 @@ export interface DocumentModelDisposers {
   [key /* sectionId */: string]: IDisposer;
 }
 
-export class DBListeners {
+export class DBListeners extends BaseListener {
   @observable public isListening = false;
   private db: DB;
 
   private modelListeners: ModelListeners = {};
-  private groupUserProblemDocumentsListeners: UserProblemDocumentListeners = {};
   private documentModelDisposers: DocumentModelDisposers = {};
 
   private latestGroupIdListener: DBLatestGroupIdListener;
@@ -55,6 +55,7 @@ export class DBListeners {
   private starsListener: DBStarsListener;
 
   constructor(db: DB) {
+    super("DBListeners");
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
@@ -118,47 +119,7 @@ export class DBListeners {
   }
 
   public getOrCreateModelListener(uniqueKeyForModel: string) {
-    if (!this.modelListeners[uniqueKeyForModel]) {
-      this.modelListeners[uniqueKeyForModel] = {};
-    }
-    return this.modelListeners[uniqueKeyForModel];
-  }
-
-  public updateGroupUserProblemDocumentListeners(document: DocumentModelType) {
-    const { user, groups } = this.db.stores;
-    const userGroup = groups.groupForUser(user.id);
-    const groupUsers = userGroup && userGroup.users;
-    if (groupUsers) {
-      groupUsers.forEach((groupUser) => {
-        if (groupUser.id === user.id) {
-          return;
-        }
-        const currentProblemDocsListener = this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
-          .problemDocsRef;
-        if (currentProblemDocsListener) {
-          currentProblemDocsListener.off();
-        }
-        const groupUserDocsRef = this.db.firebase.ref(
-          this.db.firebase.getProblemDocumentPath(user, document.key, groupUser.id)
-        );
-        this.getOrCreateGroupUserProblemDocumentListeners(document, groupUser.id)
-          .problemDocsRef = groupUserDocsRef;
-        groupUserDocsRef.on("value", this.handleGroupUserProblemDocRef(document));
-      });
-    }
-  }
-
-  public getOrCreateGroupUserProblemDocumentListeners(document: DocumentModelType, userId: string) {
-    const docKey = document.key;
-    if (!this.groupUserProblemDocumentsListeners[docKey]) {
-      this.groupUserProblemDocumentsListeners[docKey] = {};
-    }
-
-    if (!this.groupUserProblemDocumentsListeners[docKey][userId]) {
-      this.groupUserProblemDocumentsListeners[docKey][userId] = {};
-    }
-
-    return this.groupUserProblemDocumentsListeners[docKey][userId];
+    return this.modelListeners[uniqueKeyForModel] || (this.modelListeners[uniqueKeyForModel] = {});
   }
 
   public monitorDocumentVisibility = (document: DocumentModelType) => {
@@ -207,16 +168,27 @@ export class DBListeners {
     return this.monitorOtherDocument(document, LearningLogDocument);
   }
 
-  public monitorDocument = (document: DocumentModelType, readOnly: boolean = false) => {
-    this.monitorDocumentRef(document, readOnly);
-    this.monitorDocumentModel(document, readOnly);
+  public monitorDocument = (document: DocumentModelType, monitor: Monitor) => {
+    this.debugLog("#monitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.monitorDocumentRef(document, monitor);
+    this.monitorDocumentModel(document, monitor);
   }
 
-  private monitorDocumentRef = (document: DocumentModelType, readOnly: boolean = false) => {
+  public unmonitorDocument = (document: DocumentModelType, monitor: Monitor) => {
+    this.debugLog("#unmonitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.unmonitorDocumentRef(document);
+    this.unmonitorDocumentModel(document);
+  }
+
+  private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {
     const { user, documents } = this.db.stores;
     const documentKey = document.key;
     const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, document.uid);
     const documentRef = this.db.firebase.ref(documentPath);
+
+    if (monitor === Monitor.None) {
+      return;
+    }
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${documentKey}`);
     if (docListener.ref) {
@@ -224,24 +196,31 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    // for read only documents keep the local document in sync with Firebase but for editable documents
+    // for remote documents keep the local document in sync with Firebase but local documents
     // just load it once and then sync local changes to Firebase
-    documentRef[readOnly ? "on" : "once"]("value", (snapshot) => {
+    documentRef[monitor === Monitor.Remote ? "on" : "once"]("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
         const updatedContent = this.db.parseDocumentContent(updatedDoc);
         const documentModel = documents.getDocument(documentKey);
         if (documentModel) {
           documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
-          this.monitorDocumentModel(documentModel, readOnly);
+          this.monitorDocumentModel(documentModel, monitor);
         }
       }
     });
   }
 
-  private monitorDocumentModel = (document: DocumentModelType, readOnly: boolean = false) => {
-    // readonly documents don't listen for local changes to the document
-    if (readOnly) {
+  private unmonitorDocumentRef = (document: DocumentModelType) => {
+    const docListener = this.modelListeners[`document:${document.key}`];
+    if (docListener && docListener.ref) {
+      docListener.ref.off("value");
+    }
+  }
+
+  private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
+    // skip if not monitoring local changes
+    if (monitor !== Monitor.Local) {
       return;
     }
 
@@ -264,6 +243,13 @@ export class DBListeners {
                                 });
   }
 
+  private unmonitorDocumentModel = (document: DocumentModelType) => {
+    const docListener = this.modelListeners[`document:${document.key}`];
+    if (docListener && docListener.modelDisposer) {
+      docListener.modelDisposer();
+    }
+  }
+
   private stopModelListeners() {
     Object.keys(this.modelListeners).forEach((docKey) => {
       const listeners = this.modelListeners[docKey];
@@ -283,54 +269,5 @@ export class DBListeners {
     Object.keys(this.documentModelDisposers).forEach((sectionId) => {
       this.documentModelDisposers[sectionId]();
     });
-  }
-
-  private handleGroupUserProblemDocRef(document: DocumentModelType) {
-    return (snapshot: firebase.database.DataSnapshot|null) => {
-      const problemDocument: DBOfferingUserProblemDocument = snapshot && snapshot.val();
-      if (problemDocument) {
-        const groupUserId = problemDocument.self.uid;
-        const docKey = problemDocument.documentKey;
-        const mainUser = this.db.stores.user;
-        const currentDocContentListener =
-          this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId).docContentRef;
-        if (currentDocContentListener) {
-          currentDocContentListener.off();
-        }
-        const groupUserDocRef = this.db.firebase.ref(
-          this.db.firebase.getUserDocumentPath(mainUser, docKey, groupUserId)
-        );
-        this.db.listeners.getOrCreateGroupUserProblemDocumentListeners(document, groupUserId)
-          .docContentRef = groupUserDocRef;
-        groupUserDocRef.on("value", (docContentSnapshot) => {
-          this.handleGroupUserDocRef(docContentSnapshot, problemDocument);
-        });
-      }
-    };
-  }
-
-  private handleGroupUserDocRef(
-    snapshot: firebase.database.DataSnapshot|null,
-    problemDocument: DBOfferingUserProblemDocument)
-  {
-    if (snapshot) {
-      const rawGroupDoc: DBDocumentMetadata = snapshot.val();
-      if (rawGroupDoc) {
-        const groupUserId = rawGroupDoc.self.uid;
-        const {documentKey} = rawGroupDoc.self;
-        const { groups } = this.db.stores;
-        const group = groups.groupForUser(groupUserId);
-
-        this.db.openDocument({
-          documentKey,
-          type: ProblemDocument,
-          userId: groupUserId,
-          groupId: group && group.id,
-          visibility: problemDocument.visibility
-        }).then((groupUserDoc) => {
-          this.db.stores.documents.update(groupUserDoc);
-        });
-      }
-    }
   }
 }
