@@ -97,7 +97,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const group = groups.getGroupById(groupId);
     const groupDocuments = group && groupId &&
-                           (documentViewMode === DocumentViewMode.PublishedViewMode
+                           (documentViewMode === DocumentViewMode.Published
                              ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
                              : documents.getProblemDocumentsForGroup(groupId)
                            ) || [];
@@ -141,7 +141,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const canvasMessage = (document?: DocumentModelType) => {
-      if (!document && (documentViewMode === DocumentViewMode.PublishedViewMode)) {
+      if (!document && (documentViewMode === DocumentViewMode.Published)) {
         return "Not Published";
       }
     };

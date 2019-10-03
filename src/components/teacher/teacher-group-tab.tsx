@@ -7,8 +7,8 @@ import { Pager } from "../pager";
 import "./teacher-group-tab.sass";
 
 export enum DocumentViewMode {
-  LiveViewMode,
-  PublishedViewMode
+  Live,
+  Published
 }
 
 interface IProps extends IBaseProps {}
@@ -27,7 +27,7 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       page: 0,
-      documentViewMode: DocumentViewMode.LiveViewMode
+      documentViewMode: DocumentViewMode.Live
     };
   }
 

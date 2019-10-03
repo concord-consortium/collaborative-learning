@@ -22,13 +22,13 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
     const { documentViewMode, setDocumentViewMode } = this.props;
     const modeOptions = [{
         label: "Current Work",
-        selected: documentViewMode === DocumentViewMode.LiveViewMode,
-        onClick: () => setDocumentViewMode(DocumentViewMode.LiveViewMode)
+        selected: documentViewMode === DocumentViewMode.Live,
+        onClick: () => setDocumentViewMode(DocumentViewMode.Live)
       },
       {
         label: "Published Work",
-        selected: documentViewMode === DocumentViewMode.PublishedViewMode,
-        onClick: () => setDocumentViewMode(DocumentViewMode.PublishedViewMode)
+        selected: documentViewMode === DocumentViewMode.Published,
+        onClick: () => setDocumentViewMode(DocumentViewMode.Published)
       }
     ];
     const { problem } = this.stores;
