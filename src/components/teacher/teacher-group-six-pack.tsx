@@ -2,43 +2,33 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
-import { Button, ButtonGroup } from "@blueprintjs/core";
 
 import "./teacher-group-six-pack.sass";
+import { DocumentViewMode } from "./teacher-group-tab";
 
 interface IProps extends IBaseProps {
-}
-
-interface IState {
   page: number;
+  documentViewMode: DocumentViewMode;
 }
 
 const ROWS = 2;
 const COLUMNS = 3;
-const GROUPS_PER_PAGE = ROWS * COLUMNS;
+export const GROUPS_PER_PAGE = ROWS * COLUMNS;
 
 @inject("stores")
 @observer
-export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
-
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      page: 0
-    };
-  }
+export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
 
   public render() {
     return (
       <div className="teacher-group-six-pack">
         {this.renderGroups()}
-        {this.renderPager()}
       </div>
     );
   }
 
   private renderGroups() {
-    const { page } = this.state;
+    const { page } = this.props;
     const { groups } = this.stores;
     const numberOfGroups = groups.allGroups.length;
     const renders = [];
@@ -54,6 +44,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
   }
 
   private renderFourUp(groupIndex: number, r: number, c: number) {
+    const { documentViewMode } = this.props;
     const { groups } = this.stores;
     const group = groups.allGroups[groupIndex];
     return (
@@ -63,47 +54,15 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
         </div>
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
-            <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
+            <FourUpComponent
+              groupId={group.id}
+              isGhostUser={true}
+              toggleable={true}
+              documentViewMode={documentViewMode}
+            />
           </div>
         </div>
       </div>
     );
-  }
-
-  private renderPager() {
-    const { page } = this.state;
-
-    if (this.numberOfPages < 2) {
-      return null;
-    }
-
-    return (
-      <div className="teacher-group-six-pack-pager">
-        <ButtonGroup>
-          <Button onClick={this.handlePreviousPage} disabled={page <= this.prevPage}>« Previous</Button>
-          <Button onClick={this.handleNextPage} disabled={page >= this.nextPage}>Next »</Button>
-        </ButtonGroup>
-      </div>
-    );
-  }
-
-  private get numberOfPages() {
-    return Math.ceil(this.stores.groups.allGroups.length / GROUPS_PER_PAGE);
-  }
-
-  private get prevPage() {
-    return Math.max(0, this.state.page - 1);
-  }
-
-  private get nextPage() {
-    return Math.min(this.numberOfPages - 1, this.state.page + 1);
-  }
-
-  private handlePreviousPage = () => {
-    this.setState({page: this.prevPage});
-  }
-
-  private handleNextPage = () => {
-    this.setState({page: this.nextPage});
   }
 }

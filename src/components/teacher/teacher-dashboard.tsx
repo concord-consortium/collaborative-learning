@@ -3,7 +3,6 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { TeacherGroupTabComponent } from "./teacher-group-tab";
 import { TeacherStudentTabComponent } from "./teacher-student-tab";
-
 import "./teacher-dashboard.sass";
 
 interface IProps extends IBaseProps {}

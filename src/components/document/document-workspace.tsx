@@ -282,10 +282,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
             createdAt: 1,
             content: {},
           });
-
-          // The creation of normal documents would start listeners for group documents in the same section
-          // Since the creation of ghost documents is faked, listeners must be started manually here
-          this.stores.db.listeners.updateGroupUserProblemDocumentListeners(ghostProblemDocuments[ghostSectionId]);
         }
         return ghostProblemDocuments[ghostSectionId];
       }

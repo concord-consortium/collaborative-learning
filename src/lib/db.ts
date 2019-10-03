@@ -24,6 +24,12 @@ import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType
 import { safeJsonParse } from "../utilities/js-utils";
 import { find } from "lodash";
 
+export enum Monitor {
+  None = "None",
+  Local = "Local",
+  Remote = "Remote",
+}
+
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
   appMode: "authed";
@@ -100,17 +106,6 @@ export class DB {
 
       this.stores = options.stores;
 
-      if (options.appMode === "authed") {
-        firebase.auth()
-          .signInWithCustomToken(options.rawFirebaseJWT)
-          .catch(reject);
-      }
-      else {
-        firebase.auth()
-          .signInAnonymously()
-          .catch(reject);
-      }
-
       firebase.auth().onAuthStateChanged((firebaseUser) => {
         if (firebaseUser) {
           this.appMode = options.appMode;
@@ -119,6 +114,17 @@ export class DB {
           this.listeners.start().then(resolve).catch(reject);
         }
       });
+
+      if (options.appMode === "authed") {
+        return firebase.auth()
+          .signInWithCustomToken(options.rawFirebaseJWT)
+          .catch(reject);
+      }
+      else {
+        return firebase.auth()
+          .signInAnonymously()
+          .catch(reject);
+      }
     });
   }
 
@@ -309,13 +315,9 @@ export class DB {
           return found;
         })
         .then((problemDocument) => {
-          return this.createDocumentFromProblemDocument(user.id, problemDocument);
+          return this.createDocumentFromProblemDocument(user.id, problemDocument, Monitor.Local);
         })
-        .then((problemDocument) => {
-          this.listeners.updateGroupUserProblemDocumentListeners(problemDocument);
-          this.listeners.monitorDocumentVisibility(problemDocument);
-          resolve(problemDocument);
-        })
+        .then(resolve)
         .catch(reject);
     });
   }
@@ -616,7 +618,7 @@ export class DB {
 
   public createDocumentFromProblemDocument(userId: string,
                                            problemDocument: DBOfferingUserProblemDocument,
-                                           readOnly: boolean = false) {
+                                           monitor: Monitor) {
     const {documentKey} = problemDocument;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
@@ -627,9 +629,16 @@ export class DB {
         visibility: problemDocument.visibility
       })
       .then((document) => {
-        this.listeners.monitorDocument(document, readOnly);
+        if (monitor !== Monitor.None) {
+          this.listeners.monitorDocument(document, monitor);
+        }
         return document;
       });
+  }
+
+  public updateDocumentFromProblemDocument(document: DocumentModelType,
+                                           problemDocument: DBOfferingUserProblemDocument) {
+    document.setVisibility(problemDocument.visibility);
   }
 
   // handles personal documents and learning logs
@@ -639,7 +648,7 @@ export class DB {
     const groupId = group && group.id;
     return this.openDocument({type, userId: uid, documentKey, groupId, title, properties})
       .then((documentModel) => {
-        this.listeners.monitorDocument(documentModel);
+        this.listeners.monitorDocument(documentModel, Monitor.Local);
         return documentModel;
       });
   }

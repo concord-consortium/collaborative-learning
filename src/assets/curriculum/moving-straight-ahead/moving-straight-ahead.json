@@ -3,6 +3,7 @@
   "abbrevTitle": "MSA",
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
+  "placeholderText": "Enter notes here",
   "defaultStamps": [
     {
       "url": "assets/tools/drawing-tool/stamps/coin.png",

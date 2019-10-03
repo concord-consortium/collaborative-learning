@@ -1,10 +1,12 @@
 import { DB } from "../db";
+import { BaseListener } from "./base-listener";
 
-export class DBLatestGroupIdListener {
+export class DBLatestGroupIdListener extends BaseListener {
   private db: DB;
   private latestGroupIdRef: firebase.database.Reference | null = null;
 
   constructor(db: DB) {
+    super("DBLatestGroupIdListener");
     this.db = db;
   }
 
@@ -12,8 +14,10 @@ export class DBLatestGroupIdListener {
     return new Promise<void>((resolve, reject) => {
       const latestGroupIdRef = this.latestGroupIdRef = this.db.firebase.getLatestGroupIdRef();
       // use once() so we are ensured that latestGroupId is set before we resolve
+      this.debugLogHandler("#start", "adding", "once", latestGroupIdRef);
       latestGroupIdRef.once("value", (snapshot) => {
         this.handleLatestGroupIdRef(snapshot);
+        this.debugLogHandler("#start", "adding", "on value", latestGroupIdRef);
         latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
       })
       .then(snapshot => {
@@ -25,12 +29,15 @@ export class DBLatestGroupIdListener {
 
   public stop() {
     if (this.latestGroupIdRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.latestGroupIdRef);
       this.latestGroupIdRef.off("value");
       this.latestGroupIdRef = null;
     }
   }
 
   private handleLatestGroupIdRef = (snapshot: firebase.database.DataSnapshot) => {
-    this.db.stores.user.setLatestGroupId(snapshot.val() || undefined);
+    const val = snapshot.val() || undefined;
+    this.debugLogSnapshot("#handleLatestGroupIdRef", snapshot);
+    this.db.stores.user.setLatestGroupId(val);
   }
 }

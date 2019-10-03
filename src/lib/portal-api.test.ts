@@ -1,7 +1,6 @@
 import { getPortalOfferings, PortalOfferingParser } from "./portal-api";
 import * as nock from "nock";
 import { TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
-import * as appConfigJson from "../clue/app-config.json";
 
 const userType = "teacher";
 const userID = 22;
@@ -68,20 +67,17 @@ describe("Portal Offerings", () => {
       activity_url: "https://collaborative-learning.concord.org/branch/master/"
     };
 
-    const defaultOrdinal = appConfigJson.defaultProblemOrdinal;
-    const defaultUnit = appConfigJson.defaultUnit;
-
     describe("getProblemOrdinal", () => {
-      it(`should default to '${defaultOrdinal}'`, () => {
+      it(`should default to 'undefined'`, () => {
         const ordinal = getProblemOrdinal(samplePortalOffering.activity_url);
-        expect(ordinal).toEqual(defaultOrdinal);
+        expect(ordinal).toBeUndefined();
       });
     });
 
     describe("getUnitCode", () => {
-      it(`should default to '${defaultUnit}'`, () => {
+      it(`should default to 'undefined'`, () => {
         const unitCode = getUnitCode(samplePortalOffering.activity_url);
-        expect(unitCode).toEqual(defaultUnit);
+        expect(unitCode).toBeUndefined();
       });
     });
   });

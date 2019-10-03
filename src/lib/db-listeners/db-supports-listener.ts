@@ -5,12 +5,16 @@ import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudie
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
+import { BaseListener } from "./base-listener";
 
-export class DBSupportsListener {
+export class DBSupportsListener extends BaseListener {
   private db: DB;
   private supportsRef: firebase.database.Reference | null = null;
+  private onChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
+  private onChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
   constructor(db: DB) {
+    super("DBSupportsListener");
     this.db = db;
   }
 
@@ -19,20 +23,23 @@ export class DBSupportsListener {
     this.supportsRef = this.db.firebase.ref(
       this.db.firebase.getSupportsPath(this.db.stores.user)
     );
-    this.supportsRef.on("child_changed", this.handleSupportsUpdate);
-    this.supportsRef.on("child_added", this.handleSupportsUpdate);
+    this.debugLogHandlers("#start", "adding", ["child_changed", "child_added"], this.supportsRef);
+    this.supportsRef.on("child_changed", this.onChildChanged = this.handleSupportsUpdate("child_changed"));
+    this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
   }
 
   public stop() {
     if (this.supportsRef) {
-      this.supportsRef.off("child_changed", this.handleSupportsUpdate);
-      this.supportsRef.off("child_added", this.handleSupportsUpdate);
+      this.debugLogHandlers("#stop", "removing", ["child_changed", "child_added"], this.supportsRef);
+      this.supportsRef.off("child_changed", this.onChildChanged);
+      this.supportsRef.off("child_added", this.onChildAdded);
     }
   }
 
-  private handleSupportsUpdate = (snapshot: firebase.database.DataSnapshot) => {
+  private handleSupportsUpdate = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
     const {supports} = this.db.stores;
     const dbSupports = snapshot.val();
+    this.debugLogSnapshot("#handleSupportsUpdate", snapshot);
     // The top-level key will be the audience for with an updated support
     const audienceType: AudienceEnum = snapshot.ref.key as AudienceEnum;
     if (dbSupports) {

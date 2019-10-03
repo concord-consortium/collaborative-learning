@@ -3,7 +3,6 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LinkSwitcherMenu, IMenuLink  } from "./link-switcher-menu";
-import * as appConfigJson from "../clue/app-config.json";
 interface IProps extends IBaseProps {}
 
 @inject("stores")
@@ -20,7 +19,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
   }
 
   private getCurrentProblemOrdinal() {
-    const { offeringId, portalClassOfferings } = this.stores.user;
+    const { appConfig, user: { offeringId, portalClassOfferings } } = this.stores;
     if (offeringId) {
       const currentOffering = portalClassOfferings.find( offering => {
         return (offering.offeringId === offeringId);
@@ -31,7 +30,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     }
     // tslint:disable-next-line:no-console
     console.log(`Warning -- current offering not found. (Maybe in demo mode?)`);
-    return appConfigJson.defaultProblemOrdinal;
+    return appConfig.defaultProblemOrdinal;
   }
 
   private getPortalClasses() {
