@@ -44,6 +44,11 @@ export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
 export type PublicationType = typeof ProblemPublication | OtherPublicationType | typeof SupportPublication;
 
+export interface IDocumentAddTileOptions {
+  addSidecarNotes?: boolean;
+  imageUrl?: string;
+}
+
 export const DocumentToolEnum = types.enumeration("tool",
                                   ["delete", "drawing", "geometry", "image", "select", "table", "text"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
@@ -128,8 +133,8 @@ export const DocumentModel = types
       self.visibility = visibility;
     },
 
-    addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
-      return self.content.addTile(tool, addSidecarNotes);
+    addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
+      return self.content.addTile(tool, options);
     },
 
     deleteTile(tileId: string) {

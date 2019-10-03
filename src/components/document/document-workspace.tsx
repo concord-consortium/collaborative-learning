@@ -10,6 +10,7 @@ import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { AudienceModelType, ClassAudienceModel, TeacherSupportSectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
+import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.sass";
 
@@ -28,6 +29,13 @@ const ghostProblemDocuments: GhostDocumentMap = {};
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
+  private imageDragDrop: ImageDragDrop;
+
+  public componentWillMount() {
+    this.imageDragDrop = new ImageDragDrop({
+      isAcceptableImageDrag: this.isAcceptableImageDrag
+    });
+  }
 
   public componentDidMount() {
     this.guaranteePrimaryDocument();
@@ -36,11 +44,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   public render() {
     const { appConfig } = this.stores;
     const isGhostUser = this.props.isGhostUser;
+    // NOTE: the drag handlers are in three different divs because we cannot overlay
+    // the renderDocuments() div otherwise the Cypress tests will fail because none
+    // of the html elements in the documents will be visible to it.  The first div acts
+    // as a handler for the background and the left and right nav then delegate dragging
+    // and dropping to the same functions
     return (
       <div className="document-workspace">
+        <div
+          className="drag-handler"
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
         {this.renderDocuments(isGhostUser)}
-        <LeftNavComponent isGhostUser={isGhostUser} />
-        <RightNavComponent tabs={appConfig.rightNavTabs} isGhostUser={isGhostUser} />
+        <LeftNavComponent
+          isGhostUser={isGhostUser}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
+        <RightNavComponent
+          tabs={appConfig.rightNavTabs}
+          isGhostUser={isGhostUser}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
       </div>
     );
   }
@@ -125,8 +152,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       <div
         className={className}
         style={style}
-        onDragOver={this.handleDragOver}
-        onDrop={this.handleDrop(side)}
+        onDragOver={this.handleDragOverSide}
+        onDrop={this.handleDropSide(side)}
         onClick={this.handleClick}
       >
         {child}
@@ -138,8 +165,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     return (
       <div
         className="comparison-placeholder"
-        onDragOver={(this.handleDragOver)}
-        onDrop={this.handleDrop("comparison")}
+        onDragOver={(this.handleDragOverSide)}
+        onDrop={this.handleDropSide("comparison")}
         onClick={this.handleClick}
       >
         Click or drag an item in the right tabs to show it here
@@ -147,27 +174,69 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
-  private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (e.dataTransfer.types.find((type) => type === DocumentDragKey)) {
+  private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    // make sure we have a primary document to drop onto
+    return !!this.getPrimaryDocument(this.stores.ui.problemWorkspace.primaryDocumentKey);
+  }
+
+  private handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
+    this.imageDragDrop.dragOver(e);
+  }
+
+  private handleDragOverSide = (e: React.DragEvent<HTMLDivElement>) => {
+    if (this.imageDragDrop.dragOver(e) || e.dataTransfer.types.find((type) => type === DocumentDragKey)) {
       e.preventDefault();
     }
   }
 
-  private handleDrop = (side: WorkspaceSide) => {
+  private handleDropSide = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
       const {ui, documents} = this.stores;
-      const {problemWorkspace} = ui;
       const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
-      const document = documentKey ? documents.getDocument(documentKey) : null;
-      if (document) {
-        if (side === "primary") {
-          problemWorkspace.setPrimaryDocument(document);
-        }
-        else {
-          problemWorkspace.setComparisonDocument(document);
+      if (documentKey) {
+        const {problemWorkspace} = ui;
+        const document = documents.getDocument(documentKey);
+        if (document) {
+          if (side === "primary") {
+            problemWorkspace.setPrimaryDocument(document);
+          }
+          else {
+            problemWorkspace.setComparisonDocument(document);
+          }
         }
       }
+      else {
+        // try to get the row it was dropped on
+        let rowNode = e.target as HTMLElement | null;
+        while (rowNode && (rowNode.className !== "tile-row")) {
+          rowNode = rowNode.parentNode as HTMLElement | null;
+        }
+        const rowId = (rowNode && rowNode.dataset && rowNode.dataset.rowId) || undefined;
+        this.handleImageDrop(e, rowId);
+      }
     };
+  }
+
+  private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
+    const {ui} = this.stores;
+    this.imageDragDrop.drop(e)
+      .then((imageUrl) => {
+        const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
+        if (primaryDocument) {
+          // insert the tile after the row it was dropped on otherwise add to end of document
+          const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
+          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
+          primaryDocument.content.addTile("image", {
+            imageUrl,
+            insertRowInfo: {
+              rowInsertIndex
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        ui.alert(err.toString());
+      });
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

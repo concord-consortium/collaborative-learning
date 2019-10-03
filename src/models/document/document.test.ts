@@ -62,7 +62,7 @@ describe("document model", () => {
     document.addTile("text");
     expect(document.content.tileMap.size).toBe(1);
     // adding geometry tool adds sidecar text tool
-    document.addTile("geometry", true);
+    document.addTile("geometry", {addSidecarNotes: true});
     expect(document.content.tileMap.size).toBe(3);
   });
 

@@ -359,8 +359,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     const isInsertingInExistingRow = insertRowInfo && insertRowInfo.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
-    const createSideCar = (createTileType === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.addTile(createTileType, createSideCar, insertRowInfo);
+    const addSidecarNotes = (createTileType === "geometry") && !isInsertingInExistingRow;
+    const rowTile = content.addTile(createTileType, {addSidecarNotes, insertRowInfo});
 
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
