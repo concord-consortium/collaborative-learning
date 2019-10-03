@@ -7,7 +7,7 @@ import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument,  SupportPublication} from "../../models/document/document";
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -26,6 +26,8 @@ interface IProps extends IBaseProps {
   onNewDocument?: (document: DocumentModelType) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
+  onPublishSupport?: (document: DocumentModelType) => void;
+  onPublishDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -56,6 +58,13 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, da
           data-test={dataTest} onClick={onClick} >
       <use xlinkHref={`#icon-publish`} />
     </svg>
+  );
+};
+
+const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="support" key="support" className="action icon-support"
+                onClickButton={onClick} />
   );
 };
 
@@ -172,6 +181,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
     const isShared = visibility === "public";
+    const showPublishSupport = user.isTeacher;
     const showShare = !user.isTeacher;
     const show4up = !workspace.comparisonVisible && !user.isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
@@ -192,7 +202,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
+              showPublishSupport ? <PublishSupportButton onClick={this.handlePublishSupport} /> : null,
+              <PublishButton key="publish" onClick={this.handlePublishDocument} />,
               showShare ? <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} /> : null
             ]}
             {show4up ? this.renderMode() : null}
@@ -244,9 +255,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             </div>
         }
         <div className="actions">
+          {!hideButtons && <PublishSupportButton onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishOtherDocument} />
+              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
             </div>
           }
         </div>
@@ -306,7 +318,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderStatusBar(type: string) {
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    // const showComment = !isPrimary && (document.type === ProblemPublication);
     const showComment = false;
     return (
       <div className={`statusbar ${type}`}>
@@ -361,7 +373,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSaveComment = (comment: string, tileId: string) => {
-    const { documents, db, user } = this.stores;
+    const { documents, user } = this.stores;
     const document = documents.findDocumentOfTile(tileId);
     const toolApi = this.toolApiMap[tileId];
     const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
@@ -454,20 +466,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       });
   }
 
-  private handlePublishWorkspace = () => {
-    const { document } = this.props;
-    const { db, ui, appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    // TODO: Disable publish button while publishing
-    db.publishProblemDocument(document)
-      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
+  private handlePublishSupport = () => {
+    const { document, onPublishSupport } = this.props;
+    onPublishSupport && onPublishSupport(document);
   }
 
-  private handlePublishOtherDocument = () => {
-    const { db, ui, appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(this.props.document.type, 1);
-    db.publishOtherDocument(this.props.document)
-      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
+  private handlePublishDocument = () => {
+    const { document, onPublishDocument } = this.props;
+    onPublishDocument && onPublishDocument(document);
   }
 
   private isPrimary() {

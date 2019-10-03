@@ -6,7 +6,7 @@ import { niceDate } from "../../utilities/time";
 import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType,
   audienceInfo } from "../../models/stores/supports";
-import { sectionInfo, allSectionInfo } from "../../models/curriculum/section";
+import { SectionType, getSectionTitle } from "../../models/curriculum/section";
 import { createTextSupport } from "../../models/curriculum/support";
 
 import "./teacher-support.sass";
@@ -41,13 +41,11 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     const { time, audience } = this.props;
     const audienceType = audience.type;
     const messageTarget = audienceInfo[audienceType].display;
-    const sectionOptions = (problem.sections).map(section => {
-      const sectionType = section.type;
-      return <option key={sectionType} value={sectionType}>{sectionInfo[sectionType].title}</option>;
+    const problemSectionTypes = problem.sections.map(section => section.type);
+    const sectionTypes = [SectionType.all, ...problemSectionTypes];
+    const sectionOptions = sectionTypes.map(sectionType => {
+      return <option key={sectionType} value={sectionType}>{getSectionTitle(sectionType)}</option>;
     });
-    sectionOptions.unshift(
-      <option key={"all"} value={"all"}>{allSectionInfo.title}</option>
-    );
     return (
       <div className="teacher-support">
         <div className="date">{niceDate(time)}</div>

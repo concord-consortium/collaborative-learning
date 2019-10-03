@@ -418,6 +418,23 @@ export const DocumentContentModel = types
     }
   }));
 
+// authored content is converted to current content on the fly
+export interface IAuthoredBaseTileContent {
+  type: string;
+}
+
+export interface IAuthoredTileContent extends IAuthoredBaseTileContent {
+  [key: string]: any;
+}
+
+export interface IAuthoredTile {
+  content: IAuthoredTileContent;
+}
+
+export interface IAuthoredDocumentContent {
+  tiles: IAuthoredTile[];
+}
+
 function migrateSnapshot(snapshot: any): any {
   interface OriginalTileLayoutModel {
     height?: number;
