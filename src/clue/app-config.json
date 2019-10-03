@@ -36,8 +36,8 @@
   "showClassSwitcher": true,
   "rightNavTabs": [
     {
-      "tab": "class-work",
-      "label": "Class Work",
+      "tab": "student-work",
+      "label": "Student Workspaces",
       "hideGhostUser": true,
       "teacherOnly": true,
       "sections": [

@@ -1,6 +1,7 @@
 import { types, SnapshotIn, Instance } from "mobx-state-tree";
 
 export enum ERightNavTab {
+  kStudentWork = "student-work",
   kMyWork = "my-work",
   kClassWork = "class-work",
   kLearningLog = "learning-log",
