@@ -83,6 +83,15 @@ export enum LogEventName {
 
 type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 
+interface IDocumentInfo {
+  type: string;
+  key?: string;
+  section?: string;
+  uid?: string;
+  title?: string;
+  properties?: { [prop: string]: string };
+}
+
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
     if (DEBUG_LOGGER) {
@@ -130,6 +139,8 @@ export class Logger {
           souceObjectId: metaData.originalTileId,
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
+          sourceDocumentTitle: sourceDocument.title || "",
+          sourceDocumentProperties: sourceDocument.properties || {},
           sourceSection: sourceDocument.section || document.section   // if it's instructions, use dest doc's section
         };
       }
@@ -140,8 +151,11 @@ export class Logger {
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
     const parameters = {
+      documentUid: document.uid,
       documentKey: document.key,
-      documentType: document.type
+      documentType: document.type,
+      documentTitle: document.title || "",
+      documentProperties: document.properties && document.properties.toJSON() || {}
     };
     Logger.log(event, parameters);
   }
@@ -215,14 +229,11 @@ export class Logger {
     return logMessage;
   }
 
-  private getDocumentForTile(tileId: string): {type: string, key?: string, section?: string, uid?: string } {
+  private getDocumentForTile(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId);
     if (document) {
-      return {
-        type: document.type,
-        key: document.key,
-        uid: document.uid
-      };
+      const { type, key, uid, title, properties } = document;
+      return { type, key, uid, title, properties: properties && properties.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
