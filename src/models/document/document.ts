@@ -14,6 +14,7 @@ export const LearningLogDocument = "learningLog";
 export const PublicationDocument = "publication";
 export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
+export const SupportPublication = "supportPublication";
 
 export function isProblemType(type: string) {
   return [ProblemDocument, PublicationDocument].indexOf(type) >= 0;
@@ -29,13 +30,14 @@ export function isUnpublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 export function isPublishedType(type: string) {
-  return [PublicationDocument, PersonalPublication, LearningLogPublication].indexOf(type) >= 0;
+  return [PublicationDocument, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0;
 }
 
 export const DocumentTypeEnum = types.enumeration("type",
               [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, LearningLogDocument,
-                PublicationDocument, PersonalPublication, LearningLogPublication]);
+                PublicationDocument, PersonalPublication, LearningLogPublication,
+                SupportPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
@@ -71,10 +73,14 @@ export const DocumentModel = types
     get isLearningLog() {
       return (self.type === LearningLogDocument) || (self.type === LearningLogPublication);
     },
+    get isSupport() {
+      return self.type === SupportPublication;
+    },
     get isPublished() {
       return (self.type === PublicationDocument)
               || (self.type === LearningLogPublication)
-              || (self.type === PersonalPublication);
+              || (self.type === PersonalPublication)
+              || (self.type === SupportPublication);
     },
     getProperty(key: string) {
       return self.properties.get(key);

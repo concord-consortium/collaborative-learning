@@ -133,19 +133,16 @@
           outline: none
           outline-offset: 0
 
-      .icon-new
-        border-top-left-radius: $border-radius
+      .icon-button
         background-color: $color1-3
         padding: $padding
         padding-top: 2px
-        margin-left: 0
         position: relative
         width: 40px
         height: 36px
         cursor: pointer
 
-        .new
-          background-image: url("../../assets/icons/new/new.svg")
+        .button-icon
           background-repeat: no-repeat
           position: absolute
           left: 15%
@@ -156,13 +153,22 @@
           padding-top: 2px
           cursor: pointer
 
+          &:active
+            transform-origin: center
+            transform: scale(.85)
+
+      .icon-new
+        border-top-left-radius: $border-radius
+        margin-left: 0
+
+        .new
+          background-image: url("../../assets/icons/new/new.svg")
+
           &:hover
             background-image: url("../../assets/icons/new/new-hover.svg")
 
           &:active
             background-image: url("../../assets/icons/new/new-active.svg")
-            transform-origin: center
-            transform: scale(.85)
 
   .canvas-area
     position: absolute

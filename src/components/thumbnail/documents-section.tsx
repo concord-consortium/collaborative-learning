@@ -2,7 +2,8 @@ import * as React from "react";
 import { observer } from "mobx-react";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType } from "../../models/document/document";
+import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, PublicationDocument, SupportPublication
+      } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import { NavTabSectionModelType } from "../../models/view/right-nav";
 import { CanvasComponent } from "../document/canvas";
@@ -23,15 +24,10 @@ interface IProps {
 
 function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
   if (section.title === "%abbrevInvestigation%") {
-    const { unit, problem } = stores;
+    const { unit, investigation } = stores;
     const { abbrevTitle } = unit;
     const prefix = abbrevTitle ? `${abbrevTitle}: ` : "";
-    // For now pull investigation number from problem title.
-    // Teacher dashboard work adds investigation to store, at which
-    // point it can be pulled from there directly.
-    const problemChar0 = problem.title.length ? problem.title[0] : "";
-    const investigationNum = problemChar0 >= "0" && problemChar0 <= "9" ? problemChar0 : "";
-    return `${prefix}Investigation ${investigationNum}`;
+    return `${prefix}Investigation ${investigation.ordinal}`;
   }
   return section.title;
 }
@@ -39,6 +35,7 @@ function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
 function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, document: DocumentModelType) {
   const { problem, class: _class } = stores;
   const { type, uid } = document;
+  if (type === SupportPublication) return document.getProperty("caption") || "Support";
   const user = _class && _class.getUserById(uid);
   const userName = user && user.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
@@ -53,13 +50,30 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     const sectionTitle = getSectionTitle(section, stores);
     const { documents, user } = stores;
     let sectionDocs: DocumentModelType[] = [];
+    const publishedDocs: { [source: string]: DocumentModelType } = {};
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
         sectionDocs.push(...documents.byTypeForUser(type as any, user.id));
       }
       else if (isPublishedType(type)) {
-        sectionDocs.push(...documents.byType(type as any));
+        // only show the most recent publication of each document
+        documents
+          .byType(type as any)
+          .forEach(doc => {
+            // personal documents and learning logs have originDocs.
+            // problem documents only have the uids of their creator,
+            // but as long as we're scoped to a single problem, there
+            // shouldn't be published documents from other problems.
+            const source = doc.originDoc || doc.uid;
+            if (source) {
+              const entry = publishedDocs[source];
+              if (!entry || (entry.createdAt < doc.createdAt)) {
+                publishedDocs[source] = doc;
+              }
+            }
+          });
+        sectionDocs.push(...Object.values(publishedDocs));
       }
     });
     // filter by additional properties

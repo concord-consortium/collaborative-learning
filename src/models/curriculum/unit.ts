@@ -5,6 +5,8 @@ import { SectionModelType, SectionType } from "./section";
 import { SupportModel } from "./support";
 import { each, isObject } from "lodash";
 import { StampModel } from "../tools/drawing/drawing-content";
+import { IStores } from "../stores/stores";
+import { AppConfigModelType } from "../stores/app-config-model";
 
 export const UnitModel = types
   .model("Unit", {
@@ -12,6 +14,7 @@ export const UnitModel = types
     abbrevTitle: "",
     title: types.string,
     subtitle: "",
+    placeholderText: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
@@ -76,3 +79,39 @@ function replaceSectionTypes(obj: {}): SnapshotIn<typeof UnitModel> {
   });
   return obj as SnapshotIn<typeof UnitModel>;
 }
+
+function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
+  const unitUrlParam = unitId && appConfig.units.get(unitId);
+  if (!unitUrlParam){
+    // tslint:disable-next-line
+    console.warn(`unitId "${unitId}" not found in appConfig.units`);
+  }
+  const urlParam = unitUrlParam || appConfig.defaultUnit && appConfig.units.get(appConfig.defaultUnit);
+  return fetch(urlParam!)
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+            else {
+              throw Error(`Request rejected with status ${response.status}`);
+            }
+          })
+          .catch(error => {
+            throw Error(`Request rejected with exception`);
+          });
+}
+
+export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
+  const unitJson = await getUnitJson(unitId, stores.appConfig);
+  const unit = createFromJson(unitJson);
+  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
+
+  if (unit) {
+    stores.unit = unit;
+    stores.documents.setUnit(stores.unit);
+    if (investigation && problem) {
+      stores.investigation = investigation;
+      stores.problem = problem;
+    }
+  }
+};

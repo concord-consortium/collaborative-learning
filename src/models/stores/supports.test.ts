@@ -1,8 +1,8 @@
 import { getSnapshot } from "mobx-state-tree";
-import { SupportsModel, SupportItemType, AudienceEnum, TeacherSupportModel, ClassAudienceModel, GroupAudienceModel,
+import { SupportsModel, SupportTarget, AudienceEnum, TeacherSupportModel, ClassAudienceModel, GroupAudienceModel,
   UserAudienceModel, TeacherSupportModelType } from "./supports";
 import { UnitModel } from "../curriculum/unit";
-import { SupportModel } from "../curriculum/support";
+import { createTextSupport, ESupportType } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel } from "../curriculum/problem";
 import { SectionType } from "../curriculum/section";
@@ -24,13 +24,13 @@ describe("supports model", () => {
   it("uses override values", () => {
     const supports = SupportsModel.create({
       curricularSupports: [
-        {text: "support #1", type: SupportItemType.unit, visible: true},
-        {text: "support #2", type: SupportItemType.investigation},
-        {text: "support #3", type: SupportItemType.problem, visible: true},
-        {text: "support #4", type: SupportItemType.section},
+        {support: {type: ESupportType.text, content: "support #1"}, type: SupportTarget.unit, visible: true},
+        {support: {type: ESupportType.text, content: "support #2"}, type: SupportTarget.investigation},
+        {support: {type: ESupportType.text, content: "support #3"}, type: SupportTarget.problem, visible: true},
+        {support: {type: ESupportType.text, content: "support #4"}, type: SupportTarget.section},
       ],
       classSupports: [
-        {key: "1", text: "support #5", type: SupportItemType.problem,
+        {key: "1", support: {type: ESupportType.text, content: "support #5"}, type: SupportTarget.problem,
           audience: ClassAudienceModel.create(), authoredTime: 42}
       ]
     });
@@ -38,25 +38,25 @@ describe("supports model", () => {
       curricularSupports: [
         {
           supportType: "curricular",
-          text: "support #1",
+          support: {type: ESupportType.text, content: "support #1"},
           type: "unit",
           visible: true,
         },
         {
           supportType: "curricular",
-          text: "support #2",
+          support: {type: ESupportType.text, content: "support #2"},
           type: "investigation",
           visible: false,
         },
         {
           supportType: "curricular",
-          text: "support #3",
+          support: {type: ESupportType.text, content: "support #3"},
           type: "problem",
           visible: true,
         },
         {
           supportType: "curricular",
-          text: "support #4",
+          support: {type: ESupportType.text, content: "support #4"},
           type: "section",
           visible: false,
         },
@@ -65,7 +65,7 @@ describe("supports model", () => {
         {
           key: "1",
           supportType: "teacher",
-          text: "support #5",
+          support: {type: ESupportType.text, content: "support #5"},
           type: "problem",
           audience: {
             type: "class"
@@ -96,21 +96,21 @@ describe("supports model", () => {
         {
           type: SectionType.introduction,
           supports: [
-            SupportModel.create({text: "Investigation 1, Problem 1, section: introduction, support #1"}),
-            SupportModel.create({text: "Investigation 1, Problem 1, section: introduction, support #2"})
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #1"},
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #2"}
           ]
         },
         {
           type: SectionType.initialChallenge,
           supports: [
-            SupportModel.create({text: "Investigation 1, Problem 1, section: initial challenge, support #1"}),
-            SupportModel.create({text: "Investigation 1, Problem 1, section: initial challenge, support #2"})
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #1"},
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #2"}
           ]
         }
       ],
       supports: [
-        SupportModel.create({text: "Investigation 1, Problem 1, support #1"}),
-        SupportModel.create({text: "Investigation 1, Problem 1, support #2"})
+        {type: ESupportType.text, content: "Investigation 1, Problem 1, support #1"},
+        {type: ESupportType.text, content: "Investigation 1, Problem 1, support #2"}
       ]
     };
     const investigation1 = {
@@ -125,27 +125,29 @@ describe("supports model", () => {
             {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "Investigation 1, Problem 2, section: introduction, support #1"}),
-                SupportModel.create({text: "Investigation 1, Problem 2, section: introduction, support #2"})
+                {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #1"},
+                {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #2"}
               ]
             },
             {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "Investigation 1, Problem 2, section: initial challenge, support #1"}),
-                SupportModel.create({text: "Investigation 1, Problem 2, section: initial challenge, support #2"})
+                {type: ESupportType.text,
+                  content: "Investigation 1, Problem 2, section: initial challenge, support #1"},
+                {type: ESupportType.text,
+                  content: "Investigation 1, Problem 2, section: initial challenge, support #2"}
               ]
             }
           ],
           supports: [
-            SupportModel.create({text: "Investigation 1, Problem 1, support #1"}),
-            SupportModel.create({text: "Investigation 1, Problem 1, support #2"})
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, support #1"},
+            {type: ESupportType.text, content: "Investigation 1, Problem 1, support #2"}
           ]
         }
       ],
       supports: [
-        SupportModel.create({text: "Investigation 1, support #1"}),
-        SupportModel.create({text: "Investigation 1, support #2"})
+        {type: ESupportType.text, content: "Investigation 1, support #1"},
+        {type: ESupportType.text, content: "Investigation 1, support #2"}
       ]
     };
     const investigation2 = {
@@ -159,21 +161,23 @@ describe("supports model", () => {
             {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "Investigation 2, Problem 1, section: introduction, support #1"}),
-                SupportModel.create({text: "Investigation 2, Problem 1, section: introduction, support #2"})
+                {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #1"},
+                {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #2"}
               ]
             },
             {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "Investigation 2, Problem 1, section: initial challenge, support #1"}),
-                SupportModel.create({text: "Investigation 2, Problem 1, section: initial challenge, support #2"})
+                {type: ESupportType.text,
+                  content: "Investigation 2, Problem 1, section: initial challenge, support #1"},
+                {type: ESupportType.text,
+                  content: "Investigation 2, Problem 1, section: initial challenge, support #2"}
               ]
             }
           ],
           supports: [
-            SupportModel.create({text: "Investigation 2, Problem 1, support #1"}),
-            SupportModel.create({text: "Investigation 2, Problem 1, support #2"})
+            {type: ESupportType.text, content: "Investigation 2, Problem 1, support #1"},
+            {type: ESupportType.text, content: "Investigation 2, Problem 1, support #2"}
           ]
         },
         {
@@ -183,39 +187,43 @@ describe("supports model", () => {
             {
               type: SectionType.introduction,
               supports: [
-                SupportModel.create({text: "Investigation 2, Problem 2, section: introduction, support #1"}),
-                SupportModel.create({text: "Investigation 2, Problem 2, section: introduction, support #2"})
+                {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #1"},
+                {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #2"}
               ]
             },
             {
               type: SectionType.initialChallenge,
               supports: [
-                SupportModel.create({text: "Investigation 2, Problem 2, section: initial challenge, support #1"}),
-                SupportModel.create({text: "Investigation 2, Problem 2, section: initial challenge, support #2"})
+                {type: ESupportType.text,
+                  content: "Investigation 2, Problem 2, section: initial challenge, support #1"},
+                {type: ESupportType.text,
+                  content: "Investigation 2, Problem 2, section: initial challenge, support #2"}
               ]
             }
           ],
           supports: [
-            SupportModel.create({text: "Investigation 2, Problem 2, support #1"}),
-            SupportModel.create({text: "Investigation 2, Problem 2, support #2"})
+            {type: ESupportType.text, content: "Investigation 2, Problem 2, support #1"},
+            {type: ESupportType.text, content: "Investigation 2, Problem 2, support #2"}
           ]
         }
       ],
       supports: [
-        SupportModel.create({text: "Investigation 2, support #1"}),
-        SupportModel.create({text: "Investigation 2, support #2"})
+        {type: ESupportType.text, content: "Investigation 2, support #1"},
+        {type: ESupportType.text, content: "Investigation 2, support #2"}
       ]
     };
 
-    supports.createFromUnit(UnitModel.create({
-      title: "Unit 1",
-      investigations: [investigation1, investigation2],
-      supports: [
-        SupportModel.create({text: "Unit 1, support #1"}),
-        SupportModel.create({text: "Unit 1, support #2"})
-      ]
-    }), InvestigationModel.create(cloneDeep(investigation1)),
-        ProblemModel.create(cloneDeep(problem1)));
+    supports.createFromUnit({
+      unit: UnitModel.create({
+        title: "Unit 1",
+        investigations: [investigation1, investigation2],
+        supports: [
+          {type: ESupportType.text, content: "Unit 1, support #1"},
+          {type: ESupportType.text, content: "Unit 1, support #2"}
+        ]
+      }),
+      investigation: InvestigationModel.create(cloneDeep(investigation1)),
+      problem: ProblemModel.create(cloneDeep(problem1))});
 
     expect(supports.getSupportsForUserProblem(
                       { sectionId: SectionType.introduction, groupId: "groupId", userId: "userId" }))
@@ -223,14 +231,20 @@ describe("supports model", () => {
         {
           sectionId: "introduction",
           supportType: "curricular",
-          text: "Investigation 1, Problem 1, section: introduction, support #1",
+          support: {
+            type: "text",
+            content: "Investigation 1, Problem 1, section: introduction, support #1"
+          },
           type: "section",
           visible: false,
         },
         {
           sectionId: "introduction",
           supportType: "curricular",
-          text: "Investigation 1, Problem 1, section: introduction, support #2",
+          support: {
+            type: "text",
+            content: "Investigation 1, Problem 1, section: introduction, support #2"
+          },
           type: "section",
           visible: false,
         }
@@ -241,15 +255,15 @@ describe("supports model", () => {
     const supports = SupportsModel.create({});
     const earlySupport = TeacherSupportModel.create({
       key: "1",
-      text: "foo",
-      type: SupportItemType.problem,
+      support: createTextSupport("foo"),
+      type: SupportTarget.problem,
       audience: ClassAudienceModel.create(),
       authoredTime: 100
     });
     const lateSupport = TeacherSupportModel.create({
       key: "2",
-      text: "bar",
-      type: SupportItemType.problem,
+      support: createTextSupport("bar"),
+      type: SupportTarget.problem,
       audience: ClassAudienceModel.create(),
       authoredTime: 200
     });
@@ -270,13 +284,15 @@ describe("supports model", () => {
   });
 
   it("Gets supports by audience and section type", () => {
-    const classSupportAll = {key: "1", text: "", type: SupportItemType.problem,
+    const classSupportAll = {key: "1", support: createTextSupport(""), type: SupportTarget.problem,
       audience: ClassAudienceModel.create(), authoredTime: 42};
-    const classSupportIntro = {key: "2", text: "", type: SupportItemType.section, sectionId: SectionType.introduction,
+    const classSupportIntro = {key: "2", support: createTextSupport(""),
+      type: SupportTarget.section, sectionId: SectionType.introduction,
       audience: ClassAudienceModel.create(), authoredTime: 43};
-    const groupSupport = {key: "3", text: "", type: SupportItemType.problem,
+    const groupSupport = {key: "3", support: createTextSupport(""), type: SupportTarget.problem,
       audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
-    const userSupport = {key: "4", text: "", type: SupportItemType.section, sectionId: SectionType.didYouKnow,
+    const userSupport = {key: "4", support: createTextSupport(""),
+      type: SupportTarget.section, sectionId: SectionType.didYouKnow,
       audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
 
     const supports = SupportsModel.create({

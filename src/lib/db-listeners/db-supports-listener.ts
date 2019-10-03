@@ -1,8 +1,9 @@
 import { DB } from "../db";
-import { SupportItemType, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
+import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
   AudienceModelType, GroupAudienceModel, UserAudienceModel} from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
+import { ESupportType, SupportModel } from "../../models/curriculum/support";
 
 export class DBSupportsListener {
   private db: DB;
@@ -66,10 +67,12 @@ export class DBSupportsListener {
   }
 
   private createSupportModel(sectionTarget: string, dbSupport: DBSupport, audience: AudienceModelType) {
+    const supportContentType: ESupportType = (dbSupport.type as ESupportType) || ESupportType.text;
+    const supportModel = SupportModel.create({ type: supportContentType, content: dbSupport.content });
     return TeacherSupportModel.create({
       key: dbSupport.self.key,
-      text: dbSupport.content,
-      type: sectionTarget === "all" ? SupportItemType.problem : SupportItemType.section,
+      support: supportModel,
+      type: sectionTarget === "all" ? SupportTarget.problem : SupportTarget.section,
       sectionId: sectionTarget === "all" ? undefined : sectionTarget as SectionType,
       audience,
       authoredTime: dbSupport.timestamp,

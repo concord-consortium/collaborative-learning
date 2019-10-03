@@ -1,10 +1,13 @@
 import * as jwt from "jsonwebtoken";
-import * as queryString from "query-string";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams, DefaultProblemOrdinal } from "../utilities/url-params";
-import {NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS} from "../components/demo/demo-creator";
-import { IPortalClass, IPortalProblem } from "../models/stores/user";
+import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
+import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+import { AppConfigModelType } from "../models/stores/app-config-model";
+import { IPortalClassOffering } from "../models/stores/user";
+import { getErrorMessage } from "../utilities/super-agent-helpers";
+import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
+import { Logger, LogEventName } from "../lib/logger";
 
 const initials = require("initials");
 
@@ -67,8 +70,7 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  portalClasses?: IPortalClass[];
-  portalProblems?: IPortalProblem[];
+  portalClassOfferings?: IPortalClassOffering[];
 }
 
 export interface StudentUser extends User {
@@ -186,14 +188,6 @@ export interface PortalFirebaseTeacherJWT extends BasePortalFirebaseJWT {
 }
 
 export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacherJWT;
-
-export const getErrorMessage = (err: any, res: superagent.Response) => {
-  // The response should always be non-null, per the typedef and documentation:
-  // cf. https://visionmedia.github.io/superagent/#error-handling
-  // However, Rollbar has reported errors due to undefined responses
-  // Using err.status or err.response, per the above link, may be preferable here
-  return (res && res.body ? res.body.message : null) || err;
-};
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
@@ -317,12 +311,19 @@ export const getClassInfo = (params: GetClassInfoParams) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
+export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
+  interface IAuthenticateResponse {
+    authenticatedUser: AuthenticatedUser;
+    classInfo?: ClassInfo;
+    problemId?: string;
+    unitCode?: string;
+  }
   // tslint:disable-next-line:max-line-length
-  return new Promise<{authenticatedUser: AuthenticatedUser, classInfo?: ClassInfo, problemId?: string}>((resolve, reject) => {
+  return new Promise<IAuthenticateResponse>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
-    const problemOrdinal = urlParams.problem || DefaultProblemOrdinal;
+    // when launched as a report, the params will not contain the problemOrdinal
+    const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
@@ -362,7 +363,6 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
       if (!urlParams.offering) {
         return reject("Missing offering parameter!");
       }
-
       const {protocol, host} = parseUrl(urlParams.class);
       basePortalUrl = `${protocol}//${host}/`;
     }
@@ -375,183 +375,78 @@ export const authenticate = (appMode: AppMode, urlParams?: QueryParams) => {
 
     return getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken)
       .then(([rawPortalJWT, portalJWT]) => {
-        if ((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher")) {
-          const portal = parseUrl(basePortalUrl).host;
-          let classInfoUrl: string | undefined;
-          let offeringId: string | undefined;
+        if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
+          throw new Error("Only student and teacher logins are currently supported!");
+        }
 
-          if (portalJWT.user_type === "learner") {
-            classInfoUrl = portalJWT.class_info_url;
-            offeringId = `${portalJWT.offering_id}`;
-          }
-          else if (urlParams && urlParams.class && urlParams.offering) {
-            classInfoUrl = urlParams.class;
-            offeringId = urlParams.offering.split("/").pop() as string;
-          }
+        const portal = parseUrl(basePortalUrl).host;
+        let classInfoUrl: string | undefined;
+        let offeringId: string | undefined;
+        let portalClassOfferings: any;
 
-          if (classInfoUrl && offeringId) {
-            return (getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
-              .then((classInfo) => {
-                return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
-                  .then(([rawFirebaseJWT, firebaseJWT]) => {
-                    return getPortalClasses(portalJWT.user_type, rawPortalJWT, urlParams)
-                      .then((portalClasses) => {
-                        return getPortalProblems(portalJWT.user_type, portalJWT.uid,
-                            portalJWT.domain, rawPortalJWT, urlParams)
-                          .then((portalProblems) => {
-                            const uidAsString = `${portalJWT.uid}`;
-                            let authenticatedUser: AuthenticatedUser | undefined;
-                            if (portalJWT.user_type === "learner") {
-                              authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                            }
-                            else {
-                              authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                            }
+        if (portalJWT.user_type === "learner") {
+          classInfoUrl = portalJWT.class_info_url;
+          offeringId = `${portalJWT.offering_id}`;
+        }
+        else if (urlParams && urlParams.class && urlParams.offering) {
+          classInfoUrl = urlParams.class;
+          offeringId = urlParams.offering.split("/").pop() as string;
+        }
 
-                            if (authenticatedUser) {
-                              authenticatedUser.portalJWT = portalJWT;
-                              authenticatedUser.rawPortalJWT = rawPortalJWT;
-                              authenticatedUser.firebaseJWT = firebaseJWT;
-                              authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                              authenticatedUser.id = uidAsString;
-                              authenticatedUser.portal = portal;
-                              authenticatedUser.portalClasses = portalClasses;
-                              authenticatedUser.portalProblems = portalProblems;
+        if (!classInfoUrl || !offeringId) {
+          throw new Error("Unable to get classInfoUrl or offeringId");
+        }
 
-                              getProblemIdForAuthenticatedUser(rawPortalJWT, urlParams)
-                              .then((problemId) => {
-                                if (authenticatedUser) {
-                                  resolve({authenticatedUser, classInfo, problemId});
-                                }
-                              });
-                            }
-                            else {
-                              reject("Current user not found in class roster");
-                            }
+        return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
+          .then((classInfo) => {
+            return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
+              .then(([rawFirebaseJWT, firebaseJWT]) => {
+                getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
+                  .then(result => {
+                    portalClassOfferings = getPortalClassOfferings(result, appConfig, urlParams);
+                    const uidAsString = `${portalJWT.uid}`;
+                    let authenticatedUser: AuthenticatedUser | undefined;
+
+                    if (portalJWT.user_type === "learner") {
+                      authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
+                    } else {
+                      authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
+                    }
+
+                    if (!authenticatedUser) {
+                      throw new Error("Current user not found in class roster");
+                    }
+
+                    authenticatedUser.portalJWT = portalJWT;
+                    authenticatedUser.rawPortalJWT = rawPortalJWT;
+                    authenticatedUser.firebaseJWT = firebaseJWT;
+                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                    authenticatedUser.id = uidAsString;
+                    authenticatedUser.portal = portal;
+                    if (portalClassOfferings) {
+                      authenticatedUser.portalClassOfferings = portalClassOfferings;
+                    }
+                    getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams)
+                      .then(({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
+                        if (authenticatedUser) {
+                          Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+                          resolve({
+                            authenticatedUser,
+                            classInfo,
+                            unitCode: newUnitCode,
+                            problemId: newProblemOrdinal
                           });
-                      });
+                        }
+                      })
+                      .catch(reject);
                   })
-                .catch(reject);
+                  .catch(reject);
               })
-            );
-          }
-          else {
-            reject("Unable to get classInfoUrl or offeringId");
-          }
-        }
-        else {
-          reject("Only student and teacher logins are currently supported!");
-        }
-      })
-      .catch(reject);
-  });
-};
-
-const getPortalProblems = (
-    userType: string,
-    userId: number,
-    domain: string,
-    rawPortalJWT: any,
-    urlParams?: QueryParams): Promise<IPortalProblem[] | undefined> => {
-  return new Promise<IPortalProblem[] | undefined>((resolve, reject) => {
-    if (userType === "teacher" && urlParams && urlParams.class) {
-      superagent
-      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const classId = (urlParams.class!).split("/classes/").pop();
-          /* NP: 2019-09-11
-          TODO: FIXME
-              We will want to handle assigning localhost CLUE activities.
-              So we will need a better way to distinguish CLUE assignments.
-              Extract a helper function isClueAssignment or something similar.
-          */
-          const problemsAssignedThisClass =
-            res.body.filter( (activity: any) =>
-              `${activity.clazz_id}` === classId &&
-              /^https:\/\/collaborative-learning/.test(activity.activity_url) );
-          const portalProblems: IPortalProblem[] = problemsAssignedThisClass.map( (activity: any) => {
-            return (
-              {
-                problemDesignator: activity.activity_url.match(/\?problem=(.+)/)[1],
-                switchUrlLocation:
-                  `?class=${urlParams.class}` +
-                  `&offering=${urlParams.offering!.replace(/\/offerings\/.*$/, `/offerings/${activity.id}`)}` +
-                  `&reportType=${urlParams.reportType}` +
-                  `&token=${urlParams.token}`
-              }
-            );
-          });
-          resolve((portalProblems.length > 0) ? portalProblems : undefined);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
-  });
-};
-
-/*
-TODO: FIXME
-  The ClassSwitcher will also need to add whatever problem the teacher was last
-  looking at in the problem switcher, so that when they switch classes they
-  want to be looking at the same problem if possible, otherwise view the first
-  assigned problem.
-*/
-const getPortalClasses = (userType: string, rawPortalJWT: any, urlParams?: QueryParams): Promise<IPortalClass[]> => {
-  return new Promise<IPortalClass[]>((resolve, reject) => {
-    if (userType === "teacher" && urlParams && urlParams.class) {
-      const url = urlParams.class.replace(/classes\/\d*$/, "classes/mine");
-      superagent
-      .get(url)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const portalClasses = res.body.classes.map( (rawPortalClass: any) => {
-            return (
-              {
-                className: rawPortalClass.name,
-                classHash: rawPortalClass.class_hash,
-                classUri: rawPortalClass.uri,
-              }
-            );
-          });
-          resolve(portalClasses);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
-  });
-};
-
-export const getProblemIdForAuthenticatedUser = (rawPortalJWT: string, urlParams?: QueryParams) => {
-  return new Promise<string|undefined>((resolve, reject) => {
-    if (urlParams && urlParams.offering) {
-      superagent
-      .get(urlParams.offering)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const activityUrl = ((res.body || {}).activity_url) || "";
-          const [ignore, query, ...rest] = activityUrl.split("?");
-          const params = queryString.parse(query);
-          resolve(params.problem as string);
-        }
-      });
-    }
-    else {
-      resolve(undefined);
-    }
+              .catch(reject);
+        })
+        .catch(reject);
+    })
+    .catch(reject);
   });
 };
 

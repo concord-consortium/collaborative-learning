@@ -11,9 +11,11 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
   DBOtherDocument, DBOtherDocumentMap, IOtherDocumentProperties, DBOtherPublication } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
-      } from "../models/document/document";
+       } from "../models/document/document";
+import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType } from "../models/document/document-content";
+import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+       } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
@@ -97,17 +99,6 @@ export class DB {
 
       this.stores = options.stores;
 
-      if (options.appMode === "authed") {
-        firebase.auth()
-          .signInWithCustomToken(options.rawFirebaseJWT)
-          .catch(reject);
-      }
-      else {
-        firebase.auth()
-          .signInAnonymously()
-          .catch(reject);
-      }
-
       firebase.auth().onAuthStateChanged((firebaseUser) => {
         if (firebaseUser) {
           this.appMode = options.appMode;
@@ -116,6 +107,17 @@ export class DB {
           this.listeners.start().then(resolve).catch(reject);
         }
       });
+
+      if (options.appMode === "authed") {
+        return firebase.auth()
+          .signInWithCustomToken(options.rawFirebaseJWT)
+          .catch(reject);
+      }
+      else {
+        return firebase.auth()
+          .signInAnonymously()
+          .catch(reject);
+      }
     });
   }
 
@@ -376,12 +378,13 @@ export class DB {
       this.createDocument({ type: PublicationDocument, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
-        const groupUserConnections: DBGroupUserConnections = userGroup.users
+        const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
           .reduce((allUsers: DBGroupUserConnections, groupUser) => {
             allUsers[groupUser.id] = groupUser.connected;
             return allUsers;
           }, {});
+        const groupProps = userGroup ? { groupId: userGroup.id, groupUserConnections } : {};
         const publication: DBPublication = {
           version: "1.0",
           self: {
@@ -389,13 +392,13 @@ export class DB {
             offeringId: user.offeringId,
           },
           documentKey: document.self.documentKey,
-          groupId: userGroup.id,
           userId: user.id,
-          groupUserConnections
+          ...groupProps
         };
 
         publicationRef.set(publication)
           .then(() => {
+            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);
@@ -427,6 +430,7 @@ export class DB {
 
         publicationRef.set(publication)
           .then(() => {
+            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);
@@ -519,6 +523,12 @@ export class DB {
     });
   }
 
+  public copyOtherDocument(document: DocumentModelType, title: string) {
+    const content = cloneContentWithUniqueIds(document.content);
+    const copyType = document.type === ProblemDocument ? PersonalDocument : document.type as OtherDocumentType;
+    return this.createOtherDocument(copyType, { title, content });
+  }
+
   public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
     const { user } = this.stores;
 
@@ -601,10 +611,10 @@ export class DB {
 
   // handles published personal documents and published learning logs
   public createDocumentModelFromOtherPublication(publication: DBOtherPublication, type: OtherPublicationType) {
-    const {title, uid, originDoc, self: {documentKey}} = publication;
+    const {title, properties, uid, originDoc, self: {documentKey}} = publication;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, originDoc})
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc})
       .then((document) => {
         return document;
       });
@@ -616,7 +626,9 @@ export class DB {
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
-        allUsers[groupUserId] = groupUserConnections[groupUserId];
+        if (groupUserConnections && groupUserConnections[groupUserId]) {
+          allUsers[groupUserId] = groupUserConnections[groupUserId];
+        }
         return allUsers;
       }, {} as DBGroupUserConnections);
 
@@ -737,7 +749,8 @@ export class DB {
     });
   }
 
-  public createSupport(content: string, sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
+  public createSupport(supportModel: SupportModelType,
+                       sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
       this.firebase.getSupportsPath(user, audience, sectionTarget)
@@ -753,7 +766,8 @@ export class DB {
         key: supportRef.key!
       },
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-      content,
+      type: supportModel.type,
+      content: supportModel.content,
       deleted: false
     };
     supportRef.set(support);

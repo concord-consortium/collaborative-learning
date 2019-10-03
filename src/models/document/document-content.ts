@@ -91,7 +91,7 @@ export const DocumentContentModel = types
           : self.rowOrder[self.rowOrder.length - 1];
         return  self.rowOrder.indexOf(lastVisibleRowId);
       },
-      publish() {
+      snapshotWithUniqueIds() {
         const snapshot = cloneDeep(getSnapshot(self));
         const idMap: { [id: string]: string } = {};
 
@@ -133,10 +133,15 @@ export const DocumentContentModel = types
 
         snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
 
-        return JSON.stringify(snapshot);
+        return snapshot;
       }
     };
   })
+  .views(self => ({
+    publish() {
+      return JSON.stringify(self.snapshotWithUniqueIds());
+    }
+  }))
   .actions(self => ({
     afterCreate() {
       self.rowMap.forEach(row => {
@@ -444,3 +449,7 @@ function migrateSnapshot(snapshot: any): any {
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
 export type DocumentContentSnapshotType = SnapshotIn<typeof DocumentContentModel>;
+
+export function cloneContentWithUniqueIds(content?: DocumentContentModelType) {
+  return content && DocumentContentModel.create(content.snapshotWithUniqueIds());
+}

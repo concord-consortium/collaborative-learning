@@ -5,6 +5,7 @@
   "units": {
     "dataflow": "assets/curriculum/dataflow/dataflow.json"
   },
+  "defaultProblemOrdinal": "1",
   "defaultUnit": "dataflow",
   "defaultDocumentType": "personal",
   "defaultDocumentTitle": "Program",
@@ -22,6 +23,14 @@
       }
     ]
   },
+  "documentLabels": {
+    "personal": {
+      "labels": {
+        "1": "Program",
+        "n": "Programs"
+      }
+    }
+  },
   "rightNavTabs": [
     {
       "tab": "my-work",
@@ -34,7 +43,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["!dfHasData"]
+          "properties": ["!dfHasData", "!isDeleted"]
         },
         {
           "title": "Data",
@@ -42,7 +51,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["dfHasData"]
+          "properties": ["dfHasData", "!isDeleted"]
         }
       ]
     },

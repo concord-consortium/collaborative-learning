@@ -7,3 +7,4 @@ if (debug.length > 0) {
 const debugContains = (key: string) => debug.indexOf(key) !== -1;
 
 export const DEBUG_CANVAS = debugContains("canvas");
+export const DEBUG_LOGGER = debugContains("logger");
