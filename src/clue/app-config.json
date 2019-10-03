@@ -36,6 +36,22 @@
   "showClassSwitcher": true,
   "rightNavTabs": [
     {
+      "tab": "class-work",
+      "label": "Class Work",
+      "hideGhostUser": true,
+      "teacherOnly": true,
+      "sections": [
+        {
+          "title": "Group Workspaces",
+          "type": "personal-documents",
+          "dataTestHeader": "group-workspaces",
+          "dataTestItem": "group-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["!isDeleted"]
+        }
+      ]
+    },
+    {
       "tab": "my-work",
       "label": "My Work",
       "hideGhostUser": true,

@@ -43,8 +43,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { appConfig } = this.stores;
+    const { appConfig, user } = this.stores;
+    const { rightNavTabs } = appConfig;
+    const studentTabs = rightNavTabs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
+    const isTeacher = user.isTeacher;
+    const tabsToDisplay = isTeacher ? rightNavTabs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -58,6 +62,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           onDrop={this.handleImageDrop}
         />
         {this.renderDocuments(isGhostUser)}
+        <LeftNavComponent isGhostUser={isGhostUser} />
+        <RightNavComponent tabs={tabsToDisplay} isGhostUser={isGhostUser} />
         <LeftNavComponent
           isGhostUser={isGhostUser}
           onDragOver={this.handleDragOverWorkspace}

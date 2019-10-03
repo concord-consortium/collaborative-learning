@@ -46,6 +46,7 @@ export const RightNavTabModel =
     tab: types.enumeration<ERightNavTab>("ERightNavTab", Object.values(ERightNavTab)),
     label: types.string,
     hideGhostUser: false,
+    teacherOnly: false,
     sections: types.array(NavTabSectionModel)
   });
 export type RightNavTabSpec = SnapshotIn<typeof RightNavTabModel>;
