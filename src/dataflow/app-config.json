@@ -43,7 +43,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["!dfHasData"]
+          "properties": ["!dfHasData", "!isDeleted"]
         },
         {
           "title": "Data",
@@ -51,7 +51,7 @@
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["dfHasData"]
+          "properties": ["dfHasData", "!isDeleted"]
         }
       ]
     },
