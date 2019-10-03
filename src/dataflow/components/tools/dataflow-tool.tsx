@@ -15,6 +15,7 @@ import { IOtherDocumentProperties } from "../../../lib/db-types";
 interface IProps {
   model: ToolTileModelType;
   readOnly?: boolean;
+  height?: number;
 }
 
 interface IState {
@@ -29,7 +30,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   public state: IState = {};
 
   public render() {
-    const { model, readOnly } = this.props;
+    const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programRunId, programIsRunning, programStartTime, programEndTime, programRunTime, programZoom }
@@ -59,6 +60,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 programZoom={programZoom}
                 onZoomChange={this.handleProgramZoomChange}
                 size={size}
+                tileHeight={height}
               />
             );
           }}
