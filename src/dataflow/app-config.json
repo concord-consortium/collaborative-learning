@@ -23,6 +23,14 @@
       }
     ]
   },
+  "documentLabels": {
+    "personal": {
+      "labels": {
+        "1": "Program",
+        "n": "Programs"
+      }
+    }
+  },
   "rightNavTabs": [
     {
       "tab": "my-work",
