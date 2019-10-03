@@ -7,7 +7,6 @@ import { each, isObject } from "lodash";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { IStores } from "../stores/stores";
 import { AppConfigModelType } from "../stores/app-config-model";
-import * as appConfigJson from "../../clue/app-config.json";
 
 export const UnitModel = types
   .model("Unit", {
@@ -15,6 +14,7 @@ export const UnitModel = types
     abbrevTitle: "",
     title: types.string,
     subtitle: "",
+    placeholderText: "",
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
@@ -104,7 +104,7 @@ function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType )
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
   const unit = createFromJson(unitJson);
-  const {investigation, problem} = unit.getProblem(problemOrdinal || appConfigJson.defaultProblemOrdinal);
+  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
   if (unit) {
     stores.unit = unit;

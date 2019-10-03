@@ -127,6 +127,10 @@ export const DocumentModel = types
                           : visibility;
     },
 
+    setVisibility(visibility: "public" | "private") {
+      self.visibility = visibility;
+    },
+
     addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
       return self.content.addTile(tool, options);
     },
