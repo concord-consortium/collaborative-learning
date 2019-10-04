@@ -456,8 +456,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleDocumentRename = () => {
     const { document } = this.props;
     const { appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Rename ${docTypeString}`)
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    this.stores.ui.prompt(`Rename your ${docTypeStringL}:`, document.title, `Rename ${docTypeString}`)
       .then((title: string) => {
         if (title !== document.title) {
           document.setTitle(title);
