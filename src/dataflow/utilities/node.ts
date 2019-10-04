@@ -326,3 +326,6 @@ export const IntervalTimes: IntervalTime[] = [
     maxProgramRunTime: 2592000
   }
 ];
+
+export const kRelaySelectMessage = "Select a relay";
+export const kSensorSelectMessage = "Select a relay";

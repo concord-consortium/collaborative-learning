@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { NodeSensorTypes, NodeChannelInfo } from "../../../utilities/node";
+import { NodeSensorTypes, NodeChannelInfo, kSensorSelectMessage } from "../../../utilities/node";
 import { useStopEventPropagation } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
@@ -122,7 +122,7 @@ export class SensorSelectControl extends Rete.Control {
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        if (!ch && (!id || id === "none")) return "Select a sensor";
+        if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return "Finding " + id;
         let count = 0;
@@ -134,7 +134,7 @@ export class SensorSelectControl extends Rete.Control {
       if (!options.length) {
         options.push("none");
       }
-      const titleClass = getChannelString(selectedChannel).includes("Select") ? "label unselected" : "label";
+      const titleClass = getChannelString(selectedChannel).includes(kSensorSelectMessage) ? "label unselected" : "label";
       return (
         <div className="node-select sensor-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
