@@ -43,7 +43,7 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
             return (
               <TabComponent
                 id={this.getTabId(sectionIndex)}
-                key={section.abbrev}
+                key={section.title}
                 active={leftNavExpanded && (activeSectionIndex === sectionIndex)}
                 onClick={this.handleTabClick(sectionIndex)}
               >

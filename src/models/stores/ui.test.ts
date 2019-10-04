@@ -1,5 +1,5 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
-import { SectionModel, SectionType } from "../curriculum/section";
+import { SectionModel } from "../curriculum/section";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
 import { ERightNavTab } from "../view/right-nav";
@@ -115,7 +115,7 @@ describe("ui model", () => {
 
   it("allows activeSection to be set", () => {
     SectionModel.create({
-      type: SectionType.introduction
+      type: "introduction"
     });
     ui.setActiveSectionIndex(1);
     expect(ui.activeSectionIndex).toBe(1);

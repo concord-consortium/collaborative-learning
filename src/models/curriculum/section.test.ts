@@ -1,15 +1,35 @@
-import { getSectionInfo, SectionModel, SectionType } from "./section";
-import { each } from "lodash";
+import { getSectionInitials, getSectionPlaceholder, getSectionTitle,
+        kAllSectionType, SectionModel, setSectionInfoMap } from "./section";
 
-describe("workspace model", () => {
+describe("SectionModel", () => {
 
-  it("supports built-in section types", () => {
-    each(SectionType, type => {
-      const section = SectionModel.create({ type });
-      const info = getSectionInfo(type);
-      expect(section.title).toBe(info.title);
-      expect(section.abbrev).toBe(info.abbrev);
-    });
+  it("supports all/unknown section types by default", () => {
+    expect(getSectionInitials("foo")).toBe("?");
+    expect(getSectionTitle("foo")).toBe("Unknown");
+    expect(getSectionPlaceholder("foo")).toBe("");
+    expect(getSectionInitials(kAllSectionType)).toBe("*");
+    expect(getSectionTitle(kAllSectionType)).toBe("All");
+
+    const section = SectionModel.create({ type: "foo" });
+    expect(section.initials).toBe("?");
+    expect(section.title).toBe("Unknown");
+  });
+
+  it("supports setSectionInfoMap() to configure sections", () => {
+    setSectionInfoMap({ foo: { initials: "FS", title: "Foo Section", placeholder: "Foo Placeholder" } });
+
+    const fooSection = SectionModel.create({ type: "foo" });
+    expect(fooSection.initials).toBe("FS");
+    expect(fooSection.title).toBe("Foo Section");
+    expect(fooSection.placeholder).toBe("Foo Placeholder");
+
+    const barSection = SectionModel.create({ type: "bar" });
+    expect(barSection.initials).toBe("?");
+    expect(barSection.title).toBe("Unknown");
+    expect(barSection.placeholder).toBe("");
+
+    expect(getSectionInitials(kAllSectionType)).toBe("*");
+    expect(getSectionTitle(kAllSectionType)).toBe("All");
   });
 
 });

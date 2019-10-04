@@ -4,6 +4,33 @@
   "title": "Stretching and Shrinking",
   "subtitle": "Understanding Similarity",
   "placeholderText": "Enter notes here",
+  "sections": {
+    "introduction": {
+      "initials": "In",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "W?",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "N?",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "D?",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    }
+  },
   "lookingAhead": {
     "tiles": [
       {

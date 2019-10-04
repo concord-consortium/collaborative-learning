@@ -20,7 +20,7 @@ import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWith
 import { Firebase } from "./firebase";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
+import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { find } from "lodash";
 
@@ -452,7 +452,7 @@ export class DB {
 
   public publishDocumentAsSupport(documentModel: DocumentModelType,
                                   audience: AudienceModelType,
-                                  sectionTarget: TeacherSupportSectionTarget,
+                                  sectionTarget: SectionTarget,
                                   caption: string) {
     const {user} = this.stores;
     const content = documentModel.content.publish();
@@ -810,7 +810,7 @@ export class DB {
   }
 
   public createSupport(supportModel: SupportModelType,
-                       sectionTarget: TeacherSupportSectionTarget, audience: AudienceModelType) {
+                       sectionTarget: SectionTarget, audience: AudienceModelType) {
     const { user } = this.stores;
     const classSupportsRef = this.firebase.ref(
       this.firebase.getSupportsPath(user, audience, sectionTarget)
@@ -840,7 +840,7 @@ export class DB {
   public deleteSupport(support: TeacherSupportModelType) {
     const { user } = this.stores;
     const { audience, key } = support;
-    const dbSupportType: TeacherSupportSectionTarget = support.sectionTarget;
+    const dbSupportType: SectionTarget = support.sectionTarget;
     const updateRef = this.firebase.ref(this.firebase.getSupportsPath(user, audience, dbSupportType, key));
     updateRef.update({
       deleted: true
