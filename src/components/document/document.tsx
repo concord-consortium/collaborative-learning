@@ -177,13 +177,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const {problem, appMode, clipboard, user} = this.stores;
+    const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
     const isShared = visibility === "public";
-    const showPublishSupport = user.isTeacher;
-    const showShare = !user.isTeacher;
-    const show4up = !workspace.comparisonVisible && !user.isTeacher;
+    const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
@@ -202,11 +200,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              showPublishSupport ? <PublishSupportButton onClick={this.handlePublishSupport} /> : null,
+              isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />,
               <PublishButton key="publish" onClick={this.handlePublishDocument} />,
-              showShare ? <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} /> : null
+              !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
-            {show4up ? this.renderMode() : null}
+            {show4up && this.renderMode()}
           </div>
         }
       </div>
@@ -234,6 +232,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
+    const { user: { isTeacher } } = this.stores;
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -255,7 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             </div>
         }
         <div className="actions">
-          {!hideButtons && <PublishSupportButton onClick={this.handlePublishSupport} />}
+          {!hideButtons && isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
