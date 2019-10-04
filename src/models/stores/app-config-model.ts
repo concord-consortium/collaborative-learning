@@ -28,7 +28,7 @@ export const DocumentLabelModel = types
     }
   }));
 export const AppConfigModel = types
-  .model("User", {
+  .model("AppConfig", {
     appName: "",
     pageTitle: "",
     demoProblemTitle: "",
@@ -40,6 +40,9 @@ export const AppConfigModel = types
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
+    initialLearningLogTitle: "",
+    defaultLearningLogDocument: false,
+    documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
     showClassSwitcher: false,
     rightNavTabs: types.array(RightNavTabModel),
@@ -51,7 +54,7 @@ export const AppConfigModel = types
     },
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels.get(docType);
-      return docLabel && docLabel.getLabel(num, lowerCase);
+      return docLabel && docLabel.getLabel(num, lowerCase) || "";
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;

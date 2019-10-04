@@ -6,13 +6,14 @@ import { AppMode, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBPublicationDocumentMetadata,
-  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBSupport, DBTileComment,
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
-  DBOtherDocument, DBOtherDocumentMap, IOtherDocumentProperties, DBOtherPublication } from "./db-types";
+  DBOtherDocument, DBOtherDocumentMap, IDocumentProperties, DBOtherPublication,
+  DBPublishedSupport, DBSupportPublicationMetadata, DBSupport } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
-        PersonalPublication, PublicationDocument, LearningLogPublication, OtherPublicationType, OtherDocumentType
-       } from "../models/document/document";
-import { SupportModelType } from "../models/curriculum/support";
+        PersonalPublication, ProblemPublication, LearningLogPublication, OtherPublicationType, OtherDocumentType,
+        SupportPublication } from "../models/document/document";
+import { SupportModelType, ESupportType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
        } from "../models/document/document-content";
@@ -22,6 +23,12 @@ import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { find } from "lodash";
+
+export enum Monitor {
+  None = "None",
+  Local = "Local",
+  Remote = "Remote",
+}
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBAuthConnectOptions {
@@ -47,7 +54,7 @@ export type DBClearLevel = "all" | "class" | "offering";
 
 export interface ICreateOtherDocumentParams {
   title?: string;
-  properties?: IOtherDocumentProperties;
+  properties?: IDocumentProperties;
   content?: DocumentContentModelType;
 }
 
@@ -59,7 +66,7 @@ export interface OpenDocumentOptions {
   sectionId?: string;
   visibility?: "public" | "private";
   title?: string;
-  properties?: IOtherDocumentProperties;
+  properties?: IDocumentProperties;
   groupUserConnections?: {};
   originDoc?: string;
 }
@@ -243,6 +250,22 @@ export class DB {
       : this.createPersonalDocument({ content: defaultContent });
   }
 
+  public async guaranteeLearningLog(initialTitle?: string, defaultContent?: DocumentContentModelType) {
+    const {user, documents} = this.stores;
+
+    const learningLogDocument = documents.getLearningLogDocument(user.id);
+    if (learningLogDocument) return learningLogDocument;
+
+    const learningLogDocumentsRef = this.firebase.ref(this.firebase.getLearningLogPath(user));
+    const learningLogDocumentsSnapshot = await learningLogDocumentsRef.once("value");
+    const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
+                                                  learningLogDocumentsSnapshot.val();
+    const firstLearningLogDocument = find(learningLogDocuments, () => true);
+    return firstLearningLogDocument
+      ? this.openOtherDocument(LearningLogDocument, firstLearningLogDocument.self.documentKey)
+      : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
+  }
+
   public createProblemDocument(content?: DocumentContentModelType) {
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user, documents} = this.stores;
@@ -308,13 +331,9 @@ export class DB {
           return found;
         })
         .then((problemDocument) => {
-          return this.createDocumentFromProblemDocument(user.id, problemDocument);
+          return this.createDocumentFromProblemDocument(user.id, problemDocument, Monitor.Local);
         })
-        .then((problemDocument) => {
-          this.listeners.updateGroupUserProblemDocumentListeners(problemDocument);
-          this.listeners.monitorDocumentVisibility(problemDocument);
-          resolve(problemDocument);
-        })
+        .then(resolve)
         .catch(reject);
     });
   }
@@ -339,22 +358,15 @@ export class DB {
 
       switch (type) {
         case PersonalDocument:
+        case LearningLogDocument:
+        case PersonalPublication:
+        case LearningLogPublication:
           metadata = {version, self, createdAt, type};
           break;
         case ProblemDocument:
+        case ProblemPublication:
+        case SupportPublication:
           metadata = {version, self, createdAt, type, classHash, offeringId};
-          break;
-        case LearningLogDocument:
-          metadata = {version, self, createdAt, type};
-          break;
-        case PersonalPublication:
-          metadata = {version, self, createdAt, type};
-          break;
-        case PublicationDocument:
-          metadata = {version, self, createdAt, type, classHash, offeringId};
-          break;
-        case LearningLogPublication:
-          metadata = {version, self, createdAt, type};
           break;
       }
 
@@ -375,7 +387,7 @@ export class DB {
     const {user, groups} = this.stores;
     const content = documentModel.content.publish();
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: PublicationDocument, content }).then(({document, metadata}) => {
+      this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
@@ -435,6 +447,47 @@ export class DB {
           })
           .catch(reject);
       });
+    });
+  }
+
+  public publishDocumentAsSupport(documentModel: DocumentModelType,
+                                  audience: AudienceModelType,
+                                  sectionTarget: TeacherSupportSectionTarget,
+                                  caption: string) {
+    const {user} = this.stores;
+    const content = documentModel.content.publish();
+    return new Promise<{document: DBDocument, metadata: DBSupportPublicationMetadata}>((resolve, reject) => {
+      this.createDocument({ type: SupportPublication, content })
+        .then(({document, metadata}) => {
+          const supportPath = this.firebase.getSupportsPath(user, audience, sectionTarget);
+          const supportRef = this.firebase.ref(supportPath).push();
+          const fbSupportDocPath = this.firebase.getUserDocumentPath(user, document.self.documentKey);
+          const support: DBPublishedSupport = {
+            version: "1.0",
+            self: {
+              classHash: user.classHash,
+              offeringId: user.offeringId,
+              audienceType: audience.type,
+              audienceId: audience.identifier || "",
+              sectionTarget,
+              key: supportRef.key!
+            },
+            uid: user.id,
+            properties: { caption, ...documentModel.copyProperties() },
+            originDoc: documentModel.key,
+            timestamp: firebase.database.ServerValue.TIMESTAMP as number,
+            type: ESupportType.publication,
+            content: fbSupportDocPath,
+            deleted: false
+          };
+
+          supportRef.set(support)
+            .then(() => {
+              Logger.logDocumentEvent(LogEventName.PUBLISH_SUPPORT, documentModel);
+              resolve({document, metadata: metadata as DBSupportPublicationMetadata});
+            })
+            .catch(reject);
+        });
     });
   }
 
@@ -581,7 +634,7 @@ export class DB {
 
   public createDocumentFromProblemDocument(userId: string,
                                            problemDocument: DBOfferingUserProblemDocument,
-                                           readOnly: boolean = false) {
+                                           monitor: Monitor) {
     const {documentKey} = problemDocument;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
@@ -592,9 +645,16 @@ export class DB {
         visibility: problemDocument.visibility
       })
       .then((document) => {
-        this.listeners.monitorDocument(document, readOnly);
+        if (monitor !== Monitor.None) {
+          this.listeners.monitorDocument(document, monitor);
+        }
         return document;
       });
+  }
+
+  public updateDocumentFromProblemDocument(document: DocumentModelType,
+                                           problemDocument: DBOfferingUserProblemDocument) {
+    document.setVisibility(problemDocument.visibility);
   }
 
   // handles personal documents and learning logs
@@ -604,7 +664,7 @@ export class DB {
     const groupId = group && group.id;
     return this.openDocument({type, userId: uid, documentKey, groupId, title, properties})
       .then((documentModel) => {
-        this.listeners.monitorDocument(documentModel);
+        this.listeners.monitorDocument(documentModel, Monitor.Local);
         return documentModel;
       });
   }
@@ -757,6 +817,7 @@ export class DB {
     );
     const supportRef = classSupportsRef.push();
     const support: DBSupport = {
+      version: "1.0",
       self: {
         classHash: user.classHash,
         offeringId: user.offeringId,
@@ -765,6 +826,9 @@ export class DB {
         sectionTarget,
         key: supportRef.key!
       },
+      uid: user.id,
+      properties: {},
+      originDoc: "",
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
       type: supportModel.type,
       content: supportModel.content,
