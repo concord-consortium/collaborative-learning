@@ -107,7 +107,7 @@ class Canvas{
     }
 
     getShareButton(){
-        return cy.get('[data-test=document-titlebar-actions] .visibility.private .icon-share');
+        return cy.get('[data-test=document-titlebar-actions] #icon-share .visibility.private');
     }
 
     shareCanvas(){
@@ -115,7 +115,7 @@ class Canvas{
     }
 
     getUnshareButton(){
-        return cy.get('[data-test=document-titlebar-actions] .visibility.public .icon-share');
+        return cy.get('[data-test=document-titlebar-actions] #icon-share .visibility.public');
     }
 
     unshareCanvas(){
