@@ -134,7 +134,9 @@ export class SensorSelectControl extends Rete.Control {
       if (!options.length) {
         options.push("none");
       }
-      const titleClass = getChannelString(selectedChannel).includes(kSensorSelectMessage) ? "label unselected" : "label";
+      const titleClass = getChannelString(selectedChannel).includes(kSensorSelectMessage)
+                         ? "label unselected"
+                         : "label";
       return (
         <div className="node-select sensor-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
