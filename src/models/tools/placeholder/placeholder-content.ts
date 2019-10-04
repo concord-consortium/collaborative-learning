@@ -5,7 +5,7 @@ export const kPlaceholderToolID = "Placeholder";
 export const PlaceholderContentModel = types
   .model("PlaceholderContent", {
     type: types.optional(types.literal(kPlaceholderToolID), kPlaceholderToolID),
-    prompt: types.string
+    prompt: ""
   });
 
 export type PlaceholderContentModelType = Instance<typeof PlaceholderContentModel>;

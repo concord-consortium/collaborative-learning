@@ -201,6 +201,9 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
+    addSectionHeaderRow(isSectionHeader: boolean, sectionId: string) {
+      self.insertRow(TileRowModel.create({ isSectionHeader, sectionId }));
+    },
     addTileInNewRow(content: ToolContentUnionType, options?: NewRowOptions): INewRowTile {
       const tile = createToolTileModelFromContent(content);
       const o = options || {};
@@ -472,7 +475,6 @@ function migrateSnapshot(snapshot: any): any {
   }
 
   interface OriginalToolTileModel {
-    id: string;
     layout?: OriginalTileLayoutModel;
     content: any;
   }
@@ -482,7 +484,13 @@ function migrateSnapshot(snapshot: any): any {
   tiles.forEach(tile => {
     const newTile = cloneDeep(tile);
     const tileHeight = newTile.layout && newTile.layout.height;
-    docContent.addTileInNewRow(newTile.content, { rowHeight: tileHeight });
+    const { isSectionHeader, sectionId } = newTile.content;
+    if (isSectionHeader && sectionId) {
+      docContent.addSectionHeaderRow(isSectionHeader, sectionId);
+    }
+    else {
+      docContent.addTileInNewRow(newTile.content, { rowHeight: tileHeight });
+    }
   });
   return getSnapshot(docContent);
 }

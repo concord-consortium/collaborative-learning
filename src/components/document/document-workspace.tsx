@@ -5,9 +5,10 @@ import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { kAllSectionType } from "../../models/curriculum/section";
+import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
+import { DocumentContentModel } from "../../models/document/document-content";
 import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
@@ -72,12 +73,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private getDefaultDocumentContent() {
+    const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
+            problem } = this.stores;
+    if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
+      const tiles: any = [];
+      problem.sections.forEach(section => {
+        tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
+        const placeholder = getSectionPlaceholder(section.type);
+        tiles.push({ content: { type: "Placeholder", prompt: placeholder }});
+      });
+      return DocumentContentModel.create({ tiles } as any);
+    }
+    else if (defaultDocumentContent) {
+      return defaultDocumentContent;
+    }
+  }
+
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultDocumentType, defaultDocumentContent,
-                         defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultDocumentType, defaultLearningLogDocument,
+                        defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+      const documentContent = this.getDefaultDocumentContent();
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }

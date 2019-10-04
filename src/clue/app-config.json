@@ -12,6 +12,7 @@
   "defaultLearningLogTitle": "UntitledLog",
   "initialLearningLogTitle": "My First Learning Log",
   "defaultLearningLogDocument": true,
+  "autoSectionProblemDocuments": true,
   "documentLabels": {
     "personal": {
       "labels": {
