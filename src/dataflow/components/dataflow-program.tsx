@@ -16,7 +16,8 @@ import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factor
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramRunTimes, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
+         DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
@@ -42,6 +43,9 @@ interface NodeValueMap {
 type NodeValue = number | NodeValueMap;
 
 interface NodeSequenceNameMap {
+  [key: number]: string;
+}
+interface NodeSequenceUnitsMap {
   [key: number]: string;
 }
 
@@ -100,6 +104,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
   private sequenceNames: NodeSequenceNameMap;
+  private sequenceUnits: NodeSequenceUnitsMap;
   private intervalHandle: any;
   private programEditor: NodeEditor;
   private programEngine: any;
@@ -353,7 +358,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                                   : ProgramDisplayStates.Program;
     this.setState({ programRunState, programDisplayState });
     this.updateGraphDataSet();
-    this.sequenceNames = this.getNodeSequenceNames();
+    const sequenceInfo = this.getNodeSequenceNamesAndUnits();
+    this.sequenceNames = sequenceInfo.names;
+    this.sequenceUnits = sequenceInfo.units;
   }
 
   private updateDisabledIntervals() {
@@ -459,7 +466,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     const programData: any = this.generateProgramData();
     uploadProgram(programData);
-    this.sequenceNames = this.getNodeSequenceNames();
+    const sequenceInfo = this.getNodeSequenceNamesAndUnits();
+    this.sequenceNames = sequenceInfo.names;
+    this.sequenceUnits = sequenceInfo.units;
     this.setState({programRunState: ProgramRunStates.Running,
                    programDisplayState: ProgramDisplayStates.Graph});
   }
@@ -689,22 +698,31 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private getNodeSequenceNames = () => {
-    // returns a mapping of input block ids to user-specified sequence names
+  private getNodeSequenceNamesAndUnits = () => {
+    // returns a mapping of input block ids to user-specified sequence names and units if available
     const sequenceNames: NodeSequenceNameMap = {};
-    this.programEditor.nodes.forEach((n: Node) => {
-      if (n.name === "Data Storage" && n.inputs) {
-        Array.from(n.inputs.values()).forEach((inp: Input) => {
-          const nodeId = inp.connections && inp.connections[0] && inp.connections[0].output &&
-                         inp.connections[0].output.node && inp.connections[0].output.node.id;
-          const sequenceName: unknown = n.data[inp.key.replace("num", "sequence")];
-          if (nodeId && typeof sequenceName === "string") {
-            sequenceNames[nodeId] = sequenceName;
+    const sequenceUnits: NodeSequenceUnitsMap = {};
+    const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
+    if (dataStorage && dataStorage.inputs) {
+      Array.from(dataStorage.inputs.values()).forEach((inp: Input) => {
+        const nodeId = inp.connections && inp.connections[0] && inp.connections[0].output &&
+                       inp.connections[0].output.node && inp.connections[0].output.node.id;
+        const sequenceName: unknown = dataStorage.data[inp.key.replace("num", "sequence")];
+        if (nodeId && typeof sequenceName === "string") {
+          sequenceNames[nodeId] = sequenceName;
+          const node = this.programEditor.nodes.find(n => n.id === nodeId && n.name === "Sensor");
+          let units = "";
+          if (node) {
+            const sensorType = NodeSensorTypes.find((s: any) => s.type === node.data.type);
+            if (sensorType && sensorType.units) {
+              units = sensorType.units;
+            }
           }
-        });
-      }
-    });
-    return sequenceNames;
+          sequenceUnits[nodeId] = units;
+        }
+      });
+    }
+    return { names: sequenceNames, units: sequenceUnits };
   }
 
   private updateGraphDataSet = () => {
@@ -721,7 +739,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             timeData.values.forEach((value: any, i: number) => {
               if (graphDataSet.sequences.length < (i + 1)) {
                 const name = this.sequenceNames[timeData.blockIds[i]];
-                const graphSequence: DataSequence = { name: name || timeData.blockIds[i], units: "my-units", data: [] };
+                const units = this.sequenceUnits[timeData.blockIds[i]];
+                const graphSequence: DataSequence = {name: name || timeData.blockIds[i], units: units || "", data: []};
                 graphDataSet.sequences.push(graphSequence);
               }
               const pt: DataPoint = { x: 0, y: 0 };
