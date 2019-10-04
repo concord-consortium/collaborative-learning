@@ -59,21 +59,23 @@ export class SensorSelectControl extends Rete.Control {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
       let icon = "";
+      let name = "";
       const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
       if (sensorType && sensorType.icon) {
         icon = `#${sensorType.icon}`;
+        name = sensorType.name;
       }
 
       return (
         <div className="node-select sensor-type" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             { type === "none"
-              ? <div className="label">Select a sensor type</div>
+              ? <div className="label unselected">Select a sensor type</div>
               : <div className="top-item-holder">
                   <svg className="icon top">
                     <use xlinkHref={icon}/>
                   </svg>
-                  <div className="label">{type}</div>
+                  <div className="label">{name}</div>
                 </div>
             }
             <svg className="icon dropdown-caret">
@@ -132,10 +134,11 @@ export class SensorSelectControl extends Rete.Control {
       if (!options.length) {
         options.push("none");
       }
+      const titleClass = getChannelString(selectedChannel).includes("Select") ? "label unselected" : "label";
       return (
         <div className="node-select sensor-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <div className="label">{getChannelString(selectedChannel)}</div>
+            <div className={titleClass}>{getChannelString(selectedChannel)}</div>
             <div className="dropdown-caret-holder">
               <svg className="icon dropdown-caret">
                 <use xlinkHref="#icon-dropdown-caret"/>

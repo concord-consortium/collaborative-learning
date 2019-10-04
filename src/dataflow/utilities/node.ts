@@ -27,119 +27,119 @@ export const NodeTypes = [
 
 export const NodeOperationTypes = [
   {
-    name: "add",
+    name: "Add",
     type: "math",
     method: (n1: number, n2: number) => n1 + n2,
     numberSentence: (n1: string, n2: string) => `${n1} + ${n2} = `,
     icon: "icon-add"
   },
   {
-    name: "subtract",
+    name: "Subtract",
     type: "math",
     method: (n1: number, n2: number) => n1 - n2,
     numberSentence: (n1: string, n2: string) => `${n1} - ${n2} = `,
     icon: "icon-subtract"
   },
   {
-    name: "multiply",
+    name: "Multiply",
     type: "math",
     method: (n1: number, n2: number) => n1 * n2,
     numberSentence: (n1: string, n2: string) => `${n1} * ${n2} = `,
     icon: "icon-multiply"
   },
   {
-    name: "divide",
+    name: "Divide",
     type: "math",
     method: (n1: number, n2: number) => n1 / n2,
     numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
     icon: "icon-divide"
   },
   {
-    name: "absolute value",
+    name: "Absolute Value",
     type: "transform",
     method: (n1: number, n2: number) => Math.abs(n1),
     numberSentence: (n1: string, n2: string) => `|${n1}| = `,
     icon: "icon-absolute-value"
   },
   {
-    name: "negation",
+    name: "Negation",
     type: "transform",
     method: (n1: number, n2: number) => 0 - n1,
     numberSentence: (n1: string, n2: string) => `-(${n1}) = `,
     icon: "icon-negation"
   },
   {
-    name: "not",
+    name: "Not",
     type: "transform",
     method: (n1: number, n2: number) => n1 ? 0 : 1,
     numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
     icon: "icon-not"
   },
   {
-    name: "greater than",
+    name: "Greater Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),
     numberSentence: (n1: string, n2: string) => `${n1} > ${n2} ⇒ `,
     icon: "icon-greater-than"
   },
   {
-    name: "less than",
+    name: "Less Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 < n2),
     numberSentence: (n1: string, n2: string) => `${n1} < ${n2} ⇒ `,
     icon: "icon-less-than"
   },
   {
-    name: "greater than or equal to",
+    name: "Greater Than Or Equal To",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 >= n2),
     numberSentence: (n1: string, n2: string) => `${n1} >= ${n2} ⇒ `,
     icon: "icon-greater-than-or-equal-to"
   },
   {
-    name: "less than or equal to",
+    name: "Less Than Or Equal To",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 <= n2),
     numberSentence: (n1: string, n2: string) => `${n1} <= ${n2} ⇒ `,
     icon: "icon-less-than-or-equal-to"
   },
   {
-    name: "equal",
+    name: "Equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 === n2),
     numberSentence: (n1: string, n2: string) => `${n1} == ${n2} ⇒ `,
     icon: "icon-equal"
   },
   {
-    name: "not equal",
+    name: "Not Equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 !== n2),
     numberSentence: (n1: string, n2: string) => `${n1} != ${n2} ⇒ `,
     icon: "icon-not-equal"
   },
   {
-    name: "and",
+    name: "And",
     type: "logic",
     method: (n1: number, n2: number) => n1 && n2 ? 1 : 0,
     numberSentence: (n1: string, n2: string) => `${n1} && ${n2} ⇒ `,
     icon: "icon-and"
   },
   {
-    name: "or",
+    name: "Or",
     type: "logic",
     method: (n1: number, n2: number) => n1 || n2 ? 1 : 0,
     numberSentence: (n1: string, n2: string) => `${n1} || ${n2} ⇒ `,
     icon: "icon-or"
   },
   {
-    name: "nand",
+    name: "Nand",
     type: "logic",
     method: (n1: number, n2: number) => +(!(n1 && n2 ? 1 : 0)),
     numberSentence: (n1: string, n2: string) => `${n1} nand ${n2} ⇒ `,
     icon: "icon-nand"
   },
   {
-    name: "xor",
+    name: "Xor",
     type: "logic",
     method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0)),
     numberSentence: (n1: string, n2: string) => `${n1} xor ${n2} ⇒ `,
@@ -149,13 +149,13 @@ export const NodeOperationTypes = [
 
 export const NodeSensorTypes = [
   {
-    name: "temperature",
+    name: "Temperature",
     type: "temperature",
     units: "°C",
     icon: "icon-temperature"
   },
   {
-    name: "humidity",
+    name: "Humidity",
     type: "humidity",
     units: "%",
     icon: "icon-humidity"
@@ -173,19 +173,19 @@ export const NodeSensorTypes = [
     icon: "icon-o2"
   },
   {
-    name: "light",
+    name: "Light",
     type: "light",
     units: "lux",
     icon: "icon-light"
   },
   {
-    name: "soil moisture",
+    name: "Soil Moisture",
     type: "soil-moisture",
     units: "",
     icon: "icon-soil-moisture"
   },
   {
-    name: "particulates",
+    name: "Particulates",
     type: "particulates",
     units: "PM2.5",
     icon: "icon-particulates"
@@ -194,22 +194,22 @@ export const NodeSensorTypes = [
 
 export const NodeGeneratorTypes = [
   {
-    name: "sine",
+    name: "Sine",
     method: (t: number, p: number, a: number, v: number) => Math.round(Math.sin(t * Math.PI / (p / 2)) * a * 100) / 100,
     icon: "icon-sine-generator"
   },
   {
-    name: "square",
+    name: "Square",
     method: (t: number, p: number, a: number, v: number) => t % p < p / 2 ? 1 * a : 0,
     icon: "icon-square-generator"
   },
   {
-    name: "triangle",
+    name: "Triangle",
     method: (t: number, p: number, a: number, v: number) => (2 * a / p) * Math.abs(t % p - p / 2),
     icon: "icon-triangle-generator"
   },
   {
-    name: "noise",
+    name: "Noise",
     method: (t: number, p: number, a: number, v: number) => Math.random() * a,
     icon: "icon-noise-generator"
   },

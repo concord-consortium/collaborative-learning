@@ -57,7 +57,7 @@ export class RelaySelectControl extends Rete.Control {
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
       };
-
+      const titleClass = getChannelString(selectedChannel).includes("Select") ? "label unselected" : "label";
       const options: any = [...channelsForType];
       if (!options.length) {
         options.push("none");
@@ -65,7 +65,7 @@ export class RelaySelectControl extends Rete.Control {
       return (
         <div className="node-select relay-select" ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <div className="label">{getChannelString(selectedChannel)}</div>
+            <div className={titleClass}>{getChannelString(selectedChannel)}</div>
             <svg className="icon dropdown-caret">
               <use xlinkHref="#icon-dropdown-caret"/>
             </svg>
