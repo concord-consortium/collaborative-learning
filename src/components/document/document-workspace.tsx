@@ -252,9 +252,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const defaultDocTitle = document.isLearningLog
                             ? appConfig.defaultLearningLogTitle
                             : appConfig.defaultDocumentTitle;
-    const docTypeString = appConfig.getDocumentLabel(docType, 1);
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
     const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
-    this.stores.ui.prompt(`Name your new ${docTypeString}:`, `${nextTitle}`, `Create ${docTypeString}`)
+    this.stores.ui.prompt(`Name your new ${docTypeStringL}:`, `${nextTitle}`, `Create ${docTypeString}`)
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
         .catch(this.stores.ui.setError);
@@ -273,8 +274,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleCopyDocument = (document: DocumentModelType) => {
     const { appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    this.stores.ui.prompt(`Give your ${docTypeString} copy a new name:`,
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    this.stores.ui.prompt(`Give your ${docTypeStringL} copy a new name:`,
                           `Copy of ${document.title || this.stores.problem.title}`, `Copy ${docTypeString}`)
       .then((title: string) => {
         this.handleCopyDocumentOpen(document, title)
@@ -292,8 +294,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleDeleteDocument = (document: DocumentModelType) => {
     const { appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    this.stores.ui.confirm(`Delete this ${docTypeString}? ${document.title}`, `Delete ${docTypeString}`)
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
       .then((confirmDelete: boolean) => {
         const docType = document.type;
         if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
@@ -335,13 +338,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handlePublishDocument = (document: DocumentModelType) => {
     const { appConfig, db, ui } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
     // TODO: Disable publish button while publishing
     const dbPublishDocumentFunc = document.type === ProblemDocument
                                     ? db.publishProblemDocument
                                     : db.publishOtherDocument;
     dbPublishDocumentFunc.call(db, document)
-      .then(() => ui.alert(`Your ${docTypeString.toLowerCase()} was published.`, `${docTypeString} Published`));
+      .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
   }
 
   private getPrimaryDocument(documentKey?: string) {
