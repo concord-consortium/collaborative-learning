@@ -3,6 +3,7 @@ import { DocumentContentModel, DocumentContentModelType } from "./document-conte
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
 import { IDocumentProperties } from "../../lib/db-types";
+import { AppConfigModelType } from "../stores/app-config-model";
 import { forEach } from "lodash";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
@@ -103,6 +104,16 @@ export const DocumentModel = types
     },
     getUserStarAtIndex(index: number) {
       return self.stars[index];
+    }
+  }))
+  .views(self => ({
+    getLabel(appConfig: AppConfigModelType, count: number, lowerCase?: boolean) {
+      const props = appConfig.documentLabelProperties || [];
+      let docStr = self.type as string;
+      props.forEach(prop => {
+        docStr += self.getProperty(prop) ? `:${prop}` : `:!${prop}`;
+      });
+      return appConfig.getDocumentLabel(docStr, count, lowerCase);
     }
   }))
   .actions((self) => ({
