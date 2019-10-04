@@ -62,6 +62,20 @@
               background-image: url("../assets/icons/delete/delete-hover.svg")
           &:active
               background-image: url("../assets/icons/delete/delete-active.svg")
+        .button-icon.share
+          &.visibility.public
+            background-image: url("../assets/icons/share/share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/not-share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/not-share-active.svg")
+        .button-icon.share
+          &.visibility.private
+            background-image: url("../assets/icons/share/not-share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/share-active.svg")
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1

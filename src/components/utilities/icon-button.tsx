@@ -4,6 +4,7 @@ interface IconButtonProps {
   icon: string;
   key: string;
   className: string;
+  innerClassName?: string;
   onClickButton: () => void;
   url?: string;
 }
@@ -20,7 +21,7 @@ export const IconButton = (props: IconButtonProps) => {
       data-test={`${props.icon}-icon`}
     >
       <div
-        className={`button-icon ${props.icon}`}
+        className={`button-icon ${props.icon} ${props.innerClassName}`}
         style={props.url ? styleIcon : undefined}
       />
     </button>

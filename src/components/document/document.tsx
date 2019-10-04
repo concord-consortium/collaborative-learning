@@ -96,15 +96,11 @@ const DeleteButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
+const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
   return (
-    <div key="share" className={`visibility action ${visibility}`}>
-      <svg id="currVis" className={`share icon icon-share`}
-            data-test="share-icon" onClick={onClick}>
-        <use xlinkHref={`#icon-share`} />
-      </svg>
-    </div>
+    <IconButton icon="share" key={`share-${visibility}`} className={`action icon-share`}
+                innerClassName={`visibility ${visibility}`} onClickButton={onClick}/>
   );
 };
 
