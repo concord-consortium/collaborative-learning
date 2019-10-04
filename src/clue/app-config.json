@@ -10,7 +10,7 @@
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",
   "defaultLearningLogTitle": "UntitledLog",
-  "defaultInitialLearningLogTitle": "My First Learning Log",
+  "initialLearningLogTitle": "My First Learning Log",
   "defaultLearningLogDocument": true,
   "documentLabels": {
     "personal": {

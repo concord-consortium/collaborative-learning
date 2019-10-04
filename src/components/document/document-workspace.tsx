@@ -46,7 +46,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private async guaranteeInitialDocuments() {
     const { appConfig: { defaultDocumentType, defaultDocumentContent,
-                         defaultLearningLogDocument, defaultInitialLearningLogTitle },
+                         defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
@@ -55,7 +55,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       }
     }
     // Guarantee the user starts with one learning log
-    defaultLearningLogDocument && await db.guaranteeLearningLog(defaultInitialLearningLogTitle);
+    defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
   }
 
   private renderDocuments(isGhostUser: boolean) {
