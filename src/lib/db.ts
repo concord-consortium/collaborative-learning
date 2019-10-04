@@ -250,6 +250,22 @@ export class DB {
       : this.createPersonalDocument({ content: defaultContent });
   }
 
+  public async guaranteeLearningLog(initialTitle?: string, defaultContent?: DocumentContentModelType) {
+    const {user, documents} = this.stores;
+
+    const learningLogDocument = documents.getLearningLogDocument(user.id);
+    if (learningLogDocument) return learningLogDocument;
+
+    const learningLogDocumentsRef = this.firebase.ref(this.firebase.getLearningLogPath(user));
+    const learningLogDocumentsSnapshot = await learningLogDocumentsRef.once("value");
+    const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
+                                                  learningLogDocumentsSnapshot.val();
+    const firstLearningLogDocument = find(learningLogDocuments, () => true);
+    return firstLearningLogDocument
+      ? this.openOtherDocument(LearningLogDocument, firstLearningLogDocument.self.documentKey)
+      : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
+  }
+
   public createProblemDocument(content?: DocumentContentModelType) {
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user, documents} = this.stores;

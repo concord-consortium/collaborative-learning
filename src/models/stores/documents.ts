@@ -48,6 +48,12 @@ export const DocumentsModel = types
       });
     },
 
+    getLearningLogDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === LearningLogDocument) && (document.uid === userId);
+      });
+    },
+
     getProblemDocument(userId: string) {
       return self.all.find((document) => {
         return (document.type === ProblemDocument) && (document.uid === userId);
