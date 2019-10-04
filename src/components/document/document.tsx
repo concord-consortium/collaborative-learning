@@ -254,7 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons && isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
+              <PublishButton onClick={this.handlePublishDocument} />
             </div>
           }
         </div>
