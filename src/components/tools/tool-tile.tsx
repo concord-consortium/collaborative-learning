@@ -72,6 +72,7 @@ interface IProps {
   readOnly?: boolean;
   toolApiInterface?: IToolApiInterface;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  onRequestRowHeight: (height: number) => void;
 }
 
 const kToolComponentMap: any = {
