@@ -36,6 +36,7 @@ export const NavTabSectionModel =
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
     properties: types.array(types.string),
+    showGroupWorkspaces: false,
     showStars: false,
     addDocument: false
   });

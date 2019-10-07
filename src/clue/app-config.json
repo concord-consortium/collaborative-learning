@@ -40,14 +40,14 @@
       "label": "Student Workspaces",
       "hideGhostUser": true,
       "teacherOnly": true,
+      "groupsDisplay": true,
       "sections": [
         {
           "title": "Group Workspaces",
           "type": "personal-documents",
           "dataTestHeader": "group-workspaces",
           "dataTestItem": "group-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["!isDeleted"]
+          "showGroupWorkspaces": true
         }
       ]
     },
