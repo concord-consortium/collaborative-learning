@@ -16,7 +16,7 @@ interface IProps extends IBaseProps {
   context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
-  onRequestRowHeight: (height: number) => void;
+  onRequestRowHeight: (tileId: string, height: number) => void;
 }
 
 interface IState {
@@ -101,7 +101,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     // if we have a new image, or the image height has changed, reqest an explicit height
     if (this.state.imageEntry && this.state.imageEntry.height
         && (!prevState.imageEntry || prevState.imageEntry.height !== this.state.imageEntry.height)) {
-      this.props.onRequestRowHeight(this.state.imageEntry.height);
+      this.props.onRequestRowHeight(this.props.model.id, this.state.imageEntry.height);
     }
   }
 

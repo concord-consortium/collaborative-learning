@@ -122,7 +122,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     this.setState({ tileAcceptDrop: tileId });
   }
 
-  private handleRequestRowHeight = (height: number) => {
+  private handleRequestRowHeight = (tileId: string, height: number) => {
     this.props.model.setRowHeight(height);
   }
 
