@@ -6,6 +6,7 @@ import { defaultImageContent } from "../tools/image/image-content";
 import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTileIdsInTableSnapshot
         } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
+import { defaultPlaceholderContent } from "../tools/placeholder/placeholder-content";
 import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
@@ -233,6 +234,10 @@ export const DocumentContentModel = types
     }
   }))
   .actions((self) => ({
+    addPlaceholderTile() {
+      const content = defaultPlaceholderContent();
+      return self.addTileInNewRow(content);
+    },
     addGeometryTile(addSidecarNotes?: boolean) {
       const result = self.addTileInNewRow(defaultGeometryContent(),
                                           { rowHeight: kGeometryDefaultHeight });
@@ -411,6 +416,9 @@ export const DocumentContentModel = types
           break;
         case "drawing":
           tileInfo = self.addDrawingTile();
+          break;
+        case "placeholder":
+          tileInfo = self.addPlaceholderTile();
           break;
       }
 
