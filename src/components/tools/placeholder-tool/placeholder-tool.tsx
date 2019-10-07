@@ -2,7 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { SectionHeader } from "../section-header";
+import { SectionType } from "../../../models/curriculum/section";
 
 import "./placeholder-tool.sass";
 
@@ -21,11 +21,6 @@ export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> 
     const classes = `placeholder-tool`;
     return (
       <div>
-        <SectionHeader
-          title="Section Header Title"
-          abbreviation="SH"
-        />
-
         <div className={classes}>
           <div>
             Create or drag files here
