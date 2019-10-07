@@ -1,5 +1,6 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
+import CSS from "csstype";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
@@ -118,11 +119,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
-    const imageDisplayStyle = {
-      backgroundImage: "url(" + imageToUseForDisplay + ")",
-      width: imageWidth + "px",
-      height: imageHeight + "px"
+    const imageDisplayStyle: CSS.Properties = {
+      backgroundImage: "url(" + imageToUseForDisplay + ")"
     };
+    if (!imageEntry) {
+      imageDisplayStyle.width = defaultImagePlaceholderSize.width + "px";
+      imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
+    }
     return (
       <div className={divClasses}
         onMouseDown={this.handleMouseDown}
