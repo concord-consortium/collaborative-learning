@@ -312,6 +312,9 @@ export const DocumentContentModel = types
       self.tileMap.delete(tileId);
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
+      if (newRowIndex === 0) {
+        return;
+      }
       const rowId = self.rowOrder[rowIndex];
       self.rowOrder.splice(rowIndex, 1);
       self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
@@ -322,7 +325,7 @@ export const DocumentContentModel = types
       const dstRowId = self.rowOrder[rowIndex];
       const dstRow = dstRowId && self.rowMap.get(dstRowId);
       const tile = self.getTile(tileId);
-      if (srcRow && dstRow && tile) {
+      if (srcRow && dstRow && tile && !dstRow.isSectionHeader) {
         if (srcRow === dstRow) {
           // move a tile within a row
           const srcIndex = srcRow.indexOfTile(tileId);

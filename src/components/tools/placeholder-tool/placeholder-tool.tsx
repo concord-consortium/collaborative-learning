@@ -18,9 +18,7 @@ export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> 
     return (
       <div>
         <div className={classes}>
-          <div>
-            {this.renderPlaceholderText()}
-          </div>
+          {this.renderPlaceholderText()}
         </div>
       </div>
     );
