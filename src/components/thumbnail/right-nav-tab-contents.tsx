@@ -46,12 +46,6 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
       );
     };
 
-    const renderGroupWorkspacesSection = () => {
-      const allGroups = groups.groupForUser(user.id);
-      // tslint:disable-next-line
-      console.log(`Hello MOM!: ${JSON.stringify(groups, null, " ")}`);
-    };
-
     if (!myTabSpec) return null;
     return (
       <div className={this.props.className}>
@@ -71,11 +65,9 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   }
 
   private renderFourUpThumbnail(group: any) {
-
-    function boohoo(grp: any) {
-      // tslint:disable-next-line
-      console.log(`got a click on: ${grp.id}`);
-    }
+    const { ui } = this.stores;
+    const { setTeacherWorkgroup } = ui;
+    const showGroupFourUp = () => setTeacherWorkgroup(group.id);
 
     const styles: React.CSSProperties = {
       width: "100px",
@@ -86,24 +78,13 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
 
     return (
       <div>
-        <div onClick={boohoo.bind(this, group)}>
+        <div onClick={showGroupFourUp}>
           {group.id}
           <div style={styles}>
             <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
           </div>
         </div>
       </div>
-
-      // <div className="teacher-group">
-      //   <div className="group-label">
-      //     Group {String(group.id)}
-      //   </div>
-      //   <div className="teacher-group-canvas-container">
-      //     <div className="teacher-group-canvas">
-      //       <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
-      //     </div>
-      //   </div>
-      // </div>
     );
   }
 

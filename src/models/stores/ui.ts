@@ -33,6 +33,7 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
+    teacherGroupId: types.maybe(types.string)
   })
   .views((self) => ({
     get allContracted() {
@@ -94,12 +95,18 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
+    const setTeacherWorkgroup = (id: string) => {
+      // TODO: Log these events ... ?
+      self.teacherGroupId = id;
+    };
+
     return {
       contractAll,
       alert,
       prompt,
       confirm,
       resolveDialog,
+      setTeacherWorkgroup,
 
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);

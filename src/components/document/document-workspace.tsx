@@ -11,6 +11,7 @@ import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument,
 import { DocumentContentModel } from "../../models/document/document-content";
 import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
+import { FourUpComponent } from "../four-up";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.sass";
@@ -113,7 +114,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private renderDocuments(isGhostUser: boolean) {
     const {appConfig, documents, ui} = this.stores;
-    const {problemWorkspace} = ui;
+    const { problemWorkspace, teacherGroupId} = ui;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = problemWorkspace.comparisonDocumentKey
                                && documents.getDocument(problemWorkspace.comparisonDocumentKey);
@@ -123,22 +124,36 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       return this.renderDocument("single-workspace", "primary");
     }
 
+    const TeacherFourUp = (props: any) => {
+      return <FourUpComponent groupId={teacherGroupId} isGhostUser={true} toggleable={true} />;
+    };
+
+    const Document = (props: any) => {
+      return (
+        <DocumentComponent
+          document={primaryDocument}
+          workspace={problemWorkspace}
+          onNewDocument={this.handleNewDocument}
+          onCopyDocument={this.handleCopyDocument}
+          onDeleteDocument={this.handleDeleteDocument}
+          toolbar={toolbar}
+          side="primary"
+          isGhostUser={isGhostUser}
+        />
+      );
+    };
+
+    const primaryDoc = teacherGroupId
+      ? <TeacherFourUp/>
+      : <Document />;
+
     if (problemWorkspace.comparisonVisible) {
       return (
         <div onClick={this.handleClick}>
           {this.renderDocument(
             "left-workspace",
             "primary",
-            <DocumentComponent
-              document={primaryDocument}
-              workspace={problemWorkspace}
-              onNewDocument={this.handleNewDocument}
-              onCopyDocument={this.handleCopyDocument}
-              onDeleteDocument={this.handleDeleteDocument}
-              toolbar={toolbar}
-              side="primary"
-              isGhostUser={isGhostUser}
-            />
+            primaryDoc
           )}
           {this.renderDocument("right-workspace", "comparison", comparisonDocument
               ? <DocumentComponent
@@ -156,6 +171,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       return this.renderDocument(
               "single-workspace",
               "primary",
+              primaryDoc
               <DocumentComponent
                 document={primaryDocument}
                 workspace={problemWorkspace}
