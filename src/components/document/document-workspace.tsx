@@ -124,53 +124,73 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       return this.renderDocument("single-workspace", "primary");
     }
 
-    const TeacherFourUp = (props: any) => {
-      return <FourUpComponent groupId={teacherGroupId} isGhostUser={true} toggleable={true} />;
-    };
+    const TeacherFourUp = <FourUpComponent groupId={teacherGroupId} isGhostUser={true} toggleable={true} />;
 
-    const Document = (props: any) => {
-      return (
-        <DocumentComponent
-          document={primaryDocument}
-          workspace={problemWorkspace}
-          onNewDocument={this.handleNewDocument}
-          onCopyDocument={this.handleCopyDocument}
-          onDeleteDocument={this.handleDeleteDocument}
-          toolbar={toolbar}
-          side="primary"
-          isGhostUser={isGhostUser}
-        />
-      );
-    };
+    const Primary = (
+      <DocumentComponent
+        document={primaryDocument}
+        workspace={problemWorkspace}
+        onNewDocument={this.handleNewDocument}
+        onCopyDocument={this.handleCopyDocument}
+        onDeleteDocument={this.handleDeleteDocument}
+        toolbar={toolbar}
+        side="primary"
+        isGhostUser={isGhostUser}
+      />
+    );
 
-    const primaryDoc = teacherGroupId
-      ? <TeacherFourUp/>
-      : <Document />;
+    const Comparison = comparisonDocument
+      ? (
+          <DocumentComponent
+            document={comparisonDocument}
+            workspace={problemWorkspace}
+            readOnly={true}
+            side="comparison"
+            isGhostUser={isGhostUser}
+          />
+        )
+      : this.renderComparisonPlaceholder();
 
-    if (problemWorkspace.comparisonVisible) {
-      return (
-        <div onClick={this.handleClick}>
-          {this.renderDocument(
-            "left-workspace",
-            "primary",
-            primaryDoc
-          )}
-          {this.renderDocument("right-workspace", "comparison", comparisonDocument
-              ? <DocumentComponent
-                  document={comparisonDocument}
-                  workspace={problemWorkspace}
-                  readOnly={true}
-                  side="comparison"
-                  isGhostUser={isGhostUser}
-                />
-              : this.renderComparisonPlaceholder())}
-        </div>
-      );
-    }
-    else {
-      return this.renderDocument(
-              "single-workspace",
+    if (!teacherGroupId) {
+      if (problemWorkspace.comparisonVisible) {
+        return (
+          <div onClick={this.handleClick}>
+            { this.renderDocument(
+              "left-workspace",
               "primary",
+              Primary
+            )}
+            { this.renderDocument("right-workspace", "comparison", Comparison) }
+          </div>
+        );
+      }
+      else {
+        return this.renderDocument(
+                "single-workspace",
+                "primary",
+                Primary
+              );
+      }
+    } else {
+      if (problemWorkspace.comparisonVisible) {
+        return (
+          <div onClick={this.handleClick}>
+            { this.renderDocument(
+              "left-workspace",
+              "primary",
+              Primary
+            )}
+            { this.renderDocument("right-workspace", "comparison", TeacherFourUp) }
+          </div>
+        );
+      }
+      else {
+        return this.renderDocument(
+                "single-workspace",
+                "primary",
+                TeacherFourUp
+              );
+      }
               primaryDoc
               <DocumentComponent
                 document={primaryDocument}
@@ -186,6 +206,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
               />
             );
     }
+
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
