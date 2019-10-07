@@ -141,11 +141,6 @@
       "iconId": "icon-select-tool"
     },
     {
-      "name": "placeholder",
-      "title": "Placeholder",
-      "iconId": "icon-settings"
-    },
-    {
       "name": "text",
       "title": "Text",
       "iconId": "icon-text-tool",

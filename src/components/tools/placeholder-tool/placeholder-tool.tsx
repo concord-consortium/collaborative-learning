@@ -2,7 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { SectionType } from "../../../models/curriculum/section";
+import { PlaceholderContentModelType } from "../../../models/tools/placeholder/placeholder-content";
 
 import "./placeholder-tool.sass";
 
@@ -13,20 +13,29 @@ interface IProps {
 @inject("stores")
 @observer
 export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> {
-  // WTD leave this in for now so we can delete test tiles, but eventually
-  // we might want to make it so the tile cannot be selected and deleted
-  public static tileHandlesSelection = true;
-
   public render() {
     const classes = `placeholder-tool`;
     return (
       <div>
         <div className={classes}>
           <div>
-            Create or drag files here
+            {this.renderPlaceholderText()}
           </div>
         </div>
+      </div>
+    );
+  }
 
+  private renderPlaceholderText = () => {
+    const placeholderContent = this.props.model.content as PlaceholderContentModelType;
+    const placeholderLines = placeholderContent.prompt.split("\n");
+    return (
+      <div>
+        {placeholderLines.map((line, index) => {
+          return (
+            <div key={index}>{line}</div>
+          );
+        })}
       </div>
     );
   }
