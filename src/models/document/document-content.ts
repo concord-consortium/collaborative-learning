@@ -300,7 +300,7 @@ export const DocumentContentModel = types
           row.removeTileFromRow(tileId);
         }
         // track empty rows
-        if (row.tiles.length === 0) {
+        if (row.tiles.length === 0 && !row.isSectionHeader) {
           rowsToDelete.push(row);
         }
       });
