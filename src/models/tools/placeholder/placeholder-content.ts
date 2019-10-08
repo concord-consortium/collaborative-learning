@@ -12,7 +12,7 @@ export function defaultPlaceholderContent() {
 export const PlaceholderContentModel = types
   .model("PlaceholderContent", {
     type: types.optional(types.literal(kPlaceholderToolID), kPlaceholderToolID),
-    prompt: types.string
+    prompt: ""
   })
   .actions(self => ({
     setPrompt(prompt: string) {
