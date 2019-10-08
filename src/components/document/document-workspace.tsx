@@ -5,10 +5,11 @@ import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { SectionType, getSectionAbbrev } from "../../models/curriculum/section";
+import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
-import { AudienceModelType, ClassAudienceModel, TeacherSupportSectionTarget } from "../../models/stores/supports";
+import { DocumentContentModel } from "../../models/document/document-content";
+import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
@@ -72,12 +73,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private getDefaultDocumentContent() {
+    const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
+            problem } = this.stores;
+    if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
+      const tiles: any = [];
+      problem.sections.forEach(section => {
+        tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
+        const placeholder = getSectionPlaceholder(section.type);
+        tiles.push({ content: { type: "Placeholder", prompt: placeholder }});
+      });
+      return DocumentContentModel.create({ tiles } as any);
+    }
+    else if (defaultDocumentContent) {
+      return defaultDocumentContent;
+    }
+  }
+
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultDocumentType, defaultDocumentContent,
-                         defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultDocumentType, defaultLearningLogDocument,
+                        defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+      const documentContent = this.getDefaultDocumentContent();
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }
@@ -320,7 +339,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     return match && match[1] ? match[1] : title;
   }
 
-  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: TeacherSupportSectionTarget) {
+  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: SectionTarget) {
     return document.type === ProblemDocument
             ? this.getProblemBaseTitle(this.stores.problem.title)
             : document.title;
@@ -329,7 +348,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handlePublishSupport = async (document: DocumentModelType) => {
     const { db, ui } = this.stores;
     const audience: AudienceModelType = ClassAudienceModel.create();
-    const sectionTarget: TeacherSupportSectionTarget = SectionType.all;
+    const sectionTarget: SectionTarget = kAllSectionType;
     const caption = this.getSupportDocumentBaseCaption(document, sectionTarget) || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, audience, sectionTarget, caption)

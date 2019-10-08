@@ -42,7 +42,7 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
       };
     };
 
-    const progressItems = sections.map(s => makeProgressItem(s.abbrev));
+    const progressItems = sections.map(s => makeProgressItem(s.initials));
     return(
       <div className="sixpack-right-controls">
         <div className="top-controls">
