@@ -128,10 +128,12 @@ context('Test Canvas', function(){
             //TODO: add verification that document is saved and sorted to the correct section in right nav 
             //(ie personal docs=>my work:workspaces, investigations=>my-work:investigation, learning log=>my work:learning log)
             describe('verify that canvas is saved from various locations', function(){
-                it('will restore from My Work tab', function() {
-                    let canvas1='New Doc Edit';
-                    let canvas2="Drawing Wumps";
-
+                let canvas1='New Doc Edit';
+                let canvas2="Drawing Wumps";
+                before(function(){
+                    canvas.createNewDocument(canvas1);
+                });
+                it('will restore from My Work tab', function() {}
                     //restore canvas from personal workspace section
                     rightNav.openRightNavTab('my-work');
                     rightNav.openSection('my-work','workspaces');
@@ -152,37 +154,9 @@ context('Test Canvas', function(){
                     graphToolTile.getGraphTile().should('be.visible')
                 });
             });
-
-            describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
-                //TODO need to verify expected behavior when switching from canvas to canvas whether 4-up view should stay up.
-                // TODO Replace save and restore of documents
-                // it('verify canvas stays in 4up view when changing canvases', ()=>{
-                //     // leftNav.openToWorkspace('Initial Challenge');
-                //     // canvas.getCanvasTitle().should('contain','Initial Challenge');
-                //     canvas.openFourUpView();
-                //     canvas.getFourUpView().should('be.visible');
-                //     leftNav.openToWorkspace('What if...?');
-                //     canvas.getCanvasTitle().should('contain','What if');
-                //     canvas.getFourUpView().should('be.visible');
-                //     rightNav.openMyWorkTab();
-                //     rightNav.openMyWorkAreaCanvasItem("Initial Challenge");
-                //     canvas.getCanvasTitle().should('contain','Initial Challenge');
-
-                //     canvas.openOneUpViewFromFourUp(); //clean up
-                // });
-            });
         });
 
         context('test footer elements', function(){
-            describe('Test supports area', function(){
-                it.skip('verify supports comes up correctly', function(){
-                    canvas.getSupportList().each(($support, index, $list)=>{
-                        let label=$support.text();
-                        cy.wrap($support).click();
-                        canvas.getSupportTitle().should('contain', label);
-                    });
-                });
-            });
             describe('Test the 2-up view', function(){
                 it('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
@@ -214,7 +188,7 @@ context('Test Canvas', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.getFourUpViewToggle().should('be.visible');
                 });
-                // TODO: Learning logs has changed with the new feature changes
+                // TODO: Move this to right side nav test
                 it.skip('verify learning log canvas side by side in right side 2 up view', function() {
                     learningLog.createLearningLog('pool'); //setup
                     //open 2up view
