@@ -4,6 +4,7 @@ import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
 import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { SectionHeader } from "../tools/section-header";
 import "./tile-row.sass";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
@@ -70,12 +71,16 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { model } = this.props;
+    const { isSectionHeader, sectionId } = model;
     const height = this.props.height || model.height;
     const style = height ? { height } : undefined;
     return (
       <div className={`tile-row`} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
-        {this.renderTiles(height)}
+        { isSectionHeader && sectionId
+          ? <SectionHeader type={sectionId}/>
+          : this.renderTiles(height)
+        }
         {!this.props.readOnly && this.renderDragDropHandles()}
       </div>
     );

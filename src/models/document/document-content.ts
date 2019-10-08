@@ -6,6 +6,7 @@ import { defaultImageContent } from "../tools/image/image-content";
 import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTileIdsInTableSnapshot
         } from "../tools/table/table-content";
 import { defaultTextContent } from "../tools/text/text-content";
+import { defaultPlaceholderContent } from "../tools/placeholder/placeholder-content";
 import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
@@ -233,6 +234,10 @@ export const DocumentContentModel = types
     }
   }))
   .actions((self) => ({
+    addPlaceholderTile() {
+      const content = defaultPlaceholderContent();
+      return self.addTileInNewRow(content);
+    },
     addGeometryTile(addSidecarNotes?: boolean) {
       const result = self.addTileInNewRow(defaultGeometryContent(),
                                           { rowHeight: kGeometryDefaultHeight });
@@ -295,7 +300,7 @@ export const DocumentContentModel = types
           row.removeTileFromRow(tileId);
         }
         // track empty rows
-        if (row.tiles.length === 0) {
+        if (row.isEmpty) {
           rowsToDelete.push(row);
         }
       });
@@ -307,6 +312,13 @@ export const DocumentContentModel = types
       self.tileMap.delete(tileId);
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
+      if (newRowIndex === 0) {
+        const dstRowId = self.rowOrder[0];
+        const dstRow = dstRowId && self.rowMap.get(dstRowId);
+        if (dstRow && dstRow.isSectionHeader) {
+          return;
+        }
+      }
       const rowId = self.rowOrder[rowIndex];
       self.rowOrder.splice(rowIndex, 1);
       self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
@@ -317,7 +329,7 @@ export const DocumentContentModel = types
       const dstRowId = self.rowOrder[rowIndex];
       const dstRow = dstRowId && self.rowMap.get(dstRowId);
       const tile = self.getTile(tileId);
-      if (srcRow && dstRow && tile) {
+      if (srcRow && dstRow && tile && !dstRow.isSectionHeader) {
         if (srcRow === dstRow) {
           // move a tile within a row
           const srcIndex = srcRow.indexOfTile(tileId);
@@ -411,6 +423,9 @@ export const DocumentContentModel = types
           break;
         case "drawing":
           tileInfo = self.addDrawingTile();
+          break;
+        case "placeholder":
+          tileInfo = self.addPlaceholderTile();
           break;
       }
 
