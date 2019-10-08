@@ -77,9 +77,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     return (
       <div className={`tile-row`} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
-        {isSectionHeader && sectionId ?
-          <SectionHeader type={sectionId}/>
-          : this.renderTiles(height)}
+        { isSectionHeader && sectionId
+          ? <SectionHeader type={sectionId}/>
+          : this.renderTiles(height)
+        }
         {!this.props.readOnly && this.renderDragDropHandles()}
       </div>
     );

@@ -1,5 +1,4 @@
 import * as React from "react";
-import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { PlaceholderContentModelType } from "../../../models/tools/placeholder/placeholder-content";
@@ -10,16 +9,11 @@ interface IProps {
   model: ToolTileModelType;
 }
 
-@inject("stores")
-@observer
 export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> {
   public render() {
-    const classes = `placeholder-tool`;
     return (
-      <div>
-        <div className={classes}>
-          {this.renderPlaceholderText()}
-        </div>
+      <div className="placeholder-tool">
+        {this.renderPlaceholderText()}
       </div>
     );
   }

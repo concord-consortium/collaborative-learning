@@ -313,7 +313,11 @@ export const DocumentContentModel = types
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
       if (newRowIndex === 0) {
-        return;
+        const dstRowId = self.rowOrder[0];
+        const dstRow = dstRowId && self.rowMap.get(dstRowId);
+        if (dstRow && dstRow.isSectionHeader) {
+          return;
+        }
       }
       const rowId = self.rowOrder[rowIndex];
       self.rowOrder.splice(rowIndex, 1);
