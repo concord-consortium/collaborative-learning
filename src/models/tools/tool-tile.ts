@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { kPlaceholderToolID } from "./placeholder/placeholder-content";
 import { findMetadata, ToolContentUnion, ToolContentUnionType } from "./tool-types";
 import * as uuid from "uuid/v4";
 
@@ -29,6 +30,9 @@ export const ToolTileModel = types
     },
     get isUserResizable() {
       return !!(self.content as any).isUserResizable;
+    },
+    get isPlaceholder() {
+      return self.content.type === kPlaceholderToolID;
     }
   }))
   .actions(self => ({

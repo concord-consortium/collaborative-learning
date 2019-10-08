@@ -14,7 +14,6 @@ describe("ToolTileModel", () => {
       if (toolID === kUnknownToolID) {
         content.originalType = "foo";
       }
-      content.url = "foo";
       let toolTile = ToolTileModel.create({
                       content: ToolContentModel.create(content)
                     });

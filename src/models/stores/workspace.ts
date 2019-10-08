@@ -81,7 +81,7 @@ export const WorkspaceModel = types
       },
 
       setPrimaryGhostSection(section: SectionModelType) {
-        self.primaryDocumentKey = createGhostSectionDocumentKey(section.id);
+        self.primaryDocumentKey = createGhostSectionDocumentKey(section.type);
       },
     };
   });

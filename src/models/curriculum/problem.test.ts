@@ -1,6 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
-import { SectionType, SectionModelType } from "./section";
+import { SectionModelType } from "./section";
 import { omitUndefined } from "../../utilities/test-utils";
 
 describe("problem model", () => {
@@ -27,10 +27,10 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
-          type: SectionType.introduction
+          type: "introduction"
         },
         {
-          type: SectionType.initialChallenge
+          type: "initialChallenge"
         }
       ]
     });
@@ -41,11 +41,11 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
-          type: SectionType.introduction,
+          type: "introduction",
           supports: []
         },
         {
-          type: SectionType.initialChallenge,
+          type: "initialChallenge",
           supports: []
         }
       ],
@@ -61,24 +61,24 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
-          type: SectionType.introduction
+          type: "introduction"
         },
         {
-          type: SectionType.initialChallenge
+          type: "initialChallenge"
         }
       ]
     });
     const firstSection = problem.getSectionByIndex(0) as SectionModelType;
-    expect(firstSection.type).toBe(SectionType.introduction);
+    expect(firstSection.type).toBe("introduction");
     const lastSection = problem.getSectionByIndex(1) as SectionModelType;
-    expect(lastSection.type).toBe(SectionType.initialChallenge);
+    expect(lastSection.type).toBe("initialChallenge");
 
     // < 0 returns first section
     const underflowSection = problem.getSectionByIndex(-1) as SectionModelType;
-    expect(underflowSection.type).toBe(SectionType.introduction);
+    expect(underflowSection.type).toBe("introduction");
     // > length return last section
     const overflowSection = problem.getSectionByIndex(10) as SectionModelType;
-    expect(overflowSection.type).toBe(SectionType.initialChallenge);
+    expect(overflowSection.type).toBe("initialChallenge");
   });
 
   it("can get sections by id", () => {
@@ -88,17 +88,17 @@ describe("problem model", () => {
       subtitle: "sub",
       sections: [
         {
-          type: SectionType.introduction
+          type: "introduction"
         },
         {
-          type: SectionType.initialChallenge
+          type: "initialChallenge"
         }
       ]
     });
-    const firstSection = problem.getSectionById(SectionType.introduction) as SectionModelType;
-    expect(firstSection.type).toBe(SectionType.introduction);
-    const lastSection = problem.getSectionById(SectionType.initialChallenge) as SectionModelType;
-    expect(lastSection.type).toBe(SectionType.initialChallenge);
+    const firstSection = problem.getSectionById("introduction") as SectionModelType;
+    expect(firstSection.type).toBe("introduction");
+    const lastSection = problem.getSectionById("initialChallenge") as SectionModelType;
+    expect(lastSection.type).toBe("initialChallenge");
 
   });
 });

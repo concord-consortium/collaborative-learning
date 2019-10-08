@@ -7,12 +7,14 @@ import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
+import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
 import TableToolComponent from "./table-tool/table-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
+import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
@@ -76,6 +78,7 @@ interface IProps {
 }
 
 const kToolComponentMap: any = {
+        [kPlaceholderToolID]: PlaceholderToolComponent,
         [kDrawingToolID]: DrawingToolComponent,
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,

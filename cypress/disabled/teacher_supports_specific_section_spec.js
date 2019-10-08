@@ -2,7 +2,6 @@ import Header from '../../support/elements/Header';
 import RightNav from '../../support/elements/RightNav';
 import LeftNav from '../../support/elements/LeftNav';
 import Canvas from '../../support/elements/Canvas';
-import Workspace from '../../support/elements/Workspace';
 import TeacherDashboard from '../../support/elements/TeacherDashboard';
 
 let qaClass = 10,
@@ -18,7 +17,6 @@ let header = new Header,
     rightNav = new RightNav,
     leftNav = new LeftNav,
     canvas = new Canvas,
-    workspace = new Workspace,
     teacherDashboard = new TeacherDashboard;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;

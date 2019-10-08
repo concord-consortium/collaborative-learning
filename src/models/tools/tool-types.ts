@@ -2,6 +2,8 @@ import { IAnyType, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { kGeometryToolID, GeometryContentModel, GeometryContentModelType,
           GeometryMetadataModel, GeometryMetadataModelType } from "./geometry/geometry-content";
 import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
+import { kPlaceholderToolID, PlaceholderContentModel, PlaceholderContentModelType
+      } from "./placeholder/placeholder-content";
 import { kTableToolID, TableContentModel, TableContentModelType,
           TableMetadataModel, TableMetadataModelType } from "./table/table-content";
 import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
@@ -12,6 +14,7 @@ import { DrawingContentModelType, DrawingContentModel, kDrawingToolID,
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",
                               [
+                                kPlaceholderToolID,
                                 kGeometryToolID,
                                 kImageToolID,
                                 kTableToolID,
@@ -21,6 +24,7 @@ export const ToolTypeEnum = types.enumeration(
                               ]);
 export const ToolContentUnion = types.union(
                                   { dispatcher: toolFactory },
+                                  PlaceholderContentModel,
                                   GeometryContentModel,
                                   ImageContentModel,
                                   TableContentModel,
@@ -28,7 +32,8 @@ export const ToolContentUnion = types.union(
                                   DrawingContentModel,
                                   UnknownContentModel);
 
-export type ToolContentUnionType = GeometryContentModelType |
+export type ToolContentUnionType = PlaceholderContentModelType |
+                                    GeometryContentModelType |
                                     ImageContentModelType |
                                     TableContentModelType |
                                     TextContentModelType |
@@ -62,6 +67,7 @@ interface IPrivate {
 
 export const _private: IPrivate = {
   toolMap: {
+    [kPlaceholderToolID]: PlaceholderContentModel,
     [kGeometryToolID]: GeometryContentModel,
     [kImageToolID]: ImageContentModel,
     [kTableToolID]: TableContentModel,
