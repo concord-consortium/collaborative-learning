@@ -3,14 +3,12 @@ import Canvas from '../../../support/elements/common/Canvas'
 import ClueCanvas from '../../../support/elements/clue/cCanvas'
 import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
 import RightNav from '../../../support/elements/common/RightNav'
-import LearningLog from '../../../support/elements/clue/LearningLog';
 import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const rightNav = new RightNav;
-const learningLog = new LearningLog;
 const graphToolTile = new GraphToolTile;
 
 context('Test graph tool functionalities', function(){

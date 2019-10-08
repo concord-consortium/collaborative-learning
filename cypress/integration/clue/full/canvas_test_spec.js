@@ -2,7 +2,6 @@ import LeftNav from '../../../support/elements/clue/LeftNav'
 import Canvas from '../../../support/elements/common/Canvas'
 import ClueCanvas from '../../../support/elements/clue/cCanvas'
 import RightNav from '../../../support/elements/common/RightNav'
-import LearningLog from '../../../support/elements/clue/LearningLog';
 import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
 import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
 import DrawToolTile from '../../../support/elements/clue/DrawToolTile'
@@ -13,7 +12,6 @@ let leftNav = new LeftNav;
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
 let rightNav = new RightNav;
-let learningLog = new LearningLog;
 let graphToolTile = new GraphToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
@@ -114,9 +112,11 @@ context('Test Canvas', function(){
                 textToolTile.getTextTile().first().scrollIntoView();
             });
             it('verifies scrolling in 4up view', function(){
-                 clueCanvas.openFourUpView();
-                 canvas.scrollToBottom(clueCanvas.getNorthWestCanvas());
+                clueCanvas.openFourUpView();
+                // canvas.scrollToBottom(clueCanvas.getNorthWestCanvas());
+                tableToolTile.getTableTile().scrollIntoView().click();
                 tableToolTile.getTableTile().last().should('be.visible');
+                textToolTile.getTextTile().first().scrollIntoView();
                 clueCanvas.getSouthWestCanvas().should('be.visible');
             });
             after(()=>{
@@ -125,54 +125,32 @@ context('Test Canvas', function(){
         });
 
         context('save and restore of tool tiles', function(){
-            describe('verify that tool tiles is saved from various locations', function(){
-                // TODO: display:none issue
-                it.skip('will restore from My Work tab', function() {
-                    //TODO need to figure out why the page object commands do not work for opening Introduction canvas
-                    let canvas1='Initial Challenge';
-                    let canvas2='Introduction';
-                    // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
-                    rightNav.openMyWorkTab();
-                    rightNav.openMyWorkAreaCanvasItem(canvas1);
-                    // rightNav.closeMyWorkTab();
-                    rightNav.openMyWorkTab();
-                    rightNav.openMyWorkAreaCanvasItem(canvas2);
+            //TODO: add verification that document is saved and sorted to the correct section in right nav 
+            //(ie personal docs=>my work:workspaces, investigations=>my-work:investigation, learning log=>my work:learning log)
+            describe('verify that canvas is saved from various locations', function(){
+                it('will restore from My Work tab', function() {
+                    let canvas1='New Doc Edit';
+                    let canvas2="Drawing Wumps";
 
-                    textToolTile.getTextTile().should('exist');
-                    graphToolTile.getGraphTile().first().should('exist');
-                    drawToolTile.getDrawTile().should('exist');
-                    imageToolTile.getImageTile().should('exist');
-                    tableToolTile.getTableTile().should('exist');
+                    //restore canvas from personal workspace section
+                    rightNav.openRightNavTab('my-work');
+                    rightNav.openSection('my-work','workspaces');
+                    rightNav.openCanvasItem('my-work','workspaces', canvas1);
+                    canvas.getPersonalDocTitle().should('contain', canvas1)
+                    graphToolTile.getGraphTile().should('be.visible');
+                    textToolTile.getTextTile().should('be.visible');
+                    tableToolTile.getTableTile().should('not.be.visible');
 
-                    //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
-                    // cy.get('#leftNavTab1').click();
-                    // cy.get('#leftNavContainer1 > .left-nav-panel > .section > .canvas > .document-content > .buttons > button').click();
-                    // cy.get('.single-workspace > .document > .titlebar > .title').should('contain','Initial');
-                    // cy.get('#rightNavTab-my-work').click({force:true});
-                    // cy.get('.list > .list-item[title*="Initial"]').click();
-                    // cy.get('.single-workspace > .document > .titlebar > .title').should('contain', 'Initial');
-                    // cy.get('#rightNavTab-my-work').click({force:true});
-                    // cy.get('.list > .list-item[title*="Introduction"]').click();
-                    // cy.get('.single-workspace > .document > .titlebar > .title').should('contain', 'Introduction');
-
+                    //restore canvas from investigation section
+                    rightNav.openRightNavTab('my-work');
+                    rightNav.openCanvasItem('my-work','investigations',canvas2);
+                    clueCanvas.getInvestigationCanvasTitle().should('contain', canvas2)
+                    //verify canvas is still in 4up view
+                    clueCanvas.getFourUpView().should('be.visible')
                     //verify text element with Hello World in showing
-                    // canvas.getTextTile().first().should('contain', 'Hello World');
+                    textToolTile.getTextTile().first().should('contain', 'Hello World');
+                    graphToolTile.getGraphTile().should('be.visible')
                 });
-            });
-
-            describe('verify that if user opens same canvas from on left-nav tab, saved canvas opens', function() {
-                // TODO Replace save and restore of documents
-                // it('will restore from left nav', function() {
-                //     leftNav.openToWorkspace('What if...?');
-                //     canvas.getCanvasTitle().should('contain', 'What if');
-                //     leftNav.openToWorkspace('Introduction');
-                //     canvas.getCanvasTitle().should('contain','Introduction');
-                //     textToolTile.getTextTile().should('exist');
-                //     graphToolTile.getGraphTile().should('exist');
-                //     drawToolTile.getDrawTile().should('exist');
-                //     imageToolTile.getImageTile().should('exist');
-                //     tableToolTile.getTableTile().should('exist');
-                // });
             });
 
             describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
