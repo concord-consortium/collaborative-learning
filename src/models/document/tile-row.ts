@@ -29,8 +29,11 @@ export const TileRowModel = types
     tiles: types.array(TileLayoutModel)
   })
   .views(self => ({
+    get isEmpty() {
+      return (self.tiles.length === 0) && !self.isSectionHeader;
+    },
     get isUserResizable() {
-      return self.tiles.some(tileRef => tileRef.isUserResizable);
+      return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
     get tileIds() {
       return self.tiles.map(tile => tile.tileId).join(", ");

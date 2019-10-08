@@ -5,7 +5,7 @@ export const kPlaceholderToolID = "Placeholder";
 export function defaultPlaceholderContent() {
   return PlaceholderContentModel.create({
     type: kPlaceholderToolID,
-    prompt: "Create or drag files here"
+    prompt: "Create or drag tiles here"
   });
 }
 
