@@ -63,8 +63,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           onDrop={this.handleImageDrop}
         />
         {this.renderDocuments(isGhostUser)}
-        <LeftNavComponent isGhostUser={isGhostUser} />
-        <RightNavComponent tabs={tabsToDisplay} isGhostUser={isGhostUser} />
         <LeftNavComponent
           isGhostUser={isGhostUser}
           onDragOver={this.handleDragOverWorkspace}
@@ -133,6 +131,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
+        onPublishSupport={this.handlePublishSupport}
+        onPublishDocument={this.handlePublishDocument}
         toolbar={toolbar}
         side="primary"
         isGhostUser={isGhostUser}
@@ -191,20 +191,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                 TeacherFourUp
               );
       }
-              primaryDoc
-              <DocumentComponent
-                document={primaryDocument}
-                workspace={problemWorkspace}
-                onNewDocument={this.handleNewDocument}
-                onCopyDocument={this.handleCopyDocument}
-                onDeleteDocument={this.handleDeleteDocument}
-                onPublishSupport={this.handlePublishSupport}
-                onPublishDocument={this.handlePublishDocument}
-                toolbar={toolbar}
-                side="primary"
-                isGhostUser={isGhostUser}
-              />
-            );
     }
 
   }
