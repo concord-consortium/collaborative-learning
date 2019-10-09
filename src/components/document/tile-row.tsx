@@ -107,13 +107,17 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   private renderDragDropHandles() {
     const { model: { isUserResizable }, dropHighlight } = this.props;
     const highlight = this.state.tileAcceptDrop ? undefined : dropHighlight;
+    const { isSectionHeader } = this.props.model;
+    if (isSectionHeader && highlight === "top") {
+      // WTD determine if 0th section, if so, disable drag highlight
+    }
     return [
       <div key="top-drop-feedback"
           className={`drop-feedback ${highlight === "top" ? "show top" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`drop-feedback ${highlight === "left" ? "show left" : ""}`} />,
+          className={`drop-feedback ${highlight === "left" && !isSectionHeader ? "show left" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`drop-feedback ${highlight === "right" ? "show right" : ""}`} />,
+          className={`drop-feedback ${highlight === "right" && !isSectionHeader ? "show right" : ""}`} />,
       <div key="bottom-drop-feedback"
           className={`drop-feedback ${highlight === "bottom" ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"

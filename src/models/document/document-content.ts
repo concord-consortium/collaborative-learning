@@ -164,6 +164,15 @@ export const DocumentContentModel = types
     };
   })
   .views(self => ({
+    getSectionIds() {
+      const sectionIds: any = [];
+      self.rowMap.forEach(row => {
+        if (row.isSectionHeader && row.sectionId) {
+          sectionIds.push(row.sectionId);
+        }
+      });
+      return sectionIds;
+    },
     getTilesInSection(sectionId: string) {
       const tiles: ToolTileModelType[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -173,6 +182,25 @@ export const DocumentContentModel = types
           .forEach(tile => tile && !tile.isPlaceholder && tiles.push(tile));
       });
       return tiles;
+    },
+    getPlaceholderInSection(sectionId: string) {
+      const tiles: ToolTileModelType[] = [];
+      const rows = self.getRowsInSection(sectionId);
+      rows.forEach(row => {
+        row.tiles
+          .map(tileLayout => self.tileMap.get(tileLayout.tileId))
+          .forEach(tile => tile && tile.isPlaceholder && tiles.push(tile));
+      });
+      return tiles;
+    },
+    getSectionHeaderRowIndex(sectionId: string) {
+      let rowIndex;
+      self.rowMap.forEach(row => {
+        if (row.isSectionHeader && row.sectionId && sectionId === row.sectionId) {
+          rowIndex = self.getRowIndex(row.id);
+        }
+      });
+      return rowIndex;
     },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());
@@ -288,29 +316,6 @@ export const DocumentContentModel = types
         self.addTileInNewRow(snapshot.content, newRowOptions);
       }
     },
-    deleteTile(tileId: string) {
-      Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
-
-      const rowsToDelete: TileRowModelType[] = [];
-      self.rowMap.forEach(row => {
-        // remove from row
-        if (row.hasTile(tileId)) {
-          const tile = self.getTile(tileId);
-          tile && tile.willRemoveFromDocument();
-          row.removeTileFromRow(tileId);
-        }
-        // track empty rows
-        if (row.isEmpty) {
-          rowsToDelete.push(row);
-        }
-      });
-      // remove empty rows
-      rowsToDelete.forEach(row => {
-        self.deleteRow(row.id);
-      });
-      // delete tile
-      self.tileMap.delete(tileId);
-    },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
       if (newRowIndex === 0) {
         const dstRowId = self.rowOrder[0];
@@ -377,95 +382,163 @@ export const DocumentContentModel = types
       }
     }
   }))
-  .actions((self) => ({
-    moveTile(tileId: string, rowInfo: IDropRowInfo) {
-      const srcRowId = self.findRowContainingTile(tileId);
-      if (!srcRowId) return;
-      const srcRowIndex = self.getRowIndex(srcRowId);
-      const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
-      if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-        self.moveTileToRow(tileId, rowDropIndex, 0);
-        return;
-      }
-      if ((rowDropIndex != null) && (rowDropLocation === "right")) {
-        self.moveTileToRow(tileId, rowDropIndex);
-        return;
-      }
-      if ((srcRowIndex >= 0)) {
-        // if only one tile in source row, move the entire row
-        if (self.numTilesInRow(srcRowId) === 1) {
-          if (rowInsertIndex !== srcRowIndex) {
-            self.moveRowToIndex(srcRowIndex, rowInsertIndex);
-          }
-        }
-        else {
-          self.moveTileToNewRow(tileId, rowInsertIndex);
-        }
-      }
-    }
-  }))
-  .actions((self) => ({
-    addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
-      const {addSidecarNotes, insertRowInfo} = options || {};
-      let tileInfo;
-      switch (tool) {
-        case "text":
-          tileInfo = self.addTextTile();
-          break;
-        case "table":
-          tileInfo = self.addTableTile();
-          break;
-        case "geometry":
-          tileInfo = self.addGeometryTile(addSidecarNotes);
-          break;
-        case "image":
-          tileInfo = self.addImageTile(options && options.imageUrl);
-          break;
-        case "drawing":
-          tileInfo = self.addDrawingTile();
-          break;
-        case "placeholder":
-          tileInfo = self.addPlaceholderTile();
-          break;
-      }
-
-      if (tileInfo && insertRowInfo) {
-        // Move newly-create tile(s) into requested row. If we have created more than one tile, e.g. the sidecar text
-        // for the graph tool, we need to insert the tiles one after the other. If we are inserting on the left, we
-        // have to reverse the order of insertion. If we are inserting into a new row, the first tile is inserted into a
-        // new row and then the sidecar tiles into that same row. This makes the logic rather verbose...
-        const { rowDropLocation } = insertRowInfo;
-
-        let tilesIdsToMove;
-        if (tileInfo.additionalTileIds) {
-          tilesIdsToMove = [tileInfo.tileId, ...tileInfo.additionalTileIds];
-          if (rowDropLocation && rowDropLocation === "left") {
-            tilesIdsToMove = tilesIdsToMove.reverse();
-          }
-        } else {
-          tilesIdsToMove = [tileInfo.tileId];
-        }
-
-        const moveSubsequentTilesRight = !rowDropLocation || rowDropLocation === "bottom" || rowDropLocation === "top";
-
-        tilesIdsToMove.forEach((id, i) => {
-          if (i > 0) {
-            if (moveSubsequentTilesRight) {
-              insertRowInfo.rowDropLocation = "right";
-              if (rowDropLocation === undefined) {
-                insertRowInfo.rowDropIndex = 0;
-              } else if (rowDropLocation === "bottom") {
-                insertRowInfo.rowDropIndex = (insertRowInfo.rowDropIndex || 0) + 1;
-              }
+  .actions(self => {
+    const actions = {
+      addSectionPlaceholderTiles() {
+        const sectionIds = self.getSectionIds();
+        sectionIds.forEach((id: any) => {
+          const sectionTiles = self.getTilesInSection(id);
+          const placeholderTiles = self.getPlaceholderInSection(id);
+          if (sectionTiles.length === 0 && placeholderTiles.length === 0) {
+            // we have 0 non-ph tiles and 0 ph tiles, add the ph tile
+            const sectionRow = self.getSectionHeaderRowIndex(id);
+            if (sectionRow !== undefined) {
+              const options: IDocumentContentAddTileOptions = {
+                insertRowInfo: {
+                  rowDropIndex: sectionRow,
+                  rowDropLocation: "bottom",
+                  rowInsertIndex: sectionRow + 1
+                }
+              };
+              actions.addTile("placeholder", options);
             }
           }
-          self.moveTile(id, insertRowInfo);
         });
-      }
+      },
+      removeSectionPlaceholderTiles() {
+        const sectionIds = self.getSectionIds();
+        sectionIds.forEach((id: any) => {
+          const sectionTiles = self.getTilesInSection(id);
+          const placeholderTiles = self.getPlaceholderInSection(id);
+          if (sectionTiles.length && placeholderTiles.length) {
+            // we have a non-ph tile and a ph tile, delete the ph tile
+            placeholderTiles.forEach(tile => {
+              actions.deleteTile(tile.id);
+            });
+          }
+        });
+      },
+      deleteTile(tileId: string) {
+        Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
 
-      return tileInfo;
-    }
-  }));
+        const rowsToDelete: TileRowModelType[] = [];
+        self.rowMap.forEach(row => {
+          // remove from row
+          if (row.hasTile(tileId)) {
+            const tile = self.getTile(tileId);
+            tile && tile.willRemoveFromDocument();
+            row.removeTileFromRow(tileId);
+          }
+          // track empty rows
+          if (row.isEmpty) {
+            rowsToDelete.push(row);
+          }
+        });
+        // remove empty rows
+        rowsToDelete.forEach(row => {
+          self.deleteRow(row.id);
+        });
+        // delete tile
+        self.tileMap.delete(tileId);
+        actions.addSectionPlaceholderTiles();
+      },
+      moveTile(tileId: string, rowInfo: IDropRowInfo) {
+        const srcRowId = self.findRowContainingTile(tileId);
+        if (!srcRowId) return;
+        const srcRowIndex = self.getRowIndex(srcRowId);
+        const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
+        if ((rowDropIndex != null) && (rowDropLocation === "left")) {
+          self.moveTileToRow(tileId, rowDropIndex, 0);
+          return;
+        }
+        if ((rowDropIndex != null) && (rowDropLocation === "right")) {
+          self.moveTileToRow(tileId, rowDropIndex);
+          return;
+        }
+        if ((srcRowIndex >= 0)) {
+          // if only one tile in source row, move the entire row
+          if (self.numTilesInRow(srcRowId) === 1) {
+            if (rowInsertIndex !== srcRowIndex) {
+              self.moveRowToIndex(srcRowIndex, rowInsertIndex);
+            }
+          }
+          else {
+            self.moveTileToNewRow(tileId, rowInsertIndex);
+          }
+        }
+        const tile = self.getTile(tileId);
+        if (tile && tile.content.type !== "Placeholder") {
+          actions.addSectionPlaceholderTiles();
+          actions.removeSectionPlaceholderTiles();
+        }
+      },
+      addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+        const {addSidecarNotes, insertRowInfo} = options || {};
+        let tileInfo;
+        switch (tool) {
+          case "text":
+            tileInfo = self.addTextTile();
+            break;
+          case "table":
+            tileInfo = self.addTableTile();
+            break;
+          case "geometry":
+            tileInfo = self.addGeometryTile(addSidecarNotes);
+            break;
+          case "image":
+            tileInfo = self.addImageTile(options && options.imageUrl);
+            break;
+          case "drawing":
+            tileInfo = self.addDrawingTile();
+            break;
+          case "placeholder":
+            tileInfo = self.addPlaceholderTile();
+            break;
+        }
+
+        if (tileInfo && insertRowInfo) {
+          // Move newly-create tile(s) into requested row. If we have created more than one tile, e.g. the sidecar text
+          // for the graph tool, we need to insert the tiles one after the other. If we are inserting on the left, we
+          // have to reverse the order of insertion. If we are inserting into a new row, the first tile is inserted
+          // into a new row and then the sidecar tiles into that same row. This makes the logic rather verbose...
+          const { rowDropLocation } = insertRowInfo;
+
+          let tilesIdsToMove;
+          if (tileInfo.additionalTileIds) {
+            tilesIdsToMove = [tileInfo.tileId, ...tileInfo.additionalTileIds];
+            if (rowDropLocation && rowDropLocation === "left") {
+              tilesIdsToMove = tilesIdsToMove.reverse();
+            }
+          } else {
+            tilesIdsToMove = [tileInfo.tileId];
+          }
+
+          const moveSubsequentTilesRight = !rowDropLocation
+                                           || rowDropLocation === "bottom"
+                                           || rowDropLocation === "top";
+
+          tilesIdsToMove.forEach((id, i) => {
+            if (i > 0) {
+              if (moveSubsequentTilesRight) {
+                insertRowInfo.rowDropLocation = "right";
+                if (rowDropLocation === undefined) {
+                  insertRowInfo.rowDropIndex = 0;
+                } else if (rowDropLocation === "bottom") {
+                  insertRowInfo.rowDropIndex = (insertRowInfo.rowDropIndex || 0) + 1;
+                }
+              }
+            }
+            actions.moveTile(id, insertRowInfo);
+          });
+        }
+        if (tool !== "placeholder") {
+          actions.removeSectionPlaceholderTiles();
+        }
+        return tileInfo;
+      }
+    };
+    return actions;
+  });
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {
