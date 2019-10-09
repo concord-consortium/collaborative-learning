@@ -3,7 +3,6 @@ import Canvas from '../../../support/elements/common/Canvas'
 import ClueCanvas from '../../../support/elements/clue/cCanvas'
 import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
 import RightNav from '../../../support/elements/common/RightNav'
-import LearningLog from '../../../support/elements/clue/LearningLog';
 import TableToolTile from '../../../support/elements/clue/TableToolTile'
 import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
 
@@ -11,7 +10,6 @@ const leftNav = new LeftNav;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const rightNav = new RightNav;
-const learningLog = new LearningLog;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const imageToolTile = new ImageToolTile;
@@ -40,7 +38,6 @@ function connectTableToGraph(){
 context('Tests for graph and table integration', function(){
     describe('connect table to graph before adding coordinates', function(){
         it('setup', function(){
-            leftNav.openToWorkspace('Extra Workspace');
             addTableAndGraph();
             connectTableToGraph();
         })
@@ -48,6 +45,7 @@ context('Tests for graph and table integration', function(){
           const xCoord = '9';
           const yCoord = '9';
             it('will add a blank row', function(){ 
+                tableToolTile.getTableTile().should('exist')
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
                 graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
@@ -55,24 +53,21 @@ context('Tests for graph and table integration', function(){
             it('will add a coordinate in x only column', function(){
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
-                tableToolTile.getTableCell().eq(2).type(xCoord);
+                tableToolTile.enterData(2,xCoord);
                 tableToolTile.getTableCell().eq(3).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p2').should('not.exist');
             })
             // TODO: p3, whether existing or not, continually breaks the tests
-            it.skip('will add a coordinate in y only column', function(){
+            it('will add a coordinate in y only column', function(){
                 tableToolTile.addNewRow();
                 tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
+                tableToolTile.enterData(5,yCoord)
                 tableToolTile.getTableCell().eq(5).type(yCoord);
-                tableToolTile.getTableCell().eq(4).type('0');
                 graphToolTile.getGraphPointLabel().contains('p3').should('not.exist');
             })
-            // TODO: This is currently not working due to the above test failing
-            it.skip('will update blank cells', function(){
-                tableToolTile.getTableCell().eq(0).type('0');
-                tableToolTile.getTableCell().eq(6).type(' '); // Unsure why, but this is necessary to store coordinate
-                tableToolTile.getTableCell().eq(1).type('0');
-                tableToolTile.getTableCell().eq(6).type(' ');
+            it('will update blank cells', function(){
+                tableToolTile.enterData(0,'0')
+                tableToolTile.enterData(1,'0')
                 graphToolTile.getGraphPointLabel().contains('p1').should('exist');
                 graphToolTile.getGraphPointCoordinates(0).should('contain', '(0, 0)' );
                 tableToolTile.getTableCell().eq(3).type('0');
@@ -82,41 +77,33 @@ context('Tests for graph and table integration', function(){
                 tableToolTile.getTableCell().eq(4).type('0');
                 tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p3').should('exist');
-                graphToolTile.getGraphPointCoordinates(2).should('contain', '(0, '+yCoord+')');
-            });
+                graphToolTile.getGraphPointCoordinates(2).should('contain', '(0, '+yCoord+')');            });
         });
         describe('test creating a polygon', function (){
-            // TODO: Unable to find the DOM elements
-            it.skip('will add both coordinates in the table', function(){
-                tableToolTile.getTableCell().eq(6).type('5');
-                tableToolTile.getTableCell().eq(7).type('0');
-                tableToolTile.getTableCell().eq(8).type(' ');//need to create the next row
-                tableToolTile.getTableCell().eq(7).type('5');//go back and update p4 to be the right coords.
-                tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
-
-                //verify p4 is on the table
+            it('will add both coordinates in the table', function(){
+                tableToolTile.addNewRow();
+                tableToolTile.enterData(6,'5')
+                tableToolTile.enterData(7,'5')
                 graphToolTile.getGraphPointLabel().contains('p4').should('exist');
                 graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
             })
-            // TODO: Unable to find element
-            it.skip('will create a polygon', function(){ //first point is created in previous it
+            it('will create a polygon', function(){ //first point is created in previous it
                 graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
                 graphToolTile.getGraphPolygon().should('exist')
             });
-            // TODO: Unable to find element
-            it.skip('will add angle to a table point', function(){
+            it('will add angle to a table point', function(){
                 graphToolTile.showAngle();
                 graphToolTile.getAngleAdornment().should('exist');
             });
             // TODO: Failing to find 8
-            it.skip('will move a point by changing coordinates on the table', function(){
+            it('will move a point by changing coordinates on the table', function(){
                 let new_x = '8';
                 tableToolTile.getTableCell().eq(6).type(new_x);
                 tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+new_x+', 5)' )
             });
             // TODO: Found 3 while expecting 4
-            it.skip('will delete a point in the table', function(){
+            it('will delete a point in the table', function(){
                 let  id='';
                 let point=2; //the 3rd point in the graph
                 tableToolTile.removeRows(2);
@@ -194,7 +181,7 @@ context('Tests for graph and table integration', function(){
         describe('test non-numeric entries in table', function(){
             it('will enter non-numeric number in the table', function(){
                 tableToolTile.getTableCell().eq(5).type('g{enter}');
-                tableToolTile.getTableCell().eq(5).should('be.empty')
+                tableToolTile.getTableCell().eq(5).should('contain',5)
             })
         });
         describe('Test disconnecting the table', function(){
@@ -214,95 +201,70 @@ context('Tests for graph and table integration', function(){
         });
     });
     describe('connect table to graph after adding coordinates in table', function(){
-        it('setup', function(){
+        before(()=>{
+            let title = 'table to graph'
+            canvas.canvas();
+            canvas.createNewDocument(title);
+            canvas.getPersonalDocTitle().should('contain', title)
             addTableAndGraph();
         })
-        it('will add coordinates in the table', function(){
-            tableToolTile.getTableCell().eq(0).type('5');
-            tableToolTile.getTableCell().eq(1).type('5');
-            tableToolTile.addNewRow();
-            tableToolTile.getTableCell().eq(2).type('0');
-            tableToolTile.getTableCell().eq(3).type('0');
-            tableToolTile.addNewRow();
-            tableToolTile.getTableCell().eq(4).type('9');
-            tableToolTile.getTableCell().eq(5).type('5');
-            tableToolTile.addNewRow();
-            tableToolTile.getTableCell().eq(6).type(' '); //type in space in the ghost row in lieu of {enter}
-            tableToolTile.getTableCell().eq(1).type('5');
-            tableToolTile.getTableCell().eq(6).type(' ');
-            tableToolTile.getTableCell().eq(3).type('0');
-            tableToolTile.getTableCell().eq(6).type(' ');
-            tableToolTile.getTableCell().eq(5).type('5');
-            tableToolTile.getTableCell().eq(6).type(' ');
-
-        })
-        it('will change the name of the axis in the table', function(){
-            tableToolTile.renameColumn('x', 'neptune');
-            tableToolTile.renameColumn('y', 'saturn');
-        });
-        // TODO: connectTableToGraph()'s trigger method is being called on two elements
-        it.skip('will connect table to graph', function(){
-            connectTableToGraph();
-        });
-        // TODO: None of them contain their respective elements
-        it.skip('verify table is labeled with point names', function(){
-            tableToolTile.getTableIndexColumnCell().eq(0).should('contain', 'p1');
-            tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
-            tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
-        })
-        // TODO: None of them contain their respective elements
-        it.skip('verify points are on the graph', function(){
-            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
-            // graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
-            graphToolTile.getGraphPointLabel().contains('p2').should('exist');
-            // graphToolTile.getGraphPointCoordinates().should('contain', '(0,f 0)' );
-            graphToolTile.getGraphPointLabel().contains('p3').should('exist');
-            // graphToolTile.getGraphPointCoordinates().should('contain', '(9, 5)' )
-        })
-        // TODO: Neptune and Saturn are on the graph but are not being found
-        it.skip('verify axes names are on the graph', function(){
-            graphToolTile.getGraphAxisLabelId('x')
-            .then((id)=>{
-                id='#'.concat(id);
-                cy.get(id).then(($el)=>{
-                    expect($el.text()).to.contain('neptune');                        
-                })
+        describe('Add coordinates to the table',()=>{
+            it('will add coordinates in the table', function(){
+                tableToolTile.addNewRow();
+                tableToolTile.enterData(0,'5');
+                tableToolTile.enterData(1,'5');
+                tableToolTile.addNewRow();
+                tableToolTile.enterData(2,'0');
+                tableToolTile.enterData(3,'0');
+                tableToolTile.addNewRow();
+                tableToolTile.enterData(4,'9');
+                tableToolTile.enterData(5,'5');
+                tableToolTile.addNewRow();
+    
+            })
+            it('will change the name of the axis in the table', function(){
+                tableToolTile.renameColumn('x', 'neptune');
+                tableToolTile.renameColumn('y', 'saturn');
             });
-            graphToolTile.getGraphAxisLabelId('y')
-            .then((id)=> {
-                id = '#'.concat(id);
-                cy.get(id).then(($el) => {
-                    expect($el.text()).to.contain('saturn');
+            it('will connect table to graph', function(){
+                connectTableToGraph();
+            });
+            it('verify table is labeled with point names', function(){
+                tableToolTile.getTableIndexColumnCell().eq(0).should('contain', 'p1');
+                tableToolTile.getTableIndexColumnCell().eq(1).should('contain', 'p2');
+                tableToolTile.getTableIndexColumnCell().eq(2).should('contain', 'p3');
+            })
+            // TODO: None of them contain their respective elements
+            it('verify points are on the graph', function(){
+                graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+                // graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
+                graphToolTile.getGraphPointLabel().contains('p2').should('exist');
+                // graphToolTile.getGraphPointCoordinates().should('contain', '(0,f 0)' );
+                graphToolTile.getGraphPointLabel().contains('p3').should('exist');
+                // graphToolTile.getGraphPointCoordinates().should('contain', '(9, 5)' )
+            })
+            it('verify axes names are on the graph', function(){
+                graphToolTile.getGraphAxisLabelId('x')
+                .then((id)=>{
+                    id='#'.concat(id);
+                    cy.get(id).then(($el)=>{
+                        expect($el.text()).to.contain('neptune');                        
+                    })
                 });
-            });
-        })
-    })
-});
-// TODO: Need to write.
-context.skip('Learning log', function(){
-    it('will create a learning log', function(){
-
-    });
-    it('will connect table to graph', function(){
-        // connectTableToGraph();
-    });
-    it('will create a polygon in the table', function(){ //first point is created in previous it
-
-    });
-    it('will publish learning log', function(){
-
-    });
-    it('will open Class Work canvas in 2up view', function(){
-
-    });
-    it('will close learning log, and restore', function(){
-
-    });
+                graphToolTile.getGraphAxisLabelId('y')
+                .then((id)=> {
+                    id = '#'.concat(id);
+                    cy.get(id).then(($el) => {
+                        expect($el.text()).to.contain('saturn');
+                    });
+                });
+            })
+        });
+    });        
 });
 // TODO: Need to write.
 context.skip('Save and restore keeps the connection between table and graph', function(){
     it('will restore a canvas with connected table and graph', function(){
-        // leftNav.openToWorkspace('Extra Workspace');
     });
     it('will add a point to the graph from the table', function(){
         //verify that point is added to the graph
