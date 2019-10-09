@@ -55,7 +55,7 @@
     "test:branch": "cypress open --env testEnv=branch",
     "test:branch:df": "cypress open --env testEnv=branch:df",
     "test:local": "cypress open --env testEnv=local",
-    "test:clue:local": "cypress run --env testEnv=local --config video=false,defaultCommandTimeout=8000 --spec 'cypress/integration/clue/**/*' 'cypress/integration/common/*'"
+    "test:branch:clue": "cypress run --env testEnv=branch --config video=false,defaultCommandTimeout=8000 --spec cypress/integration/clue/**/*, cypress/integration/common/*"
   },
   "repository": {
     "type": "git",

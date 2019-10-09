@@ -51,7 +51,7 @@ class ClueCanvas{
         return cy.get('.canvas-area .four-up .canvas-container.north-east');
     }
     getNorthWestCanvas(){
-        return cy.get(this.northWestCanvas())//.parent().parent().parent();
+        return cy.get(this.northWestCanvas()).parent().parent().parent();
     }
     getSouthEastCanvas(){
         return cy.get('.canvas-area .four-up .canvas-container.south-east');

@@ -36,6 +36,10 @@ class Canvas{
         return cy.get('[data-test=publish-icon]');
     }
 
+    getPersonalPublishIcon(){
+        return cy.get('[data-test=other-doc-publish-icon]');
+    }
+
     getEditTitleIcon(){
         return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]')
     }
@@ -48,10 +52,19 @@ class Canvas{
         return cy.get('[data-test=delete-icon]')
     }
 
-    createNewDocument(title){
+    createNewProblemDocument(title){
         this.getNewDocumentIcon().click()
             .then(()=>{
                 dialog.getDialogTitle().should('exist').contains('Create Problem Workspace');
+                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                dialog.getDialogOKButton().click();
+            })
+        cy.wait(3000)    
+    }
+    createNewExtraDocument(title){
+        this.getNewDocumentIcon().click()
+            .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
@@ -67,8 +80,13 @@ class Canvas{
             })
     }
 
-    copyDocument(){
-        this.getCopyIcon().click();
+    copyDocument(title){
+        this.getCopyIcon().click()
+            .then(function(){
+                dialog.getDialogTitle().should('exist').contains('Copy Problem Workspace');
+                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                dialog.getDialogOKButton().click(); 
+            })
     }
 
     deleteDocument(){
@@ -79,6 +97,15 @@ class Canvas{
     cy.wait(3000)    
     }
 
+    publishPersonalCanvas(){
+        this.getPersonalPublishIcon().click()
+            .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Published');
+                dialog.getDialogOKButton().click();
+                dialog.getDialogTitle().should('not.exist');
+                this.getPersonalPublishIcon().should('exist');
+            });
+    }
     publishCanvas(){
         this.getPublishIcon().click()
             .then(()=>{

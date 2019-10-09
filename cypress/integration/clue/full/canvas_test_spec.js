@@ -70,7 +70,7 @@ context('Test Canvas', function(){
             });
             it('verify new document button', function(){
                 let title = 'New Doc'
-                canvas.createNewDocument(title);
+                canvas.createNewProblemDocument(title);
                 canvas.getPersonalDocTitle().should('contain', title)
                 canvas.getEditTitleIcon().should('be.visible')
                 clueCanvas.getFourUpViewToggle().should('not.exist')

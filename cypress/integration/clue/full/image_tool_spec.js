@@ -9,7 +9,7 @@ const clueCanvas = new ClueCanvas;
 const imageToolTile = new ImageToolTile;
 const rightNav = new RightNav;
 const dialog = new Dialog
-const baseUrl = `${Cypress.config("baseUrl")}`;
+const baseUrl = (`${Cypress.config("baseUrl")}`).split('/branch/')[0];
 
 let userCanvas = 'Uploaded Images'
 context('Test image functionalities', function(){
@@ -28,22 +28,22 @@ context('Test image functionalities', function(){
             imageToolTile.getImageToolControl().last().click();
             imageToolTile.getImageURLTextField().last().click().type(imageFileURL);
             cy.get(imageToolTile.imageChooseFileButton()).last().click();
-            cy.wait(1000);
+            cy.wait(2000);
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
         it('will load an gif from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/model_image.gif';
             clueCanvas.addTile('image');
-            imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().last().click().type(imageFileURL);
-            cy.get(imageToolTile.imageChooseFileButton()).last().click();
-            cy.wait(1000);
-            imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
+            imageToolTile.getImageToolControl().eq(1).click();
+            imageToolTile.getImageURLTextField().click().type(imageFileURL);
+            cy.get(imageToolTile.imageChooseFileButton()).click();
+            cy.wait(2000);
+            imageToolTile.getImageToolImage().eq(1).should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
     })
     describe('upload image from user computer',()=>{   
         before(()=>{ //create a new doc so that save and restore can e tested
-            canvas.createNewDocument(userCanvas) 
+            canvas.createNewProblemDocument(userCanvas) 
             cy.wait(2000)
         })
         it('will upload png file from user computer', function(){
@@ -51,7 +51,7 @@ context('Test image functionalities', function(){
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/png')
-            cy.wait(1000)
+            cy.wait(2000)
         })
 
         it('will upload jpg file from user computer', function(){
@@ -59,7 +59,7 @@ context('Test image functionalities', function(){
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/jpg');
-            cy.wait(1000)
+            cy.wait(2000)
         })
 
         it('will upload gif file from user computer', function(){
@@ -67,7 +67,7 @@ context('Test image functionalities', function(){
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/gif')
-            cy.wait(1000)
+            cy.wait(2000)
         })
     });
     describe('restore of images', function(){
@@ -78,7 +78,7 @@ context('Test image functionalities', function(){
             cy.wait(5000)
         })
         it('verify restore of all images that were added by URL', function(){
-            const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg', 'https://codap.concord.org/~eireland/model_image.gif'];
+            const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/model_image.gif', 'https://codap.concord.org/~eireland/case_image.jpg'];
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);
                 expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
@@ -91,9 +91,10 @@ context('Test image functionalities', function(){
         })
         it('verify restore of all  images that were added by upload', function(){
             const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
+
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);
-                expect($images).to.have.css('background-image').and.contains('url("blob:'+baseUrl);
+                expect($images).to.have.css('background-image').and.contains('url("'+baseUrl);
             })
         })
     });

@@ -44,6 +44,7 @@ context('Test group functionalities', function(){
                 clueCanvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
                 clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
                 clueCanvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
+                
             });
         });
         describe('test the 4-up view', function(){

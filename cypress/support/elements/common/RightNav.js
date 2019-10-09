@@ -1,3 +1,8 @@
+//Tabs: ['my-work','class-work','learning-log','supports']
+//Sections: [['workspaces','investigations'],
+//           ['personal', 'published', 'learning-log', 'starred']
+//           [''],
+//           ['jit','teacher-supports']]
 class RightNav{
     getRightNavTabs(){
         return cy.get('.right-nav .tabs');
@@ -29,7 +34,11 @@ class RightNav{
     }
 
     openSection(tab,section){
-        cy.get('[data-test='+tab+'-section-'+section+']').click()
+        if (tab=='learning-log'){
+            cy.get('[data-test='+tab+'-section]').click();
+        } else {   
+            cy.get('[data-test='+tab+'-section-'+section+']').click();
+        }
     }
 
     closeSection(tab,section){
@@ -41,11 +50,16 @@ class RightNav{
     }
 
     getCanvasItemTitle(tab,section){
-        return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list.shown').find('.footer .info div')
+        if (tab=='learning-log'){
+            return cy.get('[data-test='+tab+'-section]').siblings('.list.shown').find('.footer .info div')
+        } else {
+            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list.shown').find('.footer .info div')
+
+        }
     }
 
     openCanvasItem(tab, section, title){
-        this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click();
+        this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
 }
 export default RightNav;
