@@ -232,6 +232,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderToggleOverlays(groupUsers: FourUpUser[]) {
+    const {documentViewMode} = this.props;
     const {width, height, hSplitter, vSplitter} = this.grid;
     const toggledStyle = {top: 0, left: 0, width, height};
     const nwStyle = {top: 0, left: 0, width: vSplitter, height: hSplitter};
@@ -239,44 +240,58 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const seStyle = {top: hSplitter, left: vSplitter, right: 0, bottom: 0};
     const swStyle = {top: hSplitter, left: 0, width: vSplitter, bottom: 0};
 
+    const groupDoc = (index: number) => {
+      return groupUsers[index] && groupUsers[index].doc;
+    };
+
+    const toggledGroupDoc = (context: string) => {
+      const user = this.userByContext[context];
+      return user && user.doc;
+    };
+
     const {toggledContext} = this.state;
     if (toggledContext) {
       return (
         <FourUpOverlayComponent
-          context={toggledContext}
-          style={toggledStyle}
-          onClick={this.handleOverlayClicked}
+            context={toggledContext}
+            style={toggledStyle}
+            onClick={this.handleOverlayClicked}
+            documentViewMode={documentViewMode}
+            document={toggledGroupDoc(toggledContext)}
         />
       );
-    }
-    else {
+    } else {
       return (
-        <>
-          {groupUsers[0] ?
+        <div>
           <FourUpOverlayComponent
             context="four-up-nw"
             style={nwStyle}
             onClick={this.handleOverlayClicked}
-          /> : null}
-          {groupUsers[1] ?
+            documentViewMode={documentViewMode}
+            document={groupDoc(0)}
+          />
           <FourUpOverlayComponent
             context="four-up-ne"
             style={neStyle}
             onClick={this.handleOverlayClicked}
-          /> : null}
-          {groupUsers[2] ?
+            documentViewMode={documentViewMode}
+            document={groupDoc(1)}
+          />
           <FourUpOverlayComponent
             context="four-up-se"
             style={seStyle}
             onClick={this.handleOverlayClicked}
-          /> : null}
-          {groupUsers[3] ?
+            documentViewMode={documentViewMode}
+            document={groupDoc(2)}
+          />
           <FourUpOverlayComponent
             context="four-up-sw"
             style={swStyle}
             onClick={this.handleOverlayClicked}
-          /> : null}
-        </>
+            documentViewMode={documentViewMode}
+            document={groupDoc(3)}
+          />
+        </div>
       );
     }
   }
