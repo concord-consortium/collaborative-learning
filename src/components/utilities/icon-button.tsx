@@ -5,7 +5,7 @@ interface IconButtonProps {
   key: string;
   className: string;
   innerClassName?: string;
-  onClickButton: () => void;
+  onClickButton?: () => void;
   url?: string;
 }
 

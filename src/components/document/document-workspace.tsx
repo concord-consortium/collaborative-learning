@@ -312,15 +312,26 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDeleteDocument = (document: DocumentModelType) => {
-    const { appConfig } = this.stores;
+    const { appConfig, documents, user } = this.stores;
+    let countNotDeleted = 0;
+    const getOtherDocument = documents.byTypeForUser((PersonalDocument || LearningLogDocument), user.id);
+    getOtherDocument.forEach(doc => {
+      const isDeletedStatus = doc.getProperty("isDeleted");
+      if (isDeletedStatus !== "true") {
+        ++countNotDeleted;
+      }
+    });
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
     this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
       .then((confirmDelete: boolean) => {
-        const docType = document.type;
-        if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
+        const docType = (document.type === PersonalDocument) || (document.type === LearningLogDocument);
+        if (confirmDelete && docType && (countNotDeleted > 1)) {
           document.setProperty("isDeleted", "true");
           this.handleDeleteOpenPrimaryDocument();
+        }
+        if (countNotDeleted <= 1) {
+          this.stores.ui.alert(`Cannot delete the last ${docTypeStringL}.`, `Error: Delete ${docTypeString}`);
         }
       });
   }

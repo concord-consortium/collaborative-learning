@@ -76,6 +76,13 @@
               background-image: url("../assets/icons/share/share-hover.svg")
             &:active
               background-image: url("../assets/icons/share/share-active.svg")
+        .button-icon.delete-disabled
+          background-image: url("../assets/icons/delete/delete-disabled.svg")
+          cursor: default
+          &:active
+            transform-origin: center
+            transform: none
+            cursor: default
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1

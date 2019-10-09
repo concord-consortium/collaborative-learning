@@ -96,6 +96,12 @@ const DeleteButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+const DeleteDisabledButton = () => {
+  return (
+    <IconButton icon="delete-disabled" key="delete-disabled" className="action icon-delete-disabled" />
+  );
+};
+
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
   return (
@@ -228,14 +234,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
-    const { user: { isTeacher } } = this.stores;
+    const { user: { isTeacher }, documents, user } = this.stores;
+    let countNotDeleted = 0;
+    const getOtherDocument = documents.byTypeForUser((PersonalDocument || LearningLogDocument), user.id);
+    getOtherDocument.forEach(doc => {
+      const isDeletedStatus = doc.getProperty("isDeleted");
+      if (isDeletedStatus !== "true") {
+        ++countNotDeleted;
+      }
+    });
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
-            <DeleteButton onClick={this.handleDeleteDocumentClick} />
+            {countNotDeleted > 1
+              ? <DeleteButton onClick={this.handleDeleteDocumentClick} /> : <DeleteDisabledButton />
+            }
           </div>
         }
         {
