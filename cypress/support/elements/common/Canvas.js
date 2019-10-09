@@ -51,7 +51,7 @@ class Canvas{
     createNewDocument(title){
         this.getNewDocumentIcon().click()
             .then(()=>{
-                dialog.getDialogTitle().should('exist').contains('Create Personal Document');
+                dialog.getDialogTitle().should('exist').contains('Create Problem Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
@@ -61,7 +61,7 @@ class Canvas{
     editTitle(title){
         this.getEditTitleIcon().click()
             .then(function(){
-                dialog.getDialogTitle().should('exist').contains('Edit Document Title');
+                dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })

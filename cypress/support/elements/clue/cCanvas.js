@@ -154,8 +154,11 @@ class ClueCanvas{
      }
 
      getRightSideWorkspaceTitle(){
-         return cy.get('.right-workspace [data-test=document-title]')
+         return cy.get('.right-workspace [data-test=personal-doc-title]')
      }
+     getRightSideInvestigationTitle(){
+        return cy.get('.right-workspace [data-test=document-title]')
+    }
     getRightSideLLTitle(){
         return cy.get('.right-workspace [data-test=learning-log-title]')
     }
