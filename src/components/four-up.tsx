@@ -21,6 +21,8 @@ interface IProps extends IBaseProps {
   toolApiInterface?: IToolApiInterface;
   toggleable?: boolean;
   documentViewMode?: DocumentViewMode;
+  selectedSectionId?: string | null;
+  viaTeacherDashboard?: boolean;
 }
 
 interface IState {
