@@ -1,4 +1,4 @@
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores/stores";

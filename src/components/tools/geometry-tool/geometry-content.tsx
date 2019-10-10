@@ -29,7 +29,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";

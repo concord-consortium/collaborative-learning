@@ -13,7 +13,7 @@ import { isComment } from "./jxg-types";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";

@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;

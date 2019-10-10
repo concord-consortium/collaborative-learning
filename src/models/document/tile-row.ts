@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { ToolTileModelType } from "../tools/tool-tile";
 
 export const TileLayoutModel = types

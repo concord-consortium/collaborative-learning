@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { boolean, ISimpleType } from "mobx-state-tree/dist/internal";
 
 export const TileCommentModel = types

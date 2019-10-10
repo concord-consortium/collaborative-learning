@@ -2,7 +2,7 @@
 import { applyAction, clone, destroy, getSnapshot, onAction } from "mobx-state-tree";
 import { addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet,
           CaseID, ICaseID, ICase, DataSet, IDataSet } from "./data-set";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 // tslint:disable:one-variable-per-declaration
 

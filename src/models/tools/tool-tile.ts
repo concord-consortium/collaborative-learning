@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { kPlaceholderToolID } from "./placeholder/placeholder-content";
 import { findMetadata, ToolContentUnion, ToolContentUnionType } from "./tool-types";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
