@@ -121,7 +121,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return 0;
     });
 
-    // save reference to use for logger in #handleOverlayClicked
+    // save reference to use for the username display in this render and logger in #handleOverlayClicked
     this.userByContext = {
       "four-up-nw": groupUsers[0],
       "four-up-ne": groupUsers[1],
@@ -168,6 +168,16 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
                        readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))} {...others}/>
     );
 
+    const memberName = (context: string) => {
+      const groupUser = this.userByContext[context];
+      const isToggled = context === toggledContext;
+      if (groupUser) {
+        const className = `member${isToggled ? " member-centered" : ""}`;
+        const name = isToggled ? groupUser.user.name : groupUser.user.initials;
+        return <div className={className}>{name}</div>;
+      }
+    }
+
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         {!toggledContext || (toggledContext === "four-up-nw") ?
@@ -175,28 +185,28 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
             {nwCanvas}
           </div>
-          {groupUsers[0] && <div className="member">{groupUsers[0].user.initials}</div>}
+          {memberName("four-up-nw")}
         </div> : null}
         {!toggledContext || (toggledContext === "four-up-ne") ?
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
             {hideCanvas(1) ? this.renderUnshownMessage(groupUsers[1], "ne") : neCanvas}
           </div>
-          {groupUsers[1] && <div className="member">{groupUsers[1].user.initials}</div>}
+          {memberName("four-up-ne")}
         </div> : null}
         {!toggledContext || (toggledContext === "four-up-se") ?
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
             {hideCanvas(2) ? this.renderUnshownMessage(groupUsers[2], "se") : seCanvas}
           </div>
-          {groupUsers[2] && <div className="member">{groupUsers[2].user.initials}</div>}
+          {memberName("four-up-se")}
         </div> : null}
         {!toggledContext || (toggledContext === "four-up-sw") ?
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
             {hideCanvas(3) ? this.renderUnshownMessage(groupUsers[3], "sw") : swCanvas}
           </div>
-          {groupUsers[3] && <div className="member">{groupUsers[3].user.initials}</div>}
+          {memberName("four-up-sw")}
         </div> : null}
         {!toggledContext ? this.renderSplitters() : null}
         {toggleable ? this.renderToggleOverlays(groupUsers) : null}
