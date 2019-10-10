@@ -2,9 +2,9 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentViewMode } from "./teacher/teacher-group-tab";
+import { DocumentModelType } from "../models/document/document";
 
 import "./four-up-overlay.sass";
-import { DocumentModelType } from "../models/document/document";
 
 interface IProps extends IBaseProps {
   context: string;
