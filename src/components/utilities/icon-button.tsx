@@ -6,6 +6,7 @@ interface IconButtonProps {
   className: string;
   innerClassName?: string;
   onClickButton?: () => void;
+  enabled?: boolean;
   url?: string;
 }
 

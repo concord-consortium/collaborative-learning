@@ -89,17 +89,13 @@ const CopyButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const DeleteButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="delete" key="delete" className="action icon-delete"
-                onClickButton={onClick} />
-  );
-};
-
-const DeleteDisabledButton = () => {
-  return (
-    <IconButton icon="delete-disabled" key="delete-disabled" className="action icon-delete-disabled" />
-  );
+const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
+    const enabledClass = enabled ? "enabled" : "disabled";
+    return (
+      <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
+                  enabled={enabled} innerClassName={enabledClass}
+                  onClickButton={enabled ? onClick : undefined} />
+    );
 };
 
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
@@ -235,23 +231,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
     const { user: { isTeacher }, documents, user } = this.stores;
-    let countNotDeleted = 0;
-    const getOtherDocument = documents.byTypeForUser((PersonalDocument || LearningLogDocument), user.id);
-    getOtherDocument.forEach(doc => {
-      const isDeletedStatus = doc.getProperty("isDeleted");
-      if (isDeletedStatus !== "true") {
-        ++countNotDeleted;
-      }
-    });
+    const otherDocuments = documents.byTypeForUser(document.type, user.id);
+    const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
-            {countNotDeleted > 1
-              ? <DeleteButton onClick={this.handleDeleteDocumentClick} /> : <DeleteDisabledButton />
-            }
+            <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
           </div>
         }
         {
