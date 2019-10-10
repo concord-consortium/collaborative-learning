@@ -26,11 +26,11 @@ describe("ImageMap", () => {
   const kBlobUrl = "blob://some-blob-path";
   const kDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABG2lUWH";
   const kInputs = [ kLocalImage, kHttpImage, kHttpsImage, kFBStorageUrl, kFBStorageRef,
-                    kCCImgOriginal, kCCImgFBRTDB, kCCImgS3, kBlobUrl, kDataUri ];
+                    kCCImgOriginal, kCCImgFBRTDB, kDataUri, kCCImgS3, kBlobUrl];
   const kHandlers = [ localAssetsImagesHandler, externalUrlImagesHandler, externalUrlImagesHandler,
                       firebaseStorageImagesHandler, firebaseStorageImagesHandler,
                       firebaseRealTimeDBImagesHandler, firebaseRealTimeDBImagesHandler,
-                      undefined, undefined, undefined];
+                      externalUrlImagesHandler, undefined, undefined ];
   function expectToMatch(handler: IImageHandler, matches: string[]) {
     expect(kInputs.every((input, index) => {
       const didMatch = handler.match(input);
@@ -54,7 +54,7 @@ describe("ImageMap", () => {
   });
 
   it("test externalUrlImagesHandler", () => {
-    expectToMatch(externalUrlImagesHandler, [kHttpImage, kHttpsImage, kFBStorageUrl]);
+    expectToMatch(externalUrlImagesHandler, [kHttpImage, kHttpsImage, kFBStorageUrl, kDataUri]);
 
     let p1: any;
     let p2: any;

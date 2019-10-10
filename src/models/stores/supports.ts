@@ -1,13 +1,17 @@
 import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
-import { UnitModelType } from "../curriculum/unit";
-import { SupportModel, SupportModelType, getDocumentContentForSupport } from "../curriculum/support";
-import { ProblemModelType } from "../curriculum/problem";
 import { InvestigationModelType } from "../curriculum/investigation";
+import { ProblemModelType } from "../curriculum/problem";
+import { getSectionAbbrev, getSectionTitle, SectionType } from "../curriculum/section";
+import { ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
+import { UnitModelType } from "../curriculum/unit";
+import { DB } from "../../lib/db";
+import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
-import { SectionType, AllSectionType, sectionInfo, allSectionInfo } from "../curriculum/section";
+import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent } from "../document/document-content";
 import { DocumentModel, SupportPublication } from "../document/document";
 import { DocumentsModelType } from "./documents";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 export enum AudienceEnum {
   class = "class",
@@ -33,7 +37,7 @@ export enum SupportTarget {
   section = "section",
 }
 
-export type TeacherSupportSectionTarget = SectionType | AllSectionType;
+export type TeacherSupportSectionTarget = SectionType;
 
 export interface ISupportTarget {
   sectionId?: SectionType;
@@ -47,12 +51,12 @@ export const ClassAudienceModel = types
     identifier: types.undefined
   });
 export const GroupAudienceModel = types
-  .model("ClassAudienceModel", {
+  .model("GroupAudienceModel", {
     type: types.optional(types.literal(AudienceEnum.group), AudienceEnum.group),
     identifier: types.string
   });
 export const UserAudienceModel = types
-  .model("ClassAudienceModel", {
+  .model("UserAudienceModel", {
     type: types.optional(types.literal(AudienceEnum.user), AudienceEnum.user),
     identifier: types.string
   });
@@ -70,57 +74,52 @@ export const TeacherSupportModel = types
     sectionId: types.maybe(types.enumeration<SectionType>("SectionType", Object.values(SectionType))),
     audience: AudienceModel,
     authoredTime: types.number,
+    originDoc: types.maybe(types.string),
+    caption: types.maybe(types.string),
     deleted: false
   })
-  .actions((self) => {
-    return {
-      setVisible(visible: boolean) {
-        self.visible = visible;
-      }
-    };
-  })
-  .views((self) => {
-    return {
-      get sectionTarget(): TeacherSupportSectionTarget {
-        return self.type === SupportTarget.section
-          ? self.sectionId!
-          : "all";
-      },
+  .views(self => ({
+    get sectionTarget(): TeacherSupportSectionTarget {
+      return (self.type === SupportTarget.section) && self.sectionId
+              ? self.sectionId
+              : SectionType.all;
+    }
+  }))
+  .views(self => ({
+    get sectionTargetDisplay(): string {
+      return getSectionTitle(self.sectionTarget);
+    },
 
-      get sectionTargetDisplay(): string {
-        return self.type === SupportTarget.section
-          ? sectionInfo[self.sectionId!].title
-          : allSectionInfo.title;
-      },
-
-      showForUserProblem(target: ISupportTarget) {
-        const isUndeleted = !self.deleted;
-        const isForSection = self.type === SupportTarget.problem
-          || self.type === SupportTarget.section && self.sectionId === target.sectionId;
-        const isForUser = self.audience.type === AudienceEnum.class
-          || self.audience.type === AudienceEnum.group && self.audience.identifier === target.groupId
-          || self.audience.type === AudienceEnum.user && self.audience.identifier === target.userId;
-        return isUndeleted && isForSection && isForUser;
-      }
-    };
-  });
+    showForUserProblem(target: ISupportTarget) {
+      const isUndeleted = !self.deleted;
+      const isForSection = self.type === SupportTarget.problem
+        || self.type === SupportTarget.section && self.sectionId === target.sectionId;
+      const isForUser = self.audience.type === AudienceEnum.class
+        || self.audience.type === AudienceEnum.group && self.audience.identifier === target.groupId
+        || self.audience.type === AudienceEnum.user && self.audience.identifier === target.userId;
+      return isUndeleted && isForSection && isForUser;
+    }
+  }))
+  .actions(self => ({
+    setVisible(visible: boolean) {
+      self.visible = visible;
+    }
+  }));
 
 export interface ICreateFromUnitParams {
   unit: UnitModelType;
   investigation?: InvestigationModelType;
   problem?: ProblemModelType;
   documents?: DocumentsModelType;
-}
-
-export interface IAddSupportDocuments extends ICreateFromUnitParams {
-  supports: CurricularSupportModelType[];
+  db?: DB;
+  supports?: CurricularSupportModelType[] | TeacherSupportModelType[];
 }
 
 export const CurricularSupportModel = types
   .model("CurricularSupportModel", {
     supportType: types.optional(types.literal(SupportType.curricular), SupportType.curricular),
     support: SupportModel,
-    type: types.enumeration<SupportTarget>("SupportItemType", Object.values(SupportTarget)),
+    type: types.enumeration<SupportTarget>("SupportTarget", Object.values(SupportTarget)),
     visible: false,
     sectionId: types.maybe(types.string)
   })
@@ -194,7 +193,7 @@ export const SupportsModel = types
         self.curricularSupports.replace(supports);
 
         if (documents) {
-          addVirtualSupportDocumentsToStore({ supports, ...params });
+          addSupportDocumentsToStore({ supports, ...params });
         }
       },
 
@@ -230,34 +229,101 @@ export const SupportsModel = types
 
 export type CurricularSupportModelType = Instance<typeof CurricularSupportModel>;
 export type TeacherSupportModelType = Instance<typeof TeacherSupportModel>;
+export type UnionSupportModelType = CurricularSupportModelType | TeacherSupportModelType;
 export type SupportItemModelType = Instance<typeof SupportItemModel>;
 export type SupportsModelType = Instance<typeof SupportsModel>;
 
-function addVirtualSupportDocumentsToStore(params: IAddSupportDocuments) {
-  const { supports, investigation, problem, documents } = params;
+function getTeacherSupportCaption(support: TeacherSupportModelType,
+                                  investigation?: InvestigationModelType, problem?: ProblemModelType) {
   const investigationPart = investigation ? `${investigation.ordinal}` : "*";
   const problemPart = problem ? `${problem.ordinal}` : "*";
+  const { sectionId } = support;
+  const sectionPart = sectionId ? " " + getSectionAbbrev(sectionId as SectionType) : "";
+  return `${investigationPart}.${problemPart}${sectionPart} ${support.caption || "Untitled"}`;
+}
+
+function getCurricularSupportCaption(support: CurricularSupportModelType, index: number,
+                                     investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  const investigationPart = investigation ? `${investigation.ordinal}` : "*";
+  const problemPart = problem ? `${problem.ordinal}` : "*";
+  const { sectionId } = support;
+  const sectionPart = sectionId ? " " + getSectionTitle(sectionId as SectionType) : "";
+  return `${investigationPart}.${problemPart}${sectionPart} Support ${index}`;
+}
+
+function getSupportCaption(support: UnionSupportModelType, index: number,
+                           investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  return support.supportType === SupportType.teacher
+          ? getTeacherSupportCaption(support, investigation, problem)
+          : getCurricularSupportCaption(support, index, investigation, problem);
+}
+
+export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
+  const { db, documents, investigation, problem, supports } = params;
   let index = 0;
   let lastSection: string | undefined;
-  supports.forEach(support => {
-    const supportSection = support.sectionId;
-    const sectionPart = supportSection && sectionInfo[supportSection as SectionType].title;
-    if (supportSection === lastSection) {
+  supports && supports.forEach(async (support: UnionSupportModelType) => {
+    const { supportType, sectionId } = support;
+    if (sectionId === lastSection) {
       ++index;
     }
     else {
       index = 1;
-      lastSection = supportSection;
+      lastSection = sectionId;
     }
-    const supportCaption = `${investigationPart}.${problemPart} ${sectionPart} Support ${index}`;
-    const document = DocumentModel.create({
-                      uid: "curriculum",
-                      type: SupportPublication,
-                      key: supportCaption,  // use the caption as unique ID since we don't have a firebase ID
-                      properties: { curricularSupport: "true", caption: supportCaption },
-                      createdAt: Date.now(),
-                      content: getSnapshot(getDocumentContentForSupport(support.support))
-                    });
-    documents && documents.add(document);
+    const supportCaption = getSupportCaption(support, index, investigation, problem);
+    const supportKey = supportType === SupportType.teacher
+                        ? (support as TeacherSupportModelType).key || supportCaption
+                        : supportCaption;
+    const originDoc = supportType === SupportType.teacher
+                        ? (support as TeacherSupportModelType).originDoc
+                        : undefined;
+    const properties: IDocumentProperties = supportType === SupportType.curricular
+                                              ? { curricularSupport: "true", caption: supportCaption }
+                                              : { teacherSupport: "true", caption: supportCaption };
+    const content = await getDocumentContentForSupport(support.support, db);
+    if (content) {
+      const document = DocumentModel.create({
+                        uid: "curriculum",
+                        type: SupportPublication,
+                        key: supportKey,
+                        originDoc,
+                        properties,
+                        createdAt: Date.now(),
+                        content: getSnapshot(content)
+                      });
+      documents && documents.add(document);
+    }
   });
+}
+
+export async function getDocumentContentForSupport(support: SupportModelType, db?: DB) {
+  let content: DocumentContentSnapshotType | IAuthoredDocumentContent | undefined;
+  switch (support.type) {
+    case ESupportType.document:
+      content = safeJsonParse(support.content);
+      break;
+    case ESupportType.publication:
+      if (db) {
+        const contentPath = `${support.content}/content`;
+        const contentRef = db.firebase.ref(contentPath);
+        const snapshot = await contentRef.once("value");
+        content = snapshot && safeJsonParse(snapshot.val());
+      }
+      break;
+    case ESupportType.text:
+    default:
+      content = {
+        tiles: [
+          {
+            content: {
+              type: "Text",
+              text: support.content
+            }
+          }
+        ]
+      };
+      break;
+  }
+  return content ? DocumentContentModel.create(content) : undefined;
 }

@@ -12,7 +12,9 @@ describe("document-content model", () => {
     documentContent.addTile("text");
     expect(documentContent.tileMap.size).toBe(1);
     // adding geometry tool adds sidecar text tool
-    documentContent.addTile("geometry", true);
+    documentContent.addTile("geometry", {
+      addSidecarNotes: true
+    });
     expect(documentContent.tileMap.size).toBe(3);
   });
 
@@ -26,10 +28,13 @@ describe("document-content model", () => {
     expect(textTile2RowIndex1).toBe(1);
 
     // insert image between text tiles
-    const imageTile1 = documentContent.addTile("image", false, {
-      rowInsertIndex: 1,
-      rowDropIndex: 1,
-      rowDropLocation: "bottom"
+    const imageTile1 = documentContent.addTile("image", {
+      addSidecarNotes: false,
+      insertRowInfo: {
+        rowInsertIndex: 1,
+        rowDropIndex: 1,
+        rowDropLocation: "bottom"
+      }
     });
 
     const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
@@ -44,10 +49,13 @@ describe("document-content model", () => {
     expect(textTile2RowIndex1).toBe(2);
 
     // insert image at bottom
-    const imageTile2 = documentContent.addTile("image", false, {
-      rowInsertIndex: 3,
-      rowDropIndex: 3,
-      rowDropLocation: "bottom"
+    const imageTile2 = documentContent.addTile("image", {
+      addSidecarNotes: false,
+      insertRowInfo: {
+        rowInsertIndex: 3,
+        rowDropIndex: 3,
+        rowDropLocation: "bottom"
+      }
     });
 
     const rowId2 = documentContent.findRowContainingTile(imageTile2!.tileId);
@@ -65,10 +73,13 @@ describe("document-content model", () => {
 
     expect(textTile2RowIndex1).toBe(1);
 
-    const imageTile1 = documentContent.addTile("image", false, {
-      rowInsertIndex: 1,
-      rowDropIndex: 1,
-      rowDropLocation: "left"
+    const imageTile1 = documentContent.addTile("image", {
+      addSidecarNotes: false,
+      insertRowInfo: {
+        rowInsertIndex: 1,
+        rowDropIndex: 1,
+        rowDropLocation: "left"
+      }
     });
 
     const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
@@ -87,10 +98,13 @@ describe("document-content model", () => {
     documentContent.addTile("text");
     const textTile2 = documentContent.addTile("text");
 
-    const graphTileInfo = documentContent.addTile("geometry", true, {
-      rowInsertIndex: 1,
-      rowDropIndex: 1,
-      rowDropLocation: "bottom"
+    const graphTileInfo = documentContent.addTile("geometry", {
+      addSidecarNotes: true,
+      insertRowInfo: {
+        rowInsertIndex: 1,
+        rowDropIndex: 1,
+        rowDropLocation: "bottom"
+      }
     });
 
     const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
@@ -117,10 +131,13 @@ describe("document-content model", () => {
     documentContent.addTile("text");
     const textTile2 = documentContent.addTile("text");
 
-    const graphTileInfo = documentContent.addTile("geometry", true, {
-      rowInsertIndex: 1,
-      rowDropIndex: 1,
-      rowDropLocation: "left"
+    const graphTileInfo = documentContent.addTile("geometry", {
+      addSidecarNotes: true,
+      insertRowInfo: {
+        rowInsertIndex: 1,
+        rowDropIndex: 1,
+        rowDropLocation: "left"
+      }
     });
 
     const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);

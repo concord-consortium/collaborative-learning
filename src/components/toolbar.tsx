@@ -99,7 +99,7 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
   private handleAddToolTile(tool: DocumentTool) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const rowTile = document.addTile(tool, tool === "geometry");
+    const rowTile = document.addTile(tool, {addSidecarNotes: tool === "geometry"});
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }

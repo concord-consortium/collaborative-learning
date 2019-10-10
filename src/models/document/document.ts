@@ -2,7 +2,8 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
-import { IOtherDocumentProperties } from "../../lib/db-types";
+import { IDocumentProperties } from "../../lib/db-types";
+import { AppConfigModelType } from "../stores/app-config-model";
 import { forEach } from "lodash";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
@@ -11,13 +12,13 @@ export const SectionDocumentDEPRECATED = "section";
 export const ProblemDocument = "problem";
 export const PersonalDocument = "personal";
 export const LearningLogDocument = "learningLog";
-export const PublicationDocument = "publication";
+export const ProblemPublication = "publication";
 export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 export const SupportPublication = "supportPublication";
 
 export function isProblemType(type: string) {
-  return [ProblemDocument, PublicationDocument].indexOf(type) >= 0;
+  return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
 }
 export function isPersonalType(type: string) {
   return [PersonalDocument, PersonalPublication].indexOf(type) >= 0;
@@ -30,17 +31,24 @@ export function isUnpublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 export function isPublishedType(type: string) {
-  return [PublicationDocument, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0;
+  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0;
 }
 
 export const DocumentTypeEnum = types.enumeration("type",
               [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, LearningLogDocument,
-                PublicationDocument, PersonalPublication, LearningLogPublication,
+                ProblemPublication, PersonalPublication, LearningLogPublication,
                 SupportPublication]);
 export type DocumentType = typeof DocumentTypeEnum.Type;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
+export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
+export type PublicationType = typeof ProblemPublication | OtherPublicationType | typeof SupportPublication;
+
+export interface IDocumentAddTileOptions {
+  addSidecarNotes?: boolean;
+  imageUrl?: string;
+}
 
 export const DocumentToolEnum = types.enumeration("tool",
                                   ["dataflow", "delete", "drawing", "geometry", "image", "select", "table", "text"]);
@@ -65,7 +73,7 @@ export const DocumentModel = types
   })
   .views(self => ({
     get isProblem() {
-      return (self.type === ProblemDocument) || (self.type === PublicationDocument);
+      return (self.type === ProblemDocument) || (self.type === ProblemPublication);
     },
     get isPersonal() {
       return (self.type === PersonalDocument || (self.type === PersonalPublication));
@@ -77,7 +85,7 @@ export const DocumentModel = types
       return self.type === SupportPublication;
     },
     get isPublished() {
-      return (self.type === PublicationDocument)
+      return (self.type === ProblemPublication)
               || (self.type === LearningLogPublication)
               || (self.type === PersonalPublication)
               || (self.type === SupportPublication);
@@ -85,7 +93,7 @@ export const DocumentModel = types
     getProperty(key: string) {
       return self.properties.get(key);
     },
-    copyProperties(): IOtherDocumentProperties {
+    copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
     },
     get isStarred() {
@@ -96,6 +104,16 @@ export const DocumentModel = types
     },
     getUserStarAtIndex(index: number) {
       return self.stars[index];
+    }
+  }))
+  .views(self => ({
+    getLabel(appConfig: AppConfigModelType, count: number, lowerCase?: boolean) {
+      const props = appConfig.documentLabelProperties || [];
+      let docStr = self.type as string;
+      props.forEach(prop => {
+        docStr += self.getProperty(prop) ? `:${prop}` : `:!${prop}`;
+      });
+      return appConfig.getDocumentLabel(docStr, count, lowerCase);
     }
   }))
   .actions((self) => ({
@@ -122,8 +140,12 @@ export const DocumentModel = types
                           : visibility;
     },
 
-    addTile(tool: DocumentTool, addSidecarNotes?: boolean) {
-      return self.content.addTile(tool, addSidecarNotes);
+    setVisibility(visibility: "public" | "private") {
+      self.visibility = visibility;
+    },
+
+    addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
+      return self.content.addTile(tool, options);
     },
 
     deleteTile(tileId: string) {

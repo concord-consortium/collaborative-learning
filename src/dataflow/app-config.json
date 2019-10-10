@@ -23,8 +23,15 @@
       }
     ]
   },
+  "documentLabelProperties": ["dfHasData"],
   "documentLabels": {
-    "personal": {
+    "personal:dfHasData": {
+      "labels": {
+        "1": "Dataset",
+        "n": "Datasets"
+      }
+    },
+    "personal:!dfHasData": {
       "labels": {
         "1": "Program",
         "n": "Programs"

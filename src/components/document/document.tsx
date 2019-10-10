@@ -7,7 +7,7 @@ import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument,  SupportPublication} from "../../models/document/document";
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -26,6 +26,8 @@ interface IProps extends IBaseProps {
   onNewDocument?: (document: DocumentModelType) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
+  onPublishSupport?: (document: DocumentModelType) => void;
+  onPublishDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -52,6 +54,13 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 const PublishButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="publish" key="publish-key" className="action icon-publish"
+                onClickButton={onClick} />
+  );
+};
+
+const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="support" key="support" className="action icon-support"
                 onClickButton={onClick} />
   );
 };
@@ -165,12 +174,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const {problem, appMode, clipboard, user} = this.stores;
+    const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
     const {document: { visibility }, workspace} = this.props;
     const isShared = visibility === "public";
-    const showShare = !user.isTeacher;
-    const show4up = !workspace.comparisonVisible && !user.isTeacher;
+    const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
@@ -189,10 +197,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <PublishButton key="publish" onClick={this.handlePublishWorkspace} />,
-              showShare ? <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} /> : null
+              isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />,
+              <PublishButton key="publish" onClick={this.handlePublishDocument} />,
+              !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
-            {show4up ? this.renderMode() : null}
+            {show4up && this.renderMode()}
           </div>
         }
       </div>
@@ -220,6 +229,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
+    const { user: { isTeacher } } = this.stores;
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -241,9 +251,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             </div>
         }
         <div className="actions">
+          {!hideButtons && isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <PublishButton onClick={this.handlePublishOtherDocument} />
+              <PublishButton onClick={this.handlePublishDocument} />
             </div>
           }
         </div>
@@ -303,7 +314,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderStatusBar(type: string) {
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    // const showComment = !isPrimary && (document.type === ProblemPublication);
     const showComment = false;
     return (
       <div className={`statusbar ${type}`}>
@@ -358,7 +369,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSaveComment = (comment: string, tileId: string) => {
-    const { documents, db, user } = this.stores;
+    const { documents, user } = this.stores;
     const document = documents.findDocumentOfTile(tileId);
     const toolApi = this.toolApiMap[tileId];
     const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
@@ -442,8 +453,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleDocumentRename = () => {
     const { document } = this.props;
     const { appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    this.stores.ui.prompt(`Rename your ${docTypeString}:`, document.title, `Rename ${docTypeString}`)
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    this.stores.ui.prompt(`Rename your ${docTypeStringL}:`, document.title, `Rename ${docTypeString}`)
       .then((title: string) => {
         if (title !== document.title) {
           document.setTitle(title);
@@ -451,20 +463,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       });
   }
 
-  private handlePublishWorkspace = () => {
-    const { document } = this.props;
-    const { db, ui, appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(document.type, 1);
-    // TODO: Disable publish button while publishing
-    db.publishProblemDocument(document)
-      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
+  private handlePublishSupport = () => {
+    const { document, onPublishSupport } = this.props;
+    onPublishSupport && onPublishSupport(document);
   }
 
-  private handlePublishOtherDocument = () => {
-    const { db, ui, appConfig } = this.stores;
-    const docTypeString = appConfig.getDocumentLabel(this.props.document.type, 1);
-    db.publishOtherDocument(this.props.document)
-      .then(() => ui.alert(`Your ${docTypeString} was published.`, `${docTypeString} Published`));
+  private handlePublishDocument = () => {
+    const { document, onPublishDocument } = this.props;
+    onPublishDocument && onPublishDocument(document);
   }
 
   private isPrimary() {

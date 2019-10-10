@@ -31,6 +31,8 @@ export const SupportsComponent = () => {
 interface IProps extends IBaseProps {
   tabs?: RightNavTabSpec[];
   isGhostUser: boolean;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 interface IState {
@@ -74,12 +76,13 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    const {onDragOver, onDrop} = this.props;
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
     const tabSpecs = this.props.tabs && this.props.tabs
                       .filter(tabSpec => !(this.props.isGhostUser && tabSpec.hideGhostUser));
     if (!tabSpecs || !tabSpecs.length) return null;
     return (
-      <div className="right-nav">
+      <div className="right-nav" onDragOver={onDragOver} onDrop={onDrop}>
         <TabSetComponent className={rightNavExpanded ? "expanded" : undefined}>
           {tabSpecs.map(spec => {
             return (

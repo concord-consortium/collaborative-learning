@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType, DocumentType, LearningLogDocument, LearningLogPublication,
-        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument
+        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument,
+        ProblemPublication
       } from "../document/document";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
@@ -47,6 +48,12 @@ export const DocumentsModel = types
       });
     },
 
+    getLearningLogDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === LearningLogDocument) && (document.uid === userId);
+      });
+    },
+
     getProblemDocument(userId: string) {
       return self.all.find((document) => {
         return (document.type === ProblemDocument) && (document.uid === userId);
@@ -56,6 +63,12 @@ export const DocumentsModel = types
     getProblemDocumentsForGroup(groupId: string) {
       return self.all.filter((document) => {
         return (document.type === ProblemDocument) && (document.groupId === groupId);
+      });
+    },
+
+    getLastPublishedProblemDocumentsForGroup(groupId: string) {
+      return self.all.filter((document) => {
+        return (document.type === ProblemPublication) && (document.groupId === groupId);
       });
     },
 

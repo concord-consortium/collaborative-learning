@@ -2,8 +2,13 @@ import { types } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 
 export enum ESupportType {
+  // simple text supports (e.g. legacy supports); content is simple text
   text = "text",
-  document = "document"
+  // supports with embedded document content (e.g. curricular supports with document content)
+  // content is stringified document content
+  document = "document",
+  // published teacher supports: content is path to published support document
+  publication = "publication"
 }
 
 interface LegacySupportSnapshot {
@@ -16,7 +21,7 @@ export function createTextSupport(text: string) {
 
 export const SupportModel = types
   .model("Support", {
-    type: types.enumeration<ESupportType>("Type", Object.values(ESupportType)),
+    type: types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)),
     // text string or path to document
     content: types.string
   })
@@ -27,9 +32,3 @@ export const SupportModel = types
   });
 
 export type SupportModelType = typeof SupportModel.Type;
-
-export function getDocumentContentForSupport(support: SupportModelType) {
-    const content = DocumentContentModel.create();
-    content.addTextTile(support.content);
-    return content;
-}

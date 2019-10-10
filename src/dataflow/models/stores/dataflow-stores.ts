@@ -7,7 +7,9 @@ export interface IStores extends IBaseStores {
   iot: IoT;
 }
 
-export type ICreateStores = Partial<IStores>;
+interface ICreateStores extends Partial<IStores> {
+  demoName?: string;
+}
 
 export function createStores(params?: ICreateStores): IStores {
   let baseParams;

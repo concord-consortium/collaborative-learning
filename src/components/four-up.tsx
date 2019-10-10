@@ -12,6 +12,7 @@ import { FourUpOverlayComponent } from "./four-up-overlay";
 
 import "./four-up.sass";
 import { Logger, LogEventName } from "../lib/logger";
+import { DocumentViewMode } from "./teacher/teacher-group-tab";
 
 interface IProps extends IBaseProps {
   userId?: string;
@@ -19,6 +20,7 @@ interface IProps extends IBaseProps {
   isGhostUser?: boolean;
   toolApiInterface?: IToolApiInterface;
   toggleable?: boolean;
+  documentViewMode?: DocumentViewMode;
 }
 
 interface IState {
@@ -73,6 +75,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    const {documentViewMode} = this.props;
     const {toggledContext} = this.state;
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -94,7 +97,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const group = groups.getGroupById(groupId);
     const groupDocuments = group && groupId &&
-                           documents.getProblemDocumentsForGroup(groupId) || [];
+                           (documentViewMode === DocumentViewMode.Published
+                             ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
+                             : documents.getProblemDocumentsForGroup(groupId)
+                           ) || [];
     const groupUsers: FourUpUser[] = group
       ? group.users
           .map((groupUser) => {
@@ -134,26 +140,32 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
     };
 
+    const canvasMessage = (document?: DocumentModelType) => {
+      if (!document && (documentViewMode === DocumentViewMode.Published)) {
+        return "Not Published";
+      }
+    };
+
     const nwCanvas = (
       <CanvasComponent context="four-up-nw" scale={nwCell.scale}
                        editabilityLocation={toggleable ? undefined : groupUsers[0] && "north west"}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
-                       document={groupDoc(0)} {...others} />
+                       document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))} {...others} />
     );
     const neCanvas = (
       <CanvasComponent context="four-up-ne" scale={neCell.scale}
                        editabilityLocation={toggleable ? undefined : groupUsers[1] && "north east"}
-                       readOnly={true} document={groupDoc(1)} {...others} />
+                       readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))} {...others} />
     );
     const seCanvas = (
       <CanvasComponent context="four-up-se" scale={seCell.scale}
                        editabilityLocation={toggleable ? undefined : groupUsers[2] && "south east"}
-                       readOnly={true} document={groupDoc(2)} {...others}/>
+                       readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))} {...others}/>
     );
     const swCanvas = (
       <CanvasComponent context="four-up-sw" scale={swCell.scale}
                        editabilityLocation={toggleable ? undefined : groupUsers[3] && "south west"}
-                       readOnly={true} document={groupDoc(3)} {...others}/>
+                       readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))} {...others}/>
     );
 
     return (

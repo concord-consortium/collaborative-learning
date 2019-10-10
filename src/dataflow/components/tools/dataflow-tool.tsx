@@ -3,6 +3,7 @@ import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { BaseComponent } from "../../../components/base";
 import { ICreateOtherDocumentParams } from "../../../lib/db";
+import { IDocumentProperties } from "../../../lib/db-types";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
@@ -10,7 +11,6 @@ import { DataflowProgram } from "../dataflow-program";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import "./dataflow-tool.sass";
-import { IOtherDocumentProperties } from "../../../lib/db-types";
 
 interface IProps {
   model: ToolTileModelType;
@@ -89,7 +89,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             programContent.setRunningStatus(endTime);
           }
         });
-        const properties: IOtherDocumentProperties = { dfRunId: id };
+        const properties: IDocumentProperties = { dfRunId: id };
         if (datasetName.length > 0) {
           properties.dfHasData = "true";
         }
