@@ -13,6 +13,7 @@ export const UnitModel = types
     abbrevTitle: "",
     title: types.string,
     subtitle: "",
+    disabled: types.array(types.string),
     placeholderText: "",
     sections: types.maybe(types.frozen<ISectionInfoMap>()),
     lookingAhead: types.maybe(DocumentContentModel),

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
+import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
@@ -94,12 +95,17 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   private hotKeys: HotKeys = new HotKeys();
 
   public componentDidMount() {
+    const { model } = this.props;
+    const { content: { type } } = model;
+    model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
+
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
         "cmd-shift-c": this.handleCopyJson
       });
     }
+
     if (this.domElement) {
       this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
     }

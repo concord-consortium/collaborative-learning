@@ -74,6 +74,7 @@
           "ordinal": 1,
           "title": "MSA 1.1 Walk Marathons",
           "subtitle": "Finding and Using Rates",
+          "disabled": ["GeometryMovableLineEquation"],
           "sections": [
             {
               "type": "introduction",

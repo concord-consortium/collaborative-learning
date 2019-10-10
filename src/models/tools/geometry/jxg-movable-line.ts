@@ -117,7 +117,7 @@ export function findMovableLineRelative(obj: JXG.GeometryElement): JXG.Line | un
 }
 
 export const movableLineChangeAgent: JXGChangeAgent = {
-  create: (board, change) => {
+  create: (board, change, context) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
     const lineId = id || uniqueId();
     const props = syncClientColors({...sharedProps, ...shared });
@@ -145,7 +145,9 @@ export const movableLineChangeAgent: JXGChangeAgent = {
       );
       const overrides: any = {
         name() {
-          return this.getSlope && this.getRise && this.getSlope() !== Infinity
+          const disableEquation = context && context.isFeatureDisabled &&
+                                    context.isFeatureDisabled("GeometryMovableLineEquation");
+          return !disableEquation && this.getSlope && this.getRise && this.getSlope() !== Infinity
             ? this.getRise() >= 0
               ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
               : `y = ${JXG.toFixed(this.getSlope(), 1)}x \u2212 ${JXG.toFixed(this.getRise() * -1, 1)}`

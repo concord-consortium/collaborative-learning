@@ -46,6 +46,7 @@ export function getSectionPlaceholder(type: SectionType) {
 export const SectionModel = types
   .model("Section", {
     type: types.string, // sectionId corresponding to entry in unit
+    disabled: types.array(types.string),
     content: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
   })

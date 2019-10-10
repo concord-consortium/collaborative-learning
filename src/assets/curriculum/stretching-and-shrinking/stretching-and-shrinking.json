@@ -602,6 +602,7 @@
           "ordinal": 1,
           "title": "2.1 Drawing Wumps",
           "subtitle": "Making Similar Figures",
+          "disabled": ["GeometryLinkedTables"],
           "sections": [
             {
               "type": "introduction",
