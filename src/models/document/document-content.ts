@@ -8,7 +8,8 @@ import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTil
 import { defaultTextContent } from "../tools/text/text-content";
 import { defaultPlaceholderContent } from "../tools/placeholder/placeholder-content";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType
+        } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
