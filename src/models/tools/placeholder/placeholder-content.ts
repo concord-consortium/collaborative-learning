@@ -2,21 +2,21 @@ import { types, Instance, SnapshotOut } from "mobx-state-tree";
 
 export const kPlaceholderToolID = "Placeholder";
 
-export function defaultPlaceholderContent() {
+export function defaultPlaceholderContent(sectionId: string = "") {
   return PlaceholderContentModel.create({
     type: kPlaceholderToolID,
-    prompt: "Create or drag tiles here"
+    sectionId
   });
 }
 
 export const PlaceholderContentModel = types
   .model("PlaceholderContent", {
     type: types.optional(types.literal(kPlaceholderToolID), kPlaceholderToolID),
-    prompt: ""
+    sectionId: ""
   })
   .actions(self => ({
-    setPrompt(prompt: string) {
-      self.prompt = prompt;
+    setSectionId(sectionId: string = "") {
+      self.sectionId = sectionId;
     }
   }));
 

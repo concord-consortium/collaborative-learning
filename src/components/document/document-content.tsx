@@ -150,7 +150,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       }
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  height={rowHeight} tileMap={tileMap}
+                                  rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
@@ -345,7 +345,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (e.dataTransfer.getData(kDragRowHeight)) {
       dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
     }
-    content.copyTileIntoRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
+    content.copyTileIntoNewRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
   }
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {

@@ -169,7 +169,7 @@ describe("logger", () => {
 
       const serialized = JSON.stringify(getSnapshot(tileToCopy));
 
-      await destinationDocument.content.copyTileIntoRow(serialized, tileToCopy.id, 0);
+      await destinationDocument.content.copyTileIntoNewRow(serialized, tileToCopy.id, 0);
     });
 
   });

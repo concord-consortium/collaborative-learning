@@ -1,14 +1,15 @@
 import { getSectionInitials, getSectionPlaceholder, getSectionTitle,
-        kAllSectionType, SectionModel, setSectionInfoMap } from "./section";
+        kAllSectionType, SectionModel, setSectionInfoMap, kDefaultPlaceholder } from "./section";
 
 describe("SectionModel", () => {
 
   it("supports all/unknown section types by default", () => {
     expect(getSectionInitials("foo")).toBe("?");
     expect(getSectionTitle("foo")).toBe("Unknown");
-    expect(getSectionPlaceholder("foo")).toBe("");
+    expect(getSectionPlaceholder("foo")).toBe(kDefaultPlaceholder);
     expect(getSectionInitials(kAllSectionType)).toBe("*");
     expect(getSectionTitle(kAllSectionType)).toBe("All");
+    expect(getSectionPlaceholder(kAllSectionType)).toBe(kDefaultPlaceholder);
 
     const section = SectionModel.create({ type: "foo" });
     expect(section.initials).toBe("?");
@@ -26,7 +27,7 @@ describe("SectionModel", () => {
     const barSection = SectionModel.create({ type: "bar" });
     expect(barSection.initials).toBe("?");
     expect(barSection.title).toBe("Unknown");
-    expect(barSection.placeholder).toBe("");
+    expect(barSection.placeholder).toBe(kDefaultPlaceholder);
 
     expect(getSectionInitials(kAllSectionType)).toBe("*");
     expect(getSectionTitle(kAllSectionType)).toBe("All");
