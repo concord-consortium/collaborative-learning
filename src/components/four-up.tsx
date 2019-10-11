@@ -176,7 +176,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const name = isToggled ? groupUser.user.name : groupUser.user.initials;
         return <div className={className}>{name}</div>;
       }
-    }
+    };
 
     return (
       <div className="four-up" ref={(el) => this.container = el}>
