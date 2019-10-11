@@ -4,6 +4,7 @@ import * as React from "react";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
+import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
@@ -11,7 +12,6 @@ import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument,
 import { DocumentContentModel } from "../../models/document/document-content";
 import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
-import { FourUpComponent } from "../four-up";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.sass";
@@ -71,6 +71,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         <RightNavComponent
           tabs={appConfig.rightNavTabs}
           isGhostUser={isGhostUser}
+          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
@@ -111,18 +112,45 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments(isGhostUser: boolean) {
-    const {appConfig, documents, ui} = this.stores;
-    const { problemWorkspace, teacherGroupId} = ui;
+    const {appConfig, documents, ui, groups} = this.stores;
+
+    const { problemWorkspace, showTeacherGroupView} = ui;
+    const { comparisonDocumentKey } = problemWorkspace;
+
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
-    const comparisonDocument = problemWorkspace.comparisonDocumentKey
-                               && documents.getDocument(problemWorkspace.comparisonDocumentKey);
+    const comparisonDocument = comparisonDocumentKey
+                               && documents.getDocument(comparisonDocumentKey);
+
+    const groupVirtualDocument = comparisonDocumentKey
+      && groups.documentForGroup(comparisonDocumentKey);
+
     const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
-    const TeacherFourUp = <FourUpComponent groupId={teacherGroupId} isGhostUser={true} toggleable={true} />;
+    const CompareDocument = groupVirtualDocument
+      ? <GroupVirtualDocumentComponent
+          key={comparisonDocumentKey}
+          document={groupVirtualDocument}
+          workspace={problemWorkspace}
+        />
+      : comparisonDocument
+        ?
+          <DocumentComponent
+            document={comparisonDocument}
+            workspace={problemWorkspace}
+            onNewDocument={this.handleNewDocument}
+            onCopyDocument={this.handleCopyDocument}
+            onDeleteDocument={this.handleDeleteDocument}
+            onPublishSupport={this.handlePublishSupport}
+            onPublishDocument={this.handlePublishDocument}
+            toolbar={toolbar}
+            side="comparison"
+            isGhostUser={isGhostUser}
+          />
+        : this.renderComparisonPlaceholder();
 
     const Primary = (
       <DocumentComponent
@@ -139,60 +167,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       />
     );
 
-    const Comparison = comparisonDocument
-      ? (
-          <DocumentComponent
-            document={comparisonDocument}
-            workspace={problemWorkspace}
-            readOnly={true}
-            side="comparison"
-            isGhostUser={isGhostUser}
-          />
-        )
-      : this.renderComparisonPlaceholder();
-
-    if (!teacherGroupId) {
-      if (problemWorkspace.comparisonVisible) {
-        return (
-          <div onClick={this.handleClick}>
-            { this.renderDocument(
-              "left-workspace",
-              "primary",
-              Primary
-            )}
-            { this.renderDocument("right-workspace", "comparison", Comparison) }
-          </div>
-        );
-      }
-      else {
-        return this.renderDocument(
-                "single-workspace",
-                "primary",
-                Primary
-              );
-      }
-    } else {
-      if (problemWorkspace.comparisonVisible) {
-        return (
-          <div onClick={this.handleClick}>
-            { this.renderDocument(
-              "left-workspace",
-              "primary",
-              Primary
-            )}
-            { this.renderDocument("right-workspace", "comparison", TeacherFourUp) }
-          </div>
-        );
-      }
-      else {
-        return this.renderDocument(
-                "single-workspace",
-                "primary",
-                TeacherFourUp
-              );
-      }
+    if (problemWorkspace.comparisonVisible) {
+      return (
+        <div onClick={this.handleClick}>
+          { this.renderDocument("left-workspace", "primary", Primary) }
+          { this.renderDocument("right-workspace", "comparison", CompareDocument) }
+        </div>
+      );
     }
-
+    else {
+      return this.renderDocument("single-workspace", "primary", Primary);
+    }
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {

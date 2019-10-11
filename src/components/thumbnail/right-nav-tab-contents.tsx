@@ -6,7 +6,7 @@ import { DocumentDragKey, DocumentModelType } from "../../models/document/docume
 import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
-
+import { GroupVirtualDocument } from "../../models/document/group-vritual-document";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
@@ -66,8 +66,10 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
 
   private renderFourUpThumbnail(group: any) {
     const { ui } = this.stores;
-    const { setTeacherWorkgroup } = ui;
-    const showGroupFourUp = () => setTeacherWorkgroup(group.id);
+    const showGroupFourUp = () =>  {
+      ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
+      ui.problemWorkspace.toggleComparisonVisible({override: true});
+    };
 
     const styles: React.CSSProperties = {
       width: "100px",
