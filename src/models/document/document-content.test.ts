@@ -1,4 +1,4 @@
-import { DocumentContentModel, DocumentContentModelType } from "./document-content";
+import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds } from "./document-content";
 import { defaultTextContent } from "../tools/text/text-content";
 
 describe("DocumentContentModel", () => {
@@ -394,4 +394,35 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
   });
 
+});
+
+describe("DocumentContentModel", () => {
+
+  it("can cloneWithUniqueIds()", () => {
+    const content = DocumentContentModel.create({});
+    content.addTextTile("foo");
+    const srcTileId = content.getRowByIndex(0)!.getTileIdAtIndex(0);
+
+    const copy = cloneContentWithUniqueIds(content);
+    const copyTileId = copy!.getRowByIndex(0)!.getTileIdAtIndex(0);
+    expect(copy!.rowCount).toBe(1);
+    expect(copyTileId).not.toBe(srcTileId);
+  });
+
+  it("can import authored content", () => {
+    const srcContent: any = {
+            tiles: [
+              { content: { isSectionHeader: true, sectionId: "Foo" } },
+              { content: { type: "Text", text: "foo" } }
+            ]
+          };
+    const content = DocumentContentModel.create(srcContent);
+    expect(content.rowCount).toBe(2);
+    const row = content.getRowByIndex(1);
+    expect(row!.tileCount).toBe(1);
+    const tileId = row!.getTileIdAtIndex(0);
+    const tile = content.tileMap.get(tileId);
+    const tileContent = tile!.content;
+    expect(tileContent.type).toBe("Text");
+  });
 });
