@@ -3,8 +3,9 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
-import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
+import { IDocumentContentAddTileOptions } from "../models/document/document-content";
 import { ToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
+import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
 
@@ -88,18 +89,22 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
 
   private showDropRowHighlight = () => {
     const { document } = this.props;
-    document.content.highlightLastVisibleRow(true);
+    document.content.showPendingInsertHighlight(true);
   }
 
   private removeDropRowHighlight = () => {
     const { document } = this.props;
-    document.content.highlightLastVisibleRow(false);
+    document.content.showPendingInsertHighlight(false);
   }
 
   private handleAddToolTile(tool: DocumentTool) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const rowTile = document.addTile(tool, {addSidecarNotes: tool === "geometry"});
+    const newTileOptions: IDocumentContentAddTileOptions = {
+            addSidecarNotes: tool === "geometry",
+            insertRowInfo: { rowInsertIndex: document.content.defaultInsertRow }
+          };
+    const rowTile = document.addTile(tool, newTileOptions);
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }
