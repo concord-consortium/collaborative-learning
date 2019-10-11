@@ -8,7 +8,6 @@ const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const imageToolTile = new ImageToolTile;
 const rightNav = new RightNav;
-const dialog = new Dialog
 const baseUrl = (`${Cypress.config("baseUrl")}`).split('/branch/')[0];
 
 let userCanvas = 'Uploaded Images'
@@ -94,7 +93,7 @@ context('Test image functionalities', function(){
 
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);
-                expect($images).to.have.css('background-image').and.contains('url("'+baseUrl);
+                expect($images).to.have.css('background-image').and.contains('url("blob:'+baseUrl);
             })
         })
     });
