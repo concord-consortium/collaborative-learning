@@ -80,8 +80,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       const tiles: any = [];
       problem.sections.forEach(section => {
         tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-        const placeholder = getSectionPlaceholder(section.type);
-        tiles.push({ content: { type: "Placeholder", prompt: placeholder }});
+        tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
       });
       return DocumentContentModel.create({ tiles } as any);
     }
