@@ -27,7 +27,8 @@ export const UserModel = types
     latestGroupId: types.maybe(types.string),
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
-    portalClassOfferings: types.array(PortalClassOffering)
+    portalClassOfferings: types.array(PortalClassOffering),
+    lastSupportViewTimestamp: types.maybe(types.number)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -61,6 +62,9 @@ export const UserModel = types
       if (user.portalClassOfferings) {
         self.portalClassOfferings.replace(user.portalClassOfferings);
       }
+    },
+    setLastSupportViewTimestamp(timestamp: number) {
+      self.lastSupportViewTimestamp = timestamp;
     }
   }))
   .views((self) => ({

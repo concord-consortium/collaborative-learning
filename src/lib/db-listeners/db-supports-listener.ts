@@ -10,6 +10,7 @@ import { BaseListener } from "./base-listener";
 export class DBSupportsListener extends BaseListener {
   private db: DB;
   private supportsRef: firebase.database.Reference | null = null;
+  private lastSupportViewTimestampRef: firebase.database.Reference | null = null;
   private onChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
@@ -26,6 +27,10 @@ export class DBSupportsListener extends BaseListener {
     this.debugLogHandlers("#start", "adding", ["child_changed", "child_added"], this.supportsRef);
     this.supportsRef.on("child_changed", this.onChildChanged = this.handleSupportsUpdate("child_changed"));
     this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
+
+    this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
+    this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
   }
 
   public stop() {
@@ -33,6 +38,10 @@ export class DBSupportsListener extends BaseListener {
       this.debugLogHandlers("#stop", "removing", ["child_changed", "child_added"], this.supportsRef);
       this.supportsRef.off("child_changed", this.onChildChanged);
       this.supportsRef.off("child_added", this.onChildAdded);
+    }
+    if (this.lastSupportViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
+      this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
     }
   }
 
@@ -95,5 +104,11 @@ export class DBSupportsListener extends BaseListener {
       caption: dbSupport.properties && dbSupport.properties.caption,
       deleted: dbSupport.deleted
     });
+  }
+
+  private handleLastSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+    const val = snapshot.val() || undefined;
+    this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
+    this.db.stores.user.setLastSupportViewTimestamp(val);
   }
 }

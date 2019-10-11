@@ -847,4 +847,8 @@ export class DB {
     });
   }
 
+  public setLastSupportViewTimestamp() {
+    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
+  }
+
 }
