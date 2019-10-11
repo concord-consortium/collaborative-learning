@@ -145,8 +145,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
-      if (!dropHighlight && index === highlightPendingDropLocation) {
-        dropHighlight = "bottom";
+      if (!dropHighlight) {
+        if (index === highlightPendingDropLocation) {
+          dropHighlight = "top";
+        }
+        else if ((index === rowOrder.length - 1) && (index + 1 === highlightPendingDropLocation)) {
+          dropHighlight = "bottom";
+        }
       }
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}

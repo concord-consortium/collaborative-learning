@@ -108,7 +108,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await document.content.addTextTile("test");
+      await document.content.addTextTile({ text: "test" });
     });
 
     it.skip("can log copying tiles between documents", async (done) => {

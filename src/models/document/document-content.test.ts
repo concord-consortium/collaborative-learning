@@ -8,6 +8,12 @@ describe("DocumentContentModel", () => {
     documentContent = DocumentContentModel.create({});
   });
 
+  it("behaves like empty content when empty", () => {
+    expect(documentContent.rowCount).toBe(0);
+    expect(documentContent.indexOfLastVisibleRow).toBe(-1);
+    expect(documentContent.defaultInsertRow).toBe(0);
+  });
+
   it("allows the tool tiles to be added", () => {
     expect(documentContent.tileMap.size).toBe(0);
     documentContent.addTile("text");
@@ -17,6 +23,7 @@ describe("DocumentContentModel", () => {
       addSidecarNotes: true
     });
     expect(documentContent.tileMap.size).toBe(3);
+    expect(documentContent.defaultInsertRow).toBe(2);
   });
 
   it("allows the tool tiles to be added as new rows at specified locations", () => {
@@ -209,6 +216,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.getRowByIndex(0)!.isSectionHeader).toBe(true);
     expect(content.isPlaceholderRow(content.getRowByIndex(1)!)).toBe(true);
     expect(isPlaceholderSection("A")).toBe(true);
+    expect(content.defaultInsertRow).toBe(1);
 
     content.addSectionHeaderRow("B");
     // [Header:A, Placeholder, Header:B]
@@ -218,16 +226,18 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.getRowByIndex(2)!.isSectionHeader).toBe(true);
     expect(content.isPlaceholderRow(content.getRowByIndex(3)!)).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(1);
   });
 
   it("will remove placeholder tiles when adding a new tile in the last section", () => {
     // [Header:A, Placeholder, Header:B, Placeholder]
-    content.addTextTile("foo");
+    content.addTextTile({ text: "foo", rowIndex: content.rowCount });
     // [Header:A, Placeholder, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
-  });
+    expect(content.defaultInsertRow).toBe(4);
+});
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
     // [Header:A, Placeholder, Header:B, Text]
@@ -236,6 +246,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(4);
   });
 
   it("will restore placeholder tiles when deleting the last row in an interior section", () => {
@@ -246,7 +257,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
-  });
+    expect(content.defaultInsertRow).toBe(4);
+});
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
     // [Header:A, Placeholder, Header:B, Text]
@@ -256,17 +268,19 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(1);
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
     // [Header:A, Placeholder, Header:B, Placeholder]
-    content.addTextTile("foo");
+    content.addTextTile({ text: "foo", rowIndex: content.rowCount });
     // [Header:A, Placeholder, Header:B, Text]
     content.moveRowToIndex(3, 1);
     // [Header:A, Text, Header:B, Placeholder]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving entire rows (1 => 3)", () => {
@@ -276,6 +290,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to a new row", () => {
@@ -286,6 +301,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to a new row", () => {
@@ -296,6 +312,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to an existing row", () => {
@@ -306,6 +323,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(content.defaultInsertRow).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to an existing row", () => {
@@ -400,7 +418,7 @@ describe("DocumentContentModel", () => {
 
   it("can cloneWithUniqueIds()", () => {
     const content = DocumentContentModel.create({});
-    content.addTextTile("foo");
+    content.addTextTile({ text: "foo" });
     const srcTileId = content.getRowByIndex(0)!.getTileIdAtIndex(0);
 
     const copy = cloneContentWithUniqueIds(content);
