@@ -3,7 +3,7 @@ import { externalUrlImagesHandler, localAssetsImagesHandler,
         IImageHandler, ImageMapModel, ImageMapModelType } from "./image-map";
 import * as ImageUtils from "../utilities/image-utils";
 const urlParser = require("url");
-const placeholderImage = require("../assets/image_placeholder.png");
+const placeholderImage = require("../public/images/image_placeholder.png");
 
 let sImageMap: ImageMapModelType;
 
@@ -15,7 +15,7 @@ beforeAll(() => {
 });
 
 describe("ImageMap", () => {
-  const kLocalImage = "assets/logo_tw.png";
+  const kLocalImage = "public/images/logo_tw.png";
   const kHttpImage = "http://icon.cat/img/icon_loop.png";
   const kHttpsImage = "https://icon.cat/img/icon_loop.png";
   const kFBStorageUrl = "https://firebasestorage.googleapis.com/path/to/image";

@@ -2,7 +2,7 @@ import { DB } from "../lib/db";
 import { ImageModelType, ImageModel } from "../models/image";
 import { ImageContentSnapshotOutType } from "../models/tools/image/image-content";
 import { safeJsonParse } from "./js-utils";
-const placeholderImage = require("../assets/image_placeholder.png");
+const placeholderImage = require("../public/images/image_placeholder.png");
 
 const ImageConstants = {
   maxWidth: 512,

@@ -34,7 +34,7 @@ import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+const placeholderImage = require("../../../public/images/image_placeholder.png");
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 

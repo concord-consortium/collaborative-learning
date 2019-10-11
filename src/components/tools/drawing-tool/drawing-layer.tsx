@@ -15,7 +15,7 @@ import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+const placeholderImage = require("../../../public/images/image_placeholder.png");
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";

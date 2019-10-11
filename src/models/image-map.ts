@@ -1,8 +1,8 @@
 import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
 import { getImageDimensions, storeCorsImage, storeFileImage, storeImage } from "../utilities/image-utils";
 import { DB } from "../lib/db";
-const placeholderImage = require("../assets/image_placeholder.png");
-const loadingSpinner = require("../assets/Spinner-1s-200px.svg");
+const placeholderImage = require("../public/images/image_placeholder.png");
+const loadingSpinner = require("../public/images/spinner-1s-200px.svg");
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -231,7 +231,7 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return url ? url.startsWith("assets/") : false;
+    return url ? url.startsWith("public/") : false;
   },
 
   store(url: string) {

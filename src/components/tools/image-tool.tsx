@@ -6,7 +6,7 @@ import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { debounce } from "lodash";
-const placeholderImage = require("../../assets/image_placeholder.png");
+const placeholderImage = require("../../public/images/image_placeholder.png");
 import { autorun, IReactionDisposer } from "mobx";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
