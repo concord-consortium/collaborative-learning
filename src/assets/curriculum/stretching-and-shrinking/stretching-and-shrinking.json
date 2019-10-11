@@ -147,7 +147,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
+                      "text": "<h2>Some style examples (h2):</h2><h3>Text styles (h3)</h3><ul><li><strong>Bold</strong></li><li><em>Italic</em></li><li><u>Underline</u></li><li><em><strong><u>All three!</u></strong></em></li><li><code>Typewriter Font: <strong>Bold</strong>, <em>Italic</em>, <u>Underlined</u></code></li></ul><ul><li>Superscripts: <em>y</em> = 3<em>x</em><sup>2</sup></li><li>Subscripts: H<sub>2</sub>O</li></ul><br />Also supports numbered lists...<ol><li>Nothing is better than complete happiness.</li><li>A ham sandwich is better than nothing.</li><li>Ergo, A ham sandwich is better than complete happiness.</li></ol><br />In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
                     }
                   },
                   {
