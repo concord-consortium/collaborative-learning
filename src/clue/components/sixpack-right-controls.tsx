@@ -9,7 +9,9 @@ import { DocumentViewMode } from "../../components/teacher/teacher-group-tab";
 
 interface IProps {
   documentViewMode: DocumentViewMode;
+  selectedSectionId: string | null;
   setDocumentViewMode: (documentViewMode: DocumentViewMode) => void;
+  setSelectedSectionId: (sectionId: string) => void;
 }
 
 @inject("stores")
@@ -19,7 +21,13 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { documentViewMode, setDocumentViewMode } = this.props;
+    const {
+      documentViewMode,
+      setDocumentViewMode,
+      selectedSectionId,
+      setSelectedSectionId
+    } = this.props;
+
     const modeOptions = [{
         label: "Current Work",
         selected: documentViewMode === DocumentViewMode.Live,
@@ -31,25 +39,17 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
         onClick: () => setDocumentViewMode(DocumentViewMode.Published)
       }
     ];
-    const { problem } = this.stores;
-    const { sections } = problem;
-    const makeProgressItem = (s: string) => {
-      return {
-        label: s,
-        completed: Math.floor(Math.random() * 12) + 1,
-        total: 12,
-        selected: false
-      };
-    };
 
-    const progressItems = sections.map(s => makeProgressItem(s.initials));
     return(
       <div className="sixpack-right-controls">
         <div className="top-controls">
           <ToggleGroup options={modeOptions} orientation="vertical"/>
         </div>
         <div className="bottom-controls">
-          <ProgressWidget items={progressItems} />
+          <ProgressWidget
+            selectedSectionId={selectedSectionId}
+            setSelectedSectionId={setSelectedSectionId}
+          />
         </div>
         <div className="pager-controls">
           {this.props.children}

@@ -15,8 +15,9 @@ export class SectionHeader extends React.Component<IProps, {}> {
   public render() {
     const initials = getSectionInitials(this.props.type);
     const title = getSectionTitle(this.props.type);
+    // id is set to allow for scrolling to section in teacher dashboard
     return (
-      <div className="row-section-header" data-test="section-header">
+      <div id={`section_${initials}`} className="row-section-header" data-test="section-header">
         <div className="initials">{initials}</div>
         <div className="title">{title}</div>
       </div>

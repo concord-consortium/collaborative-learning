@@ -17,6 +17,7 @@ interface IState {
   selectedGroupId?: string;
   page: number;
   documentViewMode: DocumentViewMode;
+  selectedSectionId: string | null;
 }
 
 @inject("stores")
@@ -25,20 +26,28 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
+
     this.state = {
       page: 0,
-      documentViewMode: DocumentViewMode.Live
+      documentViewMode: DocumentViewMode.Live,
+      selectedSectionId: null
     };
   }
 
   public render() {
-    const {page, documentViewMode} = this.state;
+    const {page, documentViewMode, selectedSectionId} = this.state;
     return (
       <div className="teacher-group-tab">
-        <TeacherGroupSixPack page={page} documentViewMode={documentViewMode} />
+        <TeacherGroupSixPack
+          page={page}
+          documentViewMode={documentViewMode}
+          selectedSectionId={selectedSectionId}
+        />
         <SixPackRightControls
           documentViewMode={documentViewMode}
           setDocumentViewMode={this.handleSetDocumentViewMode}
+          setSelectedSectionId={this.handleSetSelectedSectionId}
+          selectedSectionId={selectedSectionId}
         >
           <Pager
             currentPage={this.state.page}
@@ -56,5 +65,11 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     return Math.ceil(this.stores.groups.allGroups.length / GROUPS_PER_PAGE);
   }
 
-  private handleSetDocumentViewMode = (documentViewMode: DocumentViewMode) => this.setState({documentViewMode});
+  private handleSetDocumentViewMode = (documentViewMode: DocumentViewMode) => {
+    this.setState({documentViewMode});
+  }
+
+  private handleSetSelectedSectionId = (selectedSectionId: string) => {
+    this.setState({selectedSectionId});
+  }
 }
