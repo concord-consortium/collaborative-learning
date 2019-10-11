@@ -1,7 +1,8 @@
 import * as React from "react";
 import { BaseComponent } from "../../base";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { getSectionPlaceholder } from "../../../models/curriculum/section";
 import { PlaceholderContentModelType } from "../../../models/tools/placeholder/placeholder-content";
+import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
 import "./placeholder-tool.sass";
 
@@ -18,9 +19,11 @@ export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> 
     );
   }
 
-  private renderPlaceholderText = () => {
-    const placeholderContent = this.props.model.content as PlaceholderContentModelType;
-    const placeholderLines = placeholderContent.prompt.split("\n");
+  private renderPlaceholderText() {
+    const content = this.props.model.content as PlaceholderContentModelType;
+    const { sectionId } = content;
+    const placeholder = getSectionPlaceholder(sectionId);
+    const placeholderLines = placeholder.split("\n");
     return (
       <div>
         {placeholderLines.map((line, index) => {
