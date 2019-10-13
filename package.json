@@ -126,7 +126,6 @@
   "dependencies": {
     "@blueprintjs/core": "^3.18.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
-    "@types/is-hotkey": "^0.1.1",
     "@types/slate-html-serializer": "^0.6.3",
     "ag-grid-community": "^21.2.1",
     "ag-grid-react": "^21.2.1",
@@ -136,7 +135,6 @@
     "firebase": "^6.6.1",
     "immutable": "^3.8.2",
     "initials": "^3.0.1",
-    "is-hotkey": "^0.1.6",
     "jsonwebtoken": "^8.5.0",
     "lodash": "^4.17.15",
     "mobx": "^5.13.0",

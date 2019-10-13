@@ -2,8 +2,7 @@ import * as Immutable from "immutable";
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { Operation, Value } from "slate";
-import { Editor, Plugin } from "slate-react";
-import { isHotkey } from "is-hotkey";
+import { Editor } from "slate-react";
 
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
@@ -26,17 +25,6 @@ interface IState {
   value?: Value;
 }
 ​
-enum ESlateType {
-  mark = "mark",
-  block = "block"
-}
-
-interface IOnKeyDownHandlerDef {
-  slateType: ESlateType;
-  key: string;
-  type: string;
-}
-
 function BulletItem(props: any) {
   return (
     <ul {...props.attributes}>{props.children}</ul>
@@ -56,31 +44,12 @@ function Typewriter(props: any) {
   );
 }
 
-function Button(props: any) {
-  const { active, reversed} = props;
-  return (<span className={"floating-text-tool-button"} />);
-}
-
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
-
-  private plugins: Plugin[] = [
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "mod+b",       type: "bold" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "mod+i",       type: "italic" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "mod+u",       type: "underline" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "mod+s",       type: "superscript" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "mod+shift+s", type: "subscript" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.mark,  key: "ctrl+t",      type: "typewriter" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "ctrl+b",      type: "bulleted" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "ctrl+n",      type: "numbered" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "ctrl+1",      type: "header-1" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "ctrl+2",      type: "header-2" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "ctrl+3",      type: "header-3" }),
-  ];
 
   public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
@@ -108,8 +77,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
     if (content.type === "Text") {
       if (!readOnly) {
-          content.setSlate(change.value);
-          this.setState({ value: change.value });
+        content.setSlate(change.value);
+        this.setState({ value: change.value });
       }
     }
   }
@@ -144,16 +113,10 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `text-tool ${editableClass}`;
 
-    const onButtonPress = () => {
-      // tslint:disable-next-line
-      console.log("Hey, look, no hands!");
-    };
-
     if (!this.state.value) { return null; }
     return (
       <div>
         <Editor
-          plugins={this.plugins}
           key={model.id}
           className={classes}
           placeholder={placeholderText}
@@ -163,10 +126,6 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           renderMark={this.renderMark}
           renderBlock={this.renderBlock}
         />
-        {/* <EditorStyleBar
-          onButtonPress={onButtonPress}
-          value={this.state.value}
-        /> */}
       </div>
     );
   }
@@ -201,102 +160,4 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as TextContentModelType;
   }
 
-  private makeOnKeyDownHandler(hotKeyDef: IOnKeyDownHandlerDef): Plugin {
-    // Builds and returns a Slate plug-in for an onKeyDown handler.
-    const { key, type, slateType } = hotKeyDef;
-    switch (slateType) {
-      case ESlateType.mark:
-        return ({
-          onKeyDown(event: any, editor: any, next: () => any) {
-            if (! isHotkey(key, event)) {
-              next();
-            } else {
-              event.preventDefault();
-              switch (type) {
-                case "superscript":
-                case "subscript":
-                  // Special case handling of supers & subs to prevent nesting.
-                  const hasType = editor.value.marks.some( (m: any) => ["superscript", "subscript"].includes(m.type) );
-                  if (! hasType) {
-                    editor.toggleMark(type);
-                  } else {
-                    editor.removeMark("superscript")
-                          .removeMark("subscript");
-                  }
-                  break;
-                default:
-                  // Handles everything else. E.g., bold, underline, italic, typewriter, etc.
-                  editor.toggleMark(type);
-                  break;
-              }
-            }
-          }
-        });
-      case ESlateType.block:
-        return ({
-          onKeyDown(event: any, editor: any, next: () => any) {
-            const DEFAULT_BLOCK_TYPE = "paragraph";
-            if (! isHotkey(key, event)) {
-              next();
-            } else {
-              event.preventDefault();
-              const { value: {blocks, document} } = editor;
-              const containsListItems = blocks.some((block: any) => block.type === "list-item");
-              const isListOfThisType = blocks.some( (block: any) => {
-                return !!document.getClosest(block.key, (parent: any) => parent.type === type);
-              });
-              switch (type) {
-                case "bulleted":
-                case "numbered":
-                  // If what we are setting is not yet a list, we want to set
-                  // them to list-items, and wrap them with the appropriate type of
-                  // containing block.
-                  if (! containsListItems) {
-                    editor.setBlocks("list-item")
-                          .wrapBlock(type);
-                  } else {
-                    if (isListOfThisType) {
-                      // removes.
-                      editor.setBlocks(DEFAULT_BLOCK_TYPE)
-                            .unwrapBlock("bulleted")
-                            .unwrapBlock("numbered");
-                    } else {
-                      // If we are here, then it is a list and we are trying to
-                      // switch everything in the selection to that new list type,
-                      // or, if we are already that type, we want to clear.
-                      editor.unwrapBlock(type === "bulleted" ? "numbered" : "bulleted")
-                            .wrapBlock(type);
-                    }
-                  }
-                  break;
-                case "header-1":
-                case "header-2":
-                case "header-3":
-                default:
-                  // const containsListItems = blocks.some((block: any) => block.type === "list-item");
-                  const isAlreadySet = blocks.some( (block: any) => block.type === type );
-                  editor.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : type);
-                  if (containsListItems) {
-                    // In this case, we are trying to change a block away from
-                    // being a list. To do this, we either set the type we are
-                    // after, or clear it, if it's already set to that type. Then
-                    // we remove any part of the selection that might be a wrapper
-                    // of either type of list.
-                    editor.unwrapBlock("bulleted")
-                          .unwrapBlock("numbered");
-                  }
-                  break;
-              }
-            }
-          }
-        });
-      default:
-        return ({
-          onKeyDown(event: any, editor: any, next: () => any) {
-            // tslint:disable-next-line
-            console.log(`Internal error: unknown Slate editor type "${slateType}"`);
-          }
-        });
-    }
-  }
 }
