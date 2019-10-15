@@ -48,6 +48,10 @@ export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions 
   insertRowInfo?: IDropRowInfo;
 }
 
+export interface ITileCountsPerSection {
+  [key: string]: number;
+}
+
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
@@ -216,6 +220,15 @@ export const DocumentContentModel = types
     },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());
+    }
+  }))
+  .views(self => ({
+    getTileCountsPerSection(sectionIds: string[]): ITileCountsPerSection {
+      const counts: ITileCountsPerSection = {};
+      sectionIds.forEach(sectionId => {
+        counts[sectionId] = self.getTilesInSection(sectionId).length;
+      });
+      return counts;
     }
   }))
   .actions(self => ({
