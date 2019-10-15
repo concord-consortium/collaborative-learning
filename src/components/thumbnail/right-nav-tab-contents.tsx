@@ -7,6 +7,7 @@ import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelTy
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
 import { GroupVirtualDocument } from "../../models/document/group-vritual-document";
+import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
@@ -69,6 +70,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     const showGroupFourUp = () =>  {
       ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
       ui.problemWorkspace.toggleComparisonVisible({override: true});
+      ui.setTeacherPanelKey(EPanelId.workspace);
     };
 
     const styles: React.CSSProperties = {

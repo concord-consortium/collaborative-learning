@@ -62,3 +62,24 @@
   .group-1-2
     grid-row: 1 2
     grid-column: 2 3
+
+
+.group-header
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  .icon-expand-group-view
+    background-color: transparent
+    cursor: pointer
+    border: 0
+    padding: 6px
+    &:hover
+        background-color: hsla(1, 0%, 0%, 0.1)
+
+    .expand-group-view
+      background-image: url("../../assets/icons/clue-dashboard/expand-group-view.svg")
+      background-repeat: no-repeat
+      box-sizing: content-box
+      width: 39px
+      height: 30px
+

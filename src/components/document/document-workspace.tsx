@@ -114,7 +114,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private renderDocuments(isGhostUser: boolean) {
     const {appConfig, documents, ui, groups} = this.stores;
 
-    const { problemWorkspace, showTeacherGroupView} = ui;
+    const { problemWorkspace } = ui;
     const { comparisonDocumentKey } = problemWorkspace;
 
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
