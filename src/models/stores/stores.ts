@@ -72,3 +72,33 @@ export function createStores(params?: ICreateStores): IStores {
     clipboard: ClipboardModel.create()
   };
 }
+
+export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
+  const { unit, investigation, problem } = stores;
+  const section = sectionId && problem.getSectionById(sectionId);
+  return [unit, investigation, problem, section].reduce((prev, level) => {
+    const featureIndex = level ? level.disabled.findIndex(f => f === feature || f === `!${feature}`) : -1;
+    const isEnabledAtLevel = featureIndex >= 0 && level && level.disabled[featureIndex][0] === "!";
+    return featureIndex >= 0 ? isEnabledAtLevel : prev;
+  }, true);
+}
+
+export function getDisabledFeaturesOfTile(stores: IStores, tile: string, sectionId?: string) {
+  const { unit, investigation, problem } = stores;
+  const section = sectionId && problem.getSectionById(sectionId);
+  const disabledMap: { [feature: string]: boolean } = {};
+  [unit, investigation, problem, section]
+    .forEach((level, index) => {
+      level && level.disabled.forEach(feature => {
+        const regex = new RegExp(`(!)?(${tile}.+)`);
+        const match = regex.exec(feature);
+        if (match && match[2]) {
+          disabledMap[match[2]] = !match[1];
+        }
+      });
+    });
+  return Object.keys(disabledMap).reduce<string[]>((prev, feature) => {
+    disabledMap[feature] && prev.push(feature);
+    return prev;
+  }, []);
+}

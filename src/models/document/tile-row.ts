@@ -32,11 +32,18 @@ export const TileRowModel = types
     get isEmpty() {
       return (self.tiles.length === 0) && !self.isSectionHeader;
     },
+    get tileCount() {
+      return self.tiles.length;
+    },
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
     get tileIds() {
       return self.tiles.map(tile => tile.tileId).join(", ");
+    },
+    getTileIdAtIndex(index: number) {
+      const layout = self.tiles[index];
+      return layout && layout.tileId;
     },
     hasTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId) >= 0;

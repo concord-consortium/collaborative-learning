@@ -19,6 +19,7 @@ import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
 import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { isFeatureSupported } from "../../../models/stores/stores";
 import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
@@ -825,12 +826,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private isAcceptableTileDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
+    const canAcceptTableDrops = isFeatureSupported(this.stores, "GeometryLinkedTables") &&
+                                  this.isDragTileInSameDocument(e);
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension
     const kImgDropMarginPct = 0.1;
     if (!readOnly &&
         ((toolType === "image") ||
-        ((toolType === "table") && this.isDragTileInSameDocument(e)))) {
+        ((toolType === "table") && canAcceptTableDrops))) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
       const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;

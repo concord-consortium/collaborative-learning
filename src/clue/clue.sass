@@ -60,11 +60,35 @@
           &:active
             background-image: url("../assets/icons/copy/copy-active.svg")
         .button-icon.delete
-          background-image: url("../assets/icons/delete/delete.svg")
-          &:hover
-              background-image: url("../assets/icons/delete/delete-hover.svg")
-          &:active
-              background-image: url("../assets/icons/delete/delete-active.svg")
+          &.enabled
+            background-image: url("../assets/icons/delete/delete.svg")
+            &:hover
+                background-image: url("../assets/icons/delete/delete-hover.svg")
+            &:active
+                background-image: url("../assets/icons/delete/delete-active.svg")
+          &.disabled
+            background-image: url("../assets/icons/delete/delete-disabled.svg")
+            cursor: default
+            &:active
+              transform-origin: center
+              transform: none
+              cursor: default
+        .button-icon.share
+          &.visibility.public
+            background-image: url("../assets/icons/share/share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/not-share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/not-share-active.svg")
+        .button-icon.share
+          &.visibility.private
+            background-image: url("../assets/icons/share/not-share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/share-active.svg")
+      .icon-button.delete-disabled
+        cursor: default
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1

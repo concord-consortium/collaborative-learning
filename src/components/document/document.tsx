@@ -89,22 +89,20 @@ const CopyButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const DeleteButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="delete" key="delete" className="action icon-delete"
-                onClickButton={onClick} />
-  );
+const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
+    const enabledClass = enabled ? "enabled" : "disabled";
+    return (
+      <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
+                  enabled={enabled} innerClassName={enabledClass}
+                  onClickButton={enabled ? onClick : undefined} />
+    );
 };
 
-const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
+const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
   return (
-    <div key="share" className={`visibility action ${visibility}`}>
-      <svg id="currVis" className={`share icon icon-share`}
-            data-test="share-icon" onClick={onClick}>
-        <use xlinkHref={`#icon-share`} />
-      </svg>
-    </div>
+    <IconButton icon="share" key={`share-${visibility}`} className={`action icon-share`}
+                innerClassName={`visibility ${visibility}`} onClickButton={onClick}/>
   );
 };
 
@@ -232,14 +230,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
-    const { user: { isTeacher } } = this.stores;
+    const { user: { isTeacher }, documents, user } = this.stores;
+    const otherDocuments = documents.byTypeForUser(document.type, user.id);
+    const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
-            <DeleteButton onClick={this.handleDeleteDocumentClick} />
+            <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
           </div>
         }
         {

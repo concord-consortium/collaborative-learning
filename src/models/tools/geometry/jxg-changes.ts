@@ -43,14 +43,21 @@ export interface JXGNormalizedChange {
   links?: ILinkProperties;
 }
 
+export interface IChangeContext {
+  isFeatureDisabled?: (feature: string) => boolean;
+}
+
 export type JXGElement = JXG.Board | JXG.Line | JXG.Point | JXG.Text;
 export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
 // for all other changes it should be the board
-export type JXGCreateHandler = (board: JXG.Board|string, change: JXGChange) => JXGChangeResult;
-export type JXGUpdateHandler = (board: JXG.Board, change: JXGChange) => JXGChangeResult;
-export type JXGDeleteHandler = (board: JXG.Board, change: JXGChange) => void;
+export type JXGCreateHandler = (board: JXG.Board|string, change: JXGChange,
+                                context?: IChangeContext) => JXGChangeResult;
+export type JXGUpdateHandler = (board: JXG.Board, change: JXGChange,
+                                context?: IChangeContext) => JXGChangeResult;
+export type JXGDeleteHandler = (board: JXG.Board, change: JXGChange,
+                                context?: IChangeContext) => void;
 
 export interface JXGChangeAgent {
   create: JXGCreateHandler;

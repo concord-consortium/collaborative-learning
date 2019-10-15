@@ -18,6 +18,8 @@ interface IProps extends IBaseProps {
   readOnly?: boolean;
   scale?: number;
   toolApiInterface?: IToolApiInterface;
+  selectedSectionId?: string | null;
+  viaTeacherDashboard?: boolean;
 }
 
 interface IDragResizeRow {
@@ -55,6 +57,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (this.domElement) {
       this.domElement.addEventListener("scroll", throttle(this.updateVisibleRows, 100));
       this.updateVisibleRows();
+      this.scrollToSection(this.props.selectedSectionId);
 
       if ((window as any).MutationObserver) {
         this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
@@ -67,16 +70,37 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     this.mutationObserver.disconnect();
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps) {
     // recalculate after render
     requestAnimationFrame(() => {
       this.updateVisibleRows();
+
+      const domElement = this.domElement;
+      if (!domElement) {
+        return;
+      }
+
+      // scroll to selected section if it changed
+      const {selectedSectionId} = this.props;
+      if (selectedSectionId && (selectedSectionId !== prevProps.selectedSectionId)) {
+        this.scrollToSection(selectedSectionId);
+      }
+
+      // move to current section or top of document when content switches in teacher dashboard
+      requestAnimationFrame(() => {
+        if (this.props.content !== prevProps.content) {
+          if (!this.scrollToSection(this.props.selectedSectionId)) {
+            domElement.scrollTo({top: 0});
+          }
+        }
+      });
     });
   }
 
   public render() {
+    const {viaTeacherDashboard} = this.props;
     return (
-      <div className="document-content"
+      <div className={`document-content${viaTeacherDashboard ? " document-content-smooth-scroll" : ""}`}
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}
         onDragLeave={this.handleDragLeave}
@@ -145,12 +169,17 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
-      if (!dropHighlight && index === highlightPendingDropLocation) {
-        dropHighlight = "bottom";
+      if (!dropHighlight) {
+        if (index === highlightPendingDropLocation) {
+          dropHighlight = "top";
+        }
+        else if ((index === rowOrder.length - 1) && (index + 1 === highlightPendingDropLocation)) {
+          dropHighlight = "bottom";
+        }
       }
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  height={rowHeight} tileMap={tileMap}
+                                  rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
@@ -345,7 +374,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (e.dataTransfer.getData(kDragRowHeight)) {
       dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
     }
-    content.copyTileIntoRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
+    content.copyTileIntoNewRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
   }
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -401,6 +430,37 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     if (this.state.dropRowInfo) {
       this.setState({ dropRowInfo: undefined });
+    }
+  }
+
+  private scrollToSection(sectionId: string | null | undefined ) {
+    if (!sectionId || !this.domElement) {
+      return false;
+    }
+
+    const sectionElementTop = this.findSectionElementTop(this.domElement, sectionId);
+    if (sectionElementTop !== undefined) {
+      this.domElement.scrollTo({top: sectionElementTop});
+      return true;
+    }
+    return false;
+  }
+
+  private findSectionElementTop(parent: HTMLElement, sectionId: string, top: number = 0): number | undefined {
+    for (let i = 0; i < parent.childNodes.length; i++) {
+      const child = parent.childNodes.item(i) as HTMLElement;
+      if (child.nodeType === 1) { // 1 is element
+        if (child.id === `section_${sectionId}`) {
+          return top + child.offsetTop;
+        }
+        if (child.childNodes) {
+          const sectionElementTop = this.findSectionElementTop(child, sectionId, top);
+          if (sectionElementTop !== undefined) {
+            return sectionElementTop;
+          }
+        }
+        top += child.clientHeight;
+      }
     }
   }
 

@@ -7,8 +7,7 @@ import * as uuid from "uuid/v4";
 export const kDefaultMinWidth = 60;
 
 export function createToolTileModelFromContent(content: ToolContentUnionType) {
-  // cast required as of MST ~3.8 -- seems unnecessary
-  return ToolTileModel.create({ content } as any);
+  return ToolTileModel.create({ content });
 }
 
 export const ToolTileModel = types
@@ -46,6 +45,10 @@ export const ToolTileModel = types
     willRemoveFromDocument() {
       const willRemoveFromDocument = (self.content as any).willRemoveFromDocument;
       return willRemoveFromDocument && willRemoveFromDocument();
+    },
+    setDisabledFeatures(disabled: string[]) {
+      const metadata: any = findMetadata(self.content.type, self.id);
+      metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
     }
   }));
 

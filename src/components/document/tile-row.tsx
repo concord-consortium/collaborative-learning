@@ -50,6 +50,7 @@ interface IProps {
   docId: string;
   scale?: number;
   model: TileRowModelType;
+  rowIndex: number;
   height?: number;
   tileMap: any;
   readOnly?: boolean;
@@ -105,17 +106,22 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderDragDropHandles() {
-    const { model: { isUserResizable }, dropHighlight } = this.props;
+    const { model: { isUserResizable }, rowIndex, dropHighlight } = this.props;
     const highlight = this.state.tileAcceptDrop ? undefined : dropHighlight;
+    const { isSectionHeader } = this.props.model;
+    const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
+    const showLeftHighlight = (highlight === "left") && !isSectionHeader;
+    const showRightHighlight = (highlight === "right") && !isSectionHeader;
+    const showBottomHighlight = (highlight === "bottom");
     return [
       <div key="top-drop-feedback"
-          className={`drop-feedback ${highlight === "top" ? "show top" : ""}`} />,
+          className={`drop-feedback ${showTopHighlight ? "show top" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`drop-feedback ${highlight === "left" ? "show left" : ""}`} />,
+          className={`drop-feedback ${showLeftHighlight ? "show left" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`drop-feedback ${highlight === "right" ? "show right" : ""}`} />,
+          className={`drop-feedback ${showRightHighlight ? "show right" : ""}`} />,
       <div key="bottom-drop-feedback"
-          className={`drop-feedback ${highlight === "bottom" ? "show bottom" : ""}`} />,
+          className={`drop-feedback ${showBottomHighlight ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}

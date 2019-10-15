@@ -86,8 +86,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
       const tiles: any = [];
       problem.sections.forEach(section => {
         tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-        const placeholder = getSectionPlaceholder(section.type);
-        tiles.push({ content: { type: "Placeholder", prompt: placeholder }});
+        tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
       });
       return DocumentContentModel.create({ tiles } as any);
     }
@@ -256,14 +255,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
     const {ui} = this.stores;
     this.imageDragDrop.drop(e)
-      .then((imageUrl) => {
+      .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
         if (primaryDocument) {
           // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
           const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
           primaryDocument.content.addTile("image", {
-            imageUrl,
+            url,
             insertRowInfo: {
               rowInsertIndex
             }
@@ -326,17 +325,23 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDeleteDocument = (document: DocumentModelType) => {
-    const { appConfig } = this.stores;
+    const { appConfig, documents, user } = this.stores;
+    const otherDocuments = documents.byTypeForUser(document.type, user.id);
+    const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
+    if (countNotDeleted <= 1) {
+      this.stores.ui.alert(`Cannot delete the last ${docTypeStringL}.`, `Error: Delete ${docTypeString}`);
+    }
+    else {
+      this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
       .then((confirmDelete: boolean) => {
-        const docType = document.type;
-        if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
+        if (confirmDelete) {
           document.setProperty("isDeleted", "true");
           this.handleDeleteOpenPrimaryDocument();
         }
       });
+    }
   }
 
   private handleDeleteOpenPrimaryDocument = async () => {

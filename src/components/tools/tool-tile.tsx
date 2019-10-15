@@ -1,6 +1,7 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
+import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
@@ -94,12 +95,17 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   private hotKeys: HotKeys = new HotKeys();
 
   public componentDidMount() {
+    const { model } = this.props;
+    const { content: { type } } = model;
+    model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
+
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
         "cmd-shift-c": this.handleCopyJson
       });
     }
+
     if (this.domElement) {
       this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
     }
@@ -129,11 +135,14 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
-        <div className="tool-tile-drag-handle tool select">
-          <svg className={`icon icon-select-tool`}>
-            <use xlinkHref={`#icon-select-tool`} />
-          </svg>
-        </div>
+        { ToolComponent !== PlaceholderToolComponent
+          ? <div className="tool-tile-drag-handle tool select">
+            <svg className={`icon icon-select-tool`}>
+              <use xlinkHref={`#icon-select-tool`} />
+            </svg>
+          </div>
+          : null
+        }
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
@@ -201,6 +210,11 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
     // set the drag data
     const { model, docId, height, scale } = this.props;
+    const ToolComponent = kToolComponentMap[model.content.type];
+    if (ToolComponent === PlaceholderToolComponent) {
+      e.preventDefault();
+      return;
+    }
     const snapshot = cloneDeep(getSnapshot(model));
     const id = snapshot.id;
     delete snapshot.id;
@@ -216,7 +230,6 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(dragTileType(model.content.type), model.content.type);
 
     // set the drag image
-    const ToolComponent = kToolComponentMap[model.content.type];
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
     const dragImage = ToolComponent && ToolComponent.getDragImageNode

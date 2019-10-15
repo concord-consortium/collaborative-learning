@@ -47,7 +47,7 @@ export type PublicationType = typeof ProblemPublication | OtherPublicationType |
 
 export interface IDocumentAddTileOptions {
   addSidecarNotes?: boolean;
-  imageUrl?: string;
+  url?: string;
 }
 
 export const DocumentToolEnum = types.enumeration("tool",

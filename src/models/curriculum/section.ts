@@ -18,7 +18,8 @@ export interface ISectionInfoMap {
 export const kAllSectionType = "all";
 const kAllSectionInfo = { initials: "*", title: "All" };
 export const kUnknownSectionType = "unknown";
-const kUnknownSectionInfo = { initials: "?", title: "Unknown" };
+export const kDefaultPlaceholder = "Create or drag tiles here";
+const kUnknownSectionInfo = { initials: "?", title: "Unknown", placeholder: kDefaultPlaceholder };
 
 let gSectionInfoMap: ISectionInfoMap = { [kAllSectionType]: kAllSectionInfo };
 
@@ -40,12 +41,13 @@ export function getSectionTitle(type: SectionType) {
 }
 
 export function getSectionPlaceholder(type: SectionType) {
-  return getSectionInfo(type).placeholder || "";
+  return getSectionInfo(type).placeholder || kDefaultPlaceholder;
 }
 
 export const SectionModel = types
   .model("Section", {
     type: types.string, // sectionId corresponding to entry in unit
+    disabled: types.array(types.string),
     content: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
   })

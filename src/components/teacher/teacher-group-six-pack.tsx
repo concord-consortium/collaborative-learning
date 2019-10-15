@@ -10,6 +10,7 @@ import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   page: number;
   documentViewMode: DocumentViewMode;
+  selectedSectionId: string | null;
 }
 
 const ROWS = 2;
@@ -45,7 +46,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
   }
 
   private renderFourUp(groupIndex: number, r: number, c: number) {
-    const { documentViewMode } = this.props;
+    const { documentViewMode, selectedSectionId } = this.props;
     const { groups } = this.stores;
     const group = groups.allGroups[groupIndex];
 
@@ -86,6 +87,8 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
               isGhostUser={true}
               toggleable={true}
               documentViewMode={documentViewMode}
+              selectedSectionId={selectedSectionId}
+              viaTeacherDashboard={true}
             />
           </div>
         </div>

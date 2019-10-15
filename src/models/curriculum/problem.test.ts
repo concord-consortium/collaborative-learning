@@ -14,6 +14,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
+      disabled: [],
       sections: [],
       supports: []
     });
@@ -39,13 +40,16 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "sub",
+      disabled: [],
       sections: [
         {
           type: "introduction",
+          disabled: [],
           supports: []
         },
         {
           type: "initialChallenge",
+          disabled: [],
           supports: []
         }
       ],

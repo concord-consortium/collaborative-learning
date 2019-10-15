@@ -1,43 +1,62 @@
+import { inject } from "mobx-react";
 import * as React from "react";
 import "./progress-widget.sass";
+
+import { ProgressWidgetItem } from "./progress-widget-item";
+import { BaseComponent } from "../../components/base";
 
 export interface IProgressItem {
   label: string;
   completed: number;
   total: number;
-  selected: boolean;
 }
 
 interface IProps {
-  items: IProgressItem[];
+  selectedSectionId: string | null;
+  setSelectedSectionId: (sectionId: string) => void;
 }
 
-interface IState {}
+interface IState {
+  progressItems: IProgressItem[];
+}
 
-export class ProgressWidget extends React.Component<IProps, IState> {
+@inject("stores")
+export class ProgressWidget extends BaseComponent<IProps, IState> {
 
-  public renderItem(progressItem: IProgressItem) {
-    const className = progressItem.selected
-      ? "section-section selected"
-      : "section-section";
-    return(
-      <div className="section-section" key={progressItem.label}>
-        <div className="section-circle">{progressItem.label}</div>
-        <div className="section-progress">
-          <div className="section-current">{progressItem.completed}</div>
-          <div className="section-of">of</div>
-          <div className="section-total">{progressItem.total}</div>
-        </div>
-    </div>
-    );
+  constructor(props: IProps) {
+    super(props);
+
+    const { problem } = this.stores;
+    const { sections } = problem;
+    const makeProgressItem = (s: string): IProgressItem => {
+      return {
+        label: s,
+        completed: Math.floor(Math.random() * 12) + 1,
+        total: 12
+      };
+    };
+    const progressItems = sections.map(s => makeProgressItem(s.initials));
+
+    this.state = {
+      progressItems
+    };
   }
-
   public render() {
-    const { items } = this.props;
+    const { selectedSectionId, setSelectedSectionId } = this.props;
+    const { progressItems } = this.state;
     return(
-      <div className="section-progress">
+      <div className="progress-widget">
         <div className="label"> Progress </div>
-        { items.map(i => this.renderItem(i)) }
+        { progressItems.map(item => {
+            return (
+              <ProgressWidgetItem
+                key={item.label}
+                item={item}
+                selected={item.label === selectedSectionId}
+                setSelectedSectionId={setSelectedSectionId}
+              />
+            );
+          })}
       </div>
     );
   }

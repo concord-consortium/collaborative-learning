@@ -1,4 +1,4 @@
-import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext } from "./jxg-changes";
 import { boardChangeAgent, isBoard, kReverse, sortByCreation } from "./jxg-board";
 import { commentChangeAgent } from "./jxg-comment";
 import { imageChangeAgent } from "./jxg-image";
@@ -31,13 +31,16 @@ const agents: JXGChangeAgents = {
   vertexangle: vertexAngleChangeAgent
 };
 
+export interface IDispatcherChangeContext extends IChangeContext {
+  onWillApplyChange?: OnWillApplyChange;
+  onDidApplyChange?: OnDidApplyChange;
+}
+
 export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
-                             onWillApplyChange?: OnWillApplyChange,
-                             onDidApplyChange?: OnDidApplyChange): JXGChangeResult[] {
+                             context?: IDispatcherChangeContext): JXGChangeResult[] {
   let _board: JXG.Board | undefined;
   const results = changes.map(change => {
-                    const result = applyChange(_board || board, change,
-                                               onWillApplyChange, onDidApplyChange);
+                    const result = applyChange(_board || board, change, context);
                     const resultBoard = castArray(result).find(isBoard) as JXG.Board;
                     if ((typeof board === "string") && resultBoard) {
                       _board = resultBoard;
@@ -52,38 +55,37 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
 }
 
 export function applyChange(board: JXG.Board|string, change: JXGChange,
-                            onWillApplyChange?: OnWillApplyChange,
-                            onDidApplyChange?: OnDidApplyChange): JXGChangeResult {
+                            context?: IDispatcherChangeContext): JXGChangeResult {
   let _board = board as JXG.Board;
   const target = change.target.toLowerCase();
 
   // give clients a chance to intercede before the change is applied
-  if (onWillApplyChange) {
-    onWillApplyChange(board, change);
+  if (context && context.onWillApplyChange) {
+    context.onWillApplyChange(board, change);
   }
 
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
-    applyUpdateObjects(_board, change);
+    applyUpdateObjects(_board, change, context);
     return;
   }
   // special case for delete/object, where we dispatch by object type
   if ((change.operation === "delete") && (target === "object")) {
-    applyDeleteObjects(_board, change);
+    applyDeleteObjects(_board, change, context);
     return;
   }
-  const result = dispatchChange(board, change);
+  const result = dispatchChange(board, change, context);
 
   // give clients a chance to intercede after the change has been applied
-  if (onDidApplyChange) {
+  if (context && context.onDidApplyChange) {
     if (isBoard(result)) _board = result as JXG.Board;
-    onDidApplyChange(_board, change);
+    context.onDidApplyChange(_board, change);
   }
 
   return result;
 }
 
-function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
+function applyUpdateObjects(board: JXG.Board, change: JXGChange, context?: IChangeContext) {
   const ids = castArray(change.targetID);
   ids.forEach((id, index) => {
     const obj = id && board.objects[id];
@@ -100,11 +102,11 @@ function applyUpdateObjects(board: JXG.Board, change: JXGChange) {
                     parents: change.parents,
                     properties: props,
                     links: change.links
-                  });
+                  }, context);
   });
 }
 
-function applyDeleteObjects(board: JXG.Board, change: JXGChange) {
+function applyDeleteObjects(board: JXG.Board, change: JXGChange, context?: IChangeContext) {
   const ids = castArrayCopy(change.targetID);
   sortByCreation(board, ids, kReverse);
   ids.forEach(id => {
@@ -118,16 +120,16 @@ function applyDeleteObjects(board: JXG.Board, change: JXGChange) {
                       target,
                       targetID: id,
                       links: change.links
-                    });
+                    }, context);
     }
   });
 }
 
-function dispatchChange(board: JXG.Board|string, change: JXGChange): JXGChangeResult {
+function dispatchChange(board: JXG.Board|string, change: JXGChange, context?: IChangeContext): JXGChangeResult {
   const target = change.target.toLowerCase();
   const agent = agents[target];
   const handler = agent && agent[change.operation];
   return handler
-          ? (handler as JXGCreateHandler)(board, change)
+          ? (handler as JXGCreateHandler)(board, change, context)
           : undefined;
 }
