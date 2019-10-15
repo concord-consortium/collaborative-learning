@@ -37,6 +37,23 @@
     background-color: $sky-dark-2
     border-color: $sky-light-3
 
+  .support-badge
+    $badge-radius: 9px
+    position: absolute
+    left: -$padding - ($badge-radius / 4)
+    top: 0
+    background-color: #fff
+    border: 4px solid $sky
+    width: $badge-radius * 2
+    height: $badge-radius * 2
+    border-radius: $badge-radius
+
+  &.hovering
+    /* can't use :hover since we want the badge to change when the tab is hovered */
+    .support-badge
+      background-color: $sky-dark-1
+      border-color: $sky-light-3
+
 .document
   .titlebar
     &.personal, &.personalPublication, &.problem, &.publication

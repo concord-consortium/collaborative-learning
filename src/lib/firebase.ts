@@ -299,6 +299,10 @@ export class Firebase {
     return this.ref(this.getUserPath(this.db.stores.user)).child("latestGroupId");
   }
 
+  public getLastSupportViewTimestampRef() {
+    return this.ref(this.getUserPath(this.db.stores.user)).child("lastSupportViewTimestamp");
+  }
+
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
     if (snapshot) {
       const connected = snapshot.val();
