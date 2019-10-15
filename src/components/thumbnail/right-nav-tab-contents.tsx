@@ -26,7 +26,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const { appConfig: { rightNavTabs }, user, groups } = this.stores;
+    const { appConfig: { rightNavTabs }, user } = this.stores;
     const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
 
     const renderDocumentsSection = (section: any) => {
@@ -81,7 +81,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     };
 
     return (
-      <div>
+      <div key={group.id}>
         <div onClick={showGroupFourUp}>
           {group.id}
           <div style={styles}>
