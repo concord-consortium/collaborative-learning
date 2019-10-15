@@ -32,6 +32,9 @@ export const ToolTileModel = types
     },
     get isPlaceholder() {
       return self.content.type === kPlaceholderToolID;
+    },
+    get placeholderSectionId() {
+      return (self.content.type === kPlaceholderToolID) ? self.content.sectionId : undefined;
     }
   }))
   .actions(self => ({

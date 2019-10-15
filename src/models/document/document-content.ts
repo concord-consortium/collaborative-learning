@@ -186,6 +186,11 @@ export const DocumentContentModel = types
     };
   })
   .views(self => ({
+    getSectionTypeForPlaceholderRow(row: TileRowModelType) {
+      if (!self.isPlaceholderRow(row)) return;
+      const tile = self.getTile(row.tiles[0].tileId);
+      return tile && tile.placeholderSectionId;
+    },
     get defaultInsertRow() {
       // next tile comes after the last visible row with content
       for (let i = self.indexOfLastVisibleRow; i >= 0; --i) {
@@ -605,7 +610,8 @@ function migrateSnapshot(snapshot: any): any {
       docContent.addSectionHeaderRow(sectionId);
     }
     else {
-      docContent.addTileInNewRow(newTile.content, { rowHeight: tileHeight });
+      const options = { rowIndex: docContent.rowCount, rowHeight: tileHeight };
+      docContent.addTileInNewRow(newTile.content, options);
     }
   });
   return getSnapshot(docContent);
