@@ -443,4 +443,25 @@ describe("DocumentContentModel", () => {
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
   });
+
+  it("can import authored content with sections and placeholders", () => {
+    const srcContent: any = {
+            tiles: [
+              { content: { isSectionHeader: true, sectionId: "foo" } },
+              { content: { type: "Placeholder", sectionId: "foo" } },
+              { content: { isSectionHeader: true, sectionId: "bar" } },
+              { content: { type: "Placeholder", sectionId: "bar" } }
+            ]
+          };
+    const content = DocumentContentModel.create(srcContent);
+    expect(content.rowCount).toBe(4);
+    expect(content.getRowByIndex(0)!.isSectionHeader).toBe(true);
+    expect(content.isPlaceholderRow(content.getRowByIndex(1)!)).toBe(true);
+    expect(content.getRowByIndex(2)!.isSectionHeader).toBe(true);
+    expect(content.isPlaceholderRow(content.getRowByIndex(3)!)).toBe(true);
+    expect(content.getSectionTypeForPlaceholderRow(content.getRowByIndex(1)!))
+      .toBe(content.getRowByIndex(0)!.sectionId);
+    expect(content.getSectionTypeForPlaceholderRow(content.getRowByIndex(3)!))
+      .toBe(content.getRowByIndex(2)!.sectionId);
+  });
 });
