@@ -1,21 +1,11 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import * as FileSaver from "file-saver";
-
-import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument } from "../../models/document/document";
 import { IGroupVirtualDocument } from "../../models/document/group-vritual-document";
-import { ToolbarComponent } from "../toolbar";
-import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
+import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
-import { ToolbarConfig } from "../../models/tools/tool-types";
-import { IconButton } from "../utilities/icon-button";
-import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
@@ -30,32 +20,29 @@ interface IState {
   documentKey: string;
   documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
-  commentTileId: string;
 }
 
 @inject("stores")
 @observer
 export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState> {
+/*
+  NP/DL: 2019-10-15 -- Provides a view component for "GroupVirtualDocuments"
+  SEE: `src/models/document/group-virtual-document`
 
-  // public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-  //   const { document } = nextProps;
-  //   const documentContext: IDocumentContext = {
-  //           getProperty: (key: string) => document.properties.get(key),
-  //           setProperties: (properties: ISetProperties) => document.setProperties(properties)
-  //         };
-  //   return document.key === prevState.documentKey
-  //           ? {}
-  //           : { documentKey: document.key, documentContext };
-  // }
-  // private toolApiMap: IToolApiMap = {};
+  This work helps teachers quickly switch between multiple compare views of
+  different workgroups.
+
+  See PT Stories:
+  https://www.pivotaltracker.com/story/show/168619033
+  https://www.pivotaltracker.com/story/show/168711827
+*/
   private toolApiInterface: IToolApiInterface;
 
   constructor(props: IProps) {
     super(props);
     this.state = {
       documentKey: props.document.key,
-      isCommentDialogOpen: false,
-      commentTileId: ""
+      isCommentDialogOpen: false
     };
   }
 
@@ -65,7 +52,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
       <DocumentContext.Provider value={this.state.documentContext}>
         <div key="document" className="document">
           {this.renderTitleBar()}
-          {this.renderCanvas()}
+          <div className="canvas-area">{this.render4UpCanvas()}</div>
           {this.renderStatusBar(type)}
         </div>
       </DocumentContext.Provider>
@@ -73,7 +60,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   }
 
   private renderTitleBar() {
-    const type = "problem";
+    const type = "group";
     return (
       <div>
         <div className={`titlebar ${type}`}/>
@@ -84,11 +71,6 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
           Title
         </div>
       </div>
-    );
-  }
-  private renderCanvas() {
-    return (
-      <div className="canvas-area">{this.render4UpCanvas()}</div>
     );
   }
 
@@ -108,12 +90,8 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   private renderStatusBar(type: string) {
     return (
       <div className={`statusbar ${type}`}>
-        <div className="supports">
-          {null}
-        </div>
-        <div className="actions">
-          {null}
-        </div>
+        <div className="supports">{ null } </div>
+        <div className="actions"> { null } </div>
       </div>
     );
   }
