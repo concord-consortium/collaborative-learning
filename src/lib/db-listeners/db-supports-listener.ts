@@ -41,7 +41,7 @@ export class DBSupportsListener extends BaseListener {
     }
     if (this.lastSupportViewTimestampRef) {
       this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
-      this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
+      this.lastSupportViewTimestampRef.off("value", this.handleLastSupportViewTimestampRef);
     }
   }
 
