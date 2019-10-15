@@ -203,6 +203,11 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             const { dataSet } = this.props;
             dataSet && dataSet.setAttributeName(id, name);
           }
+          // WIP:
+          // The value of renameId is now showing the new value when stepping through
+          // The columns, however, still are not refreshing without a hard refresh of the DOM
+          const renameId: string[] = [id];
+          this.gridColumnApi && this.gridColumnApi.autoSizeColumns(renameId);
         },
         onUpdateExpression: (id: string, expression: string, rawExpression: string) => {
           if (this.props.onSetExpression) {
@@ -237,6 +242,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       cellClass: "cdp-case-index-cell",
       colId: "__CASE_INDEX__",
       width: 50,
+      autoHeight: true,
       pinned: "left",
       lockPosition: true,
       valueGetter: this.props.indexValueGetter || defaultIndexValueGetter,
@@ -283,7 +289,6 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
                 ? params.value.toFixed(places)
                 : params.value;
     };
-
     return ({
       headerClass: "cdp-column-header cdp-attr-column-header",
       cellClass: `cdp-row-data-cell ${expression ? "has-expression" : ""}`,
@@ -293,6 +298,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       colId: attribute.id,
       editable,
       width: defaultWidth,
+      maxWidth: 357,
+      autoHeight: true,
       resizable: true,
       lockPosition: true,
       valueGetter: (params: ValueGetterParams) => {
