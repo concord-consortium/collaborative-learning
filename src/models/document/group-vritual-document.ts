@@ -7,6 +7,9 @@ export interface IGroupVirtualDocument {
   key: string;
 }
 
+interface IGroupConstructorParams {
+  id: string;
+}
 /*
   NP/DL: 2019-10-15 -- GroupVirtualDocuments are simple objects that behave
   superficially like "Documents" in the workspace view.
@@ -24,7 +27,7 @@ export interface IGroupVirtualDocument {
 export class GroupVirtualDocument {
   public readonly id: string;
 
-  constructor(group: GroupModelType) {
+  constructor(group: IGroupConstructorParams) {
     this.id = group.id;
   }
 

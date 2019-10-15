@@ -1,0 +1,45 @@
+@import ../vars
+
+.document
+  .titlebar
+    .title
+    .group-title
+      font-family: 'Lato-Italic', 'Lato Italic', 'Lato', 'ArialMT', 'Arial'
+      font-style: italic
+      font-weight: 400
+      font-size: 14px
+      margin-left: 0.5em
+      align-self: center
+    .actions
+      .mode
+        border-top-right-radius: $border-radius
+
+      .mode #nextMode
+        display: none
+
+      .icon
+        &.group-number
+          display: flex
+          flex-direction: row
+          justify-content: center
+          align-items: center
+          border-radius: 4px
+          height: 25px
+          margin: 2px
+          margin-left: 5px
+          width: auto
+          background-color: $sage-light-3
+          .number
+            font-family: Lato-Bold, "Lato Bold", Lato, sans-serif
+            font-size: 14pt
+            line-height: auto
+            font-weight: 700
+            text-align: center;
+          &:hover
+            background-color: $sage-dark-2
+            color: $sage-light-2
+
+          &.active
+            background-color: $sage-dark-3
+            color: $sage-light-3
+

@@ -3,11 +3,11 @@ import * as React from "react";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { IGroupVirtualDocument } from "../../models/document/group-vritual-document";
+import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-vritual-document";
 import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 
-import "./document.sass";
+import "./group-virtual-document.sass";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -59,19 +59,39 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     );
   }
 
+  private groupButton(groupId: string) {
+    const { document } = this.props;
+    const thisId = document.id;
+    const selected = thisId === groupId;
+    const className = `icon group-number ${selected ? "active" : ""}`;
+    const clickHandler = () => this.handleGroupClicked(groupId);
+    return(
+      <div className={className} onClick={clickHandler}>
+        <div className="number">G{groupId}</div>
+      </div>
+    );
+  }
+
   private renderTitleBar() {
     const type = "group";
+    const { groups } = this.stores;
+    const { document } = this.props;
+    const thisId = document.id;
     return (
-      <div>
-        <div className={`titlebar ${type}`}/>
+      <div className={`titlebar ${type}`}>
         <div className="actions">
-          fake buttons
+          { groups.allGroups.map( group => this.groupButton(group.id)) }
         </div>
-        <div className="title" data-test="document-title">
-          Title
+        <div className="group-title" data-test="document-title">
+          Group {thisId}
         </div>
       </div>
     );
+  }
+
+  private handleGroupClicked(groupID: string) {
+    const { ui } = this.stores;
+    ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({id: groupID}));
   }
 
   private render4UpCanvas() {
