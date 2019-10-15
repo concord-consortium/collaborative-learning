@@ -19,6 +19,7 @@ import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
+import { LinkIndicatorComponent } from "./link-indicator";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -135,6 +136,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
+        <LinkIndicatorComponent type={model.content.type} id={model.id} />
         { ToolComponent !== PlaceholderToolComponent
           ? <div className="tool-tile-drag-handle tool select">
             <svg className={`icon icon-select-tool`}>
