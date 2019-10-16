@@ -1,4 +1,5 @@
-import { UnitModel } from "./unit";
+import { UnitModel, isDifferentUnitAndProblem } from "./unit";
+import { IStores } from "../stores/stores";
 
 describe("UnitModel", () => {
 
@@ -10,6 +11,7 @@ describe("UnitModel", () => {
   const inInvestigation1 = { ordinal: 1, title: investigation1Title, problems: [ inProblem1 ] };
   const inInvestigation2 = { ordinal: 2, title: investigation2Title, problems: [ inProblem1 ] };
   const unit = UnitModel.create({
+                code: "u1",
                 title: "Unit 1",
                 investigations: [ inInvestigation1, inInvestigation2 ]
               });
@@ -34,5 +36,19 @@ describe("UnitModel", () => {
     const result21 = unit.getProblem("2.1");
     expect(result21.problem && result21.problem.title).toBe(problemTitle);
     expect(result21.investigation && result21.investigation.title).toBe(investigation2Title);
+  });
+
+  it("isDifferentUnitAndProblem() should work as expected", () => {
+    const stores: IStores = {
+            unit,
+            investigation: unit.getInvestigation(1),
+            problem: unit.getInvestigation(1)!.getProblem(1)
+          } as IStores;
+    expect(isDifferentUnitAndProblem(stores, "u1", undefined)).toBe(false);
+    expect(isDifferentUnitAndProblem(stores, undefined, "1.1")).toBe(false);
+    expect(isDifferentUnitAndProblem(stores, "u1", "1.1")).toBe(false);
+    expect(isDifferentUnitAndProblem(stores, "u1", "1.2")).toBe(true);
+    expect(isDifferentUnitAndProblem(stores, "u2", "1.1")).toBe(true);
+    expect(isDifferentUnitAndProblem(stores, "u2", "2.2")).toBe(true);
   });
 });
