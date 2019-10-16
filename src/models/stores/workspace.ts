@@ -69,7 +69,7 @@ export const WorkspaceModel = types
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
         if (!visible) {
-          self.comparisonDocumentKey = undefined;
+           self.comparisonDocumentKey = undefined;
         }
 
         if (!muteLog) {

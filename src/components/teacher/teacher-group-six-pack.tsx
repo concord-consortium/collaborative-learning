@@ -59,19 +59,33 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
     const TeacherGroupHeader = (props: IGroupHeaderProps) => {
       const { ui }  = this.stores;
 
-      const clickHandler = () => {
+      const showGroupClickHandler = () => {
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
       };
+
+      const showGroupSupportClickHandler = () => {
+        ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
+        ui.problemWorkspace.toggleComparisonVisible({override: true});
+        ui.setTeacherPanelKey(EPanelId.workspace);
+      };
+
       return(
         <div className="group-header">
           <div className="group-label">Group {String(group.id)}</div>
-          <IconButton
-            icon="expand-group-view"
-            key="expand-group-view"
-            className="action icon-expand-group-view"
-            onClickButton={clickHandler} />
+          <div className="actions">
+            <IconButton
+              className="icon"
+              icon="support"
+              key="support"
+              onClickButton={showGroupSupportClickHandler} />
+            <IconButton
+              className="icon"
+              icon="expand-group-view"
+              key="expand-group-view"
+              onClickButton={showGroupClickHandler} />
+          </div>
         </div>
       );
     };
