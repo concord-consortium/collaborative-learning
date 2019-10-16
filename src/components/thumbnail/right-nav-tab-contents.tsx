@@ -30,21 +30,21 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
 
     const renderDocumentsSection = (section: any) => {
-      const sectionId = navTabSectionId(section);
-      const _handleDocumentStarClick = section.showStars && user.isTeacher
-                                        ? this.handleDocumentStarClick
-                                        : undefined;
-      return (
-        <DocumentsSection
-          key={sectionId} tab={myTabSpec!.tab} section={section}
-          stores={this.stores} scale={this.props.scale}
-          isExpanded={this.state.showSection.get(sectionId)}
-          onToggleExpansion={this.handleToggleExpansion}
-          onNewDocumentClick={this.handleNewDocumentClick}
-          onDocumentClick={this.handleDocumentClick}
-          onDocumentDragStart={this.handleDocumentDragStart}
-          onDocumentStarClick={_handleDocumentStarClick} />
-      );
+          const sectionId = navTabSectionId(section);
+          const _handleDocumentStarClick = section.showStarsForUser(user)
+                                            ? this.handleDocumentStarClick
+                                            : undefined;
+          return (
+            <DocumentsSection
+              key={sectionId} tab={myTabSpec.tab} section={section}
+              stores={this.stores} scale={this.props.scale}
+              isExpanded={this.state.showSection.get(sectionId)}
+              onToggleExpansion={this.handleToggleExpansion}
+              onNewDocumentClick={this.handleNewDocumentClick}
+              onDocumentClick={this.handleDocumentClick}
+              onDocumentDragStart={this.handleDocumentDragStart}
+              onDocumentStarClick={_handleDocumentStarClick} />
+          );
     };
 
     if (!myTabSpec) return null;

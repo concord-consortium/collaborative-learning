@@ -98,6 +98,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
                 active={rightNavExpanded && (activeRightNavTab === spec.tab)}
                 onClick={this.handleTabClick(spec.tab)} >
                 {spec.label}
+                {this.renderTabDecoration(spec.tab)}
               </TabComponent>
             );
           })}
@@ -141,6 +142,15 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private renderTabDecoration(tab: ERightNavTab) {
+    if (tab === ERightNavTab.kSupports) {
+      const {user, supports} = this.stores;
+      if (user.isStudent && supports.hasNewSupports(user.lastSupportViewTimestamp)) {
+        return <div className="support-badge" />;
+      }
+    }
+  }
+
   private renderLoadingText(tab: ERightNavTab) {
     const {activeRightNavTab} = this.stores.ui;
     return (
@@ -154,7 +164,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTabClick = (tab: ERightNavTab) => {
-    const { ui } = this.stores;
+    const { db, ui, user } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (!navDoneExpanding) {
@@ -163,6 +173,10 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
         this.stores.ui.toggleRightNav(true);
+
+        if ((tab === ERightNavTab.kSupports) && user.isStudent) {
+          db.setLastSupportViewTimestamp();
+        }
       } else {
         this.stores.ui.toggleRightNav();
       }

@@ -168,6 +168,20 @@ export const SupportsModel = types
         return supports.concat(teacherSupports);
     }
   }))
+  .views((self) => ({
+    hasNewSupports(afterTimestamp?: number) {
+      if (afterTimestamp) {
+        // true if there has been a teacher support after the last support tab open
+        const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
+          return support.authoredTime > latest ? support.authoredTime : latest;
+        }, 0);
+        return latestAuthoredTime > afterTimestamp;
+      } else {
+        // have not opened supports yet so true if any exist
+        return self.allSupports.length > 0;
+      }
+    }
+  }))
   .actions((self) => {
     return {
       createFromUnit(params: ICreateFromUnitParams) {

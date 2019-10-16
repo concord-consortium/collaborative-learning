@@ -117,7 +117,12 @@ export class DB {
 
       if (options.appMode === "authed") {
         return firebase.auth()
-          .signInWithCustomToken(options.rawFirebaseJWT)
+          .signOut()
+          .then(() => {
+            return firebase.auth()
+              .signInWithCustomToken(options.rawFirebaseJWT)
+              .catch(reject);
+          })
           .catch(reject);
       }
       else {
@@ -845,6 +850,10 @@ export class DB {
     updateRef.update({
       deleted: true
     });
+  }
+
+  public setLastSupportViewTimestamp() {
+    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
   }
 
 }

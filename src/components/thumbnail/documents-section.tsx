@@ -124,13 +124,13 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
             // pass function so logic stays here but access occurs from child
             // so that mobx-react triggers child render not parent render.
             const onIsStarred = () => {
-              return section.showStars
+              return section.showStarsForUser(user)
                       ? user.isTeacher
                         ? document.isStarredByUser(user.id)
                         : document.isStarred
                       : false;
             };
-            const _handleDocumentStarClick = section.showStars && user.isTeacher
+            const _handleDocumentStarClick = section.showStarsForUser(user)
                                               ? handleDocumentStarClick
                                               : undefined;
             return (

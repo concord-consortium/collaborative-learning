@@ -9,14 +9,34 @@ interface IProps {
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
+interface IState {
+  hovering: boolean;
+}
+
 @observer
-export class TabComponent extends React.Component<IProps, {}> {
+export class TabComponent extends React.Component<IProps, IState> {
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      hovering: false
+    };
+  }
 
   public render() {
     const {id, active} = this.props;
-    const className = `tab${active ? " active" : ""}`;
+    const {hovering} = this.state;
+    const className = `tab${active ? " active" : ""}${hovering ? " hovering" : ""}`;
     return (
-      <div id={id} className={className} onClick={this.handleClick} role="tab" aria-selected={active}>
+      <div
+        id={id}
+        className={className}
+        onClick={this.handleClick}
+        onMouseOver={this.handleMouseOver}
+        onMouseOut={this.handleMouseOut}
+        role="tab"
+        aria-selected={active}
+      >
         {this.props.children}
       </div>
     );
@@ -26,5 +46,15 @@ export class TabComponent extends React.Component<IProps, {}> {
     if (this.props.onClick) {
       this.props.onClick(e);
     }
+  }
+
+  // manual hover state is maintained so that we can set a class to override
+  // a child element's style - the :hover pseudo class won't work in this case
+  private handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
+    this.setState({hovering: true});
+  }
+
+  private handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    this.setState({hovering: false});
   }
 }

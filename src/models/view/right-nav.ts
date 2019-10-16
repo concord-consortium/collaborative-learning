@@ -1,4 +1,5 @@
 import { types, SnapshotIn, Instance } from "mobx-state-tree";
+import { UserModelType, UserTypeEnum } from "../stores/user";
 
 export enum ERightNavTab {
   kStudentWork = "student-work",
@@ -36,10 +37,15 @@ export const NavTabSectionModel =
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
     properties: types.array(types.string),
+    showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,
-    showStars: false,
     addDocument: false
-  });
+  })
+  .views(self => ({
+    showStarsForUser(user: UserModelType) {
+      return user.type && (self.showStars.indexOf(user.type) !== -1);
+    }
+  }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType = Instance<typeof NavTabSectionModel>;
 

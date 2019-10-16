@@ -62,14 +62,24 @@
           "dataTestHeader": "my-work-section-workspaces",
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
-          "properties": ["!isDeleted"]
+          "properties": ["!isDeleted"],
+          "showStars": ["student", "teacher"]
         },
         {
           "title": "Problem Workspaces",
           "type": "problem-documents",
           "dataTestHeader": "my-work-section-investigations",
           "dataTestItem": "my-work-list-items",
-          "documentTypes": ["problem"]
+          "documentTypes": ["problem"],
+          "showStars": ["student", "teacher"]
+        },
+        {
+          "title": "Starred",
+          "type": "starred-problem-documents",
+          "dataTestHeader": "my-work-section-starred",
+          "documentTypes": ["personal", "problem"],
+          "properties": ["starred"],
+          "showStars": ["student", "teacher"]
         }
       ]
     },
@@ -92,7 +102,7 @@
           "dataTestHeader": "class-work-section-published",
           "dataTestItem": "class-work-list-items",
           "documentTypes": ["publication"],
-          "showStars": true
+          "showStars": ["teacher"]
         },
         {
           "className": "section learning-log published",
@@ -103,13 +113,13 @@
           "documentTypes": ["learningLogPublication"]
         },
         {
-          "className": "section problem published starred",
+          "className": "section problem starred",
           "title": "Starred",
           "type": "starred-problem-documents",
           "dataTestHeader": "class-work-section-starred",
           "documentTypes": ["publication"],
           "properties": ["starred"],
-          "showStars": true
+          "showStars": ["teacher"]
         }
       ]
     },
