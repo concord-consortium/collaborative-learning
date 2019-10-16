@@ -72,7 +72,7 @@ export const WorkspaceModel = types
         self.comparisonVisible = visible;
         self.hidePrimaryForCompare = hidePrimary;
         if (!visible) {
-           self.comparisonDocumentKey = undefined;
+          self.comparisonDocumentKey = undefined;
         }
 
         if (!muteLog) {
