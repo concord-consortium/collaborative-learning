@@ -33,7 +33,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
 
         {myTabSpec.sections.map(section => {
           const sectionId = navTabSectionId(section);
-          const _handleDocumentStarClick = section.showStars && user.isTeacher
+          const _handleDocumentStarClick = section.showStarsForUser(user)
                                             ? this.handleDocumentStarClick
                                             : undefined;
           return (

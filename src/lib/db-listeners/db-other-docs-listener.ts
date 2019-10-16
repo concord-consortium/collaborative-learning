@@ -3,6 +3,7 @@ import { DBOtherDocument, DBOtherPublication } from "../db-types";
 import { LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
         } from "../../models/document/document";
 import { BaseListener } from "./base-listener";
+import { syncStars } from "./sync-stars";
 
 export class DBOtherDocumentsListener extends BaseListener {
   private db: DB;
@@ -56,7 +57,7 @@ export class DBOtherDocumentsListener extends BaseListener {
   }
 
   private handleDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents} = this.db.stores;
+    const {documents, user} = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentAdded", snapshot);
     if (dbDoc) {
@@ -64,6 +65,12 @@ export class DBOtherDocumentsListener extends BaseListener {
         .then(this.documentType === PersonalDocument
                 ? this.db.listeners.monitorPersonalDocument
                 : this.db.listeners.monitorLearningLogDocument)
+        .then(doc => {
+          if ((doc.type === PersonalDocument) && (doc.uid === user.id)) {
+            syncStars(doc, this.db);
+          }
+          return doc;
+        })
         .then(documents.add);
     }
   }
