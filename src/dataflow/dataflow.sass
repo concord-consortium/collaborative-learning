@@ -58,11 +58,21 @@ $list-item-scale: 0.1
           .icon-delete
             margin-left: 0
             .delete
-              background-image: url("../assets/icons/delete/delete.svg")
-              &:hover
-                background-image: url("../assets/icons/delete/delete-hover.svg")
-              &:active
-                background-image: url("../assets/icons/delete/delete-active.svg")
+              &.enabled
+                background-image: url("../assets/icons/delete/delete.svg")
+                &:hover
+                  background-image: url("../assets/icons/delete/delete-hover.svg")
+                &:active
+                  background-image: url("../assets/icons/delete/delete-active.svg")
+              &.disabled
+                background-image: url("../assets/icons/delete/delete-disabled.svg")
+                cursor: default
+                &:active
+                  transform-origin: center
+                  transform: none
+                  cursor: default
+          .icon-button.delete-disabled
+            cursor: default
         .title
           #icon-edit
             &.icon-edit
