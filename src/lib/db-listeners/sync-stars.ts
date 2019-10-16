@@ -20,4 +20,3 @@ export const syncStars = (doc: DocumentModelType, db: DB) => {
     }
   });
 };
-
