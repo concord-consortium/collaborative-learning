@@ -80,7 +80,7 @@ export function isDifferentUnitAndProblem(stores: IStores, unitId?: string | und
   if (!unitId || !problemOrdinal) return false;
   const { unit, investigation, problem } = stores;
   const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
-  return (unit.code === unitId) && (combinedOrdinal === problemOrdinal);
+  return (unit.code !== unitId) || (combinedOrdinal !== problemOrdinal);
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
