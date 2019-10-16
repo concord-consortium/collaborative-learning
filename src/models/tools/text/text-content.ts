@@ -1,7 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
-import SlateHtmlSerializer from "./slate-deserializer";
+import Markdown from "slate-md-serializer";
+import SlateHtmlSerializer from "./slate-html-serializer";
 import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kTextToolID = "Text";
@@ -10,7 +11,9 @@ export function defaultTextContent(initialText?: string) {
   return TextContentModel.create({ text: initialText || "" });
 }
 
-const Html = new SlateHtmlSerializer();
+const HtmlSerializer = new SlateHtmlSerializer();
+
+const MarkdownSerializer = new Markdown();
 
 export const emptyJson: ValueJSON = {
               document: {
@@ -65,9 +68,9 @@ export const TextContentModel = types
         case "slate":
           return self.getSlate();
         case "html":
-          return Html.deserialize(self.joinText);
+          return HtmlSerializer.deserialize(self.joinText);
         case "markdown":
-          // handle markdown import here; for now we treat as text
+          return MarkdownSerializer.deserialize(self.joinText);
         default:
           return Plain.deserialize(self.joinText);
       }

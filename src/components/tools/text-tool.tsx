@@ -11,6 +11,55 @@ import { autorun, IReactionDisposer } from "mobx";
 
 import "./text-tool.sass";
 
+/*
+  The Slate internal data model uses, among other things, "marks" and "blocks"
+  to implement structured text. Marks are generally used for character styles
+  and blocks are generally used to implement complex structures that are similar
+  to the CSS-concept of "display: block", as opposed to, "display: inline".
+
+  The following tables show the names used to distinguish the mark & block
+  types within the slate model. These names have been selected to peacefully
+  co-exist with the names generated when HTML and Markdown formatted text are
+  converted to a slate model for presentation and editing in the text-tool.
+
+  Marks:
+
+    |  Slate Name |  Markdown | HTML tag |  Hot-Key  |
+    |-------------|-----------|----------|-----------|
+    | bold        | **xyzzy** | <strong> | CMD-b     |
+    | italic      | _xyzzy_   | <em>     | CMD-i     |
+    | code        | `xyzzy`   | <code>   |           |
+    | inserted    | ++xyzzy++ | <mark>   |           |
+    | deleted     | ~~xyzzy~~ | <del>    |           |
+    | underlined  | __xyzzy__ | <u>      | CMD-u     |
+    | superscript |           | <sup>    |           |
+    | subscript   |           | <sub>    |           |
+
+  Blocks:
+
+    | Slate Name      | Markdown      | HTML tag     |
+    |-----------------|---------------|----------|
+    | paragraph       |               | <p>          |
+    | horizontal-rule | ---           | <hr>         |
+    | heading1        | #             | <h1>         |
+    | heading2        | ##            | <h2>         |
+    | heading3        | ###           | <h3>         |
+    | heading4        | ####          | <h4>         |
+    | heading5        | #####         | <h5>         |
+    | heading6        | ######        | <h6>         |
+    | bulleted-list   | `* ` prefix   | <ul>         |
+    | todo-list       | `- [ ] `      | <ul>         | broken
+    | ordered-list    | `1. ` prefix  | <ol>         |
+    | code            | ```           | <code>       | blocks, unlike marks
+    | table           | \| & - syntax | <table>      | needs <tbody>
+    | table-row       |               | <tr>         | needs <tbody>
+    | table-head      |               | <th>         | needs <tbody>
+    | table-cell      |               | <td>         | needs <tbody>
+    | block-quote     | `> ` prefix   | <blockquote> |
+    | image           | `![]` syntax  | <img>        | broken
+    | link            | `[]()` syntax | <a>          | broken
+*/
+
 interface SlateChange {
   operations: Immutable.List<Operation>;
   value: Value;
@@ -23,25 +72,6 @@ interface IProps {
 
 interface IState {
   value?: Value;
-}
-​
-function BulletItem(props: any) {
-  return (
-    <ul {...props.attributes}>{props.children}</ul>
-  );
-}
-
-function NumberedItem(props: any) {
-  return (
-    <ol {...props.attributes}>{props.children}</ol>
-  );
-}
-
-function Typewriter(props: any) {
-  const { children, attributes } = props;
-  return (
-    <code {...attributes}>{children}</code>
-  );
 }
 
 @inject("stores")
@@ -133,26 +163,79 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   private renderMark = (props: any, editor: any, next: () => any ) => {
     const { children, mark, attributes } = props;
     switch (mark.type) {
-      case "bold": return (<strong{...{ attributes }}>{children}</strong>);
-      case "italic": return (<em{...{ attributes }}>{children}</em>);
-      case "underline": return (<u{...{ attributes }}>{children}</u>);
-      case "typewriter": return (<Typewriter {...props} />);
-      case "superscript": return (<sup{...{ attributes }}>{children}</sup>);
-      case "subscript": return (<sub{...{ attributes }}>{children}</sub>);
-      default: return next();
+      case "bold":
+        return (<strong {...attributes}>{children}</strong>);
+      case "code":
+        return (<code {...attributes}>{children}</code>);
+      case "italic":
+        return (<em{ ...attributes}>{children}</em>);
+      case "underlined":
+        return (<u {...attributes}>{children}</u>);
+      case "deleted":
+        return (<del {...attributes}>{children}</del>);
+      case "inserted":
+        return (<mark {...attributes}>{children}</mark>);
+      case "superscript":
+        return (<sup {...attributes}>{children}</sup>);
+      case "subscript":
+        return (<sub {...attributes}>{children}</sub>);
+      default:
+        return next();
     }
   }
 
   private renderBlock = (props: any, editor: any, next: () => any ) => {
     const { children, attributes, node: {type} } = props;
     switch (type) {
-      case "bulleted": return (<BulletItem {...props} />);
-      case "numbered": return (<NumberedItem {...props} />);
-      case "list-item": return (<li {...{attributes}}>{children}</li>);
-      case "header-1": return (<h1 {...{attributes}}>{children}</h1>);
-      case "header-2": return (<h2 {...{attributes}}>{children}</h2>);
-      case "header-3": return (<h3 {...{attributes}}>{children}</h3>);
-      default: return next();
+      case "paragraph":
+        return (<p {...attributes}>{children}</p>);
+      case "heading1":
+        return (<h1 {...{attributes}}>{children}</h1>);
+      case "heading2":
+        return (<h2 {...{attributes}}>{children}</h2>);
+      case "heading3":
+        return (<h3 {...{attributes}}>{children}</h3>);
+      case "heading4":
+        return (<h4 {...{attributes}}>{children}</h4>);
+      case "heading5":
+        return (<h5 {...{attributes}}>{children}</h5>);
+      case "heading6":
+        return (<h6 {...{attributes}}>{children}</h6>);
+      case "code":
+        return (<code {...attributes}>{children}</code>);
+      case "ordered-list":
+        return (<ol {...attributes}>{children}</ol>);
+      case "bulleted-list":
+      case "todo-list":
+        return (<ul {...attributes}>{children}</ul>);
+      case "list-item":
+        return (<li {...{attributes}}>{children}</li>);
+      case "horizontal-rule":
+        return (<hr />);
+
+      // Note: Tables, as are implemented in the current de-serializer, do not
+      // nest a <tbody> element within the <table>. A new rule could easily
+      // be added that would handle this case and bring the DOM in alignment
+      // with the slate model.
+      //
+      // TODO: Add rule for <tbody>.
+
+      case "table":
+        return (<table {...attributes}>{children}</table>);
+      case "table-row":
+        return (<tr {...attributes}>{children}</tr>);
+      case "table-head":
+        return (<th {...attributes}>{children}</th>);
+      case "table-cell":
+        return (<td {...attributes}>{children}</td>);
+      case "block-quote":
+        return (<blockquote {...attributes}>{children}</blockquote>);
+      case "image":  // TODO: This is broken.
+        return (<img src={props.src} title={props.title} />);
+      case "link":   // TODO: This is broken.
+        return (<a href={props.href} {...attributes}>{children}</a>);
+      default:
+        return next();
     }
   }
 

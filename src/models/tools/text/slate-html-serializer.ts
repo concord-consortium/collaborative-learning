@@ -16,15 +16,19 @@ const tags: ITagDefinition[] = [
   {slateType: SlateType.mark, slateName: "italic", htmlTag: "em"},
   {slateType: SlateType.mark, slateName: "superscript", htmlTag: "sup"},
   {slateType: SlateType.mark, slateName: "subscript", htmlTag: "sub"},
-  {slateType: SlateType.mark, slateName: "typewriter", htmlTag: "code"},
-  {slateType: SlateType.mark, slateName: "underline", htmlTag: "u"},
+  {slateType: SlateType.mark, slateName: "code", htmlTag: "code"},
+  {slateType: SlateType.mark, slateName: "underlined", htmlTag: "u"},
   {slateType: SlateType.block, slateName: "paragraph", htmlTag: "p"},
-  {slateType: SlateType.block, slateName: "header-1", htmlTag: "h1"},
-  {slateType: SlateType.block, slateName: "header-2", htmlTag: "h2"},
-  {slateType: SlateType.block, slateName: "header-3", htmlTag: "h3"},
-  {slateType: SlateType.block, slateName: "bulleted", htmlTag: "ul"},
-  {slateType: SlateType.block, slateName: "numbered", htmlTag: "ol"},
-  {slateType: SlateType.block, slateName: "list-item", htmlTag: "li"}
+  {slateType: SlateType.block, slateName: "heading1", htmlTag: "h1"},
+  {slateType: SlateType.block, slateName: "heading2", htmlTag: "h2"},
+  {slateType: SlateType.block, slateName: "heading3", htmlTag: "h3"},
+  {slateType: SlateType.block, slateName: "heading4", htmlTag: "h4"},
+  {slateType: SlateType.block, slateName: "heading5", htmlTag: "h5"},
+  {slateType: SlateType.block, slateName: "heading6", htmlTag: "h6"},
+  {slateType: SlateType.block, slateName: "bulleted-list", htmlTag: "ul"},
+  {slateType: SlateType.block, slateName: "ordered-list", htmlTag: "ol"},
+  {slateType: SlateType.block, slateName: "list-item", htmlTag: "li"},
+  {slateType: SlateType.block, slateName: "horizontal-rule", htmlTag: "hr"}
 ];
 
 const rules = [
