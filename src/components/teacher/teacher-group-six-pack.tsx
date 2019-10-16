@@ -6,7 +6,7 @@ import { IconButton } from "../utilities/icon-button";
 import "./teacher-group-six-pack.sass";
 import { DocumentViewMode } from "./teacher-group-tab";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { EPanelId } from "../../clue/components/clue-app-content";
+import { EPanelId } from "../../dataflow/components/dataflow-app-content";
 interface IProps extends IBaseProps {
   page: number;
   documentViewMode: DocumentViewMode;

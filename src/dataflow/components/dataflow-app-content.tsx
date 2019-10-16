@@ -10,6 +10,11 @@ import { HubListComponent } from "./hub-list";
 import "./dataflow-app-content.sass";
 import { DataflowContentModelType } from "../models/tools/dataflow/dataflow-content";
 
+export enum EPanelId {
+  dashboard = "dashboard",
+  workspace = "workspace"
+}
+
 interface IProps extends IBaseProps {}
 
 interface IState {

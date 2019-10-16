@@ -7,7 +7,7 @@ import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSection
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { EPanelId } from "../../clue/components/clue-app-content";
+import { EPanelId } from "../../dataflow/components/dataflow-app-content";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
