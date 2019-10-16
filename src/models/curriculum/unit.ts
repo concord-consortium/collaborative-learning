@@ -76,6 +76,13 @@ function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType )
           });
 }
 
+export function isDifferentUnitAndProblem(stores: IStores, unitId?: string | undefined, problemOrdinal?: string) {
+  if (!unitId || !problemOrdinal) return false;
+  const { unit, investigation, problem } = stores;
+  const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
+  return (unit.code === unitId) && (combinedOrdinal === problemOrdinal);
+}
+
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
   const unit = UnitModel.create(unitJson);
