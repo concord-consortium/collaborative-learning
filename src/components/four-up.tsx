@@ -5,6 +5,7 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
          FourUpGridModelType } from "../models/view/four-up-grid";
 import { CanvasComponent } from "./document/canvas";
 import { BaseComponent, IBaseProps } from "./base";
+import { DocumentViewMode } from "../components/document/document";
 import { DocumentModelType } from "../models/document/document";
 import { GroupUserModelType } from "../models/stores/groups";
 import { IToolApiInterface } from "./tools/tool-tile";
@@ -12,7 +13,6 @@ import { FourUpOverlayComponent } from "./four-up-overlay";
 
 import "./four-up.sass";
 import { Logger, LogEventName } from "../lib/logger";
-import { DocumentViewMode } from "./teacher/teacher-group-tab";
 
 interface IProps extends IBaseProps {
   userId?: string;

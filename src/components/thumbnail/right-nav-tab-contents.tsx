@@ -7,7 +7,14 @@ import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSection
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { EPanelId } from "../../dataflow/components/dataflow-app-content";
+
+// TODO: Move this CLUE-dependency to app-config somehow
+// originally defined in src/clue/components/clue-app-content.tsx
+export enum EPanelId {
+  dashboard = "dashboard",
+  workspace = "workspace"
+}
+
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
