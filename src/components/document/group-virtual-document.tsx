@@ -3,7 +3,7 @@ import * as React from "react";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-vritual-document";
+import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 

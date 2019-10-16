@@ -44,7 +44,7 @@
       "sections": [
         {
           "title": "Group Workspaces",
-          "type": "personal-documents",
+          "type": "problem-documents",
           "dataTestHeader": "group-workspaces",
           "dataTestItem": "group-list-items",
           "showGroupWorkspaces": true

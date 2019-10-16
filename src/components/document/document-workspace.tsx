@@ -121,7 +121,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                                && documents.getDocument(comparisonDocumentKey);
 
     const groupVirtualDocument = comparisonDocumentKey
-      && groups.documentForGroup(comparisonDocumentKey);
+      && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
     const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 

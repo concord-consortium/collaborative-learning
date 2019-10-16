@@ -6,7 +6,7 @@ import { DocumentDragKey, DocumentModelType } from "../../models/document/docume
 import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
-import { GroupVirtualDocument } from "../../models/document/group-vritual-document";
+import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;

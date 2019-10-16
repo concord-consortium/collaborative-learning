@@ -1,5 +1,3 @@
-import {GroupModelType} from "../stores/groups";
-
 export const kGroupVirtualDocumentType = "GroupVirtualDocumentType";
 export interface IGroupVirtualDocument {
   id: string;

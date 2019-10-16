@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
-import { GroupVirtualDocument } from "../document/group-vritual-document";
+import { GroupVirtualDocument } from "../document/group-virtual-document";
 
 export const GroupUserModel = types
   .model("GroupUser", {
@@ -82,7 +82,7 @@ export const GroupsModel = types
           return !!group.users.find((user) => user.id === uid);
         });
       },
-      get groupDocuments() {
+      get groupVirtualDocuments() {
         return self.allGroups.map((group) => {
           return new GroupVirtualDocument(group);
         });
@@ -98,8 +98,8 @@ export const GroupsModel = types
         const groupUser = self.groupForUser(uid);
         return !!(groupId && groupUser && (groupUser.id === groupId));
       },
-      documentForGroup(groupId: string) {
-        return self.groupDocuments.find((g) => groupId === g.key);
+      virtualDocumentForGroup(groupId: string) {
+        return self.groupVirtualDocuments.find((g) => groupId === g.key);
       }
     };
   });

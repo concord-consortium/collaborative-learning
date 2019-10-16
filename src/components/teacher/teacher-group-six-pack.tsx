@@ -5,7 +5,7 @@ import { FourUpComponent } from "../four-up";
 import { IconButton } from "../utilities/icon-button";
 import "./teacher-group-six-pack.sass";
 import { DocumentViewMode } from "./teacher-group-tab";
-import { GroupVirtualDocument } from "../../models/document/group-vritual-document";
+import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   page: number;
@@ -60,7 +60,6 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
       const { ui }  = this.stores;
 
       const clickHandler = () => {
-        // tslint:disable-next-line
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
