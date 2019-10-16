@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
-import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
+import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
@@ -29,22 +29,22 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     const { appConfig: { rightNavTabs }, user } = this.stores;
     const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
 
-    const renderDocumentsSection = (section: any) => {
-          const sectionId = navTabSectionId(section);
-          const _handleDocumentStarClick = section.showStarsForUser(user)
-                                            ? this.handleDocumentStarClick
-                                            : undefined;
-          return (
-            <DocumentsSection
-              key={sectionId} tab={myTabSpec.tab} section={section}
-              stores={this.stores} scale={this.props.scale}
-              isExpanded={this.state.showSection.get(sectionId)}
-              onToggleExpansion={this.handleToggleExpansion}
-              onNewDocumentClick={this.handleNewDocumentClick}
-              onDocumentClick={this.handleDocumentClick}
-              onDocumentDragStart={this.handleDocumentDragStart}
-              onDocumentStarClick={_handleDocumentStarClick} />
-          );
+    const renderDocumentsSection = (section: NavTabSectionModelType) => {
+      const sectionId = navTabSectionId(section);
+      const _handleDocumentStarClick = section.showStarsForUser(user)
+                                        ? this.handleDocumentStarClick
+                                        : undefined;
+      return (
+        <DocumentsSection
+          key={sectionId} tab={myTabSpec!.tab} section={section}
+          stores={this.stores} scale={this.props.scale}
+          isExpanded={this.state.showSection.get(sectionId)}
+          onToggleExpansion={this.handleToggleExpansion}
+          onNewDocumentClick={this.handleNewDocumentClick}
+          onDocumentClick={this.handleDocumentClick}
+          onDocumentDragStart={this.handleDocumentDragStart}
+          onDocumentStarClick={_handleDocumentStarClick} />
+      );
     };
 
     if (!myTabSpec) return null;

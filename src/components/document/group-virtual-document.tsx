@@ -66,7 +66,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     const className = `icon group-number ${selected ? "active" : ""}`;
     const clickHandler = () => this.handleGroupClicked(groupId);
     return(
-      <div className={className} onClick={clickHandler}>
+      <div key={groupId} className={className} onClick={clickHandler}>
         <div className="number">G{groupId}</div>
       </div>
     );
