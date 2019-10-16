@@ -36,6 +36,22 @@
   "showClassSwitcher": true,
   "rightNavTabs": [
     {
+      "tab": "student-work",
+      "label": "Student Workspaces",
+      "hideGhostUser": true,
+      "teacherOnly": true,
+      "groupsDisplay": true,
+      "sections": [
+        {
+          "title": "Group Workspaces",
+          "type": "problem-documents",
+          "dataTestHeader": "group-workspaces",
+          "dataTestItem": "group-list-items",
+          "showGroupWorkspaces": true
+        }
+      ]
+    },
+    {
       "tab": "my-work",
       "label": "My Work",
       "hideGhostUser": true,

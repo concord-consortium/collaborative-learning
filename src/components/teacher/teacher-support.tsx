@@ -1,14 +1,15 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-
 import { niceDate } from "../../utilities/time";
-import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
 import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../models/stores/supports";
 import { getSectionTitle, kAllSectionType } from "../../models/curriculum/section";
 import { createTextSupport } from "../../models/curriculum/support";
 
 import "./teacher-support.sass";
+
+// SEE: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+const ENTER_KEY_CODE = 13;
 
 interface IProps extends IBaseProps {
   support?: TeacherSupportModelType;
@@ -100,7 +101,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
   }
 
   private handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.keyCode === ENTER) {
+    if (e.keyCode === ENTER_KEY_CODE) {
       this.handleSubmit();
     }
   }

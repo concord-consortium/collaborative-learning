@@ -198,7 +198,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />,
+              isTeacher && <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
               <PublishButton key="publish" onClick={this.handlePublishDocument} />,
               !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
@@ -254,7 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             </div>
         }
         <div className="actions">
-          {!hideButtons && isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />}
+          {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />

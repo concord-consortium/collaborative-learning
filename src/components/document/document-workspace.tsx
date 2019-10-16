@@ -4,6 +4,7 @@ import * as React from "react";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
+import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
@@ -43,8 +44,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { appConfig } = this.stores;
+    const { appConfig, user } = this.stores;
+    const { rightNavTabs } = appConfig;
+    const studentTabs = rightNavTabs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
+    const isTeacher = user.isTeacher;
+    const tabsToDisplay = isTeacher ? rightNavTabs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -66,6 +71,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         <RightNavComponent
           tabs={appConfig.rightNavTabs}
           isGhostUser={isGhostUser}
+          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
@@ -105,63 +111,71 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments(isGhostUser: boolean) {
-    const {appConfig, documents, ui} = this.stores;
-    const {problemWorkspace} = ui;
+    const {appConfig, documents, ui, groups} = this.stores;
+
+    const { problemWorkspace } = ui;
+    const { comparisonDocumentKey } = problemWorkspace;
+
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
-    const comparisonDocument = problemWorkspace.comparisonDocumentKey
-                               && documents.getDocument(problemWorkspace.comparisonDocumentKey);
+    const comparisonDocument = comparisonDocumentKey
+                               && documents.getDocument(comparisonDocumentKey);
+
+    const groupVirtualDocument = comparisonDocumentKey
+      && groups.virtualDocumentForGroup(comparisonDocumentKey);
+
     const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
+    const CompareDocument = groupVirtualDocument
+      ? <GroupVirtualDocumentComponent
+          key={comparisonDocumentKey}
+          document={groupVirtualDocument}
+          workspace={problemWorkspace}
+        />
+      : comparisonDocument
+        ?
+          <DocumentComponent
+            document={comparisonDocument}
+            workspace={problemWorkspace}
+            onNewDocument={this.handleNewDocument}
+            onCopyDocument={this.handleCopyDocument}
+            onDeleteDocument={this.handleDeleteDocument}
+            onPublishSupport={this.handlePublishSupport}
+            onPublishDocument={this.handlePublishDocument}
+            toolbar={toolbar}
+            side="comparison"
+            isGhostUser={isGhostUser}
+          />
+        : this.renderComparisonPlaceholder();
+
+    const Primary = (
+      <DocumentComponent
+        document={primaryDocument}
+        workspace={problemWorkspace}
+        onNewDocument={this.handleNewDocument}
+        onCopyDocument={this.handleCopyDocument}
+        onDeleteDocument={this.handleDeleteDocument}
+        onPublishSupport={this.handlePublishSupport}
+        onPublishDocument={this.handlePublishDocument}
+        toolbar={toolbar}
+        side="primary"
+        isGhostUser={isGhostUser}
+      />
+    );
+
     if (problemWorkspace.comparisonVisible) {
       return (
         <div onClick={this.handleClick}>
-          {this.renderDocument(
-            "left-workspace",
-            "primary",
-            <DocumentComponent
-              document={primaryDocument}
-              workspace={problemWorkspace}
-              onNewDocument={this.handleNewDocument}
-              onCopyDocument={this.handleCopyDocument}
-              onDeleteDocument={this.handleDeleteDocument}
-              toolbar={toolbar}
-              side="primary"
-              isGhostUser={isGhostUser}
-            />
-          )}
-          {this.renderDocument("right-workspace", "comparison", comparisonDocument
-              ? <DocumentComponent
-                  document={comparisonDocument}
-                  workspace={problemWorkspace}
-                  readOnly={true}
-                  side="comparison"
-                  isGhostUser={isGhostUser}
-                />
-              : this.renderComparisonPlaceholder())}
+          { this.renderDocument("left-workspace", "primary", Primary) }
+          { this.renderDocument("right-workspace", "comparison", CompareDocument) }
         </div>
       );
     }
     else {
-      return this.renderDocument(
-              "single-workspace",
-              "primary",
-              <DocumentComponent
-                document={primaryDocument}
-                workspace={problemWorkspace}
-                onNewDocument={this.handleNewDocument}
-                onCopyDocument={this.handleCopyDocument}
-                onDeleteDocument={this.handleDeleteDocument}
-                onPublishSupport={this.handlePublishSupport}
-                onPublishDocument={this.handlePublishDocument}
-                toolbar={toolbar}
-                side="primary"
-                isGhostUser={isGhostUser}
-              />
-            );
+      return this.renderDocument("single-workspace", "primary", Primary);
     }
   }
 
