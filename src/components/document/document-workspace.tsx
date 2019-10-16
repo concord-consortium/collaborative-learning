@@ -114,8 +114,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const {appConfig, documents, ui, groups} = this.stores;
 
     const { problemWorkspace } = ui;
-    const { comparisonDocumentKey } = problemWorkspace;
-
+    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible} = problemWorkspace;
+    const showPrimary = !hidePrimaryForCompare;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
                                && documents.getDocument(comparisonDocumentKey);
@@ -134,6 +134,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           key={comparisonDocumentKey}
           document={groupVirtualDocument}
           workspace={problemWorkspace}
+          side={hidePrimaryForCompare ? "primary" : "comparison"}
         />
       : comparisonDocument
         ?
@@ -151,7 +152,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           />
         : this.renderComparisonPlaceholder();
 
-    const Primary = (
+    const Primary =
       <DocumentComponent
         document={primaryDocument}
         workspace={problemWorkspace}
@@ -163,10 +164,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         toolbar={toolbar}
         side="primary"
         isGhostUser={isGhostUser}
-      />
-    );
+      />;
 
-    if (problemWorkspace.comparisonVisible) {
+    // Show Pimary and comparison docs:
+    if (comparisonVisible && showPrimary) {
       return (
         <div onClick={this.handleClick}>
           { this.renderDocument("left-workspace", "primary", Primary) }
@@ -174,6 +175,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         </div>
       );
     }
+    // Just display the "Compare" document.
+    else if (hidePrimaryForCompare) {
+      return this.renderDocument("single-workspace", "primary", CompareDocument);
+    }
+    // Just display the primary document:
     else {
       return this.renderDocument("single-workspace", "primary", Primary);
     }

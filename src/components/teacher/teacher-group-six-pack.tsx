@@ -61,7 +61,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
 
       const showGroupClickHandler = () => {
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
-        ui.problemWorkspace.toggleComparisonVisible({override: true});
+        ui.problemWorkspace.toggleComparisonVisible({override: true, hidePrimary: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
       };
 
