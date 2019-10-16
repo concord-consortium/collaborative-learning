@@ -2,13 +2,15 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
-
+import { IconButton } from "../utilities/icon-button";
 import "./teacher-group-six-pack.sass";
 import { DocumentViewMode } from "./teacher-group-tab";
-
+import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
+import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   page: number;
   documentViewMode: DocumentViewMode;
+  selectedSectionId: string | null;
 }
 
 const ROWS = 2;
@@ -44,14 +46,39 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
   }
 
   private renderFourUp(groupIndex: number, r: number, c: number) {
-    const { documentViewMode } = this.props;
+    const { documentViewMode, selectedSectionId } = this.props;
     const { groups } = this.stores;
     const group = groups.allGroups[groupIndex];
+
+    interface IGroupRecord {
+      id: string;
+    }
+    interface IGroupHeaderProps {
+      group: IGroupRecord;
+    }
+    const TeacherGroupHeader = (props: IGroupHeaderProps) => {
+      const { ui }  = this.stores;
+
+      const clickHandler = () => {
+        ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
+        ui.problemWorkspace.toggleComparisonVisible({override: true});
+        ui.setTeacherPanelKey(EPanelId.workspace);
+      };
+      return(
+        <div className="group-header">
+          <div className="group-label">Group {String(group.id)}</div>
+          <IconButton
+            icon="expand-group-view"
+            key="expand-group-view"
+            className="action icon-expand-group-view"
+            onClickButton={clickHandler} />
+        </div>
+      );
+    };
+
     return (
       <div className={`teacher-group group-${r}-${c}`} key={`group-${r}-${c}`}>
-        <div className="group-label">
-          Group {String(group.id)}
-        </div>
+        <TeacherGroupHeader group={ group } />
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent
@@ -59,6 +86,8 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
               isGhostUser={true}
               toggleable={true}
               documentViewMode={documentViewMode}
+              selectedSectionId={selectedSectionId}
+              viaTeacherDashboard={true}
             />
           </div>
         </div>

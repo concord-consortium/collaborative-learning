@@ -37,7 +37,7 @@ function connectTableToGraph(){
 }
 
 context('Tests for graph and table integration', function(){
-    describe('connect table to graph before adding coordinates', function(){
+    describe.skip('connect table to graph before adding coordinates', function(){
         it('setup', function(){
             leftNav.openToWorkspace('Extra Workspace');
             addTableAndGraph();

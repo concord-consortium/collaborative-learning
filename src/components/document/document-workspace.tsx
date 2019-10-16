@@ -4,11 +4,13 @@ import * as React from "react";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
+import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { SectionType, getSectionAbbrev } from "../../models/curriculum/section";
+import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
-import { AudienceModelType, ClassAudienceModel, TeacherSupportSectionTarget } from "../../models/stores/supports";
+import { DocumentContentModel } from "../../models/document/document-content";
+import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
@@ -42,8 +44,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { appConfig } = this.stores;
+    const { appConfig, user } = this.stores;
+    const { rightNavTabs } = appConfig;
+    const studentTabs = rightNavTabs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
+    const isTeacher = user.isTeacher;
+    const tabsToDisplay = isTeacher ? rightNavTabs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -65,6 +71,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         <RightNavComponent
           tabs={appConfig.rightNavTabs}
           isGhostUser={isGhostUser}
+          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
@@ -72,12 +79,29 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     );
   }
 
+  private getDefaultDocumentContent() {
+    const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
+            problem } = this.stores;
+    if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
+      const tiles: any = [];
+      problem.sections.forEach(section => {
+        tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
+        tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
+      });
+      return DocumentContentModel.create({ tiles } as any);
+    }
+    else if (defaultDocumentContent) {
+      return defaultDocumentContent;
+    }
+  }
+
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultDocumentType, defaultDocumentContent,
-                         defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultDocumentType, defaultLearningLogDocument,
+                        defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, defaultDocumentContent);
+      const documentContent = this.getDefaultDocumentContent();
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }
@@ -87,63 +111,71 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocuments(isGhostUser: boolean) {
-    const {appConfig, documents, ui} = this.stores;
-    const {problemWorkspace} = ui;
+    const {appConfig, documents, ui, groups} = this.stores;
+
+    const { problemWorkspace } = ui;
+    const { comparisonDocumentKey } = problemWorkspace;
+
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
-    const comparisonDocument = problemWorkspace.comparisonDocumentKey
-                               && documents.getDocument(problemWorkspace.comparisonDocumentKey);
+    const comparisonDocument = comparisonDocumentKey
+                               && documents.getDocument(comparisonDocumentKey);
+
+    const groupVirtualDocument = comparisonDocumentKey
+      && groups.virtualDocumentForGroup(comparisonDocumentKey);
+
     const toolbar = appConfig && getSnapshot(appConfig.toolbar);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
+    const CompareDocument = groupVirtualDocument
+      ? <GroupVirtualDocumentComponent
+          key={comparisonDocumentKey}
+          document={groupVirtualDocument}
+          workspace={problemWorkspace}
+        />
+      : comparisonDocument
+        ?
+          <DocumentComponent
+            document={comparisonDocument}
+            workspace={problemWorkspace}
+            onNewDocument={this.handleNewDocument}
+            onCopyDocument={this.handleCopyDocument}
+            onDeleteDocument={this.handleDeleteDocument}
+            onPublishSupport={this.handlePublishSupport}
+            onPublishDocument={this.handlePublishDocument}
+            toolbar={toolbar}
+            side="comparison"
+            isGhostUser={isGhostUser}
+          />
+        : this.renderComparisonPlaceholder();
+
+    const Primary = (
+      <DocumentComponent
+        document={primaryDocument}
+        workspace={problemWorkspace}
+        onNewDocument={this.handleNewDocument}
+        onCopyDocument={this.handleCopyDocument}
+        onDeleteDocument={this.handleDeleteDocument}
+        onPublishSupport={this.handlePublishSupport}
+        onPublishDocument={this.handlePublishDocument}
+        toolbar={toolbar}
+        side="primary"
+        isGhostUser={isGhostUser}
+      />
+    );
+
     if (problemWorkspace.comparisonVisible) {
       return (
         <div onClick={this.handleClick}>
-          {this.renderDocument(
-            "left-workspace",
-            "primary",
-            <DocumentComponent
-              document={primaryDocument}
-              workspace={problemWorkspace}
-              onNewDocument={this.handleNewDocument}
-              onCopyDocument={this.handleCopyDocument}
-              onDeleteDocument={this.handleDeleteDocument}
-              toolbar={toolbar}
-              side="primary"
-              isGhostUser={isGhostUser}
-            />
-          )}
-          {this.renderDocument("right-workspace", "comparison", comparisonDocument
-              ? <DocumentComponent
-                  document={comparisonDocument}
-                  workspace={problemWorkspace}
-                  readOnly={true}
-                  side="comparison"
-                  isGhostUser={isGhostUser}
-                />
-              : this.renderComparisonPlaceholder())}
+          { this.renderDocument("left-workspace", "primary", Primary) }
+          { this.renderDocument("right-workspace", "comparison", CompareDocument) }
         </div>
       );
     }
     else {
-      return this.renderDocument(
-              "single-workspace",
-              "primary",
-              <DocumentComponent
-                document={primaryDocument}
-                workspace={problemWorkspace}
-                onNewDocument={this.handleNewDocument}
-                onCopyDocument={this.handleCopyDocument}
-                onDeleteDocument={this.handleDeleteDocument}
-                onPublishSupport={this.handlePublishSupport}
-                onPublishDocument={this.handlePublishDocument}
-                toolbar={toolbar}
-                side="primary"
-                isGhostUser={isGhostUser}
-              />
-            );
+      return this.renderDocument("single-workspace", "primary", Primary);
     }
   }
 
@@ -223,14 +255,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
     const {ui} = this.stores;
     this.imageDragDrop.drop(e)
-      .then((imageUrl) => {
+      .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
         if (primaryDocument) {
           // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
           const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
           primaryDocument.content.addTile("image", {
-            imageUrl,
+            url,
             insertRowInfo: {
               rowInsertIndex
             }
@@ -293,17 +325,23 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleDeleteDocument = (document: DocumentModelType) => {
-    const { appConfig } = this.stores;
+    const { appConfig, documents, user } = this.stores;
+    const otherDocuments = documents.byTypeForUser(document.type, user.id);
+    const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
+    if (countNotDeleted <= 1) {
+      this.stores.ui.alert(`Cannot delete the last ${docTypeStringL}.`, `Error: Delete ${docTypeString}`);
+    }
+    else {
+      this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
       .then((confirmDelete: boolean) => {
-        const docType = document.type;
-        if (confirmDelete && ((docType === PersonalDocument) || (docType === LearningLogDocument))) {
+        if (confirmDelete) {
           document.setProperty("isDeleted", "true");
           this.handleDeleteOpenPrimaryDocument();
         }
       });
+    }
   }
 
   private handleDeleteOpenPrimaryDocument = async () => {
@@ -320,7 +358,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     return match && match[1] ? match[1] : title;
   }
 
-  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: TeacherSupportSectionTarget) {
+  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: SectionTarget) {
     return document.type === ProblemDocument
             ? this.getProblemBaseTitle(this.stores.problem.title)
             : document.title;
@@ -329,7 +367,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private handlePublishSupport = async (document: DocumentModelType) => {
     const { db, ui } = this.stores;
     const audience: AudienceModelType = ClassAudienceModel.create();
-    const sectionTarget: TeacherSupportSectionTarget = SectionType.all;
+    const sectionTarget: SectionTarget = kAllSectionType;
     const caption = this.getSupportDocumentBaseCaption(document, sectionTarget) || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, audience, sectionTarget, caption)

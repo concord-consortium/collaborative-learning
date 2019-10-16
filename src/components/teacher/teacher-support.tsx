@@ -1,15 +1,15 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-
 import { niceDate } from "../../utilities/time";
-import { ENTER } from "@blueprintjs/core/lib/esm/common/keys";
-import { TeacherSupportModelType, TeacherSupportSectionTarget, AudienceModelType,
-  audienceInfo } from "../../models/stores/supports";
-import { SectionType, getSectionTitle } from "../../models/curriculum/section";
+import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../models/stores/supports";
+import { getSectionTitle, kAllSectionType } from "../../models/curriculum/section";
 import { createTextSupport } from "../../models/curriculum/support";
 
 import "./teacher-support.sass";
+
+// SEE: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+const ENTER_KEY_CODE = 13;
 
 interface IProps extends IBaseProps {
   support?: TeacherSupportModelType;
@@ -42,7 +42,7 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     const audienceType = audience.type;
     const messageTarget = audienceInfo[audienceType].display;
     const problemSectionTypes = problem.sections.map(section => section.type);
-    const sectionTypes = [SectionType.all, ...problemSectionTypes];
+    const sectionTypes = [kAllSectionType, ...problemSectionTypes];
     const sectionOptions = sectionTypes.map(sectionType => {
       return <option key={sectionType} value={sectionType}>{getSectionTitle(sectionType)}</option>;
     });
@@ -95,13 +95,13 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
     const content = this.inputElem && this.inputElem.value;
     const sectionTarget = this.sectionElem && this.sectionElem.value;
     if (this.inputElem && content && sectionTarget) {
-      db.createSupport(createTextSupport(content), sectionTarget as TeacherSupportSectionTarget, audience);
+      db.createSupport(createTextSupport(content), sectionTarget, audience);
       this.inputElem.value = "";
     }
   }
 
   private handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.keyCode === ENTER) {
+    if (e.keyCode === ENTER_KEY_CODE) {
       this.handleSubmit();
     }
   }

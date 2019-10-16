@@ -1,10 +1,11 @@
 import * as Adapter from "enzyme-adapter-react-16";
 import * as React from "react";
 
-import { configure, mount, shallow } from "enzyme";
+import { configure, mount } from "enzyme";
 import { DemoCreatorComponment } from "./demo-creator";
 import { createStores, IStores } from "../../models/stores/stores";
 import { DemoModel } from "../../models/stores/demo";
+import { UnitModel } from "../../models/curriculum/unit";
 
 const demoUnitJson = {
   code: "test",
@@ -40,8 +41,6 @@ const demoUnitJson = {
   ]
 };
 
-import { createFromJson } from "../../models/curriculum/unit";
-
 configure({ adapter: new Adapter() });
 
 describe("DemoCreator Component", () => {
@@ -55,7 +54,7 @@ describe("DemoCreator Component", () => {
           name: "Test Class"
         }
       }),
-      unit: createFromJson(demoUnitJson)
+      unit: UnitModel.create(demoUnitJson)
     });
   });
 

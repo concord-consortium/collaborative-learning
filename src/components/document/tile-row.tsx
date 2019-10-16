@@ -4,6 +4,7 @@ import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
 import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { SectionHeader } from "../tools/section-header";
 import "./tile-row.sass";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
@@ -49,6 +50,7 @@ interface IProps {
   docId: string;
   scale?: number;
   model: TileRowModelType;
+  rowIndex: number;
   height?: number;
   tileMap: any;
   readOnly?: boolean;
@@ -70,12 +72,16 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { model } = this.props;
+    const { isSectionHeader, sectionId } = model;
     const height = this.props.height || model.height;
     const style = height ? { height } : undefined;
     return (
       <div className={`tile-row`} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
-        {this.renderTiles(height)}
+        { isSectionHeader && sectionId
+          ? <SectionHeader type={sectionId}/>
+          : this.renderTiles(height)
+        }
         {!this.props.readOnly && this.renderDragDropHandles()}
       </div>
     );
@@ -93,23 +99,29 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}
                                     onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
+                                    onRequestRowHeight={this.handleRequestRowHeight}
                                     {...others} />
               : null;
     });
   }
 
   private renderDragDropHandles() {
-    const { model: { isUserResizable }, dropHighlight } = this.props;
+    const { model: { isUserResizable }, rowIndex, dropHighlight } = this.props;
     const highlight = this.state.tileAcceptDrop ? undefined : dropHighlight;
+    const { isSectionHeader } = this.props.model;
+    const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
+    const showLeftHighlight = (highlight === "left") && !isSectionHeader;
+    const showRightHighlight = (highlight === "right") && !isSectionHeader;
+    const showBottomHighlight = (highlight === "bottom");
     return [
       <div key="top-drop-feedback"
-          className={`drop-feedback ${highlight === "top" ? "show top" : ""}`} />,
+          className={`drop-feedback ${showTopHighlight ? "show top" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`drop-feedback ${highlight === "left" ? "show left" : ""}`} />,
+          className={`drop-feedback ${showLeftHighlight ? "show left" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`drop-feedback ${highlight === "right" ? "show right" : ""}`} />,
+          className={`drop-feedback ${showRightHighlight ? "show right" : ""}`} />,
       <div key="bottom-drop-feedback"
-          className={`drop-feedback ${highlight === "bottom" ? "show bottom" : ""}`} />,
+          className={`drop-feedback ${showBottomHighlight ? "show bottom" : ""}`} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}
@@ -119,6 +131,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
     this.setState({ tileAcceptDrop: tileId });
+  }
+
+  private handleRequestRowHeight = (tileId: string, height: number) => {
+    this.props.model.setRowHeight(height);
   }
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
+import CSS from "csstype";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
@@ -15,6 +16,7 @@ interface IProps extends IBaseProps {
   context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onRequestRowHeight: (tileId: string, height: number) => void;
 }
 
 interface IState {
@@ -92,9 +94,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.disposers.forEach(disposer => disposer());
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
+    }
+    // if we have a new image, or the image height has changed, reqest an explicit height
+    if (this.state.imageEntry && this.state.imageEntry.height
+        && (!prevState.imageEntry || prevState.imageEntry.height !== this.state.imageEntry.height)) {
+      this.props.onRequestRowHeight(this.props.model.id, this.state.imageEntry.height);
     }
   }
 
@@ -118,11 +125,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
-    const imageDisplayStyle = {
-      backgroundImage: "url(" + imageToUseForDisplay + ")",
-      width: imageWidth + "px",
-      height: imageHeight + "px"
+    const imageDisplayStyle: CSS.Properties = {
+      backgroundImage: "url(" + imageToUseForDisplay + ")"
     };
+    if (!imageEntry) {
+      imageDisplayStyle.width = defaultImagePlaceholderSize.width + "px";
+      imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
+    }
     return (
       <div className={divClasses}
         onMouseDown={this.handleMouseDown}

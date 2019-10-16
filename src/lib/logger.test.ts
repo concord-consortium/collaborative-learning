@@ -108,7 +108,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await document.content.addTextTile("test");
+      await document.content.addTextTile({ text: "test" });
     });
 
     it.skip("can log copying tiles between documents", async (done) => {
@@ -169,7 +169,7 @@ describe("logger", () => {
 
       const serialized = JSON.stringify(getSnapshot(tileToCopy));
 
-      await destinationDocument.content.copyTileIntoRow(serialized, tileToCopy.id, 0);
+      await destinationDocument.content.copyTileIntoNewRow(serialized, tileToCopy.id, 0);
     });
 
   });

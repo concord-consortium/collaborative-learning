@@ -3,6 +3,7 @@ import { DBPublication } from "../db-types";
 import { forEach } from "lodash";
 import { onPatch } from "mobx-state-tree";
 import { BaseListener } from "./base-listener";
+import { syncStars } from "./sync-stars";
 
 export class DBPublicationsListener extends BaseListener {
   private db: DB;
@@ -61,22 +62,7 @@ export class DBPublicationsListener extends BaseListener {
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
           documents.add(doc);
-          onPatch(doc.stars, patch => {
-            const [, index, replaceKey] = patch.path.split("/");
-            if (patch.op === "add") {
-              const star = patch.value;
-              const { starred, key } = star;
-              if (key === "") { // key will be assigned from Firebase node id
-                this.db.createUserStar(doc, starred);
-              }
-            } else if (patch.op === "replace" && replaceKey === "starred") {
-              const starIndex = parseInt(index, 10);
-              const star = doc.getUserStarAtIndex(starIndex);
-              if (star) {
-                this.db.setUserStarState(doc.key, star.key, star.starred);
-              }
-            }
-          });
+          syncStars(doc, this.db);
           onPatch(doc.comments, patch => {
             const [, tileId, , index, replaceKey] = patch.path.split("/");
             if (patch.op === "add") {

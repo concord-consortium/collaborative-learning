@@ -7,6 +7,7 @@ export const ProblemModel = types
     ordinal: types.integer,
     title: types.string,
     subtitle: "",
+    disabled: types.array(types.string),
     sections: types.array(SectionModel),
     supports: types.array(SupportModel),
   })

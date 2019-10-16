@@ -1,6 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
+import Markdown from "slate-md-serializer";
+import SlateHtmlSerializer from "./slate-html-serializer";
 import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kTextToolID = "Text";
@@ -9,7 +11,9 @@ export function defaultTextContent(initialText?: string) {
   return TextContentModel.create({ text: initialText || "" });
 }
 
-export const StringOrArray = types.union(types.string, types.array(types.string));
+const HtmlSerializer = new SlateHtmlSerializer();
+
+const MarkdownSerializer = new Markdown();
 
 export const emptyJson: ValueJSON = {
               document: {
@@ -40,8 +44,8 @@ const errorJson: ValueJSON = {
 export const TextContentModel = types
   .model("TextTool", {
     type: types.optional(types.literal(kTextToolID), kTextToolID),
-    text: types.optional(StringOrArray, ""),
-    // e.g. "markdown", "slate", "quill", empty => plain text
+    text: types.optional(types.union(types.string, types.array(types.string)), ""),
+    // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string)
   })
   .views(self => ({
@@ -63,8 +67,10 @@ export const TextContentModel = types
       switch (self.format) {
         case "slate":
           return self.getSlate();
+        case "html":
+          return HtmlSerializer.deserialize(self.joinText);
         case "markdown":
-          // handle markdown import here; for now we treat as text
+          return MarkdownSerializer.deserialize(self.joinText);
         default:
           return Plain.deserialize(self.joinText);
       }
@@ -75,7 +81,11 @@ export const TextContentModel = types
       self.format = undefined;
       self.text = text;
     },
-    setMarkdown(text: string) {
+    setHtml(text: string | string[]) {
+      self.format = "html";
+      self.text = text;
+    },
+    setMarkdown(text: string | string[]) {
       self.format = "markdown";
       self.text = text;
     },

@@ -82,8 +82,8 @@ export const getProblemIdForAuthenticatedUser =
     }
     else {
       resolve({
-        unitCode: appConfig.defaultUnit,
-        problemOrdinal: appConfig.defaultProblemOrdinal
+        unitCode: urlParams && urlParams.unit || appConfig.defaultUnit,
+        problemOrdinal: urlParams && urlParams.problem || appConfig.defaultProblemOrdinal
       });
     }
   });

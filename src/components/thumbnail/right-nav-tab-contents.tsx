@@ -3,9 +3,11 @@ import * as React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
-import { ENavTabSectionType, ERightNavTab, navTabSectionId, NavTabSectionModelType } from "../../models/view/right-nav";
+import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
-
+import { FourUpComponent } from "../four-up";
+import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
+import { EPanelId } from "../../clue/components/clue-app-content";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
@@ -26,28 +28,66 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   public render() {
     const { appConfig: { rightNavTabs }, user } = this.stores;
     const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
+
+    const renderDocumentsSection = (section: NavTabSectionModelType) => {
+      const sectionId = navTabSectionId(section);
+      const _handleDocumentStarClick = section.showStarsForUser(user)
+                                        ? this.handleDocumentStarClick
+                                        : undefined;
+      return (
+        <DocumentsSection
+          key={sectionId} tab={myTabSpec!.tab} section={section}
+          stores={this.stores} scale={this.props.scale}
+          isExpanded={this.state.showSection.get(sectionId)}
+          onToggleExpansion={this.handleToggleExpansion}
+          onNewDocumentClick={this.handleNewDocumentClick}
+          onDocumentClick={this.handleDocumentClick}
+          onDocumentDragStart={this.handleDocumentDragStart}
+          onDocumentStarClick={_handleDocumentStarClick} />
+      );
+    };
+
     if (!myTabSpec) return null;
     return (
       <div className={this.props.className}>
         <div className="header">{myTabSpec.label}</div>
 
         {myTabSpec.sections.map(section => {
-          const sectionId = navTabSectionId(section);
-          const _handleDocumentStarClick = section.showStars && user.isTeacher
-                                            ? this.handleDocumentStarClick
-                                            : undefined;
-          return (
-            <DocumentsSection
-              key={sectionId} tab={myTabSpec.tab} section={section}
-              stores={this.stores} scale={this.props.scale}
-              isExpanded={this.state.showSection.get(sectionId)}
-              onToggleExpansion={this.handleToggleExpansion}
-              onNewDocumentClick={this.handleNewDocumentClick}
-              onDocumentClick={this.handleDocumentClick}
-              onDocumentDragStart={this.handleDocumentDragStart}
-              onDocumentStarClick={_handleDocumentStarClick} />
-          );
+          const showWorkspaces = section.showGroupWorkspaces;
+          return (!showWorkspaces ? renderDocumentsSection(section) : this.renderGroups() );
         })}
+      </div>
+    );
+  }
+
+  private renderGroups() {
+    const { groups } = this.stores;
+    return groups.allGroups.map( group => this.renderFourUpThumbnail(group));
+  }
+
+  private renderFourUpThumbnail(group: any) {
+    const { ui } = this.stores;
+    const showGroupFourUp = () =>  {
+      ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
+      ui.problemWorkspace.toggleComparisonVisible({override: true});
+      ui.setTeacherPanelKey(EPanelId.workspace);
+    };
+
+    const styles: React.CSSProperties = {
+      width: "100px",
+      height: "100px",
+      position: "relative",
+      pointerEvents: "none"
+    };
+
+    return (
+      <div key={group.id}>
+        <div onClick={showGroupFourUp}>
+          {group.id}
+          <div style={styles}>
+            <FourUpComponent groupId={group.id} isGhostUser={true} toggleable={true} />
+          </div>
+        </div>
       </div>
     );
   }
