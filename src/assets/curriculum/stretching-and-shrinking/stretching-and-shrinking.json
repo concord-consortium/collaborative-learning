@@ -159,8 +159,8 @@
                         "__underline__",
                         "`code/typewriter`",
                         "++inserted/added/highlighter++",
-                        "~~deleted/strikethru~~",
-                        "_Note:_ Combinations of styles will be eventually supported. At the moment, combining them may cause bizzare results.",
+                        "~~deleted/strike-through~~",
+                        "_Note:_ Combinations of styles will be eventually supported. At the moment, combining them may cause bizarre results.",
                         "---",
                         "### 2. _Subscripts & Superscripts_ (Implemented only in HTML)",
                         "Currently, superscripts & subscripts are only supported in the HTML format. There don't seem to be any Markdown conventions for this particular styling. There may be a way to handle certain, special case HTML styles, tags within the Markdown format, as shown below. For the moment, however, this is not yet implemented",
@@ -207,7 +207,7 @@
                         "| ----------- | ----------- |",
                         "| Paragraph | Text |",
                         "| Header | Title |",
-                        "### 9. _Bock Quotes (& Paragraphs)_",
+                        "### 9. _Block Quotes (& Paragraphs)_",
                         "Paragraphs are simply long lines of text in this JSON file. To be formatted as a paragraph they must be all on the same line.",
                         "Successive long text strings create separate paragraphs. Of course, it would be possible to tweak the rendering of all this. But, for the moment, this is all that is implemented.",
                         "The following paragraph is prefixed with a `> ` mark that will cause it to render as a block quote.",
@@ -257,7 +257,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "plain",
                       "text": [
                         "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
                       ]

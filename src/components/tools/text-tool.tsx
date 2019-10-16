@@ -38,7 +38,7 @@ import "./text-tool.sass";
   Blocks:
 
     | Slate Name      | Markdown      | HTML tag     |
-    |-----------------|---------------|----------|
+    |-----------------|---------------|--------------|
     | paragraph       |               | <p>          |
     | horizontal-rule | ---           | <hr>         |
     | heading1        | #             | <h1>         |
@@ -145,18 +145,16 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
     if (!this.state.value) { return null; }
     return (
-      <div>
-        <Editor
-          key={model.id}
-          className={classes}
-          placeholder={placeholderText}
-          readOnly={readOnly}
-          value={this.state.value}
-          onChange={this.onChange}
-          renderMark={this.renderMark}
-          renderBlock={this.renderBlock}
-        />
-      </div>
+      <Editor
+        key={model.id}
+        className={classes}
+        placeholder={placeholderText}
+        readOnly={readOnly}
+        value={this.state.value}
+        onChange={this.onChange}
+        renderMark={this.renderMark}
+        renderBlock={this.renderBlock}
+      />
     );
   }
 
@@ -213,7 +211,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       case "horizontal-rule":
         return (<hr />);
 
-      // Note: Tables, as are implemented in the current de-serializer, do not
+      // Note: Tables, as implemented in the current de-serializer, do not
       // nest a <tbody> element within the <table>. A new rule could easily
       // be added that would handle this case and bring the DOM in alignment
       // with the slate model.
