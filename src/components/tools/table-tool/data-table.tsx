@@ -203,6 +203,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             const { dataSet } = this.props;
             dataSet && dataSet.setAttributeName(id, name);
           }
+          setTimeout(() => this.gridColumnApi && this.gridColumnApi.autoSizeColumns([id]), 10);
         },
         onUpdateExpression: (id: string, expression: string, rawExpression: string) => {
           if (this.props.onSetExpression) {
