@@ -243,13 +243,13 @@ export class DB {
 
     // personal document
     const personalDocument = documents.getPersonalDocument(user.id);
-    if (personalDocument) return personalDocument;
+    if (personalDocument && !personalDocument.getProperty("isDeleted")) return personalDocument;
 
     const personalDocumentsRef = this.firebase.ref(this.firebase.getUserPersonalDocPath(user));
     const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
     const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
                                                   personalDocumentsSnapshot.val();
-    const firstPersonalDocument = find(personalDocuments, () => true);
+    const firstPersonalDocument = find(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
     return firstPersonalDocument
       ? this.openOtherDocument(PersonalDocument, firstPersonalDocument.self.documentKey)
       : this.createPersonalDocument({ content: defaultContent });
