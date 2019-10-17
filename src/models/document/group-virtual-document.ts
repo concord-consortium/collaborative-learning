@@ -1,3 +1,5 @@
+import { GroupModelType } from "../stores/groups";
+
 export const kGroupVirtualDocumentType = "GroupVirtualDocumentType";
 export interface IGroupVirtualDocument {
   id: string;
@@ -25,7 +27,7 @@ interface IGroupConstructorParams {
 export class GroupVirtualDocument {
   public readonly id: string;
 
-  constructor(group: IGroupConstructorParams) {
+  constructor(group: IGroupConstructorParams | GroupModelType) {
     this.id = group.id;
   }
 

@@ -2,6 +2,8 @@ import * as React from "react";
 import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
 import { LinkSwitcherMenu, IMenuLink } from "./link-switcher-menu";
+import { LogEventName } from "../lib/logger";
+import { toJS } from "mobx";
 
 interface IProps extends IBaseProps {}
 
@@ -53,7 +55,8 @@ export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
           title: portalOffering ? problem.title : `${problem.title} (N/A)`,
           link: portalOffering ? portalOffering.location : undefined,
           enabled: true,
-          extras: { unitCode, problemOrdinal, title: problem.title }
+          extras: { unitCode, problemOrdinal, title: problem.title },
+          log: {event: LogEventName.DASHBOARD_SWITCH_PROBLEM, parameters: toJS(portalOffering)}
         });
       });
     });

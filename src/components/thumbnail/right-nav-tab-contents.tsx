@@ -8,6 +8,8 @@ import { DocumentsSection } from "./documents-section";
 import { FourUpComponent } from "../four-up";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { EPanelId } from "../../clue/components/clue-app-content";
+import { GroupModelType } from "../../models/stores/groups";
+import { LogEventName, Logger } from "../../lib/logger";
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
@@ -65,9 +67,10 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     return groups.allGroups.map( group => this.renderFourUpThumbnail(group));
   }
 
-  private renderFourUpThumbnail(group: any) {
+  private renderFourUpThumbnail(group: GroupModelType) {
     const { ui } = this.stores;
     const showGroupFourUp = () =>  {
+      Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "right-nav"});
       ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
       ui.problemWorkspace.toggleComparisonVisible({override: true});
       ui.setTeacherPanelKey(EPanelId.workspace);

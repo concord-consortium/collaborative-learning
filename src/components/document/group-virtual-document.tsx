@@ -8,6 +8,7 @@ import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 
 import "./group-virtual-document.sass";
+import { LogEventName, Logger } from "../../lib/logger";
 
 export type WorkspaceSide = "primary" | "comparison";
 
@@ -92,6 +93,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
 
   private handleGroupClicked(groupID: string) {
     const { ui } = this.stores;
+    Logger.log(LogEventName.VIEW_GROUP, {group: groupID, via: "group-document-titlebar"});
     ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({id: groupID}));
   }
 
