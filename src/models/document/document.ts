@@ -47,11 +47,12 @@ export type PublicationType = typeof ProblemPublication | OtherPublicationType |
 
 export interface IDocumentAddTileOptions {
   addSidecarNotes?: boolean;
-  imageUrl?: string;
+  url?: string;
 }
 
 export const DocumentToolEnum = types.enumeration("tool",
-                                  ["dataflow", "delete", "drawing", "geometry", "image", "select", "table", "text"]);
+                                                  ["dataflow", "delete", "drawing", "geometry", "image",
+                                                   "select", "table", "text", "placeholder"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types

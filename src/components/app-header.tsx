@@ -110,7 +110,9 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
       );
     };
 
-    const panelButtons = panels.map(spec => {
+    const panelButtons = panels
+      .filter(spec => spec.label.length > 0)
+      .map(spec => {
       return (
         <PanelButton
           key={spec.panelId}

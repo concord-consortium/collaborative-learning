@@ -42,6 +42,7 @@ export const AppConfigModel = types
     defaultLearningLogTitle: "UntitledLog",
     initialLearningLogTitle: "",
     defaultLearningLogDocument: false,
+    autoSectionProblemDocuments: false,
     documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
     showClassSwitcher: false,

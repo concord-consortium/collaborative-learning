@@ -2,6 +2,7 @@ import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { forEach } from "lodash";
 import { BaseListener } from "./base-listener";
+import { syncStars } from "./sync-stars";
 
 export class DBProblemDocumentsListener extends BaseListener {
   private db: DB;
@@ -81,6 +82,7 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.db.createDocumentFromProblemDocument(document.self.uid, document, monitor)
           .then((doc) => {
             if (isOwnDocument) {
+              syncStars(doc, this.db);
               this.db.listeners.monitorDocumentVisibility(doc);
             }
             return doc;

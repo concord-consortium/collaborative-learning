@@ -1,6 +1,6 @@
 import * as firebase from "firebase/app";
 import { OtherDocumentType, PersonalDocument } from "../models/document/document";
-import { TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
+import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
@@ -199,7 +199,7 @@ export class Firebase {
   public getSupportsPath(
     user: UserModelType,
     audience?: AudienceModelType,
-    sectionTarget?: TeacherSupportSectionTarget,
+    sectionTarget?: SectionTarget,
     key?: string
   ) {
     const audienceSuffix = audience
@@ -297,6 +297,10 @@ export class Firebase {
 
   public getLatestGroupIdRef() {
     return this.ref(this.getUserPath(this.db.stores.user)).child("latestGroupId");
+  }
+
+  public getLastSupportViewTimestampRef() {
+    return this.ref(this.getUserPath(this.db.stores.user)).child("lastSupportViewTimestamp");
   }
 
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {

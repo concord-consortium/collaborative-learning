@@ -5,7 +5,6 @@ import { UnitModel } from "../curriculum/unit";
 import { createTextSupport, ESupportType } from "../curriculum/support";
 import { InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel } from "../curriculum/problem";
-import { SectionType } from "../curriculum/section";
 import { omitUndefined } from "../../utilities/test-utils";
 import { cloneDeep } from "lodash";
 
@@ -94,14 +93,14 @@ describe("supports model", () => {
       title: "Problem 1",
       sections: [
         {
-          type: SectionType.introduction,
+          type: "introduction",
           supports: [
             {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #1"},
             {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #2"}
           ]
         },
         {
-          type: SectionType.initialChallenge,
+          type: "initialChallenge",
           supports: [
             {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #1"},
             {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #2"}
@@ -123,14 +122,14 @@ describe("supports model", () => {
           title: "Problem 2",
           sections: [
             {
-              type: SectionType.introduction,
+              type: "introduction",
               supports: [
                 {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #1"},
                 {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #2"}
               ]
             },
             {
-              type: SectionType.initialChallenge,
+              type: "initialChallenge",
               supports: [
                 {type: ESupportType.text,
                   content: "Investigation 1, Problem 2, section: initial challenge, support #1"},
@@ -159,14 +158,14 @@ describe("supports model", () => {
           title: "Problem 1",
           sections: [
             {
-              type: SectionType.introduction,
+              type: "introduction",
               supports: [
                 {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #1"},
                 {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #2"}
               ]
             },
             {
-              type: SectionType.initialChallenge,
+              type: "initialChallenge",
               supports: [
                 {type: ESupportType.text,
                   content: "Investigation 2, Problem 1, section: initial challenge, support #1"},
@@ -185,14 +184,14 @@ describe("supports model", () => {
           title: "Problem 2",
           sections: [
             {
-              type: SectionType.introduction,
+              type: "introduction",
               supports: [
                 {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #1"},
                 {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #2"}
               ]
             },
             {
-              type: SectionType.initialChallenge,
+              type: "initialChallenge",
               supports: [
                 {type: ESupportType.text,
                   content: "Investigation 2, Problem 2, section: initial challenge, support #1"},
@@ -226,7 +225,7 @@ describe("supports model", () => {
       problem: ProblemModel.create(cloneDeep(problem1))});
 
     expect(supports.getSupportsForUserProblem(
-                      { sectionId: SectionType.introduction, groupId: "groupId", userId: "userId" }))
+                      { sectionId: "introduction", groupId: "groupId", userId: "userId" }))
       .toEqual([
         {
           sectionId: "introduction",
@@ -287,12 +286,12 @@ describe("supports model", () => {
     const classSupportAll = {key: "1", support: createTextSupport(""), type: SupportTarget.problem,
       audience: ClassAudienceModel.create(), authoredTime: 42};
     const classSupportIntro = {key: "2", support: createTextSupport(""),
-      type: SupportTarget.section, sectionId: SectionType.introduction,
+      type: SupportTarget.section, sectionId: "introduction",
       audience: ClassAudienceModel.create(), authoredTime: 43};
     const groupSupport = {key: "3", support: createTextSupport(""), type: SupportTarget.problem,
       audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
     const userSupport = {key: "4", support: createTextSupport(""),
-      type: SupportTarget.section, sectionId: SectionType.didYouKnow,
+      type: SupportTarget.section, sectionId: "didYouKnow",
       audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
 
     const supports = SupportsModel.create({
@@ -309,30 +308,30 @@ describe("supports model", () => {
     });
 
     const generalClassSupports = supports.getSupportsForUserProblem(
-                                  { sectionId: SectionType.didYouKnow, groupId: "group0", userId: "user0" });
+                                  { sectionId: "didYouKnow", groupId: "group0", userId: "user0" });
     expect(generalClassSupports.length).toEqual(1);
     expect((generalClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
 
     const setionClassSupports = supports.getSupportsForUserProblem(
-                                  { sectionId: SectionType.introduction, groupId: "group0", userId: "user0" });
+                                  { sectionId: "introduction", groupId: "group0", userId: "user0" });
     expect(setionClassSupports.length).toEqual(2);
     expect((setionClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
     expect((setionClassSupports[1] as TeacherSupportModelType).key).toEqual(classSupportIntro.key);
 
     const groupSupports = supports.getSupportsForUserProblem(
-                            { sectionId: SectionType.didYouKnow, groupId: "group1", userId: "user0" });
+                            { sectionId: "didYouKnow", groupId: "group1", userId: "user0" });
     expect(groupSupports.length).toEqual(2);
     expect((groupSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
     expect((groupSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
 
     const userSupports = supports.getSupportsForUserProblem(
-                            { sectionId: SectionType.didYouKnow, groupId: "group0", userId: "user1" });
+                            { sectionId: "didYouKnow", groupId: "group0", userId: "user1" });
     expect(userSupports.length).toEqual(2);
     expect((userSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
     expect((userSupports[1] as TeacherSupportModelType).key).toEqual(userSupport.key);
 
     const multiSupports = supports.getSupportsForUserProblem(
-                            { sectionId: SectionType.didYouKnow, groupId: "group1", userId: "user1" });
+                            { sectionId: "didYouKnow", groupId: "group1", userId: "user1" });
     expect(multiSupports.length).toEqual(3);
     expect((multiSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
     expect((multiSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);

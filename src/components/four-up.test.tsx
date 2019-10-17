@@ -9,7 +9,6 @@ import { DocumentModel, ProblemDocument, DocumentModelType } from "../models/doc
 import { createStores } from "../models/stores/stores";
 import { CanvasComponent } from "./document/canvas";
 import { UserModel } from "../models/stores/user";
-import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "../models/stores/workspace";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
 configure({ adapter: new Adapter() });

@@ -1,9 +1,8 @@
-import { SnapshotIn, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
-import { SectionModelType, SectionType } from "./section";
+import { ISectionInfoMap, setSectionInfoMap } from "./section";
 import { SupportModel } from "./support";
-import { each, isObject } from "lodash";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { IStores } from "../stores/stores";
 import { AppConfigModelType } from "../stores/app-config-model";
@@ -14,12 +13,19 @@ export const UnitModel = types
     abbrevTitle: "",
     title: types.string,
     subtitle: "",
+    disabled: types.array(types.string),
     placeholderText: "",
+    sections: types.maybe(types.frozen<ISectionInfoMap>()),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
   })
+  .actions(self => ({
+    afterCreate() {
+      setSectionInfoMap(self.sections);
+    }
+  }))
   .views(self => ({
     get fullTitle() {
       return `${self.title}${self.subtitle ? ": " + self.subtitle : ""}`;
@@ -49,37 +55,6 @@ export const UnitModel = types
 
 export type UnitModelType = typeof UnitModel.Type;
 
-/*
-  createFromJson
-
-  The JSON representation contains strings for things like SectionTypes.
-  CurriculumModel.create() expects proper TypeScript enumerated values instead.
-  This function recursively replaces SectionType strings with the corresponding
-  SectionType enumerated values and returns the resulting CurriculumModel.
- */
-export function createFromJson(json: any) {
-  const snapshot = replaceSectionTypes(json);
-  return UnitModel.create(snapshot);
-}
-
-/*
-  replaceSectionTypes
-
-  Recursively replaces SectionType strings in 'type' fields with corresponding
-  SectionType enumerated values.
- */
-function replaceSectionTypes(obj: {}): SnapshotIn<typeof UnitModel> {
-  each(obj, (v, k) => {
-    if ((k === "type") && (SectionType[v] != null)) {
-      (obj as SectionModelType).type = SectionType[v] as SectionType;
-    }
-    else if (isObject(v)) {
-      replaceSectionTypes(v);
-    }
-  });
-  return obj as SnapshotIn<typeof UnitModel>;
-}
-
 function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
   const unitUrlParam = unitId && appConfig.units.get(unitId);
   if (!unitUrlParam){
@@ -101,9 +76,16 @@ function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType )
           });
 }
 
+export function isDifferentUnitAndProblem(stores: IStores, unitId?: string | undefined, problemOrdinal?: string) {
+  if (!unitId || !problemOrdinal) return false;
+  const { unit, investigation, problem } = stores;
+  const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
+  return (unit.code === unitId) && (combinedOrdinal === problemOrdinal);
+}
+
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
-  const unit = createFromJson(unitJson);
+  const unit = UnitModel.create(unitJson);
   const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
   if (unit) {

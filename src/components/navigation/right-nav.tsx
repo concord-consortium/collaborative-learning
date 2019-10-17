@@ -12,6 +12,10 @@ import "./right-nav.sass";
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
 
+export const StudentWorkComponent = () => {
+  return <RightNavTabContents tabId={ERightNavTab.kStudentWork} className="student-work" scale={kRightNavItemScale} />;
+};
+
 export const MyWorkComponent = () => {
   return <RightNavTabContents tabId={ERightNavTab.kMyWork} className="my-work" scale={kRightNavItemScale} />;
 };
@@ -31,6 +35,7 @@ export const SupportsComponent = () => {
 interface IProps extends IBaseProps {
   tabs?: RightNavTabSpec[];
   isGhostUser: boolean;
+  isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -79,7 +84,8 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     const {onDragOver, onDrop} = this.props;
     const {activeRightNavTab, rightNavExpanded} = this.stores.ui;
     const tabSpecs = this.props.tabs && this.props.tabs
-                      .filter(tabSpec => !(this.props.isGhostUser && tabSpec.hideGhostUser));
+                      .filter(tabSpec => !(this.props.isGhostUser && tabSpec.hideGhostUser))
+                      .filter(tabSpec => tabSpec.teacherOnly ? this.props.isTeacher : true);
     if (!tabSpecs || !tabSpecs.length) return null;
     return (
       <div className="right-nav" onDragOver={onDragOver} onDrop={onDrop}>
@@ -92,6 +98,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
                 active={rightNavExpanded && (activeRightNavTab === spec.tab)}
                 onClick={this.handleTabClick(spec.tab)} >
                 {spec.label}
+                {this.renderTabDecoration(spec.tab)}
               </TabComponent>
             );
           })}
@@ -111,6 +118,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private renderTabContents() {
     const {activeRightNavTab} = this.stores.ui;
     const tabContents: RightNavTabMap<() => JSX.Element> = {
+            [ERightNavTab.kStudentWork]: () => <StudentWorkComponent />,
             [ERightNavTab.kMyWork]: () => <MyWorkComponent />,
             [ERightNavTab.kClassWork]: () => <ClassWorkComponent />,
             [ERightNavTab.kLearningLog]: () => <LearningLogsComponent />,
@@ -134,6 +142,15 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private renderTabDecoration(tab: ERightNavTab) {
+    if (tab === ERightNavTab.kSupports) {
+      const {user, supports} = this.stores;
+      if (user.isStudent && supports.hasNewSupports(user.lastSupportViewTimestamp)) {
+        return <div className="support-badge" />;
+      }
+    }
+  }
+
   private renderLoadingText(tab: ERightNavTab) {
     const {activeRightNavTab} = this.stores.ui;
     return (
@@ -147,7 +164,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTabClick = (tab: ERightNavTab) => {
-    const { ui } = this.stores;
+    const { db, ui, user } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (!navDoneExpanding) {
@@ -156,6 +173,10 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
         this.stores.ui.toggleRightNav(true);
+
+        if ((tab === ERightNavTab.kSupports) && user.isStudent) {
+          db.setLastSupportViewTimestamp();
+        }
       } else {
         this.stores.ui.toggleRightNav();
       }

@@ -33,6 +33,7 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
+    teacherPanelKey: types.maybe(types.string)
   })
   .views((self) => ({
     get allContracted() {
@@ -93,7 +94,6 @@ export const UIModel = types
       self.dialog = undefined;
       dialogResolver = undefined;
     };
-
     return {
       contractAll,
       alert,
@@ -143,6 +143,9 @@ export const UIModel = types
           self.problemWorkspace.setAvailableDocument(document);
           contractAll();
         }
+      },
+      setTeacherPanelKey(key: string) {
+        self.teacherPanelKey = key;
       }
     };
   });
