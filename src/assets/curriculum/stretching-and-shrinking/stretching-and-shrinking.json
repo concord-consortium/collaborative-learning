@@ -147,120 +147,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "# MARKDOWN",
-                        "---",
-                        "### 1. _Styles_",
-                        "",
-                        "Styles are applied on a string of characters.",
-                        "_italic_",
-                        "**bold**",
-                        "__underline__",
-                        "`code/typewriter`",
-                        "++inserted/added/highlighter++",
-                        "~~deleted/strike-through~~",
-                        "_Note:_ Combinations of styles will be eventually supported. At the moment, combining them may cause bizarre results.",
-                        "---",
-                        "### 2. _Subscripts & Superscripts_ (Implemented only in HTML)",
-                        "Currently, superscripts & subscripts are only supported in the HTML format. There don't seem to be any Markdown conventions for this particular styling. There may be a way to handle certain, special case HTML styles, tags within the Markdown format, as shown below. For the moment, however, this is not yet implemented",
-                        "H<sub>2</sub>O",
-                        "---",
-                        "### 3. _Headings_",
-                        "",
-                        "# # Heading 1",
-                        "## ## Heading 2",
-                        "### ### Heading 3",
-                        "#### #### Heading 4",
-                        "##### ##### Heading 5",
-                        "###### ###### Heading 6",
-                        "---",
-                        "### 4. _Code Blocks_",
-                        "```",
-                        "const messageMe = () => {",
-                        "  const msg = \"I can write FORTRAN in any language!\";",
-                        "  console.log(msg);",
-                        "}",
-                        "```",
-                        "",
-                        "---",
-                        "### 5. _Bullet Lists_",
-                        "* bullet a",
-                        "* bullet b",
-                        "    * bullet c",
-                        "* bullet d",
-                        "---",
-                        "### 6. _Numbered Lists_ (nesting numbered lists not yet working)",
-                        "1. One is the loneliest number.",
-                        "1. Two can be as bad as one;",
-                        "    1. it's the loneliest number, since the number one.",
-                        "1. Three's a crowd!",
-                        "---",
-                        "### 7. _\"TO DO\" Lists_ (not yet working)",
-                        "- [x] Get up",
-                        "- [x] Brush teeth",
-                        "- [ ] Read _War and Peace_",
-                        "- [ ] Go to bed",
-                        "---",
-                        "### 8. _Tables_ (border formatting not yet working)",
-                        "| Syntax | Description |",
-                        "| ----------- | ----------- |",
-                        "| Paragraph | Text |",
-                        "| Header | Title |",
-                        "### 9. _Block Quotes (& Paragraphs)_",
-                        "Paragraphs are simply long lines of text in this JSON file. To be formatted as a paragraph they must be all on the same line.",
-                        "Successive long text strings create separate paragraphs. Of course, it would be possible to tweak the rendering of all this. But, for the moment, this is all that is implemented.",
-                        "The following paragraph is prefixed with a `> ` mark that will cause it to render as a block quote.",
-                        "> I know not how I seem to others, but to myself I am but a small child wandering upon the vast shores of knowledge, every now and then finding a small bright pebble to content myself with while the vast ocean of undiscovered truth lay before me.",
-                        "_Sir Isaac Newton_",
-                        "---",
-                        "### 10. _Links & Images_ (Broken)",
-                        "Links and images are a bit more difficult than can be done in the time remaining. These will need to be finished, or disabled.",
-                        "![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")",
-                        "[Google](https://www.google.com)"
-                      ]
-                    } 
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h1>HTML</h1>",
-                        "<hr />",
-                        "In addition to the Markdown format, HTML is also supported. This is a sampling of HTML styled text.",
-                        "<h2>Some HTML style examples (this is an h2):",
-                        "</h2>",
-                        "<h3>Text styles (this is an h3)</h3>",
-                        "<ul>",
-                        "<li><strong>Bold</strong></li>",
-                        "<li><em>Italic</em></li>",
-                        "<li><u>Underline</u></li>",
-                        "<li><em><strong><u>All three!</u></strong></em></li>",
-                        "<li><code>Typewriter Font: <strong>Bold</strong>, <em>Italic</em>, <u>Underlined</u></code></li>",
-                        "</ul>",
-                        "<ul>",
-                        "<li>Superscripts: <em>y</em> = 3<em>x</em><sup>2</sup></li>",
-                        "<li>Subscripts: H<sub>2</sub>O</li>",
-                        "</ul>",
-                        "<br />",
-                        "Also supports numbered lists...",
-                        "<ol>",
-                        "<li>Nothing is better than complete happiness.</li>",
-                        "<li>A ham sandwich is better than nothing.</li>",
-                        "<li>Ergo, A ham sandwich is better than complete happiness.</li>",
-                        "</ol>",
-                        "<br />"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "plain",
-                      "text": [
-                        "In this Investigation, you will make scale drawings of figures. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
-                      ]
+                      "text": "In this Investigation, you will make <strong>scale drawings</strong> of figures called <strong>similar figures</strong>. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
                     }
                   },
                   {
@@ -268,8 +155,16 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
                     }
-                  },
-                  {
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
                     "content": {
                       "type": "Text",
                       "text": "The Mystery Club at P.I. Middle School meets monthly. Members watch videos, discuss novels, play “whodunit” games, and talk about real-life mysteries. One day, a member announces that the school is having a contest. A teacher in disguise will appear for a few minutes at school each day for a week. Any student can pay $1 for a guess at the identity of the mystery teacher. The student with the first correct guess wins a prize."
@@ -292,19 +187,17 @@
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
                     }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
+                  },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                      "text": "• Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "• Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain."
                     }
                   }
                 ]
@@ -318,13 +211,21 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Could you have found the height of the teacher if you did not know that the magazine was 10 inches tall? Explain."
+                      "text": "<strong>Situation A. Daphne’s Reasoning</strong> \nDaphne claims she used proportional reasoning to solve the problem. She wrote:<code>Each PI magazine measures 10 inches in real life. I used the PI magazine height to measure the height of the teacher.</code>\nComplete Daphne’s reasoning to estimate the height of the teacher." 
+                      
+
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Can you think of some other times you could use a photo to estimate the size of something?"
+                      "text": "<strong>Situation B. What’s Different?</strong>\nHow does the real-life teacher differ from the teacher in the photo?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "<strong>Situation C.</strong>\nCan you think of some other times you could use a photo to estimate the size of something?"
                     }
                   }
                 ],
@@ -338,13 +239,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The Mystery Club Advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_500w.png"
+                      "text": "The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
                     }
                   }
                 ],
@@ -366,26 +261,8 @@
                 "tiles": [
                   {
                     "content": {
-                    "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
                       "type": "Text",
-                      "text": "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
+                      "text": "In Problem 1.1 A, Daphne used proportional reasoning to solve the mystery. She reasoned:\n\n</em>Each PI magazine height measures 10 inches in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall.</em>\n\nDaphne’s reasoning is similar to the reasoning you have done in the <strong>Comparing Quantities</strong> unit where you used ratios to describe and compare quantities. Recall that a ratio is a comparison of two quantities, such as two lengths. \n\n1 PI magazine height to the height of the teacher (7 PI magazines)\n<strong>or</strong>\n1 PI magazine: 7 PI magazines\n<strong>or</strong> \n10 in: 70 in "
                     }
                   }
                 ],
@@ -399,13 +276,31 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure."
+                      "text": "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How are the original figure and its image alike? Different? How do you know?"
+                      "text": "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "<ol><li>Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure.</li><li>How are the original figure and its image alike? Different? What is your evidence?</li></ol>"
                     }
                   }
                 ]
@@ -429,13 +324,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. What if you could change the position of the anchor point? How does this affect the image?"
+                      "text": "<strong>Situation A. Making Comparisons</strong>\nMs. Marvel’s class made several comparison statements about the original figure and the image.<ul><li>Which of these statements are true? Explain your reasoning. </li><li>Which of these statements represent ratios? Write these as ratio statements. </li></ul>\nComparison 1. The lengths of the sides of the image are twice the lengths of the original. \n\nComparison 2. The distance from a point on the original figure from P is equal to the distance the image of the point is from P.  \nComparison 3. The measure of an angle in the original figure has the same measure as the image of the angle.\nComparison 4. The area of the hat of the original figure is about ¼ the area of the hat of image. "
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. What if you used three rubber bands? How does this affect the image?"
+                      "text": "<strong>Situation B. Creating a New Figure</strong>\nUse your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons in Situation A are true for the original figure and its image?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "<strong>Situation C. Changing the Anchor Point</strong><ol><li>What if you could change the position of the anchor point? How does this affect the image?</li><li>What if you used three rubber bands and traced the figure using the knot closest to the anchor point? How does this affect the image?</li><li>Amy says the rubber bands are multipliers. They have a multiplying effect. Use the language of ratios to restate Amy’s idea mathematically.</li></ol>"
                     }
                   }
                 ]
@@ -449,13 +350,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The original figure and its image are similar figures."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "For two similar figures, what things are the same? What things are different? Explain how."
+                      "text": "The original figure and its image are <strong>similar figures</strong>. The image is also called the <em>scale drawing</em> of the original figure. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know."
                     }
                   }
                 ]
@@ -536,37 +431,71 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BAC can also be called ∠A"
+                      "text": "∠BAC can also be called ∠ A"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠BCA can also be called ∠C"
+                      "text": "∠BCA can also be called ∠ C"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "∠ABC can also be called ∠B"
+                      "text": "∠ABC can also be called ∠ B"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "What names would you give the angles of the large triangle?"
+                      "text": "<em>What names would you give the angles in the large triangle above?</em>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Daphne thinks the rubber-band method is clever, but she believes the school copier can make more accurate copies in a greater variety of sizes. She makes a copy of “Super Sleuth” with two different percent size factors. The results are shown below."
+                      "text": "<em>Name the corresponding angles in the following two similar triangles?</em>"
                     }
                   },
                   {
+                    "layout": {
+                      "height": 300
+                    },
                     "content": {
-                    "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -1],
+                          "axisRange": [20, 20]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 5]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [12, 5]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 7]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [15, 1]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [16, 6]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [15, 7]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -579,6 +508,12 @@
                 "tiles": [
                    {
                     "content": {
+                      "type": "Text",
+                      "text": "Daphne thinks the rubber-band method is clever, but she believes the school copier can make more accurate copies in a greater variety of sizes. She makes a copy of “Super Sleuth” with two different percent size factors. The results are shown below."
+                    }
+                  },
+                  {
+                    "content": {
                     "type": "Image",
                     "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
                     }
@@ -586,7 +521,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "What percent size factors did Daphne use to create the images, Copy 1 and Copy 2? Explain your reasoning."
+                      "text": "<ul><li>What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning.</li><li>How are the copies like the original? How are they different?</li></ul>"
                     }
                   }
                 ]
@@ -607,19 +542,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Compare the original figure to each of the images. Explain how you can use the percent setting to predict the relationship between the following features in and Copy 1, and the original and Copy 2.\n\n- Corresponding angles?\n\n- Corresponding side lengths?\n\n- Corresponding perimeters?\n\n- Corresponding areas?"
+                      "text": "<strong>Situation A. Comparing the Image to the Original</strong>\nCompare each copy to the original figure.<ol><li>Describe how the side lengths compare to the corresponding side lengths in the original figure.</li><li>Describe how the angle measures compare to the corresponding angle measures in the original figure.</li><li>Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure.</li><li>Describe how the area of the triangle in each copy compares to the area in the original figure.</li><li>Explain how the percent setting can be used to predict the relationships between each copy and the original figure.</li></ol>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. What if you wanted to create an image whose side lengths were twice the length of the original? What percent setting would you choose on the copier?"
+                      "text": "<strong>Situation B. Changing Percents</strong>\nWhat if you wanted to create an image whose side lengths were twice the length of the original? What percent setting would you choose on the copier?"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "3. Amelia thinks that the copier creates images that are similar to those made with the rubber-band stretchers and the photograph. Do you agree? Explain why."
+                      "text": "<strong>Situation C. Amelia’s Claim</strong>\nAmelia thinks that the copier creates images that are similar to those made with the rubber band stretchers and the photograph. Do you agree? Explain why or why not."
                     }
                   }
                 ]
@@ -633,70 +568,12 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "For similar figures, what things stay the same? What things change? Explain how. Has your answer to this question changed from Problem 1.2? Explain."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "What do you know about similarity?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                      "text": "For similar figures, what attributes and <strong>measures</strong> stay the same? What characteristics and <strong>measures</strong> change? How does a <strong>multiplier</strong> play a role in these changes?"
                     }
                   }
                 ]
               },
               "supports": []
-            }
-          ]
-        },
-        {
-          "description": "Reflection 1.4",
-          "ordinal": 4,
-          "title": "1.MR Mathematical Reflection 1",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Mathematical Reflection 1"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures. You used photos, rubber-band stretchers, and copy machines to make scale drawings. The original figure and its image are similar figures."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "What do you know about similarity?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
             }
           ]
         }
@@ -730,27 +607,18 @@
                     {
                       "content": {
                         "type": "Text",
-                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions."
+                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. Do the rules create scale drawings? That is, are the two figures similar?"
                       }
-                    },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_12_play_500w.png"
                     }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points on the new figure, using key points from the original figure."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_500w.png"
-                    }
-                  },
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+
                   {
                     "content": {
                       "type": "Text",
@@ -760,87 +628,105 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Zack and Marta experiment with enlarging and reducing figures on a coordinate grid. First, Zack draws Mug Wump on graph paper. Then, he labels the key points from A to X and lists the coordinates for each point. Marta writes the rules that will change Mug’s size. Marta tries several rules for transforming Mug into different sizes."
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "To draw Mug on a coordinate graph paper, refer to the columns for Zug, Lug, Bug and Glug in the table below"
+                      "text": "Zack and Marta experiment with enlarging and reducing figures on a coordinate grid. First, Zack draws Mug Wump on graph paper. Then he labels the key points from A to X and lists the coordinates for each point. Marta writes the rules that will change Mug’s size. Marta tries several rules for transforming Mug into different sizes. She wonders which rules will make family members that are similar shapes."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- For Parts 1-3 of the figure, plot the points in order. Connect them as you go along."
+                      "text": "Draw Mug on a coordinate graph paper by referring to the “Mug Wump” columns in the table.<ul><li>For Parts 1-3 of the figure, plot the points in order. Connect them as you go along.</li><li>For Part 4, plot the two points, but do not connect them.</li></ul>Use the coordinate rules in the table to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- For part 4, plot the two points, but do not connect them."
+                      "text": "Mug Wump: <em>(x, y)</em>,  Zug: <em>(2x, 2y)</em>, Lug: <em>(3x, y)</em>, Bug: <em>(3x, 3y)</em>, Glug: <em>(x, 3y)</em>"
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "text": "To draw Zug, Lug, Bug, and Glug on coordinate graph paper use the columns for Zug, Lug, Bug, and Glug."
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Mug Wump x",
+                          "type": "number",
+                          "values": [0, 2, 2, 3, 2, 5, 5, 6, 6, 8, 6, 2, 0]
+                        },
+                         {
+                          "name": "Mug Wump y",
+                          "type": "number",
+                          "values": [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 7, 7, 1]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 400
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "text": "- Use the given rule to find the coordinates of the points. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug's coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2)."
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Mug Wump x, Part 2",
+                          "type": "number",
+                          "values": [2, 6, 6, 2, 2]
+                        },
+                         {
+                          "name": "Mug Wump y, Part 2",
+                          "type": "number",
+                          "values": [2, 2, 3, 3 ,2]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 200
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "text": "- Plot and connect the points from A to W for each figure on separate axes."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Use the coordinate rules to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Which characters are imposters? How do you know?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "                                       Coordinates of Game Characters\n                |    Mug Wump    |       Zug       |      Lug        |     Bug        |     Glug     |\nRULE    |           (x, y)             |   (2x, 2y)    |   (3x, 2y)  |   (3x, 3y)   |   (x, 3y)    |\n_________________________________________________________________________\nPOINT |                                               PART 1\n_________________________________________________________________________\n     A         |          (0,1)            |     (0,2)      |                      |                      |                      |\n     B         |          (2,1)            |     (4,2)      |                      |                      |                      | \n     C         |          (2,0)           |                       |                      |                      |                      |\n     D        |          (3,0)            |                       |                      |                      |                      |\n     E         |          (3,1)            |                       |                      |                      |                      |\n     F         |          (5,1)            |                       |                      |                      |                      |\n     G        |          (5,0)            |                       |                      |                      |                      |\n     H        |          (6,0)            |                       |                      |                      |                      |\n      I         |          (6,1)            |                       |                      |                      |                      |\n     J         |          (8,1)            |                       |                      |                      |                      |\n     K        |          (6,7)            |                       |                      |                      |                      |\n     L         |          (2,7)            |                       |                      |                      |                      |\n     M       |          (0,1)            |                       |                      |                      |                      |"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "                                       Coordinates of Game Characters\n                 |    Mug Wump    |       Zug       |      Lug        |     Bug        |     Glug     |\nRULE    |           (x, y)             |   (2x, 2y)    |   (3x, 2y)  |   (3x, 3y)   |   (x, 3y)    |\n_________________________________________________________________________\nPOINT |                                               PART 2 (Start Over) \n_________________________________________________________________________\n     M         |          (2,2)            |                      |                      |                      |                      |\n     N          |          (6,2)            |                      |                      |                      |                      | \n     O          |          (6,3)           |                      |                      |                      |                      |\n     P           |          (2,3)            |                      |                      |                      |                      |\n     Q          |          (2,2)            |                      |                      |                      |                      |"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "                                       Coordinates of Game Characters\n                |     Mug Wump    |       Zug       |      Lug        |     Bug        |     Glug     |\nRULE    |           (x, y)             |   (2x, 2y)    |   (3x, 2y)  |   (3x, 3y)   |   (x, 3y)    |\n_________________________________________________________________________\nPOINT |                                               PART 3 (Start Over) \n_________________________________________________________________________\n     R         |          (3,4)             |                      |                      |                      |                      |\n     S         |          (4,5)             |                      |                      |                      |                      | \n     T         |          (5,4)            |                      |                      |                      |                      |\n     U        |          (3,4)            |                       |                      |                      |                      |  "
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Mug Wump x, Part 3",
+                          "type": "number",
+                          "values": [3,4,5,3]
+                        },
+                         {
+                          "name": "Mug Wump y, Part 3",
+                          "type": "number",
+                          "values": [4,5,4,4]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 150
                     }
                   },
                    {
                     "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Mug Wump x, Part 4",
+                          "type": "number",
+                          "values": [2, 6]
+                        },
+                         {
+                          "name": "Mug Wump y, Part 4",
+                          "type": "number",
+                          "values": [5, 5]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 400
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Text",
-                      "text": "                                       Coordinates of Game Characters\n                |     Mug Wump    |       Zug       |      Lug        |     Bug        |     Glug     |\nRULE    |           (x, y)             |   (2x, 2y)    |   (3x, 2y)  |   (3x, 3y)   |   (x, 3y)    |\n_________________________________________________________________________\nPOINT |                                               PART 4 (Start Over) \n_________________________________________________________________________\n     V         |  (2,5) (make a dot)    |                  |                      |                      |     \n     W       |  (6,5) (make a dot)    |                  |                      |                      |"
+                      "text": "• Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2). \n\n• Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes. \n\n• Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
                     }
                   }
                 ]
@@ -867,25 +753,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. What if the rule is (5x, 5y)? Marta says this will make a character that is similar to Mug. Is this true? Why?"
+                      "text": "<strong>Situation A. Marta’s Claim</strong>\nMarta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. What if the rule is (5x, y)? Marta says this character is not similar to Mug. Is this true? Why?"
+                      "text": "<strong>Situation B. Jacob’s Claim</strong>\nJacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "3. Jacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Mug. Is he correct? Explain why."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "4. Make a rule that would create a figure similar to Lug."
+                      "text": "<strong>Situation C. New Rules</strong>\nMake a rule that would create a figure similar to Lug."
                     }
                   }
                 ]
@@ -899,13 +779,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. How can you determine if an original and its image are similar by looking at the coordinate rule that produced the image?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "2. What features stay the same for Mug and similar figures? What features might change?"
+                      "text": "How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change?"
                     }
                   }
                 ]
@@ -922,13 +796,13 @@
           "subtitle": "Changing a Figure's Size and Location",
           "sections": [
             {
-              "type": "introduction",
+              "type": "initialChallenge",
               "content": {
                 "tiles": [
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Zack experiments with multiplying Mug’s coordinates by different whole numbers to make other characters. Marta asks her uncle how multiplying the coordinates by a decimal or adding numbers to or subtracting numbers from each coordinate will affect Mug’s shape. He gives her a sketch for a new shape (a hat for Mug) and some rules to try."
+                      "text": "Zack experiments with multiplying Mug’s coordinates by different whole numbers to make other characters. Marta asks her uncle how multiplying the coordinates by a decimal or adding numbers to or subtracting numbers from each coordinate will affect Mug’s shape. He gives her a sketch for a new shape (a hat for Mug) and some rules to investigate."
                     }
                   },
                   {
@@ -943,6 +817,12 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -5],
+                          "axisRange": [15, 15]
+                        }
+                      },
                       "objects": [
                         {
                           "type": "polygon",
@@ -999,25 +879,11 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_2_In_16_rules_mug_hat_500w.png"
                     }
-                  }
-                ]
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Predict what will happen to the hat with each rule."
-                    }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Test each rule. How does your result compare with your prediction?"
+                      "text": "• Look closely at each rule and predict what will happen to the hat with each rule.\n• Test each rule. How does your result compare with your prediction? "
                     }
                   }
                 ]
@@ -1038,43 +904,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. What if you wanted a figure that is similar to Mug? What rule would you need if:"
+                      "text": "<strong>Situation A. Writing New Hat Rules</strong>\nWhat if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if<ol><li>The side lengths are one third as long as Mug’s hat?</li><li>The side lengths are 1.5 times as long as Mug’s hat?</li><li>The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?</li><li>The image is in another quadrant?</li></ol>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- The side lengths are one third as long as Mug's."
+                      "text": "<strong>Situation B. Negative Numbers and Rules</strong>\nWhat if you multiply each coordinate by a negative number? What happens to the image?"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- The side lengths are 1.5 times as long as Mug's."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- The hat is the same size as Mug's but has moved right 1 unit and up 5 units."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- The image is in another quadrant."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "2. What if you multiply each coordinate by a negative number? What happens to the image?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "3. Isaiah challenges his group to write a rule that will put Mug's hat on Mug. Is this possible? Why?"
+                      "text": "<strong>Situation C. Isaiah’s Challenge: Putting the Hat on Mug</strong>\nIsaiah challenges his group to write a rule that will put Mug’s hat on Mug. Is this possible? Why?"
                     }
                   }
                 ]
@@ -1098,19 +940,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "If you know the coordinate rules to create an image,"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- How can you tell if the two figures are similar?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "- How can you predict the side lengths of the image?"
+                      "text": "If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?"
                     }
                   }
                 ]
@@ -1140,7 +970,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How did you decide which of the computer game characters were members of the Wump family? How did you decide which were impostors?"
+                      "text": "In the computer game the characters were members of the Wump family. You found a way to decide which characters were imposters using the coordinate rule."
                     }
                   },
                   {
@@ -1152,37 +982,25 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How can you decide whether two shapes are similar?"
+                      "text": "<em>How can you decide whether two shapes are similar?</em>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:"
+                      "text": "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:<ul><li>Corresponding angles are the same size</li><li>The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure.</li></ul>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- Corresponding angles are the same size"
+                      "text": "The <strong>scale factor</strong> is the number that the side lengths of one figure can be multiplied by to give the corresponding side lengths of a similar figure. <ul><li>What is the multiplier or scale factor when you use two rubber bands to enlarge a figure? </li><li>What is the multiplier or scale factor when you use a copier setting of <em>150%</em>? <em>75%</em>?</li><ul>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "- The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "The scale factor is the number that the side lengths of one figure can be multiplied by to give the corresponding side lengths of a similar figure."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "The rectangles below are similar. The scale factor from the smaller rectangle to the larger rectangle is 3."
+                      "text": "The rectangles below are similar. The scale factor from the smaller rectangle to the larger rectangle is 3. That is, for every 1 cm in the original figure, there are 3 cm in the image.  The ratio of the original length of a side to the length of a corresponding side is 1:3."
                     }
                   },
                   {
@@ -1194,13 +1012,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "What is the scale factor from the larger rectangle to the smaller rectangle?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Explain how you found it."
+                      "text": "<em>What is the scale factor from the larger rectangle to the smaller rectangle? Explain how you found it.</em>"
                     }
                   }
                 ]
@@ -1539,19 +1351,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Identify pairs of rectangles that are similar. For those that are similar, what is the scale factor?"
+                      "text": "• Identify pairs of rectangles that are similar. Provide evidence that your rectangles are similar. For those that are similar, what is the scale factor?"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Identify pairs of triangles that are similar. For those that are similar, what is the scale factor?"
+                      "text": "• Identify pairs of triangles that are similar. Provide evidence that your triangles are similar. For those that are similar, what is the scale factor? "
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "3. In what ways could the scale factor be useful?"
+                      "text": "• In what ways could scale factor be useful when determining similar figures?"
                     }
                   }
                 ]
@@ -1572,25 +1384,24 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. Marta and Zack agree that rectangles J and I are similar. But Marta says the scale factor is 2 and Zack says the factor is 1/2. Who is correct? Explain why."
+                      "text": "In Situations A, B, and C Marta and Zack make claims. \n<strong>Situation A. Finding Scale Factors</strong>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "<strong>Situation B. Predicting Perimeters in Similar Figures</strong>\nMarta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Marta claims that if she knows the perimeter of one shape, she can predict the perimiter of a similar shape. Do you agree? Explain why."
+                      "text": "<strong>Situation C. Determining Similarity</strong>\nZack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "3. Zack says that to determine if two rectangles are similar, you only need to show that the scale factor is the same for corresponding side lengths. Is this correct? Explain."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "4. Is Zack's claim true for triangles? Explain."
+                      "text": "<strong>Situation D. Using Ratios</strong>\nWhat if the ratio of original side: corresponding side in a similar figure is 3:4. What is the scale factor?"
                     }
                   }
                 ]
@@ -1604,13 +1415,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "How can you decide if two shapes are similar?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "How can you determine the scale factor between two similar shapes?"
+                      "text": "How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes?"
                     }
                   }
                 ]
@@ -1626,53 +1431,6 @@
             }
           ],
           "supports": []
-        },
-        {
-          "description": "Reflection 2.4",
-          "ordinal": 4,
-          "title": "2.MR Mathematical Reflection 2",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Mathematical Reflection 2"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "In this Investigation, you solved problems that involved enlarging (stretching) and reducing (shrinking) figures using coordinate rules and grids."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Now what do you know about similarity?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                    }
-                  }
-                ]
-              },
-              "supports": [
-                {
-                  "text": "What measurements change from one similar figure to another?"
-                },
-                {
-                  "text": "How is the change related to the scale factor?"
-                }
-              ]
-            }
-          ]
         }
       ],
       "supports": [
