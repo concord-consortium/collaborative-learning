@@ -26,6 +26,7 @@ export const WorkspaceModel = types
     primaryDocumentKey: types.maybe(types.string),
     comparisonDocumentKey: types.maybe(types.string),
     comparisonVisible: false,
+    hidePrimaryForCompare: false
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
@@ -65,9 +66,11 @@ export const WorkspaceModel = types
         }
       },
 
-      toggleComparisonVisible({override, muteLog = false}: {override?: boolean; muteLog?: boolean} = {}) {
+      toggleComparisonVisible({override, muteLog = false, hidePrimary = false}:
+          {override?: boolean; muteLog?: boolean, hidePrimary?: boolean} = {}) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
+        self.hidePrimaryForCompare = hidePrimary;
         if (!visible) {
           self.comparisonDocumentKey = undefined;
         }
