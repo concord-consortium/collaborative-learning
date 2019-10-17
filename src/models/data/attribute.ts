@@ -23,6 +23,12 @@ export const Attribute = types.model("Attribute", {
   value(index: number) {
     return self.values[index];
   },
+  numericValue(index: number) {
+    const v = self.values[index];
+    if (v == null || v === "") return NaN;
+    if (typeof v === "string") return parseFloat(v);
+    return v;
+  },
   derive(name?: string) {
     return { id: self.id, name: name || self.name, units: self.units, values: [] };
   }
