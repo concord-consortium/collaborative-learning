@@ -91,10 +91,10 @@ context('single student functional test',()=>{
             canvas.addTableTile();
             tableToolTile.getTableTile().should('exist');
         });
-        it('verifies scrolling', function(){
-            tableToolTile.getTableTile().scrollIntoView().click();
-            textToolTile.getTextTile().first().scrollIntoView();
-        });
+        // it('verifies scrolling', function(){
+        //     tableToolTile.getTableTile().scrollIntoView().click();
+        //     textToolTile.getTextTile().first().scrollIntoView();
+        // });
     });
     context('save and restore of canvas', function(){
         let canvas1='Document 1';
