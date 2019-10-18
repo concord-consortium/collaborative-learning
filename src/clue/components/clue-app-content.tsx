@@ -1,17 +1,12 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { AppHeaderComponent, IPanelGroupSpec } from "../../components/app-header";
+import { AppHeaderComponent, EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
-import { TeacherDashboardComponent } from "../../components/teacher/teacher-dashboard";
 import { DialogComponent } from "../../components/utilities/dialog";
-import "./clue-app-content.sass";
+import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 import { Logger, LogEventName } from "../../lib/logger";
-
-export enum EPanelId {
-  dashboard = "dashboard",
-  workspace = "workspace"
-}
+import "./clue-app-content.sass";
 
 interface IProps extends IBaseProps {}
 

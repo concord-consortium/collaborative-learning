@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
-import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../models/stores/supports";
+import { BaseComponent, IBaseProps } from "../../../components/base";
+import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../../models/stores/supports";
 import { TeacherSupport } from "./teacher-support";
 
 import "./teacher-supports.sass";
