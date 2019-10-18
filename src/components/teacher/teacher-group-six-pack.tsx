@@ -7,6 +7,7 @@ import "./teacher-group-six-pack.sass";
 import { DocumentViewMode } from "./teacher-group-tab";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { EPanelId } from "../../clue/components/clue-app-content";
+import { LogEventName, Logger } from "../../lib/logger";
 interface IProps extends IBaseProps {
   page: number;
   documentViewMode: DocumentViewMode;
@@ -60,12 +61,14 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
       const { ui }  = this.stores;
 
       const showGroupClickHandler = () => {
+        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-standalone-group"});
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true, hidePrimary: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
       };
 
       const showGroupSupportClickHandler = () => {
+        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-comparison-group"});
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
