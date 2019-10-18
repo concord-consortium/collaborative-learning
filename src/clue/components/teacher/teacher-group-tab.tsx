@@ -1,15 +1,11 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
+import { BaseComponent, IBaseProps } from "../../../components/base";
+import { DocumentViewMode } from "../../../components/document/document";
+import { Pager } from "../../../components/pager";
+import { SixPackRightControls } from "./sixpack-right-controls";
 import { TeacherGroupSixPack, GROUPS_PER_PAGE } from "./teacher-group-six-pack";
-import { SixPackRightControls } from "../../clue/components/sixpack-right-controls";
-import { Pager } from "../pager";
 import "./teacher-group-tab.sass";
-
-export enum DocumentViewMode {
-  Live,
-  Published
-}
 
 interface IProps extends IBaseProps {}
 

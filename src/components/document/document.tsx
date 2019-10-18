@@ -18,6 +18,11 @@ import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
 
+export enum DocumentViewMode {
+  Live,
+  Published
+}
+
 export type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {

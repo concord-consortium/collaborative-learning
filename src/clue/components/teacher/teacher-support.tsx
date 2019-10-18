@@ -1,10 +1,10 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
-import { niceDate } from "../../utilities/time";
-import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../models/stores/supports";
-import { getSectionTitle, kAllSectionType } from "../../models/curriculum/section";
-import { createTextSupport } from "../../models/curriculum/support";
+import { BaseComponent, IBaseProps } from "../../../components/base";
+import { niceDate } from "../../../utilities/time";
+import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../../models/stores/supports";
+import { getSectionTitle, kAllSectionType } from "../../../models/curriculum/section";
+import { createTextSupport } from "../../../models/curriculum/support";
 
 import "./teacher-support.sass";
 

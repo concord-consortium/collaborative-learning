@@ -1,13 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 
-import { BaseComponent, IBaseProps } from "../base";
-import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
-import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
 import { DocumentsSection } from "./documents-section";
+import { EPanelId } from "../app-header";
+import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
+import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { EPanelId } from "../../clue/components/clue-app-content";
+import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
+
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;

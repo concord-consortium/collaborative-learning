@@ -1,12 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
-import { FourUpComponent } from "../four-up";
-import { IconButton } from "../utilities/icon-button";
+import { EPanelId } from "../../../components/app-header";
+import { BaseComponent, IBaseProps } from "../../../components/base";
+import { DocumentViewMode } from "../../../components/document/document";
+import { FourUpComponent } from "../../../components/four-up";
+import { IconButton } from "../../../components/utilities/icon-button";
+import { GroupVirtualDocument } from "../../../models/document/group-virtual-document";
+
 import "./teacher-group-six-pack.sass";
-import { DocumentViewMode } from "./teacher-group-tab";
-import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { EPanelId } from "../../clue/components/clue-app-content";
+
 interface IProps extends IBaseProps {
   page: number;
   documentViewMode: DocumentViewMode;

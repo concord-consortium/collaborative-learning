@@ -1,11 +1,11 @@
 import { inject } from "mobx-react";
 import * as React from "react";
-import { ToggleGroup } from "../../components/toggle-group";
+import { BaseComponent } from "../../../components/base";
+import { DocumentViewMode } from "../../../components/document/document";
+import { ToggleGroup } from "../../../components/toggle-group";
+import { ProgressWidget } from "../progress-widget";
 
 import "./sixpack-right-controls.sass";
-import { ProgressWidget, IProgressItem } from "./progress-widget";
-import { BaseComponent } from "../../components/base";
-import { DocumentViewMode } from "../../components/teacher/teacher-group-tab";
 
 interface IProps {
   documentViewMode: DocumentViewMode;

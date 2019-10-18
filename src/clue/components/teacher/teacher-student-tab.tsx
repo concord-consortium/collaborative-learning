@@ -1,9 +1,9 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "../base";
-import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { BaseComponent, IBaseProps } from "../../../components/base";
+import { GroupModelType, GroupUserModelType } from "../../../models/stores/groups";
 import { TeacherSupports } from "./teacher-supports";
-import { UserAudienceModel } from "../../models/stores/supports";
+import { UserAudienceModel } from "../../../models/stores/supports";
 
 import "./teacher-student-tab.sass";
 
