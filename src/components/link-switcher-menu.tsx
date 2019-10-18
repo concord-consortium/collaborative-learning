@@ -1,11 +1,19 @@
 import { Button, Popover, Position, Menu, MenuItem } from "@blueprintjs/core";
 import * as React from "react";
+import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
+
+export interface IMenuLinkLog {
+  event: LogEventName;
+  parameters?: object;
+  method?: LogEventMethod;
+}
 
 export interface IMenuLink {
   title: string;
   link?: string;
   enabled?: boolean;
   extras?: any;
+  log?: IMenuLinkLog;
 }
 
 interface IProps {
@@ -21,13 +29,19 @@ interface ILinkProps {
   link?: string;
   onClick?: (link?: string, extras?: any) => void;
   extras?: any;
+  log?: IMenuLinkLog;
 }
 
 function LinkMenuItem(props: ILinkProps) {
-  const {title, disabled, current, link, onClick, extras } = props;
+  const {title, disabled, current, link, onClick, extras, log } = props;
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
     if (!disabled && onClick) {
-      onClick(link, extras);
+      const clicked = () => onClick(link, extras);
+      if (log) {
+        Logger.log(log.event, log.parameters, log.method, clicked);
+      } else {
+        clicked();
+      }
     }
   };
 
@@ -54,6 +68,7 @@ export class LinkSwitcherMenu extends React.Component<IProps, {}> {
           disabled={!item.enabled}
           link={item.link}
           extras={item.extras}
+          log={item.log}
           onClick={onClick}
         />
       );

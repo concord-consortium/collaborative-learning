@@ -7,7 +7,9 @@ import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
 import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
+import { GroupModelType } from "../../models/stores/groups";
 import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
+import { LogEventName, Logger } from "../../lib/logger";
 
 interface IProps extends IBaseProps {
   tabId: ERightNavTab;
@@ -66,9 +68,10 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     return groups.allGroups.map( group => this.renderFourUpThumbnail(group));
   }
 
-  private renderFourUpThumbnail(group: any) {
+  private renderFourUpThumbnail(group: GroupModelType) {
     const { ui } = this.stores;
     const showGroupFourUp = () =>  {
+      Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "right-nav"});
       ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
       ui.problemWorkspace.toggleComparisonVisible({override: true});
       ui.setTeacherPanelKey(EPanelId.workspace);

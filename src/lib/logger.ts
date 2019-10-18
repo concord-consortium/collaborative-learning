@@ -53,6 +53,7 @@ export enum LogEventName {
   VIEW_SHOW_COMPARISON_PANEL,
   VIEW_HIDE_COMPARISON_PANEL,
   VIEW_SHOW_SUPPORT,
+  VIEW_GROUP,
 
   CREATE_PERSONAL_DOCUMENT,
   CREATE_LEARNING_LOG,
@@ -71,15 +72,12 @@ export enum LogEventName {
   INTERNAL_AUTHENTICATED,
   INTERNAL_FIREBASE_DISCONNECTED,
 
-  // the following TODOs are to be done when the functionality is added to the app
-  DASHBOARD_SWITCH_CLASS,  // TODO: add logEvent call when functionality added
-  DASHBOARD_SWITCH_PROBLEM,  // TODO: add logEvent call when functionality added
-  DASHBOARD_CLICK_ON_GROUP,  // TODO: decide if this is needed, currently there is no way to select a group
+  DASHBOARD_SWITCH_CLASS,
+  DASHBOARD_SWITCH_PROBLEM,
   DASHBOARD_DESELECT_STUDENT,
   DASHBOARD_SELECT_STUDENT,
   DASHBOARD_TOGGLE_TO_WORKSPACE,
-  DASHBOARD_TOGGLE_TO_DASHBOARD,
-  DASHBOARD_TURN_METRICS_ON,  // TODO: add logEvent call when functionality added
+  DASHBOARD_TOGGLE_TO_DASHBOARD
 }
 
 type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
@@ -92,6 +90,8 @@ interface IDocumentInfo {
   title?: string;
   properties?: { [prop: string]: string };
 }
+
+export type ILogCallback = () => void;
 
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
@@ -107,12 +107,12 @@ export class Logger {
     this._instance.investigationTitle = investigation.title;
   }
 
-  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod) {
+  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod, callback?: ILogCallback) {
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-    sendToLoggingService(logMessage);
+    sendToLoggingService(logMessage, callback);
   }
 
   public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
@@ -243,12 +243,19 @@ export class Logger {
   }
 }
 
-function sendToLoggingService(data: LogMessage) {
+function sendToLoggingService(data: LogMessage, callback?: ILogCallback) {
   if (DEBUG_LOGGER) {
     // tslint:disable-next-line:no-console
     console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
   }
   const request = new XMLHttpRequest();
+  if (callback) {
+    request.onreadystatechange = () => {
+      if (request.readyState === 4) {
+        callback();
+      }
+    };
+  }
   request.open("POST", logManagerUrl, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));

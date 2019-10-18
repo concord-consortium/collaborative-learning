@@ -6,6 +6,7 @@ import { DocumentViewMode } from "../../../components/document/document";
 import { FourUpComponent } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
 import { GroupVirtualDocument } from "../../../models/document/group-virtual-document";
+import { LogEventName, Logger } from "../../../lib/logger";
 
 import "./teacher-group-six-pack.sass";
 
@@ -62,12 +63,14 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
       const { ui }  = this.stores;
 
       const showGroupClickHandler = () => {
+        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-standalone-group"});
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true, hidePrimary: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
       };
 
       const showGroupSupportClickHandler = () => {
+        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-comparison-group"});
         ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
         ui.problemWorkspace.toggleComparisonVisible({override: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
