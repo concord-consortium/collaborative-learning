@@ -29,6 +29,26 @@
       "initials": "DY",
       "title": "Did You Know?",
       "placeholder": "Work area for\nDid You Know? section"
+    },
+     "MathReflection1": {
+      "initials": "R1",
+      "title": "Mathematical Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Mathematical Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Mathematical Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Mathematical Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
   "lookingAhead": {
@@ -1716,7 +1736,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
+                        "In <em>Shapes and Designs</em>, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
                       ]
                     }
                   },
@@ -1737,17 +1757,17 @@
                   },
                   {
                     "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "You can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
                     }
                   },
                   {
@@ -1764,7 +1784,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
+                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile."
                       ]
                     }
                   }
@@ -1781,7 +1801,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Sketch or use your Shape Set to make several copies of these shapes: "
+                        "Sketch or use your Shape Set to make several copies of each of the following shapes:",
+                        "<strong>Quadrilaterals</strong>             <strong>Triangles</strong>",
+                        "A non-square rectangle                              A right triangle",
+                        "A non-rectangular parallelogram                   An isosceles triangles"
                       ]
                     }
                   },
@@ -1790,7 +1813,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Quadrilaterals: a non-square rectangle, a non-rectangular parallelogram, and a trapezoid"
+                        "• Which shapes are rep-tiles? Make a sketch to show how the copies fit together."
                       ]
                     }
                   },
@@ -1799,7 +1822,25 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Triangles: a right triangle, an isosceles triangle, and a scalene triangle"
+                        "• For the shapes that rep-tile, what is the scale factor from the original figure to its image? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• How does the perimeter of the larger figure relate to the perimeter of the original figure?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• How does the area of the larger figure relate to the area of the original figure?"
                       ]
                     }
                   },
@@ -2057,7 +2098,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What if you extend one of the rep-tile patterns you drew in the Initial Challenge. You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. Show how the copies fit together."
+                        "<h3>Situation A. Extending a Rep-tile</h3> What if you extend one of the rep-tile patterns you drew in the Initial Challenge? You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. <ol><li>Show how the copies fit together.</li><li>What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?</li></ol>"
                       ]
                     }
                   },
@@ -2066,7 +2107,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?"
+                        "<h3>Situation B. Making Rep-tiles </h3>Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
                       ]
                     }
                   },
@@ -2075,7 +2116,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "2. Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                        "<h3>Situation C. Scale Factors and Rep-tiles</h3>It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and its image?"
                       ]
                     }
                   },
@@ -2084,7 +2125,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "3. It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and the image?"
+                        "<h3>Situation D. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). Explain why the smaller shapes are similar to the original."
                       ]
                     }
                   },
@@ -2093,30 +2134,102 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "4. Tomoko claims that all triangles are rep-tiles. Is this true? Explain."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "5. Make a sketch of a quadrilateral. Divide the quadrilateral into four congruent smaller quadrilaterals. Explain why the smaller quadrilaterals are similar to the original."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "6. Make a sketch of a triangle. Divide the triangle."
+                        "<h3>Situation E. Claims About Rep-tiles</h3>Tomoko claims that all triangles are rep-tiles. Is this true? Explain. Kazuko claims that if you want to show that two triangles with the same angle measures are similar, you can use a unit rep-tile. She used an equilateral triangle whose side lengths are one unit. Does her strategy work? Explain. "
                       ]
                     }
                   }
                 ],
-                "supports": []
+                "supports": [
+                  {
+                    "tiles": [
+                      {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "What is the scale factor from the smaller square to the larger square? "
+                            ]
+                        }
+                      },
+                      {
+                        "layout": {
+                          "height": 200
+                        },
+                        "content": {
+                          "type":"Geometry",
+                          "objects": [
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [1, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 2],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [1, 2],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [4, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 4],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [4, 4],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             },
             {
@@ -2128,14 +2241,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How do rep-tiles show the relationship between the scale factor and the area of similar shape?"
+                        "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area?"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_500w.png"
                     }
                   }
                 ],
@@ -2149,7 +2256,7 @@
           "description": "Problem 3.2",
           "ordinal": 2,
           "title": "3.2 Designing Under Constraints",
-          "subtitle": "Scale Factors and Similar Shapes",
+          "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
           "sections": [
             {
               "type": "introduction",
@@ -2160,14 +2267,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The scale factor from one figure to a similar figure gives you information about how the side lengths, perimeters, and areas of the figures are related. In Problem 3.2, you will use what you learned to draw scale drawings."
+                        "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
                     }
                   }
                 ],
@@ -2178,6 +2279,21 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.<ul><li>Rectangle P. The scale factor from Rectangle A to Rectangle P is 2.5.</li></li>Rectangle Q. The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li>Rectangle R. The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+                      ]
+                    }
+                  },
                   {
                     "layout": {
                       "height": 260
@@ -2252,61 +2368,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Constraints for A: For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. The scale factor from Rectangle A to the new rectangle J is 2.5."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. The area of the new rectangle K is 1/4 the area of Rectangle A."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. The perimeter of the new rectangle L is three times the perimeter of Rectangle A."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Constraints for B: For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. The area of the new triangle W is 16 times the area of Triangle B."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. The scale factor from Triangle B to the new triangle X is 1/2."
+                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li>Triangle X. The area of Triangle X is 16 times the area of Triangle B.</li><li> Triangle Y. The scale factor from Triangle B to Triangle X is 1/2. </li><li> Triangle Z. The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
                       ]
                     }
                   }
@@ -2314,13 +2376,13 @@
               },
               "supports": [
                 {
-                  "text": "Can using corresponding sides help?"
+                  "text": "How do you find the scale factor between two similar figures?"
                 },
                 {
-                  "text": "Can using corresponding angles help?"
+                  "text": "If the scale factor from one shape to the other is 2, how do corresponding sides, perimeters, areas, and angles change from the original figure to its image?"
                 },
                 {
-                  "text": "What is the scale factor from one shape to the other?"
+                  "text": "What is the area of Rectangle A? What is the perimeter of Rectangle A?"
                 }
               ]
             },
@@ -2333,7 +2395,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What if you are given the following designs for similar figures."
+                        "<h3>Situation A. Similar Rectangles</h3>These two rectangles are similar. Is it possible to find the length of side AD? Explain your reasoning."
                       ]
                     }
                   },
@@ -2342,7 +2404,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Is it possible to find the length of side AD? Explain."
+                        "<h3>Situation B. Similar Triangles</h3>These two triangles are similar. Find all the missing side lengths and angles. Explain your reasoning."
                       ]
                     }
                   },
@@ -3081,13 +3143,13 @@
             }
           ]
         }, {
-          "description": "Reflection 4.4",
+          "description": "Mathematic Reflections",
           "ordinal": 4,
-          "title": "4.MR Mathematical Reflection 4",
+          "title": "Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
-              "type": "nowWhatDoYouKnow",
+              "type": "MathReflection1",
               "content": {
                 "tiles": [
                   {
@@ -3095,37 +3157,27 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Mathematical Reflection 4"
+                        "In this Investigation, we explored ways to use similar figures to estimate sizes. Now what do you know about similarity? Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
                       ]
                     }
-                  },
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Investigation, we explored ways to use similar figures to find information about shapes."
+                        "In this Investigation, we explored ways to use similar figures to find information about shapes. Now what do you know about similarity? Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
                       ]
                     }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Now what do you know about similarity?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                      ]
-                    }
-                  }
+                  } 
                 ]
               },
               "supports": [ ]
