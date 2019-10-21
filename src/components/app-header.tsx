@@ -10,6 +10,7 @@ import "./utilities/blueprint.sass";
 import "./app-header.sass";
 
 export enum EPanelId {
+  controlPanel = "control-panels",
   dashboard = "dashboard",
   workspace = "workspace"
 }

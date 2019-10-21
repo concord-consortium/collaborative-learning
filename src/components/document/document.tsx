@@ -25,11 +25,6 @@ export enum DocumentViewMode {
 
 export type WorkspaceSide = "primary" | "comparison";
 
-export enum DocumentViewMode {
-  Live,
-  Published
-}
-
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;

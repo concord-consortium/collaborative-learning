@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { AppHeaderComponent, IPanelGroupSpec } from "../../components/app-header";
-import { DataflowPanelType } from "./dataflow-types";
+import { AppHeaderComponent, EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
@@ -10,22 +9,17 @@ import { HubListComponent } from "./hub-list";
 import "./dataflow-app-content.sass";
 import { DataflowContentModelType } from "../models/tools/dataflow/dataflow-content";
 
-export enum EPanelId {
-  dashboard = "dashboard",
-  workspace = "workspace"
-}
-
 interface IProps extends IBaseProps {}
 
 interface IState {
-  current: DataflowPanelType;
+  current: EPanelId;
 }
 
 @inject("stores")
 @observer
 export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
-  public state: IState = { current: DataflowPanelType.kWorkspacePanelId };
+  public state: IState = { current: EPanelId.workspace };
 
   public componentWillMount() {
     const { iot } = this.stores;
@@ -40,11 +34,11 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
   public render() {
     const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
     const panels: IPanelGroupSpec = [{
-      panelId: DataflowPanelType.kControlPanelId,
+      panelId: EPanelId.controlPanel,
       label: "Control Panels",
       content: <HubListComponent />
     }, {
-      panelId: DataflowPanelType.kWorkspacePanelId,
+      panelId: EPanelId.workspace,
       label: "Workspace",
       content: <DocumentWorkspaceComponent isGhostUser={isGhostUser} />
     }];
@@ -72,7 +66,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     ui.toggleLeftNav(false);
     ui.toggleRightNav(false);
-    this.setState({ current: panelId as DataflowPanelType });
+    this.setState({ current: panelId as EPanelId });
   }
 
   private userHasRunningPrograms = () => {
