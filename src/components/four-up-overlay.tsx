@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
-import { DocumentViewMode } from "../components/document/document";
+import { DocumentViewMode } from "./document/document";
 import { DocumentModelType } from "../models/document/document";
 
 import "./four-up-overlay.sass";

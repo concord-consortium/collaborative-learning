@@ -3,6 +3,7 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LinkSwitcherMenu, IMenuLink  } from "./link-switcher-menu";
+import { LogEventName } from "../lib/logger";
 interface IProps extends IBaseProps {}
 
 @inject("stores")
@@ -65,13 +66,15 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
         links.push({
           title: className,
           link: matchingLink.location,
-          enabled: true
+          enabled: true,
+          log: {event: LogEventName.DASHBOARD_SWITCH_CLASS, parameters: {className, link: matchingLink.location}}
         });
       } else if (classLinks) {
         links.push({
           title: className,
           link: classLinks[0].location,
-          enabled: true
+          enabled: true,
+          log: {event: LogEventName.DASHBOARD_SWITCH_CLASS, parameters: {className, link: classLinks[0].location}}
         });
       } else {
         // tslint:disable-next-line:no-console

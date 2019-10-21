@@ -2,15 +2,20 @@ import { Button, ButtonGroup } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
+import { ClassMenuContainer } from "./class-menu-container";
+import { ProblemMenuContainer } from "./problem-menu-container";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
-import { ClassMenuContainer } from "./class-menu-container";
-import { ProblemMenuContainer } from "./problem-menu-container";
+
+export enum EPanelId {
+  dashboard = "dashboard",
+  workspace = "workspace"
+}
 
 export interface IPanelSpec {
-  panelId: string;
+  panelId: EPanelId;
   label: string;
   content: JSX.Element;
 }
