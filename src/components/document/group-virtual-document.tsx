@@ -8,12 +8,14 @@ import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 
 import "./group-virtual-document.sass";
+import { LogEventName, Logger } from "../../lib/logger";
 
 export type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: IGroupVirtualDocument;
+  side: WorkspaceSide;
 }
 
 interface IState {
@@ -91,6 +93,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
 
   private handleGroupClicked(groupID: string) {
     const { ui } = this.stores;
+    Logger.log(LogEventName.VIEW_GROUP, {group: groupID, via: "group-document-titlebar"});
     ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({id: groupID}));
   }
 
@@ -106,12 +109,46 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
         toolApiInterface={this.toolApiInterface} />
     );
   }
+  private isPrimary() {
+    return this.props.side === "primary";
+  }
+
+  private handleToggleTwoUp = () => {
+    const { workspace } = this.props;
+    const currMode = workspace.hidePrimaryForCompare || false;
+    this.props.workspace.toggleComparisonVisible({override: true, hidePrimary: !currMode });
+  }
+
+  private renderTwoUpButton() {
+    const { workspace } = this.props;
+    const currMode = workspace.hidePrimaryForCompare ? "up1" : "up2";
+    const nextMode = workspace.hidePrimaryForCompare ? "up2" : "up1";
+
+    return (
+      <div className="mode action">
+        <svg id="currMode" className={`mode icon icon-${currMode}`} data-test="two-up-curr-mode"
+             onClick={this.handleToggleTwoUp}>
+          <use xlinkHref={`#icon-${currMode}`} />
+        </svg>
+        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`} data-test="two-up-next-mode"
+             onClick={this.handleToggleTwoUp}
+        >
+          <use xlinkHref={`#icon-${nextMode}`} />
+        </svg>
+      </div>
+    );
+  }
 
   private renderStatusBar(type: string) {
+    const isPrimary = this.isPrimary();
     return (
       <div className={`statusbar ${type}`}>
-        <div className="supports">{ null } </div>
-        <div className="actions"> { null } </div>
+        <div className="supports">
+          {null}
+        </div>
+        <div className="actions">
+          {isPrimary ? this.renderTwoUpButton() : null}
+        </div>
       </div>
     );
   }

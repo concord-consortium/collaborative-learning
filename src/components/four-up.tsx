@@ -1,18 +1,18 @@
 import { observer, inject } from "mobx-react";
 import * as React from "react";
 
-import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
-         FourUpGridModelType } from "../models/view/four-up-grid";
-import { CanvasComponent } from "./document/canvas";
 import { BaseComponent, IBaseProps } from "./base";
-import { DocumentViewMode } from "../components/document/document";
+import { CanvasComponent } from "./document/canvas";
+import { DocumentViewMode } from "./document/document";
 import { DocumentModelType } from "../models/document/document";
 import { GroupUserModelType } from "../models/stores/groups";
+import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
+      } from "../models/view/four-up-grid";
 import { IToolApiInterface } from "./tools/tool-tile";
 import { FourUpOverlayComponent } from "./four-up-overlay";
+import { Logger, LogEventName } from "../lib/logger";
 
 import "./four-up.sass";
-import { Logger, LogEventName } from "../lib/logger";
 
 interface IProps extends IBaseProps {
   userId?: string;

@@ -32,6 +32,7 @@ import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovab
   handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -523,6 +524,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
+  private rescaleBoardAndAxes(xMax: number, yMax: number, xMin: number, yMin: number) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
+    }
+  }
+
+  private autoRescaleBoardAndAxes(dataSet: IDataSet) {
+    const { board } = this.state;
+    if (board && (dataSet.attributes.length >= 2) && (dataSet.cases.length >= 1)) {
+      const dataBounds = getDataSetBounds(dataSet);
+      if (dataBounds.every((b, i) => (i >= 2) || (isFinite(b.min) && isFinite(b.max)))) {
+        const xDataMin = Math.floor(dataBounds[0].min - 1);
+        const xDataMax = Math.ceil(dataBounds[0].max + 1);
+        const yDataMin = Math.floor(dataBounds[1].min - 1);
+        const yDataMax = Math.ceil(dataBounds[1].max + 1);
+
+        const boundingBox = board.getBoundingBox();
+        let [xBoardMin, yBoardMax, xBoardMax, yBoardMin] = boundingBox;
+        if (xDataMin < xBoardMin) xBoardMin = xDataMin;
+        if (xDataMax > xBoardMax) xBoardMax = xDataMax;
+        if (yDataMin < yBoardMin) yBoardMin = yDataMin;
+        if (yDataMax > yBoardMax) yBoardMax = yDataMax;
+
+        this.rescaleBoardAndAxes(xBoardMax, yBoardMax, xBoardMin, yBoardMin);
+      }
+    }
+  }
+
   private handleToggleVertexAngle = () => {
     const { board } = this.state;
     const selectedObjects = board && this.getContent().selectedObjects(board);
@@ -618,14 +652,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
-    const { board } = this.state;
-    const content = this.getContent();
-    if (board) {
-      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      if (axes) {
-        axes.forEach(this.handleCreateAxis);
-      }
-    }
+    this.rescaleBoardAndAxes(xMax, yMax, xMin, yMin);
     this.setState({ axisSettingsOpen: false });
   }
 
@@ -931,6 +958,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
       const dataSet = tableContent.getSharedData();
+      this.autoRescaleBoardAndAxes(dataSet);
+
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
         const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
