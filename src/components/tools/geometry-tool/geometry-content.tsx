@@ -937,6 +937,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 }
               });
               this.updateImageUrl(contentUrl);
+              if (this.props.size.height && image.height! > this.props.size.height) {
+                this.props.onRequestRowHeight(this.props.model.id, image.height!);
+              }
             });
         }
     }
