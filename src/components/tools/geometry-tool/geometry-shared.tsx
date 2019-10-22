@@ -22,4 +22,5 @@ export interface IGeometryProps extends SizeMeProps {
   readOnly?: boolean;
   toolApiInterface?: IToolApiInterface;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  onRequestRowHeight: (tileId: string, height: number) => void;
 }
