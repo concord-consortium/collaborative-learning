@@ -1,4 +1,9 @@
-import Header from '../../support/elements/Header';
+import Header from '../../../support/elements/common/Header';
+import ClueHeader from '../../../support/elements/clue/cHeader';
+
+
+const header = new Header;
+const clueHeader = new ClueHeader;
 
 let student = '5',
     classroom = '5',
@@ -8,18 +13,17 @@ let student = '5',
 
 
 describe('Check header area for correctness', function(){
-    const workspace = new Header();
     it('will verify if class name is correct', function(){
-        workspace.getClassName().should('contain',''+'Class '+classroom);
+        header.getClassName().should('contain',''+'Class '+classroom);
     });
     it('will verify if group name is present', function(){
-        workspace.getGroupName().should('contain','Group '+ group);
+        clueHeader.getGroupName().should('contain','Group '+ group);
     });
     it('will verify group members is correct', function(){
-        workspace.getGroupMembers().should('contain','S'+student);
+        clueHeader.getGroupMembers().should('contain','S'+student);
     });
     it('will verify student name is correct', function(){
-        workspace.getUserName().should('contain','Student '+student);
+        header.getUserName().should('contain','Student '+student);
     });
 });
 // TODO: Need to be written

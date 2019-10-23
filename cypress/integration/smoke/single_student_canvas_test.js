@@ -1,12 +1,12 @@
-import LeftNav from '../../support/elements/LeftNav'
-import Canvas from '../../support/elements/Canvas'
-import RightNav from '../../support/elements/RightNav'
-import LearningLog from '../../support/elements/LearningLog';
-import GraphToolTile from '../../support/elements/GraphToolTile'
-import ImageToolTile from '../../support/elements/ImageToolTile'
-import DrawToolTile from '../../support/elements/DrawToolTile'
-import TextToolTile from '../../support/elements/TextToolTile'
-import TableToolTile from '../../support/elements/TableToolTile'
+import LeftNav from '../../support/xelements/LeftNav'
+import Canvas from '../../support/xelements/Canvas'
+import RightNav from '../../support/xelements/RightNav'
+import LearningLog from '../../support/xelements/LearningLog';
+import GraphToolTile from '../../support/xelements/GraphToolTile'
+import ImageToolTile from '../../support/xelements/ImageToolTile'
+import DrawToolTile from '../../support/xelements/DrawToolTile'
+import TextToolTile from '../../support/xelements/TextToolTile'
+import TableToolTile from '../../support/xelements/TableToolTile'
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;
