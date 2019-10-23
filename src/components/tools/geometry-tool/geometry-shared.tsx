@@ -1,8 +1,10 @@
 import { SizeMeProps } from "react-sizeme";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { IToolApiInterface } from "../tool-tile";
+import { HotKeyHandler } from "../../../utilities/hot-keys";
 
 export interface IActionHandlers {
+  handleArrows: HotKeyHandler;
   handleCut: () => void;
   handleCopy: () => void;
   handlePaste: () => void;
