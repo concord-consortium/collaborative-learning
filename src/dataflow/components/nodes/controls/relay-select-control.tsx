@@ -116,14 +116,6 @@ export class RelaySelectControl extends Rete.Control {
 
   public setChannels = (channels: NodeChannelInfo[]) => {
     this.props.channels = channels;
-
-    if (this.node.data[this.key] && this.node.data[this.key] !== "none") {
-      if (!channels.find(ch => ch.channelId === this.node.data[this.key])) {
-        this.props.value = "none";
-        this.putData(this.key, "none");
-      }
-    }
-
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
   }
