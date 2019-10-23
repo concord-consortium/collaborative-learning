@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "jest": {
@@ -32,6 +32,7 @@
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
+    "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
