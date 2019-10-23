@@ -328,4 +328,4 @@ export const IntervalTimes: IntervalTime[] = [
 ];
 
 export const kRelaySelectMessage = "Select a relay";
-export const kSensorSelectMessage = "Select a relay";
+export const kSensorSelectMessage = "Select a sensor";
