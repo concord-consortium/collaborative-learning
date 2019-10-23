@@ -1,5 +1,23 @@
 # Changelog
 
+## Version 0.8.0 - released October 23, 2019
+
+- User documents associated with problems rather than sections
+- Users can create personal document workspaces
+- Uesrs can rename/delete personal documents and learning logs
+- Teacher dashboard
+- Teacher switch classes & problems
+- Teacher workspace
+- Rich-content supports
+- Support Dataflow application
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 421,764 bytes | -15% |
+| index.js | 4,124,348 bytes | 2% |
+
 ## Version 0.7.1 - released May 29, 2019
 
 - Fixes listeners on loading empty document causing data loss
