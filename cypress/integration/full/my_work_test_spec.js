@@ -1,6 +1,6 @@
-import Workspace from '../../support/elements/Workspace'
-import RightNav from '../../support/elements/RightNav'
-import Canvas from '../../support/elements/Canvas'
+import Workspace from '../../support/xelements/Workspace'
+import RightNav from '../../support/xelements/RightNav'
+import Canvas from '../../support/xelements/Canvas'
 
 describe('Test right nav tabs', function(){
 
