@@ -1,17 +1,22 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
+import CSS from "csstype";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { debounce } from "lodash";
 const placeholderImage = require("../../assets/image_placeholder.png");
+import { autorun, IReactionDisposer } from "mobx";
+import { ImageDragDrop } from "../utilities/image-drag-drop";
+
 import "./image-tool.sass";
 
 interface IProps extends IBaseProps {
   context: string;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onRequestRowHeight: (tileId: string, height: number) => void;
 }
 
 interface IState {
@@ -19,7 +24,6 @@ interface IState {
   isLoading?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
-  syncedChanges: number;
 }
 
 const defaultImagePlaceholderSize = { width: 128, height: 128 };
@@ -28,18 +32,12 @@ const defaultImagePlaceholderSize = { width: 128, height: 128 };
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const content = nextProps.model.content as ImageContentModelType;
-    if (content.changeCount > prevState.syncedChanges) {
-      return { isLoading: true, imageContentUrl: content.url, syncedChanges: content.changeCount };
-    }
-    return {};
-  }
+  public state: IState = { isLoading: true };
 
-  public state: IState = { isLoading: true, syncedChanges: 0 };
-
+  private syncedChanges: number;
   private _isMounted = false;
   private inputElt: HTMLInputElement | null;
+  private disposers: IReactionDisposer[];
   private debouncedUpdateImage = debounce((url: string) => {
             gImageMap.getImage(url)
               .then(image => {
@@ -63,21 +61,47 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
                 });
               });
           }, 100);
+  private imageDragDrop: ImageDragDrop;
+
+  public componentWillMount() {
+    this.imageDragDrop = new ImageDragDrop({
+      isAcceptableImageDrag: this.isAcceptableImageDrag
+    });
+  }
 
   public componentDidMount() {
     this._isMounted = true;
+    this.syncedChanges = 0;
+    this.disposers = [];
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
     }
+
+    this.disposers.push(autorun(() => {
+      const content = this.getContent();
+      if (content.changeCount > this.syncedChanges) {
+        this.setState({
+          isLoading: true,
+          imageContentUrl: content.url
+        });
+        this.syncedChanges = content.changeCount;
+      }
+    }));
   }
 
   public componentWillUnmount() {
     this._isMounted = false;
+    this.disposers.forEach(disposer => disposer());
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
+    }
+    // if we have a new image, or the image height has changed, reqest an explicit height
+    if (this.state.imageEntry && this.state.imageEntry.height
+        && (!prevState.imageEntry || prevState.imageEntry.height !== this.state.imageEntry.height)) {
+      this.props.onRequestRowHeight(this.props.model.id, this.state.imageEntry.height);
     }
   }
 
@@ -87,8 +111,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
 
     const contentUrl = this.getContent().url;
-    const isExternalUrl = gImageMap.isExternalUrl(contentUrl);
-    const editableUrl = isExternalUrl ? contentUrl : undefined;
+    const isEditableUrl = gImageMap.isExternalUrl(contentUrl) && !gImageMap.isDataImageUrl(contentUrl);
+    const editableUrl = isEditableUrl ? contentUrl : undefined;
 
     // Include states for selected and editing separately to clean up UI a little
     const editableClass = readOnly ? "read-only" : "editable";
@@ -101,11 +125,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
-    const imageDisplayStyle = {
-      backgroundImage: "url(" + imageToUseForDisplay + ")",
-      width: imageWidth + "px",
-      height: imageHeight + "px"
+    const imageDisplayStyle: CSS.Properties = {
+      backgroundImage: "url(" + imageToUseForDisplay + ")"
     };
+    if (!imageEntry) {
+      imageDisplayStyle.width = defaultImagePlaceholderSize.width + "px";
+      imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
+    }
     return (
       <div className={divClasses}
         onMouseDown={this.handleMouseDown}
@@ -218,9 +244,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
-    const hasUriList = e.dataTransfer.types.indexOf("text/uri-list") >= 0;
     // image drop area is central 80% in each dimension
-    if (!readOnly && hasUriList) {
+    if (!readOnly) {
       const kImgDropMarginPct = 0.1;
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
@@ -236,24 +261,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const isAcceptableDrag = this.isAcceptableImageDrag(e);
-    if (isAcceptableDrag) {
-      e.dataTransfer.dropEffect = "copy";
-      e.preventDefault();
-    }
+    this.imageDragDrop.dragOver(e);
   }
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (this.isAcceptableImageDrag(e)) {
-      const uriList = e.dataTransfer.getData("text/uri-list");
-      const uriArray = uriList && uriList.split(/[\r\n]+/);
-      const dropUrl = uriArray && uriArray[0];
-      if (dropUrl) {
+    this.imageDragDrop.drop(e)
+      .then((dropUrl) => {
         this.setState({ isEditing: false });
         this.storeNewImageUrl(dropUrl);
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
+      })
+      .catch((err) => {
+        this.stores.ui.alert(err.toString());
+      });
   }
 }

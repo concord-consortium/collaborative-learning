@@ -1,12 +1,6 @@
+import { SizeMeProps } from "react-sizeme";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { IToolApiInterface } from "../tool-tile";
-
-export interface SizeMeProps {
-  size?: {
-    width: number | null;
-    height: number | null;
-  };
-}
 
 export interface IActionHandlers {
   handleCut: () => void;

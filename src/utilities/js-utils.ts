@@ -20,7 +20,7 @@ export function castArrayCopy(itemOrArray: any) {
 export function safeJsonParse(json?: string) {
   let parsed;
   try {
-    parsed = json && JSON.parse(json);
+    parsed = json ? JSON.parse(json) : undefined;
   }
   catch (e) {
     // swallow errors

@@ -93,6 +93,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}
                                     onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
+                                    onRequestRowHeight={this.handleRequestRowHeight}
                                     {...others} />
               : null;
     });
@@ -119,6 +120,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
     this.setState({ tileAcceptDrop: tileId });
+  }
+
+  private handleRequestRowHeight = (tileId: string, height: number) => {
+    this.props.model.setRowHeight(height);
   }
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {

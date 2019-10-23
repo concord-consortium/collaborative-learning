@@ -6,22 +6,34 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel,
 import { CanvasComponent } from "./document/canvas";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
-import { WorkspaceModelType } from "../models/stores/workspace";
+import { GroupUserModelType } from "../models/stores/groups";
 import { IToolApiInterface } from "./tools/tool-tile";
+import { FourUpOverlayComponent } from "./four-up-overlay";
 
 import "./four-up.sass";
+import { Logger, LogEventName } from "../lib/logger";
+import { DocumentViewMode } from "./teacher/teacher-group-tab";
 
 interface IProps extends IBaseProps {
-  document?: DocumentModelType;
-  workspace: WorkspaceModelType;
+  userId?: string;
+  groupId?: string;
   isGhostUser?: boolean;
   toolApiInterface?: IToolApiInterface;
+  toggleable?: boolean;
+  documentViewMode?: DocumentViewMode;
+}
+
+interface IState {
+  toggledContext: string | null;
 }
 
 interface FourUpUser {
-  doc: DocumentModelType|undefined;
-  initials: string;
-  name: string;
+  user: GroupUserModelType;
+  doc?: DocumentModelType;
+}
+
+interface ContextUserMap {
+  [key: string]: FourUpUser | undefined;
 }
 
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
@@ -29,12 +41,17 @@ export const BORDER_SIZE = 4;
 
 @inject("stores")
 @observer
-export class FourUpComponent extends BaseComponent<IProps, {}> {
+export class FourUpComponent extends BaseComponent<IProps, IState> {
   private grid: FourUpGridModelType;
   private container: HTMLDivElement | null;
+  private userByContext: ContextUserMap = {};
 
   constructor(props: IProps) {
     super(props);
+
+    this.state = {
+      toggledContext: null
+    };
 
     // use local grid model
     this.grid = FourUpGridModel.create({
@@ -58,41 +75,59 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
+    const {documentViewMode} = this.props;
+    const {toggledContext} = this.state;
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
-    const nwStyle = {top: 0, left: 0, width: nwCell.width, height: nwCell.height};
-    const neStyle = {top: 0, left: neCell.left, right: 0, height: neCell.height};
-    const seStyle = {top: seCell.top, left: seCell.left, right: 0, bottom: 0};
-    const swStyle = {top: swCell.top, left: 0, width: swCell.width, bottom: 0};
+    const toggledStyle = {top: 0, left: 0, width, height};
+    const nwStyle = toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height};
+    const neStyle = toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height};
+    const seStyle = toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0};
+    const swStyle = toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0};
     const scaleStyle = (cell: FourUpGridCellModelType) => {
-      const transform = `scale(${cell.scale})`;
+      const transform = `scale(${toggledContext ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
-    const { groups, user, documents } = this.stores;
-    const { workspace, document, isGhostUser, ...others } = this.props;
+    const { groups, documents } = this.stores;
+    const { userId, groupId, isGhostUser, toggleable, ...others } = this.props;
 
-    const group = groups.groupForUser(user.id);
-    const groupDocuments = group &&
-                           document &&
-                           documents.getSectionDocumentsForGroup(document.sectionId!, group.id);
+    const group = groups.getGroupById(groupId);
+    const groupDocuments = group && groupId &&
+                           (documentViewMode === DocumentViewMode.Published
+                             ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
+                             : documents.getProblemDocumentsForGroup(groupId)
+                           ) || [];
     const groupUsers: FourUpUser[] = group
       ? group.users
-          .filter((groupUser) => groupUser.id !== user.id)
           .map((groupUser) => {
             const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
               return groupDocument.uid === groupUser.id;
             });
             return {
+              user: groupUser,
               doc: groupUserDoc,
-              initials: groupUser.initials,
-              name: groupUser.name
+              initials: groupUser.initials
             };
           })
       : [];
+    // put the primary user's document first (i.e. in the upper-left corner)
+    groupUsers.sort((a, b) => {
+      if (a.user.id === userId) return -1;
+      if (b.user.id === userId) return 1;
+      return 0;
+    });
+
+    // save reference to use for logger in #handleOverlayClicked
+    this.userByContext = {
+      "four-up-nw": groupUsers[0],
+      "four-up-ne": groupUsers[1],
+      "four-up-se": groupUsers[2],
+      "four-up-sw": groupUsers[3],
+    };
 
     const groupDoc = (index: number) => {
       return groupUsers[index] && groupUsers[index].doc;
@@ -105,63 +140,73 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
       return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
     };
 
-    // If the user is real, their document should be displayed first
-    if (!isGhostUser) {
-      groupUsers.unshift({
-        doc: document,
-        initials: user.initials,
-        name: user.name
-      });
-    }
+    const canvasMessage = (document?: DocumentModelType) => {
+      if (!document && (documentViewMode === DocumentViewMode.Published)) {
+        return "Not Published";
+      }
+    };
 
     const nwCanvas = (
       <CanvasComponent context="four-up-nw" scale={nwCell.scale}
-                       editabilityLocation={groupUsers[0] && "north west"}
+                       editabilityLocation={toggleable ? undefined : groupUsers[0] && "north west"}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
-                       document={groupDoc(0)} {...others} />
+                       document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))} {...others} />
     );
     const neCanvas = (
       <CanvasComponent context="four-up-ne" scale={neCell.scale}
-                       editabilityLocation={groupUsers[1] && "north east"}
-                       readOnly={true} document={groupDoc(1)} {...others} />
+                       editabilityLocation={toggleable ? undefined : groupUsers[1] && "north east"}
+                       readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))} {...others} />
     );
     const seCanvas = (
       <CanvasComponent context="four-up-se" scale={seCell.scale}
-                       editabilityLocation={groupUsers[2] && "south east"}
-                       readOnly={true} document={groupDoc(2)} {...others}/>
+                       editabilityLocation={toggleable ? undefined : groupUsers[2] && "south east"}
+                       readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))} {...others}/>
     );
     const swCanvas = (
       <CanvasComponent context="four-up-sw" scale={swCell.scale}
-                       editabilityLocation={groupUsers[3] && "south west"}
-                       readOnly={true} document={groupDoc(3)} {...others}/>
+                       editabilityLocation={toggleable ? undefined : groupUsers[3] && "south west"}
+                       readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))} {...others}/>
     );
 
     return (
       <div className="four-up" ref={(el) => this.container = el}>
+        {!toggledContext || (toggledContext === "four-up-nw") ?
         <div className="canvas-container north-west" style={nwStyle}>
           <div className="canvas-scaler" style={scaleStyle(nwCell)}>
             {nwCanvas}
           </div>
-          {groupUsers[0] && <div className="member">{groupUsers[0].initials}</div>}
-        </div>
+          {groupUsers[0] && <div className="member">{groupUsers[0].user.initials}</div>}
+        </div> : null}
+        {!toggledContext || (toggledContext === "four-up-ne") ?
         <div className="canvas-container north-east" style={neStyle}>
           <div className="canvas-scaler" style={scaleStyle(neCell)}>
             {hideCanvas(1) ? this.renderUnshownMessage(groupUsers[1], "ne") : neCanvas}
           </div>
-          {groupUsers[1] && <div className="member">{groupUsers[1].initials}</div>}
-        </div>
+          {groupUsers[1] && <div className="member">{groupUsers[1].user.initials}</div>}
+        </div> : null}
+        {!toggledContext || (toggledContext === "four-up-se") ?
         <div className="canvas-container south-east" style={seStyle}>
           <div className="canvas-scaler" style={scaleStyle(seCell)}>
             {hideCanvas(2) ? this.renderUnshownMessage(groupUsers[2], "se") : seCanvas}
           </div>
-          {groupUsers[2] && <div className="member">{groupUsers[2].initials}</div>}
-        </div>
+          {groupUsers[2] && <div className="member">{groupUsers[2].user.initials}</div>}
+        </div> : null}
+        {!toggledContext || (toggledContext === "four-up-sw") ?
         <div className="canvas-container south-west" style={swStyle}>
           <div className="canvas-scaler" style={scaleStyle(swCell)}>
             {hideCanvas(3) ? this.renderUnshownMessage(groupUsers[3], "sw") : swCanvas}
           </div>
-          {groupUsers[3] && <div className="member">{groupUsers[3].initials}</div>}
-        </div>
+          {groupUsers[3] && <div className="member">{groupUsers[3].user.initials}</div>}
+        </div> : null}
+        {!toggledContext ? this.renderSplitters() : null}
+        {toggleable ? this.renderToggleOverlays(groupUsers) : null}
+      </div>
+    );
+  }
+
+  private renderSplitters() {
+    return (
+      <>
         <div
           className="horizontal splitter"
           style={{top: this.grid.hSplitter, height: this.grid.splitterSize}}
@@ -182,12 +227,62 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
           }}
           onMouseDown={this.handleCenter}
         />
-      </div>
+      </>
     );
   }
 
+  private renderToggleOverlays(groupUsers: FourUpUser[]) {
+    const {width, height, hSplitter, vSplitter} = this.grid;
+    const toggledStyle = {top: 0, left: 0, width, height};
+    const nwStyle = {top: 0, left: 0, width: vSplitter, height: hSplitter};
+    const neStyle = {top: 0, left: vSplitter, right: 0, height: hSplitter};
+    const seStyle = {top: hSplitter, left: vSplitter, right: 0, bottom: 0};
+    const swStyle = {top: hSplitter, left: 0, width: vSplitter, bottom: 0};
+
+    const {toggledContext} = this.state;
+    if (toggledContext) {
+      return (
+        <FourUpOverlayComponent
+          context={toggledContext}
+          style={toggledStyle}
+          onClick={this.handleOverlayClicked}
+        />
+      );
+    }
+    else {
+      return (
+        <>
+          {groupUsers[0] ?
+          <FourUpOverlayComponent
+            context="four-up-nw"
+            style={nwStyle}
+            onClick={this.handleOverlayClicked}
+          /> : null}
+          {groupUsers[1] ?
+          <FourUpOverlayComponent
+            context="four-up-ne"
+            style={neStyle}
+            onClick={this.handleOverlayClicked}
+          /> : null}
+          {groupUsers[2] ?
+          <FourUpOverlayComponent
+            context="four-up-se"
+            style={seStyle}
+            onClick={this.handleOverlayClicked}
+          /> : null}
+          {groupUsers[3] ?
+          <FourUpOverlayComponent
+            context="four-up-sw"
+            style={swStyle}
+            onClick={this.handleOverlayClicked}
+          /> : null}
+        </>
+      );
+    }
+  }
+
   private renderUnshownMessage = (groupUser: FourUpUser, location: "ne" | "se" | "sw") => {
-    const groupUserName = groupUser ? groupUser.name : "User";
+    const groupUserName = groupUser ? groupUser.user.name : "User";
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>
@@ -244,5 +339,16 @@ export class FourUpComponent extends BaseComponent<IProps, {}> {
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
+  }
+
+  private handleOverlayClicked = (context: string) => {
+    const { groupId } = this.props;
+    const groupUser = this.userByContext[context];
+    const toggledContext = context === this.state.toggledContext ? null : context;
+    this.setState({toggledContext});
+    if (groupUser) {
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      Logger.log(event, {groupId, studentId: groupUser.user.id});
+    }
   }
 }

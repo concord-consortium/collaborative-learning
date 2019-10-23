@@ -1,31 +1,33 @@
 import { onSnapshot } from "mobx-state-tree";
 
-import { DB } from "../db";
+import { DB, Monitor } from "../db";
 import { observable } from "mobx";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
-import { DBSectionDocumentsListener } from "./db-section-documents-listener";
-import { DBLearningLogsListener } from "./db-learning-logs-listener";
+import { DBOtherDocumentsListener } from "./db-other-docs-listener";
+import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, SectionDocument } from "../../models/document/document";
+import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+        } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { DBOfferingUserSectionDocument, DBDocument, DBDocumentMetadata } from "../db-types";
+import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
+import { BaseListener } from "./base-listener";
 
 export interface ModelListeners {
   [key /* unique Key */: string]: {
     ref?: firebase.database.Reference;
     modelDisposer?: IDisposer;
-  };
+  } | undefined;
 }
 
-export interface UserSectionDocumentListeners {
+export interface UserProblemDocumentListeners {
   [key /* sectionId */: string]: {
     [key /* userId */: string]: {
-      sectionDocsRef?: firebase.database.Reference;
+      problemDocsRef?: firebase.database.Reference;
       docContentRef?: firebase.database.Reference;
     };
   };
@@ -35,29 +37,31 @@ export interface DocumentModelDisposers {
   [key /* sectionId */: string]: IDisposer;
 }
 
-export class DBListeners {
+export class DBListeners extends BaseListener {
   @observable public isListening = false;
   private db: DB;
 
   private modelListeners: ModelListeners = {};
-  private groupUserSectionDocumentsListeners: UserSectionDocumentListeners = {};
   private documentModelDisposers: DocumentModelDisposers = {};
 
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
-  private sectionDocumentsListener: DBSectionDocumentsListener;
-  private learningLogsListener: DBLearningLogsListener;
+  private problemDocumentsListener: DBProblemDocumentsListener;
+  private personalDocumentsListener: DBOtherDocumentsListener;
+  private learningLogsListener: DBOtherDocumentsListener;
   private publicationListener: DBPublicationsListener;
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
   private starsListener: DBStarsListener;
 
   constructor(db: DB) {
+    super("DBListeners");
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
-    this.sectionDocumentsListener = new DBSectionDocumentsListener(db);
-    this.learningLogsListener = new DBLearningLogsListener(db);
+    this.problemDocumentsListener = new DBProblemDocumentsListener(db);
+    this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
+    this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
@@ -72,7 +76,10 @@ export class DBListeners {
           return this.groupsListener.start();
         })
         .then(() => {
-          return this.sectionDocumentsListener.start();
+          return this.problemDocumentsListener.start();
+        })
+        .then(() => {
+          return this.personalDocumentsListener.start();
         })
         .then(() => {
           return this.learningLogsListener.start();
@@ -105,90 +112,83 @@ export class DBListeners {
 
     this.publicationListener.stop();
     this.learningLogsListener.stop();
-    this.sectionDocumentsListener.stop();
+    this.personalDocumentsListener.stop();
+    this.problemDocumentsListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
   }
 
   public getOrCreateModelListener(uniqueKeyForModel: string) {
-    if (!this.modelListeners[uniqueKeyForModel]) {
-      this.modelListeners[uniqueKeyForModel] = {};
-    }
-    return this.modelListeners[uniqueKeyForModel];
+    return this.modelListeners[uniqueKeyForModel] || (this.modelListeners[uniqueKeyForModel] = {});
   }
 
-  public updateGroupUserSectionDocumentListeners(document: DocumentModelType) {
-    const { user, groups } = this.db.stores;
-    const userGroup = groups.groupForUser(user.id);
-    const groupUsers = userGroup && userGroup.users;
-    if (groupUsers) {
-      groupUsers.forEach((groupUser) => {
-        if (groupUser.id === user.id) {
-          return;
-        }
-        const currentSectionDocsListener = this.getOrCreateGroupUserSectionDocumentListeners(document, groupUser.id)
-          .sectionDocsRef;
-        if (currentSectionDocsListener) {
-          currentSectionDocsListener.off();
-        }
-        const groupUserSectionDocsRef = this.db.firebase.ref(
-          this.db.firebase.getSectionDocumentPath(user, document.sectionId, groupUser.id)
-        );
-        this.getOrCreateGroupUserSectionDocumentListeners(document, groupUser.id)
-          .sectionDocsRef = groupUserSectionDocsRef;
-        groupUserSectionDocsRef.on("value", this.handleGroupUserSectionDocRef(document));
-      });
-    }
-  }
-
-  public getOrCreateGroupUserSectionDocumentListeners(document: DocumentModelType, userId: string) {
-    const sectionId = document.sectionId!;
-    if (!this.groupUserSectionDocumentsListeners[sectionId]) {
-      this.groupUserSectionDocumentsListeners[sectionId] = {};
-    }
-
-    if (!this.groupUserSectionDocumentsListeners[sectionId][userId]) {
-      this.groupUserSectionDocumentsListeners[sectionId][userId] = {};
-    }
-
-    return this.groupUserSectionDocumentsListeners[sectionId][userId];
-  }
-
-  public monitorSectionDocumentVisibility = (document: DocumentModelType) => {
+  public monitorDocumentVisibility = (document: DocumentModelType) => {
     const { user } = this.db.stores;
-    const updateRef = this.db.firebase.ref(this.db.firebase.getSectionDocumentPath(user, document.sectionId));
+    const updateRef = this.db.firebase.ref(this.db.firebase.getProblemDocumentPath(user, document.key));
     const disposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
         visibility: newDocument.visibility
       });
     }));
-    this.documentModelDisposers[document.sectionId!] = disposer;
+    this.documentModelDisposers[document.key] = disposer;
   }
 
-  public monitorLearningLogDocument = (learningLog: DocumentModelType) => {
+  public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
     const { user } = this.db.stores;
-    const { key } = learningLog;
+    const { key } = document;
 
-    const listener = this.getOrCreateModelListener(`learningLogWorkspace:${key}`);
+    const listenerKey = type === PersonalDocument
+                          ? `personalDocument:${key}`
+                          : `learningLogWorkspace:${key}`;
+    const listener = this.getOrCreateModelListener(listenerKey);
     if (listener.modelDisposer) {
       listener.modelDisposer();
     }
 
-    const updateRef = this.db.firebase.ref(this.db.firebase.getLearningLogPath(user, key));
-    listener.modelDisposer = (onSnapshot(learningLog, (newLearningLog) => {
+    const updatePath = type === PersonalDocument
+                        ? this.db.firebase.getUserPersonalDocPath(user, key)
+                        : this.db.firebase.getLearningLogPath(user, key);
+    const updateRef = this.db.firebase.ref(updatePath);
+    listener.modelDisposer = (onSnapshot(document, (newDocument) => {
       updateRef.update({
-        title: newLearningLog.title,
+        title: newDocument.title,
+        properties: newDocument.properties
         // TODO: for future ordering story add original to model and update here
       });
     }));
 
-    return learningLog;
+    return document;
   }
 
-  public monitorDocumentRef = (document: DocumentModelType) => {
+  public monitorPersonalDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, PersonalDocument);
+  }
+
+  public monitorLearningLogDocument = (document: DocumentModelType) => {
+    return this.monitorOtherDocument(document, LearningLogDocument);
+  }
+
+  public monitorDocument = (document: DocumentModelType, monitor: Monitor) => {
+    this.debugLog("#monitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.monitorDocumentRef(document, monitor);
+    this.monitorDocumentModel(document, monitor);
+  }
+
+  public unmonitorDocument = (document: DocumentModelType, monitor: Monitor) => {
+    this.debugLog("#unmonitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.unmonitorDocumentRef(document);
+    this.unmonitorDocumentModel(document);
+  }
+
+  private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {
     const { user, documents } = this.db.stores;
     const documentKey = document.key;
-    const documentRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, documentKey));
+    const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, document.uid);
+    const documentRef = this.db.firebase.ref(documentPath);
+
+    if (monitor === Monitor.None) {
+      return;
+    }
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${documentKey}`);
     if (docListener.ref) {
@@ -196,22 +196,34 @@ export class DBListeners {
     }
     docListener.ref = documentRef;
 
-    let initialLoad = true;
-    documentRef.on("value", (snapshot) => {
+    // for remote documents keep the local document in sync with Firebase but local documents
+    // just load it once and then sync local changes to Firebase
+    documentRef[monitor === Monitor.Remote ? "on" : "once"]("value", (snapshot) => {
       if (snapshot && snapshot.val()) {
         const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.db.parseDocumentContent(updatedDoc, initialLoad);
-        initialLoad = false;
+        const updatedContent = this.db.parseDocumentContent(updatedDoc);
         const documentModel = documents.getDocument(documentKey);
         if (documentModel) {
           documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
-          this.monitorDocumentModel(documentModel);
+          this.monitorDocumentModel(documentModel, monitor);
         }
       }
     });
   }
 
-  public monitorDocumentModel = (document: DocumentModelType) => {
+  private unmonitorDocumentRef = (document: DocumentModelType) => {
+    const docListener = this.modelListeners[`document:${document.key}`];
+    if (docListener && docListener.ref) {
+      docListener.ref.off("value");
+    }
+  }
+
+  private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
+    // skip if not monitoring local changes
+    if (monitor !== Monitor.Local) {
+      return;
+    }
+
     const { user } = this.db.stores;
     const { key, content } = document;
 
@@ -220,12 +232,22 @@ export class DBListeners {
       docListener.modelDisposer();
     }
 
-    const updateRef = this.db.firebase.ref(this.db.firebase.getUserDocumentPath(user, key));
+    const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
+    const updateRef = this.db.firebase.ref(updatePath);
     docListener.modelDisposer = onSnapshot(content, (newContent) => {
+                                  document.incChangeCount();
                                   updateRef.update({
-                                    content: JSON.stringify(newContent)
+                                    content: JSON.stringify(newContent),
+                                    changeCount: document.changeCount
                                   });
                                 });
+  }
+
+  private unmonitorDocumentModel = (document: DocumentModelType) => {
+    const docListener = this.modelListeners[`document:${document.key}`];
+    if (docListener && docListener.modelDisposer) {
+      docListener.modelDisposer();
+    }
   }
 
   private stopModelListeners() {
@@ -247,55 +269,5 @@ export class DBListeners {
     Object.keys(this.documentModelDisposers).forEach((sectionId) => {
       this.documentModelDisposers[sectionId]();
     });
-  }
-
-  private handleGroupUserSectionDocRef(document: DocumentModelType) {
-    return (snapshot: firebase.database.DataSnapshot|null) => {
-      const sectionDocument: DBOfferingUserSectionDocument = snapshot && snapshot.val();
-      if (sectionDocument) {
-        const groupUserId = sectionDocument.self.uid;
-        const docKey = sectionDocument.documentKey;
-        const mainUser = this.db.stores.user;
-        const currentDocContentListener =
-          this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId).docContentRef;
-        if (currentDocContentListener) {
-          currentDocContentListener.off();
-        }
-        const groupUserDocRef = this.db.firebase.ref(
-          this.db.firebase.getUserDocumentPath(mainUser, docKey, groupUserId)
-        );
-        this.db.listeners.getOrCreateGroupUserSectionDocumentListeners(document, groupUserId)
-          .docContentRef = groupUserDocRef;
-        groupUserDocRef.on("value", (docContentSnapshot) => {
-          this.handleGroupUserDocRef(docContentSnapshot, sectionDocument);
-        });
-      }
-    };
-  }
-
-  private handleGroupUserDocRef(
-    snapshot: firebase.database.DataSnapshot|null,
-    sectionDocument: DBOfferingUserSectionDocument)
-  {
-    if (snapshot) {
-      const rawGroupDoc: DBDocumentMetadata = snapshot.val();
-      if (rawGroupDoc) {
-        const groupUserId = rawGroupDoc.self.uid;
-        const {documentKey} = rawGroupDoc.self;
-        const { groups } = this.db.stores;
-        const group = groups.groupForUser(groupUserId);
-
-        this.db.openDocument({
-          documentKey,
-          type: SectionDocument,
-          sectionId: sectionDocument.self.sectionId,
-          userId: groupUserId,
-          groupId: group && group.id,
-          visibility: sectionDocument.visibility
-        }).then((groupUserDoc) => {
-          this.db.stores.documents.update(groupUserDoc);
-        });
-      }
-    }
   }
 }

@@ -9,23 +9,30 @@ export enum SectionType {
   whatIf = "whatIf",
   nowWhatDoYouKnow = "nowWhatDoYouKnow",
   didYouKnow = "didYouKnow",
-  extraWorkspace = "extraWorkspace"
+  all = "all"
 }
 
 // TODO: figure out way to add SectionType as the index type to this const
-export const sectionInfo = {
+const sectionInfo = {
   [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
   [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
   [SectionType.whatIf]: { title: "What if...?", abbrev: "W?" },
   [SectionType.nowWhatDoYouKnow]: { title: "Now What Do You Know?", abbrev: "N?" },
   [SectionType.didYouKnow]: { title: "Did You Know?", abbrev: "D?" },
-  [SectionType.extraWorkspace]: { title: "Extra Workspace", abbrev: "Ex" }
+  [SectionType.all]: { title: "All", abbrev: "*" }
 };
 
-export type AllSectionType = "all";
-export const allSectionInfo = {
-  title: "All"
-};
+export function getSectionInfo(sectionType: SectionType) {
+  return sectionInfo[sectionType];
+}
+
+export function getSectionTitle(sectionType?: SectionType) {
+  return sectionInfo[sectionType || SectionType.all].title;
+}
+
+export function getSectionAbbrev(sectionType?: SectionType) {
+  return sectionInfo[sectionType || SectionType.all].abbrev;
+}
 
 export const SectionModel = types
   .model("Section", {

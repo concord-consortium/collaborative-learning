@@ -8,6 +8,7 @@ import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 import { ITableChange } from "../models/tools/table/table-content";
+import { DEBUG_LOGGER } from "../lib/debug";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
 const applicationName = "CLUE";
@@ -22,6 +23,7 @@ interface LogMessage {
   investigation?: string;
   problem?: string;
   section?: string;
+  group?: string;
   time: number;
   event: string;
   method: string;
@@ -51,6 +53,7 @@ export enum LogEventName {
   VIEW_HIDE_COMPARISON_PANEL,
   VIEW_SHOW_SUPPORT,
 
+  CREATE_PERSONAL_DOCUMENT,
   CREATE_LEARNING_LOG,
 
   GRAPH_TOOL_CHANGE,
@@ -59,12 +62,42 @@ export enum LogEventName {
 
   TILE_UNDO,
   TILE_REDO,
+
+  PUBLISH_DOCUMENT,
+  PUBLISH_SUPPORT,
+
+  // the followng are for potential debugging purposes and are all marked "internal"
+  INTERNAL_AUTHENTICATED,
+  INTERNAL_FIREBASE_DISCONNECTED,
+
+  // the following TODOs are to be done when the functionality is added to the app
+  DASHBOARD_SWITCH_CLASS,  // TODO: add logEvent call when functionality added
+  DASHBOARD_SWITCH_PROBLEM,  // TODO: add logEvent call when functionality added
+  DASHBOARD_CLICK_ON_GROUP,  // TODO: decide if this is needed, currently there is no way to select a group
+  DASHBOARD_DESELECT_STUDENT,
+  DASHBOARD_SELECT_STUDENT,
+  DASHBOARD_TOGGLE_TO_WORKSPACE,
+  DASHBOARD_TOGGLE_TO_DASHBOARD,
+  DASHBOARD_TURN_METRICS_ON,  // TODO: add logEvent call when functionality added
 }
 
 type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 
+interface IDocumentInfo {
+  type: string;
+  key?: string;
+  section?: string;
+  uid?: string;
+  title?: string;
+  properties?: { [prop: string]: string };
+}
+
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+    if (DEBUG_LOGGER) {
+      // tslint:disable-next-line:no-console
+      console.log("Logger#initializeLogger called.");
+    }
     this._instance = new Logger(stores, investigation, problem);
   }
 
@@ -106,6 +139,8 @@ export class Logger {
           souceObjectId: metaData.originalTileId,
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
+          sourceDocumentTitle: sourceDocument.title || "",
+          sourceDocumentProperties: sourceDocument.properties || {},
           sourceSection: sourceDocument.section || document.section   // if it's instructions, use dest doc's section
         };
       }
@@ -116,9 +151,11 @@ export class Logger {
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
     const parameters = {
+      documentUid: document.uid,
       documentKey: document.key,
       documentType: document.type,
-      section: document.sectionId
+      documentTitle: document.title || "",
+      documentProperties: document.properties && document.properties.toJSON() || {}
     };
     Logger.log(event, parameters);
   }
@@ -167,17 +204,6 @@ export class Logger {
   ): LogMessage {
     const {user, ui, documents} = this.stores;
 
-    // If params doesn't already specify a section, see if we know what section the user is in.
-    // Move section to top level
-    let section = parameters && parameters.section;
-    if (!section && ui.sectionWorkspace.primaryDocumentKey) {
-      const primaryDocument = documents.getDocument(ui.sectionWorkspace.primaryDocumentKey);
-      if (primaryDocument && primaryDocument.sectionId) {
-        section = primaryDocument.sectionId;
-      }
-    }
-    if (parameters) delete parameters.section;
-
     const logMessage: LogMessage = {
       application: applicationName,
       username:  user.id,
@@ -186,7 +212,6 @@ export class Logger {
       appMode: this.stores.appMode,
       investigation: this.investigationTitle,
       problem: this.problemTitle,
-      section,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
       event,
       method,
@@ -197,18 +222,18 @@ export class Logger {
       logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
     }
 
+    if (user.isStudent) {
+      logMessage.group = user.latestGroupId;
+    }
+
     return logMessage;
   }
 
-  private getDocumentForTile(tileId: string): {type: string, key?: string, section?: string, uid?: string } {
+  private getDocumentForTile(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId);
     if (document) {
-      return {
-        type: document.type,
-        key: document.key,
-        section: document.sectionId,
-        uid: document.uid
-      };
+      const { type, key, uid, title, properties } = document;
+      return { type, key, uid, title, properties: properties && properties.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
@@ -218,6 +243,10 @@ export class Logger {
 }
 
 function sendToLoggingService(data: LogMessage) {
+  if (DEBUG_LOGGER) {
+    // tslint:disable-next-line:no-console
+    console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
+  }
   const request = new XMLHttpRequest();
   request.open("POST", logManagerUrl, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");

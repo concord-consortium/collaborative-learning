@@ -1,3 +1,4 @@
+import { AppConfigModelType, AppConfigModel } from "./app-config-model";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
@@ -8,14 +9,18 @@ import { UnitModelType, UnitModel } from "../curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
-import { LearningLogWorkspace, SectionWorkspace } from "./workspace";
+import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
 export interface IStores {
   appMode: AppMode;
   appVersion: string;
+  appConfig: AppConfigModelType;
+  unit: UnitModelType;
+  investigation: InvestigationModelType;
   problem: ProblemModelType;
   user: UserModelType;
   ui: UIModelType;
@@ -23,40 +28,32 @@ export interface IStores {
   class: ClassModelType;
   documents: DocumentsModelType;
   db: DB;
-  unit: UnitModelType;
   demo: DemoModelType;
   showDemoCreator: boolean;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
 }
 
-export interface ICreateStores {
-  appMode?: AppMode;
-  appVersion?: string;
-  problem?: ProblemModelType;
-  user?: UserModelType;
-  ui?: UIModelType;
-  groups?: GroupsModelType;
-  class?: ClassModelType;
-  documents?: DocumentsModelType;
-  db?: DB;
-  showDemoCreator?: boolean;
-  unit?: UnitModelType;
-  demo?: DemoModelType;
-  supports?: SupportsModelType;
+interface ICreateStores extends Partial<IStores> {
+  demoName?: string;
 }
 
 export function createStores(params?: ICreateStores): IStores {
   const user = params && params.user || UserModel.create({ id: "0" });
+  const appConfig = params && params.appConfig || AppConfigModel.create();
+  const demoName = params && params.demoName || appConfig.appName;
   return {
     appMode: params && params.appMode ? params.appMode : "dev",
     appVersion: params && params.appVersion || "unknown",
-    // for ease of testing, we create a null problem if none is provided
+    appConfig,
+    // for testing, we create a null problem or investigation if none is provided
+    investigation: params && params.investigation || InvestigationModel.create({
+      ordinal: 0, title: "Null Investigation"}),
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
     ui: params && params.ui || UIModel.create({
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {
@@ -69,7 +66,7 @@ export function createStores(params?: ICreateStores): IStores {
     db: params && params.db || new DB(),
     documents: params && params.documents || DocumentsModel.create({}),
     unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
-    demo: params && params.demo || DemoModel.create({class: {id: "0", name: "Null Class"}}),
+    demo: params && params.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create()

@@ -1,0 +1,51 @@
+@import ../../components/vars
+
+.sixpack-right-controls
+  display: flex
+  flex-direction: column
+  align-items: stretch
+  right: 0px
+  margin: 6px
+  margin-left: 0px
+  padding-right: 5px
+  border: #c9dab7
+  .top-controls
+    background-color: $sage
+    padding: 5px
+  .bottom-controls
+    background-color: $sage
+    padding: 10px
+    margin-top: 6px
+    flex-grow: 2
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    .section-progress
+      color: $sky-dark-5
+  .pager-controls
+    background-color: $sage
+    padding: 10px
+    margin-top: 6px
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    .section-progress
+      color: $sky-dark-5
+  button
+    border-radius: 5px
+    font-size: 10pt
+    outline: none
+    background-color: red
+    border-radius: 5px
+    &.live
+      background-color: $sage-dark-1
+      &:hover
+        background-color: $sage-light-2
+      &.selected
+        background-color: #d8e1e8
+    &.pub
+      background-color: $sage-dark-1
+      &:hover
+        background-color: $sage-light-2
+      &.selected
+        background-color: #d8e1e8

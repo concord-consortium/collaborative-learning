@@ -1,10 +1,9 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { BaseComponent, IBaseProps } from "../base";
+import { UIDialogModelType } from "../../models/stores/ui";
 
 import "./dialog.sass";
-import { UIDialogModelType } from "../../models/stores/ui";
-import { onSnapshot } from "mobx-state-tree";
 
 interface IProps extends IBaseProps {
   dialog?: UIDialogModelType;
@@ -33,7 +32,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  public componentWillReceiveProps(nextProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if (nextProps.dialog !== this.props.dialog) {
       this.setState({promptValue: nextProps.dialog && nextProps.dialog.defaultValue});
     }

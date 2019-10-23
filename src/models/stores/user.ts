@@ -5,6 +5,16 @@ const initials = require("initials");
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
+export const PortalClassOffering = types.model("PortalClassOffering", {
+  className: "",
+  problemOrdinal: "",
+  unitCode: "",
+  offeringId: "",
+  location: ""
+});
+
+export type IPortalClassOffering = typeof PortalClassOffering.Type;
+
 export const UserModel = types
   .model("User", {
     authenticated: false,
@@ -16,7 +26,8 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
-    loggingRemoteEndpoint: types.maybe(types.string)
+    loggingRemoteEndpoint: types.maybe(types.string),
+    portalClassOfferings: types.array(PortalClassOffering)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -47,9 +58,18 @@ export const UserModel = types
       if (user.firebaseJWT && (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl) {
         self.loggingRemoteEndpoint = (user.firebaseJWT as PortalFirebaseStudentJWT).returnUrl;
       }
-    },
+      if (user.portalClassOfferings) {
+        self.portalClassOfferings.replace(user.portalClassOfferings);
+      }
+    }
   }))
   .views((self) => ({
+    get isStudent() {
+      return self.type === "student";
+    },
+    get isTeacher() {
+      return self.type === "teacher";
+    },
     get initials() {
       return initials(self.name);
     }

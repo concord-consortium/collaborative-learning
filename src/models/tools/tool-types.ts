@@ -1,4 +1,4 @@
-import { IAnyType, types } from "mobx-state-tree";
+import { IAnyType, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { kGeometryToolID, GeometryContentModel, GeometryContentModelType,
           GeometryMetadataModel, GeometryMetadataModelType } from "./geometry/geometry-content";
 import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
@@ -42,6 +42,17 @@ export type ToolMetadataUnionType = GeometryMetadataModelType |
 interface IToolMap {
   [id: string]: IAnyType;
 }
+
+export const ToolButtonModel = types.model("ToolButton", {
+  name: types.string,
+  title: types.string,
+  iconId: types.string,
+  isTileTool: false     // boolean that defaults to false
+});
+export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
+export type ToolButtonConfig = SnapshotOut<typeof ToolButtonModel>;
+
+export type ToolbarConfig = ToolButtonConfig[];
 
 interface IPrivate {
   toolMap: IToolMap;

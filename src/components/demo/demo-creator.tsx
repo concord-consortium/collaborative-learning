@@ -24,18 +24,21 @@ interface IProblemOption {
 @inject("stores")
 @observer
 export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
-  private problems: IProblemOption[] = [];
+  private problemOptions: IProblemOption[] = [];
 
-  public componentWillMount() {
-    const { unit, demo } = this.stores;
+  public UNSAFE_componentWillMount() {
+    const { appConfig, unit, demo } = this.stores;
+    const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
 
     unit.investigations.forEach((investigation, iIndex) => {
       investigation.problems.forEach((problem, pIndex) => {
-        const title = `${investigation.title}: ${problem.title}: ${problem.subtitle}`;
+        const title = problemTitleTemplate
+                        .replace("%investigationTitle%", investigation.title)
+                        .replace("%problemTitle%", problem.fullTitle);
         const ordinal = `${iIndex + 1}.${pIndex + 1}`;
-        this.problems.push({investigation, problem, ordinal, title});
+        this.problemOptions.push({investigation, problem, ordinal, title});
         if (!demo.problemOrdinal) {
           demo.setProblemOrdinal(ordinal);
         }
@@ -48,9 +51,9 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
     const studentLinks: JSX.Element[] = [];
     const teacherLinks: JSX.Element[] = [];
     const classes: JSX.Element[] = [];
-    const selectedProblem = this.problems[demo.problemIndex];
+    const selectedProblem = this.problemOptions[demo.problemIndex];
 
-    const problems = this.problems.map((problem) => {
+    const problems = this.problemOptions.map((problem) => {
       return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
 
@@ -70,6 +73,9 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
       <div className="demo">
         <h1>Demo Creator</h1>
         <div>
+          <label>Name:</label> <input type="text" onChange={this.handleSetName} defaultValue={demo.name} />
+        </div>
+        <div>
           <label>Class:</label> <select className="classes" onChange={this.handleSelectClass}>{classes}</select>
         </div>
         <div>
@@ -88,10 +94,11 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
 
   private createLink(userType: string, userIndex: number) {
     const { demo, unit } = this.stores;
+    const demoNameParam = demo.name ? `&demoName=${demo.name}` : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // tslint:disable-next-line:max-line-length
-    const href = `?appMode=demo&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
+    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
     return (
       <li key={userIndex}>
         <a href={href} target="_blank">{userType} {userIndex}</a>
@@ -107,5 +114,10 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
   private handleSelectClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = `${e.target.value}`;
     this.stores.demo.setClass(id, `Class ${id}`);
+  }
+
+  private handleSetName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = `${e.target.value}`;
+    this.stores.demo.setName(name);
   }
 }

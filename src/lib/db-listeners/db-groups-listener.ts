@@ -1,14 +1,16 @@
-import { DB } from "../db";
+import { DB, Monitor } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
 import * as firebase from "firebase/app";
-import { SectionDocument } from "../../models/document/document";
+import { ProblemDocument } from "../../models/document/document";
 import { map } from "lodash";
+import { BaseListener } from "./base-listener";
 
-export class DBGroupsListener {
+export class DBGroupsListener extends BaseListener {
   private db: DB;
   private groupsRef: firebase.database.Reference | null = null;
 
   constructor(db: DB) {
+    super("DBGroupsListener");
     this.db = db;
   }
 
@@ -18,9 +20,11 @@ export class DBGroupsListener {
       const groupsRef = this.groupsRef = this.db.firebase.ref(this.db.firebase.getGroupsPath(user));
 
       // use once() so we are ensured that groups are set before we resolve
+      this.debugLogHandler("#start", "adding", "once", groupsRef);
       groupsRef.once("value")
         .then((snapshot) => {
           const dbGroups: DBOfferingGroupMap = snapshot.val() || {};
+          this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
           groups.updateFromDB(user.id, dbGroups, this.db.stores.class);
 
@@ -36,6 +40,7 @@ export class DBGroupsListener {
           }
         })
         .then(() => {
+          this.debugLogHandler("#start", "adding", "on value", groupsRef);
           groupsRef.on("value", this.handleGroupsRef);
         })
         .then(resolve)
@@ -45,6 +50,7 @@ export class DBGroupsListener {
 
   public stop() {
     if (this.groupsRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.groupsRef);
       this.groupsRef.off("value", this.handleGroupsRef);
       this.groupsRef = null;
     }
@@ -55,6 +61,8 @@ export class DBGroupsListener {
     const groups: DBOfferingGroupMap = snapshot.val() || {};
     const myGroupIds: string[] = [];
     const overSubscribedUserUpdates: any = {};
+
+    this.debugLogSnapshot("#handleGroupsRef", snapshot);
 
     // ensure that the current user is not in more than 1 group and groups are not oversubscribed
     Object.keys(groups).forEach((groupId) => {
@@ -95,8 +103,32 @@ export class DBGroupsListener {
       // otherwise set the groups
       this.db.stores.groups.updateFromDB(user.id, groups, this.db.stores.class);
 
-      documents.byType(SectionDocument).forEach((sectionDoc) => {
-        this.db.listeners.updateGroupUserSectionDocumentListeners(sectionDoc);
+      // in teacher mode we listen to all documents and the document's group might change
+      // if a student changes groups so we need to gather the updated group id for each
+      // student and set it for the student's problem documents
+      const userGroupIds: any = {};
+      this.db.stores.groups.allGroups.forEach((group) => {
+        group.users.forEach((groupUser) => {
+          userGroupIds[groupUser.id] = group.id;
+        });
+      });
+
+      documents.byType(ProblemDocument).forEach((document) => {
+        document.setGroupId(userGroupIds[document.uid]);
+
+        // students only monitor documents in their group to save bandwidth
+        if (user.isStudent) {
+          if (document.groupId === user.latestGroupId) {
+            if (document.uid !== user.id) {
+              // ensure the group document is monitored
+              this.db.listeners.monitorDocument(document, Monitor.Remote);
+            }
+          }
+          else {
+            // ensure we don't monitor documents outside the group
+            this.db.listeners.unmonitorDocument(document, Monitor.Remote);
+          }
+        }
       });
     }
   }

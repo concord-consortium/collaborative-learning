@@ -35,6 +35,33 @@
       white-space: nowrap
       overflow: hidden
       text-overflow: ellipsis
+      display: flex
+      justify-content: center
+      align-items: center
+
+      .icon-edit
+        background-color: $color1-3
+        width: 9.9px
+        height: 10.1px
+        cursor: pointer
+        border: 0
+        padding: 0
+        margin-left: $half-margin
+        margin-bottom: $half-margin
+
+        &:focus
+          outline: none
+          outline-offset: 0
+
+        .edit
+          background-image: url("../../assets/icons/edit/edit.svg")
+          background-repeat: no-repeat
+          box-sizing: content-box
+          width: 17.8px
+          height: 18px
+
+          &:hover
+            background-image: url("../../assets/icons/edit/edit-hover.svg")
 
     .actions
       flex-grow: 0
@@ -76,6 +103,7 @@
 
       .icon
         box-sizing: content-box
+        background-repeat: no-repeat
         background-color: $color1-3
         color: $color1-7
         width: 36px
@@ -90,6 +118,70 @@
 
         &:active
           background-color: $color1-5
+
+      .icon-button
+        border: 0
+        padding: 0
+
+        &:hover
+          background-color: $color1
+
+        &:active
+          background-color: $color1-4
+
+        &:focus
+          outline: none
+          outline-offset: 0
+
+      .icon-button
+        background-color: $color1-3
+        padding: $padding
+        padding-top: 2px
+        position: relative
+        width: 40px
+        height: 36px
+        cursor: pointer
+
+        .button-icon
+          background-repeat: no-repeat
+          position: absolute
+          left: 15%
+          bottom: 10%
+          width: 30px
+          height: 26px
+          padding: $half-padding
+          padding-top: 2px
+          cursor: pointer
+
+          &:active
+            transform-origin: center
+            transform: scale(.85)
+
+      .icon-new
+        border-top-left-radius: $border-radius
+        margin-left: 0
+
+        .new
+          background-image: url("../../assets/icons/new/new.svg")
+
+          &:hover
+            background-image: url("../../assets/icons/new/new-hover.svg")
+
+          &:active
+            background-image: url("../../assets/icons/new/new-active.svg")
+
+      .icon-support
+        border-top-left-radius: $border-radius
+        margin-left: 0
+
+        .support
+          background-image: url("../../assets/icons/support/support.svg")
+
+          &:hover
+            background-image: url("../../assets/icons/support/support-hover.svg")
+
+          &:active
+            background-image: url("../../assets/icons/support/support-active.svg")
 
   .canvas-area
     position: absolute

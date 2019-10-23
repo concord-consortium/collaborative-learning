@@ -1,19 +1,29 @@
-import { UnitModelType } from "../models/curriculum/unit";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { IStores } from "../models/stores/stores";
 import { Logger } from "./logger";
 
-export const setTitle = (showDemoCreator?: boolean, problem?: ProblemModelType) => {
-  document.title = showDemoCreator ? `CLUE: Demo Creator` : (problem ? `CLUE: ${problem.fullTitle}` : document.title);
+export const setPageTitle = (stores: IStores, argProblem?: ProblemModelType) => {
+  const { appConfig, showDemoCreator, unit, problem: storeProblem } = stores;
+  const pageTitleTemplate = appConfig && appConfig.pageTitle;
+  let pageTitle;
+  if (pageTitleTemplate) {
+    const problem = argProblem || storeProblem;
+    pageTitle = pageTitleTemplate
+                  .replace("%unitTitle%", unit && unit.fullTitle || "")
+                  .replace("%problemTitle%", problem && problem.fullTitle || "");
+  }
+  document.title = showDemoCreator
+                    ? `CLUE: Demo Creator`
+                    : (pageTitle || document.title);
 };
 
 export const updateProblem = (stores: IStores, problemId: string) => {
-  const {unit, showDemoCreator} = stores;
+  const {unit} = stores;
   const {investigation, problem} = unit.getProblem(problemId);
   if (investigation && problem) {
     Logger.updateProblem(investigation, problem);
-    setTitle(showDemoCreator, problem);
-    stores.supports.createFromUnit(unit, investigation, problem);
+    setPageTitle(stores, problem);
+    stores.supports.createFromUnit({unit, investigation, problem, documents: stores.documents});
     stores.problem = problem;
   }
 };

@@ -1,15 +1,16 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { SectionModel, SectionType } from "../curriculum/section";
-import { SectionWorkspace, LearningLogWorkspace } from "./workspace";
+import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
+import { ERightNavTab } from "../view/right-nav";
 
 describe("ui model", () => {
   let ui: UIModelType;
 
   beforeEach(() => {
     ui = UIModel.create({
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {
@@ -23,10 +24,9 @@ describe("ui model", () => {
     expect(ui.allContracted).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.bottomNavExpanded).toBe(false);
     expect(ui.error).toBe(null);
     expect(ui.activeSectionIndex).toBe(0);
-    expect(ui.activeRightNavTab).toBe("My Work");
+    expect(ui.activeRightNavTab).toBe(ERightNavTab.kMyWork);
     expect(ui.showDemoCreator).toBe(false);
     expect(ui.dialog).toBe(undefined);
   });
@@ -36,8 +36,8 @@ describe("ui model", () => {
       rightNavExpanded: true,
       showDemoCreator: true,
       error: "test",
-      sectionWorkspace: {
-        type: SectionWorkspace,
+      problemWorkspace: {
+        type: ProblemWorkspace,
         mode: "1-up"
       },
       learningLogWorkspace: {
@@ -48,7 +48,6 @@ describe("ui model", () => {
     expect(ui.allContracted).toBe(false);
     expect(ui.rightNavExpanded).toBe(true);
     expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.bottomNavExpanded).toBe(false);
     expect(ui.error).toBe("test");
     expect(ui.showDemoCreator).toBe(true);
   });
@@ -89,39 +88,14 @@ describe("ui model", () => {
     expect(ui.rightNavExpanded).toBe(true);
   });
 
-  it("allows bottom nav to be toggled", () => {
-    ui.toggleBottomNav();
-    expect(ui.allContracted).toBe(false);
-    expect(ui.bottomNavExpanded).toBe(true);
-    ui.toggleBottomNav();
-    expect(ui.allContracted).toBe(true);
-    expect(ui.bottomNavExpanded).toBe(false);
-  });
-
-  it("allows bottom nav to be explicitly set", () => {
-    ui.toggleBottomNav(false);
-    expect(ui.allContracted).toBe(true);
-    expect(ui.bottomNavExpanded).toBe(false);
-    ui.toggleBottomNav(true);
-    expect(ui.allContracted).toBe(false);
-    expect(ui.bottomNavExpanded).toBe(true);
-  });
-
   it("only allows some components to be expanded at a time", () => {
     ui.toggleLeftNav();
     expect(ui.leftNavExpanded).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
-    expect(ui.bottomNavExpanded).toBe(false);
 
     ui.toggleRightNav();
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.rightNavExpanded).toBe(true);
-    expect(ui.bottomNavExpanded).toBe(false);
-
-    ui.toggleBottomNav();
-    expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.rightNavExpanded).toBe(true);
-    expect(ui.bottomNavExpanded).toBe(true);
   });
 
   it("allows all components to be contracted", () => {

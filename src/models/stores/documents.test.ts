@@ -1,4 +1,4 @@
-import { DocumentModel, DocumentModelType, SectionDocument, DocumentType} from "../document/document";
+import { DocumentModel, DocumentModelType, ProblemDocument, DocumentType} from "../document/document";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { ClassModelType, ClassModel, ClassUserModel } from "./class";
 
@@ -8,12 +8,11 @@ describe("documents model", () => {
 
   beforeEach(() => {
     document = DocumentModel.create({
-      type: SectionDocument,
+      type: ProblemDocument,
       title: "test",
       uid: "1",
       key: "test",
       createdAt: 1,
-      sectionId: "2",
       content: {}
     }),
     documents = DocumentsModel.create({});
@@ -36,9 +35,9 @@ describe("documents model", () => {
   });
 
   it("allows documents to be found by section id", () => {
-    expect(documents.getSectionDocument("1", "2")).toBe(undefined);
+    expect(documents.getProblemDocument("1")).toBe(undefined);
     documents.add(document);
-    expect(documents.getSectionDocument("1", "2")).toBe(document);
+    expect(documents.getProblemDocument("1")).toBe(document);
   });
 
   describe("getLatestPublications", () => {
@@ -81,83 +80,82 @@ describe("documents model", () => {
       });
     });
 
-    const getPublishedDocument = (createdAt: number, sectionId: string, uid: string) => {
+    const getPublishedDocument = (createdAt: number, uid: string) => {
       return DocumentModel.create({
         uid,
         type: "publication",
-        key: `llDoc-${uid}-${sectionId}-${createdAt}`,
+        key: `pubDoc-${uid}-${createdAt}`,
         createdAt,
         content: {},
-        groupId: "1",
-        sectionId,
+        groupId: "1"
       });
     };
 
     it("finds documents from the correct section", () => {
-      const pub1 = getPublishedDocument(0, "introduction", "1");
-      const badPub1 = getPublishedDocument(10, "initialChallenge", "1");
+      const pub1 = getPublishedDocument(0, "1");
+      const badPub1 = getPublishedDocument(10, "1");
 
       documents.add(pub1);
       documents.add(badPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestPublicationsForSection("introduction", clazz);
+      const latestPubs = documents.getLatestPublications(clazz);
       expect(latestPubs.length).toBe(1);
-      expect(latestPubs[0]).toBe(pub1);
+      expect(latestPubs[0]).toBe(badPub1);
     });
 
     it("finds the newest document for a user", () => {
-      const pub1 = getPublishedDocument(0, "introduction", "1");
-      const newerPub1 = getPublishedDocument(10, "introduction", "1");
+      const pub1 = getPublishedDocument(0, "1");
+      const newerPub1 = getPublishedDocument(10, "1");
 
       documents.add(pub1);
       documents.add(newerPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestPublicationsForSection("introduction", clazz);
+      const latestPubs = documents.getLatestPublications(clazz);
       expect(latestPubs.length).toBe(1);
       expect(latestPubs[0]).toBe(newerPub1);
     });
 
     it("sorts publications by last name", () => {
-      const pub1 = getPublishedDocument(0, "introduction", "1");
-      const pub3 = getPublishedDocument(10, "introduction", "3");
+      const pub1 = getPublishedDocument(0, "1");
+      const pub3 = getPublishedDocument(10, "3");
 
       documents.add(pub3);
       documents.add(pub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestPublicationsForSection("introduction", clazz);
+      const latestPubs = documents.getLatestPublications(clazz);
       expect(latestPubs.length).toBe(2);
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub3);
     });
 
     it("sorts publications by first name, in case of matching last names", () => {
-      const pub1 = getPublishedDocument(0, "introduction", "1");
-      const pub2 = getPublishedDocument(10, "introduction", "2");
+      const pub1 = getPublishedDocument(0, "1");
+      const pub2 = getPublishedDocument(10, "2");
 
       documents.add(pub2);
       documents.add(pub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestPublicationsForSection("introduction", clazz);
+      const latestPubs = documents.getLatestPublications(clazz);
       expect(latestPubs.length).toBe(2);
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub2);
     });
 
     it("sorts publications with missing users last", () => {
-      const pub1 = getPublishedDocument(0, "introduction", "1");
-      const pub2 = getPublishedDocument(10, "introduction", "2");
-      const pubNull = getPublishedDocument(4, "introduction", "foo");
+      const pub1 = getPublishedDocument(0, "1");
+      const pub2 = getPublishedDocument(10, "2");
+      const pubNull = getPublishedDocument(4, "foo");
 
       documents.add(pubNull);
       documents.add(pub1);
       documents.add(pub2);
       expect(documents.all.length).toBe(3);
 
-      const latestPubs = documents.getLatestPublicationsForSection("introduction", clazz);
+      const latestPubs = documents.getLatestPublications(clazz);
       expect(latestPubs.length).toBe(3);
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub2);
@@ -187,7 +185,7 @@ describe("documents model", () => {
       documents.add(badPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(1);
       expect(latestPubs[0]).toBe(pub1);
     });
@@ -200,7 +198,7 @@ describe("documents model", () => {
       documents.add(newerPub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(1);
       expect(latestPubs[0]).toBe(newerPub1);
     });
@@ -213,7 +211,7 @@ describe("documents model", () => {
       documents.add(pub1);
       expect(documents.all.length).toBe(2);
 
-      const latestPubs = documents.getLatestLogPublications();
+      const latestPubs = documents.getLatestOtherPublications("learningLogPublication");
       expect(latestPubs.length).toBe(2);
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub3);

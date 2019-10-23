@@ -1,4 +1,4 @@
-import { SectionType } from "../models/curriculum/section";
+import { ESupportType } from "../models/curriculum/support";
 import { AudienceEnum, TeacherSupportSectionTarget } from "../models/stores/supports";
 
 // NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
@@ -23,11 +23,19 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBDocumentType = "section" | "learningLog" | "publication" | "learningLogPublication";
-export type DBDocumentMetadata = DBSectionDocumentMetadata |
+export type DBDocumentType = "section" |
+                              "problem" | "publication" |
+                              "personal" | "personalPublication" |
+                              "learningLog" | "learningLogPublication" |
+                              "supportPublication";
+export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
+                                 DBProblemDocumentMetadata |
+                                 DBPersonalDocumentMetadata |
                                  DBLearningLogDocumentMetadata |
                                  DBPublicationDocumentMetadata |
-                                 DBLearningLogPublicationMetadata;
+                                 DBPersonalPublicationMetadata |
+                                 DBLearningLogPublicationMetadata |
+                                 DBSupportPublicationMetadata;
 
 export interface DBBaseDocumentMetadata {
   version: "1.0";
@@ -40,61 +48,44 @@ export interface DBBaseDocumentMetadata {
   type: DBDocumentType;
 }
 
-export interface DBSectionDocumentMetadata extends DBBaseDocumentMetadata {
-  type: "section";
+export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
   classHash: string;
   offeringId: string;
+}
+
+export interface DBSectionDocumentMetadataDEPRECATED extends DBBaseProblemDocumentMetadata {
+  type: "section";
+}
+export interface DBProblemDocumentMetadata extends DBBaseProblemDocumentMetadata {
+  type: "problem";
+}
+export interface DBPersonalDocumentMetadata extends DBBaseDocumentMetadata {
+  type: "personal";
 }
 export interface DBLearningLogDocumentMetadata extends DBBaseDocumentMetadata {
   type: "learningLog";
 }
-export interface DBPublicationDocumentMetadata extends DBBaseDocumentMetadata {
+export interface DBPublicationDocumentMetadata extends DBBaseProblemDocumentMetadata {
   type: "publication";
-  classHash: string;
-  offeringId: string;
 }
+
+export interface DBPersonalPublicationMetadata extends DBBaseDocumentMetadata {
+  type: "personalPublication";
+}
+
 export interface DBLearningLogPublicationMetadata extends DBBaseDocumentMetadata {
   type: "learningLogPublication";
+}
+
+export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetadata {
+  type: "supportPublication";
 }
 
 export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
 
-export interface DBPublication {
-  version: "1.0";
-  self: {
-    classHash: string;
-    offeringId: string;
-  };
-  documentKey: string;
-  groupId: string;
-  userId: string;
-  sectionId: string;
-  groupUserConnections: DBGroupUserConnections;
-}
-
-export interface DBLearningLog {
-  version: "1.0";
-  self: {
-    uid: string;
-    classHash: string;
-    documentKey: string;
-  };
-  title: string;
-}
-
-export interface DBLearningLogPublication {
-  version: "1.0";
-  self: {
-    classHash: string;
-    documentKey: string;
-  };
-  title: string;
-  uid: string;
-  originDoc: string;
-}
-
+// section documents [deprecated] and problem documents
 export interface DBDocument {
   version: "1.0";
   self: {
@@ -103,7 +94,50 @@ export interface DBDocument {
     classHash: string;
   };
   content?: string;
+  changeCount?: number;
   type: DBDocumentType;
+}
+
+export interface IDocumentProperties {
+  [key: string]: string;
+}
+
+// personal documents and learning logs
+export interface DBOtherDocument {
+  version: "1.0";
+  self: {
+    uid: string;
+    classHash: string;
+    documentKey: string;
+  };
+  title: string;
+  properties?: IDocumentProperties;
+}
+
+// published section documents [deprecated] and problem documents
+export interface DBPublication {
+  version: "1.0";
+  self: {
+    classHash: string;
+    offeringId: string;
+  };
+  documentKey: string;
+  groupId?: string;
+  userId: string;
+  groupUserConnections?: DBGroupUserConnections;
+}
+
+// published personal documents and learning logs
+export interface DBOtherPublication {
+  version: "1.0";
+  self: {
+    classHash: string;
+    documentKey: string;
+  };
+  title: string;
+  properties: IDocumentProperties;
+  uid: string;
+  originDoc: string;
 }
 
 export interface DBClass {
@@ -143,15 +177,31 @@ export interface DBOfferingUser {
     offeringId: string;
     uid: string;
   };
-  sectionDocuments?: DBOfferingUserSectionDocumentMap;
+  documents?: DBOfferingUserProblemDocumentMap;
+  sectionDocuments?: DBOfferingUserSectionDocumentMapDEPRECATED;
   // TDB: store ui information here?
 }
 
-export interface DBOfferingUserSectionDocumentMap {
-  [key /* sectionId */: string]: DBOfferingUserSectionDocument;
+export interface DBOfferingUserProblemDocument {
+  version: "1.0";
+  self: {
+    classHash: string;
+    offeringId: string;
+    uid: string;
+  };
+  visibility: "public" | "private";
+  documentKey: string; // firebase id of portal user document
 }
 
-export interface DBOfferingUserSectionDocument {
+export interface DBOfferingUserProblemDocumentMap {
+  [key: string]: DBOfferingUserProblemDocument;
+}
+
+export interface DBOfferingUserSectionDocumentMapDEPRECATED {
+  [key /* sectionId */: string]: DBOfferingUserSectionDocumentDEPRECATED;
+}
+
+export interface DBOfferingUserSectionDocumentDEPRECATED {
   version: "1.0";
   self: {
     classHash: string;
@@ -189,6 +239,10 @@ export interface DBOfferingGroupUser {
   disconnectedTimestamp?: number;
 }
 
+export interface DBOtherDocumentMap {
+  [key: string]: DBOtherDocument;
+}
+
 export interface DBImage {
   version: "1.0";
   self: {
@@ -203,19 +257,38 @@ export interface DBImage {
   createdBy: string;
 }
 
-export interface DBSupport {
+export interface DBBaseSupport {
   self: {
     classHash: string;
     offeringId: string;
     audienceType: AudienceEnum;
-    audienceId: string;
+    audienceId?: string;
     sectionTarget: TeacherSupportSectionTarget;
     key: string;
   };
+  version: string;
+  uid: string;
+  properties: IDocumentProperties;
   timestamp: number;
+  type: ESupportType;
   content: string;
   deleted: boolean;
 }
+
+export interface DBTextSupport extends DBBaseSupport {
+  type: ESupportType.text;
+}
+
+export interface DBDocumentSupport extends DBBaseSupport {
+  type: ESupportType.document;
+}
+
+export interface DBPublishedSupport extends DBBaseSupport {
+  type: ESupportType.publication;
+  originDoc: string;
+}
+
+export type DBSupport = DBTextSupport | DBDocumentSupport | DBPublishedSupport;
 
 export interface DBTileComment {
   content: string;

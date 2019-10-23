@@ -1,8 +1,10 @@
 import * as firebase from "firebase/app";
+import { OtherDocumentType, PersonalDocument } from "../models/document/document";
+import { TeacherSupportSectionTarget, AudienceModelType } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { urlParams } from "../utilities/url-params";
-import { TeacherSupportSectionTarget, AudienceModelType, AudienceEnum } from "../models/stores/supports";
+import { Logger, LogEventName } from "../lib/logger";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -53,6 +55,8 @@ export class Firebase {
   public getRootFolder() {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
     const { appMode, user } = this.db.stores;
+    const { demoName } = urlParams;
+
     const parts = [];
     if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
       parts.push(FIREBASE_ROOT_OVERRIDE);
@@ -60,6 +64,12 @@ export class Firebase {
       parts.push(`${appMode}`);
       if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
         parts.push(this.userId);
+      }
+      else if (appMode === "demo") {
+        const slug = demoName && demoName.length > 0 ? this.escapeKey(demoName) : "";
+        if (slug.length > 0) {
+          parts.push(slug);
+        }
       }
     }
     parts.push("portals");
@@ -84,10 +94,17 @@ export class Firebase {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
+  // Published learning logs
   public getClassPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;
   }
 
+  // Published personal documents
+  public getClassPersonalPublicationsPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/personalPublications`;
+  }
+
+  // All documents associated with this user
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
@@ -111,9 +128,23 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
+  // Unpublished personal document/learning log
+  public getOtherDocumentPath(user: UserModelType, documentType: OtherDocumentType, documentKey?: string) {
+    const dir = documentType === PersonalDocument ? "personalDocs" : "learningLogs";
+    const key = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user)}/${dir}${key}`;
+  }
+
+  // Unpublished learning log
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
+  }
+
+  // Unpublished personal document
+  public getUserPersonalDocPath(user: UserModelType, documentKey?: string, userId?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getUserPath(user, userId)}/personalDocs${suffix}`;
   }
 
   public getImagesPath(user: UserModelType) {
@@ -132,7 +163,18 @@ export class Firebase {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
-  public getSectionDocumentPath(user: UserModelType, sectionId?: string, userId?: string) {
+  // Unpublished problem document
+  public getProblemDocumentPath(user: UserModelType, documentKey: string, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/documents/${documentKey}`;
+  }
+
+  // Unpublished problem documents
+  public getProblemDocumentsPath(user: UserModelType, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/documents`;
+  }
+
+  // Unpublished section documents [deprecated]
+  public getSectionDocumentPathDEPRECATED(user: UserModelType, sectionId?: string, userId?: string) {
     const suffix = sectionId ? `/${sectionId}` : "";
     return `${this.getOfferingUserPath(user, userId)}/sectionDocuments${suffix}`;
   }
@@ -149,6 +191,7 @@ export class Firebase {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
+  // Published section/problem documents
   public getPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;
   }
@@ -257,8 +300,16 @@ export class Firebase {
   }
 
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
-    if (snapshot && snapshot.val()) {
-      return userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+    if (snapshot) {
+      const connected = snapshot.val();
+      if (connected) {
+        userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
+      }
+      else {
+        // since the Logger currenly had no retry this won't be logged on a general network
+        // disconnect but might be helpful to know if only Firebase disconnected
+        Logger.log(LogEventName.INTERNAL_FIREBASE_DISCONNECTED);
+      }
     }
   }
 

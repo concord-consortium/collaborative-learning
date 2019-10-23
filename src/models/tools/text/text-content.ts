@@ -18,10 +18,7 @@ export const emptyJson: ValueJSON = {
                   type: "paragraph",
                   nodes: [{
                     object: "text",
-                    leaves: [{
-                      object: "leaf",
-                      text: ""
-                    }]
+                    text: ""
                   }]
                 }]
               }
@@ -34,10 +31,7 @@ const errorJson: ValueJSON = {
             type: "paragraph",
             nodes: [{
               object: "text",
-              leaves: [{
-                object: "leaf",
-                text: "A slate error occurred"
-              }]
+              text: "A slate error occurred"
             }]
           }]
         }
@@ -56,57 +50,39 @@ export const TextContentModel = types
               ? self.text.join("\n")
               : self.text as string;
 
-    }
-  }))
-  .extend(self => {
-
-    // views
-    function getSlate() {
+    },
+    getSlate() {
       const parsed = Array.isArray(self.text)
                       ? emptyJson
                       : safeJsonParse(self.text as string) || emptyJson;
       return Value.fromJSON(parsed);
     }
-
-    function convertSlate(value?: Value): Value {
+  }))
+  .views(self => ({
+    asSlate(): Value {
       switch (self.format) {
         case "slate":
-          const json = value && JSON.stringify(value.toJSON());
-          return value && (json === self.text) ? value : getSlate();
+          return self.getSlate();
         case "markdown":
           // handle markdown import here; for now we treat as text
         default:
           return Plain.deserialize(self.joinText);
       }
     }
-
-    // actions
-    function setText(text: string) {
+  }))
+  .actions(self => ({
+    setText(text: string) {
       self.format = undefined;
       self.text = text;
-    }
-
-    function setMarkdown(text: string) {
+    },
+    setMarkdown(text: string) {
       self.format = "markdown";
       self.text = text;
-    }
-
-    function setSlate(value: Value) {
+    },
+    setSlate(value: Value) {
       self.format = "slate";
       self.text = JSON.stringify(value.toJSON());
     }
-
-    return {
-      views: {
-        getSlate,
-        convertSlate
-      },
-      actions: {
-        setText,
-        setMarkdown,
-        setSlate
-      }
-    };
-  });
+  }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;

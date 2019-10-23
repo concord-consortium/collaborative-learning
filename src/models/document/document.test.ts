@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { DocumentModel, SectionDocument, DocumentModelType } from "./document";
+import { DocumentModel, ProblemDocument, DocumentModelType } from "./document";
 import { DocumentContentModel } from "./document-content";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
@@ -9,7 +9,7 @@ describe("document model", () => {
 
   beforeEach(() => {
     document = DocumentModel.create({
-      type: SectionDocument,
+      type: ProblemDocument,
       uid: "1",
       key: "test",
       createdAt: 1,
@@ -20,13 +20,13 @@ describe("document model", () => {
 
   it("uses override values", () => {
     expect(getSnapshot(document)).toEqual({
-      type: SectionDocument,
+      type: ProblemDocument,
       uid: "1",
       key: "test",
       createdAt: 1,
       groupId: undefined,
-      sectionId: undefined,
       title: undefined,
+      properties: {},
       visibility: "public",
       groupUserConnections: {},
       comments: {},
@@ -36,7 +36,14 @@ describe("document model", () => {
         rowOrder: [],
         tileMap: {}
       },
+      changeCount: 0
     });
+  });
+
+  it("can set title", () => {
+    expect(document.title).toBeUndefined();
+    document.setTitle("FooTitle");
+    expect(document.title).toBe("FooTitle");
   });
 
   it("can set content", () => {
@@ -55,7 +62,7 @@ describe("document model", () => {
     document.addTile("text");
     expect(document.content.tileMap.size).toBe(1);
     // adding geometry tool adds sidecar text tool
-    document.addTile("geometry", true);
+    document.addTile("geometry", {addSidecarNotes: true});
     expect(document.content.tileMap.size).toBe(3);
   });
 
@@ -79,5 +86,14 @@ describe("document model", () => {
     expect(document.visibility).toBe("public");
     document.toggleVisibility("private");
     expect(document.visibility).toBe("private");
+  });
+
+  it("can set/get document properties", () => {
+    expect(document.getProperty("foo")).toBeUndefined();
+    document.setProperty("foo", "bar");
+    expect(document.getProperty("foo")).toBe("bar");
+    document.setProperties({ foo: undefined, bar: "baz" });
+    expect(document.getProperty("foo")).toBeUndefined();
+    expect(document.getProperty("bar")).toBe("baz");
   });
 });

@@ -74,8 +74,8 @@ export const vertexAngleChangeAgent: JXGChangeAgent = {
                       .map(id => board.objects[id as string])
                       .filter(pt => pt != null);
     // cf. http://jsxgraph.uni-bayreuth.de/wiki/index.php/Positioning_of_labels
-    const overrides = { name() { return `${this.Value ? JXG.toFixed(this.Value() * 180 / Math.PI, 0) : ""}°`; },
-                        clientType: "vertexAngle" };
+    const overrides: any = { name() { return `${this.Value ? JXG.toFixed(this.Value() * 180 / Math.PI, 0) : ""}°`; },
+                              clientType: "vertexAngle" };
     const props = assign({ id: uuid(), radius: 1 }, change.properties, overrides);
     return parents.length === 3 ? board.create("angle", parents, props) : undefined;
   },

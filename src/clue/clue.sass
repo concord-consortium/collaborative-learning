@@ -1,0 +1,75 @@
+// application-specific styling goes here
+@import ../components/vars
+
+#rightNavTab-my-work, #rightNavTab-class-work
+  color: $terra-text
+  background-color: $terra-light-1
+  border-color: $terra
+  &:hover
+    background-color: $terra-dark-1
+    border-color: $terra-light-3
+  &.active
+    color: white
+    background-color: $terra-dark-2
+    border-color: $terra-light-3
+
+#rightNavTab-learning-log
+  color: $peacock-text
+  background-color: $peacock-light-1
+  border-color: $peacock
+  &:hover
+    background-color: $peacock-dark-1
+    border-color: $peacock-light-3
+  &.active
+    color: white
+    background-color: $peacock-dark-2
+    border-color: $peacock-light-3
+
+#rightNavTab-supports
+  color: $sky-text
+  background-color: $sky-light-1
+  border-color: $sky
+  &:hover
+    background-color: $sky-dark-1
+    border-color: $sky-light-3
+  &.active
+    color: white
+    background-color: $sky-dark-2
+    border-color: $sky-light-3
+
+.document
+  .titlebar
+    &.personal, &.personalPublication, &.problem, &.publication
+      background-color: $sage-light-1
+    &.learningLog, &.learningLogPublication
+      background-color: $peacock-light-1
+    &.supportPublication
+      background-color: $sky-light-1
+    .actions
+      .action.icon, .action.icon-button
+        background-color: inherit
+        .button-icon
+          margin-left: 5px
+        .button-icon.copy
+          background-image: url("../assets/icons/copy/copy.svg")
+          &:hover
+            background-image: url("../assets/icons/copy/copy-hover.svg")
+          &:active
+            background-image: url("../assets/icons/copy/copy-active.svg")
+        .button-icon.delete
+          background-image: url("../assets/icons/delete/delete.svg")
+          &:hover
+              background-image: url("../assets/icons/delete/delete-hover.svg")
+          &:active
+              background-image: url("../assets/icons/delete/delete-active.svg")
+  .statusbar
+    &.personal, &.personalPublication, &.problem, &.publication
+      background-color: $sage-light-1
+    &.learningLog, &.learningLogPublication
+      background-color: $peacock-light-1
+    &.supportPublication
+      background-color: $sky-light-1
+    .actions
+      .action
+        .icon
+          background-color: inherit

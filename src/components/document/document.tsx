@@ -2,16 +2,18 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import * as FileSaver from "file-saver";
 
-import { SupportItemModelType, SupportType } from "../../models/stores/supports";
 import { CanvasComponent } from "./canvas";
+import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, SectionDocument, PublicationDocument } from "../../models/document/document";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
+         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { SectionType } from "../../models/curriculum/section";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
+import { ToolbarConfig } from "../../models/tools/tool-types";
+import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
@@ -21,19 +23,105 @@ export type WorkspaceSide = "primary" | "comparison";
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
+  onNewDocument?: (document: DocumentModelType) => void;
+  onCopyDocument?: (document: DocumentModelType) => void;
+  onDeleteDocument?: (document: DocumentModelType) => void;
+  onPublishSupport?: (document: DocumentModelType) => void;
+  onPublishDocument?: (document: DocumentModelType) => void;
+  toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
   isGhostUser?: boolean;
 }
 
 interface IState {
+  documentKey: string;
+  documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
   commentTileId: string;
 }
 
+type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
+
+const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
+  return (
+    <svg key="download" className={`action icon icon-download`} onClick={onClick}>
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const PublishButton = ({ onClick, dataTestName }: { onClick: SVGClickHandler, dataTestName?: string }) => {
+  const dataTest = dataTestName || "publish-icon";
+  return (
+    <svg key="publish" className={`action icon icon-publish`}
+          data-test={dataTest} onClick={onClick} >
+      <use xlinkHref={`#icon-publish`} />
+    </svg>
+  );
+};
+
+const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="support" key="support" className="action icon-support"
+                onClickButton={onClick} />
+  );
+};
+
+const NewButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="new" key="new" className="action icon-new"
+                onClickButton={onClick} />
+  );
+};
+
+const EditButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="edit" key="edit" className="action icon-edit"
+                onClickButton={onClick} />
+  );
+};
+
+const CopyButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="copy" key="copy" className="action icon-copy"
+                onClickButton={onClick} />
+  );
+};
+
+const DeleteButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="delete" key="delete" className="action icon-delete"
+                onClickButton={onClick} />
+  );
+};
+
+const ShareButton = ({ isShared, onClick }: { isShared: boolean, onClick: SVGClickHandler }) => {
+  const visibility = isShared ? "public" : "private";
+  return (
+    <div key="share" className={`visibility action ${visibility}`}>
+      <svg id="currVis" className={`share icon icon-share`}
+            data-test="share-icon" onClick={onClick}>
+        <use xlinkHref={`#icon-share`} />
+      </svg>
+    </div>
+  );
+};
+
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
+
+  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
+    const { document } = nextProps;
+    const documentContext: IDocumentContext = {
+            getProperty: (key: string) => document.properties.get(key),
+            setProperties: (properties: ISetProperties) => document.setProperties(properties)
+          };
+    return document.key === prevState.documentKey
+            ? {}
+            : { documentKey: document.key, documentContext };
+  }
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
@@ -54,78 +142,71 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     };
 
     this.state = {
+      documentKey: props.document.key,
       isCommentDialogOpen: false,
       commentTileId: ""
     };
   }
 
   public render() {
-    const {document, isGhostUser, readOnly} = this.props;
-    const isPublication = document.isPublished;
-    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    return [
-        showToolbar ? this.renderToolbar() : null,
+    const { document: { type } } = this.props;
+    return (
+      <DocumentContext.Provider value={this.state.documentContext}>
+        {this.renderToolbar()}
         <div key="document" className="document">
-          {this.renderTitleBar()}
+          {this.renderTitleBar(type)}
           {this.renderCanvas()}
-          {this.renderStatusBar()}
+          {this.renderStatusBar(type)}
         </div>
-    ];
+      </DocumentContext.Provider>
+    );
   }
 
-  private renderTitleBar() {
+  private renderTitleBar(type: string) {
     const { document, side, isGhostUser } = this.props;
     const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
-    if (document.isSection) {
-      return this.renderSectionTitleBar(hideButtons);
+    if (document.isProblem) {
+      return this.renderProblemTitleBar(type, hideButtons);
     }
-    if (document.isLearningLog) {
-      return this.renderLearningLogTitleBar(hideButtons);
+    if (document.isPersonal || document.isLearningLog) {
+      return this.renderOtherDocumentTitleBar(type, hideButtons);
+    }
+    if (document.isSupport) {
+      return this.renderSupportTitleBar(type);
     }
   }
 
-  private renderSectionTitleBar(hideButtons?: boolean) {
-    const {problem, appMode, clipboard} = this.stores;
-    const {workspace, document} = this.props;
-    const activeSection = problem.getSectionById(document.sectionId!);
-    const show4up = !workspace.comparisonVisible;
+  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
+    const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
+    const problemTitle = problem.title;
+    const {document: { visibility }, workspace} = this.props;
+    const isShared = visibility === "public";
+    const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <svg key="download" className={`action icon icon-download`}
-                                    onClick={this.handleDownloadTileJson}>
-                                <use xlinkHref={`#icon-publish`} />
-                              </svg>
+                            ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className="titlebar">
+      <div className={`titlebar ${type}`}>
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+            <CopyButton onClick={this.handleCopyDocumentClick} />
+          </div>
+        }
         <div className="title" data-test="document-title">
-          {activeSection ? `Section: ${activeSection.title}` : "Section"}
+          {problemTitle}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              <svg key="publish" className={`action icon icon-publish`} data-test="publish-icon"
-                   onClick={this.handlePublishWorkspace}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>,
-              this.renderShare()
+              isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />,
+              <PublishButton key="publish" onClick={this.handlePublishDocument} />,
+              !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
-            {show4up ? this.renderMode() : null}
+            {show4up && this.renderMode()}
           </div>
         }
-      </div>
-    );
-  }
-
-  private renderShare() {
-    const {document} = this.props;
-    const currVis = document.visibility === "private" ? "private" : "public";
-    return (
-      <div key="share" className={`visibility action ${currVis}`}>
-        <svg id="currVis" className={`share icon icon-share`} data-test="share-icon"
-             onClick={this.handleToggleVisibility}>
-          <use xlinkHref={`#icon-share`} />
-        </svg>
       </div>
     );
   }
@@ -149,33 +230,64 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderLearningLogTitleBar(hideButtons?: boolean) {
+  private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
+    const { user: { isTeacher } } = this.stores;
     return (
-      <div className="learning-log titlebar">
+      <div className={`titlebar ${type}`}>
+        {!hideButtons &&
+          <div className="actions">
+            <NewButton onClick={this.handleNewDocumentClick} />
+            <CopyButton onClick={this.handleCopyDocumentClick} />
+            <DeleteButton onClick={this.handleDeleteDocumentClick} />
+          </div>
+        }
+        {
+          document.type === LearningLogDocument || document.type === LearningLogPublication
+          ? <div className="title" data-test="learning-log-title">
+              <span className="title-info">Learning Log: {document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
+          : <div className="title" data-test="personal-doc-title">
+              <span>{document.title}</span>
+              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+            </div>
+        }
         <div className="actions">
+          {!hideButtons && isTeacher && <PublishSupportButton onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <svg key="publish" className={`icon icon-publish`} data-test="learning-log-publish-icon"
-                   onClick={this.handlePublishLearningLog}>
-                <use xlinkHref={`#icon-publish`} />
-              </svg>
+              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
             </div>
           }
         </div>
-        <div className="title" data-test="learning-log-title">Learning Log: {document.title}</div>
+      </div>
+    );
+  }
+
+  private renderSupportTitleBar(type: string) {
+    const { document } = this.props;
+    return (
+      <div className={`titlebar ${type}`}>
+        <div className="title" data-test="document-title">
+          {document.getProperty("caption")}
+        </div>
       </div>
     );
   }
 
   private renderToolbar() {
+    const {document, isGhostUser, readOnly} = this.props;
+    const isPublication = document.isPublished;
+    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
+    if (!showToolbar || !this.props.toolbar) return;
     return <ToolbarComponent key="toolbar" document={this.props.document}
-                              toolApiMap={this.toolApiMap} />;
+                              config={this.props.toolbar} toolApiMap={this.toolApiMap} />;
   }
 
   private renderCanvas() {
     const { document, workspace, side, isGhostUser } = this.props;
-    const fourUp = (document.type === SectionDocument) &&
+    const fourUp = (document.type === ProblemDocument) &&
                     (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
     const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
     return (
@@ -193,25 +305,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private render4UpCanvas() {
     const {isGhostUser, document} = this.props;
-    const {sectionWorkspace} = this.stores.ui;
+    const { groups } = this.stores;
+    const group = isGhostUser ? undefined : groups.groupForUser(document.uid);
+    const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
     return (
-      <FourUpComponent document={document} workspace={sectionWorkspace} isGhostUser={isGhostUser}
+      <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
                         toolApiInterface={this.toolApiInterface} />
     );
   }
 
-  private renderStatusBar() {
-    const {document} = this.props;
+  private renderStatusBar(type: string) {
     const isPrimary = this.isPrimary();
-    const showContents = isPrimary && (document.type === SectionDocument);
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === PublicationDocument);
+    // const showComment = !isPrimary && (document.type === ProblemPublication);
     const showComment = false;
     return (
-      <div className="statusbar">
+      <div className={`statusbar ${type}`}>
         <div className="supports">
-          {showContents ? this.renderSupportIcons() : null}
-          {showContents ? this.renderVisibleSupports() : null}
+          {null}
         </div>
         <div className="actions">
           {isPrimary ? this.renderTwoUpButton() : null}
@@ -261,7 +372,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSaveComment = (comment: string, tileId: string) => {
-    const { documents, db, user } = this.stores;
+    const { documents, user } = this.stores;
     const document = documents.findDocumentOfTile(tileId);
     const toolApi = this.toolApiMap[tileId];
     const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
@@ -305,66 +416,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderSupportIcons() {
-    const supports = this.getSupportsWithIndices();
-    const anyActive = supports.some((support) => support.item.visible);
-    return (
-      <div className="supports-list">
-        {supports.map((support) => {
-          const {index, item} = support;
-          const visibility = !anyActive || item.visible ? "show" : "hide";
-          const audience = item.supportType === SupportType.teacher ? item.audience.type : "curricular";
-          return (
-            <svg
-              key={index}
-              onClick={this.handleToggleSupport(item)}
-              className={`icon ${this.getSupportName(index)} ${visibility}`}
-              data-test={`support-icon ${audience}`}
-            >
-              <use xlinkHref={`#${this.getSupportName(index)}`} />
-            </svg>
-          );
-        })}
-      </div>
-    );
-  }
-
-  private getSupportName(supportIndex: number) {
-    // There are currently 4 (0-based) support icons defined in index.html
-    const safeIndex = supportIndex % 4;
-    return `icon-support${safeIndex}`;
-  }
-
-  private renderVisibleSupports() {
-    const supports = this.getSupportsWithIndices().filter((supportWithIndex) => supportWithIndex.item.visible);
-    if (supports.length === 0) {
-      return null;
-    }
-    return (
-      <div className="visible-supports">
-        <div className="supports-list" data-test="supports-list">
-          {supports.map((support) => {
-            return (
-              <div key={support.index} onClick={this.handleToggleSupport(support.item)}>
-                {support.item.text}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
   }
 
   private handleToggleVisibility = () => {
     this.props.document.toggleVisibility();
-  }
-
-  private handleToggleSupport = (support: SupportItemModelType) => {
-    return () => this.stores.supports.toggleSupport(support);
   }
 
   private handleToggleTwoUp = () => {
@@ -381,32 +438,42 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     clipboard.clear();
   }
 
-  private handlePublishWorkspace = () => {
-    const { db, ui } = this.stores;
-    // TODO: Disable publish button while publishing
-    db.publishDocument(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Document Published"));
+  private handleNewDocumentClick = () => {
+    const { document, onNewDocument } = this.props;
+    onNewDocument && onNewDocument(document);
   }
 
-  private handlePublishLearningLog = () => {
-    const { db, ui } = this.stores;
-    db.publishLearningLog(this.props.document)
-      .then(() => ui.alert("Your document was published.", "Learning Log Published"));
+  private handleCopyDocumentClick = () => {
+    const { document, onCopyDocument } = this.props;
+    onCopyDocument && onCopyDocument(document);
   }
 
-  private getSupportsWithIndices() {
-    const { groups, user } = this.stores;
-    const userId = user.id;
-    const group = groups.groupForUser(userId);
-    const groupId = group && group.id;
-    return this.stores.supports.getSupportsForUserProblem(
-      this.props.document.sectionId! as SectionType,
-      groupId,
-      userId
-    )
-    .map((support, index) => {
-      return {index, item: support};
-    });
+  private handleDeleteDocumentClick = () => {
+    const { document, onDeleteDocument } = this.props;
+    onDeleteDocument && onDeleteDocument(document);
+  }
+
+  private handleDocumentRename = () => {
+    const { document } = this.props;
+    const { appConfig } = this.stores;
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    this.stores.ui.prompt(`Rename your ${docTypeStringL}:`, document.title, `Rename ${docTypeString}`)
+      .then((title: string) => {
+        if (title !== document.title) {
+          document.setTitle(title);
+        }
+      });
+  }
+
+  private handlePublishSupport = () => {
+    const { document, onPublishSupport } = this.props;
+    onPublishSupport && onPublishSupport(document);
+  }
+
+  private handlePublishDocument = () => {
+    const { document, onPublishDocument } = this.props;
+    onPublishDocument && onPublishDocument(document);
   }
 
   private isPrimary() {

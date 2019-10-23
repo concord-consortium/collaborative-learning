@@ -11,10 +11,10 @@ export interface ImageToolChange {
   url: string;
 }
 
-export function defaultImageContent() {
+export function defaultImageContent(url?: string) {
   const change = JSON.stringify({
                   operation: "update",
-                  url: placeholderImage
+                  url: url || placeholderImage
                 });
   return ImageContentModel.create({
                             type: "Image",
