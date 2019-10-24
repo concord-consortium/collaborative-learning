@@ -20,12 +20,13 @@ export class LinkIndicatorComponent extends React.Component<IProps>{
     const metadata = findMetadata(type, id);
     const isGeometry = this.props.type === "Geometry";
     const isTable = this.props.type === "Table";
-    const geometryLinkCount = metadata as GeometryMetadataModelType;
-    const tableLinkCount = metadata as TableMetadataModelType;
-    const linkCount = Math.max(isGeometry ? geometryLinkCount.linkedTableCount
-                                          : isTable ? tableLinkCount.linkCount : 0);
+    const geometryMetadata = metadata as GeometryMetadataModelType;
+    const tableMetadata = metadata as TableMetadataModelType;
+    const linkCount = Math.min(3, isGeometry ? geometryMetadata.linkedTableCount
+                                             : isTable ? tableMetadata.linkCount : 0);
+
     return (
-      metadata !== undefined && linkCount > 0
+      linkCount > 0
         ? <IconButton icon="link-indicator" key={`link-indicator`} className={`icon-link-indicator`}
                       innerClassName={`link-indicator-icon-${linkCount} link-icon`} />
         : null
