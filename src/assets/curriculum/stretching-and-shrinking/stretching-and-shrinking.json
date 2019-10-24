@@ -2487,7 +2487,33 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Durell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle."
+                        "In this problem you will use similar triangles to find the distance across a river."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Durrell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, <strong>nested triangles</strong>, which are triangles that share a common angle.\n\nThe angles that look like right angles are right angles. The triangles in the diagram are similar."
+                      ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "•  What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
                       ]
                     }
                   },
@@ -2496,28 +2522,16 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
                     }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The angles that look like right angles are right angles."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The triangles in the diagram are similar."
-                      ]
-                    }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {
+                  "text": "What shapes do you see in the diagram?"
+                },
+                {
+                  "text": "What measurements do we know?"
+                }]
             },
             {
               "type": "initialChallenge",
@@ -2593,64 +2607,11 @@
               "supports": []
             }
           ]
-        },
-        {
-          "description": "Reflection 3.4",
-          "ordinal": 4,
-          "title": "3.MR Mathematical Reflection 3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Mathematical Reflection 3"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this Investigation, we explored similar polygons, scale factors and measures related to similar figures."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Now what do you know about similarity?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [
-              ]
-            }
-          ]
         }
       ],
       "supports": []
-    },
-     {
+    }, 
+    {
       "description": "Investigation 4",
       "ordinal": 4,
       "title": "Similarity and Ratios",
@@ -2990,31 +2951,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you found two ways to find missing lengths in pairs of similar figures."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Scale Factor Method: Use the scale factor from one figure to the other."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "OR"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Ratios of Side Lengths within Figures Method: Use the ratios of adjacent side lengths within each figure."
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.  <h3>OR</h3>  <h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths within each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
                       ]
                     }
                   }
@@ -3029,15 +2966,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram below shows two triangles."
+                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
                       ]
                     }
                   }, {
@@ -3050,7 +2979,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Examine the diagram of the shadow method. How can you use this method to find the height of the Statue of Liberty? What is the height?"
+                        "Examine the diagram of the shadow method. \nWhy are the measures of the corresponding angles of the large triangle and the small triangle equal? \nHow can you use this method to find the height of the Statue of Liberty? What is the height?"
                       ]
                     }
                   }, {
@@ -3058,7 +2987,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "If the sun is shining, try the shadow method to find the height of an object outside your building. You will need \n\n* A building, tree, or other object whose height you want to measure \n\n* A meter stick \n\n* The length of the shadow of the stick’s shadow \n\n* The length of the shadow of the building’s shadow"
+                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ol><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the stick’s shadow</li><li>The length of the shadow cast by the building, tree, or other object</li></ol>"
                       ]
                     }
                   }
@@ -3074,7 +3003,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. When you use the shadow method, what problems might affect the accuracy of your answers?"
+                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet long. How tall is the tree?"
                       ]
                     }
                   }, {
@@ -3082,18 +3011,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "2. A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow 4.5 feet length. How tall is the tree?"
+                        "<h3>Situation B. Using the &quot;Mirror Method&quot;</h3> Another method for finding heights of objects is called the “mirror method.” Ashton’s class experimented with the mirror method to understand how it worked by using it to measure the height of their principal. They knew from science class that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). Therefore, the two triangles are similar."
                       ]
                     }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. Ashton’s class used the mirror method to measure heights. The school principal visits Ashton’s class one day. Ashton uses the mirror method to estimate the principal’s height. This diagram shows the measurements he records."
-                      ]
-                    }
-                  }, {
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
@@ -3103,7 +3025,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "* Does this method work? Why?"
+                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li></ol>"
                       ]
                     }
                   }, {
@@ -3111,15 +3033,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "* What estimate should Ashton give for the principal’s height?"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4. What other ways have you used in this unit to create similar figures?"
+                        "<h3>Situation C. Creating Similar Figures</h3>Mario thought that the mirrors and shadows created similar figures. Is his claim correct? Explain. What other methods have you used in this unit to create similar figures?"
                       ]
                     }
                   }
@@ -3142,9 +3056,18 @@
               }
             }
           ]
-        }, {
+        }
+      ],
+      "supports": [
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "MR1 - MR4",
+      "problems": [{
           "description": "Mathematic Reflections",
-          "ordinal": 4,
+          "ordinal": 1,
           "title": "Mathematical Reflections",
           "subtitle": "",
           "sections": [
@@ -3157,7 +3080,41 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Investigation, we explored ways to use similar figures to estimate sizes. Now what do you know about similarity? Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3174,7 +3131,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Investigation, we explored ways to use similar figures to find information about shapes. Now what do you know about similarity? Discuss your ideas with other students and your teachers. Then write a summary in your learning log."
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
