@@ -23,10 +23,10 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import Header from './elements/Header';
-import RightNav from './elements/RightNav';
-import LeftNav from './elements/LeftNav';
-import Canvas from './elements/Canvas';
+import ClueHeader from './elements/clue/cHeader';
+import 'cypress-file-upload';
+import 'cypress-commands';
+
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
 
@@ -34,10 +34,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         problem = 2.3;
     let teacher = 10;
 
-    let header = new Header,
-        rightNav = new RightNav,
-        leftNav = new LeftNav,
-        canvas = new Canvas;
+    let header = new ClueHeader;
     let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
@@ -80,4 +77,3 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         cy.get('span').should('contain','QA Cleared: OK');
     }
 })
-

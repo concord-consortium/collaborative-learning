@@ -1,16 +1,11 @@
-import LeftNav from '../../support/elements/LeftNav'
-import Canvas from '../../support/elements/Canvas'
-import GraphToolTile from '../../support/elements/GraphToolTile'
-import RightNav from '../../support/elements/RightNav'
-import BottomNav from '../../support/elements/BottomNav';
-import LearningLog from '../../support/elements/LearningLog';
-import TableToolTile from '../../support/elements/TableToolTile'
-import ImageToolTile from '../../support/elements/ImageToolTile'
+import LeftNav from '../../support/xelements/LeftNav'
+import Canvas from '../../support/xelements/Canvas'
+import GraphToolTile from '../../support/xelements/GraphToolTile'
+import TableToolTile from '../../support/xelements/TableToolTile'
+import ImageToolTile from '../../support/xelements/ImageToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
-const rightNav = new RightNav;
-const learningLog = new LearningLog;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const imageToolTile = new ImageToolTile;
@@ -29,15 +24,15 @@ function connectTableToGraph(){
     const dataTransfer = new DataTransfer;
 
     tableToolTile.getTableTile()
-        .trigger('dragstart', {dataTransfer});
+        .trigger('dragstart',{dataTransfer});
     graphToolTile.getGraphTile()
-        .trigger('drop', {dataTransfer});
+        .trigger('drop',{dataTransfer});
     tableToolTile.getTableTile()
         .trigger('dragend');
 }
 
 context('Tests for graph and table integration', function(){
-    describe.skip('connect table to graph before adding coordinates', function(){
+    describe('connect table to graph before adding coordinates', function(){
         it('setup', function(){
             leftNav.openToWorkspace('Extra Workspace');
             addTableAndGraph();
@@ -48,6 +43,7 @@ context('Tests for graph and table integration', function(){
           const yCoord = '9';
             it('will add a blank row', function(){ 
                 tableToolTile.addNewRow();
+                cy.wait(1000)
                 tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
                 graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
             });
@@ -276,27 +272,6 @@ context('Tests for graph and table integration', function(){
             });
         })
     })
-});
-// TODO: Need to write.
-context.skip('Learning log', function(){
-    it('will create a learning log', function(){
-
-    });
-    it('will connect table to graph', function(){
-        // connectTableToGraph();
-    });
-    it('will create a polygon in the table', function(){ //first point is created in previous it
-
-    });
-    it('will publish learning log', function(){
-
-    });
-    it('will open Class Work canvas in 2up view', function(){
-
-    });
-    it('will close learning log, and restore', function(){
-
-    });
 });
 // TODO: Need to write.
 context.skip('Save and restore keeps the connection between table and graph', function(){
