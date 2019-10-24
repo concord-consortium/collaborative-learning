@@ -1,15 +1,11 @@
 
-import dfBlock from "../../../support/elements/dfBlock";
-import dfCanvas from "../../../support/elements/dfCanvas";
-import LeftNav from "../../support/elements/LeftNav";
-import Header from "../../support/elements/Header";
-import Canvas from "../../../support/elements/common/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 context('block functionalites and relationships',()=>{
 //delete of connection

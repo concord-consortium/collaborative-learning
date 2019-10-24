@@ -9,17 +9,13 @@
 //Has only one output node
 //Has no input node
 
-import dfBlock from "../../support/elements/dfBlock";
-import dfCanvas from "../../support/elements/dfCanvas";
-import LeftNav from "../../support/elements/LeftNav";
-import Header from "../../support/elements/Header";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 const testBlock = 'sensor'
 context('Sensor block tests',()=>{
@@ -42,7 +38,7 @@ context('Sensor block tests',()=>{
             dfblock.getInputNodesNum(testBlock).should('not.exist');
         })
         it('verify changing sensor type changes the hub list selection',()=>{
-            var sensorTypes=['humidity','temperature','particulates'];
+            var sensorTypes=['Humidity','Temperature','Particulates'];
 
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
                 dfblock.selectSensorType(sensor);
@@ -53,13 +49,13 @@ context('Sensor block tests',()=>{
                         expect($option).to.contain('None Available');
                     }
                     else {
-                        expect($option).to.contain(sensor);
+                        expect($option).to.contain(sensor.toLowerCase());
                     } 
                 }) 
             })       
         })
         it('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
-            var sensorTypes=['humidity','temeprature'];
+            var sensorTypes=['Humidity','Temeprature'];
             var hub ='cc-west-office-hub'; //use cc-west-hub since it has two temp and two humidity
 
             dfblock.selectSensorType(sensorTypes[0]);
@@ -68,20 +64,20 @@ context('Sensor block tests',()=>{
             dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
                 console.log($option.text()+' length: '+ $optionList.length)
                 if ($option.text().includes(hub)){ //cc-west-office-hub:humidity(plug 1),cc-west-office-hub:humidity(plug 1)
-                    console.log("hub name: "+hub+':'+sensorTypes[0]+'(plug '+(index+1)+')');
-                            expect($option).to.contain(hub+':'+sensorTypes[0]+'(plug '+(index+1)+')');
+                    console.log("hub name: "+hub+':'+(sensorTypes[0].toLowerCase())+'(plug '+(index+1)+')');
+                            expect($option).to.contain(hub+':'+sensorTypes[0].toLowerCase()+'(plug '+(index+1)+')');
                 }
             }) 
         })
         it('verify sensor type matches units shown in text field',()=>{
             var sensorTypes=[
-                                {type:'temperature', unit:'°C'},
-                                {type:'humidity', unit:'%'},
+                                {type:'Temperature', unit:'°C'},
+                                {type:'Humidity', unit:'%'},
                                 {type:'CO₂', unit:'PPM'},
                                 {type:'O₂',unit:'%'},
-                                {type:'light',unit:'lux'},
-                                {type:'soil moisture',unit:''},
-                                {type:'particulates',unit:'PM2.5'}
+                                {type:'Light',unit:'lux'},
+                                {type:'Soil Moisture',unit:''},
+                                {type:'Particulates',unit:'PM2.5'}
                             ];
 
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
@@ -90,7 +86,7 @@ context('Sensor block tests',()=>{
             })       
         })
         it('verify sensor blocks outputs correctly',()=>{
-            var sensor = "humidity";
+            var sensor = "Humidity";
             var hubcce = 'cceast-sim-hub:humidity'
             var hubccw = "cc-west-office-hub:humidity(plug 2)";
             dfblock.selectSensorType(sensor);

@@ -1,14 +1,10 @@
-import dfBlock from "../../support/elements/dfBlock";
-import dfCanvas from "../../support/elements/dfCanvas";
-import LeftNav from "../../support/elements/LeftNav";
-import Header from "../../support/elements/Header";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 var input1=18, input2=6; //nums typed into math input nodes
 var input3=3, input4=2; //nums typed into the 2 number blocks
@@ -48,21 +44,21 @@ context('Math block test',()=>{
         })
         it('verify subtract',()=>{
             dfblock.getMathOperatorDropdown().click();
-            dfblock.selectMathOperator('subtract')
+            dfblock.selectMathOperator('Subtract')
             dfblock.getMathValueTextField().should('contain',input1+' - '+input2+' = '+(input1-input2))
             dfblock.getTransformValueTextField().should('contain','|'+(input1-input2)+'| = '+Math.abs((input1-input2)))
             //subtract negative number
         })
         it('verify multiply',()=>{
             dfblock.getMathOperatorDropdown().click();
-            dfblock.selectMathOperator('multiply')
+            dfblock.selectMathOperator('Multiply')
             dfblock.getMathValueTextField().should('contain',input1+' * '+input2+' = '+(input1*input2))
             dfblock.getTransformValueTextField().should('contain','|'+(input1*input2)+'| = '+Math.abs(input1*input2))
             //multiply negative number
         })
         it('verify divide',()=>{
             dfblock.getMathOperatorDropdown().click();
-            dfblock.selectMathOperator('divide')
+            dfblock.selectMathOperator('Divide')
             dfblock.getMathValueTextField().should('contain',input1+' / '+input2+' = '+(input1/input2))
             dfblock.getTransformValueTextField().should('contain','|'+(input1/input2)+'| = '+Math.abs(input1/input2))
             //divide by 0 outputs infinity, and 0/0 outputs NaN

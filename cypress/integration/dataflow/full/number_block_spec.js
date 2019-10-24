@@ -1,14 +1,10 @@
-import dfBlock from "../../support/elements/dfBlock";
-import Header from "../../support/elements/Header";
-import LeftNav from "../../support/elements/LeftNav";
-import dfCanvas from "../../support/elements/dfCanvas";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import Header from "../../../support/elements/dataflow/dfHeader";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
 
 const header = new Header;
-const leftNav = new LeftNav;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 const testBlock = 'number'
 context('Number block test',()=>{

@@ -53,7 +53,9 @@
     "test:production": "cypress open --env testEnv=production",
     "test:master": "cypress open --env testEnv=master ",
     "test:branch": "cypress open --env testEnv=branch",
-    "test:local": "cypress open --env testEnv=local"
+    "test:local": "cypress open --env testEnv=local",
+    "test:cypress:clue": "cypress run --spec 'cypress/integration/clue/**/* --config video=false,defaultCommandTimeout=8000 --env testEnv=local",
+    "test:cypress:dataflow": "cypress run --spec 'cypress/integration/dataflow/**/*' --config video=false,defaultCommandTimeout=8000 --env testEnv=local"
   },
   "repository": {
     "type": "git",

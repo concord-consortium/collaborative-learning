@@ -1,14 +1,10 @@
-import dfBlock from "../../support/elements/dfBlock";
-import dfCanvas from "../../support/elements/dfCanvas";
-import LeftNav from "../../support/elements/LeftNav";
-import Header from "../../support/elements/Header";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 var input1=7, input2=6; //nums typed into math input nodes
 var input3=3, input4=2; //nums typed into the 2 number blocks
@@ -50,37 +46,37 @@ context('Logic block test',()=>{
             dfblock.getNumberInput(0).type('{backspace}'+input3+'{enter}');
             dfblock.getNumberInput(1).type('{backspace}'+input4+'{enter}');
             dfblock.openLogicOperatorDropdown();
-            dfblock.selectLogicOperator('less than')
+            dfblock.selectLogicOperator('Less Than')
             dfblock.getLogicValueTextField().should('contain',input3+' < '+input4+' ⇒ '+((input3<input4)?1:0))
             dfblock.getRelayValueTextField().should('contain', ((input3<input4)?'on':'off'))
 
         })
         it('verify greater than or equal to',()=>{
             dfblock.openLogicOperatorDropdown();
-            dfblock.selectLogicOperator('greater than or equal to')
+            dfblock.selectLogicOperator('Greater Than Or Equal To')
             dfblock.getLogicValueTextField().should('contain',input3+' >= '+input4+' ⇒ '+((input3>=input4)?1:0))
         })
         it('verify less than or equal to',()=>{
             dfblock.openLogicOperatorDropdown();
-            dfblock.selectLogicOperator('less than or equal to')
+            dfblock.selectLogicOperator('Less Than Or Equal To')
             dfblock.getLogicValueTextField().should('contain',input3+' <= '+input4+' ⇒ '+((input3<=input4)?1:0))
         })
         it('verify equal and not equal',()=>{
-            const exp = new RegExp(`^(equal)`, "g")
+            const exp = new RegExp(`^(Equal)`, "g")
             dfblock.openLogicOperatorDropdown();
             dfblock.selectLogicOperator(exp)
             dfblock.getLogicValueTextField().should('contain',input3+' == '+input4+' ⇒ '+((input3==input4)?1:0))
             dfblock.openLogicOperatorDropdown();
-            dfblock.selectLogicOperator('not equal')
+            dfblock.selectLogicOperator('Not Equal')
             dfblock.getLogicValueTextField().should('contain',input3+' != '+input4+' ⇒ '+((input3!=input4)?1:0))
         })
         it('verify and',()=>{
             dfblock.openLogicOperatorDropdown();
-            dfblock.selectLogicOperator('and')
+            dfblock.selectLogicOperator('And')
             dfblock.getLogicValueTextField().should('contain',input3+' && '+input4+' ⇒ '+((input3&&input4)?1:0))
         })
         it('verify or',()=>{
-            const exp = new RegExp(`^(or)`, "g")
+            const exp = new RegExp(`^(Or)`, "g")
             dfblock.openLogicOperatorDropdown();
             dfblock.selectLogicOperator(exp)
             dfblock.getLogicValueTextField().should('contain',input3+' || '+input4+' ⇒ '+((input3||input4)?1:0))

@@ -1,14 +1,10 @@
-import dfBlock from "../../support/elements/dfBlock";
-import Header from "../../support/elements/Header";
-import LeftNav from "../../support/elements/LeftNav";
-import dfCanvas from "../../support/elements/dfCanvas";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 const testBlock = 'data-storage';
 context('Data Storage block tests',()=>{//Use generator block on square wave for on/off
@@ -19,14 +15,13 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
         dfcanvas.openBlock('Data Storage')
         dfblock.moveBlock(testBlock,0,250,5);
         dfcanvas.scrollToTopOfTile();
-        dfblock.selectGeneratorType('square');
+        dfblock.selectGeneratorType('Square');
     })
     describe('Data Storage block UI',()=>{
         it('verify UI',()=>{ //block should have 1 dropdowns, one value field, no input node, one output mode
-            dfcanvas.scrollToTopOfTile();
             dfblock.getBlockTitle(testBlock).should('contain','Data Storage');
             dfblock.getStorageNameTextField().should('be.visible');
-            dfblock.getStorageIntervalTextField().should('be.visible');
+            dfblock.getStorageIntervalDropdown().should('be.visible');
             dfblock.getStorageSequenceTextField().should('be.visible');
             dfblock.getOutputNodesNum(testBlock).should('not.exist');
             dfblock.getInputNode(testBlock).should('be.visible');
@@ -40,11 +35,11 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.getStorageNameTextField().type('{selectall}{backspace}'+datasetName);
             dfblock.getStorageNameTextField().should('have.value',datasetName);
         })
-        it('verify interval can be entered',()=>{
-            var interval = '2'
-            dfblock.getStorageIntervalTextField().should('have.value','1');
-            dfblock.getStorageIntervalTextField().type(interval);
-            dfblock.getStorageIntervalTextField().should('have.value','1'+interval);
+        it('verify interval can be chosen',()=>{
+            var interval = '5 seconds'
+            dfblock.getStorageIntervalDropdown().should('contain','1 second');
+            dfblock.selectStorageIntervalTime(interval);
+            dfblock.getStorageIntervalDropdown().should('contain', interval);
         })
         it('verify sequence name can be entered',()=>{
             var sequenceName = 'input generator'

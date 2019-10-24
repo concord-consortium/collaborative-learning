@@ -1,14 +1,10 @@
-import dfBlock from "../../support/elements/dfBlock";
-import Header from "../../support/elements/Header";
-import LeftNav from "../../support/elements/LeftNav";
-import dfCanvas from "../../support/elements/dfCanvas";
-import Canvas from "../../support/elements/Canvas";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
-const canvas = new Canvas;
 
 const testBlock = 'relay'
 
@@ -25,7 +21,6 @@ context('Relay block tests',()=>{//Use number block and change the value manuall
     })
     describe('Relay block UI',()=>{
         it('verify UI',()=>{ //block should have 1 dropdowns, one value field, no input node, one output mode
-            dfcanvas.scrollToTopOfTile();
             dfblock.getBlockTitle(testBlock).should('contain','Relay');
             dfblock.getRelayListDropDown().should('be.visible');
             dfblock.getRelayValueTextField().should('be.visible');

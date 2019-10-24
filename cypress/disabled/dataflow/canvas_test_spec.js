@@ -4,11 +4,11 @@
 //verify reset of plot
 //verify clear of canvas
 
-import dfBlock from "../../support/elements/dfBlock";
+import dfBlock from "../../../support/elements/dfBlock";
 import Header from "../../support/elements/Header";
 import LeftNav from "../../support/elements/LeftNav";
 import dfCanvas from "../../support/elements/dfCanvas";
-import Canvas from "../../../support/elements/common/Canvas";
+import Canvas from "../../../../support/elements/common/Canvas";
 import RightNav from "../../support/elements/RightNav";
 
 
