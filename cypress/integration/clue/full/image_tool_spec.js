@@ -86,6 +86,7 @@ context('Test image functionalities', function(){
             rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','workspaces')
             rightNav.openCanvasItem('my-work','workspaces', userCanvas)
+            cy.wait(5000)
         })
         it('verify restore of all  images that were added by upload', function(){
             const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
