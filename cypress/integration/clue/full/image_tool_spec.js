@@ -93,7 +93,7 @@ context('Test image functionalities', function(){
 
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 expect($list).to.have.length(3);
-                expect($images).to.have.css('background-image').and.contains('url("'+baseUrl);
+                expect($images).to.have.css('background-image').and.contains('url("data:image');
             })
         })
     });
