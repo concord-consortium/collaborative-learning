@@ -158,6 +158,10 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
   private handleSetActionHandlers = (handlers: IActionHandlers) => {
     this.setState({ handlers }, () => {
       this.hotKeys.register({
+        "left": handlers.handleArrows,
+        "up": handlers.handleArrows,
+        "right": handlers.handleArrows,
+        "down":  handlers.handleArrows,
         "backspace": handlers.handleDelete,
         "delete": handlers.handleDelete,
         "cmd-c": handlers.handleCopy,
