@@ -195,18 +195,19 @@ context('Test graph tool functionalities', function(){
             })
             it('verify delete points alters polygon',()=>{
                 let basePointCount = 4, baseAngleCount=3; // number of points already in doc
-
+                
+                graphToolTile.getGraphPoint().should('have.length', basePointCount)
                 graphToolTile.selectGraphPoint(13,4);
                 graphToolTile.getAngleAdornment().should('have.length',baseAngleCount);
                 graphToolTile.deleteGraphElement();
-                graphToolTile.getGraphPoint().should('have.length', basePointCount)
+                graphToolTile.getGraphPoint().should('have.length', basePointCount-1)
                 graphToolTile.selectGraphPoint(6.8, 2.2);
                 // graphToolTile.getGraphPoint().last().click();
                 graphToolTile.deleteGraphElement();
-                graphToolTile.getGraphPoint().should('have.length', basePointCount -1)
+                graphToolTile.getGraphPoint().should('have.length', basePointCount -2)
                 graphToolTile.selectGraphPoint(3,5);
                 graphToolTile.deleteGraphElement();
-                graphToolTile.getGraphPoint().should('have.length', basePointCount-2)
+                graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
             })
         })
 
