@@ -46,7 +46,7 @@ class RightNav{
     }
 
     getAllSectionCanvasItems(tab, section){
-        return cy.get('[data-test='+tab+'-section-'+section).siblings('[data-test=my-work-list-items]');
+        return cy.get('[data-test='+tab+'-section-'+section).siblings('.list').find('[data-test='+tab+'-list-items]');
     }
 
     getCanvasItemTitle(tab,section){

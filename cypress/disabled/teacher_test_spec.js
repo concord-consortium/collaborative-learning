@@ -1,9 +1,9 @@
-import Header from '../../support/xelements/Header';
-import RightNav from '../../support/xelements/RightNav';
-import LeftNav from '../../support/xelements/LeftNav';
-import Canvas from '../../support/xelements/Canvas';
-import Workspace from '../../support/xelements/Workspace';
-import TeacherDashboard from '../../support/xelements/TeacherDashboard';
+import Header from '../support/xelements/Header';
+import RightNav from '../support/xelements/RightNav';
+import LeftNav from '../support/xelements/LeftNav';
+import Canvas from '../support/xelements/Canvas';
+import Workspace from '../support/xelements/Workspace';
+import TeacherDashboard from '../support/xelements/TeacherDashboard';
 
 let qaClass = 10,
     qaGroup10 = 10,
