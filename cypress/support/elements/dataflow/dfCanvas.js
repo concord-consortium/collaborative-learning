@@ -1,10 +1,16 @@
+import Dialog from "../common/Dialog";
+import Canvas from "../common/Canvas";
+
+const dialog = new Dialog;
+const canvas = new Canvas
+
 //Dataflow canvas and toolbar
 class dfCanvas{
     getDataFlowToolTile(){
         return cy.get('.single-workspace .dataflow-tool.editable');
     }
     getProgramToolbar(){
-        return cy.get('.single-workspace [data-test=program-toolbar');
+        return cy.get('.single-workspace [data-test=program-toolbar]');
     }
     getProgramToolbarButtons(){
         return cy.get('.single-workspace [data-test=program-toolbar] button')
@@ -65,6 +71,16 @@ class dfCanvas{
     }
     zoomOut(){
         this.getZoomOutButton().click().click().click().click().click();
+    }
+
+    createNewProgram(title){
+        canvas.getNewDocumentIcon().click()
+            .then(()=>{
+                // dialog.getDialogTitle().should('exist').and('contains','Create New Dataset');
+                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                dialog.getDialogOKButton().click();
+            })
+        cy.wait(3000)    
     }
 }
 export default dfCanvas;

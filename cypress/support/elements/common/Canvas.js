@@ -64,7 +64,7 @@ class Canvas{
     createNewExtraDocument(title){
         this.getNewDocumentIcon().click()
             .then(()=>{
-                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+                //dialog.getDialogTitle().should('exist').and('contains','Create Extra Workspace'); //cannot be too specific because of difference bet. CLUE and Dataflow
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })

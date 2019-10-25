@@ -1,8 +1,8 @@
-import dfHeader from "../../../../support/elements/dataflow/dfHeader";
-import RightNav from "../../../../support/elements/common/RightNav";
-import LeftNav from "../../../../support/elements/clue/LeftNav";
-import dfControlPanels from "../../../../support/elements/dataflow/dfControlPanels";
-import Canvas from "../../../../support/elements/common/Canvas";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
+import RightNav from "../../../support/elements/common/RightNav";
+import LeftNav from "../../../support/elements/clue/LeftNav";
+import dfControlPanels from "../../../support/elements/dataflow/dfControlPanels";
+import Canvas from "../../../support/elements/common/Canvas";
 
 
 
@@ -24,7 +24,7 @@ context('Workspace view',()=>{
         it('verify click on Workspace button shows the dataflow workspace',()=>{
             header.switchWorkspace('Workspace');
             canvas.getSingleCanvas().should('be.visible')
-            leftNav.getLeftNavTabs().should('not.exist')
+            leftNav.getLeftNavTabs().should('not.be.visible')
             rightNav.getRightNavTabs().should('exist')
         })
     })

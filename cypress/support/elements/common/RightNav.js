@@ -33,8 +33,11 @@ class RightNav{
         return cy.get('[data-test='+tab+'-section-'+section+'] .title')
     }
 
-    openSection(tab,section){
-        if (tab=='learning-log'){
+    openSection(tab,section,title=''){ 
+        if (section===''){
+            cy.get('[data-test='+tab+'-section]').find('.title').contains(title).click()
+        }
+        else if (tab=='learning-log'){
             cy.get('[data-test='+tab+'-section]').click();
         } else {   
             cy.get('[data-test='+tab+'-section-'+section+']').click();
@@ -50,7 +53,7 @@ class RightNav{
     }
 
     getCanvasItemTitle(tab,section){
-        if (tab=='learning-log'){
+        if ((tab=='learning-log')||(section==='')){
             return cy.get('[data-test='+tab+'-section]').siblings('.list.shown').find('.footer .info div')
         } else {
             return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list.shown').find('.footer .info div')
@@ -58,7 +61,7 @@ class RightNav{
         }
     }
 
-    openCanvasItem(tab, section, title){
+    openCanvasItem(tab, section='', title){
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
 }

@@ -5,9 +5,8 @@ const queryParams = `${Cypress.config("queryParams")}`;
 
 function parseQueryParam(){
     let userInfo={}
-
-    
-    //"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5"
+    //"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5" for CLUE
+    //"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5" for Dataflow otherwise Null Problem is the problem title
     return userInfo
 }
 

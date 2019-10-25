@@ -4,16 +4,14 @@
 //verify reset of plot
 //verify clear of canvas
 
-import dfBlock from "../../../support/elements/dfBlock";
-import Header from "../../support/elements/Header";
-import LeftNav from "../../support/elements/LeftNav";
-import dfCanvas from "../../support/elements/dfCanvas";
-import Canvas from "../../../../support/elements/common/Canvas";
-import RightNav from "../../support/elements/RightNav";
+import dfBlock from "../../../support/elements/dataflow/dfBlock";
+import dfHeader from "../../../support/elements/dataflow/dfHeader";
+import dfCanvas from "../../../support/elements/dataflow/dfCanvas";
+import Canvas from "../../../support/elements/common/Canvas";
+import RightNav from "../../../support/elements/common/RightNav";
 
 
-const header = new Header;
-const leftNav = new LeftNav;
+const header = new dfHeader;
 const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 const canvas = new Canvas;
@@ -36,7 +34,6 @@ context('canvas test',()=>{
             dfcanvas.getProgramToolbarButtons().each(($button,index,$buttonList)=>{
                 expect($button.text()).to.include(buttons[index])
             })
-            dfcanvas.scrollToTopOfTile();
             dfcanvas.getDurationDropdown().should('be.visible');
             dfcanvas.getRunButton().should('be.visible');
             dfcanvas.getStopButton().should('be.visible');
@@ -69,14 +66,13 @@ context('canvas test',()=>{
             dfcanvas.getRunButton().parent().should('have.attr','disabled');
             dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
             dfcanvas.stopProgram();
-            dfcanvas.getRunButton().parent().should('have.attr','disabled');
-            dfcanvas.getStopButton().parent().should('have.attr','disabled');
+            dfcanvas.getProgramToolbar().should('not.exist')
         })
     })
-    describe.skip('deletion',()=>{
+    describe('deletion',()=>{
         describe('delete a block',()=>{
-            before(()=>{ //start with clean canvas
-                
+            before(()=>{ 
+                dfcanvas.createNewProgram('Delete Block Program'); //start with clean canvas
                 dfcanvas.openBlock('Number');
                 dfcanvas.openBlock('Relay')
                 dfblock.moveBlock('relay',0,250,5)
@@ -99,12 +95,12 @@ context('canvas test',()=>{
             })
         })
     })
-    describe.skip('test save and restore',()=>{
-        var num1=4, num2=5, operator='multiply',storeName='multiplied',seqName='multiplication';
-        // const title = Cypress.$(canvas.personalDocTitleEl()).text()
-        var title;
+    describe('test save and restore',()=>{
+        var num1=4, num2=5, operator='Multiply',storeName='multiplied',seqName='multiplication';
+        var title='Save and Restore Program';
 
         before(()=>{//start clean
+            dfcanvas.createNewProgram(title);
             dfcanvas.openBlock('Number');
             dfcanvas.openBlock('Number');
             dfcanvas.openBlock('Math');
@@ -124,19 +120,14 @@ context('canvas test',()=>{
             dfblock.getStorageNameTextField().type('{selectall}{backspace}'+storeName);
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+seqName);
             cy.wait(3000) //wait to finish typing into element before reloading page
-             const title = Cypress.$(canvas.personalDocTitleEl()).text()
-
-            // cy.get(canvas.personalDocTitleEl()).invoke('text').as('title')
         })
-        it.skip('verify program is restored when reopened',()=>{ 
+        it('verify program is restored when reopened',()=>{ 
             //get values before close
             const input1 = Cypress.$(dfblock.numberInputEl(0)).val()
             const input2 = Cypress.$(dfblock.numberInputEl(1)).val()
             const mathValue = Cypress.$(dfblock.mathValueTextFieldEl()).text()
             const storageName = Cypress.$(dfblock.storageNameTextFieldEl()).val()
             const sequenceName = Cypress.$(dfblock.storageSequenceTextFieldEl(1)).val()
-            // const title = Cypress.$(canvas.personalDocTitleEl()).text()
-
             console.log('title: '+title);
 
             //reload page
@@ -144,10 +135,10 @@ context('canvas test',()=>{
                 cy.visit(url);
             })
             cy.wait(5000)
-            canvas.deleteTile();
 
-            rightNav.openMyWorkTab();
-            rightNav.openSavedProgramItem(cy.wrap(this.title))
+            rightNav.openRightNavTab('my-work');
+            rightNav.openSection('my-work','','Program');
+            rightNav.openCanvasItem('my-work','',title)
             cy.wait(5000)
             //compare before and after values
             dfblock.getNumberInput(0).invoke('attr','value').then((value)=>{
