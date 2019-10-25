@@ -188,7 +188,7 @@ export class DBListeners extends BaseListener {
     const updateRef = this.db.firebase.ref(updatePath);
     onSnapshot(properties, (newProperties) => {
       updateRef.update({
-        properties: JSON.stringify(newProperties)
+        properties: newProperties
       });
     });
   }

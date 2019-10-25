@@ -115,8 +115,7 @@ export interface ICreateFromUnitParams {
   documents?: DocumentsModelType;
   db?: DB;
   supports?: CurricularSupportModelType[] | TeacherSupportModelType[];
-  // tslint:disable-next-line:max-line-length
-  onDocumentCreated?: (support: CurricularSupportModelType | TeacherSupportModelType, document: DocumentModelType) => void;
+  onDocumentCreated?: (support: UnionSupportModelType, document: DocumentModelType) => void;
 }
 
 export const CurricularSupportModel = types
@@ -334,7 +333,7 @@ export async function getSupportDocumentProperties(support: TeacherSupportModelT
   const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;
   const ref = db.firebase.ref(path);
   const snapshot = await ref.once("value");
-  properties = snapshot && safeJsonParse(snapshot.val());
+  properties = snapshot && snapshot.val();
 
   return properties;
 }
