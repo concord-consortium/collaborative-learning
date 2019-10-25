@@ -15,7 +15,7 @@ class dfCanvas{
     getProgramToolbarButtons(){
         return cy.get('.single-workspace [data-test=program-toolbar] button')
     }
-    openBlock(blockType){
+    openBlock(blockType){ //blockType=[]
         cy.get('.single-workspace [data-test=program-toolbar] button').contains(blockType).click();
     }
     resetPlots(){
@@ -81,6 +81,17 @@ class dfCanvas{
                 dialog.getDialogOKButton().click();
             })
         cy.wait(3000)    
+    }
+
+    getProgramRunningCover(){
+        return cy.get('.editor.half .cover.running')
+    }
+    getProgramGraph(){
+        return cy.get('.program-graph')
+    }
+
+    getFullGraph(){
+        return cy.get('.program-graph.full')
     }
 }
 export default dfCanvas;

@@ -23,31 +23,16 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import ClueHeader from './elements/clue/cHeader';
 import 'cypress-file-upload';
 import 'cypress-commands';
 
-Cypress.Commands.add("setupGroup", (students, group) => {
-    const baseUrl = `${Cypress.config("baseUrl")}`;
+Cypress.Commands.add("waitForSpinner", () => {
+    cy.get('.progress', { timeout: 60000 }).should('not.exist')
+})
 
-    let qaClass = 10,
-        problem = 2.3;
-    let teacher = 10;
-
-    let header = new ClueHeader;
-    let i=0, j=0;
-
-    for (i=0;i<students.length;i++) {
-        cy.wait(2000)
-        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        cy.wait(3000);
-    }
-    //verify Group num and there are 4 students in the group
-    header.getGroupName().should('contain','Group '+group);
-    for (j=0; j<students.length; j++) {
-        header.getGroupMembers().find('div.member').should('contain','S'+students[j])
-    }
-});
+Cypress.Commands.add("waitForGraphSpinner", () => {
+    cy.get('.graph-loading', { timeout: 60000 }).should('not.exist')
+})
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     // cy.fixture(filename).as("image");

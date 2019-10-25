@@ -16,10 +16,6 @@
   },
   "local":{
     "baseUrl": "http://localhost:8080/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5"
-  },
-  "local:dataflow":{
-    "baseUrl": "http://localhost:8080/",
     "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5"
   }
 }

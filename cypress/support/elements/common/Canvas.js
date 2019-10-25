@@ -74,7 +74,7 @@ class Canvas{
     editTitle(title){
         this.getEditTitleIcon().click()
             .then(function(){
-                dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
+                dialog.getDialogTitle().should('exist').and('contain','Rename');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
