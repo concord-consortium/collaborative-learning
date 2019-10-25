@@ -97,7 +97,7 @@ context('single student functional test',()=>{
             tableToolTile.getTableTile().should('exist');
         });
     });
-    context('save and restore of canvas', function(){
+    context.skip('save and restore of canvas', function(){
         let canvas1='Document 1';
         let canvas2='Document 2';
         before(function(){ //Open a different document to see if original document is restored
