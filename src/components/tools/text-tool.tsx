@@ -92,6 +92,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
+  private wrapper = React.createRef<HTMLDivElement>();
+  private editor = React.createRef<Editor>();
 
   private plugins: Plugin[] = [
     this.makeOnKeyDownHandler({ slateType: ESlateType.mark, key: "mod+b", type: "bold" }),
@@ -171,22 +173,43 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly } = this.props;
     const { unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `text-tool ${editableClass}`;
+    // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
+    // used here for a while now and cypress tests depend on it. Should transition
+    // to using 'text-tool-editor' for these purposes moving forward.
+    const classes = `text-tool text-tool-editor ${editableClass}`;
 
     if (!this.state.value) { return null; }
     return (
-      <Editor
-        key={model.id}
-        className={classes}
-        placeholder={placeholderText}
-        readOnly={readOnly}
-        value={this.state.value}
-        onChange={this.onChange}
-        renderMark={this.renderMark}
-        renderBlock={this.renderBlock}
-        plugins={this.plugins}
-      />
+      // Ideally, this would just be 'text-tool' for consistency with other tools,
+      // but 'text-tool` is used for the internal editor (cf. 'classes' above),
+      // which is used for cypress tests and other purposes.
+      <div className="text-tool-wrapper"
+          ref={this.wrapper}
+          onMouseDown={this.handleMouseDownInWrapper}>
+        <Editor
+          key={model.id}
+          className={classes}
+          ref={this.editor}
+          placeholder={placeholderText}
+          readOnly={readOnly}
+          value={this.state.value}
+          onChange={this.onChange}
+          renderMark={this.renderMark}
+          renderBlock={this.renderBlock}
+          plugins={this.plugins}
+        />
+      </div>
     );
+  }
+
+  private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+    if (e.target === this.wrapper.current) {
+      this.editor.current && this.editor.current.focus();
+      ui.setSelectedTile(model);
+      e.preventDefault();
+    }
   }
 
   private renderMark = (props: any, editor: any, next: () => any ) => {
