@@ -25,7 +25,7 @@ before(function(){
 
     cy.clearQAData('all');
     cy.visit(baseUrl+queryParams);
-    cy.wait(3000);
+    cy.wait(4000);
 });
 
 Cypress.on('uncaught:exception', (err, runnable) => {
