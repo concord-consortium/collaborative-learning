@@ -27,7 +27,7 @@ export const UIModel = types
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: ERightNavTab.kMyWork,
-    selectedTileId: types.maybe(types.string),
+    selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
     dialog: types.maybe(UIDialogModel),
@@ -40,7 +40,7 @@ export const UIModel = types
       return !self.rightNavExpanded && !self.leftNavExpanded;
     },
     isSelectedTile(tile: ToolTileModelType) {
-      return (tile.id === self.selectedTileId);
+      return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
@@ -94,6 +94,22 @@ export const UIModel = types
       self.dialog = undefined;
       dialogResolver = undefined;
     };
+
+    const setOrAppendTileId = (tileId?: string, options?: {append: boolean}) => {
+      if (tileId) {
+        if (options && options.append) {
+          const index = self.selectedTileIds.indexOf(tileId);
+          if (index === -1) {
+            self.selectedTileIds.push(tileId);
+          }
+        } else {
+          self.selectedTileIds.replace([tileId]);
+        }
+      } else {
+        self.selectedTileIds.clear();
+      }
+    };
+
     return {
       contractAll,
       alert,
@@ -116,11 +132,11 @@ export const UIModel = types
       setActiveRightNavTab(tab: string) {
         self.activeRightNavTab = tab;
       },
-      setSelectedTile(tile?: ToolTileModelType) {
-        self.selectedTileId = tile ? tile.id : undefined;
+      setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
+        setOrAppendTileId(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string) {
-        self.selectedTileId = tileId;
+      setSelectedTileId(tileId: string, options?: {append: boolean}) {
+        setOrAppendTileId(tileId, options);
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;

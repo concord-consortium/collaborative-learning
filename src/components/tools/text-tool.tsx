@@ -11,6 +11,7 @@ import { TextContentModelType } from "../../models/tools/text/text-content";
 import { autorun, IReactionDisposer } from "mobx";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 
 import "./text-tool.sass";
 
@@ -101,6 +102,14 @@ interface IState {
   selectedButtons?: string[];
 }
 
+// create a global keylistener so that we know if the selection modifier keys are in use
+// when we get a change event
+let selectionModiferKeyDown = false;
+const globalOnKeyDown = (e: MouseEvent) => selectionModiferKeyDown = hasSelectionModifier(e);
+const globalOnKeyUp = (e: MouseEvent) => selectionModiferKeyDown = false;
+window.addEventListener("keydown", globalOnKeyDown);
+window.addEventListener("keyup", globalOnKeyUp);
+
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<IProps, IState> {
@@ -176,11 +185,45 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     },
   ];
 
+<<<<<<< HEAD
   // This set of plugins (as required by the Slate Editor component) provide
   // the mapping of a hot-key to the required handler.
   private slatePlugins: Plugin[] =
     this.slateMap.filter(entry => !!entry.hotKey)
       .map(entry => this.makeKeyDownHandler(entry));
+=======
+  public onChange = (change: SlateChange) => {
+    const { readOnly, model } = this.props;
+    const content = this.getContent();
+    const { ui } = this.stores;
+
+    // determine last focus state from list of operations
+    let isFocused: boolean | undefined;
+    change.operations.forEach(op => {
+      if (op && op.type === "set_selection") {
+        isFocused = op.properties.isFocused;
+      }
+    });
+
+    if (isFocused != null) {
+      // polarity is reversed from what one might expect
+      if (!isFocused) {
+        // only select - if we deselect, it breaks delete because Slate
+        // somehow detects the selection change before the click on the
+        // delete button is processed by the workspace. For now, we just
+        // disable focus change on deselection.
+        ui.setSelectedTile(model, {append: selectionModiferKeyDown});
+      }
+    }
+
+    if (content.type === "Text") {
+      if (!readOnly) {
+        content.setSlate(change.value);
+        this.setState({ value: change.value });
+      }
+    }
+  }
+>>>>>>> Added multiple selection
 
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;

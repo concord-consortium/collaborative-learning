@@ -22,6 +22,7 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { IconButton } from "../utilities/icon-button";
 import "../../utilities/dom-utils";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 
 import "./tool-tile.sass";
 
@@ -183,12 +184,12 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     this.hotKeys.dispatch(e);
   }
 
-  private handleMouseDown = (e: Event) => {
+  private handleMouseDown = (e: MouseEvent) => {
     const { model } = this.props;
     const { ui } = this.stores;
     const ToolComponent = kToolComponentMap[model.content.type];
-    if (ToolComponent && ToolComponent.tileHandlesSelection && !ui.isSelectedTile(model)) {
-      ui.setSelectedTile(model);
+    if (ToolComponent && ToolComponent.tileHandlesSelection) {
+      ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }
 

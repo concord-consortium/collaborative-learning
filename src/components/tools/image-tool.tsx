@@ -9,6 +9,7 @@ import { debounce } from "lodash";
 const placeholderImage = require("../../assets/image_placeholder.png");
 import { autorun, IReactionDisposer } from "mobx";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 
 import "./image-tool.sass";
 
@@ -194,7 +195,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.setSelectedTile(this.props.model);
+    this.stores.ui.setSelectedTile(this.props.model, {append: hasSelectionModifier(e)});
     if (this.state.isEditing && (e.target === e.currentTarget)) {
       this.setState({ isEditing: false });
     }
