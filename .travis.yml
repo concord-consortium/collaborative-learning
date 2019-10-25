@@ -17,7 +17,8 @@ install:
 script:
 - npm run build
 - npm run test:coverage -- --runInBand --forceExit
-- ./cypress/run_cypress_test.sh
+- npm run test:cypress:dataflow
+# - ./cypress/run_cypress_test.sh
 after_success:
 - ./s3_deploy.sh
 - ./rollbar_deploy.sh
