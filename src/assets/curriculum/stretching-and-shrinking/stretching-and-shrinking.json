@@ -2639,7 +2639,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?"
+                        "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
                       ]
                     }
                   }, {
@@ -2647,18 +2647,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the Comparing Bits and Pieces unit, you used ratios to describe and compare quantities. A ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8."
+                        "Recall that a ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8.”\n\nThis table gives the ratios of height to width for the images."
                       ]
                     }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "This table gives the ratios of height to width for the images."
-                      ]
-                    }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
@@ -2668,7 +2661,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What do you notice about the height-to-width ratios? The comparisons “10 to 8” and “5 to 4” are equivalent ratios. Equivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal."
+                        "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. You can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or you could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
                       ]
                     }
                   }, {
@@ -2676,20 +2669,13 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "For this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal. Is this always true?"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+                        "<em>What information does each fraction represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal.\n\nYou know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios of adjacent side lengths within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
                       ]
                     }
                   }
@@ -2704,7 +2690,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Rectangles"
+                        "For each set of figures, which are similar? Why?\n\nIf two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
                       ]
                     }
                   }, {
@@ -2714,37 +2700,13 @@
                     }
                   }, {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Triangles"
-                      ]
-                    }
-                  }, {
-                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
                     }
                   }, {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Parallelograms"
-                      ]
-                    }
-                  }, {
-                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "For each set of shapes, which are similar? Why? If two figures are similar, how does the ratio of adjacent side lengths of one figure compare to the corresponding ratio of side lengths of the other figure?"
-                      ]
                     }
                   }
                 ]
@@ -2760,7 +2722,8 @@
                   "text": "How are rectangles different from other parallelograms?"
                 }
               ]
-            }, {
+            }, 
+            {
               "type": "whatIf",
               "content": {
                 "tiles": [
@@ -2769,12 +2732,43 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Find the scale factor from one figure to a similar figure. What information does the scale factor give you? \nn2.How does the scale factor relate to the proportions of the ratios of adjacent sides? \n\n3. Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why? \n\n4. Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain. \n\n5. Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal. Is this true? Explain."
+                        "<h3>Situation A. Using the Scale Factor</h3><ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Isaiah, Noah, and Anna’s Claims</h3><ol><li>Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why?</li><li>Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain.</li><li>Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal? Is that true? Explain.</li></ol>"
                       ]
                     }
                   }
                 ]
-              }
+              },
+              "supports" : [
+                {
+                  "text": "In the Initial Challenge, can you find a pair of similar figures that satisfies each person’s claims?"
+                }
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What information does the ratio of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports" : []
             }
           ]
         }, {
@@ -2844,11 +2838,11 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 400
+                    },
                     "content": 
-                    {
-                    "type":"Geometry",
-                    "changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}","{\"operation\":\"create\",\"properties\":{\"id\":\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,18],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[13,17.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f2aafbcc-1804-4e0d-9604-ea484480310d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3,19.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"256679af-d72d-4b5c-b7aa-f6c90e3262c4\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"f2aafbcc-1804-4e0d-9604-ea484480310d\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,6.300000000000001]}","{\"operation\":\"create\",\"properties\":{\"id\":\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[1.1,1.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3.7,0.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.7,5.2]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d067f66c-ba4a-4334-a356-ab4430be843c\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a88e59a8-8b96-433e-b7ed-23dbe0d93852\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[5.817308417645462,0.6483504047306452]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9456f6f0-c71f-4091-a730-db092f41350d\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.669500594976327,0.6624620872369071]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18.193215922236906,6.8494638029196295]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[8.333707570993896,6.769491261270044]}","{\"operation\":\"create\",\"properties\":{\"id\":\"e80894ff-e77e-4cee-952e-718e09ad24c6\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c34e47b3-8769-465d-9caf-5c09194511e3\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"9456f6f0-c71f-4091-a730-db092f41350d\",\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[3.5,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c134b506-a474-477e-badd-6f3284e5f710\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[5.1000000000000005,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"738bc31d-087d-4249-bbf9-b1584656471b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"c134b506-a474-477e-badd-6f3284e5f710\",\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[8,14]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[8,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[18,13.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a72286d7-fac7-40a4-8e43-996de471d3d2\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"758ead0e-0d33-4daf-a707-622da638e34b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\"],\"endBatch\":true}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[15.06188023264823,20.20345894829196]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2c3e3378-b10b-4c44-9feb-6924de25d960\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"08cf2680-1c94-4f1c-9296-6ec2b779d23b\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"endBatch\":true}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,5.926598035131802,0.9762192571896611]},{\"position\":[1,15.778790212462667,0.990330939695923]},{\"position\":[1,18.302505539723246,7.177332655378645]},{\"position\":[1,8.442997188480236,7.09736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\"],\"properties\":[{\"position\":[1,1,1.8]}]}"]
-                    }
+                    {"type":"Geometry","changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}","{\"operation\":\"create\",\"properties\":{\"id\":\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,18],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[13,17.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f2aafbcc-1804-4e0d-9604-ea484480310d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3,19.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"256679af-d72d-4b5c-b7aa-f6c90e3262c4\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"f2aafbcc-1804-4e0d-9604-ea484480310d\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,6.300000000000001]}","{\"operation\":\"create\",\"properties\":{\"id\":\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[1.1,1.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3.7,0.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.7,5.2]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d067f66c-ba4a-4334-a356-ab4430be843c\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a88e59a8-8b96-433e-b7ed-23dbe0d93852\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[5.817308417645462,0.6483504047306452]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9456f6f0-c71f-4091-a730-db092f41350d\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.669500594976327,0.6624620872369071]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18.193215922236906,6.8494638029196295]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[8.333707570993896,6.769491261270044]}","{\"operation\":\"create\",\"properties\":{\"id\":\"e80894ff-e77e-4cee-952e-718e09ad24c6\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c34e47b3-8769-465d-9caf-5c09194511e3\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"9456f6f0-c71f-4091-a730-db092f41350d\",\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[3.5,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c134b506-a474-477e-badd-6f3284e5f710\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[5.1000000000000005,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"738bc31d-087d-4249-bbf9-b1584656471b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"c134b506-a474-477e-badd-6f3284e5f710\",\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[8,14]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[8,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[18,13.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a72286d7-fac7-40a4-8e43-996de471d3d2\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"758ead0e-0d33-4daf-a707-622da638e34b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\"],\"endBatch\":true}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[15.06188023264823,20.20345894829196]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2c3e3378-b10b-4c44-9feb-6924de25d960\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"08cf2680-1c94-4f1c-9296-6ec2b779d23b\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"endBatch\":true}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,5.926598035131802,0.9762192571896611]},{\"position\":[1,15.778790212462667,0.990330939695923]},{\"position\":[1,18.302505539723246,7.177332655378645]},{\"position\":[1,8.442997188480236,7.09736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\"],\"properties\":[{\"position\":[1,1,1.8]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"snapToGrid\":false,\"position\":[3.0603141205063,11.865891487995759]},{\"snapToGrid\":false,\"position\":[3.0398895801024057,10.26602185638533]},{\"snapToGrid\":false,\"position\":[5.540962413268945,10.334100363979896]},{\"snapToGrid\":false,\"position\":[5.560110419897596,11.833978143614674]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a68b7cff-812f-41d0-b3fb-429c5547ba51\"],\"properties\":[{\"position\":[1,18.247860730980076,7.013398229149137]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\"],\"properties\":[{\"position\":[1,15.034984210144865,15.004098305593702]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a07874b-eeea-4853-a4df-03a995ad782e\"],\"properties\":[{\"position\":[1,15.00723542390506,20.20345894829196]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.595607222012115,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}"]}
                   }  
                 ]
               },
