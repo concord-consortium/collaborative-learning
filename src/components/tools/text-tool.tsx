@@ -105,8 +105,10 @@ interface IState {
 // create a global keylistener so that we know if the selection modifier keys are in use
 // when we get a change event
 let selectionModiferKeyDown = false;
-const globalOnKeyDown = (e: MouseEvent) => selectionModiferKeyDown = hasSelectionModifier(e);
-const globalOnKeyUp = (e: MouseEvent) => selectionModiferKeyDown = false;
+const globalOnKeyDown = (e: KeyboardEvent) => {
+  selectionModiferKeyDown = selectionModiferKeyDown || hasSelectionModifier(e);
+};
+const globalOnKeyUp = (e: KeyboardEvent) => selectionModiferKeyDown = false;
 window.addEventListener("keydown", globalOnKeyDown);
 window.addEventListener("keyup", globalOnKeyUp);
 
