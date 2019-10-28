@@ -358,16 +358,14 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const ed = editor.current ? editor.current : editor;
     switch (type) {
       case "undo":
-        ed.undo();  // Not really a mark, nor a block. We'll just stuff it here, for now.
+        // Not really a mark, nor a block. We'll just stuff it here, for now.
+        ed.undo();
         break;
       case "superscript":
       case "subscript":
-        // Special case handling: Prevent nesting superscripts and subscripts.
+        // Prevent the nesting of superscripts and subscripts.
         const hasType = ed.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.type));
-        !hasType
-          ? ed.toggleMark(type)
-          : ed.removeMark("superscript")
-                  .removeMark("subscript");
+        !hasType ? ed.toggleMark(type) : ed.removeMark("superscript").removeMark("subscript");
         break;
       default:
         // Everything else (e.g. bold, underline, italic, typewriter)
@@ -390,17 +388,17 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         // For a new list first set to a list-item then wrap with the appropriate type of block after
         if (!containsListItems) {
           ed.setBlocks("list-item")
-                .wrapBlock(type);
+            .wrapBlock(type);
         }
         else {
           isListOfThisType
             // Removes the list type
             ? ed.setBlocks(DEFAULT_BLOCK_TYPE)
-                    .unwrapBlock("bulleted-list")
-                    .unwrapBlock("ordered-list")
+                .unwrapBlock("bulleted-list")
+                .unwrapBlock("ordered-list")
             // Clearing after switching to a new list type (or are that list type already)
             : ed.unwrapBlock(type === "bulleted-list" ? "ordered-list" : "bulleted-list")
-                    .unwrapBlock(type);
+                .unwrapBlock(type);
         }
         break;
       case "heading1":
@@ -419,14 +417,14 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           // we remove any part of the selection that might be a wrapper
           // of either type of list.
           ed.unwrapBlock("bulleted-list")
-                .unwrapBlock("ordered-list");
+            .unwrapBlock("ordered-list");
         }
         break;
     }
   }
 
   private makeOnKeyDownHandler(hotKeyDef: IOnKeyDownHandlerDef): Plugin {
-    // Builds and returns a Slate plug-in for an onKeyDown handler.
+    // Returns a Slate plug-in for an onKeyDown handler.
     const { key, type, slateType } = hotKeyDef;
     const onMarkEvent = (typeOfMark: string, event: any, editor: any, next: () => any) => {
       this.handleMarkEvent(typeOfMark, event, editor, next);
@@ -442,8 +440,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
               next();
             }
             else {
-              event.preventDefault();
               onMarkEvent(type, event, editor, next);
+              event.preventDefault();
             }
           }
         });
@@ -454,8 +452,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
               next();
             }
             else {
-              event.preventDefault();
               onBlockEvent(type, event, editor, next);
+              event.preventDefault();
             }
           }
         });
