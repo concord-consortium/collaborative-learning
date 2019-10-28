@@ -1,19 +1,17 @@
-import Canvas from '../../support/elements/Canvas'
-import LeftNav from '../../support/elements/LeftNav'
-import TableToolTile from '../../support/elements/TableToolTile'
-import RightNav from '../../support/elements/RightNav'
-import LearningLog from '../../support/elements/LearningLog'
+import Canvas from '../../../support/elements/common/Canvas'
+import TableToolTile from '../../../support/elements/clue/TableToolTile'
+import RightNav from '../../../support/elements/common/RightNav'
+import ClueCanvas from '../../../support/elements/clue/cCanvas'
 
 let canvas = new Canvas,
-    leftNav = new LeftNav,
+    clueCanvas = new ClueCanvas,
     tableToolTile = new TableToolTile,
-    rightNav = new RightNav,
-    learningLog = new LearningLog;
+    rightNav = new RightNav;
 
 context('Table Tool Tile',function(){
     describe('test menu functions of table', function(){
         it('will add a table to canvas', function(){
-            canvas.addTableTile();
+            clueCanvas.addTile('table');
             tableToolTile.getTableTile().should('be.visible');
         });
         it('will verify there are only two columns x & y', function(){
@@ -61,13 +59,13 @@ context('Table Tool Tile',function(){
     describe('table in different views', function(){
         //4-up view is tested in group_test_spec
         it('will open in 2-up view', function(){
-            canvas.openTwoUpView();
-            canvas.getLeftSideWorkspace().should('be.visible');
+            clueCanvas.openTwoUpView();
+            clueCanvas.getLeftSideWorkspace().should('be.visible');
             tableToolTile.getTableTile().should('be.visible');
-            canvas.getRightSideWorkspace().should('be.visible');
+            clueCanvas.getRightSideWorkspace().should('be.visible');
         });
         it('will reset to original', function(){
-            canvas.openOneUpViewFromTwoUp();
+            clueCanvas.openOneUpViewFromTwoUp();
             let singleCanvas = canvas.singleCanvas();
             let table = tableToolTile.tableToolTile();
             cy.get(singleCanvas + ' ' + table).should('be.visible');
@@ -94,7 +92,7 @@ context('Table Tool Tile',function(){
     describe('share table', function(){
         // No quick way to verify table comes up in shared view without group setup
         it('will share the canvas',function(){
-            canvas.shareCanvas();
+            clueCanvas.shareCanvas();
         })
     });
     describe('publish table', function(){
@@ -105,17 +103,6 @@ context('Table Tool Tile',function(){
             //              .should('have.length',1)
             //              .and('contain','Introduction')
             // need to verify that it is in the Class Work right nav
-        });
-    });
-    // TODO: Learning logs has changed with new feature changes.
-    describe.skip('table in learning logs', function(){
-        it('will add a table in a learning log canvas', function(){
-                learningLog.createLearningLog('table LL');
-                learningLog.getLLTableTool().click();
-                learningLog.getLLTableTile().should('be.visible');
-        });
-        it('will publish learning log to Class Logs', function(){
-                learningLog.publishLearningLog();
         });
     });
 });

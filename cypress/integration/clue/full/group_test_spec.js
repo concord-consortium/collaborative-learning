@@ -1,15 +1,19 @@
-import LeftNav from '../../support/elements/LeftNav'
-import Canvas from '../../support/elements/Canvas'
-import TextToolTile from '../../support/elements/TextToolTile'
+import LeftNav from '../../../support/elements/clue/LeftNav'
+import Canvas from '../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../support/elements/clue/cCanvas'
+import TextToolTile from '../../../support/elements/clue/TextToolTile'
+import ClueHeader from '../../../support/elements/clue/cHeader';
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
+const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
+const clueHeader = new ClueHeader;
+
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
 context('Test group functionalities', function(){
     let qaClass = 10,
-        qaOffering = 10,
         qaGroup = 10,
         problem = 3.3,
         studentArr=[15,16,17,18];
@@ -18,29 +22,28 @@ context('Test group functionalities', function(){
             it('will set up groups', function(){
                 cy.setupGroup(studentArr, qaGroup)
             });
-            // TODO: Failing on finding elements from shareCanvas()
             it.skip('will add content to each student canvas', function(){
                 let i=0;
                 for (i=0; i<studentArr.length; i++){
                     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem='+problem);
-                    canvas.addTextTile();
+                    clueCanvas.addTile('text');
                     textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
                     textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
-                    canvas.addGraphTile();
-                    canvas.addTableTile();
-                    canvas.addDrawTile();
-                    canvas.addImageTile();
-                    canvas.shareCanvas();//all students will share their canvas
+                    clueCanvas.addTile('geometry');
+                    clueCanvas.addTile('table');
+                    clueCanvas.addTile('draw');
+                    clueCanvas.addImageTile('image');
+                    clueCanvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);
                 }
             });
             it('verify 4-up view comes up correctly with students', function(){
-                canvas.openFourUpView();
-                canvas.getFourToOneUpViewToggle().should('be.visible');
-                canvas.getNorthEastCanvas().should('be.visible').and('contain','S'+studentArr[0]);
-                canvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
-                canvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
-                canvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('contain','S'+studentArr[0]);
+                clueCanvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
+                clueCanvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
             });
         });
         describe('test the 4-up view', function(){
@@ -54,20 +57,19 @@ context('Test group functionalities', function(){
             // TODO: Write this test
             it.skip('will move vertical splitter horizantally and verify canvas size change', function(){
                 cy.log('need to write this test');
-                expect(4).to.equal(3);
             });
             // TODO: drag and drop of center point to change 4up view canvas sizes
             it('will move the center handle horizontally and vertically and verify canvas size change', function (){
-                canvas.getCenterSeparator()
+                clueCanvas.getCenterSeparator()
                     .trigger('dragstart',{force:true})
                     .trigger('drag',243, 175, {force:true})
                     .trigger('dragend',{force:true});
             });
             it('will verify editing own canvas is still possible in 4-up view', function(){
-                canvas.addTextTile();
+                clueCanvas.addTile('text');
                 textToolTile.getTextTile().first().type('Hello World!');
                 textToolTile.getTextTile().first().should('contain', 'Hello World');
-                canvas.addGraphTile();
+                clueCanvas.addTile('geometry');
                 // cy.get('.canvas-container.north-west > .canvas-scaler > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool').last().click();
                 // cy.get('.canvas-container.north-west > .canvas-scaler > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me  > .geometry-tool > .JXGtext').last().should('contain', 'A' );
                 // cy.get('.canvas-container.north-west > .canvas-scaler > .canvas > .document-content > .tile-row> .tool-tile > .geometry-size-me > .geometry-tool').last().click(140,70, {force:true});
@@ -78,20 +80,31 @@ context('Test group functionalities', function(){
                 cy.get('.canvas-container.north-east > .canvas-scaler > .canvas > .document-content > .tile-row >.tool-tile > .text-tool').last().should('not.contain', 'Hello World');
                 cy.get('.canvas-container.south-west > .canvas-scaler > .canvas > .document-content > .tile-row >.tool-tile > .text-tool').last().should('not.contain', 'Hello World');
                 cy.get('.canvas-container.south-east > .canvas-scaler > .canvas > .document-content > .tile-row >.tool-tile > .text-tool').last().should('not.contain', 'Hello World');
-                canvas.openOneUpViewFromFourUp(); //clean up
             });
             it.skip('will try to delete elements from other canvases in 4 up view', function(){
                 //TODO
+                cy.log('need to write this test');
             })
 
             //TODO: have to figure out drag and drop
             it.skip('will copy text from one canvas to own canvas', function(){
                 cy.log('need to write this test');
             });
+            after(()=>{
+                clueCanvas.unshareCanvas();
+                clueCanvas.openOneUpViewFromFourUp(); //clean up
+            })
         });
 
         // TODO: Need to write tests
-        describe.skip('test sharing and unsharing canvases', function(){
+        describe('test sharing and unsharing canvases', function(){
+            it('verify share icon toggles correctly',()=>{
+                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
+                clueCanvas.shareCanvas();
+                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'private');
+                clueCanvas.unshareCanvas();
+                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
+            })
             it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
                 cy.log('need to write this test');
             });

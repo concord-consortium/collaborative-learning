@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "jest": {
@@ -32,6 +32,7 @@
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
+    "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
@@ -93,7 +94,9 @@
     "copy-webpack-plugin": "^5.0.4",
     "cross-env": "^5.2.1",
     "css-loader": "^3.2.0",
-    "cypress": "^3.4.1",
+    "cypress": "^3.5.0",
+    "cypress-commands": "^0.3.1",
+    "cypress-file-upload": "^3.4.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "file-loader": "^4.2.0",

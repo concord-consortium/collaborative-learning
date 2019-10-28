@@ -26,16 +26,16 @@ import "./text-tool.sass";
 
   Marks:
 
-    |  Slate Name |  Markdown | HTML tag |  Hot-Key  |
-    |-------------|-----------|----------|-----------|
-    | bold        | **xyzzy** | <strong> | CMD-b     |
-    | italic      | _xyzzy_   | <em>     | CMD-i     |
-    | code        | `xyzzy`   | <code>   |           |
-    | inserted    | ++xyzzy++ | <mark>   |           |
-    | deleted     | ~~xyzzy~~ | <del>    |           |
-    | underlined  | __xyzzy__ | <u>      | CMD-u     |
-    | superscript |           | <sup>    |           |
-    | subscript   |           | <sub>    |           |
+    |  Slate Name |  Markdown | HTML tag |   Hot-Key   |
+    |-------------|-----------|----------|-------------|
+    | bold        | **xyzzy** | <strong> | CMD-b       |
+    | italic      | _xyzzy_   | <em>     | CMD-i       |
+    | code        | `xyzzy`   | <code>   |             |
+    | inserted    | ++xyzzy++ | <mark>   |             |
+    | deleted     | ~~xyzzy~~ | <del>    |             |
+    | underlined  | __xyzzy__ | <u>      | CMD-u       |
+    | superscript |           | <sup>    | CMD-shift-, |
+    | subscript   |           | <sub>    | CMD-,       |
 
   Blocks:
 
@@ -95,7 +95,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   private disposers: IReactionDisposer[];
   private prevText: any;
   private prevMarks: string[] = [];
-  private editor: Editor;
+  private wrapper = React.createRef<HTMLDivElement>();
+  private editor = React.createRef<Editor>();
 
   private plugins: Plugin[] = [
     this.makeOnKeyDownHandler({ slateType: ESlateType.mark, key: "mod+b", type: "bold" }),
@@ -104,16 +105,13 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     this.makeOnKeyDownHandler({ slateType: ESlateType.mark, key: "mod+shift+,", type: "superscript" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.mark, key: "mod+,", type: "subscript" }),
 
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+0", type: "deleted" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.mark || ESlateType.block, key: "mod+`", type: "code" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "alt+shift+b", type: "bulleted" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "alt+shift+n", type: "numbered" }),
+    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+0", type: "deleted" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+1", type: "heading1" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+2", type: "heading2" }),
     this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+3", type: "heading3" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+4", type: "heading4" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+5", type: "heading5" }),
-    this.makeOnKeyDownHandler({ slateType: ESlateType.block, key: "mod+alt+6", type: "heading6" })
   ];
 
   public onChange = (change: SlateChange) => {
@@ -197,7 +195,10 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly } = this.props;
     const { ui, unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `text-tool ${editableClass}`;
+    // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
+    // used here for a while now and cypress tests depend on it. Should transition
+    // to using 'text-tool-editor' for these purposes moving forward.
+    const classes = `text-tool text-tool-editor ${editableClass}`;
 
     const enableStyleBar = ! readOnly && ui.isSelectedTile(model);
 
@@ -234,10 +235,13 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     };
 
     return (
-      <div>
+      // Ideally, this would just be 'text-tool' for consistency with other tools,
+      // but 'text-tool` is used for the internal editor (cf. 'classes' above),
+      // which is used for cypress tests and other purposes.
+      <div className="text-tool-wrapper"
+          ref={this.wrapper}
+          onMouseDown={this.handleMouseDownInWrapper}>
         <TextStyleBarComponent
-          // isVisible={enableStyleBar}
-          // isVisible={!readOnly}
           selectedButtonNames={this.state.selectedButtons ? this.state.selectedButtons : []}
           clickHandler={onClick}
           editor={this.editor}
@@ -245,6 +249,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         <Editor
           key={model.id}
           className={classes}
+          ref={this.editor}
           placeholder={placeholderText}
           readOnly={readOnly}
           value={this.state.value}
@@ -252,10 +257,21 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           renderMark={this.renderMark}
           renderBlock={this.renderBlock}
           plugins={this.plugins}
-          ref={ editor => this.editor = editor! }
+          // ref={ editor => this.editor = editor! }
+
         />
       </div>
     );
+  }
+
+  private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+    if (e.target === this.wrapper.current) {
+      this.editor.current && this.editor.current.focus();
+      ui.setSelectedTile(model);
+      e.preventDefault();
+    }
   }
 
   private renderMark = (props: any, editor: any, next: () => any ) => {
