@@ -2135,9 +2135,12 @@
                       ]
                     }
                   }
-                ],
-                "supports": [
-                  {
+                ]
+              },
+              "supports": [
+                {
+                  "type": "document",
+                  "content": {
                     "tiles": [
                       {
                         "content": {
@@ -2226,8 +2229,8 @@
                       }
                     ]
                   }
-                ]
-              }
+                }
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
