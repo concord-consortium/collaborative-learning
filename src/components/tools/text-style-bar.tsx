@@ -53,7 +53,7 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
     return (
       <div className="text-style-bar">
         {this.renderHeaderIcon()}
-        {this.buttonDefs.map( bDef => this.renderButton(bDef) )}
+        {this.buttonDefs.map(bDef => this.renderButton(bDef))}
       </div>
     );
   }
@@ -72,8 +72,8 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
     const classes = (iconName: string) => {
       const { selectedButtonNames: selected } = this.props;
       const isSelected = selected.find( b => b === buttonDef.iconName );
-      const classes = [ "button-icon", "fa", "fa-fw" ].join(" ");
-      return (`${classes} fa-${iconName} ${isSelected ? "on" : "off" }`);
+      const classList = [ "button-icon", "fa", "fa-fw" ].join(" ");
+      return (`${classList} fa-${iconName} ${isSelected ? "on" : "off" }`);
     };
     const clickHandler = (event: React.MouseEvent) => {
       this.props.clickHandler(buttonDef.iconName, this.props.editor, event);
