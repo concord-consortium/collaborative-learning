@@ -136,7 +136,7 @@ describe("ui model", () => {
   });
 
   it("allows selected tile to be set", () => {
-    expect(ui.selectedTileIds).toBe([]);
+    expect(ui.selectedTileIds).toStrictEqual([]);
     ui.setSelectedTile(ToolTileModel.create({
       id: "1",
       content: {
@@ -144,9 +144,9 @@ describe("ui model", () => {
         text: "test"
       }
     }));
-    expect(ui.selectedTileIds).toBe(["1"]);
+    expect(ui.selectedTileIds).toStrictEqual(["1"]);
     ui.setSelectedTile();
-    expect(ui.selectedTileIds).toBe([]);
+    expect(ui.selectedTileIds).toStrictEqual([]);
   });
 
   it("allows alert dialogs", () => {
