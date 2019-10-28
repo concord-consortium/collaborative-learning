@@ -214,6 +214,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         case "code":
         case "subscript":    // TODO: subs & supers need extra toggle logic see key handler
         case "superscript":
+        case "undo":
           this.handleMarkEvent(buttonName, event, editor);
           break;
         case "underline":
@@ -221,9 +222,6 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           break;
         case "strikethrough":
           this.handleMarkEvent("deleted", event, editor);
-          break;
-        case "undo":
-          editor.undo();
           break;
         case "list-ul":
           this.handleBlockEvent("bulleted-list", event, editor);
@@ -258,7 +256,6 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           renderBlock={this.renderBlock}
           plugins={this.plugins}
           // ref={ editor => this.editor = editor! }
-
         />
       </div>
     );
@@ -358,26 +355,31 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMarkEvent(type: string, event: any, editor: any, next?: () => any) {
+    const ed = editor.current ? editor.current : editor;
     switch (type) {
+      case "undo":
+        ed.undo();  // Not really a mark, nor a block. We'll just stuff it here, for now.
+        break;
       case "superscript":
       case "subscript":
         // Special case handling: Prevent nesting superscripts and subscripts.
-        const hasType = editor.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.type));
+        const hasType = ed.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.type));
         !hasType
-          ? editor.toggleMark(type)
-          : editor.removeMark("superscript")
+          ? ed.toggleMark(type)
+          : ed.removeMark("superscript")
                   .removeMark("subscript");
         break;
       default:
         // Everything else (e.g. bold, underline, italic, typewriter)
-        editor.toggleMark(type);
+        ed.toggleMark(type);
         break;
     }
   }
 
   private handleBlockEvent(type: string, event: any, editor: any, next?: () => any) {
     const DEFAULT_BLOCK_TYPE = "paragraph";
-    const { value: { blocks, document } } = editor;
+    const ed = editor.current ? editor.current : editor;
+    const { value: { blocks, document } } = ed;
     const containsListItems = blocks.some((block: any) => block.type === "list-item");
     const isListOfThisType = blocks.some((block: any) => {
       return !!document.getClosest(block.key, (parent: any) => parent.type === type);
@@ -387,17 +389,17 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       case "ordered-list":
         // For a new list first set to a list-item then wrap with the appropriate type of block after
         if (!containsListItems) {
-          editor.setBlocks("list-item")
+          ed.setBlocks("list-item")
                 .wrapBlock(type);
         }
         else {
           isListOfThisType
             // Removes the list type
-            ? editor.setBlocks(DEFAULT_BLOCK_TYPE)
+            ? ed.setBlocks(DEFAULT_BLOCK_TYPE)
                     .unwrapBlock("bulleted-list")
                     .unwrapBlock("ordered-list")
             // Clearing after switching to a new list type (or are that list type already)
-            : editor.unwrapBlock(type === "bulleted-list" ? "ordered-list" : "bulleted-list")
+            : ed.unwrapBlock(type === "bulleted-list" ? "ordered-list" : "bulleted-list")
                     .unwrapBlock(type);
         }
         break;
@@ -409,14 +411,14 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       case "heading6":
       default:
         const isAlreadySet = blocks.some((block: any) => block.type === type);
-        editor.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : type);
+        ed.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : type);
         if (containsListItems) {
           // In this case, we are trying to change a block away from
           // being a list. To do this, we either set the type we are
           // after, or clear it, if it's already set to that type. Then
           // we remove any part of the selection that might be a wrapper
           // of either type of list.
-          editor.unwrapBlock("bulleted-list")
+          ed.unwrapBlock("bulleted-list")
                 .unwrapBlock("ordered-list");
         }
         break;
