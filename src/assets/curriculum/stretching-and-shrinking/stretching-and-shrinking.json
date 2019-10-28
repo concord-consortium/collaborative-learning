@@ -790,7 +790,7 @@
                     {
                       "content": {
                         "type": "Text",
-                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. Do the rules create scale drawings? That is, are the two figures similar?"
+                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. <em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
                       }
                     }
                 ]
@@ -845,7 +845,7 @@
                         {
                           "name": "Mug Wump x",
                           "type": "number",
-                          "values": [0, 2, 2, 3, 2, 5, 5, 6, 6, 8, 6, 2, 0]
+                          "values": [0, 2, 2, 3, 3, 5, 5, 6, 6, 8, 6, 2, 0]
                         },
                          {
                           "name": "Mug Wump y",
@@ -855,7 +855,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 400
+                      "height": 380
                     }
                   },
                   {
@@ -875,7 +875,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 200
+                      "height": 180
                     }
                   },
                   {
@@ -895,7 +895,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 150
+                      "height": 145
                     }
                   },
                    {
@@ -915,7 +915,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 400
+                      "height": 100
                     }
                   },
                   {
@@ -931,16 +931,10 @@
               },
               "supports": [
                 {
-                  "text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"
-                },
-                {
-                  "text": "Describe the shape of Mug."
-                },
-                {
-                  "text": "What measures help you identify the impostors?"
-                },
-                {
                   "text": "What features are the same about Mug and the others? What features are different?"
+                },
+                {
+                  "text": "What features do you consider when you decide two figures are similar or not?"
                 }
               ]
             },
@@ -953,7 +947,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Marta’s Claim</strong>\nMarta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
+                        "<h3>Situation A. Marta’s Claim</h3>Marta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
                       ]
                     }
                   },
@@ -962,7 +956,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Jacob’s Claim</strong>\nJacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
+                        "<h3>Situation B. Jacob’s Claim</h3>Jacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
                       ]
                     }
                   },
@@ -971,13 +965,15 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. New Rules</strong>\nMake a rule that would create a figure similar to Lug."
+                        "<h3>Situation C. New Rules</h3>Make a rule that would create a figure similar to Lug."
                       ]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "Consider the rules of Mug, Zug, Lug, Bug, and Glug. Mug (x, y), Zug (2x, 2y), Lug (3x, y), Bug (3x, 3y), Glug (x, 3y). Who are similar to Mug? What feature do these rules have in common?"}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1026,13 +1022,13 @@
                   },
                   {
                     "layout": {
-                      "height": 160
+                      "height": 200
                     },
                     "content": {
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5],
+                          "axisMin": [-1, -1],
                           "axisRange": [15, 15]
                         }
                       },
@@ -1106,10 +1102,10 @@
               },
               "supports": [
                 {
-                  "text": "What do you need to do to each x coordinate? y coordinate?"
+                  "text": "To predict what will happen to the hat with rules, recall the relationship between the rules to draw Zug, Lug, Bug, and Glug and its similarity in Problem 2.1."
                 },
                 {
-                  "text": "Does adding or subtracting a number to the x or y coordinate make a difference?"
+                  "text": "In Problem 2.1, how is a rule with adding or subtracting a number to the x or y coordinate different from a rule with multiplying a number?"
                 }
               ]
             },
@@ -1148,10 +1144,10 @@
               },
               "supports": [
                 {
-                  "text": "How did adding to the coordinates change the hat?"
+                  "text": "What made the hat get smaller?"
                 },
                 {
-                  "text": "What made the hat get smaller?"
+                  "text": "How did adding to the coordinates change the hat?"
                 },
                 {
                   "text": "What did subtracting do to the hat?"
@@ -1173,14 +1169,7 @@
                   }
                 ]
               },
-              "supports": [
-                {
-                  "text": "If figures are similar, what changes and what stays the same?"
-                },
-                {
-                  "text": "How can you use the rule to predict the length of a corresponding side of the image?"
-                }
-              ]
+              "supports": [ ]
             }
           ],
           "supports": []
@@ -1628,10 +1617,7 @@
               },
               "supports": [
                 {
-                  "text": "Have you considered the corresponding angles?"
-                },
-                {
-                  "text": "How might you compare corresponding side lengths?"
+                  "text": "When you identify pairs of rectangles or triangles, what measurements do you compare? Angles, Side lengths, Perimeters, Areas, etc."
                 }
               ]
             },
@@ -1644,7 +1630,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In Situations A, B, and C Marta and Zack make claims. \n<strong>Situation A. Finding Scale Factors</strong>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
+                        "In Situations A, B, and C Marta and Zack make claims. <h3>Situation A. Finding Scale Factors</h3>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
                       ]
                     }
                   },
@@ -1653,7 +1639,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Predicting Perimeters in Similar Figures</strong>\nMarta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
+                        "<h3>Situation B. Predicting Perimeters in Similar Figures</h3>Marta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
                       ]
                     }
                   },
@@ -1662,7 +1648,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. Determining Similarity</strong>\nZack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
+                        "<h3>Situation C. Determining Similarity</h3>Zack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
                       ]
                     }
                   },
@@ -1677,7 +1663,10 @@
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "How can you find the scale factor if you used rubber bands to make similar figures?"},
+                {"text": "How can you find the scale factor if you used coordinate graphs to make similar figures?"}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1798,14 +1787,22 @@
                 "tiles": [
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Sketch or use your Shape Set to make several copies of each of the following shapes:",
-                        "<strong>Quadrilaterals</strong>             <strong>Triangles</strong>",
-                        "A non-square rectangle                              A right triangle",
-                        "A non-rectangular parallelogram                   An isosceles triangles"
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Quadrilaterals",
+                          "type": "string",
+                          "values": [ "A non-square rectangle", "A non-rectangular parallelogram"]
+                        },
+                         {
+                          "name": "Triangles",
+                          "type": "string",
+                          "values": ["A right triangle", "An isosceles triangle"]
+                        }
                       ]
+                    },
+                    "layout": {
+                      "height": 150
                     }
                   },
                   {
