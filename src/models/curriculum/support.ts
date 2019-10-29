@@ -1,5 +1,5 @@
-import { types } from "mobx-state-tree";
-import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
+import { types, getSnapshot } from "mobx-state-tree";
+import { DocumentContentModel, IAuthoredDocumentContent } from "../document/document-content";
 
 export enum ESupportType {
   // simple text supports (e.g. legacy supports); content is simple text
@@ -15,6 +15,11 @@ interface LegacySupportSnapshot {
   text: string;
 }
 
+interface RichAuthoredSupportSnapshot {
+  type: "document";
+  content: IAuthoredDocumentContent;
+}
+
 export function createTextSupport(text: string) {
   return SupportModel.create({ type: ESupportType.text, content: text });
 }
@@ -26,8 +31,15 @@ export const SupportModel = types
     content: types.string
   })
   .preProcessSnapshot(snapshot => {
-    const legacy = snapshot as any as LegacySupportSnapshot;
-    if (legacy.text) return { type: ESupportType.text, content: legacy.text };
+    const legacySupport = snapshot as any as LegacySupportSnapshot;
+    if (legacySupport.text) return { type: ESupportType.text, content: legacySupport.text };
+
+    const authoredSupport = snapshot as any as RichAuthoredSupportSnapshot;
+    if ((snapshot.type === ESupportType.document) && authoredSupport.content.tiles) {
+      const content = DocumentContentModel.create(authoredSupport.content);
+      return { type: ESupportType.document, content: JSON.stringify(getSnapshot(content)) };
+    }
+
     return snapshot;
   });
 
