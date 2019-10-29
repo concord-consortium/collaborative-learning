@@ -84,9 +84,6 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           <div className="class" data-test="user-class">
             <ClassMenuContainer />
           </div>
-          <div className="name" title={userTitle} data-test="user-name">
-            {user.name}
-          </div>
         </div>
       </div>
     );
