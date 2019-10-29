@@ -12,6 +12,7 @@ export interface IMenuLink {
   title: string;
   link?: string;
   enabled?: boolean;
+  selected?: boolean;
   extras?: any;
   log?: IMenuLinkLog;
 }

@@ -1,9 +1,11 @@
 @import ../../components/vars
 
 .document-workspace
-
   .drag-handler
     position: absolute
+    // In order for the app header to display pulldown content ontop of the
+    // workspace, we need to specify -1 z-index
+    z-index: -2
     top: $header-height
     left: 0
     right: 0
@@ -11,6 +13,9 @@
 
   .single-workspace
     position: absolute
+    // In order for the app header to display pulldown content ontop of the
+    // workspace, we need to specify -1 z-index
+    z-index: -2
     top: $header-height + $half-nav-expanded-peek
     left: $left-nav-contracted-width + $nav-expanded-peek + $workspace-toolbar-width
     right: $right-nav-contracted-width + $nav-expanded-peek
@@ -18,6 +23,9 @@
 
   .left-workspace
     position: absolute
+    // In order for the app header to display pulldown content ontop of the
+    // workspace, we need to specify -1 z-index
+    z-index: -2
     top: $header-height + $half-nav-expanded-peek
     left: $left-nav-contracted-width + $nav-expanded-peek + $workspace-toolbar-width
     right: 50%
@@ -28,6 +36,9 @@
 
   .right-workspace
     position: absolute
+    // In order for the app header to display pulldown content ontop of the
+    // workspace, we need to specify -1 z-index
+    z-index: -2
     top: $header-height + $half-nav-expanded-peek
     left: 50%
     right: $right-nav-contracted-width + $nav-expanded-peek
