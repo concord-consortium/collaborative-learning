@@ -1,5 +1,25 @@
 # Changelog
 
+## Version 0.9.0 - released October 30, 2019
+
+- Workspace documents for each problem have separate sections with section headers
+- Improved tile placement heuristic for documents with sections
+- Teacher dashboard shows student progress through sections
+- Styled text in authored curriculum content
+- Stretching & Shrinking curriculum updates
+- Auto-size table columns on column label changes
+- Auto-scale geometry tile axes when a table is linked
+- Request taller geometry row on image drag if necessary
+- Geometry: arrow keys nudge selected points
+- Linked geometry/table icons
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 439,006 bytes | 4.1% |
+| index.js | 4,229,500 bytes | 2.5% |
+
 ## Version 0.8.0 - released October 23, 2019
 
 - User documents associated with problems rather than sections
