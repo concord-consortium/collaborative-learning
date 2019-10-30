@@ -3,7 +3,7 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
-import { DropDown, IMenuItemProps } from "cc-components";
+import { DropDown, IMenuItemProps } from "concord-react-components";
 
 interface IProps extends IBaseProps {}
 

@@ -4,7 +4,7 @@ import { inject, observer } from "mobx-react";
 import { LinkSwitcherMenu, IMenuLink } from "./link-switcher-menu";
 import { LogEventName, Logger } from "../lib/logger";
 import { toJS } from "mobx";
-import { DropDown } from "cc-components";
+import { DropDown } from "concord-react-components";
 
 interface IProps extends IBaseProps {}
 
