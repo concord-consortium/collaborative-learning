@@ -610,3 +610,20 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
 }
+
+export function getDataSetBounds(dataSet: IDataSet) {
+  const result: Array<{ min: number, max: number}> = [];
+  dataSet.attributes.forEach(( attr, attrIndex) => {
+    let min = Infinity;
+    let max = -Infinity;
+    dataSet.cases.forEach(( aCase, caseIndex) => {
+      const value = dataSet.attributes[attrIndex].numericValue(caseIndex);
+      if (isFinite(value)) {
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
+    });
+    result.push({ min, max });
+  });
+  return result;
+}

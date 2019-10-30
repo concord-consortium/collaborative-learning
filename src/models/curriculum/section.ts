@@ -1,56 +1,66 @@
 import { types } from "mobx-state-tree";
-import { values } from "lodash";
 import { DocumentContentModel } from "../document/document-content";
 import { SupportModel } from "./support";
+import { cloneDeep } from "lodash";
 
-export enum SectionType {
-  introduction = "introduction",
-  initialChallenge = "initialChallenge",
-  whatIf = "whatIf",
-  nowWhatDoYouKnow = "nowWhatDoYouKnow",
-  didYouKnow = "didYouKnow",
-  all = "all"
+export type SectionType = string;
+
+export interface ISectionInfo {
+  initials: string;
+  title: string;
+  placeholder?: string;
 }
 
-// TODO: figure out way to add SectionType as the index type to this const
-const sectionInfo = {
-  [SectionType.introduction]: { title: "Introduction", abbrev: "In" },
-  [SectionType.initialChallenge]: { title: "Initial Challenge", abbrev: "IC" },
-  [SectionType.whatIf]: { title: "What if...?", abbrev: "W?" },
-  [SectionType.nowWhatDoYouKnow]: { title: "Now What Do You Know?", abbrev: "N?" },
-  [SectionType.didYouKnow]: { title: "Did You Know?", abbrev: "D?" },
-  [SectionType.all]: { title: "All", abbrev: "*" }
-};
-
-export function getSectionInfo(sectionType: SectionType) {
-  return sectionInfo[sectionType];
+export interface ISectionInfoMap {
+  [sectionId: string]: ISectionInfo;
 }
 
-export function getSectionTitle(sectionType?: SectionType) {
-  return sectionInfo[sectionType || SectionType.all].title;
+export const kAllSectionType = "all";
+const kAllSectionInfo = { initials: "*", title: "All" };
+export const kUnknownSectionType = "unknown";
+export const kDefaultPlaceholder = "Create or drag tiles here";
+const kUnknownSectionInfo = { initials: "?", title: "Unknown", placeholder: kDefaultPlaceholder };
+
+let gSectionInfoMap: ISectionInfoMap = { [kAllSectionType]: kAllSectionInfo };
+
+export function setSectionInfoMap(sectionInfoMap?: ISectionInfoMap) {
+  gSectionInfoMap = cloneDeep(sectionInfoMap) || {};
+  gSectionInfoMap[kAllSectionType] = kAllSectionInfo;
 }
 
-export function getSectionAbbrev(sectionType?: SectionType) {
-  return sectionInfo[sectionType || SectionType.all].abbrev;
+function getSectionInfo(type: SectionType) {
+  return gSectionInfoMap && gSectionInfoMap[type] || kUnknownSectionInfo;
+}
+
+export function getSectionInitials(type: SectionType) {
+  return getSectionInfo(type).initials;
+}
+
+export function getSectionTitle(type: SectionType) {
+  return getSectionInfo(type).title;
+}
+
+export function getSectionPlaceholder(type: SectionType) {
+  return getSectionInfo(type).placeholder || kDefaultPlaceholder;
 }
 
 export const SectionModel = types
   .model("Section", {
-    type: types.enumeration<SectionType>("SectionType", values(SectionType) as SectionType[]),
+    type: types.string, // sectionId corresponding to entry in unit
+    disabled: types.array(types.string),
     content: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
   })
   .views(self => {
     return {
-      get id() {
-        // until we come up with a more permanent ID
-        return self.type;
+      get initials() {
+        return getSectionInitials(self.type);
       },
       get title() {
-        return sectionInfo[self.type].title;
+        return getSectionTitle(self.type);
       },
-      get abbrev() {
-        return sectionInfo[self.type].abbrev;
+      get placeholder() {
+        return getSectionPlaceholder(self.type);
       }
     };
   });

@@ -1,21 +1,25 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
+import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
+import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
 import TableToolComponent from "./table-tool/table-tool";
 import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
+import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
+import { LinkIndicatorComponent } from "./link-indicator";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -76,6 +80,7 @@ interface IProps {
 }
 
 const kToolComponentMap: any = {
+        [kPlaceholderToolID]: PlaceholderToolComponent,
         [kDrawingToolID]: DrawingToolComponent,
         [kGeometryToolID]: GeometryToolComponent,
         [kImageToolID]: ImageToolComponent,
@@ -91,12 +96,17 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   private hotKeys: HotKeys = new HotKeys();
 
   public componentDidMount() {
+    const { model } = this.props;
+    const { content: { type } } = model;
+    model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
+
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
         "cmd-shift-c": this.handleCopyJson
       });
     }
+
     if (this.domElement) {
       this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
     }
@@ -126,11 +136,15 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
-        <div className="tool-tile-drag-handle tool select">
-          <svg className={`icon icon-select-tool`}>
-            <use xlinkHref={`#icon-select-tool`} />
-          </svg>
-        </div>
+        <LinkIndicatorComponent type={model.content.type} id={model.id} />
+        { ToolComponent !== PlaceholderToolComponent
+          ? <div className="tool-tile-drag-handle tool select">
+            <svg className={`icon icon-select-tool`}>
+              <use xlinkHref={`#icon-select-tool`} />
+            </svg>
+          </div>
+          : null
+        }
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
@@ -198,6 +212,11 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
     // set the drag data
     const { model, docId, height, scale } = this.props;
+    const ToolComponent = kToolComponentMap[model.content.type];
+    if (ToolComponent === PlaceholderToolComponent) {
+      e.preventDefault();
+      return;
+    }
     const snapshot = cloneDeep(getSnapshot(model));
     const id = snapshot.id;
     delete snapshot.id;
@@ -213,7 +232,6 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(dragTileType(model.content.type), model.content.type);
 
     // set the drag image
-    const ToolComponent = kToolComponentMap[model.content.type];
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
     const dragImage = ToolComponent && ToolComponent.getDragImageNode

@@ -19,6 +19,7 @@ import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
 import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { isFeatureSupported } from "../../../models/stores/stores";
 import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
@@ -26,11 +27,13 @@ import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
+import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle,
+        size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
-  handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
+        handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
+import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
@@ -217,6 +220,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {
+        handleArrows: this.handleArrowKeys,
         handleCut: this.handleCut,
         handleCopy: this.handleCopy,
         handlePaste: this.handlePaste,
@@ -522,6 +526,59 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
+  private rescaleBoardAndAxes(xMax: number, yMax: number, xMin: number, yMin: number) {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
+    }
+  }
+
+  private autoRescaleBoardAndAxes(dataSet: IDataSet) {
+    const { board } = this.state;
+    if (board && (dataSet.attributes.length >= 2) && (dataSet.cases.length >= 1)) {
+      const dataBounds = getDataSetBounds(dataSet);
+      if (dataBounds.every((b, i) => (i >= 2) || (isFinite(b.min) && isFinite(b.max)))) {
+        const xDataMin = Math.floor(dataBounds[0].min - 1);
+        const xDataMax = Math.ceil(dataBounds[0].max + 1);
+        const yDataMin = Math.floor(dataBounds[1].min - 1);
+        const yDataMax = Math.ceil(dataBounds[1].max + 1);
+
+        const boundingBox = board.getBoundingBox();
+        let [xBoardMin, yBoardMax, xBoardMax, yBoardMin] = boundingBox;
+        if (xDataMin < xBoardMin) xBoardMin = xDataMin;
+        if (xDataMax > xBoardMax) xBoardMax = xDataMax;
+        if (yDataMin < yBoardMin) yBoardMin = yDataMin;
+        if (yDataMax > yBoardMax) yBoardMax = yDataMax;
+
+        this.rescaleBoardAndAxes(xBoardMax, yBoardMax, xBoardMin, yBoardMin);
+      }
+    }
+  }
+
+  private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
+    const { board } = this.state;
+    const selectedObjects = board && this.getContent().selectedObjects(board);
+    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+    const hasSelectedPoints = selectedPoints ? selectedPoints.length > 0 : false;
+    let dx = 0;
+    let dy = 0;
+    switch (keys) {
+      case "left":  dx = -kSnapUnit; break;
+      case "right": dx =  kSnapUnit; break;
+      case "up":    dy =  kSnapUnit; break;
+      case "down":  dy = -kSnapUnit; break;
+    }
+    if (!e.repeat && hasSelectedPoints && (dx || dy)) {
+      const nudge = () => this.moveSelectedPoints(dx, dy);
+      (throttle(nudge, 250))();
+    }
+    return hasSelectedPoints;
+  }
+
   private handleToggleVertexAngle = () => {
     const { board } = this.state;
     const selectedObjects = board && this.getContent().selectedObjects(board);
@@ -617,14 +674,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
-    const { board } = this.state;
-    const content = this.getContent();
-    if (board) {
-      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
-      if (axes) {
-        axes.forEach(this.handleCreateAxis);
-      }
-    }
+    this.rescaleBoardAndAxes(xMax, yMax, xMin, yMin);
     this.setState({ axisSettingsOpen: false });
   }
 
@@ -825,12 +875,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private isAcceptableTileDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { readOnly } = this.props;
+    const canAcceptTableDrops = isFeatureSupported(this.stores, "GeometryLinkedTables") &&
+                                  this.isDragTileInSameDocument(e);
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension
     const kImgDropMarginPct = 0.1;
     if (!readOnly &&
         ((toolType === "image") ||
-        ((toolType === "table") && this.isDragTileInSameDocument(e)))) {
+        ((toolType === "table") && canAcceptTableDrops))) {
       const eltBounds = e.currentTarget.getBoundingClientRect();
       const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
       const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
@@ -907,6 +959,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 }
               });
               this.updateImageUrl(contentUrl);
+              if (this.props.size.height && image.height! > this.props.size.height) {
+                this.props.onRequestRowHeight(this.props.model.id, image.height!);
+              }
             });
         }
     }
@@ -928,6 +983,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
       const dataSet = tableContent.getSharedData();
+      this.autoRescaleBoardAndAxes(dataSet);
+
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
       this.applyChange(() => {
         const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
@@ -1025,10 +1082,29 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
-  private beginDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement) {
+  private moveSelectedPoints(dx: number, dy: number) {
+    this.beginDragSelectedPoints();
+    if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy])) {
+      const { board } = this.state;
+      const content = this.getContent();
+      if (board) {
+        Object.keys(this.dragPts || {})
+              .forEach(id => {
+                const elt = board.objects[id];
+                if (elt && content.isSelected(id)) {
+                  board.updateInfobox(elt);
+                }
+              });
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private beginDragSelectedPoints(evt?: any, dragTarget?: JXG.GeometryElement) {
     const { board } = this.state;
     const content = this.getContent();
-    if (board && !hasSelectionModifier(evt)) {
+    if (board && !hasSelectionModifier(evt || {})) {
       content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
@@ -1042,7 +1118,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
+  private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined, usrDiff: number[]) {
     const { board } = this.state;
     if (!board) return;
 
@@ -1060,15 +1136,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     });
 
-    const affectedObjects = keys(this.dragPts).map(id => board.objects[id]);
+    const affectedObjects = _keys(this.dragPts).map(id => board.objects[id]);
     updateVertexAnglesFromObjects(affectedObjects);
   }
 
-  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
+  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
-    if (!board || !content) return;
+    if (!board || !content) return false;
 
+    let didDragPoints = false;
     each(this.dragPts, (entry, id) => {
       const obj = board.objects[id];
       if (obj) {
@@ -1090,12 +1167,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const newUsrCoords = JXG.Math.Statistics.add(entry.initial.usrCoords, usrDiff) as number[];
             ids.push(id);
             props.push({ position: newUsrCoords });
+            didDragPoints = true;
           }
         }
       });
 
       this.applyChange(() => content.updateObjects(board, ids, props));
     }
+
+    return didDragPoints;
   }
 
   private endDragText(evt: any, dragTarget: JXG.Text, dragEntry: IDragPoint) {

@@ -2,7 +2,7 @@ import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
-import { getSectionAbbrev, getSectionTitle, SectionType } from "../curriculum/section";
+import { getSectionInitials, getSectionTitle, kAllSectionType, SectionType } from "../curriculum/section";
 import { ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
 import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
@@ -30,6 +30,8 @@ export enum SupportType {
   curricular = "curricular"
 }
 
+export type SectionTarget = SectionType;
+
 export enum SupportTarget {
   unit = "unit",
   investigation = "investigation",
@@ -37,10 +39,8 @@ export enum SupportTarget {
   section = "section",
 }
 
-export type TeacherSupportSectionTarget = SectionType;
-
 export interface ISupportTarget {
-  sectionId?: SectionType;
+  sectionId?: SectionTarget;
   groupId?: string;
   userId?: string;
 }
@@ -71,7 +71,7 @@ export const TeacherSupportModel = types
     support: SupportModel,
     type: types.enumeration<SupportTarget>("SupportTarget", Object.values(SupportTarget)),
     visible: false,
-    sectionId: types.maybe(types.enumeration<SectionType>("SectionType", Object.values(SectionType))),
+    sectionId: types.maybe(types.string),
     audience: AudienceModel,
     authoredTime: types.number,
     originDoc: types.maybe(types.string),
@@ -79,10 +79,10 @@ export const TeacherSupportModel = types
     deleted: false
   })
   .views(self => ({
-    get sectionTarget(): TeacherSupportSectionTarget {
+    get sectionTarget() {
       return (self.type === SupportTarget.section) && self.sectionId
               ? self.sectionId
-              : SectionType.all;
+              : kAllSectionType;
     }
   }))
   .views(self => ({
@@ -168,6 +168,20 @@ export const SupportsModel = types
         return supports.concat(teacherSupports);
     }
   }))
+  .views((self) => ({
+    hasNewSupports(afterTimestamp?: number) {
+      if (afterTimestamp) {
+        // true if there has been a teacher support after the last support tab open
+        const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
+          return support.authoredTime > latest ? support.authoredTime : latest;
+        }, 0);
+        return latestAuthoredTime > afterTimestamp;
+      } else {
+        // have not opened supports yet so true if any exist
+        return self.allSupports.length > 0;
+      }
+    }
+  }))
   .actions((self) => {
     return {
       createFromUnit(params: ICreateFromUnitParams) {
@@ -187,7 +201,7 @@ export const SupportsModel = types
         investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
         problem && problem.supports.forEach(createItem(SupportTarget.problem));
         problem && problem.sections.forEach((section) => {
-          section.supports.forEach(createItem(SupportTarget.section, section.id));
+          section.supports.forEach(createItem(SupportTarget.section, section.type));
         });
 
         self.curricularSupports.replace(supports);
@@ -238,7 +252,7 @@ function getTeacherSupportCaption(support: TeacherSupportModelType,
   const investigationPart = investigation ? `${investigation.ordinal}` : "*";
   const problemPart = problem ? `${problem.ordinal}` : "*";
   const { sectionId } = support;
-  const sectionPart = sectionId ? " " + getSectionAbbrev(sectionId as SectionType) : "";
+  const sectionPart = sectionId ? " " + getSectionInitials(sectionId) : "";
   return `${investigationPart}.${problemPart}${sectionPart} ${support.caption || "Untitled"}`;
 }
 
@@ -277,7 +291,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
                         : supportCaption;
     const originDoc = supportType === SupportType.teacher
                         ? (support as TeacherSupportModelType).originDoc
-                        : undefined;
+                        : supportKey; // unique origin for curricular supports
     const properties: IDocumentProperties = supportType === SupportType.curricular
                                               ? { curricularSupport: "true", caption: supportCaption }
                                               : { teacherSupport: "true", caption: supportCaption };

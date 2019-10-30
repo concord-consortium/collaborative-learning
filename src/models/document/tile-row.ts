@@ -24,14 +24,26 @@ export const TileRowModel = types
   .model("TileRow", {
     id: types.optional(types.identifier, () => uuid()),
     height: types.maybe(types.number),
+    isSectionHeader: false,
+    sectionId: types.maybe(types.string),
     tiles: types.array(TileLayoutModel)
   })
   .views(self => ({
+    get isEmpty() {
+      return (self.tiles.length === 0) && !self.isSectionHeader;
+    },
+    get tileCount() {
+      return self.tiles.length;
+    },
     get isUserResizable() {
-      return self.tiles.some(tileRef => tileRef.isUserResizable);
+      return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
     get tileIds() {
       return self.tiles.map(tile => tile.tileId).join(", ");
+    },
+    getTileIdAtIndex(index: number) {
+      const layout = self.tiles[index];
+      return layout && layout.tileId;
     },
     hasTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId) >= 0;
@@ -56,6 +68,10 @@ export const TileRowModel = types
     // undefined height == default to content height
     setRowHeight(height?: number) {
       self.height = height;
+    },
+    setSectionHeader(sectionId: string) {
+      self.isSectionHeader = true;
+      self.sectionId = sectionId;
     },
     insertTileInRow(tile: ToolTileModelType, tileIndex?: number) {
       const dstTileIndex = (tileIndex != null) && (tileIndex >= 0) && (tileIndex < self.tiles.length)

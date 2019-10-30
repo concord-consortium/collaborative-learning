@@ -20,6 +20,8 @@ interface IProps extends IBaseProps {
   editabilityLocation?: EditabilityLocation;
   toolApiInterface?: IToolApiInterface;
   overlayMessage?: string;
+  selectedSectionId?: string | null;
+  viaTeacherDashboard?: boolean;
 }
 
 @observer

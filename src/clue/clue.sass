@@ -1,6 +1,9 @@
 // application-specific styling goes here
 @import ../components/vars
 
+#rightNavTab-student-work
+  background-color: $sage-light-1
+  color: $sage-text
 #rightNavTab-my-work, #rightNavTab-class-work
   color: $terra-text
   background-color: $terra-light-1
@@ -37,6 +40,23 @@
     background-color: $sky-dark-2
     border-color: $sky-light-3
 
+  .support-badge
+    $badge-radius: 9px
+    position: absolute
+    left: -$padding - ($badge-radius / 4)
+    top: 0
+    background-color: #fff
+    border: 4px solid $sky
+    width: $badge-radius * 2
+    height: $badge-radius * 2
+    border-radius: $badge-radius
+
+  &.hovering
+    /* can't use :hover since we want the badge to change when the tab is hovered */
+    .support-badge
+      background-color: $sky-dark-1
+      border-color: $sky-light-3
+
 .document
   .titlebar
     &.personal, &.personalPublication, &.problem, &.publication
@@ -57,11 +77,35 @@
           &:active
             background-image: url("../assets/icons/copy/copy-active.svg")
         .button-icon.delete
-          background-image: url("../assets/icons/delete/delete.svg")
-          &:hover
-              background-image: url("../assets/icons/delete/delete-hover.svg")
-          &:active
-              background-image: url("../assets/icons/delete/delete-active.svg")
+          &.enabled
+            background-image: url("../assets/icons/delete/delete.svg")
+            &:hover
+                background-image: url("../assets/icons/delete/delete-hover.svg")
+            &:active
+                background-image: url("../assets/icons/delete/delete-active.svg")
+          &.disabled
+            background-image: url("../assets/icons/delete/delete-disabled.svg")
+            cursor: default
+            &:active
+              transform-origin: center
+              transform: none
+              cursor: default
+        .button-icon.share
+          &.visibility.public
+            background-image: url("../assets/icons/share/share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/not-share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/not-share-active.svg")
+        .button-icon.share
+          &.visibility.private
+            background-image: url("../assets/icons/share/not-share.svg")
+            &:hover
+              background-image: url("../assets/icons/share/share-hover.svg")
+            &:active
+              background-image: url("../assets/icons/share/share-active.svg")
+      .icon-button.delete-disabled
+        cursor: default
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1

@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { applyChange, applyChanges } from "./jxg-dispatcher";
+import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
           JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
@@ -98,10 +98,14 @@ const LinkedTableEntryModel = types
 export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
+    disabled: types.array(types.string),
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
   })
   .views(self => ({
+    isDisabled(feature: string) {
+      return self.disabled.indexOf(feature) >= 0;
+    },
     isSelected(id: string) {
       return !!self.selection.get(id);
     },
@@ -110,6 +114,9 @@ export const GeometryMetadataModel = types
     },
     isLinkedToTable(tableId: string) {
       return self.linkedTables.findIndex(entry => entry.id === tableId) >= 0;
+    },
+    get linkedTableCount() {
+      return self.linkedTables.length;
     },
     get xAxisLabel() {
       const links = self.linkedTables
@@ -125,6 +132,9 @@ export const GeometryMetadataModel = types
     }
   }))
   .actions(self => ({
+    setDisabledFeatures(disabled: string[]) {
+      self.disabled.replace(disabled);
+    },
     select(id: string) {
       self.selection.set(id, true);
     },
@@ -340,13 +350,22 @@ export const GeometryContentModel = types
       }
     }
 
+    function getDispatcherContext(): IDispatcherChangeContext {
+      const isFeatureDisabled = (feature: string) =>
+                                  self.metadata && self.metadata.disabled.indexOf(feature) >= 0;
+      return {
+        isFeatureDisabled,
+        onWillApplyChange: handleWillApplyChange,
+        onDidApplyChange: handleDidApplyChange
+      };
+    }
     // views
 
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       const changes = self.changes.map(change => JSON.parse(change));
       let board: JXG.Board | undefined;
-      applyChanges(domElementID, changes, handleWillApplyChange, handleDidApplyChange)
+      applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -893,7 +912,7 @@ export const GeometryContentModel = types
 
     function syncChange(board: JXG.Board, change: JXGChange) {
       if (board) {
-        return applyChange(board, change, handleWillApplyChange, handleDidApplyChange);
+        return applyChange(board, change, getDispatcherContext());
       }
     }
 

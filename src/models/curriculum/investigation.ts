@@ -7,6 +7,7 @@ export const InvestigationModel = types
   .model("Investigation", {
     ordinal: types.integer,
     title: types.string,
+    disabled: types.array(types.string),
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),

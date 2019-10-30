@@ -1,8 +1,8 @@
 import { types } from "mobx-state-tree";
-import { DocumentModelType } from "../document/document";
+import { DocumentModelType, DocumentModel } from "../document/document";
 import { SectionModelType } from "../curriculum/section";
 import { LogEventName, Logger } from "../../lib/logger";
-
+import { kGroupVirtualDocumentType, GroupVirtualDocument } from "../document/group-virtual-document";
 export const ProblemWorkspace = "problem";
 export const LearningLogWorkspace = "learningLog";
 
@@ -26,6 +26,7 @@ export const WorkspaceModel = types
     primaryDocumentKey: types.maybe(types.string),
     comparisonDocumentKey: types.maybe(types.string),
     comparisonVisible: false,
+    hidePrimaryForCompare: false
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
@@ -34,9 +35,9 @@ export const WorkspaceModel = types
         Logger.logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, document);
       }
     };
-    const setComparisonDocument = (document?: DocumentModelType) => {
+    const setComparisonDocument = (document?: DocumentModelType | GroupVirtualDocument) => {
       self.comparisonDocumentKey = document && document.key;
-      if (document) {
+      if (document && !(document instanceof GroupVirtualDocument)) {
         Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
       }
     };
@@ -65,9 +66,11 @@ export const WorkspaceModel = types
         }
       },
 
-      toggleComparisonVisible({override, muteLog = false}: {override?: boolean; muteLog?: boolean} = {}) {
+      toggleComparisonVisible({override, muteLog = false, hidePrimary = false}:
+          {override?: boolean; muteLog?: boolean, hidePrimary?: boolean} = {}) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
+        self.hidePrimaryForCompare = hidePrimary;
         if (!visible) {
           self.comparisonDocumentKey = undefined;
         }
@@ -81,7 +84,7 @@ export const WorkspaceModel = types
       },
 
       setPrimaryGhostSection(section: SectionModelType) {
-        self.primaryDocumentKey = createGhostSectionDocumentKey(section.id);
+        self.primaryDocumentKey = createGhostSectionDocumentKey(section.type);
       },
     };
   });

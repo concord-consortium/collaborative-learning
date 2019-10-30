@@ -8,9 +8,8 @@ import { DemoCreatorComponment } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
-import { setUnitAndProblem } from "../models/curriculum/unit";
+import { isDifferentUnitAndProblem, setUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
-import { AppMode } from "../models/stores/stores";
 import "./app.sass";
 
 interface IProps extends IBaseProps {}
@@ -85,17 +84,13 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
       }
-      if (problemId) {
-        setUnitAndProblem (stores, unitCode, problemId).then( () => {
+      if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
+        setUnitAndProblem(stores, unitCode, problemId).then( () => {
           updateProblem(stores, problemId);
-          initRollbar(stores, problemId);
-          resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
         });
-        // updateProblem(stores, problemId);
-      } else {
-        initRollbar(stores, "undefined");
-        resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
       }
+      initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
+      resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .catch((error) => {
       let errorMessage = error.toString();
