@@ -8,7 +8,7 @@ import { isHotkey } from "is-hotkey";
 import { BaseComponent } from "../base";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
-import { autorun, IReactionDisposer, values } from "mobx";
+import { autorun, IReactionDisposer } from "mobx";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
