@@ -289,19 +289,27 @@ export const GeometryContentModel = types
     }
   }))
   .actions(self => ({
-    selectElement(id: string) {
-      if (!self.isSelected(id)) {
-        self.metadata.select(id);
-      }
-    },
-    deselectElement(id: string) {
-      if (self.isSelected(id)) {
-        self.metadata.deselect(id);
-      }
-    },
-    setElementSelection(id: string, select: boolean) {
+    setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
       if (self.isSelected(id) !== select) {
+        const elt = board && board.objects[id];
+        const tableId = elt && elt.getAttribute("linkedTableId");
+        const rowId = elt && elt.getAttribute("linkedRowId");
         self.metadata.setSelection(id, select);
+        if (tableId && rowId) {
+          self.metadata.sharedSelection.select(tableId, rowId, select);
+        }
+      }
+    }
+  }))
+  .actions(self => ({
+    selectElement(board: JXG.Board | undefined, id: string) {
+      if (!self.isSelected(id)) {
+        self.setElementSelection(board, id, true);
+      }
+    },
+    deselectElement(board: JXG.Board | undefined, id: string) {
+      if (self.isSelected(id)) {
+        self.setElementSelection(board, id, false);
       }
     }
   }))
@@ -316,21 +324,21 @@ export const GeometryContentModel = types
       });
       self.metadata.clearLinkedTables();
     },
-    selectObjects(ids: string | string[]) {
+    selectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.selectElement(id);
+        self.selectElement(board, id);
       });
     },
     deselectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     },
     deselectAll(board: JXG.Board) {
       self.metadata.selection.forEach((value, id) => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     }
   }))

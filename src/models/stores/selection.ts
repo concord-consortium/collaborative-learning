@@ -32,7 +32,11 @@ export const DataSetSelectionModel = types
   }))
   .actions(self => ({
     setSelected(ids: string[]) {
-      self.clear();
+      self.selection.forEach((isSelected, id) => {
+        if (isSelected && (ids.indexOf(id) < 0)) {
+          self.select(id, false);
+        }
+      });
       ids.forEach(id => self.select(id, true));
     }
   }));

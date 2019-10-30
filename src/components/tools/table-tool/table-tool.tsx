@@ -70,6 +70,19 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
 
+    const { selection } = this.stores;
+    selection.observe(this.props.model.id, change => {
+      const rowId = change.name;
+      const isSharedRowSelected = change.type === "delete"
+              ? false
+              : (change.newValue as any).storedValue;
+      const rowNode = this.gridApi && this.gridApi.getRowNode(rowId);
+      const isRowNodeSelected = rowNode ? rowNode.isSelected() : false;
+      if (rowNode && (isSharedRowSelected !== isRowNodeSelected)) {
+        rowNode.setSelected(isSharedRowSelected, false);
+      }
+    });
+
     this.disposers.push(autorun(() => {
       const { model: { content } } = this.props;
       const tableContent = content as TableContentModelType;

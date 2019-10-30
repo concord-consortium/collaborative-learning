@@ -36,10 +36,15 @@ describe("DataSetSelectionModel", () => {
     });
     model.toggleSelected("bar");
     expect(counts).toEqual({ add: 0, update: 1, delete: 0 });
+    const nodeCount = model.selection.size;
     model.clear();
-    expect(counts).toEqual({ add: 0, update: 1, delete: 2 });
+    expect(counts).toEqual({ add: 0, update: 1, delete: nodeCount });
     model.select("baz", true);
-    expect(counts).toEqual({ add: 1, update: 1, delete: 2 });
+    expect(counts).toEqual({ add: 1, update: 1, delete: nodeCount });
+    model.setSelected(["bar", "baz"]);
+    expect(counts).toEqual({ add: 2, update: 1, delete: nodeCount });
+    model.clear();
+    expect(counts).toEqual({ add: 2, update: 1, delete: nodeCount + 2 });
   });
 });
 
