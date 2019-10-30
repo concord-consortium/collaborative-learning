@@ -100,6 +100,9 @@ export const TableMetadataModel = types
   .views(self => ({
     get isLinked() {
       return self.linkedGeometries.length > 0;
+    },
+    get linkCount() {
+      return self.linkedGeometries.length;
     }
   }))
   .actions(self => ({

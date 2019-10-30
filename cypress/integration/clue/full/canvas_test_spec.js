@@ -22,7 +22,7 @@ let studentWorkspace = 'My Student Test Workspace';
 
 context('Test Canvas', function(){
     //TODO: Tests to add to canvas:
-    // 1. reorder tiles
+    // 1. reorder 
     // 3. drag image from leftNav to canvas
     // 5. drag a tool from tool bar to canvas
     before(function(){
@@ -395,6 +395,24 @@ context('Test Canvas', function(){
     });
     context('delete workspaces',function(){
         it('verify delete of personal workspace', function(){
+            //TODO
+        })
+        it('verify delete of copy of personal workspace', function(){
+            //TODO 
+        })
+        it('verify that original personal workspace is not deleted when copy is deleted', function(){
+            //TODO
+        })
+        it('verify that published personal workspace', function(){
+            //TODO
+        })
+        it('verify delete of Learning Log workspace', function(){
+            //TODO
+        })
+        it('verify delete of starred personal workspace', function(){
+            //TODO: should also delete document from Starred section
+        })
+        it('verify investigation workspace cannot be deleted', function(){
             //TODO
         })
     })

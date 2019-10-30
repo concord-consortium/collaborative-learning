@@ -115,6 +115,9 @@ export const GeometryMetadataModel = types
     isLinkedToTable(tableId: string) {
       return self.linkedTables.findIndex(entry => entry.id === tableId) >= 0;
     },
+    get linkedTableCount() {
+      return self.linkedTables.length;
+    },
     get xAxisLabel() {
       const links = self.linkedTables
                         .map(entry => entry.x)
