@@ -78,7 +78,7 @@
           "type": "starred-problem-documents",
           "dataTestHeader": "my-work-section-starred",
           "documentTypes": ["personal", "problem"],
-          "properties": ["starred"],
+          "properties": ["starred", "!isDeleted"],
           "showStars": ["student", "teacher"]
         }
       ]
