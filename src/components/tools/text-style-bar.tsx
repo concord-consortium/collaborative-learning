@@ -14,10 +14,12 @@ interface IProps {
   selectedButtonNames: string[];
   clickHandler: (buttonName: string, editor: any, event: React.MouseEvent) => void;
   editor: any;
+  visible: boolean;  // If true, render the tool bar.
+  enabled: boolean;  // If true, let user events be processed.
 }
 
 // This component renders HTML for a vertical tool-bar used to style text in
-// a text-tool-editor. What follows is a pseudo-markup outline for the various
+// a text-tool-editor. What follows is a pseudo-markup-outline for the various
 // HTML-tags & CSS-class names.
 //
 // <div text-style-bar>
@@ -50,12 +52,20 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
   ];
 
   public render() {
-    return (
-      <div className="text-style-bar">
-        {this.renderHeaderIcon()}
-        {this.buttonDefs.map(bDef => this.renderButton(bDef))}
-      </div>
-    );
+    const onMouseDownHandler = (event: React.MouseEvent) => {
+      event.preventDefault();
+    };
+    if (this.props.visible) {
+      const enabledClass = this.props.enabled ? "enabled" : "";
+      return (
+        <div className={`text-style-bar ${enabledClass}`}
+             onMouseDown={onMouseDownHandler}>
+          {this.renderHeaderIcon()}
+          {this.buttonDefs.map(bDef => this.renderButton(bDef))}
+        </div>
+      );
+    }
+    return (null);
   }
 
   private renderHeaderIcon() {
@@ -69,19 +79,24 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderButton(buttonDef: IButtonDef) {
+    const showTip = this.props.enabled ? "enabled" : "";
     const classes = (iconName: string) => {
       const { selectedButtonNames: selected } = this.props;
       const isSelected = selected.find( b => b === buttonDef.iconName );
       const classList = [ "button-icon", "fa", "fa-fw" ].join(" ");
-      return (`${classList} fa-${iconName} ${isSelected ? "on" : "off" }`);
+      return (`${classList} fa-${iconName} ${isSelected ? "on" : "off" } ${showTip}`);
     };
     const clickHandler = (event: React.MouseEvent) => {
-      this.props.clickHandler(buttonDef.iconName, this.props.editor, event);
+      if (this.props.enabled) {
+        this.props.clickHandler(buttonDef.iconName, this.props.editor, event);
+      }
     };
     return (
-      <div className="button-with-tool-tip" key={buttonDef.iconName}>
+      <div className={`button-with-tool-tip ${showTip}`} key={buttonDef.iconName}>
         <i className={classes(buttonDef.iconName)} onClick={clickHandler} />
-        <span className="tool-tip-text">{buttonDef.toolTip}</span>
+        <span className={`tool-tip-text ${showTip}`}>
+          {buttonDef.toolTip}>
+        </span>
       </div>
     );
   }
