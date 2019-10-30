@@ -492,6 +492,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private initializeContent() {
     const content = this.getContent();
+    content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent

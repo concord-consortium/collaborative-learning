@@ -7,8 +7,8 @@ import { addAttributeToDataSet, addCanonicalCasesToDataSet,
 import { IAttribute } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
-import { CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column,
-          ColumnApi, GridApi, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
+import { CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column, ColumnApi,
+          GridApi, GridReadyEvent, ICellEditorComp, SelectionChangedEvent, RowNode, SortChangedEvent,
           TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams } from "ag-grid-community";
 import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
@@ -54,6 +54,7 @@ interface IProps {
   itemFlags?: IMenuItemFlags;
   tableComponentData?: ITableComponentData|null;
   onGridReady?: (gridReadyParams: GridReadyEvent) => void;
+  onRowSelectionChange?: (e: SelectionChangedEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onSetExpression?: (colId: string, expression: string, rawExpression: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
@@ -639,10 +640,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
   }
 
-  public handleRowSelectionChanged = () => {
-    if (this.gridApi) {
-      this.gridApi.refreshHeader();
-    }
+  public handleRowSelectionChanged = (e: SelectionChangedEvent) => {
+    e.api.refreshHeader();
+    this.props.onRowSelectionChange && this.props.onRowSelectionChange(e);
   }
 
   public handleCellEditingStarted = (event: CellEditingStartedEvent) => {

@@ -5,7 +5,8 @@ import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
-import { ColumnApi, GridApi, GridReadyEvent, ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
+import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
+        } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
@@ -117,6 +118,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           itemFlags={itemFlags}
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
+          onRowSelectionChange={this.handleRowSelectionChange}
           onSetAttributeName={this.handleSetAttributeName}
           onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
@@ -166,6 +168,12 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   private handleGridReady = (gridReadyParams: GridReadyEvent) => {
     this.gridApi = gridReadyParams.api || undefined;
     this.gridColumnApi = gridReadyParams.columnApi || undefined;
+  }
+
+  private handleRowSelectionChange = (e: SelectionChangedEvent) => {
+    const { selection } = this.stores;
+    const nodes = e.api.getSelectedNodes();
+    selection.setSelected(this.props.model.id, nodes.map(n => n.id));
   }
 
   private handleMouseDown: EventListener = (e: MouseEvent) => {
