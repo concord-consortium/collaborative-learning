@@ -285,7 +285,7 @@ export const GeometryContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(({ id: tableId }) => {
         const tableContent = getTableContent(self, tableId);
-        tableContent && tableContent.removeGeometryLink(self.metadata.id);
+        tableContent && tableContent.removeGeometryLinks(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
     },
