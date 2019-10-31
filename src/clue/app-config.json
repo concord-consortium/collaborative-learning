@@ -155,7 +155,7 @@
           "dataTestHeader": "supports-section-teacher-supports",
           "dataTestItem": "supports-list-items",
           "documentTypes": ["supportPublication"],
-          "properties": ["teacherSupport"]
+          "properties": ["teacherSupport", "!isDeleted"]
         }
       ]
     }

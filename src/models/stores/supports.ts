@@ -9,9 +9,10 @@ import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent } from "../document/document-content";
-import { DocumentModel, SupportPublication } from "../document/document";
+import { DocumentModel, SupportPublication, DocumentModelType } from "../document/document";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { TeacherSupport } from "../../clue/components/teacher/teacher-support";
 
 export enum AudienceEnum {
   class = "class",
@@ -66,6 +67,7 @@ export type AudienceModelType = Instance<typeof AudienceModel>;
 
 export const TeacherSupportModel = types
   .model("TeacherSupportModel", {
+    uid: types.string,
     supportType: types.optional(types.literal(SupportType.teacher), SupportType.teacher),
     key: types.identifier,
     support: SupportModel,
@@ -113,6 +115,7 @@ export interface ICreateFromUnitParams {
   documents?: DocumentsModelType;
   db?: DB;
   supports?: CurricularSupportModelType[] | TeacherSupportModelType[];
+  onDocumentCreated?: (support: UnionSupportModelType, document: DocumentModelType) => void;
 }
 
 export const CurricularSupportModel = types
@@ -273,11 +276,11 @@ function getSupportCaption(support: UnionSupportModelType, index: number,
 }
 
 export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
-  const { db, documents, investigation, problem, supports } = params;
+  const { db, documents, investigation, problem, supports, onDocumentCreated } = params;
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
-    const { supportType, sectionId } = support;
+    const { sectionId } = support;
     if (sectionId === lastSection) {
       ++index;
     }
@@ -286,15 +289,26 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       lastSection = sectionId;
     }
     const supportCaption = getSupportCaption(support, index, investigation, problem);
-    const supportKey = supportType === SupportType.teacher
+    const supportKey = support.supportType === SupportType.teacher
                         ? (support as TeacherSupportModelType).key || supportCaption
                         : supportCaption;
-    const originDoc = supportType === SupportType.teacher
+    const originDoc = support.supportType === SupportType.teacher
                         ? (support as TeacherSupportModelType).originDoc
-                        : supportKey; // unique origin for curricular supports
-    const properties: IDocumentProperties = supportType === SupportType.curricular
-                                              ? { curricularSupport: "true", caption: supportCaption }
-                                              : { teacherSupport: "true", caption: supportCaption };
+                        : undefined;
+    let properties: IDocumentProperties;
+    if (support.supportType === SupportType.curricular) {
+      properties = { curricularSupport: "true", caption: supportCaption };
+    }
+    // else it is a teacher support
+    else {
+      properties = { teacherSupport: "true", caption: supportCaption };
+      // if we have a db add the properties from support document which can be
+      // updated by the teacher to soft delete the document
+      if (db) {
+        properties = {...properties, ...await getSupportDocumentProperties(support, db)};
+      }
+    }
+
     const content = await getDocumentContentForSupport(support.support, db);
     if (content) {
       const document = DocumentModel.create({
@@ -307,8 +321,21 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
                         content: getSnapshot(content)
                       });
       documents && documents.add(document);
+      onDocumentCreated && onDocumentCreated(support, document);
     }
   });
+}
+
+export async function getSupportDocumentProperties(support: TeacherSupportModelType, db: DB) {
+  let properties: IDocumentProperties;
+
+  const {audience, sectionTarget, key} = support;
+  const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;
+  const ref = db.firebase.ref(path);
+  const snapshot = await ref.once("value");
+  properties = snapshot && snapshot.val();
+
+  return properties;
 }
 
 export async function getDocumentContentForSupport(support: SupportModelType, db?: DB) {

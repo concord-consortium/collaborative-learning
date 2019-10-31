@@ -29,7 +29,7 @@ describe("supports model", () => {
         {support: {type: ESupportType.text, content: "support #4"}, type: SupportTarget.section},
       ],
       classSupports: [
-        {key: "1", support: {type: ESupportType.text, content: "support #5"}, type: SupportTarget.problem,
+        {uid: "1", key: "1", support: {type: ESupportType.text, content: "support #5"}, type: SupportTarget.problem,
           audience: ClassAudienceModel.create(), authoredTime: 42}
       ]
     });
@@ -62,6 +62,7 @@ describe("supports model", () => {
       ],
       classSupports: [
         {
+          uid: "1",
           key: "1",
           supportType: "teacher",
           support: {type: ESupportType.text, content: "support #5"},
@@ -253,6 +254,7 @@ describe("supports model", () => {
   it("sorts authored supports correctly", () => {
     const supports = SupportsModel.create({});
     const earlySupport = TeacherSupportModel.create({
+      uid: "1",
       key: "1",
       support: createTextSupport("foo"),
       type: SupportTarget.problem,
@@ -260,6 +262,7 @@ describe("supports model", () => {
       authoredTime: 100
     });
     const lateSupport = TeacherSupportModel.create({
+      uid: "1",
       key: "2",
       support: createTextSupport("bar"),
       type: SupportTarget.problem,
@@ -283,14 +286,14 @@ describe("supports model", () => {
   });
 
   it("Gets supports by audience and section type", () => {
-    const classSupportAll = {key: "1", support: createTextSupport(""), type: SupportTarget.problem,
+    const classSupportAll = {uid: "1", key: "1", support: createTextSupport(""), type: SupportTarget.problem,
       audience: ClassAudienceModel.create(), authoredTime: 42};
-    const classSupportIntro = {key: "2", support: createTextSupport(""),
+    const classSupportIntro = {uid: "1", key: "2", support: createTextSupport(""),
       type: SupportTarget.section, sectionId: "introduction",
       audience: ClassAudienceModel.create(), authoredTime: 43};
-    const groupSupport = {key: "3", support: createTextSupport(""), type: SupportTarget.problem,
+    const groupSupport = {uid: "1", key: "3", support: createTextSupport(""), type: SupportTarget.problem,
       audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
-    const userSupport = {key: "4", support: createTextSupport(""),
+    const userSupport = {uid: "1", key: "4", support: createTextSupport(""),
       type: SupportTarget.section, sectionId: "didYouKnow",
       audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
 
