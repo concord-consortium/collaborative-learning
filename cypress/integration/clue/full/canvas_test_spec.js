@@ -239,7 +239,7 @@ context('Test Canvas', function(){
         });
 
         describe('save and restore of tool tiles', function(){
-            describe('verify that tool tiles is saved from various locations', function(){
+            describe.skip('verify that tool tiles is saved from various locations', function(){
                 it('will restore from My Work tab', function() {
                     //Open personal workspace
                     rightNav.openRightNavTab('my-work');
@@ -263,7 +263,7 @@ context('Test Canvas', function(){
                 });
             });
 
-            describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
+            describe.skip('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
                 it('verify restore in 4 up view',function(){
                     //Open Personal Workspace
                     rightNav.openRightNavTab('my-work');
@@ -283,7 +283,7 @@ context('Test Canvas', function(){
 
         context('test footer elements', function(){
             describe('Test the 2-up view', function(){
-                it('verify 2 up button, and correct corresponding view comes up', function(){
+                it.skip('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.openTwoUpView();
                     clueCanvas.openOneUpViewFromTwoUp();
@@ -292,7 +292,7 @@ context('Test Canvas', function(){
                     canvas.getSingleCanvas().should('be.visible');
                 });
 
-                it('verify 2-up view is visible when canvas is in 4-up view', function(){
+                it.skip('verify 2-up view is visible when canvas is in 4-up view', function(){
                     //single canvas 4up button and 2up button is visible
                     clueCanvas.getNorthEastCanvas().should('be.visible');
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
