@@ -253,7 +253,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         }
         event.preventDefault();
       }
-      // If we had nothing to process, **do** not prevent the default mouse event.
+      // If we had nothing to process, **do not** prevent the default mouse event.
     };
 
     return (
@@ -322,20 +322,19 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   private handleMarkEvent(type: string, event: any, editor: any, next?: () => any) {
     const ed = editor.current ? editor.current : editor;
-    const slateType = this.fromButtonToSlate(type)!.slate;
-    switch (slateType) {
+    switch (type) {
       case "undo":
         ed.undo();  // Not really a mark, nor a block.
         break;
       case "superscript":
       case "subscript":
         // Prevent the nesting of superscripts and subscripts.
-        const hasType = ed.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.slateType));
-        !hasType ? ed.toggleMark(slateType) : ed.removeMark("superscript").removeMark("subscript");
+        const hasType = ed.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.type));
+        !hasType ? ed.toggleMark(type) : ed.removeMark("superscript").removeMark("subscript");
         break;
       default:
         // Everything else (e.g. bold, underline, italic, typewriter, ...)
-        ed.toggleMark(slateType);
+        ed.toggleMark(type);
         break;
     }
   }
