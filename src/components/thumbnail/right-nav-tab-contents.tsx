@@ -5,7 +5,7 @@ import { DocumentsSection } from "./documents-section";
 import { EPanelId } from "../app-header";
 import { BaseComponent, IBaseProps } from "../base";
 import { FourUpComponent } from "../four-up";
-import { DocumentDragKey, DocumentModelType } from "../../models/document/document";
+import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
 import { GroupVirtualDocument } from "../../models/document/group-virtual-document";
 import { GroupModelType } from "../../models/stores/groups";
 import { ENavTabSectionType, ERightNavTab, NavTabSectionModelType, navTabSectionId} from "../../models/view/right-nav";
@@ -37,6 +37,9 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
       const _handleDocumentStarClick = section.showStarsForUser(user)
                                         ? this.handleDocumentStarClick
                                         : undefined;
+      const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+                                        ? this.handleDocumentDeleteClick
+                                        : undefined;
       return (
         <DocumentsSection
           key={sectionId} tab={myTabSpec!.tab} section={section}
@@ -46,7 +49,9 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
           onNewDocumentClick={this.handleNewDocumentClick}
           onDocumentClick={this.handleDocumentClick}
           onDocumentDragStart={this.handleDocumentDragStart}
-          onDocumentStarClick={_handleDocumentStarClick} />
+          onDocumentStarClick={_handleDocumentStarClick}
+          onDocumentDeleteClick={_handleDocumentDeleteClick}
+        />
       );
     };
 
@@ -127,6 +132,16 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   private handleDocumentStarClick = (document: DocumentModelType) => {
     const { user } = this.stores;
     document && document.toggleUserStar(user.id);
+  }
+
+  private handleDocumentDeleteClick = (document: DocumentModelType) => {
+    const {ui, supports} = this.stores;
+    ui.confirm("Do you want to delete this?", "Confirm Delete")
+      .then(ok => {
+        if (ok) {
+          document.setProperty("isDeleted", "true");
+        }
+      });
   }
 
 }

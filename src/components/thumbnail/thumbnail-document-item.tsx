@@ -13,11 +13,13 @@ interface IProps {
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
+  onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
 export const ThumbnailDocumentItem = observer((props: IProps) => {
   const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
-          onDocumentClick, onDocumentDragStart, onDocumentStarClick } = props;
+          onDocumentClick, onDocumentDragStart, onDocumentStarClick,
+        onDocumentDeleteClick } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick && onDocumentClick(document);
   };
@@ -26,6 +28,9 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
   };
   const handleDocumentStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentStarClick && onDocumentStarClick(document);
+  };
+  const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    onDocumentDeleteClick && onDocumentDeleteClick(document);
   };
   return (
     <div
@@ -45,8 +50,12 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
         </div>
       </div>
 
-      <DocumentCaption captionText={captionText} isStarred={onIsStarred()}
-                        onStarClick={onDocumentStarClick ? handleDocumentStarClick : undefined} />
+      <DocumentCaption
+        captionText={captionText}
+        isStarred={onIsStarred()}
+        onStarClick={onDocumentStarClick ? handleDocumentStarClick : undefined}
+        onDeleteClick={onDocumentDeleteClick ? handleDocumentDeleteClick : undefined}
+      />
     </div>
   );
 });
@@ -58,10 +67,11 @@ interface IDocumentCaptionProps {
   captionText: string;
   isStarred?: boolean;
   onStarClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onDeleteClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const DocumentCaption = (props: IDocumentCaptionProps) => {
-  const { captionText, isStarred, onStarClick } = props;
+  const { captionText, isStarred, onStarClick, onDeleteClick } = props;
   return (
     <div className="footer">
       <div className="info">
@@ -69,6 +79,9 @@ const DocumentCaption = (props: IDocumentCaptionProps) => {
       </div>
       {onStarClick
         ? <DocumentStar isStarred={!!isStarred} onStarClick={onStarClick} />
+        : null}
+      {onDeleteClick
+        ? <DocumentDelete onDeleteClick={onDeleteClick} />
         : null}
     </div>
   );
@@ -88,6 +101,21 @@ const DocumentStar = (props: IDocumentStarProps) => {
     <div className="icon-holder" onClick={onStarClick}>
       <svg className={"icon-star " + (isStarred ? "starred" : "")} >
         <use xlinkHref="#icon-star"/>
+      </svg>
+    </div>
+  );
+};
+
+interface IDocumentDeleteProps {
+  onDeleteClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+}
+
+const DocumentDelete = (props: IDocumentDeleteProps) => {
+  const { onDeleteClick } = props;
+  return (
+    <div className="icon-holder" onClick={onDeleteClick}>
+      <svg className="icon-delete-document">
+        <use xlinkHref="#icon-delete-document"/>
       </svg>
     </div>
   );
