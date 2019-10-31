@@ -43,6 +43,8 @@ export interface IToolApiMap {
   [id: string]: IToolApi;
 }
 
+export const kDragTiles = "org.concord.clue.drag-tiles";
+
 export const kDragRowHeight = "org.concord.clue.row.height";
 export const kDragTileSource = "org.concord.clue.tile.src";
 export const kDragTileId = "org.concord.clue.tile.id";
@@ -66,6 +68,21 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
       if (result) return result[1];
     }
   }
+}
+
+export interface IDragTileItem {
+  rowIndex: number;
+  rowHeight: number;
+  tileIndex: number;
+  tileId: string;
+  tileContent: string;
+  tileType: string;
+  // height?
+}
+
+export interface IDragTiles {
+  sourceDocId: string;
+  items: IDragTileItem[];
 }
 
 interface IProps {
@@ -103,6 +120,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private domElement: HTMLDivElement | null;
   private hotKeys: HotKeys = new HotKeys();
+  private dragElement: HTMLDivElement | null;
 
   public componentDidMount() {
     const { model } = this.props;
@@ -125,6 +143,16 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       this.domElement.removeEventListener("mousedown", this.handleMouseDown, true);
     }
   }
+
+  /*
+  was:
+           ? <div className="tool-tile-drag-handle tool select" ref={elt => this.dragElement = elt}>
+            <svg className={`icon icon-select-tool`}>
+              <use xlinkHref={`#icon-select-tool`} />
+            </svg>
+          </div>
+
+  */
 
   public render() {
     const { model, widthPct } = this.props;
@@ -187,6 +215,16 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   private handleMouseDown = (e: MouseEvent) => {
     const { model } = this.props;
     const { ui } = this.stores;
+
+    // ignore mousedown on drag element
+    let targetElement: HTMLElement | null = e.target as HTMLElement;
+    while ((targetElement !== null) && (targetElement !== this.dragElement)) {
+      targetElement = targetElement.parentElement;
+    }
+    if (targetElement === this.dragElement) {
+      return;
+    }
+
     const ToolComponent = kToolComponentMap[model.content.type];
     if (ToolComponent && ToolComponent.tileHandlesSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
@@ -222,11 +260,63 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       e.preventDefault();
       return;
     }
-    const snapshot = cloneDeep(getSnapshot(model));
-    const id = snapshot.id;
-    delete snapshot.id;
-    const dragData = JSON.stringify(snapshot);
     if (!e.dataTransfer) return;
+
+    // TODO: should this be moved to document-content.tsx since it is more than just the current tile?
+    //       and also the drop handler is there
+
+    const dragTiles: IDragTiles = {
+      sourceDocId: docId,
+      items: []
+    };
+    const { documents, ui: { selectedTileIds } } = this.stores;
+
+    // create a sorted array of selected tiles
+    selectedTileIds.forEach(selectedTileId => {
+      const document = documents.findDocumentOfTile(selectedTileId);
+      if (document) {
+        const {content} = document;
+        const tile = content.getTile(selectedTileId);
+        if (tile) {
+          const rowId = content.findRowContainingTile(tile.id);
+          const rowIndex = rowId && content.getRowIndex(rowId);
+          const row = rowId && content.getRow(rowId);
+          const rowHeight = row && row.height;
+          const tileIndex = row && row.tiles.findIndex(t => t.tileId === selectedTileId);
+          const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
+          delete tileSnapshotWithoutId.id;
+          dragTiles.items.push({
+            rowIndex: rowIndex || 0,
+            rowHeight: rowHeight || 0,
+            tileIndex: tileIndex || 0,
+            tileId: tile.id,
+            tileContent: JSON.stringify(tileSnapshotWithoutId),
+            tileType: tile.content.type
+          });
+        }
+      }
+    });
+    dragTiles.items.sort((a, b) => {
+      if (a.rowIndex < b.rowIndex) return -1;
+      if (a.rowIndex > b.rowIndex) return 1;
+      if (a.tileIndex < b.tileIndex) return -1;
+      if (a.tileIndex > b.tileIndex) return 1;
+      return 0;
+    });
+    e.dataTransfer.setData(kDragTiles, JSON.stringify(dragTiles));
+
+    // we have to set this as a transfer type because the kDragTiles contents are not available in drag over events
+    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
+
+    // NEED TO UPDATE:
+    // 1. geometry-content#handleTableTileDrop (uses kDragTileId)
+    // 2. drawing-layer#handleDrop and geometry-content#handleDrop (uses kDragTileContent)
+    // 3. drawing-layer#isAcceptableImageDrag and geometry-content#isAcceptableTileDrag (uses extractDragTileType)
+
+    /*
+
+    old single tile code:
+
     e.dataTransfer.setData(kDragTileSource, docId);
     if (height) {
       e.dataTransfer.setData(kDragRowHeight, String(height));
@@ -235,6 +325,9 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     e.dataTransfer.setData(kDragTileContent, dragData);
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(dragTileType(model.content.type), model.content.type);
+    */
+
+    // TODO: should we create an array of drag images here?
 
     // set the drag image
     const dragElt = e.target as HTMLElement;
