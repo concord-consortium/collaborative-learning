@@ -188,10 +188,10 @@ describe("GeometryContent", () => {
     const p2 = content.addPoint(board, [1, 1]);
     const p3 = content.addPoint(board, [1, 0]);
     const poly = content.createPolygonFromFreePoints(board);
-    content.selectObjects(p1!.id);
+    content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
-    content.selectObjects(poly!.id);
+    content.selectObjects(board, poly!.id);
     expect(content.isSelected(poly!.id)).toBe(true);
     expect(content.hasSelection()).toBe(true);
     let found = content.findObjects(board, (obj: JXG.GeometryElement) => {
@@ -202,7 +202,7 @@ describe("GeometryContent", () => {
     expect(content.isSelected(p1!.id)).toBe(false);
     content.deselectAll(board);
     expect(content.hasSelection()).toBe(false);
-    content.selectObjects(p1!.id);
+    content.selectObjects(board, p1!.id);
     content.deleteSelection(board);
     expect(content.hasSelection()).toBe(false);
     found = content.findObjects(board, (obj: JXG.GeometryElement) => {

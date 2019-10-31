@@ -5,7 +5,8 @@ import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
-import { ColumnApi, GridApi, GridReadyEvent, ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
+import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
+        } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
@@ -69,6 +70,19 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
 
+    const { selection } = this.stores;
+    selection.observe(this.props.model.id, change => {
+      const rowId = change.name;
+      const isSharedRowSelected = change.type === "delete"
+              ? false
+              : (change.newValue as any).storedValue;
+      const rowNode = this.gridApi && this.gridApi.getRowNode(rowId);
+      const isRowNodeSelected = rowNode ? rowNode.isSelected() : false;
+      if (rowNode && (isSharedRowSelected !== isRowNodeSelected)) {
+        rowNode.setSelected(isSharedRowSelected, false);
+      }
+    });
+
     this.disposers.push(autorun(() => {
       const { model: { content } } = this.props;
       const tableContent = content as TableContentModelType;
@@ -117,6 +131,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           itemFlags={itemFlags}
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
+          onRowSelectionChange={this.handleRowSelectionChange}
           onSetAttributeName={this.handleSetAttributeName}
           onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
@@ -166,6 +181,12 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   private handleGridReady = (gridReadyParams: GridReadyEvent) => {
     this.gridApi = gridReadyParams.api || undefined;
     this.gridColumnApi = gridReadyParams.columnApi || undefined;
+  }
+
+  private handleRowSelectionChange = (e: SelectionChangedEvent) => {
+    const { selection } = this.stores;
+    const nodes = e.api.getSelectedNodes();
+    selection.setSelected(this.props.model.id, nodes.map(n => n.id));
   }
 
   private handleMouseDown: EventListener = (e: MouseEvent) => {

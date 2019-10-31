@@ -1,4 +1,6 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { Lambda } from "mobx";
+import { SelectionStoreModelType } from "../../stores/selection";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
@@ -102,6 +104,10 @@ export const GeometryMetadataModel = types
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
   })
+  .volatile(self => ({
+    sharedSelection: undefined as any as SelectionStoreModelType,
+    tableLinkDisposers: {} as { [id: string]: Lambda }
+  }))
   .views(self => ({
     isDisabled(feature: string) {
       return self.disabled.indexOf(feature) >= 0;
@@ -132,6 +138,9 @@ export const GeometryMetadataModel = types
     }
   }))
   .actions(self => ({
+    setSharedSelection(sharedSelection: SelectionStoreModelType) {
+      self.sharedSelection = sharedSelection;
+    },
     setDisabledFeatures(disabled: string[]) {
       self.disabled.replace(disabled);
     },
@@ -141,14 +150,25 @@ export const GeometryMetadataModel = types
     deselect(id: string) {
       self.selection.set(id, false);
     },
+    setSelection(id: string, select: boolean) {
+      self.selection.set(id, select);
+    }
+  }))
+  .actions(self => ({
     addTableLink(tableId: string, axes: IAxisLabels) {
       if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
+        const disposer = self.sharedSelection.observe(tableId, change => {
+          const id = change.name;
+          self.setSelection(id, self.sharedSelection.isSelected(tableId, id));
+        });
+        disposer && (self.tableLinkDisposers[tableId] = disposer);
         self.linkedTables.push({ id: tableId, ...axes });
       }
     },
     removeTableLink(tableId: string) {
       const index = self.linkedTables.findIndex(entry => entry.id === tableId);
       if (index >= 0) {
+        delete self.tableLinkDisposers[tableId];
         self.linkedTables.splice(index, 1);
       }
     },
@@ -160,6 +180,8 @@ export const GeometryMetadataModel = types
       }
     },
     clearLinkedTables() {
+      each(self.tableLinkDisposers, disposer => disposer());
+      self.tableLinkDisposers = {};
       self.linkedTables.clear();
     }
   }));
@@ -267,14 +289,27 @@ export const GeometryContentModel = types
     }
   }))
   .actions(self => ({
-    selectElement(id: string) {
+    setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
+      if (self.isSelected(id) !== select) {
+        const elt = board && board.objects[id];
+        const tableId = elt && elt.getAttribute("linkedTableId");
+        const rowId = elt && elt.getAttribute("linkedRowId");
+        self.metadata.setSelection(id, select);
+        if (tableId && rowId) {
+          self.metadata.sharedSelection.select(tableId, rowId, select);
+        }
+      }
+    }
+  }))
+  .actions(self => ({
+    selectElement(board: JXG.Board | undefined, id: string) {
       if (!self.isSelected(id)) {
-        self.metadata.select(id);
+        self.setElementSelection(board, id, true);
       }
     },
-    deselectElement(id: string) {
+    deselectElement(board: JXG.Board | undefined, id: string) {
       if (self.isSelected(id)) {
-        self.metadata.deselect(id);
+        self.setElementSelection(board, id, false);
       }
     }
   }))
@@ -289,21 +324,21 @@ export const GeometryContentModel = types
       });
       self.metadata.clearLinkedTables();
     },
-    selectObjects(ids: string | string[]) {
+    selectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.selectElement(id);
+        self.selectElement(board, id);
       });
     },
     deselectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     },
     deselectAll(board: JXG.Board) {
       self.metadata.selection.forEach((value, id) => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     }
   }))
