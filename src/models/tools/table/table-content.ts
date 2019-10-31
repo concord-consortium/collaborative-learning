@@ -321,11 +321,11 @@ export const TableContentModel = types
             links
       });
     },
-    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
+    removeGeometryLinks(geometryIds: string | string[], links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "geometryLink",
-            ids: geometryId,
+            ids: geometryIds,
             links
       });
     }
@@ -362,7 +362,7 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
-    applyCreate(dataSet: IDataSet, change: ITableChange) {
+    applyCreate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
         case "columns":
@@ -385,13 +385,15 @@ export const TableContentModel = types
           }
           break;
         case "geometryLink":
-          const geometryId = change.ids && change.ids as string;
-          const geometryContent = geometryId && getGeometryContent(self, geometryId);
-          geometryContent && self.metadata.addLinkedGeometry(geometryId!);
+          if (!dataSetOnly) {
+            const geometryId = change.ids && change.ids as string;
+            const geometryContent = geometryId && getGeometryContent(self, geometryId);
+            geometryContent && self.metadata.addLinkedGeometry(geometryId!);
+          }
           break;
       }
     },
-    applyUpdate(dataSet: IDataSet, change: ITableChange) {
+    applyUpdate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const ids = castArray(change.ids);
       switch (change.target) {
         case "columns":
@@ -428,7 +430,7 @@ export const TableContentModel = types
           break;
       }
     },
-    applyDelete(dataSet: IDataSet, change: ITableChange) {
+    applyDelete(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const ids = change && castArray(change.ids);
       switch (change.target) {
         case "columns":
@@ -442,21 +444,23 @@ export const TableContentModel = types
           }
           break;
         case "geometryLink":
-          const geometryId = change.ids && change.ids as string;
-          geometryId && self.metadata.removeLinkedGeometry(geometryId);
+          if (!dataSetOnly) {
+            const geometryIds = castArray(change.ids);
+            geometryIds.forEach(id => self.metadata.removeLinkedGeometry(id));
+          }
           break;
       }
     }
   }))
   .views(self => ({
-    applyChange(dataSet: IDataSet, change: ITableChange) {
+    applyChange(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       switch (change.action) {
         case "create":
-          return self.applyCreate(dataSet, change);
+          return self.applyCreate(dataSet, change, dataSetOnly);
         case "update":
-          return self.applyUpdate(dataSet, change);
+          return self.applyUpdate(dataSet, change, dataSetOnly);
         case "delete":
-          return self.applyDelete(dataSet, change);
+          return self.applyDelete(dataSet, change, dataSetOnly);
       }
     }
   }))
@@ -468,12 +472,20 @@ export const TableContentModel = types
           self.applyChange(dataSet, change);
         }
       }
+    },
+    applyChangesToDataSet(dataSet: IDataSet) {
+      self.changes.forEach(jsonChange => {
+        const change = safeJsonParse(jsonChange);
+        if (change) {
+          self.applyChange(dataSet, change, true);
+        }
+      });
     }
   }))
   .views(self => ({
     getSharedData(canonicalize: boolean = true) {
       const dataSet = DataSet.create();
-      self.applyChanges(dataSet);
+      self.applyChangesToDataSet(dataSet);
 
       const attrIds = dataSet.attributes.map(attr => attr.id);
       const kLabelId = uniqueId();
@@ -494,7 +506,7 @@ export const TableContentModel = types
     },
     isValidForGeometryLink() {
       const dataSet = DataSet.create();
-      self.applyChanges(dataSet);
+      self.applyChangesToDataSet(dataSet);
 
       const attrIds = dataSet.attributes.map(attr => attr.id);
       for (const aCase of dataSet.cases) {

@@ -60,6 +60,8 @@ interface IProps {
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
   onRemoveCases?: (ids: string[]) => void;
+  onGetLinkedGeometries?: () => string[];
+  onUnlinkGeometry?: () => void;
   onSampleData?: (name: string) => void;
 }
 
@@ -233,6 +235,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             const { dataSet } = this.props;
             dataSet && dataSet.removeCases(ids);
           }
+        },
+        onGetLinkedGeometries: () => {
+          return this.props.onGetLinkedGeometries && this.props.onGetLinkedGeometries();
+        },
+        onUnlinkGeometry: () => {
+          this.props.onUnlinkGeometry && this.props.onUnlinkGeometry();
         }
       },
       headerClass: "cdp-column-header cdp-case-index-header",

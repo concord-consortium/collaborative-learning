@@ -105,14 +105,16 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly } = this.props;
-    const metadata = this.getContent().metadata;
+    const content = this.getContent();
+    const metadata = content.metadata;
     const itemFlags: IMenuItemFlags = {
             addAttribute: false,
             addCase: true,
             addRemoveDivider: false,
             renameAttribute: true,
             removeAttribute: false,
-            removeCases: true
+            removeCases: true,
+            unlinkGeometry: true
           };
     return (
       <div className="table-tool" ref={this.domRef}
@@ -122,11 +124,11 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           expressions={metadata.expressions}
           rawExpressions={metadata.rawExpressions}
           changeCount={this.syncedChanges}
-          autoSizeColumns={this.getContent().isImported}
+          autoSizeColumns={content.isImported}
           indexValueGetter={this.indexValueGetter}
           attrValueFormatter={this.attrValueFormatter}
           cellEditorComponent={LinkedTableCellEditor}
-          cellEditorParams={{ metadata: this.getContent().metadata }}
+          cellEditorParams={{ metadata }}
           defaultPrecision={1}
           itemFlags={itemFlags}
           readOnly={readOnly}
@@ -137,6 +139,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           onAddCanonicalCases={this.handleAddCanonicalCases}
           onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
           onRemoveCases={this.handleRemoveCases}
+          onGetLinkedGeometries={this.handleGetLinkedGeometries}
+          onUnlinkGeometry={this.handleUnlinkGeometry}
         />
         {this.renderInvalidPasteAlert()}
       </div>
@@ -396,6 +400,23 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.getGeometryContent(id);
       if (geometryContent) {
         geometryContent.removeObjects(undefined, ids, geomActionLinks);
+      }
+    });
+  }
+
+  private handleGetLinkedGeometries = () => {
+    return this.getContent().metadata.linkedGeometries.toJS();
+  }
+
+  private handleUnlinkGeometry = () => {
+    const geometryIds = this.getContent().metadata.linkedGeometries.toJS();
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().removeGeometryLinks(geometryIds, tableActionLinks);
+    const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+    geometryIds.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.removeTableLink(undefined, this.props.model.id, geomActionLinks);
       }
     });
   }
