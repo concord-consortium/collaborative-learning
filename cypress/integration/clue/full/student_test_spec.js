@@ -12,7 +12,7 @@ let student = '5',
     problemSet = '2.1';
 
 
-describe('Check header area for correctness', function(){
+describe.skip('Check header area for correctness', function(){
     it('will verify if class name is correct', function(){
         header.getClassName().should('contain',''+'Class '+classroom);
     });
