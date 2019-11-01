@@ -414,24 +414,31 @@ export const DocumentContentModel = types
     },
     copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
       if (tiles.length > 0) {
+        let rowDelta = 0;
         let lastRowIndex = -1;
-        const startRowIndex = tiles[0].rowIndex;
         tiles.forEach(tile => {
-          const rowOptions: INewTileOptions = {
-            rowIndex: rowIndex + (tile.rowIndex - startRowIndex),
-            rowHeight: tile.rowHeight,
-            action: LogEventName.COPY_TILE,
-            loggingMeta: {
-              originalTileId: tile.tileId
+          const content = safeJsonParse(tile.tileContent).content;
+          if (content) {
+            const rowOptions: INewTileOptions = {
+              rowIndex: rowIndex + rowDelta,
+              action: LogEventName.COPY_TILE,
+              loggingMeta: {
+                originalTileId: tile.tileId
+              }
+            };
+            if (tile.rowHeight) {
+              rowOptions.rowHeight = tile.rowHeight;
             }
-          };
-          const content = safeJsonParse(tile.tileContent);
-          if (tile.rowIndex !== lastRowIndex) {
-            self.addTileInNewRow(content, rowOptions);
-            lastRowIndex = tile.rowIndex;
-          }
-          else {
-            self.addTileInExistingRow(content, rowOptions);
+            if (tile.rowIndex !== lastRowIndex) {
+              self.addTileInNewRow(content, rowOptions);
+              if (lastRowIndex !== -1) {
+                rowDelta++;
+              }
+              lastRowIndex = tile.rowIndex;
+            }
+            else {
+              self.addTileInExistingRow(content, rowOptions);
+            }
           }
         });
       }
@@ -652,7 +659,9 @@ export const DocumentContentModel = types
           }
           if (lastRowIndex !== tile.rowIndex) {
             tileIndex = 0;
-            rowDelta++;
+            if (lastRowIndex !== -1) {
+              rowDelta++;
+            }
             lastRowIndex = tile.rowIndex;
           } else {
             tileIndex++;
