@@ -39,6 +39,11 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
 
   private prefix = isMac() ? "Cmd-" : "Ctrl-";
 
+  // If there should be a need to use this component in more than one place,
+  // it should be relatively straightforward to abstract the set of buttons
+  // outside of the component and define the contents of the bar in the client
+  // code that instantiates the TextStyleBarComponent.
+
   private buttonDefs: IButtonDef[] = [
     { iconName: "bold",        toolTip: `Bold - ${this.prefix}b`},
     { iconName: "italic",      toolTip: `Italic - ${this.prefix}i`},
