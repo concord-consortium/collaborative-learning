@@ -72,15 +72,16 @@ interface SlateChange {
   value: Value;
 }
 
-enum ESlateType {
-  block,
-  mark
+enum SlateNodeType {
+  block = "block",
+  mark = "mark"
 }
 
-interface IOnKeyDownHandlerDef {
-  key: string;
-  type: string;
-  isMark: boolean;  // False means this is a block.
+interface ISlateMapEntry {
+  slateType: string;          // Slate's block & mark names, like "bulleted-list"
+  nodeType: SlateNodeType;    // Either block or mark
+  buttonIconName?: string;    // If missing, there is no tool-bar support
+  hotKey?: string;            // If missing, not a keyboard function.
 }
 
 interface IProps {
@@ -93,12 +94,6 @@ interface IState {
   selectedButtons?: string[];
 }
 
-interface ISlateButtonMapEntry {
-  slate: string;
-  type: ESlateType;
-  button: string | null;
-}
-
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<IProps, IState> {
@@ -108,97 +103,77 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   private wrapper = React.createRef<HTMLDivElement>();
   private editor = React.createRef<Editor>();
 
-  private plugins: Plugin[] = [
-    this.makeOnKeyDownHandler({ key: "mod+b", type: "bold", isMark: true }),
-    this.makeOnKeyDownHandler({ key: "mod+i", type: "italic", isMark: true }),
-    this.makeOnKeyDownHandler({ key: "mod+u", type: "underlined", isMark: true }),
-    this.makeOnKeyDownHandler({ key: "mod+shift+,", type: "superscript", isMark: true }),
-    this.makeOnKeyDownHandler({ key: "mod+,", type: "subscript", isMark: true }),
+  private slateMap: ISlateMapEntry[] = [
+    // This table is needed to translate between Slate's block and mark types
+    // and the parameters required for event handling. (Sometimes the name
+    // differences are a little subtle.)
+    {
+      slateType: "bold",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "bold",
+      hotKey: "mod+b"
+    },
+    {
+      slateType: "italic",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "italic",
+      hotKey: "mod+i"
+    },
+    {
+      slateType: "code",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "code",
+      hotKey: undefined
+    },
+    {
+      slateType: "inserted",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: undefined,
+      hotKey: undefined
+    },
+    {
+      slateType: "deleted",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: undefined,
+      hotKey: undefined
+    },
+    {
+      slateType: "underlined",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "underline",
+      hotKey: "mod+u"
+    },
+    {
+      slateType: "superscript",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "superscript",
+      hotKey: "mod+shift+,"
+    },
+    {
+      slateType: "subscript",
+      nodeType: SlateNodeType.mark,
+      buttonIconName: "subscript",
+      hotKey: "mod+,",
+    },
+    {
+      slateType: "bulleted-list",
+      nodeType: SlateNodeType.block,
+      buttonIconName: "list-ul",
+      hotKey: undefined
+    },
+    {
+      slateType: "ordered-list",
+      nodeType: SlateNodeType.block,
+      buttonIconName: "list-ol",
+      hotKey: undefined
+    },
   ];
 
-  // This mapping table is required since the exact names of the slate block
-  // and mark types don't exactly match the names of the Font Awesome button
-  // names. See the private functions fromSlateToButton() and fromButtonToSlate()
-  // function members of this class for how this table is used.
-  private slateAndButtonNameMap: ISlateButtonMapEntry[] = [
-    { slate: "bold", type: ESlateType.mark, button: "bold" },
-    { slate: "italic", type: ESlateType.mark, button: "italic" },
-    { slate: "code", type: ESlateType.mark, button: "code" },
-    { slate: "inserted", type: ESlateType.mark, button: null },
-    { slate: "deleted", type: ESlateType.mark, button: null },
-    { slate: "underlined", type: ESlateType.mark, button: "underline" },
-    { slate: "superscript", type: ESlateType.mark, button: "superscript" },
-    { slate: "subscript", type: ESlateType.mark, button: "subscript" },
-    { slate: "bulleted-list", type: ESlateType.block, button: "list-ul" },
-    { slate: "ordered-list", type: ESlateType.block, button: "list-ol" },
-  ];
-
-  public onChange = (change: SlateChange) => {
-    const { readOnly, model } = this.props;
-    const content = this.getContent();
-    const { ui } = this.stores;
-    const listOfMarks = change.value.activeMarks;
-
-    // determine last focus state from list of operations
-    let isFocused: boolean | undefined;
-    change.operations.forEach(op => {
-      if (op && op.type === "set_selection") {
-        isFocused = op.properties.isFocused;
-      }
-    });
-
-    if (isFocused != null) {
-      // polarity is reversed from what one might expect
-      if (!isFocused) {
-        // only select - if we deselect, it breaks delete because Slate
-        // somehow detects the selection change before the click on the
-        // delete button is processed by the workspace. For now, we just
-        // disable focus change on deselection.
-        ui.setSelectedTile(model);
-      }
-    }
-
-    if (content.type === "Text") {
-      if (!readOnly) {
-        const buttonList: string[] = ["undo"];  // Always select "undo"
-        if (listOfMarks) {
-          listOfMarks.forEach(mark => {
-            if (mark) {
-              const buttonMap = this.fromSlateToButton(mark.type);
-              if (buttonMap && buttonMap.button) {
-                buttonList.push(buttonMap.button);
-              }
-            }
-          });
-        }
-
-        const { document, selection } = change.value;
-        const currentRange = Range.create(
-          {
-            anchor: selection.anchor,
-            focus: selection.focus
-          }
-        );
-        const nodes = document.getDescendantsAtRange(currentRange);
-        ["ordered-list", "bulleted-list"].forEach((slateType) => {
-          if (nodes.some((node: any) => node.type === slateType)) {
-            const buttonMap = this.fromSlateToButton(slateType);
-            if (buttonMap && buttonMap.button) {
-              buttonList.push(buttonMap.button);
-            }
-          }
-        });
-
-        content.setSlate(change.value);
-        this.setState(
-          {
-            value: change.value,
-            selectedButtons: buttonList.sort()
-          }
-        );
-      }
-    }
-  }
+  // This set of plugins (as required by the Slate Editor component) provide
+  // the mapping of a hot-key to the required handler.
+  private slatePlugins: Plugin[] =
+    this.slateMap.filter(entry => (entry.hotKey !== undefined))
+      .map(entry => this.makeOnKeyDownHandler(entry));
 
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;
@@ -238,22 +213,25 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
     if (!this.state.value) { return null; }
 
-    const onClick = (buttonName: string, editor: Editor, event: React.MouseEvent) => {
-      if (buttonName === "undo") {
-        editor.undo();
+    const onToolBarButtonClick = (
+        buttonIconName: string,
+        editor: any,
+        event: React.MouseEvent) => {
+      if (buttonIconName === "undo") {
+        const ed = editor.current ? editor.current : editor;
+        ed.undo();
         event.preventDefault();
       } else {
-        const buttonDef = this.fromButtonToSlate(buttonName);
-        if (buttonDef && buttonDef.button) {
-          if (buttonDef.type === ESlateType.mark) {
-            this.handleMarkEvent(buttonDef.button, event, editor);
+        const slateDef = this.lookupButtonIcon(buttonIconName);
+        if (slateDef && slateDef.slateType && slateDef.nodeType) {
+          if (slateDef.nodeType === SlateNodeType.mark) {
+            this.handleMarkEvent(slateDef.slateType, event, editor);
           } else {  // Here, if button.Def.type === ESlateType.block
-            this.handleBlockEvent(buttonDef.button, event, editor);
+            this.handleBlockEvent(slateDef.slateType, event, editor);
           }
+          event.preventDefault();
         }
-        event.preventDefault();
       }
-      // If we had nothing to process, **do not** prevent the default mouse event.
     };
 
     return (
@@ -265,7 +243,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextStyleBarComponent
           selectedButtonNames={this.state.selectedButtons ? this.state.selectedButtons : []}
-          clickHandler={onClick}
+          clickHandler={onToolBarButtonClick}
           editor={this.editor}
           enabled={enableStyleBar}
           visible={renderStyleBar}
@@ -280,18 +258,92 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           onChange={this.onChange}
           renderMark={this.renderMark}
           renderBlock={this.renderBlock}
-          plugins={this.plugins}
+          plugins={this.slatePlugins}
         />
       </div>
     );
   }
 
-  private fromSlateToButton(slateName: string): ISlateButtonMapEntry | undefined {
-    return (this.slateAndButtonNameMap.find((mapEntry: ISlateButtonMapEntry ) => mapEntry.slate === slateName));
+  public onChange = (change: SlateChange) => {
+    const { readOnly, model } = this.props;
+    const content = this.getContent();
+    const { ui } = this.stores;
+
+    // determine last focus state from list of operations
+    let isFocused: boolean | undefined;
+    change.operations.forEach(op => {
+      if (op && op.type === "set_selection") {
+        isFocused = op.properties.isFocused;
+      }
+    });
+
+    if (isFocused != null) {
+      // polarity is reversed from what one might expect
+      if (!isFocused) {
+        // only select - if we deselect, it breaks delete because Slate
+        // somehow detects the selection change before the click on the
+        // delete button is processed by the workspace. For now, we just
+        // disable focus change on deselection.
+        ui.setSelectedTile(model);
+      }
+    }
+
+    if (content.type === "Text" && !readOnly) {
+      content.setSlate(change.value);
+      this.setState(
+        {
+          value: change.value,
+          selectedButtons: this.getSelectedIcons(change).sort()
+        }
+      );
+    }
   }
 
-  private fromButtonToSlate(buttonName: string): ISlateButtonMapEntry | undefined {
-    return (this.slateAndButtonNameMap.find(mapEntry => mapEntry.button === buttonName));
+  private getSelectedIcons(change: SlateChange): string[] {
+    const listOfMarks = change.value.activeMarks;
+
+    const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
+
+    if (listOfMarks) {
+      listOfMarks.forEach(mark => {
+        if (mark && mark.type) {
+          const button = this.lookupSlateType(mark.type);
+          if (button && button.buttonIconName) {
+            buttonList.push(button.buttonIconName);
+          }
+        }
+      });
+    }
+
+    const { document, selection } = change.value;
+    const currentRange = Range.create(
+      {
+        anchor: selection.anchor,
+        focus: selection.focus
+      }
+    );
+    const nodes = document.getDescendantsAtRange(currentRange);
+    ["ordered-list", "bulleted-list"].forEach((slateType) => {
+      if (nodes.some((node: any) => node.type === slateType)) {
+        const button = this.lookupSlateType(slateType);
+        if (button && button.buttonIconName) {
+          buttonList.push(button.buttonIconName);
+        }
+      }
+    });
+    return buttonList;
+
+  }
+
+  private lookupButtonIcon(buttonIconName: string): ISlateMapEntry | undefined {
+    // Should probably check that there is only one entry. If there is more
+    // than one, it's a coding error.
+    return this.slateMap.find(mapEntry => mapEntry.buttonIconName === buttonIconName);
+  }
+
+  private lookupSlateType(slateType: string): ISlateMapEntry | undefined {
+    // See comment in lookupButtonIcon() -- same applies here.
+    return this.slateMap.find(mapEntry => mapEntry.slateType === slateType);
   }
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -320,55 +372,60 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as TextContentModelType;
   }
 
-  private handleMarkEvent(type: string, event: any, editor: any, next?: () => any) {
+  private handleMarkEvent(slateType: string, event: any, editor: any, next?: () => any) {
     const ed = editor.current ? editor.current : editor;
-    switch (type) {
+    switch (slateType) {
       case "undo":
-        ed.undo();  // Not really a mark, nor a block.
+        ed.undo();  // Not really a mark, nor a block, but must always be handled.
         break;
       case "superscript":
       case "subscript":
-        // Prevent the nesting of superscripts and subscripts.
-        const hasType = ed.value.marks.some((m: any) => ["superscript", "subscript"].includes(m.type));
-        !hasType ? ed.toggleMark(type) : ed.removeMark("superscript").removeMark("subscript");
+        // Special case handling: Prevent the nesting of superscripts and subscripts.
+        const hasType = ed.value.marks.some((m: any) => {
+          return (m.type === "subscript" || m.type === "superscript");
+        });
+        if (hasType) {
+          ed.removeMark("superscript").removeMark("subscript");
+        } else {
+          ed.toggleMark(slateType);
+        }
         break;
       default:
-        // Everything else (e.g. bold, underline, italic, typewriter, ...)
-        ed.toggleMark(type);
+        // Everything else (e.g. bold, underline, italic, ...)
+        ed.toggleMark(slateType);
         break;
     }
   }
 
-  private handleBlockEvent(type: string, event: any, editor: any, next?: () => any) {
+  private handleBlockEvent(slateType: string, event: any, editor: any, next?: () => any) {
     const DEFAULT_BLOCK_TYPE = "";
     const ed = editor.current ? editor.current : editor;
     const { value: { blocks, document } } = ed;
     const containsListItems = blocks.some((block: any) => block.type === "list-item");
     const isListOfThisType = blocks.some((block: any) => {
-      return !!document.getClosest(block.key, (parent: any) => parent.type === type);
+      return !!document.getClosest(block.key, (parent: any) => parent.type === slateType);
     });
-    const slateType = this.fromButtonToSlate(type)!.slate;
     switch (slateType) {
       case "undo":
-        ed.undo();  // Not really a mark, nor a block.
+        ed.undo();  // Not really a mark, nor a block, but must always be handled.
         break;
       case "bulleted-list":
       case "ordered-list":
-        if (!containsListItems) {
+        if (! containsListItems) {
           // For a brand new list, first set the selection to be a list-item.
           // Then wrap the new list-items with the appropriate type of block.
           ed.setBlocks("list-item")
             .wrapBlock(slateType);
         } else if (isListOfThisType) {
-          // If we are setting a list to it's existing type, we treat this as
+          // If we are setting a list to it's current type, we treat this as
           // a toggle-off. To do this, we unwrap the selection and remove all
           // list-items.
-          ed.setBlocks("")  // Removes blocks typed w/ "list-item"
+          ed.setBlocks(DEFAULT_BLOCK_TYPE)  // Removes blocks typed w/ "list-item"
             .unwrapBlock("bulleted-list")
             .unwrapBlock("ordered-list");
         } else {
-          // If we have bottomed out here, then we are switching a list between
-          // bulleted <-> numbered.
+          // If we have ended up here, then we are switching a list between slate
+          // types, i.e., bulleted <-> numbered.
           ed.unwrapBlock(slateType === "bulleted-list" ? "ordered-list" : "bulleted-list")
             .wrapBlock(slateType);
         }
@@ -380,12 +437,12 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       case "heading5":
       case "heading6":
       default:
-        const isAlreadySet = blocks.some((block: any) => block.type === type);
-        ed.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : type);
+        const isAlreadySet = blocks.some((block: any) => block.type === slateType);
+        ed.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : slateType);
         if (containsListItems) {
           // In this case, we are trying to change a block away from
-          // being a list. To do this, we either set the type we are
-          // after, or clear it, if it's already set to that type. Then
+          // being a list. To do this, we either set the slateType we are
+          // after, or clear it, if it's already set to that slateType. Then
           // we remove any part of the selection that might be a wrapper
           // of either type of list.
           ed.unwrapBlock("bulleted-list")
@@ -395,26 +452,39 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private makeOnKeyDownHandler(hotKeyDef: IOnKeyDownHandlerDef): Plugin {
+  private makeOnKeyDownHandler(hotKeyDef: ISlateMapEntry): Plugin {
     // Returns a Slate plug-in for an onKeyDown handler.
-    const { key, type, isMark } = hotKeyDef;
-    const onSlateEvent = (mark: boolean, slateType: string, event: any, editor: any, next: () => any) => {
-      if (mark) {
-        this.handleMarkEvent(slateType, event, editor, next);
+    const { hotKey, slateType, nodeType } = hotKeyDef;
+    const onSlateEvent = (
+      nType: SlateNodeType,
+      sType: string,
+      event: any,
+      editor: any,
+      next: () => any) => {
+      if (nType === SlateNodeType.mark) {
+        this.handleMarkEvent(sType, event, editor, next);
       } else {
-        this.handleBlockEvent(slateType, event, editor, next);
+        this.handleBlockEvent(sType, event, editor, next);
       }
       event.preventDefault();
     };
-    return ({
-      onKeyDown(event: any, editor: any, next: () => any) {
-        if (isHotkey(key, event)) {
-          onSlateEvent(isMark, type, event, editor, next);
-        } else {
+    if (! hotKey) {
+      return ({
+        onKeyDown(event: any, editor: any, next: () => any) {
           next();
         }
-      }
-    });
+      });
+    } else {
+      return ({
+        onKeyDown(event: any, editor: any, next: () => any) {
+          if (isHotkey(hotKey, event)) {
+            onSlateEvent(nodeType, slateType, event, editor, next);
+          } else {
+            next();
+          }
+        }
+      });
+    }
   }
 
 }
