@@ -135,7 +135,7 @@
     "ag-grid-community": "^21.2.1",
     "ag-grid-react": "^21.2.1",
     "classnames": "^2.2.6",
-    "concord-react-components": "^0.1.0",
+    "concord-react-components": "^0.1.2",
     "expr-eval": "^1.2.3",
     "file-saver": "^2.0.2",
     "firebase": "^6.6.1",

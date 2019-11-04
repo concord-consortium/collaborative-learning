@@ -47,10 +47,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     // with a name matching the current class name and no link. This is bit of
     // code is primarily for when the application is running in demo mode.
     if (classNames.length === 0) {
-      return {
-        currentTitle:  user.className,
-        links: [{ text: user.className} ]
-      };
+      return [];
     }
 
     // For each class (that is, for each item in the class switcher menu) we
