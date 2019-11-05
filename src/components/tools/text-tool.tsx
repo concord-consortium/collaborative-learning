@@ -172,8 +172,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   // This set of plugins (as required by the Slate Editor component) provide
   // the mapping of a hot-key to the required handler.
   private slatePlugins: Plugin[] =
-    this.slateMap.filter(entry => (entry.hotKey !== undefined))
-      .map(entry => this.makeOnKeyDownHandler(entry));
+    this.slateMap.filter(entry => !!entry.hotKey)
+      .map(entry => this.makeKeyDownHandler(entry));
 
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;
@@ -213,20 +213,19 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
     if (!this.state.value) { return null; }
 
-    const onToolBarButtonClick = (
+    const handleToolBarButtonClick = (
         buttonIconName: string,
         editor: any,
         event: React.MouseEvent) => {
       if (buttonIconName === "undo") {
-        const ed = editor.current ? editor.current : editor;
-        ed.undo();
+        editor.current && editor.current.undo();
         event.preventDefault();
       } else {
         const slateDef = this.lookupButtonIcon(buttonIconName);
         if (slateDef && slateDef.slateType && slateDef.nodeType) {
           if (slateDef.nodeType === SlateNodeType.mark) {
             this.handleMarkEvent(slateDef.slateType, event, editor);
-          } else {  // Here, if button.Def.type === ESlateType.block
+          } else {  // slateDef.nodeType === SlateNodeType.block
             this.handleBlockEvent(slateDef.slateType, event, editor);
           }
           event.preventDefault();
@@ -243,7 +242,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextStyleBarComponent
           selectedButtonNames={this.state.selectedButtons ? this.state.selectedButtons : []}
-          clickHandler={onToolBarButtonClick}
+          clickHandler={handleToolBarButtonClick}
           editor={this.editor}
           enabled={enableStyleBar}
           visible={renderStyleBar}
@@ -255,7 +254,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           placeholder={placeholderText}
           readOnly={readOnly}
           value={this.state.value}
-          onChange={this.onChange}
+          onChange={this.handleChange}
           renderMark={this.renderMark}
           renderBlock={this.renderBlock}
           plugins={this.slatePlugins}
@@ -264,7 +263,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  public onChange = (change: SlateChange) => {
+  private handleChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
@@ -373,11 +372,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMarkEvent(slateType: string, event: any, editor: any, next?: () => any) {
-    const ed = editor.current ? editor.current : editor;
+    const ed = editor.current ? editor.current : undefined;
     switch (slateType) {
-      case "undo":
-        ed.undo();  // Not really a mark, nor a block, but must always be handled.
-        break;
       case "superscript":
       case "subscript":
         // Special case handling: Prevent the nesting of superscripts and subscripts.
@@ -399,16 +395,13 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   private handleBlockEvent(slateType: string, event: any, editor: any, next?: () => any) {
     const DEFAULT_BLOCK_TYPE = "";
-    const ed = editor.current ? editor.current : editor;
+    const ed = editor.current ? editor.current : undefined;
     const { value: { blocks, document } } = ed;
     const containsListItems = blocks.some((block: any) => block.type === "list-item");
     const isListOfThisType = blocks.some((block: any) => {
       return !!document.getClosest(block.key, (parent: any) => parent.type === slateType);
     });
     switch (slateType) {
-      case "undo":
-        ed.undo();  // Not really a mark, nor a block, but must always be handled.
-        break;
       case "bulleted-list":
       case "ordered-list":
         if (! containsListItems) {
@@ -417,7 +410,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           ed.setBlocks("list-item")
             .wrapBlock(slateType);
         } else if (isListOfThisType) {
-          // If we are setting a list to it's current type, we treat this as
+          // If we are setting a list to its current type, we treat this as
           // a toggle-off. To do this, we unwrap the selection and remove all
           // list-items.
           ed.setBlocks(DEFAULT_BLOCK_TYPE)  // Removes blocks typed w/ "list-item"
@@ -452,8 +445,9 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private makeOnKeyDownHandler(hotKeyDef: ISlateMapEntry): Plugin {
-    // Returns a Slate plug-in for an onKeyDown handler.
+  private makeKeyDownHandler(hotKeyDef: ISlateMapEntry): Plugin {
+    // Returns a Slate plug-in for an onKeyDown handler required
+    // by the plug-in.
     const { hotKey, slateType, nodeType } = hotKeyDef;
     const onSlateEvent = (
       nType: SlateNodeType,
@@ -468,6 +462,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       }
       event.preventDefault();
     };
+    // Note: The following two return paths both return methods that match slate's
+    // onKeyDown() method signature.
     if (! hotKey) {
       return ({
         onKeyDown(event: any, editor: any, next: () => any) {
