@@ -7,6 +7,20 @@ import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 
+const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
+  const latestPublications: DocumentModelType[] = [];
+  publications.forEach((publication) => {
+    const latestIndex = latestPublications.findIndex((pub) => pub[attr] === publication[attr]);
+    if (latestIndex === -1) {
+      latestPublications.push(publication);
+    }
+    else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+      latestPublications[latestIndex] = publication;
+    }
+  });
+  return latestPublications;
+};
+
 export const DocumentsModel = types
   .model("Documents", {
     all: types.array(DocumentModel),
@@ -27,102 +41,86 @@ export const DocumentsModel = types
       });
     }
   }))
-  .views(self => {
-    const getLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
-      const latestPublications: DocumentModelType[] = [];
-      publications.forEach((publication) => {
-        const latestIndex = latestPublications.findIndex((pub) => pub[attr] === publication[attr]);
-        if (latestIndex === -1) {
-          latestPublications.push(publication);
-        }
-        else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
-          latestPublications[latestIndex] = publication;
-        }
+  .views(self => ({
+    getNextPersonalDocumentTitle(user: UserModelType, base: string) {
+      let maxUntitled = 0;
+      self.byTypeForUser(PersonalDocument, user.id)
+        .forEach(document => {
+          const match = /.*-([0-9]+)$/.exec(document.title || "");
+          // length check to skip timestamps
+          if (match && match[1] && (match[1].length < 4)) {
+            const suffix = parseInt(match[1], 10);
+            maxUntitled = Math.max(maxUntitled, suffix);
+          }
+        });
+      return `${base}-${++maxUntitled}`;
+    },
+
+    getPersonalDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === PersonalDocument) && (document.uid === userId);
       });
-      return latestPublications;
-    };
+    },
 
-    return {
-      getNextPersonalDocumentTitle(user: UserModelType, base: string) {
-        let maxUntitled = 0;
-        self.byTypeForUser(PersonalDocument, user.id)
-          .forEach(document => {
-            const match = /.*-([0-9]+)$/.exec(document.title || "");
-            // length check to skip timestamps
-            if (match && match[1] && (match[1].length < 4)) {
-              const suffix = parseInt(match[1], 10);
-              maxUntitled = Math.max(maxUntitled, suffix);
-            }
-          });
-        return `${base}-${++maxUntitled}`;
-      },
+    getLearningLogDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === LearningLogDocument) && (document.uid === userId);
+      });
+    },
 
-      getPersonalDocument(userId: string) {
-        return self.all.find((document) => {
-          return (document.type === PersonalDocument) && (document.uid === userId);
+    getProblemDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === ProblemDocument) && (document.uid === userId);
+      });
+    },
+
+    getProblemDocumentsForGroup(groupId: string) {
+      return self.all.filter((document) => {
+        return (document.type === ProblemDocument) && (document.groupId === groupId);
+      });
+    },
+
+    getLastPublishedProblemDocumentsForGroup(groupId: string) {
+      const groupPublications = self.byType(ProblemPublication).filter((pub) => pub.groupId === groupId);
+      return extractLatestPublications(groupPublications, "uid");
+    },
+
+    getNextLearningLogTitle(user: UserModelType, base: string) {
+      let maxUntitled = 0;
+      self.byTypeForUser(LearningLogDocument, user.id)
+        .forEach(document => {
+          const match = /.*-([0-9]+)$/.exec(document.title || "");
+          // length check to skip timestamps
+          if (match && match[1] && (match[1].length < 4)) {
+            const suffix = parseInt(match[1], 10);
+            maxUntitled = Math.max(maxUntitled, suffix);
+          }
         });
-      },
+      return `${base}-${++maxUntitled}`;
+    },
 
-      getLearningLogDocument(userId: string) {
-        return self.all.find((document) => {
-          return (document.type === LearningLogDocument) && (document.uid === userId);
-        });
-      },
+    // Returns the most recently published personal documents or learning logs per user, sorted by title
+    getLatestOtherPublications(type: OtherPublicationType) {
+      const latestPublications = extractLatestPublications(self.byType(type), "originDoc");
+      return latestPublications.sort((pub1, pub2) => {
+        return (pub1.title || "").localeCompare(pub2.title || "");
+      });
+    },
 
-      getProblemDocument(userId: string) {
-        return self.all.find((document) => {
-          return (document.type === ProblemDocument) && (document.uid === userId);
-        });
-      },
-
-      getProblemDocumentsForGroup(groupId: string) {
-        return self.all.filter((document) => {
-          return (document.type === ProblemDocument) && (document.groupId === groupId);
-        });
-      },
-
-      getLastPublishedProblemDocumentsForGroup(groupId: string) {
-        const groupPublications = self.byType(ProblemPublication).filter((pub) => pub.groupId === groupId);
-        return getLatestPublications(groupPublications, "uid");
-      },
-
-      getNextLearningLogTitle(user: UserModelType, base: string) {
-        let maxUntitled = 0;
-        self.byTypeForUser(LearningLogDocument, user.id)
-          .forEach(document => {
-            const match = /.*-([0-9]+)$/.exec(document.title || "");
-            // length check to skip timestamps
-            if (match && match[1] && (match[1].length < 4)) {
-              const suffix = parseInt(match[1], 10);
-              maxUntitled = Math.max(maxUntitled, suffix);
-            }
-          });
-        return `${base}-${++maxUntitled}`;
-      },
-
-      // Returns the most recently published personal documents or learning logs per user, sorted by title
-      getLatestOtherPublications(type: OtherPublicationType) {
-        const latestPublications = getLatestPublications(self.byType(type), "originDoc");
-        return latestPublications.sort((pub1, pub2) => {
-          return (pub1.title || "").localeCompare(pub2.title || "");
-        });
-      },
-
-      // Returns the most recently published docs for the given section/problem per user, sorted by name
-      getLatestPublications(clazz: ClassModelType) {
-        const latestPublications = getLatestPublications(self.byType(ProblemPublication), "uid");
-        return latestPublications.sort((pub1, pub2) => {
-          const user1 = clazz.getUserById(pub1.uid);
-          const user2 = clazz.getUserById(pub2.uid);
-          // Every publication should have a user, but if it's missing, sort that document last
-          if (!user1 || !user2) return (user2 ? 1 : 0) - (user1 ? 1 : 0);
-          return user1.lastName !== user2.lastName
-            ? user1.lastName.localeCompare(user2.lastName)
-            : user1.firstName.localeCompare(user2.firstName);
-        });
-      }
-    };
-  })
+    // Returns the most recently published docs for the given section/problem per user, sorted by name
+    getLatestPublications(clazz: ClassModelType) {
+      const latestPublications = extractLatestPublications(self.byType(ProblemPublication), "uid");
+      return latestPublications.sort((pub1, pub2) => {
+        const user1 = clazz.getUserById(pub1.uid);
+        const user2 = clazz.getUserById(pub2.uid);
+        // Every publication should have a user, but if it's missing, sort that document last
+        if (!user1 || !user2) return (user2 ? 1 : 0) - (user1 ? 1 : 0);
+        return user1.lastName !== user2.lastName
+          ? user1.lastName.localeCompare(user2.lastName)
+          : user1.firstName.localeCompare(user2.firstName);
+      });
+    }
+  }))
   .views(self => ({
     getLatestPersonalPublications() {
       return self.getLatestOtherPublications(PersonalPublication);
