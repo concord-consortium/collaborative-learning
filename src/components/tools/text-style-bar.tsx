@@ -45,15 +45,15 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
   // code that instantiates the TextStyleBarComponent.
 
   private buttonDefs: IButtonDef[] = [
-    { iconName: "bold",        toolTip: `Bold - ${this.prefix}b`},
-    { iconName: "italic",      toolTip: `Italic - ${this.prefix}i`},
-    { iconName: "underline",   toolTip: `Underline - ${this.prefix}u`},
+    { iconName: "bold",        toolTip: `Bold (${this.prefix}b)`},
+    { iconName: "italic",      toolTip: `Italic (${this.prefix}i)`},
+    { iconName: "underline",   toolTip: `Underline (${this.prefix}u)`},
     { iconName: "code",        toolTip: `Typewriter Font`},
-    { iconName: "subscript",   toolTip: `Subscript - ${this.prefix},`},
-    { iconName: "superscript", toolTip: `Superscript - ${this.prefix}Shift-,`},
-    { iconName: "list-ol",     toolTip: `Numbered Item`},
-    { iconName: "list-ul",     toolTip: `Bullet Item`},
-    { iconName: "undo",        toolTip: `Undo - ${this.prefix}z` }
+    { iconName: "subscript",   toolTip: `Subscript (${this.prefix},)`},
+    { iconName: "superscript", toolTip: `Superscript (${this.prefix}Shift-,)`},
+    { iconName: "list-ol",     toolTip: `Numbered List`},
+    { iconName: "list-ul",     toolTip: `Bulleted List`},
+    { iconName: "undo",        toolTip: `Undo (${this.prefix}z)` }
   ];
 
   public render() {
@@ -100,7 +100,7 @@ export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
       <div className={`button-with-tool-tip ${showTip}`} key={buttonDef.iconName}>
         <i className={classes(buttonDef.iconName)} onClick={clickHandler} />
         <span className={`tool-tip-text ${showTip}`}>
-          {buttonDef.toolTip}>
+          {buttonDef.toolTip}
         </span>
       </div>
     );

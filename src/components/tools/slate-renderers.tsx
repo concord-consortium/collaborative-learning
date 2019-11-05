@@ -1,7 +1,7 @@
 import * as React from "react";
 
 // These renderers are used by the Slate editor to translate a mark or block
-// into it's HTML representation.
+// into its HTML representation.
 
 export function renderSlateMark(markName: string, attributes: any, children: any) {
   switch (markName) {

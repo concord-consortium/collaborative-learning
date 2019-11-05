@@ -173,7 +173,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   // the mapping of a hot-key to the required handler.
   private slatePlugins: Plugin[] =
     this.slateMap.filter(entry => (entry.hotKey !== undefined))
-      .map(entry => this.makeOnKeyDownHandler(entry));
+      .map(entry => this.makeKeyDownHandler(entry));
 
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;
@@ -452,8 +452,9 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private makeOnKeyDownHandler(hotKeyDef: ISlateMapEntry): Plugin {
-    // Returns a Slate plug-in for an onKeyDown handler.
+  private makeKeyDownHandler(hotKeyDef: ISlateMapEntry): Plugin {
+    // Returns a Slate plug-in for an onKeyDown handler required
+    // by the plug-in.
     const { hotKey, slateType, nodeType } = hotKeyDef;
     const onSlateEvent = (
       nType: SlateNodeType,
@@ -468,6 +469,8 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       }
       event.preventDefault();
     };
+    // Note: The following two return paths both return methods that match slate's
+    // onKeyDown() method signature.
     if (! hotKey) {
       return ({
         onKeyDown(event: any, editor: any, next: () => any) {
