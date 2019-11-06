@@ -148,7 +148,7 @@
   "investigations": [
     {
       "description": "Investigation 0",
-      "ordinal": 1,
+      "ordinal": 0,
       "title": "Introduction to CLUE",
       "introduction": {
         "tiles": [ ]
@@ -210,7 +210,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Click on tools on the side of the workspace to create a new tile. Tiles let you make content to solve problems and record your ideas. You can also drag tools onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work."
+                        "Click on <strong>tool buttons</strong> on the side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
                       ]
                     }
                   },
@@ -219,7 +219,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "To delete tiles, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
+                        "To <strong>delete tiles</strong>, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
                       ]
                     }
                   },
@@ -228,7 +228,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you are ready to share work with your group, click the Group Share eye icon, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                        "When you are ready to <strong>share work</strong> with your group, click the Group Share eye icon, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
                       ]
                     }
                   },
@@ -237,7 +237,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you are ready to share work with your whole class, click the publish icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."
+                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."
                       ]
                     }
                   }
@@ -254,8 +254,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Click the Geometry tool icon to create a graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width.) To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
+                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/graphdoc.png"
                     }
                   },
                   {
@@ -264,6 +270,21 @@
                       "format": "html",
                       "text": [
                         "Note: Points are connected in the order they were made, which can lead, for example, to an unexpected hourglass shape as in the example above. If this is not the intended shape, simply drag the points to the desired shape."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now."
                       ]
                     }
                   }
@@ -280,7 +301,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Reach to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
+                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
                       ]
                     }
                   }
