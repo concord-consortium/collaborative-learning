@@ -1,7 +1,7 @@
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
-import RightNav from '../../../support/elements/common/RightNav';
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
+import RightNav from '../../../../support/elements/common/RightNav';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
@@ -10,6 +10,15 @@ const rightNav = new RightNav;
 const baseUrl = (`${Cypress.config("baseUrl")}`).split('/branch/')[0];
 
 let userCanvas = 'Uploaded Images'
+
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000);
+});
+
 context('Test image functionalities', function(){
     describe('upload image from URL', function(){
         it('will load an png from a URL', function(){
@@ -97,4 +106,8 @@ context('Test image functionalities', function(){
             })
         })
     });
+});
+
+after(function(){
+  cy.clearQAData('all');
 });

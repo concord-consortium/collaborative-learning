@@ -20,6 +20,11 @@ let tableToolTile = new TableToolTile;
 
 context('single student functional test',()=>{
     before(function(){
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("queryParams")}`;
+            // cy.clearQAData('all');
+            cy.visit(baseUrl+queryParams);
+            cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('Left nav tabs open and close',()=>{

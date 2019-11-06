@@ -1,12 +1,12 @@
-import LeftNav from '../../../support/elements/clue/LeftNav'
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import RightNav from '../../../support/elements/common/RightNav'
-import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
-import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
-import DrawToolTile from '../../../support/elements/clue/DrawToolTile'
-import TextToolTile from '../../../support/elements/clue/TextToolTile'
-import TableToolTile from '../../../support/elements/clue/TableToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import RightNav from '../../../../support/elements/common/RightNav'
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
+import DrawToolTile from '../../../../support/elements/clue/DrawToolTile'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import TableToolTile from '../../../../support/elements/clue/TableToolTile'
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;
@@ -26,6 +26,11 @@ context('Test Canvas', function(){
     // 3. drag image from leftNav to canvas
     // 5. drag a tool from tool bar to canvas
     before(function(){
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("queryParams")}`;
+        
+            cy.visit(baseUrl+queryParams);
+            cy.wait(5000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
 
@@ -416,4 +421,8 @@ context('Test Canvas', function(){
             //TODO
         })
     })
+});
+
+after(function(){
+  cy.clearQAData('all');
 });
