@@ -4,10 +4,12 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { ClassMenuContainer } from "./class-menu-container";
 import { ProblemMenuContainer } from "./problem-menu-container";
+import { ToggleGroup, Colors } from "concord-react-components";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
+import { Color } from "ag-grid-community";
 
 export enum EPanelId {
   dashboard = "dashboard",
@@ -90,46 +92,35 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderPanelButtons() {
-    const { panels } = this.props;
+    const { panels, onPanelChange, current} = this.props;
     if (!panels || (panels.length < 2)) return;
-
-    interface IPanelButtonProps {
-      panelId: string;
-      label: string;
-      current: string;
-      onPanelChange: (panel: string) => void;
-    }
-
-    const PanelButton: React.FC<IPanelButtonProps> = (props) => {
-      const { panelId, label, current, onPanelChange } = props;
-      const handlePanelChange = () => { onPanelChange && onPanelChange(panelId); };
-      return (
-        <Button active={current === panelId}
-                disabled={(current !== panelId) && !onPanelChange}
-                onClick={handlePanelChange}>
-          {label}
-        </Button>
-      );
-    };
 
     const panelButtons = panels
       .filter(spec => spec.label.length > 0)
       .map(spec => {
-      return (
-        <PanelButton
-          key={spec.panelId}
-          panelId={spec.panelId}
-          label={spec.label}
-          current={this.props.current}
-          onPanelChange={this.props.onPanelChange} />
-      );
-    });
-
-    return (
-      <ButtonGroup>
-        {panelButtons}
-      </ButtonGroup>
-    );
+        const { label, panelId } = spec;
+        const onClick = () => { onPanelChange && onPanelChange(panelId); };
+        const key = panelId;
+        const selected = key === current;
+        const colors = panelId === EPanelId.workspace
+          ? {
+            unselectedColor: {
+              color: Colors.Sky["sky-dark-5"],
+              background: Colors.Sky["sky-light-1"]
+            },
+            hoverColor: {
+              color: Colors.Sky["sky-dark-5"],
+              background: Colors.Sky["sky-dark-1"]
+            },
+            selectedColor: {
+              color: Colors.Sky["sky-light-2"],
+              background: Colors.Sky["sky-dark-5"]
+            }
+          }
+          : null;
+        return { label, onClick, key, selected, colors };
+      });
+    return <ToggleGroup options={panelButtons} />;
   }
 
   private renderGroup(group: GroupModelType) {
