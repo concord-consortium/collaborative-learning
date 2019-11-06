@@ -1,6 +1,6 @@
-import RightNav from '../../../support/elements/common/RightNav'
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas';
+import RightNav from '../../../../support/elements/common/RightNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 
 const rightNav = new RightNav;
 const canvas = new Canvas;
@@ -12,6 +12,11 @@ describe('Test right nav tabs', function(){
     let copyDocumentTitle = 'copy Investigation'
     
     before(function(){
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("queryParams")}`;
+        
+            cy.visit(baseUrl+queryParams);
+            cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('My Work tab tests', function(){
@@ -155,4 +160,8 @@ describe('Test right nav tabs', function(){
             });
         });
     })
+});
+
+after(function(){
+  cy.clearQAData('all');
 });

@@ -1,8 +1,8 @@
-import LeftNav from '../../../support/elements/clue/LeftNav'
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import TextToolTile from '../../../support/elements/clue/TextToolTile'
-import ClueHeader from '../../../support/elements/clue/cHeader';
+import LeftNav from '../../../../support/elements/clue/LeftNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import ClueHeader from '../../../../support/elements/clue/cHeader';
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;

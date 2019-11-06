@@ -1,5 +1,5 @@
-import Header from '../../../support/elements/common/Header'
-import ClueHeader from '../../../support/elements/clue/cHeader'
+import Header from '../../../../support/elements/common/Header'
+import ClueHeader from '../../../../support/elements/clue/cHeader'
 
 
 const header = new Header;

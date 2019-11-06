@@ -1,12 +1,21 @@
-import Canvas from '../../../support/elements/common/Canvas'
-import TableToolTile from '../../../support/elements/clue/TableToolTile'
-import RightNav from '../../../support/elements/common/RightNav'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
+import Canvas from '../../../../support/elements/common/Canvas'
+import TableToolTile from '../../../../support/elements/clue/TableToolTile'
+import RightNav from '../../../../support/elements/common/RightNav'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
 
 let canvas = new Canvas,
     clueCanvas = new ClueCanvas,
     tableToolTile = new TableToolTile,
     rightNav = new RightNav;
+
+    before(function(){
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("queryParams")}`;
+    
+        // cy.clearQAData('all');
+        cy.visit(baseUrl+queryParams);
+        cy.wait(4000);
+    });    
 
 context('Table Tool Tile',function(){
     describe('test menu functions of table', function(){
@@ -105,4 +114,8 @@ context('Table Tool Tile',function(){
             // need to verify that it is in the Class Work right nav
         });
     });
+});
+
+after(function(){
+  cy.clearQAData('all');
 });
