@@ -68,14 +68,20 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTeacherHeader(userTitle: string | undefined) {
-    const { investigation, user } = this.stores;
+    const { investigation, unit } = this.stores;
     return (
       <div className="app-header">
         <div className="left">
           <div className="problem" data-test="investigation-title">
-            {investigation.title}
+            <div className="unit">
+              {unit.title}
+            </div>
+            <div className="investigation">
+              {investigation.title}
+            </div>
           </div>
-          <div className="problem" data-test="user-problem">
+          <div className="spacer" />
+          <div className="problem-dropdown" data-test="user-class">
             <ProblemMenuContainer />
           </div>
         </div>
@@ -117,7 +123,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
               background: Colors.Sky["sky-dark-5"]
             }
           }
-          : null;
+          : undefined;
         return { label, onClick, key, selected, colors };
       });
     return <ToggleGroup options={panelButtons} />;
