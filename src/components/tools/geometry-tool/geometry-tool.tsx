@@ -73,7 +73,8 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
     const disableVertexAngle = readOnly || !supportsVertexAngle;
     const disableDelete = readOnly || !board || !content.getDeletableSelectedIds(board).length;
     const disableDuplicate = readOnly || !board || !content.getOneSelectedPolygon(board);
-    const disableComment = !content.getCommentAnchor(board) &&
+    const disableComment = !content.getOneSelectedSegment(board) &&
+                            !content.getCommentAnchor(board) &&
                             !content.getOneSelectedComment(board);
 
     return (
