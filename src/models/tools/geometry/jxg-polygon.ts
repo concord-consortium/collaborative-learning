@@ -1,5 +1,5 @@
-import { JXGChange, JXGChangeAgent } from "./jxg-changes";
-import { objectChangeAgent } from "./jxg-object";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { wn_PnPoly } from "./soft-surfer-sunday";
@@ -30,16 +30,29 @@ export function getPolygonEdges(polygon: JXG.Polygon) {
   return values(edges);
 }
 
-export function getAssociatedPolygon(elt: JXG.GeometryElement) {
-  if (isPolygon(elt)) return elt;
+export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
+  const point1 = board.objects[pointIds[0]];
+  const segment = find(point1.childElements, child => {
+                    const seg = isVisibleEdge(child) ? child as JXG.Line : undefined;
+                    if (!seg) return false;
+                    const isEdgeOfPolygon = seg.parentPolygon?.id === polygonId;
+                    const hasPoint1 = pointIds.findIndex(id => id === seg.point1.id) >= 0;
+                    const hasPoint2 = pointIds.findIndex(id => id === seg.point2.id) >= 0;
+                    return isEdgeOfPolygon && hasPoint1 && hasPoint2;
+                  });
+  return segment ? segment as JXG.Line : undefined;
+}
+
+export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | undefined{
+  if (isPolygon(elt)) return elt as JXG.Polygon;
   if (isPoint(elt)) {
-    return find(elt.childElements, child => isPolygon(child));
+    return find(elt.childElements, child => isPolygon(child)) as JXG.Polygon | undefined;
   }
   if (elt.elType === "segment") {
     const vertices = filter(elt.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
     for (const vertex of vertices) {
       const polygon = find(vertex.childElements, child => isPolygon(child));
-      if (polygon) return polygon;
+      if (polygon) return polygon as JXG.Polygon;
     }
   }
 }
@@ -142,6 +155,41 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   return moreIdsToDelete;
 }
 
+function segmentNameLabelFn(this: JXG.Line) {
+  const p1Name = getElementName(this.point1);
+  const p2Name = getElementName(this.point2);
+  return `${p1Name}${p2Name}`;
+}
+
+function segmentNameLengthFn(this: JXG.Line) {
+  return JXG.toFixed(this.L(), 1);
+}
+
+function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
+  const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
+  if (segment) {
+    const labelOption = !Array.isArray(change.properties) && change.properties?.labelOption;
+    const clientLabelOption = (labelOption === ESegmentLabelOption.kLabel) ||
+                              (labelOption === ESegmentLabelOption.kLength)
+                                ? labelOption
+                                : null;
+    const clientOriginalName = segment.getAttribute("clientOriginalName");
+    if (!clientOriginalName && (typeof segment.name === "string")) {
+      // store the original generated name so we can restore it if necessary
+      segment._set("clientOriginalName", segment.name);
+    }
+    segment._set("clientLabelOption", clientLabelOption);
+    const name = clientLabelOption
+                  ? clientLabelOption === "label"
+                      ? segmentNameLabelFn
+                      : segmentNameLengthFn
+                  // if we're removing our label, restore the original one
+                  : clientOriginalName || board.generateName(segment);
+    segment.setAttribute({ name, withLabel: !!clientLabelOption });
+    segment.label?.setAttribute({ visible: !!clientLabelOption });
+  }
+}
+
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board: JXG.Board, change: JXGChange) => {
     const parents = (change.parents || [])
@@ -165,8 +213,15 @@ export const polygonChangeAgent: JXGChangeAgent = {
     return poly;
   },
 
-  // update can be handled generically
-  update: objectChangeAgent.update,
+  update: (board: JXG.Board, change: JXGChange) => {
+    if ((change.target === "polygon") && change.parents &&
+        !Array.isArray(change.properties) && change.properties?.labelOption) {
+      updateSegmentLabelOption(board, change);
+      return;
+    }
+    // other updates can be handled generically
+    return objectChangeAgent.update(board, change);
+  },
 
   // delete can be handled generically
   delete: objectChangeAgent.delete

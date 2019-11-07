@@ -24,6 +24,10 @@ export function getGraphablePosition(pos: JXGUnsafeCoordPair) {
   }) as JXGCoordPair;
 }
 
+export function getElementName(elt: JXG.GeometryElement) {
+  return (typeof elt.name === "function") ? elt.name() : elt.name;
+}
+
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     // can't create generic objects
