@@ -148,7 +148,7 @@
   "investigations": [
     {
       "description": "Investigation 0",
-      "ordinal": 0,
+      "ordinal": 30,
       "title": "Introduction to CLUE",
       "introduction": {
         "tiles": [ ]
