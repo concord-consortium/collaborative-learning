@@ -81,8 +81,8 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     const { board, scale } = this.props;
     if (!board) return 0;
     const eventCoords = getEventCoords(board, e, scale);
-    const dx = eventCoords.usrCoords[1] - center.usrCoords[1];
-    const dy = eventCoords.usrCoords[2] - center.usrCoords[2];
+    const dx = eventCoords.scrCoords[1] - center.scrCoords[1];
+    const dy = eventCoords.scrCoords[2] - center.scrCoords[2];
     return Math.atan2(dy, dx);
   }
 
