@@ -50,7 +50,7 @@ context("Teacher Space", () => {
                     // Check problem list  UI and visibility
                     dashboard.getProblemList().should('not.exist')
                     dashboard.getProblemDropdown().should('be.visible').click({ force: true })
-                    // dashboard.getProblemList().should('exist').and('have.length', tempClass.problemTotal)
+                    dashboard.getProblemList().should('exist').and('have.length', tempClass.problemTotal)
                     dashboard.getProblemDropdown().click({ force: true })
                     dashboard.getProblemList().should('not.exist')
                     // Check class list UI and visibility
@@ -73,7 +73,7 @@ context("Teacher Space", () => {
                     let group = groups[tempGroupIndex]
 
                     // Check for group title
-                    // dashboard.getSixPackView().should('exist').and('be.visible')
+                    dashboard.getSixPackView().should('exist').and('be.visible')
                     dashboard.getGroupName().eq(group.groupIndex).should('contain', group.groupName)
                     // Check for group length (4Up Count)
                     dashboard.getSixPackView().then(() => {
