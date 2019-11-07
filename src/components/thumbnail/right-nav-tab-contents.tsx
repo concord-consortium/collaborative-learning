@@ -15,6 +15,7 @@ interface IProps extends IBaseProps {
   tabId: ERightNavTab;
   className: string;
   scale: number;
+  onToggleExpansion?: (section: NavTabSectionModelType) => void;
 }
 interface IState {
   showSection: Map<string, boolean>;
@@ -106,6 +107,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     const isExpanded = this.state.showSection.get(sectionId);
     this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
+    this.props.onToggleExpansion?.(section);
   }
 
   private handleNewDocumentClick = async (section: NavTabSectionModelType) => {

@@ -5,7 +5,7 @@ import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { RightNavTabContents } from "../thumbnail/right-nav-tab-contents";
-import { ERightNavTab, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
+import { ERightNavTab, NavTabSectionModelType, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
 import { map } from "lodash";
 import "./right-nav.sass";
 
@@ -28,8 +28,12 @@ export const LearningLogsComponent = () => {
   return <RightNavTabContents tabId={ERightNavTab.kLearningLog} className="learning-log" scale={kRightNavItemScale} />;
 };
 
-export const SupportsComponent = () => {
-  return <RightNavTabContents tabId={ERightNavTab.kSupports} className="supports" scale={kRightNavItemScale} />;
+interface ISupportsComponentProps {
+  onToggleExpansion: (section: NavTabSectionModelType) => void;
+}
+export const SupportsComponent = ({ onToggleExpansion }: ISupportsComponentProps) => {
+  return <RightNavTabContents tabId={ERightNavTab.kSupports} className="supports" scale={kRightNavItemScale}
+                              onToggleExpansion={onToggleExpansion} />;
 };
 
 interface IProps extends IBaseProps {
@@ -122,7 +126,8 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
             [ERightNavTab.kMyWork]: () => <MyWorkComponent />,
             [ERightNavTab.kClassWork]: () => <ClassWorkComponent />,
             [ERightNavTab.kLearningLog]: () => <LearningLogsComponent />,
-            [ERightNavTab.kSupports]: () => <SupportsComponent />,
+            [ERightNavTab.kSupports]: () => <SupportsComponent
+                                              onToggleExpansion={this.handleToggleSupportsExpansion} />,
           };
     const tabContainers = map(ERightNavTab, (tab: ERightNavTab) => {
             const enabledDisabledClass = activeRightNavTab === tab ? "enabled" : "disabled";
@@ -164,19 +169,18 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTabClick = (tab: ERightNavTab) => {
-    const { db, ui, user } = this.stores;
+    const { ui } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (!navDoneExpanding) {
         this.setState({navExpanding: true});
       }
+      if (tab === ERightNavTab.kSupports) {
+        this.updateStudentLastViewSupportTimestamp();
+      }
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
         this.stores.ui.toggleRightNav(true);
-
-        if ((tab === ERightNavTab.kSupports) && user.isStudent) {
-          db.setLastSupportViewTimestamp();
-        }
       } else {
         this.stores.ui.toggleRightNav();
       }
@@ -188,6 +192,17 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   private getTabId(tab: ERightNavTab) {
     return `rightNavTab-${tab}`;
+  }
+
+  private handleToggleSupportsExpansion = (section: NavTabSectionModelType) => {
+    this.updateStudentLastViewSupportTimestamp();
+  }
+
+  private updateStudentLastViewSupportTimestamp = () => {
+    const { db, user } = this.stores;
+    if (user.isStudent) {
+      db.setLastSupportViewTimestamp();
+    }
   }
 
   private updateComponentLoadAllowedState = () => {
