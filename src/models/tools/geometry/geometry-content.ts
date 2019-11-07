@@ -755,6 +755,11 @@ export const GeometryContentModel = types
       return comments.length === 1 ? comments[0] as JXG.Text : undefined;
     }
 
+    function getOneSelectedPoint(board: JXG.Board) {
+      const selected = self.selectedObjects(board);
+      return (selected.length === 1 && isPoint(selected[0]));
+    }
+
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
       const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
@@ -985,6 +990,7 @@ export const GeometryContentModel = types
         },
         copySelection,
         findObjects,
+        getOneSelectedPoint,
         getOneSelectedPolygon,
         getOneSelectedSegment,
         getOneSelectedComment,
