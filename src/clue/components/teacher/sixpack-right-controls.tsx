@@ -2,10 +2,11 @@ import { inject } from "mobx-react";
 import * as React from "react";
 import { BaseComponent } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
-import { ToggleGroup, IToggleChoice} from "concord-react-components";
+import { ToggleGroup, IToggleChoice, Themes } from "concord-react-components";
 import { ProgressWidget } from "../progress-widget";
-import { Colors } from "concord-react-components";
 import "./sixpack-right-controls.sass";
+
+const Colors = Themes.Clue;
 
 interface IProps {
   documentViewMode: DocumentViewMode;
@@ -40,15 +41,15 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
         colors: {
           selectedColor:  {
             color: "white",
-            background: Colors.Cloud['cloud-dark-5']
+            background: Colors.Cloud["cloud-dark-5"]
           },
           hoverColor: {
-            color: Colors.Cloud['cloud-dark-5'],
-            background: Colors.Sage['sage-dark-4']
+            color: Colors.Cloud["cloud-dark-5"],
+            background: Colors.Sage["sage-dark-4"]
           },
           unselectedColor:  {
-            color: Colors.Cloud['cloud-dark-5'],
-            background: Colors.Cloud['cloud-light-2']
+            color: Colors.Cloud["cloud-dark-5"],
+            background: Colors.Cloud["cloud-light-2"]
           }
         },
       }

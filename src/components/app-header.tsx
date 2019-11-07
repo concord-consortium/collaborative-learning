@@ -4,12 +4,12 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { ClassMenuContainer } from "./class-menu-container";
 import { ProblemMenuContainer } from "./problem-menu-container";
-import { ToggleGroup, Colors } from "concord-react-components";
+import { ToggleGroup, Themes } from "concord-react-components";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
-import { Color } from "ag-grid-community";
+const Colors = Themes.Clue;
 
 export enum EPanelId {
   dashboard = "dashboard",
