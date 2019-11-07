@@ -5,7 +5,7 @@ import { ITableLinkProperties } from "../table/table-content";
 export const isLinkedPoint = (v: any) => isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
 
 // Eventually should use a different color for each table
-const linkedPointColor = "#0099FF";
+const linkedPointColor = "#7D287E";
 
 export type IsValidTableLinkFunctionType = (boardId: string, tableId?: string) => boolean;
 
@@ -21,7 +21,10 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
   const linkedProps = {
           clientType: "linkedPoint",
           fixed: true,
-          fillColor: linkedPointColor,
+          strokeColor: linkedPointColor,
+          clientStrokeColor: linkedPointColor,
+          clientSelectedFillColor: linkedPointColor,
+          clientSelectedStrokeColor: linkedPointColor,
           linkedTableId: tableId,
           linkedRowId: props && props.id
         };
