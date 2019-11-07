@@ -16,20 +16,30 @@ $member-size: 18px
   font-size: 14px
 
   .left
-    flex-grow: 0
+    flex: 2
     padding: 0 $padding
     display: flex
     align-items: center
-
+    justify-content: space-between
     .problem
-      margin-left: 20px
-      margin-right: 20px
-    .class
+      text-align: center
+      color: $sage-dark-5
+      .unit
+        font-weight: bold
+      .investigation
+        font-weight: normal
+    .spacer
+      border-right: 2px solid $sage-light-1
+      height: 40px
+      margin: 5px
+    .problem-dropdown
+      height: 40px
 
   .middle
     display: flex
     align-items: center
-
+    flex: 1
+    justify-content: center
     button
       // note: need focus/accessibility solution
       outline: none
@@ -39,12 +49,12 @@ $member-size: 18px
         background-color: $color1-3
 
   .right
-    flex-grow: 0
+    flex: 2
     padding: 0 $padding
     text-align: center
     display: flex
     align-items: center
-
+    justify-content: flex-end
     .version
       padding-right: $padding
       font-size: 0.9em
