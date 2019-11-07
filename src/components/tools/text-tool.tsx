@@ -25,6 +25,13 @@ import "./text-tool.sass";
   co-exist with the names generated when HTML and Markdown formatted text are
   converted to a slate model for presentation and editing in the text-tool.
 
+  There are slate blocks and marks that are not mapped to any user actions in
+  the editor; however, they handed by this tool (when readonly) as a way to
+  render styled text in the curriculum. In other words, just because there's
+  no way for a user to create a particular style in the editor, this tool may
+  still need to render it. See the heading1 - heading6 slate blocks for
+  example.
+
   Marks:
 
     |  Slate Name |  Markdown | HTML tag |   Hot-Key   |  Tool-Bar*  |
@@ -35,8 +42,8 @@ import "./text-tool.sass";
     | inserted    | ++xyzzy++ | <mark>   |             |             |
     | deleted     | ~~xyzzy~~ | <del>    |             |             |
     | underlined  | __xyzzy__ | <u>      | CMD-u       | underline   |
-    | superscript |           | <sup>    | CMD-shift-, | subscript   |
-    | subscript   |           | <sub>    | CMD-,       | superscript |
+    | superscript |           | <sup>    | CMD-shift-, | superscript |
+    | subscript   |           | <sub>    | CMD-,       | subscript   |
 
   Blocks:
 
@@ -371,8 +378,17 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as TextContentModelType;
   }
 
+  private resolveEditorRef(editor: any): any {
+    // In some cases, the event handlers, handleMarkEvent() and handleBlockEvent()
+    // called from other methods in this component's class, and other times, they
+    // are called by Slate through the plugin interface. In the first case, the
+    // editor is a React forward reference. In the latter, it is passed as the
+    // editor instance, itself.
+    return editor.current ? editor.current : editor;
+  }
+
   private handleMarkEvent(slateType: string, event: any, editor: any, next?: () => any) {
-    const ed = editor.current ? editor.current : undefined;
+    const ed = this.resolveEditorRef(editor);
     switch (slateType) {
       case "superscript":
       case "subscript":
@@ -395,7 +411,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   private handleBlockEvent(slateType: string, event: any, editor: any, next?: () => any) {
     const DEFAULT_BLOCK_TYPE = "";
-    const ed = editor.current ? editor.current : undefined;
+    const ed = this.resolveEditorRef(editor);
     const { value: { blocks, document } } = ed;
     const containsListItems = blocks.some((block: any) => block.type === "list-item");
     const isListOfThisType = blocks.some((block: any) => {
