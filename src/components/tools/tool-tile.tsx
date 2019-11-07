@@ -144,16 +144,6 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     }
   }
 
-  /*
-  was:
-           ? <div className="tool-tile-drag-handle tool select" ref={elt => this.dragElement = elt}>
-            <svg className={`icon icon-select-tool`}>
-              <use xlinkHref={`#icon-select-tool`} />
-            </svg>
-          </div>
-
-  */
-
   public render() {
     const { model, widthPct } = this.props;
     const { ui } = this.stores;
@@ -175,7 +165,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       >
         <LinkIndicatorComponent type={model.content.type} id={model.id} />
         { ToolComponent !== PlaceholderToolComponent
-          ? <DragTileButton />
+          ? <div ref={elt => this.dragElement = elt}> <DragTileButton /></div>
           : null
         }
         {this.renderTile(ToolComponent)}
