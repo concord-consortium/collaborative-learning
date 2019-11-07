@@ -68,7 +68,23 @@ $member-size: 18px
       align-items: center
     .class
       margin-left: 20px
-      margin-right: 20px
+    .profile-icon
+      background-color: $sage-dark-2
+      width: 40px
+      height: 40px
+      display: flex
+      justify-content: center
+      align-items: center
+      text-align: center
+      &:hover
+        background-color: $sage-dark-3
+      .profile-icon-inner
+        width: 30px
+        height: 30px
+        -webkit-mask-image: url("../assets/icons/clue-dashboard/teacher-student.svg")
+        mask-image: url("../assets/icons/clue-dashboard/teacher-student.svg")
+        background-color: $sage-light-2
+
     .name
       font-weight: bold
       cursor: pointer
