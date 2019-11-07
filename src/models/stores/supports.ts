@@ -294,7 +294,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
                         : supportCaption;
     const originDoc = support.supportType === SupportType.teacher
                         ? (support as TeacherSupportModelType).originDoc
-                        : undefined;
+                        : supportKey; // unique origin for curricular supports
     let properties: IDocumentProperties;
     if (support.supportType === SupportType.curricular) {
       properties = { curricularSupport: "true", caption: supportCaption };
