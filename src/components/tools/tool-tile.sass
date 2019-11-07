@@ -13,14 +13,14 @@
     position: absolute
     right: 0px
     box-sizing: content-box
-    width: 21px
+    width: 11px
     height: 21px
-    border-radius: $border-radius
+    border-radius: $half-border-radius
     border-top-left-radius: 0
     border-bottom-right-radius: 0
     border-top-right-radius: 0
-    background-color: $color3
-    border: $border-width solid $border-color
+    background-color: $color3-4
+    border: $half-border-width solid transparent
     border-right: 0
     border-top: 0
     z-index: 1
@@ -31,11 +31,19 @@
       cursor: grab
       opacity: 1
 
+    &:focus
+      outline: none
+
     .icon
-      width: 23px
-      height: 23px
-      margin-top: -1px
+      width: 19px
+      height: 19px
+      margin-top: 5px
+      margin-left: -4px
       left: 0px
+
+    .icon-select-tool
+      background-image: url("../../assets/icons/drag-tile/drag-tile.svg")
+      background-repeat: no-repeat
 
   &.selected
     border: $half-border-width solid $color2-4

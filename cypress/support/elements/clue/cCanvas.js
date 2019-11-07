@@ -110,7 +110,7 @@ class ClueCanvas{
     }
 
     getDeleteTool(){
-        return cy.get('.single-workspace .tool.delete');
+        return cy.get('.tool.delete');
     }
 
     deleteTile(tile){

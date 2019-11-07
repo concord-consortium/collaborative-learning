@@ -58,6 +58,7 @@ declare namespace JXG {
     objectsList: GeometryElement[];
 
     create: (elementType: string, parents?: any, attributes?: any) => any;
+    generateName: (object: GeometryElement) => string;
     hasPoint: (x: number, y: number) => boolean;
     removeObject: (object: GeometryElement) => JXG.Board;
     on: (event: string, handler: (evt: any) => void) => void;
@@ -106,7 +107,7 @@ declare namespace JXG {
     id: string;
     elType: string;
     type: number;
-    name: string;
+    name: string | (() => string);
     hasLabel: boolean;
     label?: JXG.Text;
     ancestors: { [id: string]: GeometryElement };
@@ -130,7 +131,7 @@ declare namespace JXG {
     setPosition: (method: number, coords: number[]) => JXG.Point;
     getLabelAnchor: () => JXG.Coords;
     on: (event: string, handler: EventHandler) => void;
-    _set: (key: string, value: string) => void;
+    _set: (key: string, value: string | null) => void;
   }
 
   const JSXGraph: {
@@ -151,6 +152,7 @@ declare namespace JXG {
     parentPolygon?: JXG.Polygon;
     getRise: () => number;
     getSlope: () => number;
+    L: () => number;
   }
 
   class Text extends CoordsElement {

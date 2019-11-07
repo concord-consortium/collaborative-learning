@@ -80,15 +80,14 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
 
 function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const elt = document.getElementById(domElementID);
-  let eltBounds = elt && elt.getBoundingClientRect();
-  if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
-    eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
-  }
+  const eltBounds = elt?.getBoundingClientRect();
+  const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
+  const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
   const { boundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
-  const xMax = xMin + eltBounds.width / unitX;
-  const yMax = yMin + eltBounds.height / unitY;
+  const xMax = xMin + eltWidth / unitX;
+  const yMax = yMin + eltHeight / unitY;
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
