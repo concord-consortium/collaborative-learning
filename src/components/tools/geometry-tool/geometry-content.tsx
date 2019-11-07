@@ -492,6 +492,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private initializeContent() {
     const content = this.getContent();
+    content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
@@ -859,7 +860,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // select newly pasted points
         if (newPointIds.length) {
           content.deselectAll(board);
-          content.selectObjects(newPointIds);
+          content.selectObjects(board, newPointIds);
         }
       }
       return true;
@@ -1332,7 +1333,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
           if (hasSelectionModifier(evt)) {
-            geometryContent.deselectElement(id);
+            geometryContent.deselectElement(board, id);
           }
 
           if (isMovableLineControlPoint(point)) {
@@ -1345,7 +1346,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (!hasSelectionModifier(evt)) {
             geometryContent.deselectAll(board);
           }
-          geometryContent.selectElement(id);
+          geometryContent.selectElement(board, id);
         }
 
         if (isPointDraggable) {
@@ -1420,9 +1421,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (!hasSelectionModifier(evt)) {
           content.deselectAll(board);
         }
-        vertices.forEach(vertex => content.selectElement(vertex.id));
+        vertices.forEach(vertex => content.selectElement(board, vertex.id));
 
-        content.selectElement(line.id);
+        content.selectElement(board, line.id);
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect
       // else if (hasSelectionModifier(evt)) {
@@ -1528,11 +1529,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       //   }
       // }
       if (selectPolygon) {
-        geometryContent.selectElement(polygon.id);
+        geometryContent.selectElement(board, polygon.id);
         each(polygon.ancestors, point => {
           const pt = point as JXG.Point;
           if (board && !inVertex) {
-            geometryContent.selectElement(pt.id);
+            geometryContent.selectElement(board, pt.id);
           }
         });
       }
@@ -1607,7 +1608,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             content.deselectAll(board);
           }
 
-          content.selectElement(text.id);
+          content.selectElement(board, text.id);
         }
       }
     };

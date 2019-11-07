@@ -7,6 +7,20 @@ import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 
+const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
+  const latestPublications: DocumentModelType[] = [];
+  publications.forEach((publication) => {
+    const latestIndex = latestPublications.findIndex((pub) => pub[attr] === publication[attr]);
+    if (latestIndex === -1) {
+      latestPublications.push(publication);
+    }
+    else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
+      latestPublications[latestIndex] = publication;
+    }
+  });
+  return latestPublications;
+};
+
 export const DocumentsModel = types
   .model("Documents", {
     all: types.array(DocumentModel),
@@ -67,9 +81,8 @@ export const DocumentsModel = types
     },
 
     getLastPublishedProblemDocumentsForGroup(groupId: string) {
-      return self.all.filter((document) => {
-        return (document.type === ProblemPublication) && (document.groupId === groupId);
-      });
+      const groupPublications = self.byType(ProblemPublication).filter((pub) => pub.groupId === groupId);
+      return extractLatestPublications(groupPublications, "uid");
     },
 
     getNextLearningLogTitle(user: UserModelType, base: string) {
@@ -88,47 +101,15 @@ export const DocumentsModel = types
 
     // Returns the most recently published personal documents or learning logs per user, sorted by title
     getLatestOtherPublications(type: OtherPublicationType) {
-      const latestPublications: DocumentModelType[] = [];
-      self.byType(type)
-        .forEach((publication) => {
-          const originDoc = publication.originDoc;
-          const latestIndex = latestPublications.findIndex((pub) => pub.originDoc === originDoc);
-          if (latestIndex === -1) {
-            latestPublications.push(publication);
-          }
-          else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
-            latestPublications[latestIndex] = publication;
-          }
-        });
-
+      const latestPublications = extractLatestPublications(self.byType(type), "originDoc");
       return latestPublications.sort((pub1, pub2) => {
         return (pub1.title || "").localeCompare(pub2.title || "");
       });
     },
 
-    getLatestPersonalPublications() {
-      return this.getLatestOtherPublications(PersonalPublication);
-    },
-
-    getLatestLogPublications() {
-      return this.getLatestOtherPublications(LearningLogPublication);
-    },
-
     // Returns the most recently published docs for the given section/problem per user, sorted by name
     getLatestPublications(clazz: ClassModelType) {
-      const latestPublications: DocumentModelType[] = [];
-      self.byType("publication")
-        .forEach((publication) => {
-          const uid = publication.uid;
-          const latestIndex = latestPublications.findIndex((pub) => pub.uid === uid);
-          if (latestIndex === -1) {
-            latestPublications.push(publication);
-          }
-          else if (publication.createdAt > latestPublications[latestIndex].createdAt) {
-            latestPublications[latestIndex] = publication;
-          }
-        });
-
+      const latestPublications = extractLatestPublications(self.byType(ProblemPublication), "uid");
       return latestPublications.sort((pub1, pub2) => {
         const user1 = clazz.getUserById(pub1.uid);
         const user2 = clazz.getUserById(pub2.uid);
@@ -141,6 +122,14 @@ export const DocumentsModel = types
     }
   }))
   .views(self => ({
+    getLatestPersonalPublications() {
+      return self.getLatestOtherPublications(PersonalPublication);
+    },
+
+    getLatestLogPublications() {
+      return self.getLatestOtherPublications(LearningLogPublication);
+    },
+
     getNextOtherDocumentTitle(user: UserModelType, documentType: OtherDocumentType, base: string) {
       switch (documentType) {
         case PersonalDocument: return self.getNextPersonalDocumentTitle(user, base);
