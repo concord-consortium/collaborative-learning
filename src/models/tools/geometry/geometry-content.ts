@@ -2,11 +2,11 @@ import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree
 import { Lambda } from "mobx";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
-          JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
+import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
+          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
+import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
 import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
@@ -688,6 +688,19 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
+    function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
+                                       points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) {
+      const parentIds = points.map(obj => obj.id);
+      const change: JXGChange = {
+              operation: "update",
+              target: "polygon",
+              targetID: polygon.id,
+              parents: parentIds,
+              properties: { labelOption }
+            };
+      return _applyChange(board, change);
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return board.objectsList.filter(test);
     }
@@ -798,6 +811,14 @@ export const GeometryContentModel = types
         });
       });
       return properties;
+    }
+
+    function getOneSelectedSegment(board: JXG.Board) {
+      const selectedObjects = self.selectedObjects(board);
+      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      if (selectedSegments.length === 1) {
+        return selectedSegments[0];
+      }
     }
 
     function getCommentAnchor(board: JXG.Board) {
@@ -968,6 +989,12 @@ export const GeometryContentModel = types
           return batchChanges.length;
         },
         copySelection,
+        findObjects,
+        getOneSelectedPoint,
+        getOneSelectedPolygon,
+        getOneSelectedSegment,
+        getOneSelectedComment,
+        getCommentAnchor,
         getLastImageUrl(): string | undefined{
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
@@ -999,11 +1026,7 @@ export const GeometryContentModel = types
         addTableLink,
         removeTableLink,
         updateAxisLabels,
-        findObjects,
-        getOneSelectedPoint,
-        getOneSelectedPolygon,
-        getOneSelectedComment,
-        getCommentAnchor,
+        updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,

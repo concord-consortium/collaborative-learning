@@ -9,8 +9,15 @@ export type JXGUnsafeCoordPair = [number?, number?];
 
 export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
 
+export enum ESegmentLabelOption {
+  kNone = "none",
+  kLabel = "label", // parents
+  kLength = "length"
+}
+
 export interface JXGProperties {
   id?: string;
+  labelOption?: ESegmentLabelOption;
   position?: JXGUnsafeCoordPair;
   url?: string;
   xMin?: number;

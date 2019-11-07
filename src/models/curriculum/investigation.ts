@@ -16,9 +16,7 @@ export const InvestigationModel = types
   .views(self => {
     return {
       getProblem(problemOrdinal: number) {
-        return (problemOrdinal > 0) && (problemOrdinal <= self.problems.length)
-                ? self.problems[problemOrdinal - 1]
-                : undefined;
+        return self.problems.find(problem => problem.ordinal === problemOrdinal);
       }
     };
   });

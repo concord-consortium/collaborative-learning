@@ -75,7 +75,8 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
     const disableDuplicate = readOnly || !board ||
                               (!content.getOneSelectedPoint(board) &&
                                 !content.getOneSelectedPolygon(board));
-    const disableComment = !content.getCommentAnchor(board) &&
+    const disableComment = !content.getOneSelectedSegment(board) &&
+                            !content.getCommentAnchor(board) &&
                             !content.getOneSelectedComment(board);
 
     return (
