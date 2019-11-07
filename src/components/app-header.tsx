@@ -92,6 +92,9 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           <div className="class" data-test="user-class">
             <ClassMenuContainer />
           </div>
+          <div className="profile-icon">
+            <div className="profile-icon-inner"/>
+          </div>
         </div>
       </div>
     );
