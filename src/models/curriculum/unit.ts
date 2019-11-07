@@ -31,9 +31,7 @@ export const UnitModel = types
       return `${self.title}${self.subtitle ? ": " + self.subtitle : ""}`;
     },
     getInvestigation(investigationOrdinal: number) {
-      return (investigationOrdinal > 0) && (investigationOrdinal <= self.investigations.length)
-              ? self.investigations[investigationOrdinal - 1]
-              : undefined;
+      return self.investigations.find(inv => inv.ordinal === investigationOrdinal);
     }
   }))
   .views(self => ({
