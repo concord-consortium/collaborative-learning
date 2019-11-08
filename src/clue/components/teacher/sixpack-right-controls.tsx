@@ -45,7 +45,7 @@ export class SixPackRightControls extends BaseComponent<IProps, {}> {
           },
           hoverColor: {
             color: Colors.Cloud["cloud-dark-5"],
-            background: Colors.Sage["sage-dark-4"]
+            background: Colors.Cloud["cloud-dark-2"]
           },
           unselectedColor:  {
             color: Colors.Cloud["cloud-dark-5"],
