@@ -18,6 +18,7 @@ export const UIDialogModel = types
     text: types.string,
     title: types.maybe(types.string),
     defaultValue: types.maybe(types.string),
+    rows: types.maybe(types.number)
   });
 
 export const UIModel = types
@@ -76,8 +77,8 @@ export const UIModel = types
       });
     };
 
-    const prompt = (text: string, defaultValue: string = "", title?: string) => {
-      self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title});
+    const prompt = (text: string, defaultValue: string = "", title?: string, rows?: number) => {
+      self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title, rows});
       return new Promise<string>((resolve, reject) => {
         dialogResolver = resolve;
       });
