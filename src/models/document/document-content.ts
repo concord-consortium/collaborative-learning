@@ -639,39 +639,63 @@ export const DocumentContentModel = types
     return actions;
   })
   .actions(self => ({
+    mergeRow(srcRow: TileRowModelType, rowInfo: IDropRowInfo) {
+      const rowId = srcRow.id;
+      srcRow.tiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+      self.deleteRow(rowId);
+    },
+    moveTilesToNewRowAtIndex(rowTiles: IDragTileItem[], rowIndex: number) {
+      rowTiles.forEach((tile, index) => {
+        if (index === 0) {
+          self.moveTileToNewRow(tile.tileId, rowIndex);
+        }
+        else {
+          self.moveTileToRow(tile.tileId, rowIndex);
+        }
+      });
+    },
+    moveTilesToExistingRowAtIndex(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      rowTiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+    }
+  }))
+  .actions(self => ({
     moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       if (tiles.length > 0) {
-        let rowDelta = 0;
-        let tileIndex = 0;
-        let lastRowIndex = -1;
-        const startingRowDropIndex = rowInfo.rowDropIndex;
-        const startingRowInsertIndex = rowInfo.rowInsertIndex;
-        const startingRowDropLocation = rowInfo.rowDropLocation;
+        // organize tiles by row
+        const tileRows: {[index: number]: IDragTileItem[]} = {};
         tiles.forEach(tile => {
-          if (startingRowDropIndex) {
-            rowInfo.rowDropIndex = startingRowDropIndex + rowDelta;
-          }
-          if (startingRowInsertIndex) {
-            rowInfo.rowInsertIndex = startingRowInsertIndex + rowDelta;
-          }
-          if (startingRowDropLocation) {
-            rowInfo.rowDropLocation = startingRowDropLocation;
-          }
-          if (lastRowIndex !== tile.rowIndex) {
-            tileIndex = 0;
-            if (lastRowIndex !== -1) {
-              rowDelta++;
+          tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
+          tileRows[tile.rowIndex].push(tile);
+        });
+
+        // move each row
+        const { rowInsertIndex, rowDropLocation } = rowInfo;
+        Object.values(tileRows).forEach(rowTiles => {
+          const rowIndex = rowTiles[0].rowIndex;
+          const row = self.getRowByIndex(rowIndex);
+          if (row?.tiles.length === rowTiles.length) {
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // entire row is being merged with an existing row
+              self.mergeRow(row, rowInfo);
             }
-            lastRowIndex = tile.rowIndex;
-          } else {
-            tileIndex++;
-          }
-          if ((tileIndex > 0) && ((startingRowDropLocation === "top") || (startingRowDropLocation === "bottom"))) {
-            // we are dropping further tiles into the row created by the initial tile drop in the row
-            self.moveTileToRow(tile.tileId, rowInfo.rowInsertIndex, tileIndex);
+            else {
+              // entire row is being moved to a new row
+              self.moveRowToIndex(rowIndex, rowInsertIndex);
+            }
           }
           else {
-            self.moveTile(tile.tileId, rowInfo, tileIndex);
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // part of row is being moved to an existing row
+              self.moveTilesToExistingRowAtIndex(rowTiles, rowInfo);
+            }
+            else {
+              // part of row is being moved to a new row
+              self.moveTilesToNewRowAtIndex(rowTiles, rowInsertIndex);
+            }
           }
         });
       }
