@@ -308,7 +308,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                       ? appConfig.defaultDocumentContent : undefined;
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
-      problemWorkspace.setAvailableDocument(newDocument);
+      problemWorkspace.setPrimaryDocument(newDocument);
     }
   }
 
@@ -328,7 +328,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { db, ui: { problemWorkspace } } = this.stores;
     const copyDocument = await db.copyOtherDocument(document, title);
     if (copyDocument) {
-      problemWorkspace.setAvailableDocument(copyDocument);
+      problemWorkspace.setPrimaryDocument(copyDocument);
     }
   }
 
