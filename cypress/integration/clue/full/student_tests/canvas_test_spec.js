@@ -49,7 +49,7 @@ context('Test Canvas', function(){
                 clueCanvas.openOneUpViewFromFourUp();
             })
             it('verify personal workspace header UI',()=>{ //other header elements are tested in common
-               canvas.createNewProblemDocument(studentWorkspace);
+               canvas.createNewExtraDocument(studentWorkspace);
                canvas.getNewDocumentIcon().should('be.visible');
                canvas.getCopyIcon().should('be.visible');
                canvas.getDeleteIcon().should('be.visible');

@@ -107,7 +107,7 @@ context('single student functional test',()=>{
         let canvas2='Document 2';
         before(function(){ //Open a different document to see if original document is restored
             canvas.copyDocument(canvas1);
-            canvas.createNewProblemDocument(canvas2)
+            canvas.createNewExtraDocument(canvas2)
             textToolTile.getTextTile().should('not.exist')
         })
         describe('verify that canvas is saved from various locations', function(){
