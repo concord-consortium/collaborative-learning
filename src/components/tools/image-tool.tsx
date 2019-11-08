@@ -63,7 +63,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           }, 100);
   private imageDragDrop: ImageDragDrop;
 
-  public componentWillMount() {
+  constructor(props: IProps) {
+    super(props);
+
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
