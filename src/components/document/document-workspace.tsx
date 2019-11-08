@@ -292,8 +292,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const defaultDocTitle = document.isLearningLog
                             ? appConfig.defaultLearningLogTitle
                             : appConfig.defaultDocumentTitle;
-    const docTypeString = document.getLabel(appConfig, 1);
-    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const docTypeString = appConfig.getDocumentLabel(docType, 1);
+    const docTypeStringL = appConfig.getDocumentLabel(docType, 1, true);
     const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
     this.stores.ui.prompt(`Name your new ${docTypeStringL}:`, `${nextTitle}`, `Create ${docTypeString}`)
       .then((title: string) => {
