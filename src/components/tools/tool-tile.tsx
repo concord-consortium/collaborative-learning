@@ -261,29 +261,49 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     };
     const { documents, ui: { selectedTileIds } } = this.stores;
 
-    // create a sorted array of selected tiles
-    selectedTileIds.forEach(selectedTileId => {
-      const document = documents.findDocumentOfTile(selectedTileId);
-      if (document) {
-        const {content} = document;
-        const tile = content.getTile(selectedTileId);
-        if (tile) {
+    const getTileInfo = (tileId: string) => {
+      if (tileId === model.id) {
+        return {
+          tile: model,
+          rowIndex: undefined,
+          rowHeight: undefined,
+          tileIndex: undefined
+        };
+      }
+      else {
+        const content = documents.findDocumentOfTile(tileId)?.content;
+        const tile = content?.getTile(tileId);
+        if (content && tile) {
           const rowId = content.findRowContainingTile(tile.id);
           const rowIndex = rowId && content.getRowIndex(rowId);
           const row = rowId && content.getRow(rowId);
           const rowHeight = row && row.height;
-          const tileIndex = row && row.tiles.findIndex(t => t.tileId === selectedTileId);
-          const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
-          delete tileSnapshotWithoutId.id;
-          dragTiles.items.push({
-            rowIndex: rowIndex || 0,
-            rowHeight: rowHeight || 0,
-            tileIndex: tileIndex || 0,
-            tileId: tile.id,
-            tileContent: JSON.stringify(tileSnapshotWithoutId),
-            tileType: tile.content.type
-          });
+          const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
+          return {
+            tile,
+            rowIndex,
+            rowHeight,
+            tileIndex
+          };
         }
+      }
+    };
+
+    // create a sorted array of selected tiles
+    selectedTileIds.forEach(selectedTileId => {
+      const tileInfo = getTileInfo(selectedTileId);
+      if (tileInfo) {
+        const {tile, rowIndex, rowHeight, tileIndex} = tileInfo;
+        const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
+        delete tileSnapshotWithoutId.id;
+        dragTiles.items.push({
+          rowIndex: rowIndex || 0,
+          rowHeight: rowHeight || 0,
+          tileIndex: tileIndex || 0,
+          tileId: tile.id,
+          tileContent: JSON.stringify(tileSnapshotWithoutId),
+          tileType: tile.content.type
+        });
       }
     });
     dragTiles.items.sort((a, b) => {

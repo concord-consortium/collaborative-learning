@@ -108,6 +108,7 @@ export const UIModel = types
       } else {
         self.selectedTileIds.clear();
       }
+      console.log("setOrAppendTileId", self.selectedTileIds.toJSON());
     };
 
     return {
