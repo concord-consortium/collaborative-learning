@@ -124,6 +124,14 @@ const ViewModeButton = ({ onClick, icon, title }: { onClick: () => void, icon: s
   );
 };
 
+const TitleInfo = ({ docTitle, onClick }: { docTitle: string, onClick?: () => void }) => {
+  return (
+    <span onClick={onClick} className="title-info" id="titlebar-title">
+      {docTitle}
+    </span>
+  );
+};
+
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
@@ -253,11 +261,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
-              <span className="title-info">Learning Log: {document.title}</span>
+              <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <span>{document.title}</span>
+              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
