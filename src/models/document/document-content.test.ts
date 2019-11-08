@@ -1031,12 +1031,6 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     });
   });
 
-  /*
-      console.log("after", getRowLayout());
-      expect(getRowLayout()).toEqual({
-      });
-  */
-
   describe("mutiple tile copies", () => {
     describe("two of three tiles in one row", () => {
       it("can copy before another row", () => {
