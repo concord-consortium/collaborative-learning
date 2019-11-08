@@ -326,7 +326,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { db, ui: { problemWorkspace } } = this.stores;
     const copyDocument = await db.copyOtherDocument(document, title);
     if (copyDocument) {
-      problemWorkspace.setAvailableDocument(copyDocument);
+      problemWorkspace.setPrimaryDocument(copyDocument);
     }
   }
 
