@@ -180,6 +180,9 @@ class ClueCanvas{
      getLeftSideWorkspaceTitle(){
          return cy.get('.left-workspace [data-test=document-title]')
      }
+     getLeftSidePersonalDocTitle(){
+         return cy.get('.left-workspace [data-test=personal-doc-title]')
+     }
      getRightSideDocumentContent(){
          return cy.get('.right-workspace .document-content')
      }
