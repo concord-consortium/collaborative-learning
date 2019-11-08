@@ -187,13 +187,12 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     },
   ];
 
-<<<<<<< HEAD
   // This set of plugins (as required by the Slate Editor component) provide
   // the mapping of a hot-key to the required handler.
   private slatePlugins: Plugin[] =
     this.slateMap.filter(entry => !!entry.hotKey)
       .map(entry => this.makeKeyDownHandler(entry));
-=======
+
   public onChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
     const content = this.getContent();
@@ -225,7 +224,6 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       }
     }
   }
->>>>>>> Added multiple selection
 
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;
