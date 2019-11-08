@@ -8,6 +8,9 @@
   bottom: $double-nav-expanded-peek
   color: #000
   transition: left $animation-speed
+  // In order for the app header to display pulldown content ontop of the
+  // workspace, we need to specify -1 z-index
+  z-index: -1
 
   &.expanded
     left: 0
