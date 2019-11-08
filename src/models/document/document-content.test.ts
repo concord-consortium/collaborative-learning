@@ -475,28 +475,6 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
 
   let documentContent: DocumentContentModelType;
 
-  /*
-
-    Layout (| denotes a tile on the same row)
-
-    introductionRowHeader
-    introductionRow1
-      textTool1
-    introductionRow2
-      drawingTool1
-    initialChallengeRowHeader
-    initialChallengeRow1
-      tableTool | imageTool
-    initialChallengeRow2
-      graphTool | textTool2 | drawingTool2
-    whatIfRowHeader
-    whatIfRow1
-      whatIfPlaceholder
-    nowWhatDoYouKnowRowHeader
-    nowWhatDoYouKnowRow1
-      nowWhatDoYouKnowPlaceholder
-
-  */
   const srcContent: DocumentContentSnapshotType = {
     rowMap: {
       introductionRowHeader: {
@@ -712,383 +690,435 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     });
   };
 
-  const getNewRowInfo = () => {
-    const info: Array<{id: string, index: number, row: TileRowModelType}> = [];
-    const knownIds = srcContent.rowOrder!;
-    documentContent.rowOrder.forEach((id, index) => {
-      if (knownIds.indexOf(id) === -1) {
-        info.push({id, index, row: documentContent.getRowByIndex(index)!});
-      }
+  const getRowLayout = () => {
+    const rowLayout: any = {};
+    documentContent.rowOrder.forEach(rowId => {
+      const row = documentContent.getRow(rowId);
+      const key = rowId.indexOf("-") !== -1 ? "NEW_ROW" : rowId;
+      rowLayout[key] = [];
+      row?.tiles.forEach((rowTile, index) => {
+        const tileType = documentContent.getTile(rowTile.tileId)!.content.type.toUpperCase();
+        const tileId = rowTile.tileId.indexOf("-") !== -1 ? `NEW_${tileType}_TILE_${index + 1}` : rowTile.tileId;
+        rowLayout[key].push(tileId);
+      });
     });
-    return info;
+    return rowLayout;
   };
 
+  /*
+    NOTE: this is the starting layout of the document before each test:
+    {
+        introductionRowHeader: [],
+        introductionRow1: [ "textTool1" ],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+    }
+  */
   describe("single tile moves", () => {
     it("can move a tile with its own row before another tile in its own row", () => {
+      // move textToo11 to the left of drawingTool1
       const dragTiles = getDragTiles(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
         rowDropIndex: documentContent.getRowIndex("introductionRow2"),
         rowDropLocation: "left"
       };
-      const initialRowCount = documentContent.rowCount;
-      expect(documentContent.getRow("introductionRow1")).toBeDefined();
-      expect(documentContent.getRow("introductionRow2")!.tiles.length).toBe(1);
-      expect(documentContent.getRow("introductionRow1")!.tiles[0].tileId).toBe("textTool1");
-      expect(documentContent.getRow("introductionRow2")!.tiles[0].tileId).toBe("drawingTool1");
       documentContent.moveTiles(dragTiles, dropRowInfo);
-      expect(documentContent.rowCount).toBe(initialRowCount - 1);
-      expect(documentContent.getRow("introductionRow1")).toBeUndefined();
-      expect(documentContent.getRow("introductionRow2")!.tiles.length).toBe(2);
-      expect(documentContent.getRow("introductionRow2")!.tiles[0].tileId).toBe("textTool1");
-      expect(documentContent.getRow("introductionRow2")!.tiles[1].tileId).toBe("drawingTool1");
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "textTool1", "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
 
     it("can move a tile with its own row after another tile in its own row", () => {
+      // move textToo11 to the right of drawingTool1
       const dragTiles = getDragTiles(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
         rowDropIndex: documentContent.getRowIndex("introductionRow2"),
         rowDropLocation: "right"
       };
-      const initialRowCount = documentContent.rowCount;
-      expect(documentContent.getRow("introductionRow1")).toBeDefined();
-      expect(documentContent.getRow("introductionRow2")!.tiles.length).toBe(1);
-      expect(documentContent.getRow("introductionRow1")!.tiles[0].tileId).toBe("textTool1");
-      expect(documentContent.getRow("introductionRow2")!.tiles[0].tileId).toBe("drawingTool1");
       documentContent.moveTiles(dragTiles, dropRowInfo);
-      expect(documentContent.rowCount).toBe(initialRowCount - 1);
-      expect(documentContent.getRow("introductionRow1")).toBeUndefined();
-      expect(documentContent.getRow("introductionRow2")!.tiles.length).toBe(2);
-      expect(documentContent.getRow("introductionRow2")!.tiles[0].tileId).toBe("drawingTool1");
-      expect(documentContent.getRow("introductionRow2")!.tiles[1].tileId).toBe("textTool1");
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1", "textTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
 
     it("can move a tile with its own row after another row", () => {
-      const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
+      // move textTool1 after the row with drawingTool1
       const dragTiles = getDragTiles(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
-        rowInsertIndex: introductionRow2Index + 1
+        rowInsertIndex: documentContent.getRowIndex("introductionRow2") + 1
       };
-      const initialRowCount = documentContent.rowCount;
-      const initialRowIndex = documentContent.getRowIndex("introductionRow1");
-      expect(documentContent.getRow("introductionRow1")).toBeDefined();
       documentContent.moveTiles(dragTiles, dropRowInfo);
-      expect(documentContent.rowCount).toBe(initialRowCount);
-      expect(documentContent.getRow("introductionRow1")).toBeDefined();
-      expect(documentContent.getRowIndex("introductionRow1")).toBe(initialRowIndex + 1);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        introductionRow1: [ "textTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
 
     it("can move a tile with its own row before another row", () => {
-      const introductionRow1Index = documentContent.getRowIndex("introductionRow1");
+      // move drawingTool1 before the row with textTool1
       const dragTiles = getDragTiles(["drawingTool1"]);
       const dropRowInfo: IDropRowInfo = {
-        rowInsertIndex: introductionRow1Index
+        rowInsertIndex: documentContent.getRowIndex("introductionRow1")
       };
-      const initialRowCount = documentContent.rowCount;
-      const initialRowIndex = documentContent.getRowIndex("introductionRow2");
-      expect(documentContent.getRow("introductionRow2")).toBeDefined();
       documentContent.moveTiles(dragTiles, dropRowInfo);
-      expect(documentContent.rowCount).toBe(initialRowCount);
-      expect(documentContent.getRow("introductionRow2")).toBeDefined();
-      expect(documentContent.getRowIndex("introductionRow2")).toBe(initialRowIndex - 1);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        introductionRow1: [ "textTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
   });
 
   describe("mutiple tile moves", () => {
     describe("two of three tiles in one row", () => {
       it("can move into another row to the left", () => {
-        const initialRowCount = documentContent.rowCount;
-        const introductionRow1 = documentContent.getRow("introductionRow1")!;
-        const initialChallengeRow2 = documentContent.getRow("initialChallengeRow2")!;
+        // move graphTool and textTool2 to the left of introductionRow1
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
           rowDropIndex: documentContent.getRowIndex("introductionRow1"),
           rowDropLocation: "left"
         };
-
-        expect(introductionRow1.tiles.length).toBe(1);
-        expect(initialChallengeRow2.tiles.length).toBe(3);
-
         documentContent.moveTiles(dragTiles, dropRowInfo);
-
-        expect(documentContent.rowCount).toBe(initialRowCount);
-        expect(introductionRow1!.tiles.length).toBe(3);
-        expect(introductionRow1!.tiles[0].tileId).toBe("graphTool");
-        expect(introductionRow1!.tiles[1].tileId).toBe("textTool2");
-        expect(introductionRow1!.tiles[2].tileId).toBe("textTool1");
-        expect(initialChallengeRow2.tiles.length).toBe(1);
-        expect(initialChallengeRow2.tiles[0].tileId).toBe("drawingTool2");
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "graphTool", "textTool2", "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move into another row to the right", () => {
-        const initialRowCount = documentContent.rowCount;
-        const introductionRow1 = documentContent.getRow("introductionRow1")!;
-        const initialChallengeRow2 = documentContent.getRow("initialChallengeRow2")!;
+        // move graphTool and textTool2 to the right of introductionRow1
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
           rowDropIndex: documentContent.getRowIndex("introductionRow1"),
           rowDropLocation: "right"
         };
-
-        expect(introductionRow1.tiles.length).toBe(1);
-        expect(initialChallengeRow2.tiles.length).toBe(3);
-
         documentContent.moveTiles(dragTiles, dropRowInfo);
-
-        expect(documentContent.rowCount).toBe(initialRowCount);
-        expect(introductionRow1!.tiles.length).toBe(3);
-        expect(introductionRow1!.tiles[0].tileId).toBe("textTool1");
-        expect(introductionRow1!.tiles[1].tileId).toBe("graphTool");
-        expect(introductionRow1!.tiles[2].tileId).toBe("textTool2");
-        expect(initialChallengeRow2.tiles.length).toBe(1);
-        expect(initialChallengeRow2.tiles[0].tileId).toBe("drawingTool2");
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1", "graphTool", "textTool2" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move before another row", () => {
-        const initialChallengeRow1 = documentContent.getRow("initialChallengeRow1")!;
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
+        // move graphTool and textTool2 to a new row before introductionRow1
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: introductionRow2Index - 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1")
         };
-        const initialRowIndex = dragTiles[0].rowIndex;
-        const initialRowCount = Object.keys(documentContent.rowMap).length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-
         documentContent.moveTiles(dragTiles, dropRowInfo);
-
-        const newRowIndex = documentContent.getRowIndex(documentContent.findRowContainingTile(dragTiles[0].tileId)!);
-        // console.log(documentContent.rowOrder.toJSON());
-        // console.log("tiles", initialChallengeRow1.tiles.length);
-        expect(newRowIndex).toBeLessThan(initialRowIndex);
-        expect(newRowIndex).toBe(introductionRow2Index - 1);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-        expect(Object.keys(documentContent.rowMap).length).toBe(initialRowCount);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          NEW_ROW: [ "graphTool", "textTool2" ],
+          introductionRow1: [ "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move after another row", () => {
-        const initialChallengeRow1 = documentContent.getRow("initialChallengeRow1")!;
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: introductionRow2Index + 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1
         };
-        const initialRowIndex = dragTiles[0].rowIndex;
-        const initialRowCount = Object.keys(documentContent.rowMap).length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
         documentContent.moveTiles(dragTiles, dropRowInfo);
-        const newRowIndex = documentContent.getRowIndex(documentContent.findRowContainingTile(dragTiles[0].tileId)!);
-        console.log(documentContent.rowOrder.toJSON());
-        console.log("tiles", initialChallengeRow1.tiles.length);
-        expect(newRowIndex).toBeLessThan(initialRowIndex);
-        expect(newRowIndex).toBe(introductionRow2Index + 1);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-        expect(Object.keys(documentContent.rowMap).length).toBe(initialRowCount);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1" ],
+          NEW_ROW: [ "graphTool", "textTool2" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
     });
 
     describe("all tiles in one row", () => {
       it("can move into another row to the left", () => {
+        // move tableTool and imageTool to the left of introductionRow1 and delete initialChallengeRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
           rowDropIndex: documentContent.getRowIndex("introductionRow1"),
           rowDropLocation: "left"
         };
-        const initialRowCount = documentContent.rowCount;
-        const introductionRow1 = documentContent.getRow("introductionRow1")!;
-        expect(introductionRow1.tiles.length).toBe(1);
         documentContent.moveTiles(dragTiles, dropRowInfo);
-        expect(documentContent.rowCount).toBe(initialRowCount - 1);
-        expect(introductionRow1!.tiles.length).toBe(3);
-        expect(introductionRow1!.tiles[0].tileId).toBe("tableTool");
-        expect(introductionRow1!.tiles[1].tileId).toBe("imageTool");
-        expect(introductionRow1!.tiles[2].tileId).toBe("textTool1");
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "tableTool", "imageTool", "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move into another row to the right", () => {
+        // move tableTool and imageTool to the right of introductionRow1 and delete initialChallengeRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
           rowDropIndex: documentContent.getRowIndex("introductionRow1"),
           rowDropLocation: "right"
         };
-        const initialRowCount = documentContent.rowCount;
-        const introductionRow1 = documentContent.getRow("introductionRow1")!;
-        expect(introductionRow1.tiles.length).toBe(1);
         documentContent.moveTiles(dragTiles, dropRowInfo);
-        expect(documentContent.rowCount).toBe(initialRowCount - 1);
-        expect(introductionRow1!.tiles.length).toBe(3);
-        expect(introductionRow1!.tiles[0].tileId).toBe("textTool1");
-        expect(introductionRow1!.tiles[1].tileId).toBe("tableTool");
-        expect(introductionRow1!.tiles[2].tileId).toBe("imageTool");
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1", "tableTool", "imageTool" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move before another row", () => {
-        const initialChallengeRow1 = documentContent.getRow("initialChallengeRow1")!;
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
+        // move tableTool and imageTool to before introductionRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: introductionRow2Index - 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1")
         };
-        const initialRowIndex = dragTiles[0].rowIndex;
-        const initialRowCount = Object.keys(documentContent.rowMap).length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
         documentContent.moveTiles(dragTiles, dropRowInfo);
-        const newRowIndex = documentContent.getRowIndex(documentContent.findRowContainingTile(dragTiles[0].tileId)!);
-        console.log(documentContent.rowOrder.toJSON());
-        console.log("tiles", initialChallengeRow1.tiles.length);
-        expect(newRowIndex).toBeLessThan(initialRowIndex);
-        expect(newRowIndex).toBe(introductionRow2Index - 1);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-        expect(Object.keys(documentContent.rowMap).length).toBe(initialRowCount);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          introductionRow1: [ "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can move after another row", () => {
-        const initialChallengeRow1 = documentContent.getRow("initialChallengeRow1")!;
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
+        // move tableTool and imageTool to after introductionRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: introductionRow2Index + 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1
         };
-        const initialRowIndex = dragTiles[0].rowIndex;
-        const initialRowCount = Object.keys(documentContent.rowMap).length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
         documentContent.moveTiles(dragTiles, dropRowInfo);
-        const newRowIndex = documentContent.getRowIndex(documentContent.findRowContainingTile(dragTiles[0].tileId)!);
-        console.log(documentContent.rowOrder.toJSON());
-        console.log("tiles", initialChallengeRow1.tiles.length);
-        expect(newRowIndex).toBeLessThan(initialRowIndex);
-        expect(newRowIndex).toBe(introductionRow2Index + 1);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-        expect(Object.keys(documentContent.rowMap).length).toBe(initialRowCount);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1" ],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
     });
   });
 
   describe("single tile copies", () => {
     it("can copy a tile before another row", () => {
+      // copy drawingTile1 to new row before introductionRow1
       const dragTiles = getDragTiles(["drawingTool1"]);
-      const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-      const introductionRow2 = documentContent.getRowByIndex(introductionRow2Index)!;
-      const rowInsertIndex = introductionRow2Index - 1;
-      const initialRowCount = documentContent.rowOrder.length;
-
-      expect(introductionRow2.tiles.length).toBe(1);
+      const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
       documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-      expect(introductionRow2.tiles.length).toBe(1);
-
-      const newRowInfo = getNewRowInfo();
-      expect(newRowInfo.length).toBe(1);
-      expect(newRowInfo[0].index).toBe(introductionRow2Index - 1);
-      expect(newRowInfo[0].row.tiles.length).toBe(1);
-      expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        NEW_ROW: [ "NEW_DRAWING_TILE_1" ],
+        introductionRow1: [ "textTool1" ],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
 
     it("can copy a tile after another row", () => {
+      // copy drawingTile1 to new row after introductionRow1
       const dragTiles = getDragTiles(["drawingTool1"]);
-      const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-      const introductionRow2 = documentContent.getRowByIndex(introductionRow2Index)!;
-      const rowInsertIndex = introductionRow2Index + 1;
-      const initialRowCount = documentContent.rowOrder.length;
-
-      expect(introductionRow2.tiles.length).toBe(1);
+      const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
       documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-      expect(introductionRow2.tiles.length).toBe(1);
-
-      const newRowInfo = getNewRowInfo();
-      expect(newRowInfo.length).toBe(1);
-      expect(newRowInfo[0].index).toBe(introductionRow2Index + 1);
-      expect(newRowInfo[0].row.tiles.length).toBe(1);
-      expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow1: [ "textTool1" ],
+        NEW_ROW: [ "NEW_DRAWING_TILE_1" ],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
     });
   });
+
+  /*
+      console.log("after", getRowLayout());
+      expect(getRowLayout()).toEqual({
+      });
+  */
 
   describe("mutiple tile copies", () => {
     describe("two of three tiles in one row", () => {
       it("can copy before another row", () => {
+        // copy graphTool and textTool2 before introductionRow1
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
-        const initialChallengeRow2Index = documentContent.getRowIndex("initialChallengeRow2");
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-        const initialChallengeRow2 = documentContent.getRowByIndex(initialChallengeRow2Index)!;
-        const rowInsertIndex = introductionRow2Index - 1;
-        const initialRowCount = documentContent.rowOrder.length;
-
-        expect(initialChallengeRow2.tiles.length).toBe(3);
+        const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
         documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-        expect(initialChallengeRow2.tiles.length).toBe(3);
-
-        const newRowInfo = getNewRowInfo();
-        expect(newRowInfo.length).toBe(1);
-        expect(newRowInfo[0].index).toBe(introductionRow2Index - 1);
-        expect(newRowInfo[0].row.tiles.length).toBe(2);
-        expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          NEW_ROW: [ "NEW_GEOMETRY_TILE_1", "NEW_TEXT_TILE_2" ],
+          introductionRow1: [ "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can copy after another row", () => {
+        // copy graphTool and textTool2 after introductionRow1
         const dragTiles = getDragTiles(["graphTool", "textTool2"]);
-        const initialChallengeRow2Index = documentContent.getRowIndex("initialChallengeRow2");
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-        const initialChallengeRow2 = documentContent.getRowByIndex(initialChallengeRow2Index)!;
-        const rowInsertIndex = introductionRow2Index + 1;
-        const initialRowCount = documentContent.rowOrder.length;
-
-        expect(initialChallengeRow2.tiles.length).toBe(3);
+        const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
         documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-        expect(initialChallengeRow2.tiles.length).toBe(3);
-
-        const newRowInfo = getNewRowInfo();
-        expect(newRowInfo.length).toBe(1);
-        expect(newRowInfo[0].index).toBe(introductionRow2Index + 1);
-        expect(newRowInfo[0].row.tiles.length).toBe(2);
-        expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1" ],
+          NEW_ROW: [ "NEW_GEOMETRY_TILE_1", "NEW_TEXT_TILE_2" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
     });
 
     describe("all tiles in one row", () => {
       it("can copy before another row", () => {
+        // copy tableTool and imageTool before introductionRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
-        const initialChallengeRow1Index = documentContent.getRowIndex("initialChallengeRow1");
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-        const initialChallengeRow1 = documentContent.getRowByIndex(initialChallengeRow1Index)!;
-        const rowInsertIndex = introductionRow2Index - 1;
-        const initialRowCount = documentContent.rowOrder.length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
+        const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
         documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-
-        const newRowInfo = getNewRowInfo();
-        expect(newRowInfo.length).toBe(1);
-        expect(newRowInfo[0].index).toBe(introductionRow2Index - 1);
-        expect(newRowInfo[0].row.tiles.length).toBe(2);
-        expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          NEW_ROW: [ "NEW_TABLE_TILE_1", "NEW_IMAGE_TILE_2" ],
+          introductionRow1: [ "textTool1" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
 
       it("can copy after another row", () => {
+        // copy tableTool and imageTool after introductionRow1
         const dragTiles = getDragTiles(["tableTool", "imageTool"]);
-        const initialChallengeRow1Index = documentContent.getRowIndex("initialChallengeRow1");
-        const introductionRow2Index = documentContent.getRowIndex("introductionRow2");
-        const initialChallengeRow1 = documentContent.getRowByIndex(initialChallengeRow1Index)!;
-        const rowInsertIndex = introductionRow2Index + 1;
-        const initialRowCount = documentContent.rowOrder.length;
-
-        expect(initialChallengeRow1.tiles.length).toBe(2);
+        const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
         documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
-        expect(initialChallengeRow1.tiles.length).toBe(2);
-
-        const newRowInfo = getNewRowInfo();
-        expect(newRowInfo.length).toBe(1);
-        expect(newRowInfo[0].index).toBe(introductionRow2Index + 1);
-        expect(newRowInfo[0].row.tiles.length).toBe(2);
-        expect(documentContent.rowOrder.length).toBe(initialRowCount + 1);
+        expect(getRowLayout()).toEqual({
+          introductionRowHeader: [],
+          introductionRow1: [ "textTool1" ],
+          NEW_ROW: [ "NEW_TABLE_TILE_1", "NEW_IMAGE_TILE_2" ],
+          introductionRow2: [ "drawingTool1" ],
+          initialChallengeRowHeader: [],
+          initialChallengeRow1: [ "tableTool", "imageTool" ],
+          initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+          whatIfRowHeader: [],
+          whatIfRow1: [ "whatIfPlaceholder" ],
+          nowWhatDoYouKnowRowHeader: [],
+          nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+        });
       });
     });
   });
