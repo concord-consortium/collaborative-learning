@@ -159,6 +159,6 @@
     "superagent": "^5.1.0",
     "uuid": "^3.3.3",
     "whatwg-fetch": "^3.0.0",
-    "concord-react-components": "^0.1.8"
+    "@concord-consortium/react-components": "^0.1.11"
   }
 }
