@@ -49,7 +49,7 @@ context('Test Canvas', function(){
                 clueCanvas.openOneUpViewFromFourUp();
             })
             it('verify personal workspace header UI',()=>{ //other header elements are tested in common
-               canvas.createNewProblemDocument(studentWorkspace);
+               canvas.createNewExtraDocument(studentWorkspace);
                canvas.getNewDocumentIcon().should('be.visible');
                canvas.getCopyIcon().should('be.visible');
                canvas.getDeleteIcon().should('be.visible');
@@ -335,15 +335,15 @@ context('Test Canvas', function(){
                     clueCanvas.getShareButton().should('have.length',1)
                 });
                 describe('header actions in 2up view',function(){
-                    it('verify new workspace', function(){
-                        let title = 'New in 2up'
-                        canvas.createNewProblemDocument(title);
-                        clueCanvas.getRightSideWorkspaceTitle().should('contain',title)
-                    });
                     it('verify copy of workspace',function(){
                         let title = 'copy of 1.2'
                         canvas.copyDocument(title);
-                        clueCanvas.getRightSideWorkspaceTitle().should('contain',title)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
+                    });
+                    it('verify new workspace', function(){
+                        let title = 'New in 2up'
+                        canvas.createNewExtraDocument(title);
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
                     });
                     it('verify publishing', function(){//{https://www.pivotaltracker.com/story/show/169159799}
                         //TODO

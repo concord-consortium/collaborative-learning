@@ -3,7 +3,7 @@ import "./jxg";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { assign, find, values } from "lodash";
 
-const kCanvasScalerClass = "canvas-scaler";
+const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
 export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
@@ -69,10 +69,10 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
               ? document.getElementById(eltOrId)
               : eltOrId;
   for ( ; elt != null; elt = elt.parentElement) {
-    if (elt.classList.contains(kCanvasScalerClass)) {
-      const transform = elt.style.transform;
-      const match = transform && /scale\((.+)\)/.exec(transform);
-      return match && match[1] ? parseFloat(match[1]) : 1;
+    if (kScalerClasses.some(_class => elt?.classList.contains(_class))) {
+      const transform = getComputedStyle(elt).transform;
+      const match = transform && /(scale|matrix)\((.+)\)/.exec(transform);
+      return match && match[2] ? parseFloat(match[2]) : 1;
     }
   }
   return 1;

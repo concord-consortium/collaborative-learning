@@ -204,7 +204,7 @@ context('Tests for graph and table integration', function(){
         before(()=>{
             let title = 'table to graph'
             canvas.canvas();
-            canvas.createNewProblemDocument(title);
+            canvas.createNewExtraDocument(title);
             canvas.getPersonalDocTitle().should('contain', title)
             addTableAndGraph();
         })

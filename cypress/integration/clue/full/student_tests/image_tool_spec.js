@@ -50,7 +50,7 @@ context('Test image functionalities', function(){
     })
     describe('upload image from user computer',()=>{   
         before(()=>{ //create a new doc so that save and restore can e tested
-            canvas.createNewProblemDocument(userCanvas) 
+            canvas.createNewExtraDocument(userCanvas) 
             cy.wait(2000)
         })
         it('will upload png file from user computer', function(){
