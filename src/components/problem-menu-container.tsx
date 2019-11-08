@@ -1,50 +1,39 @@
 import * as React from "react";
 import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
-import { LinkSwitcherMenu, IMenuLink } from "./link-switcher-menu";
-import { LogEventName, Logger } from "../lib/logger";
+import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
 import { toJS } from "mobx";
-import { DropDown } from "concord-react-components";
+import { DropDown, IMenuItemProps } from "concord-react-components";
 
 interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
 export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
-  public render() {
-    const { problem } = this.stores;
-    const problemMenuItems = this.getProblemMenuItems();
-    const handleClick = (item: IMenuLink) => {
-      const {log, link, extras} = item;
-      const followLink = () => {
-        if (link) {
-          window.location.replace(link);
-        } else {
-          this.showUnassignedLinkAlert(extras);
-        }
-      };
-      followLink();
-      if (log) {
-        Logger.log(log.event, log.parameters, log.method);
-      }
-    };
 
-    const menuItems = problemMenuItems.map( (i) => {
-      return {
-        text: i.title,
-        link: i.link,
-        selected: i.selected,
-        onClick: () => handleClick(i)
-      };
-    });
-    return <DropDown title="Problems" items={menuItems} />;
+  public render() {
+    const problemMenuItems = this.getProblemMenuItems();
+    return <DropDown title="Problems" items={problemMenuItems} />;
   }
 
-  private showUnassignedLinkAlert(extras: any) {
+  private handleMenuItemClick = (item: IMenuItemProps, problemName: string) => {
+    const {link, text} = item;
+    if (link) {
+      window.location.replace(link);
+    } else {
+      this.showUnassignedLinkAlert(problemName);
+    }
+    const logItem = {
+      event: LogEventName.DASHBOARD_SWITCH_CLASS,
+      parameters: {text, link}
+    };
+    Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
+  }
+
+  private showUnassignedLinkAlert(problemName: string) {
     const { ui } = this.stores;
-    const identifier = `${extras.title} (${extras.unitCode})`;
     ui.alert(
-      `You must first assign ${identifier} from the portal.`,
+      `You must first assign ${problemName} from the portal.`,
       "Problem not currently assigned"
     );
   }
@@ -52,7 +41,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
   private getProblemMenuItems() {
     const { user, unit, problem } = this.stores;
     const investigations = unit.investigations;
-    const links: IMenuLink[] = [];
+    const links: IMenuItemProps[] = [];
 
     // For each problem in the curriculum assigned in this class...
     investigations.forEach ( (investigation) => {
@@ -67,15 +56,14 @@ export class ProblemMenuContainer extends BaseComponent <IProps, {}> {
             offering.unitCode === unitCode
           );
         });
-
-        links.push( {
+        const link: IMenuItemProps = {
           selected: problem.title === invProb.title,
-          title: portalOffering ? invProb.title : `${invProb.title} (N/A)`,
+          text: portalOffering ? invProb.title : `${invProb.title} (N/A)`,
           link: portalOffering ? portalOffering.location : undefined,
-          enabled: true,
-          extras: { unitCode, problemOrdinal, title: invProb.title },
-          log: {event: LogEventName.DASHBOARD_SWITCH_PROBLEM, parameters: toJS(portalOffering)}
-        });
+          disabled: false
+        };
+        link.onClick = () => this.handleMenuItemClick(link, invProb.title);
+        links.push(link);
       });
     });
     return links;
