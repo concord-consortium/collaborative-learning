@@ -33,7 +33,7 @@ class ClueCanvas{
     }
 
     getFourUpViewToggle(){
-        return cy.get('[data-test=document-titlebar-actions] .icon-up1');
+        return cy.get('[data-test=document-titlebar-actions] .up1');
     }
 
     openFourUpView(){
@@ -42,7 +42,7 @@ class ClueCanvas{
     }
 
     getFourToOneUpViewToggle(){
-        return cy.get('[data-test=document-titlebar-actions] .icon-up4');
+        return cy.get('[data-test=document-titlebar-actions] .up4');
     }
 
     openOneUpViewFromFourUp(){
@@ -144,10 +144,10 @@ class ClueCanvas{
     }
 
     getTwoUpViewToggle(){
-        return cy.get('.single-workspace .statusbar .action > .icon-up1');
+        return cy.get('.single-workspace .statusbar .action > .up1');
     }
     getTwoToOneUpViewToggle(){// from 2up view
-        return cy.get('.left-workspace .statusbar .action > .icon-up2');
+        return cy.get('.left-workspace .statusbar .action > .up2');
     }
 
     getRightSideWorkspace(){
