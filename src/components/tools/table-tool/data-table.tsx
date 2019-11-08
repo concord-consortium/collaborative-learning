@@ -713,32 +713,11 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public handleTabToNextCell = (params: TabToNextCellParams) => {
-    if (!params) { return null; }
     this.prevEditCell = params.previousCellPosition;
-    if (params.editing && !params.backwards) {
-      if (params.nextCellPosition) {
-        return params.nextCellPosition;
-      } else {
-        this.saveCellEditState();   // Save and then restore the edit state of current cell.
-        this.addLocalCaseToTable();
-        setTimeout(() => {
-          this.restoreCellEditState();
-        });
-        setTimeout(() => {
-          setTimeout(this.startEditingFirstColumnOfNextRow);
-        });
-        if (this.gridApi && this.gridColumnApi && this.prevEditCell) {
-          const rowIndex = this.prevEditCell.rowIndex + 1;
-          const columns = this.gridColumnApi.getAllDisplayedColumns();
-          // const colId = columns[1].getColId
-          const newCellPosition = this.prevEditCell;
-          newCellPosition.rowIndex = rowIndex;
-          // newCellPosition.column.colId = colId;
-          // return newCellPosition;
-        } else {
-          return params.nextCellPosition;
-        }
-      }
+    if (params.editing && !params.backwards && !params.nextCellPosition) {
+      setTimeout(() => {
+        this.startEditingFirstColumnOfNextRow();
+      }, 100);
     }
     return params.nextCellPosition;
   }
@@ -758,7 +737,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
     if (e.keyCode === 13) {
       if (this.checkForEnterAfterCellEditingStopped) {
-        setTimeout(startEditingNextRow);
+        setTimeout(startEditingNextRow, 100);
       }
       this.isProcessingEnterKey = false;
     }
