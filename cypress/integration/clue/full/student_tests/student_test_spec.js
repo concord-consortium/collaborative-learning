@@ -1,5 +1,5 @@
-import Header from '../../../support/elements/common/Header';
-import ClueHeader from '../../../support/elements/clue/cHeader';
+import Header from '../../../../support/elements/common/Header';
+import ClueHeader from '../../../../support/elements/clue/cHeader';
 
 
 const header = new Header;
@@ -11,7 +11,14 @@ let student = '5',
     offering = '5',
     problemSet = '2.1';
 
-
+    before(function(){
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("queryParams")}`;
+    
+        // cy.clearQAData('all');
+        cy.visit(baseUrl+queryParams);
+        cy.wait(4000);
+    });
 describe('Check header area for correctness', function(){
     it('will verify if class name is correct', function(){
         header.getClassName().should('contain',''+'Class '+classroom);
@@ -50,3 +57,7 @@ describe.skip('Students, class, group, problem combinations', function(){
 
     });
 })
+
+after(function(){
+  cy.clearQAData('all');
+});

@@ -52,15 +52,6 @@ class Canvas{
         return cy.get('[data-test=delete-icon]')
     }
 
-    createNewProblemDocument(title){
-        this.getNewDocumentIcon().click()
-            .then(()=>{
-                dialog.getDialogTitle().should('exist').contains('Create Problem Workspace');
-                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click();
-            })
-        cy.wait(3000)    
-    }
     createNewExtraDocument(title){
         this.getNewDocumentIcon().click()
             .then(()=>{

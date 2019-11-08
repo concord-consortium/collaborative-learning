@@ -5,26 +5,29 @@
   position: absolute
   right: 30px
   box-sizing: content-box
-  width: 21px
+  width: 19px
   height: 21px
   padding-left: 1px
   padding-right: 1px
   padding-bottom: 0px
-  border-radius: $border-radius
+  border-radius: $half-border-radius
   border-top-left-radius: 0
   border-top-right-radius: 0
-  background-color: $color3
-  border: $border-width solid $border-color
+  background-color: $color3-4
+  border: $half-border-width solid transparent
   border-right: 0
   border-top: 0
   z-index: 2
   opacity: 1
   transition: 0.3s
+  &:focus
+    outline: none
 .link-icon
   background-repeat: no-repeat
-  width: 23px
-  height: 23px
-  margin-top: -1px
+  width: 20px
+  height: 20px
+  margin-top: 1px
+  margin-left: -1px
   left: 0px
   cursor: default
 .link-indicator-icon-1

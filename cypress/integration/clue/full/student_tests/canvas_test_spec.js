@@ -1,12 +1,12 @@
-import LeftNav from '../../../support/elements/clue/LeftNav'
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import RightNav from '../../../support/elements/common/RightNav'
-import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
-import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
-import DrawToolTile from '../../../support/elements/clue/DrawToolTile'
-import TextToolTile from '../../../support/elements/clue/TextToolTile'
-import TableToolTile from '../../../support/elements/clue/TableToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import RightNav from '../../../../support/elements/common/RightNav'
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
+import DrawToolTile from '../../../../support/elements/clue/DrawToolTile'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import TableToolTile from '../../../../support/elements/clue/TableToolTile'
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;
@@ -26,6 +26,11 @@ context('Test Canvas', function(){
     // 3. drag image from leftNav to canvas
     // 5. drag a tool from tool bar to canvas
     before(function(){
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("queryParams")}`;
+        
+            cy.visit(baseUrl+queryParams);
+            cy.wait(5000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
 
@@ -44,7 +49,7 @@ context('Test Canvas', function(){
                 clueCanvas.openOneUpViewFromFourUp();
             })
             it('verify personal workspace header UI',()=>{ //other header elements are tested in common
-               canvas.createNewProblemDocument(studentWorkspace);
+               canvas.createNewExtraDocument(studentWorkspace);
                canvas.getNewDocumentIcon().should('be.visible');
                canvas.getCopyIcon().should('be.visible');
                canvas.getDeleteIcon().should('be.visible');
@@ -239,7 +244,7 @@ context('Test Canvas', function(){
         });
 
         describe('save and restore of tool tiles', function(){
-            describe('verify that tool tiles is saved from various locations', function(){
+            describe.skip('verify that tool tiles is saved from various locations', function(){
                 it('will restore from My Work tab', function() {
                     //Open personal workspace
                     rightNav.openRightNavTab('my-work');
@@ -263,7 +268,7 @@ context('Test Canvas', function(){
                 });
             });
 
-            describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
+            describe.skip('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
                 it('verify restore in 4 up view',function(){
                     //Open Personal Workspace
                     rightNav.openRightNavTab('my-work');
@@ -283,7 +288,7 @@ context('Test Canvas', function(){
 
         context('test footer elements', function(){
             describe('Test the 2-up view', function(){
-                it('verify 2 up button, and correct corresponding view comes up', function(){
+                it.skip('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.openTwoUpView();
                     clueCanvas.openOneUpViewFromTwoUp();
@@ -292,7 +297,7 @@ context('Test Canvas', function(){
                     canvas.getSingleCanvas().should('be.visible');
                 });
 
-                it('verify 2-up view is visible when canvas is in 4-up view', function(){
+                it.skip('verify 2-up view is visible when canvas is in 4-up view', function(){
                     //single canvas 4up button and 2up button is visible
                     clueCanvas.getNorthEastCanvas().should('be.visible');
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
@@ -330,15 +335,15 @@ context('Test Canvas', function(){
                     clueCanvas.getShareButton().should('have.length',1)
                 });
                 describe('header actions in 2up view',function(){
-                    it('verify new workspace', function(){
-                        let title = 'New in 2up'
-                        canvas.createNewProblemDocument(title);
-                        clueCanvas.getRightSideWorkspaceTitle().should('contain',title)
-                    });
                     it('verify copy of workspace',function(){
                         let title = 'copy of 1.2'
                         canvas.copyDocument(title);
-                        clueCanvas.getRightSideWorkspaceTitle().should('contain',title)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
+                    });
+                    it('verify new workspace', function(){
+                        let title = 'New in 2up'
+                        canvas.createNewExtraDocument(title);
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
                     });
                     it('verify publishing', function(){//{https://www.pivotaltracker.com/story/show/169159799}
                         //TODO
@@ -416,4 +421,8 @@ context('Test Canvas', function(){
             //TODO
         })
     })
+});
+
+after(function(){
+  cy.clearQAData('all');
 });

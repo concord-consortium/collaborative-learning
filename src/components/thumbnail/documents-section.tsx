@@ -20,6 +20,7 @@ interface IProps {
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
+  onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
 function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
@@ -46,7 +47,8 @@ function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, do
 export const DocumentsSection = observer(({ tab, section, stores, scale,
                                   isExpanded, onToggleExpansion,
                                   onDocumentClick, onDocumentDragStart,
-                                  onNewDocumentClick, onDocumentStarClick }: IProps) => {
+                                  onNewDocumentClick, onDocumentStarClick,
+                                  onDocumentDeleteClick }: IProps) => {
     const sectionTitle = getSectionTitle(section, stores);
     const { documents, user } = stores;
     let sectionDocs: DocumentModelType[] = [];
@@ -120,6 +122,9 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
             function handleDocumentStarClick() {
               onDocumentStarClick && onDocumentStarClick(document);
             }
+            function handleDocumentDeleteClick() {
+              onDocumentDeleteClick && onDocumentDeleteClick(document);
+            }
 
             // pass function so logic stays here but access occurs from child
             // so that mobx-react triggers child render not parent render.
@@ -133,13 +138,22 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
             const _handleDocumentStarClick = section.showStarsForUser(user)
                                               ? handleDocumentStarClick
                                               : undefined;
+            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+                                              ? handleDocumentDeleteClick
+                                              : undefined;
             return (
               <ThumbnailDocumentItem
-                key={document.key} dataTestName={`${tab}-list-items`}
-                canvasContext={tab} document={document} scale={scale}
+                key={document.key}
+                dataTestName={`${tab}-list-items`}
+                canvasContext={tab}
+                document={document}
+                scale={scale}
                 captionText={getDocumentCaption(section, stores, document)}
                 onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred} onDocumentStarClick={_handleDocumentStarClick} />
+                onIsStarred={onIsStarred}
+                onDocumentStarClick={_handleDocumentStarClick}
+                onDocumentDeleteClick={_handleDocumentDeleteClick}
+              />
             );
           })}
           {section.addDocument

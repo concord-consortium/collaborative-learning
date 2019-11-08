@@ -69,15 +69,15 @@ export function getAllObjectsUnderMouse(board: JXG.Board, evt: any, scale?: numb
 
 export function rotateCoords(coords: JXG.Coords, center: JXG.Coords, angle: number) {
   // express x, y relative to center of rotation
-  const dx = coords.usrCoords[1] - center.usrCoords[1];
-  const dy = coords.usrCoords[2] - center.usrCoords[2];
+  const dx = coords.scrCoords[1] - center.scrCoords[1];
+  const dy = coords.scrCoords[2] - center.scrCoords[2];
   // rotate
   const sinAngle = Math.sin(angle);
   const cosAngle = Math.cos(angle);
   let x = dx * cosAngle - dy * sinAngle;
   let y = dx * sinAngle + dy * cosAngle;
   // offset back to original location
-  x += center.usrCoords[1];
-  y += center.usrCoords[2];
-  return new JXG.Coords(JXG.COORDS_BY_USER, [x, y], coords.board);
+  x += center.scrCoords[1];
+  y += center.scrCoords[2];
+  return new JXG.Coords(JXG.COORDS_BY_SCREEN, [x, y], coords.board);
 }

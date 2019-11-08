@@ -1,6 +1,14 @@
-import LeftNav from '../../../support/elements/clue/LeftNav'
+import LeftNav from '../../../../support/elements/clue/LeftNav'
 
 let leftNav = new LeftNav;
+
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000);
+});
 
 describe('Test Left tabs',function(){
 
@@ -22,4 +30,8 @@ describe('Test Left tabs',function(){
             cy.get('#leftNavContainer'+index).find('.left-nav-panel .section-header h1').should("contain",title)
         })
     });
+});
+
+after(function(){
+  cy.clearQAData('all');
 });

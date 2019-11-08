@@ -3,7 +3,8 @@
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
     "msa": "assets/curriculum/moving-straight-ahead/moving-straight-ahead.json",
-    "s+s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+    "s+s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "s s": "assets/curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
   "defaultProblemOrdinal": "1.1",
   "defaultUnit": "s+s",
@@ -155,7 +156,7 @@
           "dataTestHeader": "supports-section-teacher-supports",
           "dataTestItem": "supports-list-items",
           "documentTypes": ["supportPublication"],
-          "properties": ["teacherSupport"]
+          "properties": ["teacherSupport", "!isDeleted"]
         }
       ]
     }

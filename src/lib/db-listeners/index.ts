@@ -180,6 +180,19 @@ export class DBListeners extends BaseListener {
     this.unmonitorDocumentModel(document);
   }
 
+  public syncDocumentProperties = (document: DocumentModelType, path: string) => {
+    const { user } = this.db.stores;
+    const { key, properties } = document;
+
+    const updatePath = path || this.db.firebase.getUserDocumentPath(user, key, document.uid);
+    const updateRef = this.db.firebase.ref(updatePath);
+    onSnapshot(properties, (newProperties) => {
+      updateRef.update({
+        properties: newProperties
+      });
+    });
+  }
+
   private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {
     const { user, documents } = this.db.stores;
     const documentKey = document.key;

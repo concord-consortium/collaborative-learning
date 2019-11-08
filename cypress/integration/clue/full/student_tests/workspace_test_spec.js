@@ -1,7 +1,7 @@
-import LeftNav from '../../../support/elements/clue/LeftNav';
-import RightNav from '../../../support/elements/common/RightNav';
-import ClueCanvas from '../../../support/elements/clue/cCanvas';
-import TextToolTile from '../../../support/elements/clue/TextToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav';
+import RightNav from '../../../../support/elements/common/RightNav';
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 const queryParam = `${Cypress.config("queryParams")}`
@@ -10,7 +10,13 @@ let leftNav = new LeftNav,
     clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
 
-
+    before(function(){
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("queryParams")}`;
+        // cy.clearQAData('all');
+        cy.visit(baseUrl+queryParams);
+        cy.wait(4000);
+    });
 context('Test the overall workspace', function(){
     describe('Workspace UI',()=>{
         
@@ -65,4 +71,8 @@ context('Test the overall workspace', function(){
         })
 
     });
+});
+
+after(function(){
+  cy.clearQAData('all');
 });

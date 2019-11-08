@@ -26,18 +26,20 @@ interface IProblemOption {
 export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
   private problemOptions: IProblemOption[] = [];
 
-  public UNSAFE_componentWillMount() {
+  constructor(props: IProps) {
+    super(props);
+
     const { appConfig, unit, demo } = this.stores;
     const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
 
-    unit.investigations.forEach((investigation, iIndex) => {
-      investigation.problems.forEach((problem, pIndex) => {
+    unit.investigations.forEach(investigation => {
+      investigation.problems.forEach(problem => {
         const title = problemTitleTemplate
                         .replace("%investigationTitle%", investigation.title)
                         .replace("%problemTitle%", problem.fullTitle);
-        const ordinal = `${iIndex + 1}.${pIndex + 1}`;
+        const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
         this.problemOptions.push({investigation, problem, ordinal, title});
         if (!demo.problemOrdinal) {
           demo.setProblemOrdinal(ordinal);

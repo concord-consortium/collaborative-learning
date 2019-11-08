@@ -65,6 +65,8 @@
       background-color: $peacock-light-1
     &.supportPublication
       background-color: $sky-light-1
+    #titlebar-title
+      cursor: pointer
     .actions
       .action.icon, .action.icon-button
         background-color: inherit
@@ -97,15 +99,43 @@
               background-image: url("../assets/icons/share/not-share-hover.svg")
             &:active
               background-image: url("../assets/icons/share/not-share-active.svg")
-        .button-icon.share
           &.visibility.private
             background-image: url("../assets/icons/share/not-share.svg")
             &:hover
               background-image: url("../assets/icons/share/share-hover.svg")
             &:active
               background-image: url("../assets/icons/share/share-active.svg")
+        .button-icon.publish
+          margin-right: 10px
+          background-image: url("../assets/icons/publish/publish.svg")
+          &:hover
+            background-image: url("../assets/icons/publish/publish-hover.svg")
+          &:active
+            background-image: url("../assets/icons/publish/publish-active.svg")
+        .button-icon.published
+          background-image: url("../assets/icons/published/published.svg")
+          &:hover
+            background-image: url("../assets/icons/published/published-hover.svg")
+          &:active
+            background-image: url("../assets/icons/published/published-active.svg")
+        .button-icon.up1
+          margin-left: -5px
+          background-image: url("../assets/icons/up1/up1.svg")
+          &:hover
+            background-image: url("../assets/icons/up4/up4-hover.svg")
+          &:active
+            background-image: url("../assets/icons/up4/up4-active.svg")
+        .button-icon.up4
+          margin-left: -5px
+          background-image: url("../assets/icons/up4/up4.svg")
+          &:hover
+            background-image: url("../assets/icons/up1/up1-hover.svg")
+          &:active
+            background-image: url("../assets/icons/up1/up1-active.svg")
       .icon-button.delete-disabled
         cursor: default
+      .icon-button.icon-share
+        margin-right: 10px
   .statusbar
     &.personal, &.personalPublication, &.problem, &.publication
       background-color: $sage-light-1
@@ -114,6 +144,35 @@
     &.supportPublication
       background-color: $sky-light-1
     .actions
-      .action
-        .icon
-          background-color: inherit
+      .action.icon, .action.icon-button
+        background-color: inherit
+        border: 0
+        padding: 0
+        &:focus
+          outline: none
+          outline-offset: 0
+        .button-icon
+          background-repeat: no-repeat
+          position: absolute
+          right: 10px
+          bottom: 15%
+          width: 30px
+          height: 26px
+          padding: $half-padding
+          padding-top: 2px
+          cursor: pointer
+          &:active
+            transform-origin: center
+            transform: scale(.85)
+        .button-icon.up1
+          background-image: url("../assets/icons/up1/up1.svg")
+          &:hover
+            background-image: url("../assets/icons/up2/up2-hover.svg")
+          &:active
+            background-image: url("../assets/icons/up2/up2-active.svg")
+        .button-icon.up2
+          background-image: url("../assets/icons/up2/up2.svg")
+          &:hover
+            background-image: url("../assets/icons/up1/up1-hover.svg")
+          &:active
+            background-image: url("../assets/icons/up1/up1-active.svg")

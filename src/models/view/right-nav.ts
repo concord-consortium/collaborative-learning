@@ -44,7 +44,11 @@ export const NavTabSectionModel =
   .views(self => ({
     showStarsForUser(user: UserModelType) {
       return user.type && (self.showStars.indexOf(user.type) !== -1);
-    }
+    },
+    showDeleteForUser(user: UserModelType) {
+      // allow teachers to delete supports
+      return (user.type === "teacher") && (self.type === ENavTabSectionType.kTeacherSupports);
+    },
   }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType = Instance<typeof NavTabSectionModel>;

@@ -1,17 +1,18 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
+import { UnitModelType, UnitModel } from "../curriculum/unit";
+import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
-import { UnitModelType, UnitModel } from "../curriculum/unit";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
-import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
+import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -32,6 +33,7 @@ export interface IStores {
   showDemoCreator: boolean;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
+  selection: SelectionStoreModelType;
 }
 
 interface ICreateStores extends Partial<IStores> {
@@ -69,7 +71,8 @@ export function createStores(params?: ICreateStores): IStores {
     demo: params && params.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params && params.showDemoCreator || false,
     supports: params && params.supports || SupportsModel.create({}),
-    clipboard: ClipboardModel.create()
+    clipboard: ClipboardModel.create(),
+    selection: SelectionStoreModel.create()
   };
 }
 

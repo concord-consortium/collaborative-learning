@@ -3,7 +3,7 @@ import "./jxg";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { assign, find, values } from "lodash";
 
-const kCanvasScalerClass = "canvas-scaler";
+const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
 export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
@@ -69,10 +69,10 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
               ? document.getElementById(eltOrId)
               : eltOrId;
   for ( ; elt != null; elt = elt.parentElement) {
-    if (elt.classList.contains(kCanvasScalerClass)) {
-      const transform = elt.style.transform;
-      const match = transform && /scale\((.+)\)/.exec(transform);
-      return match && match[1] ? parseFloat(match[1]) : 1;
+    if (kScalerClasses.some(_class => elt?.classList.contains(_class))) {
+      const transform = getComputedStyle(elt).transform;
+      const match = transform && /(scale|matrix)\((.+)\)/.exec(transform);
+      return match && match[2] ? parseFloat(match[2]) : 1;
     }
   }
   return 1;
@@ -80,15 +80,14 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
 
 function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const elt = document.getElementById(domElementID);
-  let eltBounds = elt && elt.getBoundingClientRect();
-  if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
-    eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
-  }
+  const eltBounds = elt?.getBoundingClientRect();
+  const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
+  const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
   const { boundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
-  const xMax = xMin + eltBounds.width / unitX;
-  const yMax = yMin + eltBounds.height / unitY;
+  const xMax = xMin + eltWidth / unitX;
+  const yMax = yMin + eltHeight / unitY;
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 

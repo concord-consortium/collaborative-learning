@@ -1,10 +1,12 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { Lambda } from "mobx";
+import { SelectionStoreModelType } from "../../stores/selection";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { forEachNormalizedChange, ILinkProperties, JXGChange, JXGProperties, JXGCoordPair, JXGParentType,
-          JXGUnsafeCoordPair } from "./jxg-changes";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
+import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
+          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
+import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
 import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
@@ -102,6 +104,10 @@ export const GeometryMetadataModel = types
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
   })
+  .volatile(self => ({
+    sharedSelection: undefined as any as SelectionStoreModelType,
+    tableLinkDisposers: {} as { [id: string]: Lambda }
+  }))
   .views(self => ({
     isDisabled(feature: string) {
       return self.disabled.indexOf(feature) >= 0;
@@ -132,6 +138,9 @@ export const GeometryMetadataModel = types
     }
   }))
   .actions(self => ({
+    setSharedSelection(sharedSelection: SelectionStoreModelType) {
+      self.sharedSelection = sharedSelection;
+    },
     setDisabledFeatures(disabled: string[]) {
       self.disabled.replace(disabled);
     },
@@ -141,14 +150,25 @@ export const GeometryMetadataModel = types
     deselect(id: string) {
       self.selection.set(id, false);
     },
+    setSelection(id: string, select: boolean) {
+      self.selection.set(id, select);
+    }
+  }))
+  .actions(self => ({
     addTableLink(tableId: string, axes: IAxisLabels) {
       if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
+        const disposer = self.sharedSelection.observe(tableId, change => {
+          const id = change.name;
+          self.setSelection(id, self.sharedSelection.isSelected(tableId, id));
+        });
+        disposer && (self.tableLinkDisposers[tableId] = disposer);
         self.linkedTables.push({ id: tableId, ...axes });
       }
     },
     removeTableLink(tableId: string) {
       const index = self.linkedTables.findIndex(entry => entry.id === tableId);
       if (index >= 0) {
+        delete self.tableLinkDisposers[tableId];
         self.linkedTables.splice(index, 1);
       }
     },
@@ -160,6 +180,8 @@ export const GeometryMetadataModel = types
       }
     },
     clearLinkedTables() {
+      each(self.tableLinkDisposers, disposer => disposer());
+      self.tableLinkDisposers = {};
       self.linkedTables.clear();
     }
   }));
@@ -267,14 +289,27 @@ export const GeometryContentModel = types
     }
   }))
   .actions(self => ({
-    selectElement(id: string) {
+    setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
+      if (self.isSelected(id) !== select) {
+        const elt = board && board.objects[id];
+        const tableId = elt && elt.getAttribute("linkedTableId");
+        const rowId = elt && elt.getAttribute("linkedRowId");
+        self.metadata.setSelection(id, select);
+        if (tableId && rowId) {
+          self.metadata.sharedSelection.select(tableId, rowId, select);
+        }
+      }
+    }
+  }))
+  .actions(self => ({
+    selectElement(board: JXG.Board | undefined, id: string) {
       if (!self.isSelected(id)) {
-        self.metadata.select(id);
+        self.setElementSelection(board, id, true);
       }
     },
-    deselectElement(id: string) {
+    deselectElement(board: JXG.Board | undefined, id: string) {
       if (self.isSelected(id)) {
-        self.metadata.deselect(id);
+        self.setElementSelection(board, id, false);
       }
     }
   }))
@@ -285,25 +320,25 @@ export const GeometryContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(({ id: tableId }) => {
         const tableContent = getTableContent(self, tableId);
-        tableContent && tableContent.removeGeometryLink(self.metadata.id);
+        tableContent && tableContent.removeGeometryLinks(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
     },
-    selectObjects(ids: string | string[]) {
+    selectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.selectElement(id);
+        self.selectElement(board, id);
       });
     },
     deselectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     },
     deselectAll(board: JXG.Board) {
       self.metadata.selection.forEach((value, id) => {
-        self.deselectElement(id);
+        self.deselectElement(board, id);
       });
     }
   }))
@@ -653,6 +688,19 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
+    function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
+                                       points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) {
+      const parentIds = points.map(obj => obj.id);
+      const change: JXGChange = {
+              operation: "update",
+              target: "polygon",
+              targetID: polygon.id,
+              parents: parentIds,
+              properties: { labelOption }
+            };
+      return _applyChange(board, change);
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return board.objectsList.filter(test);
     }
@@ -707,6 +755,11 @@ export const GeometryContentModel = types
       return comments.length === 1 ? comments[0] as JXG.Text : undefined;
     }
 
+    function getOneSelectedPoint(board: JXG.Board) {
+      const selected = self.selectedObjects(board);
+      return (selected.length === 1 && isPoint(selected[0]));
+    }
+
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
       const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
@@ -758,6 +811,14 @@ export const GeometryContentModel = types
         });
       });
       return properties;
+    }
+
+    function getOneSelectedSegment(board: JXG.Board) {
+      const selectedObjects = self.selectedObjects(board);
+      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      if (selectedSegments.length === 1) {
+        return selectedSegments[0];
+      }
     }
 
     function getCommentAnchor(board: JXG.Board) {
@@ -928,6 +989,12 @@ export const GeometryContentModel = types
           return batchChanges.length;
         },
         copySelection,
+        findObjects,
+        getOneSelectedPoint,
+        getOneSelectedPolygon,
+        getOneSelectedSegment,
+        getOneSelectedComment,
+        getCommentAnchor,
         getLastImageUrl(): string | undefined{
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
@@ -959,10 +1026,7 @@ export const GeometryContentModel = types
         addTableLink,
         removeTableLink,
         updateAxisLabels,
-        findObjects,
-        getOneSelectedPolygon,
-        getOneSelectedComment,
-        getCommentAnchor,
+        updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: _applyChange,
         syncChange,

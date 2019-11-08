@@ -1,12 +1,22 @@
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import TextToolTile from '../../../support/elements/clue/TextToolTile'
-import RightNav from '../../../support/elements/common/RightNav';
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import RightNav from '../../../../support/elements/common/RightNav';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const rightNav = new RightNav;
+
+
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    // cy.clearQAData('all');
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000);
+});
 
 context('Text tool tile functionalities', function(){
     let title;
@@ -23,7 +33,7 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextTile().last().should('contain', 'Hello World');
     });
     it('verifies restore of text field content',()=>{
-        canvas.createNewProblemDocument('text tool test');
+        canvas.createNewExtraDocument('text tool test');
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
         rightNav.openRightNavTab('my-work');
@@ -38,3 +48,7 @@ context('Text tool tile functionalities', function(){
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
     });
 })
+
+after(function(){
+  cy.clearQAData('all');
+});

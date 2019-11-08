@@ -1,9 +1,9 @@
-import LeftNav from '../../../support/elements/clue/LeftNav'
-import Canvas from '../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../support/elements/clue/cCanvas'
-import GraphToolTile from '../../../support/elements/clue/GraphToolTile'
-import RightNav from '../../../support/elements/common/RightNav'
-import ImageToolTile from '../../../support/elements/clue/ImageToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
+import RightNav from '../../../..//support/elements/common/RightNav'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
@@ -13,6 +13,13 @@ const graphToolTile = new GraphToolTile;
 
 let doc1='2.1 Drawing Wumps', doc2='Points', doc3='Polygon', doc4='Movable Line'
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000);
+});
 context('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
         it('will add a point to the origin', function(){
@@ -21,7 +28,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will add points to a graph', function(){
-            canvas.createNewProblemDocument(doc2)
+            canvas.createNewExtraDocument(doc2)
             cy.wait(2000)
             clueCanvas.addTile('geometry');
             graphToolTile.getGraphTile().last().click();
@@ -229,5 +236,8 @@ context('Test graph tool functionalities', function(){
             });
         });
     })
+});
 
+after(function(){
+  cy.clearQAData('all');
 });

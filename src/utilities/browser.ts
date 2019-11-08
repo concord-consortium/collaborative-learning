@@ -16,3 +16,8 @@ export function isSafari() {
         (navigator.userAgent.indexOf("Chrome") < 0) &&
         (navigator.userAgent.indexOf("Chromium") < 0);
 }
+
+export function isMac() {
+  return typeof window !== "undefined" &&
+         /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
+}

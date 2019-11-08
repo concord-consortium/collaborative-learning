@@ -2,14 +2,18 @@ import * as React from "react";
 import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
 import { IMenuItemFlags, TableHeaderMenu } from "./table-header-menu";
-import { addAttributeToDataSet, addCanonicalCasesToDataSet,
-         ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
+import {
+  addAttributeToDataSet, addCanonicalCasesToDataSet,
+  ICase, ICaseCreation, IDataSet
+} from "../../../models/data/data-set";
 import { IAttribute } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "ag-grid-react";
-import { CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column,
-          ColumnApi, GridApi, GridReadyEvent, ICellEditorComp, RowNode, SortChangedEvent,
-          TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams } from "ag-grid-community";
+import {
+  CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column, ColumnApi,
+  GridApi, GridReadyEvent, ICellEditorComp, SelectionChangedEvent, RowNode, SortChangedEvent,
+  TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams, CellComp
+} from "ag-grid-community";
 import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
 import "ag-grid-community/dist/styles/ag-grid.css";
@@ -52,23 +56,26 @@ interface IProps {
   autoSizeColumns?: boolean;
   defaultPrecision?: number;
   itemFlags?: IMenuItemFlags;
-  tableComponentData?: ITableComponentData|null;
+  tableComponentData?: ITableComponentData | null;
   onGridReady?: (gridReadyParams: GridReadyEvent) => void;
+  onRowSelectionChange?: (e: SelectionChangedEvent) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onSetExpression?: (colId: string, expression: string, rawExpression: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
   onSetCanonicalCaseValues?: (aCase: ICase) => void;
   onRemoveCases?: (ids: string[]) => void;
+  onGetLinkedGeometries?: () => string[];
+  onUnlinkGeometry?: () => void;
   onSampleData?: (name: string) => void;
 }
 
 interface IState {
   rowSelection: string;
-  addAttributeButtonPos: IPos|null;
+  addAttributeButtonPos: IPos | null;
 }
 
 export const LOCAL_ROW_ID = "__local__";
-const LOCAL_ROW_STYLE = {backgroundColor: "#cfc"};
+const LOCAL_ROW_STYLE = { backgroundColor: "#cfc" };
 
 interface IRowStyleParams {
   data: {
@@ -103,8 +110,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private gridColumnDefs: ColDef[] = [];
   private gridRowData: Array<IGridRow | undefined> = [];
   private components = this.props.cellEditorComponent
-                        ? { clientCellEditor: this.props.cellEditorComponent }
-                        : undefined;
+    ? { clientCellEditor: this.props.cellEditorComponent }
+    : undefined;
   private localRow: ICaseCreation = {};
   private checkForEnterAfterCellEditingStopped = false;
   private localRowChangeTimer?: any;
@@ -116,8 +123,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private savedEditContent?: string;
   private isProcessingEnterKey?: boolean;
 
-  private gridElement: HTMLDivElement|null;
-  private headerElement: HTMLDivElement|null;
+  private gridElement: HTMLDivElement | null;
+  private headerElement: HTMLDivElement | null;
 
   private sortedRowNodes: RowNode[];
 
@@ -155,7 +162,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       this.gridColumnApi.autoSizeColumns(allColumnIds);
     }
 
-    const {tableComponentData: caseTableComponentData} = this.props;
+    const { tableComponentData: caseTableComponentData } = this.props;
     if (caseTableComponentData && this.gridApi) {
       this.gridApi.setSortModel(getSnapshot(caseTableComponentData.sortModel));
 
@@ -232,6 +239,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             const { dataSet } = this.props;
             dataSet && dataSet.removeCases(ids);
           }
+        },
+        onGetLinkedGeometries: () => {
+          return this.props.onGetLinkedGeometries && this.props.onGetLinkedGeometries();
+        },
+        onUnlinkGeometry: () => {
+          this.props.onUnlinkGeometry && this.props.onUnlinkGeometry();
         }
       },
       headerClass: "cdp-column-header cdp-case-index-header",
@@ -248,7 +261,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public addLocalCaseToTable() {
-    const {dataSet} = this.props;
+    const { dataSet } = this.props;
     if (!dataSet) return;
 
     // clear local case before adding so that the update caused by addCanonicalCasesToDataSet()
@@ -272,17 +285,17 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     const defaultAttrValueFormatter = (params: ValueFormatterParams) => {
       const colName = params.colDef.field || params.colDef.headerName || "";
       const colPlaces: { [key: string]: number } = {
-              day: 0,
-              distance: 1,
-              speed: 2
-            };
+        day: 0,
+        distance: 1,
+        speed: 2
+      };
       let places = colPlaces[colName];
       if ((places == null) && (this.props.defaultPrecision != null)) {
         places = this.props.defaultPrecision;
       }
       return (places != null) && (typeof params.value === "number")
-                ? params.value.toFixed(places)
-                : params.value;
+        ? params.value.toFixed(places)
+        : params.value;
     };
 
     return ({
@@ -331,14 +344,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           return !!params.colDef.colId;
         }
         const str = (params.newValue != null) && (typeof params.newValue === "string")
-                      ? params.newValue.trim() : undefined;
+          ? params.newValue.trim() : undefined;
         const num = str ? Number(str) : undefined;
         const attrID = attribute.id;
         const caseID = dataSet && dataSet.cases[params.node.rowIndex].__id__;
         const caseValues = {
-                __id__: caseID,
-                [attrID]: (num != null) && isFinite(num) ? num : str
-              };
+          __id__: caseID,
+          [attrID]: (num != null) && isFinite(num) ? num : str
+        };
         if (caseValues[attrID] === params.oldValue) { return false; }
         // track in-flight changes
         this.localChanges.push(cloneDeep(caseValues));
@@ -384,7 +397,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       }
     }
     if (!this.props.readOnly) {
-      rows.push({id: LOCAL_ROW_ID});
+      rows.push({ id: LOCAL_ROW_ID });
     }
     return rows;
   }
@@ -639,10 +652,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     }
   }
 
-  public handleRowSelectionChanged = () => {
-    if (this.gridApi) {
-      this.gridApi.refreshHeader();
-    }
+  public handleRowSelectionChanged = (e: SelectionChangedEvent) => {
+    e.api.refreshHeader();
+    this.props.onRowSelectionChange && this.props.onRowSelectionChange(e);
   }
 
   public handleCellEditingStarted = (event: CellEditingStartedEvent) => {
@@ -704,8 +716,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     this.prevEditCell = params.previousCellPosition;
     if (params.editing && !params.backwards && !params.nextCellPosition) {
       setTimeout(() => {
-        setTimeout(this.startEditingFirstColumnOfNextRow);
-      });
+        this.startEditingFirstColumnOfNextRow();
+      }, 100);
     }
     return params.nextCellPosition;
   }
@@ -725,7 +737,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
     if (e.keyCode === 13) {
       if (this.checkForEnterAfterCellEditingStopped) {
-        setTimeout(startEditingNextRow);
+        setTimeout(startEditingNextRow, 100);
       }
       this.isProcessingEnterKey = false;
     }
@@ -796,9 +808,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         const headerRect = this.headerElement.getBoundingClientRect();
         const left = headerRect.right - gridRect.left;
         const top = headerRect.top - gridRect.top;
-        const {addAttributeButtonPos} = this.state;
+        const { addAttributeButtonPos } = this.state;
         if (!addAttributeButtonPos || (addAttributeButtonPos.top !== top) || (addAttributeButtonPos.left !== left)) {
-          this.setState({addAttributeButtonPos: {top, left}});
+          this.setState({ addAttributeButtonPos: { top, left } });
         }
       }
     }
@@ -809,13 +821,13 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public handleAddAttributeButton = () => {
-    emitTableEvent({type: "add-column"});
+    emitTableEvent({ type: "add-column" });
   }
 
   public renderAddAttributeButtonPos() {
-    const {addAttributeButtonPos} = this.state;
+    const { addAttributeButtonPos } = this.state;
     if (addAttributeButtonPos !== null) {
-      const {top, left} = addAttributeButtonPos;
+      const { top, left } = addAttributeButtonPos;
       return (
         <span
           onClick={this.handleAddAttributeButton}
@@ -840,10 +852,10 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   public render() {
     return (
       <div className="neo-codap-case-table ag-theme-fresh"
-          ref={(el) => this.gridElement = el}
-          draggable={true}
-          onDragStart={this.handleDragStart}
-          onKeyUp={this.handleKeyUp}>
+        ref={(el) => this.gridElement = el}
+        draggable={true}
+        onDragStart={this.handleDragStart}
+        onKeyUp={this.handleKeyUp}>
         <AgGridReact
           columnDefs={this.gridColumnDefs}
           getRowNodeId={this.getRowNodeId}
