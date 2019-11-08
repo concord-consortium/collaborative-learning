@@ -3,7 +3,7 @@ import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
 import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
 import { toJS } from "mobx";
-import { DropDown, IDropdownItem } from "concord-react-components";
+import { DropDown, IDropdownItem } from "@concord-consortium/react-components";
 
 interface IProps extends IBaseProps {}
 

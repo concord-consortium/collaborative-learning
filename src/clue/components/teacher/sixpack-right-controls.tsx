@@ -2,7 +2,7 @@ import { inject } from "mobx-react";
 import * as React from "react";
 import { BaseComponent } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
-import { ToggleGroup, IToggleChoice, Themes } from "concord-react-components";
+import { ToggleGroup, IToggleChoice, Themes } from "@concord-consortium/react-components";
 import { ProgressWidget } from "../progress-widget";
 import "./sixpack-right-controls.sass";
 

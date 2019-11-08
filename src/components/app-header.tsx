@@ -4,7 +4,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { ClassMenuContainer } from "./class-menu-container";
 import { ProblemMenuContainer } from "./problem-menu-container";
-import { ToggleGroup, Themes } from "concord-react-components";
+import { ToggleGroup, Themes } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
