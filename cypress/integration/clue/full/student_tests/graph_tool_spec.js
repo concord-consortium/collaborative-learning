@@ -28,7 +28,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will add points to a graph', function(){
-            canvas.createNewProblemDocument(doc2)
+            canvas.createNewExtraDocument(doc2)
             cy.wait(2000)
             clueCanvas.addTile('geometry');
             graphToolTile.getGraphTile().last().click();
