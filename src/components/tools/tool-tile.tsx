@@ -262,30 +262,24 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const { documents, ui: { selectedTileIds } } = this.stores;
 
     const getTileInfo = (tileId: string) => {
-      if (tileId === model.id) {
+      // get tile from loaded document or from curriculum
+      const content = documents.findDocumentOfTile(tileId)?.content;
+      const tile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
+      if (tile) {
+        const rowId = content?.findRowContainingTile(tile.id);
+        const rowIndex = rowId && content?.getRowIndex(rowId);
+        const row = rowId && content?.getRow(rowId);
+        const rowHeight = row && row.height;
+        const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
+        const tileContent = cloneDeep(getSnapshot(tile));
+        delete tileContent.id;
         return {
-          tile: model,
-          rowIndex: undefined,
-          rowHeight: undefined,
-          tileIndex: undefined
+          tile,
+          tileContent: JSON.stringify(tileContent),
+          rowIndex,
+          rowHeight,
+          tileIndex
         };
-      }
-      else {
-        const content = documents.findDocumentOfTile(tileId)?.content;
-        const tile = content?.getTile(tileId);
-        if (content && tile) {
-          const rowId = content.findRowContainingTile(tile.id);
-          const rowIndex = rowId && content.getRowIndex(rowId);
-          const row = rowId && content.getRow(rowId);
-          const rowHeight = row && row.height;
-          const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
-          return {
-            tile,
-            rowIndex,
-            rowHeight,
-            tileIndex
-          };
-        }
       }
     };
 
@@ -293,7 +287,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     selectedTileIds.forEach(selectedTileId => {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
-        const {tile, rowIndex, rowHeight, tileIndex} = tileInfo;
+        const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
         const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
         delete tileSnapshotWithoutId.id;
         dragTiles.items.push({
@@ -301,7 +295,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           rowHeight: rowHeight || 0,
           tileIndex: tileIndex || 0,
           tileId: tile.id,
-          tileContent: JSON.stringify(tileSnapshotWithoutId),
+          tileContent,
           tileType: tile.content.type
         });
       }
@@ -318,24 +312,17 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     // we have to set this as a transfer type because the kDragTiles contents are not available in drag over events
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
 
-    // NEED TO UPDATE:
-    // 1. geometry-content#handleTableTileDrop (uses kDragTileId)
-    // 2. drawing-layer#handleDrop and geometry-content#handleDrop (uses kDragTileContent)
-    // 3. drawing-layer#isAcceptableImageDrag and geometry-content#isAcceptableTileDrag (uses extractDragTileType)
-
-    /*
-
-    old single tile code:
-
-    e.dataTransfer.setData(kDragTileSource, docId);
-    if (height) {
-      e.dataTransfer.setData(kDragRowHeight, String(height));
+    // and to support existing geometry and drawing layer drop logic set the single tile drag fields
+    // if only 1 tile is selected
+    if (selectedTileIds.length === 1) {
+      const tileInfo = getTileInfo(selectedTileIds[0]);
+      if (tileInfo) {
+        const {tile, tileContent} = tileInfo;
+        e.dataTransfer.setData(kDragTileId, tile.id);
+        e.dataTransfer.setData(kDragTileContent, tileContent);
+        e.dataTransfer.setData(dragTileType(model.content.type), tile.content.type);
+      }
     }
-    e.dataTransfer.setData(kDragTileId, id);
-    e.dataTransfer.setData(kDragTileContent, dragData);
-    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
-    e.dataTransfer.setData(dragTileType(model.content.type), model.content.type);
-    */
 
     // TODO: should we create an array of drag images here?
 
