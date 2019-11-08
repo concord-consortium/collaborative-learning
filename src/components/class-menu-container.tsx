@@ -3,7 +3,7 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
-import { DropDown, IMenuItemProps } from "concord-react-components";
+import { DropDown, IDropdownItem } from "concord-react-components";
 
 interface IProps extends IBaseProps {}
 
@@ -41,7 +41,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
     const {user} = this.stores;
     const classNames = uniq(user.portalClassOfferings.map(o => o.className));
     const currentProblemOrdinal = this.getCurrentProblemOrdinal();
-    const links: IMenuItemProps[] = [];
+    const links: IDropdownItem[] = [];
 
     // If, by chance, there are no classes in the offerings, return a link
     // with a name matching the current class name and no link. This is bit of
