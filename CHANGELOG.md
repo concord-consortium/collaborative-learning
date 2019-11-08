@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 0.10.0 - released November 8, 2019
+
+- Support linked selection for linked geometry/table points
+- Add table menu item to unlink table from geometry tiles
+- Styles toolbar in text tool
+- Support labeling of polygon edges
+- Investigation 0 tutorial content
+- Numerous bug-fixes and minor enhancements
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 490,734 bytes | 11.8% |
+| index.js | 4,271,431 bytes | 1.0% |
+
 ## Version 0.9.0 - released October 30, 2019
 
 - Workspace documents for each problem have separate sections with section headers
