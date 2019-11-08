@@ -413,6 +413,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         }
         return;
       } catch (ex) {
+        // tslint:disable-next-line:no-console
         console.error(ex);
         return;
       }
