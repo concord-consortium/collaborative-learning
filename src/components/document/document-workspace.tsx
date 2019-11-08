@@ -306,7 +306,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
                       ? appConfig.defaultDocumentContent : undefined;
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
-      problemWorkspace.setAvailableDocument(newDocument);
+      problemWorkspace.setPrimaryDocument(newDocument);
     }
   }
 
