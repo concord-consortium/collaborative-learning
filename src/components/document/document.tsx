@@ -124,9 +124,9 @@ const ViewModeButton = ({ onClick, icon, title }: { onClick: () => void, icon: s
   );
 };
 
-const TitleInfo = ({ docTitle, onClick, title }: { docTitle: string, onClick?: () => void, title?: string }) => {
+const TitleInfo = ({ docTitle, onClick }: { docTitle: string, onClick?: () => void }) => {
   return (
-    <span onClick={onClick} className={`${title} title-info`} id={title}>
+    <span onClick={onClick} className="title-info" id="titlebar-title">
       {docTitle}
     </span>
   );
@@ -261,13 +261,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
-              <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename}
-                         title="titlebar-title" />
+              <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename}
-                         title="titlebar-title" />
+              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
