@@ -21,7 +21,7 @@ export const CollapsibleSectionHeader = (props: IProps) => {
       <svg className="icon">
         <use xlinkHref={icon}/>
       </svg>
-      <div className="title">{sectionTitle}</div>
+      <div className="title" title={sectionTitle}>{sectionTitle}</div>
     </div>
   );
 };

@@ -100,6 +100,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
                 id={this.getTabId(spec.tab)}
                 key={spec.tab}
                 active={rightNavExpanded && (activeRightNavTab === spec.tab)}
+                title={spec.label}
                 onClick={this.handleTabClick(spec.tab)} >
                 {spec.label}
                 {this.renderTabDecoration(spec.tab)}
