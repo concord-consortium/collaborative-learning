@@ -338,11 +338,11 @@ context('Test Canvas', function(){
                     it('verify copy of workspace',function(){
                         let title = 'copy of 1.2'
                         canvas.copyDocument(title);
-                        clueCanvas.getRightSideWorkspaceTitle().should('contain',title)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
                     });
                     it('verify new workspace', function(){
                         let title = 'New in 2up'
-                        canvas.createNewProblemDocument(title);
+                        canvas.createNewExtraDocument(title);
                         clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
                     });
                     it('verify publishing', function(){//{https://www.pivotaltracker.com/story/show/169159799}
