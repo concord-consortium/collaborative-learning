@@ -6,6 +6,7 @@ import "./tab.sass";
 interface IProps {
   id?: string;
   active?: boolean;
+  title?: string;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
@@ -24,7 +25,7 @@ export class TabComponent extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const {id, active} = this.props;
+    const {id, active, title} = this.props;
     const {hovering} = this.state;
     const className = `tab${active ? " active" : ""}${hovering ? " hovering" : ""}`;
     return (
@@ -35,6 +36,7 @@ export class TabComponent extends React.Component<IProps, IState> {
         onMouseOver={this.handleMouseOver}
         onMouseOut={this.handleMouseOut}
         role="tab"
+        title={title}
         aria-selected={active}
       >
         {this.props.children}

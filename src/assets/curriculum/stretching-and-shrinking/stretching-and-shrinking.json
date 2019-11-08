@@ -792,44 +792,10 @@
                       ]
                     }
                   },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
+                   {
                     "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-1, -1],
-                          "axisRange": [20, 20]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "point",
-                          "parents": [0, 5]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [12, 5]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [2, 7]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [15, 1]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [16, 6]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [15, 7]
-                        }
-                      ]
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
                     }
                   }
                 ]
@@ -959,7 +925,10 @@
                     {
                       "content": {
                         "type": "Text",
-                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. <em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
+                        "format": "html",
+                        "text": [
+                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. <em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
+                          ]
                       }
                     }
                 ]

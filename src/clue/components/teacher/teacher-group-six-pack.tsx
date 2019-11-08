@@ -81,11 +81,13 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, {}> {
           <div className="group-label">Group {String(group.id)}</div>
           <div className="actions">
             <IconButton
+              title="Support"
               className="icon"
               icon="support"
               key="support"
               onClickButton={showGroupSupportClickHandler} />
             <IconButton
+              title="Expand Group View"
               className="icon"
               icon="expand-group-view"
               key="expand-group-view"

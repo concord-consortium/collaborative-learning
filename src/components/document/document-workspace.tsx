@@ -33,7 +33,9 @@ const ghostProblemDocuments: GhostDocumentMap = {};
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   private imageDragDrop: ImageDragDrop;
 
-  public componentWillMount() {
+  constructor(props: IProps) {
+    super(props);
+
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
