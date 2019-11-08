@@ -1,0 +1,66 @@
+@import ../vars
+
+.text-style-bar
+  background-color: $color3-4
+  padding-top: 35px
+  position: absolute
+  display: inline-block
+  margin: 4px 2px 2px 2px
+  float: left
+  top: -5px
+  left: 0
+  width: 40px
+  min-height: 350px
+  height: 100%
+
+.bar-header-icon
+  position: absolute
+  top: -5px
+  left: 0
+  .header-icon
+    fill: white
+    width: 22px
+    height: 32px
+    background-color: $color3-6
+    border-bottom-right-radius: 5px
+    border: white solid 2px
+
+.button-with-tool-tip
+  position: relative
+  display: inline-block
+  background-color: $color3-4
+  color: black
+  font-size: 16px
+  margin: auto
+  padding-top: 3px
+  width: 30px
+  height: 28px
+  .on
+    color: #009CDC
+  .off
+    color: #909090
+  &:hover
+    background-color: $color3-5
+    .tool-tip-text
+      visibility: visible
+      opacity: 1
+      transition: opacity 0.5s
+      transition-delay: 0.8s
+      background-color: #f0f0f0
+
+.tool-tip-text
+  position: absolute
+  visibility: hidden
+  opacity: 0
+  transition: opacity 0.1s
+  z-index: 10
+  color: black
+  white-space: nowrap
+  text-align: center
+  margin: 0
+  padding: 2px
+  border: solid 1px #dfdfdf
+  box-shadow: 4px 4px 2px lightgray
+  font-size: 8pt
+  top: 10px
+  left: 25px
