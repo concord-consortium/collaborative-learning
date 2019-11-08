@@ -50,7 +50,12 @@ export interface IProps extends IGeometryProps {
   onUpdateToolbar: () => void;
 }
 
-interface IState extends SizeMeProps {
+// cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P]
+};
+
+interface IState extends Mutable<SizeMeProps> {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
