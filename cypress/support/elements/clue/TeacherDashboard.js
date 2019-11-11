@@ -46,10 +46,10 @@ class TeacherDashboard {
         return cy.get('.section-circle').should('contain', sectionID)
     }
     getTotalProgressNumber(sectionID) {
-        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total');
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total')
     }
     getCurrentProgressNumber(sectionID) {
-        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current');
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current')
     }
 
     // Dashboard 6 - Pack (Current Work)
@@ -65,9 +65,6 @@ class TeacherDashboard {
     }
     getGroupByName(groupName) {
         return cy.get('.teacher-group').contains(groupName)
-    }
-    getGroup(groupIndex) {
-        return cy.get('.group-0-'+groupIndex)
     }
     getFourUpViews() {
         return cy.get('.four-up')
@@ -127,8 +124,7 @@ class TeacherDashboard {
                 }
             }
         }
-        // subtract 4 because there are 4 published docs that are not in view
-        this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
+        this.getStarPublishIcon().should('have.length', totalPublished).click({force:true,multiple:true})
     }
     clearAllStarred() {
         this.getRightNavTabListShown().within(() => {
@@ -138,6 +134,27 @@ class TeacherDashboard {
 
 
     // Teacher Workspace Right Nav
+    getRightNavMyWorkTab() {
+        return cy.get('div#rightNavTab-my-work')
+    }
+    getRightNavClassWorkTab() {
+        return cy.get('div#rightNavTab-class-work')
+    }
+    getRightNavSupportsTab() {
+        return cy.get('div#rightNavTab-supports')
+    }
+    getClassWorkExtraWorkspaceTab() {
+        return cy.get('.section.personal.published')
+    }
+    getClassWorkProblemWorkspaceTab() {
+        return cy.get('.section.problem.published')
+    }
+    getClassWorkLearningLogsTab() {
+        return cy.get('.section.learning-log.published')
+    }
+    getClassWorkStarredTab() {
+        return cy.get('.section.problem.starred')
+    }
     getRightNavTabListHidden() {
         return cy.get('.class-work').find('.list').should('have.class', 'hidden')
     }
@@ -145,11 +162,16 @@ class TeacherDashboard {
         return cy.get('.class-work').find('.shown').should('have.class', 'list')
     }
 
-    verifyWorkForGroupReadOnly(group) { //table-tool does not get the .read-only class
+    verifyWorkForGroupReadOnly(group) {
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
                 this.getGroups().eq(group.groupIndex).within(() => {
                     this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
+                })
+            }
+            if (group.students[i].tools.tableTool > 0) {
+                this.getGroups().eq(group.groupIndex).within(() => {
+                    this.getStudentCanvas(group.students[i].quadrant).find('.table-tool')
                 })
             }
             if (group.students[i].tools.geometryTool > 0) {
@@ -170,18 +192,6 @@ class TeacherDashboard {
         }
     }
 
-    verifyPublishStatus(group){
-        console.log("students: "+group.students)
-        for(let i = 0; i < group.students.length; i++) {
-            if (group.students[i].published == 0) {
-                this.getGroup(0).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] span').should('contain','Not Published')
-                })
-            } else {
-                this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain',"Not Published")
-            }  
-        }
-    }
 
 
 
