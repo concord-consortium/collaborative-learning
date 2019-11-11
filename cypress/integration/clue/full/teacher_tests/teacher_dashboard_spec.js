@@ -60,8 +60,10 @@ context("Teacher Space", () => {
                     dashboard.getClassDropdown().click({ force: true })
                     dashboard.getClassList().children().should('not.exist')
                     // Check Dashboard and Workspace toggle default
-                    dashboard.getDashboardViewToggle().should('be.visible').and('have.class', 'bp3-active')
-                    dashboard.getWorkspaceViewToggle().should('be.visible').and('not.have.class', 'bp3-active')
+                    dashboard.getViewToggle('Dashboard').should('be.visible')
+                    dashboard.getViewToggle('Dashboard').parent().should('have.class', 'bp3-active')
+                    dashboard.getViewToggle('Workspace').should('be.visible')
+                    dashboard.getViewToggle('Workspace').parent().should('not.have.class', 'bp3-active')
                     // Check Teacher Username visibility and content
                     dashboard.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 })
@@ -82,26 +84,36 @@ context("Teacher Space", () => {
                 })
             })
             it('verify current and published toggle button appear and work', () => {
-                dashboard.getCurrentWorkToggle().should('have.class', 'selected').and('be.visible')
-                dashboard.getPublishedWorkToggle().should('not.have.class', 'selected').and('be.visible').click({ force: true })
-                dashboard.getCurrentWorkToggle().should('not.have.class', 'selected')
-                dashboard.getPublishedWorkToggle().should('have.class', 'selected')
-                dashboard.getCurrentWorkToggle().click({ force: true })
+                dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible')
+                dashboard.getWorkToggle("Published").should('not.have.class', 'selected').and('be.visible').click({ force: true })
+                dashboard.getWorkToggle("Current").should('not.have.class', 'selected')
+                dashboard.getWorkToggle("Published").should('have.class', 'selected')
+                dashboard.getWorkToggle("Current").click({ force: true })
             })
-            it('displays progress icons', () => {
-                dashboard.getSectionProgressIcons('IN').should('be.visible')
-                dashboard.getSectionProgressIcons('IC').should('be.visible')
-                dashboard.getSectionProgressIcons('WI').should('be.visible')
-                dashboard.getSectionProgressIcons('NW').should('be.visible')
+            describe('Progress area',()=>{
+                let sectionIDArr = ["IN","IC","WI","NW"]
+                it('displays progress icons', () => {
+                    sectionIDArr.forEach((section)=>{
+                        dashboard.getSectionProgressIcons(section).should('be.visible')
+                    })
+                })
+                it('displays progress numbers', ()=>{
+                    sectionIDArr.forEach((section)=>{
+                        dashboard.getTotalProgressNumber(section).should('be.visible')
+                        dashboard.getCurrentProgressNumber(section).should('be.visible')
+                    })
+                })
             })
         })
         describe('Header element functionality', () => {
-            it.skip('verify switching problems changes six pack content and problem title', () => {
+            it('verify switching problems changes six pack content and problem title', () => {
                 cy.get('@clueData').then((clueData) => {
                     let problems = clueData.classes[0].problems
+                    let initProblemIndex = 0
                     let tempProblemIndex = 1
 
                     dashboard.getProblemDropdown().should('not.contain', problems[tempProblemIndex].problemTitle)
+                    dashboard.getGroups().should('have.length',6)
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
                         dashboard.getProblemList().contains(problems[tempProblemIndex].problemTitle).click({ force: true })
                         cy.wait(1000)
@@ -109,15 +121,25 @@ context("Teacher Space", () => {
                         tempProblemIndex += 1
                     })
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle)
+                    dashboard.getGroups().should('have.length',0)
+
+                    //switch back to original problem for later test
+                    dashboard.getProblemDropdown().click({force:true})
+                    dashboard.getProblemList().contains(problems[initProblemIndex].problemTitle).click({ force: true })
                 })
             })
             it('verify dashboard/workspace switch changes workspace view', () => {
-                dashboard.getDashboardViewToggle().should('be.visible').and('have.class', 'bp3-active')
+                dashboard.getViewToggle('Dashboard').should('be.visible')
+                dashboard.getViewToggle('Dashboard').parent().should('have.class', 'bp3-active')
                 dashboard.getSingleWorkspace().should('not.be.visible')
-                dashboard.getWorkspaceViewToggle().should('be.visible').and('not.have.class', 'bp3-active').click({ force: true })
-                dashboard.getWorkspaceViewToggle().should('have.class', 'bp3-active')
+                dashboard.getViewToggle('Workspace').should('be.visible')
+                dashboard.getViewToggle('Workspace').parent().should('not.have.class', 'bp3-active')
+                dashboard.getViewToggle('Workspace').click({ force: true })
+                dashboard.getViewToggle("Workspace").parent().should('have.class', 'bp3-active')
                 dashboard.getSingleWorkspace().should('be.visible')
-                dashboard.getDashboardViewToggle().click({ force: true })
+                dashboard.getViewToggle("Dashboard").click({ force: true })
+                dashboard.getViewToggle('Dashboard').should('be.visible')
+                dashboard.getViewToggle('Dashboard').parent().should('have.class', 'bp3-active')
             })
             it('verify selected class is shown in class dropdown', () => {
                 cy.get('@clueData').then((clueData) => {
@@ -127,7 +149,7 @@ context("Teacher Space", () => {
                     dashboard.getClassDropdown().should('contain', tempClass.className).and('be.visible')
                 })
             })
-            it.skip('verify switching classes changes six pack content', () => {
+            it('verify switching classes changes six pack content', () => {
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0
                     const tempClassIndex = 1
@@ -137,14 +159,35 @@ context("Teacher Space", () => {
                     let initClassName = initClass.className
 
                     dashboard.getClassDropdown().should('contain', initClassName)
+                    dashboard.getGroups().should('have.length',6)
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true })
                         cy.wait(1000)
                         cy.waitForSpinner()
                     })
                     dashboard.getClassDropdown().should('contain', className)
+                    dashboard.getGroups().should('have.length',0)
+
+                    //switch back to original problem for later test
+                    dashboard.getClassDropdown().click({force:true})
+                    dashboard.getClassList().contains(initClassName).click({ force: true })
                 })
             })
+            // after(()=>{// switch back to first problem to get back six pack problem[0]
+            //     dashboard.getClassDropdown().click({force:true}).then(()=>{
+            //         dashboard.getClassList().contains("CLUE").click({force:true})
+            //         cy.wait(1000)
+            //         cy.waitForSpinner()
+            //     })
+            //     dashboard.getProblemDropdown().click({force:true}).then(()=>{
+            //         // dashboard.getProblemList().contains(problems[0].problemTitle).click({ force: true })
+            //         // cy.wait(1000)
+            //         // cy.waitForSpinner()
+            //         dashboard.getProblemList().contains("1.1 Solving a Mystery").click({force:true})
+            //         cy.wait(1000)
+            //         cy.waitForSpinner()
+            //     })
+            // })
         })
         describe('6-pack view functionality - Current Work', () => {
             it('verifies students are in correct groups', () => {
@@ -221,7 +264,7 @@ context("Teacher Space", () => {
                 let problemIndex = 0
                 let groups
 
-                dashboard.switchToPublishedView()
+                dashboard.switchWorkView("Published")
                 cy.get('@clueData').then((clueData) => {
                     let dashboard = new TeacherDashboard()
                     groups = clueData.classes[classIndex].problems[problemIndex].groups

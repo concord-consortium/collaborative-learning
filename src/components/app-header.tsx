@@ -48,7 +48,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
         <div className="left">
           <div>
             <div className="problem" data-test="problem-title">{problem.fullTitle}</div>
-            <div className="class" data-test="user-class">{user.className}</div>
+            <div className="class" data-test="user-problem">{user.className}</div>
           </div>
         </div>
         <div className="middle">
@@ -73,7 +73,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           <div className="problem" data-test="investigation-title">
             {investigation.title}
           </div>
-          <div className="problem" data-test="user-class">
+          <div className="problem" data-test="user-problem">
             <ProblemMenuContainer />
           </div>
         </div>

@@ -14,10 +14,11 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.bp3-button').eq(0)
+        return cy.get('.problem[data-test="user-class"] .bp3-button')
     }
     getClassDropdown() {
-        return cy.get('.bp3-button').eq(3)
+        // return cy.get('.bp3-button').eq(3)
+        return cy.get('.class[data-test="user-class"] .bp3-button')
     }
     getProblemList() {
         return cy.get('.bp3-fill')
@@ -25,20 +26,34 @@ class TeacherDashboard {
     getClassList() {
         return cy.get('.bp3-fill')
     }
-    getDashboardViewToggle() {
-        return cy.get('.bp3-button').eq(1)
+    getViewToggle(view) { //view=["Dashboard", "Workspace"]
+        return cy.get('.bp3-button').contains(view)
     }
     getSingleWorkspace() {
         return cy.get('.single-workspace')
     }
-    getWorkspaceViewToggle() {
-        return cy.get('.bp3-button').eq(2)
+
+    // Dashboard Right Nav
+    // type=["Current", "Published"]
+    // sectionID = ["IN","IC","WI","NW"]
+    getWorkToggle(type) {
+        return cy.get('.toggle-button').contains(type+" Work")
+    }
+    switchWorkView(type) {
+        this.getWorkToggle(type).should('not.have.class', 'selected').click({ force: true }).should('have.class', 'selected')
+    }
+    getSectionProgressIcons(sectionID) {
+        return cy.get('.section-circle').should('contain', sectionID)
+    }
+    getTotalProgressNumber(sectionID) {
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total')
+    }
+    getCurrentProgressNumber(sectionID) {
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current')
     }
 
     // Dashboard 6 - Pack (Current Work)
-    getCurrentWorkToggle() {
-        return cy.get('.toggle-button').eq(0)
-    }
+
     getSixPackView() {
         return cy.get('.teacher-group-six-pack')
     }
@@ -92,13 +107,6 @@ class TeacherDashboard {
     }
 
     // Dashboard 6 - Pack (Published Work)
-    getPublishedWorkToggle() {
-        return cy.get('.toggle-button').eq(1)
-    }
-    switchToPublishedView() {
-        this.getPublishedWorkToggle().should('not.have.class', 'selected').click({ force: true }).should('have.class', 'selected')
-    }
-
     getStarPublishIcon() {
         return cy.get('.icon-star')
     }
@@ -125,7 +133,7 @@ class TeacherDashboard {
     }
 
 
-    // Workspace Right Nav
+    // Teacher Workspace Right Nav
     getRightNavMyWorkTab() {
         return cy.get('div#rightNavTab-my-work')
     }
@@ -134,9 +142,6 @@ class TeacherDashboard {
     }
     getRightNavSupportsTab() {
         return cy.get('div#rightNavTab-supports')
-    }
-    getSectionProgressIcons(sectionID) {
-        return cy.get('.section-circle').should('contain', sectionID)
     }
     getClassWorkExtraWorkspaceTab() {
         return cy.get('.section.personal.published')
