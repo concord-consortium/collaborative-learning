@@ -22,11 +22,11 @@
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 1,
+                                        "textTool": 2,
                                         "tableTool": 1,
                                         "geometryTool": 1,
                                         "drawingTool": 0,
-                                        "imageTool": 0
+                                        "imageTool": 1
                                     }
                                 },
                                 {
@@ -48,7 +48,7 @@
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 0,
+                                        "textTool": 1,
                                         "tableTool": 0,
                                         "geometryTool": 2,
                                         "drawingTool": 0,
@@ -80,7 +80,7 @@
                                     "quadrant": ".north-west",
                                     "published" : 1,
                                     "tools": {
-                                        "textTool": 0,
+                                        "textTool": 1,
                                         "tableTool": 1,
                                         "geometryTool": 1,
                                         "drawingTool": 0,
@@ -119,7 +119,7 @@
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 0,
+                                        "textTool": 1,
                                         "tableTool": 1,
                                         "geometryTool": 1,
                                         "drawingTool": 0,
@@ -222,7 +222,7 @@
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 0,
+                                        "textTool": 1,
                                         "tableTool": 0,
                                         "geometryTool": 1,
                                         "drawingTool": 0,
@@ -293,7 +293,7 @@
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 1,
+                                        "textTool": 2,
                                         "tableTool": 1,
                                         "geometryTool": 1,
                                         "drawingTool": 0,
@@ -338,7 +338,7 @@
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
-                                        "textTool": 0,
+                                        "textTool": 3,
                                         "tableTool": 0,
                                         "geometryTool": 3,
                                         "drawingTool": 0,
