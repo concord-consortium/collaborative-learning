@@ -28,10 +28,7 @@ context("Teacher Space", () => {
         cy.login("https://learn.concord.org", clueTeacher)
         // insert offering number for your activity below
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
-        cy.wait(1000)
-        cy.waitForSpinner()
-        cy.reload()
-        cy.wait(1000)
+        // cy.wait(1000)
         cy.waitForSpinner()
     })
 
@@ -223,18 +220,34 @@ context("Teacher Space", () => {
                     })
 
                 })
-                it('clicking support button opens two up with group open', () => {
-
+                it.skip('clicking support button opens two up with group open', () => {
+                    // TODO
                 })
-                it('clicking expand group button will open that single group in teacher workspace', () => {
-
+                it.skip('clicking expand group button will open that single group in teacher workspace', () => {
+                    // TODO
                 })
                 it('verifies full student names are displayed when student canvas is expanded', () => {
-
+                    // TODO
                 })
             })
             it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
-                
+                // total = 30, IN = 30, IC = 9, WI = 10, NW = 7
+                let progress = {"total":"30",
+                                 "IN":"30",
+                                 "IC":"9",
+                                 "WI":"10",
+                                 "NW":"7"
+                                }; 
+                dashboard.getTotalProgressNumber("IN").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("IC").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("WI").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("NW").should('contain',progress["total"])
+                dashboard.getCurrentProgressNumber("IN").should('contain',progress["IN"])
+                dashboard.getCurrentProgressNumber("IC").should('contain',progress["IC"])
+                dashboard.getCurrentProgressNumber("WI").should('contain',progress["WI"])
+                dashboard.getCurrentProgressNumber("NW").should('contain',progress["NW"])
+
+
             })
             it.skip('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
