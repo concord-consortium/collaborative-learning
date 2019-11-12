@@ -216,7 +216,7 @@ context("Teacher Space", () => {
                  * sections are accurately calculated in the 'progress'?
                  */
             })
-            it('can switch pages', () => {
+            it.skip('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
                 dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
                 dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
