@@ -14,7 +14,7 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.problem[data-test="user-problem"] .bp3-button')
+        return cy.get('.problem[data-test="user-class"] .bp3-button')
     }
     getClassDropdown() {
         // return cy.get('.bp3-button').eq(3)
