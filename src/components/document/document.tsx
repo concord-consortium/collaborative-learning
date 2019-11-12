@@ -132,6 +132,13 @@ const TitleInfo = ({ docTitle, onClick }: { docTitle: string, onClick?: () => vo
   );
 };
 
+const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <IconButton icon="sticky-note" key="sticky-note" className="action icon-sticky-note"
+                onClickButton={onClick} title="View Notes" />
+  );
+};
+
 @inject("stores")
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
@@ -218,7 +225,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           </div>
         }
         <div className="title" data-test="document-title">
-          {problemTitle}
+          {problemTitle} {this.renderStickyNoteIcon()}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
@@ -233,6 +240,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
       </div>
     );
+  }
+
+  private renderStickyNoteIcon() {
+    const { user } = this.stores;
+    if (!this.isPrimary()) {
+      return;
+    }
+    const supports = this.stores.supports.getTeacherSupportsForUserProblem({userId: user.id});
+    console.log("supports", supports, this.stores.supports.teacherSupports);
+    if (supports.length === 0) {
+      return;
+    }
+    return <StickyNoteButton onClick={this.handleViewStickyNoteClick} />;
   }
 
   private renderMode() {
@@ -485,6 +505,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private isPrimary() {
     return this.props.side === "primary";
+  }
+
+  private handleViewStickyNoteClick = () => {
   }
 
 }

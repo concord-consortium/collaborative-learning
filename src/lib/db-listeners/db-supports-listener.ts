@@ -47,6 +47,7 @@ export class DBSupportsListener extends BaseListener {
   }
 
   private handleSupportsUpdate = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
+    debugger;
     const {supports} = this.db.stores;
     const dbSupports = snapshot.val();
     this.debugLogSnapshot("#handleSupportsUpdate", snapshot);
@@ -67,6 +68,9 @@ export class DBSupportsListener extends BaseListener {
           });
         });
       } else {
+
+        THIS SEEMS TO BE BROKEN NOW
+
         // Logic is the same as above, but group + user supports are first keyed by ID
         Object.keys(dbSupports).forEach(audienceId => {
           Object.keys(dbSupports[audienceId]).forEach(sectionTarget => {

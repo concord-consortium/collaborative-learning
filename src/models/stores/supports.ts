@@ -154,6 +154,13 @@ export const SupportsModel = types
     }
   }))
   .views((self) => ({
+    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherSupports.filter(support => {
+        return support.showForUserProblem(target);
+      });
+    }
+  }))
+  .views((self) => ({
     get allSupports() {
         return (self.curricularSupports as SupportItemModelType[])
         .concat(self.classSupports)
@@ -166,12 +173,7 @@ export const SupportsModel = types
         const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
           return sectionId ? support.sectionId === sectionId : true;
         });
-
-        const teacherSupports = self.teacherSupports.filter(support => {
-          return support.showForUserProblem(target);
-        });
-
-        return supports.concat(teacherSupports);
+        return supports.concat(self.getTeacherSupportsForUserProblem(target));
     }
   }))
   .views((self) => ({
