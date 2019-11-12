@@ -359,6 +359,102 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "groupIndex": 6,
+                            "groupName": "7",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing25",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing26",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 7,
+                            "groupName": "8",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing27",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 1,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing28",
+                                    "quadrant": ".north-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing29",
+                                    "quadrant": ".south-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 1,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 8,
+                            "groupName": "9",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing30",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
                         }
                     ]
                 },

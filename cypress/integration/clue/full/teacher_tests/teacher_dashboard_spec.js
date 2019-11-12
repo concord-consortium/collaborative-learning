@@ -79,7 +79,7 @@ context("Teacher Space", () => {
                     dashboard.getGroupName().eq(group.groupIndex).should('contain', group.groupName)
                     // Check for group length (4Up Count)
                     dashboard.getSixPackView().then(() => {
-                        dashboard.getFourUpViews().should('have.length', groups.length)
+                        dashboard.getFourUpViews().should('have.length', 6)
                     })
                 })
             })
@@ -103,6 +103,10 @@ context("Teacher Space", () => {
                         dashboard.getCurrentProgressNumber(section).should('be.visible')
                     })
                 })
+            })
+            it('verify six-pack page toggle',()=>{ //only passes if there are more 6 groups in the class
+                dashboard.getPreviousPageButton().should('be.visible').and('have.class','disabled')
+                dashboard.getNextPageButton().should('be.visible').and('not.have.class', 'disabled')
             })
         })
         describe('Header element functionality', () => {
@@ -199,8 +203,6 @@ context("Teacher Space", () => {
                 })
             })
             it('verify each canvas in a 4 up view is read only', () => {
-                // skipping because this test verify that it has the read-only class, 
-                //but sometimes it misses the read-only class in some tool tile element.
                 cy.get('@clueData').then((clueData) => {
                     let tempGroupIndex = 0
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
@@ -236,15 +238,15 @@ context("Teacher Space", () => {
             })
             it('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
-                dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
-                dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
+                // dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
+                // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
 
                 // Use when clue class has MORE than 6 groups
+                dashboard.getPreviousPageButton().should('have.class', 'disabled')
+                dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
+                dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
+                dashboard.getPreviousPageButton().should('have.class', 'disabled')
 
-                // dashboard.getPreviousPageButton().should('have.class', 'disabled')
-                // dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
-                // dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
-                // dashboard.getPreviousPageButton().should('have.class', 'disabled')
             })
         })
         describe('6-pack view functionality - Published Work', () => {
