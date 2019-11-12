@@ -17,7 +17,9 @@
 import './commands'
 
 // Alternatively you can use CommonJS syntax:
-// require('./commands')
+// require('./commands'
+
+Cypress.config('defaultCommandTimeout', 40000)
 
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;

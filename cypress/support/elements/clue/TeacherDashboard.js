@@ -46,10 +46,10 @@ class TeacherDashboard {
         return cy.get('.section-circle').should('contain', sectionID)
     }
     getTotalProgressNumber(sectionID) {
-        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total')
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total');
     }
     getCurrentProgressNumber(sectionID) {
-        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current')
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current');
     }
 
     // Dashboard 6 - Pack (Current Work)
@@ -124,6 +124,7 @@ class TeacherDashboard {
                 }
             }
         }
+        // subtract 4 because there are 4 published docs that are not in view
         this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
     }
     clearAllStarred() {
