@@ -79,7 +79,7 @@ context("Teacher Space", () => {
                     dashboard.getGroupName().eq(group.groupIndex).should('contain', group.groupName)
                     // Check for group length (4Up Count)
                     dashboard.getSixPackView().then(() => {
-                        dashboard.getFourUpViews().should('have.length', groups.length)
+                        dashboard.getFourUpViews().should('have.length', 6)
                     })
                 })
             })
@@ -104,6 +104,10 @@ context("Teacher Space", () => {
                     })
                 })
             })
+            it('verify six-pack page toggle',()=>{ //only passes if there are more 6 groups in the class
+                dashboard.getPreviousPageButton().should('be.visible').and('have.class','disabled')
+                dashboard.getNextPageButton().should('be.visible').and('not.have.class', 'disabled')
+            })
         })
         describe('Header element functionality', () => {
             it('verify switching problems changes six pack content and problem title', () => {
@@ -126,6 +130,8 @@ context("Teacher Space", () => {
                     //switch back to original problem for later test
                     dashboard.getProblemDropdown().click({force:true})
                     dashboard.getProblemList().contains(problems[initProblemIndex].problemTitle).click({ force: true })
+                    cy.wait(1000)
+                    cy.waitForSpinner()
                 })
             })
             it('verify dashboard/workspace switch changes workspace view', () => {
@@ -171,24 +177,12 @@ context("Teacher Space", () => {
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({force:true})
                     dashboard.getClassList().contains(initClassName).click({ force: true })
+                    cy.wait(1000)
+                    cy.waitForSpinner()
                 })
             })
-            // after(()=>{// switch back to first problem to get back six pack problem[0]
-            //     dashboard.getClassDropdown().click({force:true}).then(()=>{
-            //         dashboard.getClassList().contains("CLUE").click({force:true})
-            //         cy.wait(1000)
-            //         cy.waitForSpinner()
-            //     })
-            //     dashboard.getProblemDropdown().click({force:true}).then(()=>{
-            //         // dashboard.getProblemList().contains(problems[0].problemTitle).click({ force: true })
-            //         // cy.wait(1000)
-            //         // cy.waitForSpinner()
-            //         dashboard.getProblemList().contains("1.1 Solving a Mystery").click({force:true})
-            //         cy.wait(1000)
-            //         cy.waitForSpinner()
-            //     })
-            // })
         })
+
         describe('6-pack view functionality - Current Work', () => {
             it('verifies students are in correct groups', () => {
                 cy.get('@clueData').then((clueData) => {
@@ -208,13 +202,12 @@ context("Teacher Space", () => {
                     })
                 })
             })
-            it.skip('verify each canvas in a 4 up view is read only', () => {
-                // skipping because this test verify that it has the read-only class, 
-                //but sometimes it misses the read-only class in some tool tile element.
+            it('verify each canvas in a 4 up view is read only', () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempGroupIndex = 0
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
+                    cy.wait(500);
                 })
             })
             it('verify clicking a students canvas in 4 up view zooms into students canvas', () => { 
@@ -243,13 +236,12 @@ context("Teacher Space", () => {
             it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
                 
             })
-            it('can switch pages', () => {
+            it.skip('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
                 // dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
                 // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
 
                 // Use when clue class has MORE than 6 groups
-
                 dashboard.getPreviousPageButton().should('have.class', 'disabled')
                 dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
                 dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
@@ -272,7 +264,7 @@ context("Teacher Space", () => {
                 })
             })
             //Skipping for now because need to investigate how many are starred prior to this test
-            it.skip('removes all stars from student published work', () => { 
+            it('removes all stars from student published work', () => { 
                 dashboard.getStarPublishIcon().should('have.class', 'starred')
                 dashboard.getStarPublishIcon().click({ force: true, multiple: true })
                 dashboard.getStarPublishIcon().should('not.have.class', 'starred')

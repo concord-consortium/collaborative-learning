@@ -124,7 +124,7 @@ class TeacherDashboard {
                 }
             }
         }
-        this.getStarPublishIcon().should('have.length', totalPublished).click({force:true,multiple:true})
+        this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
     }
     clearAllStarred() {
         this.getRightNavTabListShown().within(() => {
