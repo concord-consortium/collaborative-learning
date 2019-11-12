@@ -231,7 +231,7 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return url ? url.startsWith("assets/") : false;
+    return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
   store(url: string) {
