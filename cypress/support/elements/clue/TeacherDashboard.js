@@ -162,16 +162,11 @@ class TeacherDashboard {
         return cy.get('.class-work').find('.shown').should('have.class', 'list')
     }
 
-    verifyWorkForGroupReadOnly(group) {
+    verifyWorkForGroupReadOnly(group) { //table-tool does not get the .read-only class
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
                 this.getGroups().eq(group.groupIndex).within(() => {
                     this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.tableTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.table-tool')
                 })
             }
             if (group.students[i].tools.geometryTool > 0) {
