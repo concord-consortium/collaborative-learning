@@ -1,6 +1,9 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 import RightNav from "../../../../support/elements/common/RightNav";
 
+
+let dashboard = new TeacherDashboard();
+let rightNav = new RightNav();
 /**
  * Notes:
  * 
@@ -14,10 +17,8 @@ import RightNav from "../../../../support/elements/common/RightNav";
  *    all of the students in the dashboard's current view
  */
 
-context("Teacher Space", () => {
 
-    let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
+context("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -30,6 +31,8 @@ context("Teacher Space", () => {
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
         // cy.wait(1000)
         cy.waitForSpinner()
+        
+        cy.fixture("teacher-dash-data.json").as("clueData")
     })
 
     beforeEach(() => {
@@ -264,15 +267,26 @@ context("Teacher Space", () => {
         })
         describe('6-pack view functionality - Published Work', () => {
             it('switches to published work tab and checks UI options', () => {
+                // not working - nocan't get to the right canvas
+                let classIndex = 0
+                let problemIndex = 0
+                let groupIndex = 0
+                let group
+
+                dashboard.switchWorkView("Published");
+                cy.get('@clueData').then((clueData) => {
+                    group = clueData.classes[classIndex].problems[problemIndex].groups[groupIndex]
+                    cy.wait(3000) //need to wait for canvases to load
+                    dashboard.verifyPublishStatus(group)
+                })
+
             })
             it('select stars for students', () => { // Want this to be for all students once it passes
                 let classIndex = 0
                 let problemIndex = 0
                 let groups
 
-                dashboard.switchWorkView("Published")
                 cy.get('@clueData').then((clueData) => {
-                    let dashboard = new TeacherDashboard()
                     groups = clueData.classes[classIndex].problems[problemIndex].groups
                     dashboard.starPublishedWork(groups)
                 })

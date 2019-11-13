@@ -1,5 +1,5 @@
-//Tabs: ['my-work','class-work','learning-log','supports']
-//Sections: [['workspaces','investigations'],
+//Tabs: ['my-work','class-work','learning-log','supports', 'student-work'] *student-work is teacher only
+//Sections: [['workspaces','investigations', 'starred'], *starred is teacher only
 //           ['personal', 'published', 'learning-log', 'starred']
 //           [''],
 //           ['jit','teacher-supports']]
