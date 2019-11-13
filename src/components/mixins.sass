@@ -1,0 +1,6 @@
+// Hide scrollbars.  Useful when width of scroll gutters causes issues.
+@mixin hideScrollbars
+  -ms-overflow-style: none
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    display: none

@@ -6,7 +6,7 @@ import { ToggleGroup, IToggleChoice, Themes } from "@concord-consortium/react-co
 import { ProgressWidget } from "../progress-widget";
 import "./sixpack-right-controls.sass";
 
-const Colors = Themes.Clue;
+const Colors = Themes.Default;
 
 interface IProps {
   documentViewMode: DocumentViewMode;

@@ -58,12 +58,12 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
       const classLinks = user.portalClassOfferings.filter(o => o.className === className);
       const matchingLink = classLinks.find( l => l.problemOrdinal === currentProblemOrdinal);
       const handleClick = (name: string, url: string) => {
-        window.location.replace(url);
         const log = {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
           parameters: {className, link: url}
         };
         Logger.log(log.event, log.parameters, LogEventMethod.DO);
+        window.location.replace(url);
       };
 
       if (matchingLink) {
