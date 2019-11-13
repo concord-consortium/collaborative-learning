@@ -143,12 +143,12 @@ context("Teacher Space", () => {
             it('verify dashboard/workspace switch changes workspace view', () => {
                 dashboard.getViewToggle('Dashboard').should('be.visible')
                 dashboard.getViewToggle('Dashboard').parent().should('have.class', 'bp3-active')
-                dashboard.getSingleWorkspace().should('not.be.visible')
+                clueCanvas.getSingleWorkspace().should('not.be.visible')
                 dashboard.getViewToggle('Workspace').should('be.visible')
                 dashboard.getViewToggle('Workspace').parent().should('not.have.class', 'bp3-active')
                 dashboard.getViewToggle('Workspace').click({ force: true })
                 dashboard.getViewToggle("Workspace").parent().should('have.class', 'bp3-active')
-                dashboard.getSingleWorkspace().should('be.visible')
+                clueCanvas.getSingleWorkspace().should('be.visible')
                 dashboard.getViewToggle("Dashboard").click({ force: true })
                 dashboard.getViewToggle('Dashboard').should('be.visible')
                 dashboard.getViewToggle('Dashboard').parent().should('have.class', 'bp3-active')
@@ -233,7 +233,21 @@ context("Teacher Space", () => {
                 })
                 dashboard.switchView('Dashboard') //switch back to continue tests
             })
-            it('verify clicking a students canvas in 4 up view zooms into students canvas', () => { 
+            it('clicking expand group button will open that single group in teacher workspace', () => {
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.getExpandGroupViewButton().eq(1).click();//hard coding clicking the first icon
+                    clueCanvas.getSingleWorkspace().should('be.visible');
+                    clueCanvas.getFourUpView().should('be.visible');
+                    clueCanvas.getInvestigationCanvasTitle().should('have.class', 'group-title')
+                    clueCanvas.getSingleWorkspace().within(()=>{
+                        workspace.getGroupNumberButton().should('be.visible').and('have.length',groups.length)
+                    })
+                })
+
+                dashboard.switchView('Dashboard') //switch back to continue tests
+            })
+            it('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => { 
                 cy.get('@clueData').then((clueData) => {
                     let groupIndex = 0
                     let studentIndex = 0
@@ -245,13 +259,6 @@ context("Teacher Space", () => {
                         dashboard.getStudentCanvas(student.quadrant).click({ force: true })
                     })
 
-                })
-
-                it.skip('clicking expand group button will open that single group in teacher workspace', () => {
-                    // TODO
-                })
-                it('verifies full student names are displayed when student canvas is expanded', () => {
-                    // TODO
                 })
             })
             it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
