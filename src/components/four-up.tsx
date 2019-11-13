@@ -23,6 +23,7 @@ interface IProps extends IBaseProps {
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
 }
 
 interface IState {
@@ -369,13 +370,17 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleOverlayClicked = (context: string) => {
-    const { groupId } = this.props;
+    const { groupId, setFocusedGroupUser } = this.props;
     const groupUser = this.userByContext[context];
     const toggledContext = context === this.state.toggledContext ? null : context;
     this.setState({toggledContext});
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
+    }
+    if (setFocusedGroupUser) {
+      const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
+      setFocusedGroupUser(focusedGroupUser);
     }
   }
 }

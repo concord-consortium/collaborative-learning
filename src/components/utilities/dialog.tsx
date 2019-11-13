@@ -16,7 +16,7 @@ interface IState {
 @observer
 export class DialogComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
-  private input: HTMLInputElement | null;
+  private input: HTMLInputElement | HTMLTextAreaElement | null;
 
   public componentDidMount() {
     window.addEventListener("keyup", this.handleWindowKeyUp);
@@ -99,18 +99,28 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderPromptContents(dialog: UIDialogModelType) {
+    const input = dialog.rows
+      ? <textarea
+          rows={dialog.rows}
+          data-test="dialog-text-input"
+          value={this.state.promptValue}
+          onChange={this.handlePromptValueChanged}
+          onKeyUp={this.handlePromptKeyUp}
+          ref={(el) => this.input = el}
+        />
+      : <input
+          data-test="dialog-text-input"
+          type="text"
+          value={this.state.promptValue}
+          onChange={this.handlePromptValueChanged}
+          onKeyUp={this.handlePromptKeyUp}
+          ref={(el) => this.input = el}
+        />;
     return (
       <div className="dialog-contents">
         <div className="dialog-text">{dialog.text}</div>
         <div className="dialog-input">
-          <input
-            data-test="dialog-text-input"
-            type="text"
-            value={this.state.promptValue}
-            onChange={this.handlePromptValueChanged}
-            onKeyUp={this.handlePromptKeyUp}
-            ref={(el) => this.input = el}
-          />
+          {input}
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handlePromptDialogOk} disabled={this.promptValue.length === 0}>Ok</button>
@@ -128,13 +138,13 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     this.stores.ui.resolveDialog(false);
   }
 
-  private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+  private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (this.input) {
       this.setState({promptValue: this.input.value});
     }
   }
 
-  private handlePromptKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  private handlePromptKeyUp = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     // listen for enter key
     if (e.keyCode === 13) {
       this.handlePromptDialogOk();
