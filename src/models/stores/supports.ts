@@ -105,6 +105,9 @@ export const TeacherSupportModel = types
   .actions(self => ({
     setVisible(visible: boolean) {
       self.visible = visible;
+    },
+    setDeleted(deleted: boolean) {
+      self.deleted = deleted;
     }
   }));
 
@@ -176,7 +179,7 @@ export const SupportsModel = types
       if (afterTimestamp) {
         // true if there has been a teacher support after the last support tab open
         const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
-          return support.authoredTime > latest ? support.authoredTime : latest;
+          return !support.deleted && (support.authoredTime > latest) ? support.authoredTime : latest;
         }, 0);
         return latestAuthoredTime > afterTimestamp;
       } else {
@@ -315,6 +318,9 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
     let document = documents.getDocument(supportKey);
     if (document) {
       // update existing document properties if a document exists
+      if (support.supportType === SupportType.teacher) {
+        support.setDeleted(!!properties.isDeleted);
+      }
       document.setProperties(properties);
     }
     else {

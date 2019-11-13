@@ -123,7 +123,7 @@ export class DBSupportsListener extends BaseListener {
       authoredTime: dbSupport.timestamp,
       originDoc: dbSupport.type === ESupportType.publication ? dbSupport.originDoc : undefined,
       caption: dbSupport.properties && dbSupport.properties.caption,
-      deleted: dbSupport.deleted
+      deleted: dbSupport.deleted || !!(dbSupport.properties && dbSupport.properties.isDeleted)
     });
   }
 
