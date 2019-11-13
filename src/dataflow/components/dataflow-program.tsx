@@ -29,6 +29,7 @@ import { SizeMeProps } from "react-sizeme";
 import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./dataflow-program-graph";
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
+import { GetLocalTimeStamp } from "../utilities/time";
 
 import "./dataflow-program.sass";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
@@ -491,7 +492,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let interval: number =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    const programName = "dataflow-program-" + programStartTime;
+    const programName = `dataflow-program_${GetLocalTimeStamp(programStartTime)}`;
     const programEndTime = programStartTime + (1000 * this.props.programRunTime);
 
     const hubs: string[] = [];
@@ -522,7 +523,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
-        datasetName = `${n.data.datasetName as string}-${programStartTime}`;
+        datasetName = `${n.data.datasetName as string}_${GetLocalTimeStamp(programStartTime)}`;
       }
     });
 

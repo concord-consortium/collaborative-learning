@@ -8,6 +8,7 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
 import { DataflowProgram } from "../dataflow-program";
+import { GetLocalTimeStamp } from "../../utilities/time";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import "./dataflow-tool.sass";
@@ -95,7 +96,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         }
         // create and load the new document
         const params: ICreateOtherDocumentParams = {
-                title: datasetName || `${primaryDocument.title}-${Date.now()}` ,
+                title: datasetName || `${primaryDocument.title}-${GetLocalTimeStamp(Date.now())}` ,
                 properties,
                 content: JSON.parse(documentContent.publish())
               };
