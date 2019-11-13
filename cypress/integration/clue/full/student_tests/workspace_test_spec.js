@@ -4,16 +4,13 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile'
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-const queryParam = `${Cypress.config("queryParams")}`
+const queryParams = `${Cypress.config("queryParams")}`
 let leftNav = new LeftNav,
     rightNav = new RightNav,
     clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
 
     before(function(){
-        const baseUrl = `${Cypress.config("baseUrl")}`;
-        const queryParams = `${Cypress.config("queryParams")}`;
-        // cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
         // cy.wait(4000);
@@ -37,7 +34,7 @@ context('Test the overall workspace', function(){
         });
 
         it('will verify that left nav area is closes when other tabs are opened', function(){ //should this be tab closes when no longer in that area? my work and left nav
-            cy.visit(baseUrl+queryParam);
+            cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
             // cy.wait(2000)
             leftNav.openLeftNavTab('Introduction'); //left nav expand area should be visible
