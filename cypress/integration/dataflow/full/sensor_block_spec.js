@@ -18,16 +18,23 @@ const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 
 const testBlock = 'sensor'
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Sensor')
+    dfcanvas.openBlock('Transform')
+    dfblock.moveBlock('transform',0,255,5)
+    dfblock.connectBlocks(testBlock,0,'transform')
+    dfcanvas.scrollToTopOfTile();
+})
+
 context('Sensor block tests',()=>{
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Sensor')
-        dfcanvas.openBlock('Transform')
-        dfblock.moveBlock('transform',0,255,5)
-        dfblock.connectBlocks(testBlock,0,'transform')
-        dfcanvas.scrollToTopOfTile();
-    })
     describe('Sensor block UI',()=>{
         it('verify UI',()=>{ //block should have 2 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Sensor');
@@ -101,3 +108,6 @@ context('Sensor block tests',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

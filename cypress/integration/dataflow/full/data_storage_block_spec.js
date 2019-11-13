@@ -7,16 +7,25 @@ const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 
 const testBlock = 'data-storage';
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(3000)
+    
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Generator')
+    dfcanvas.openBlock('Data Storage')
+    dfblock.moveBlock(testBlock,0,250,5);
+    dfcanvas.scrollToTopOfTile();
+    dfblock.selectGeneratorType('Square');
+})
+
 context('Data Storage block tests',()=>{//Use generator block on square wave for on/off
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Generator')
-        dfcanvas.openBlock('Data Storage')
-        dfblock.moveBlock(testBlock,0,250,5);
-        dfcanvas.scrollToTopOfTile();
-        dfblock.selectGeneratorType('Square');
-    })
+
     describe('Data Storage block UI',()=>{
         it('verify UI',()=>{ //block should have 1 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Data Storage');
@@ -54,3 +63,6 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

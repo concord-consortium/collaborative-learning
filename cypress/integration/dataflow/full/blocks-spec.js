@@ -13,6 +13,12 @@ context('block functionalites and relationships',()=>{
 //show plot
 //Each block only has one output node
     before(()=>{
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("queryParams")}`;
+        
+            cy.visit(baseUrl+queryParams);
+            cy.wait(4000)
+            
         header.switchWorkspace('Workspace');
         cy.wait(1000);
         dfcanvas.openBlock('Number')
@@ -65,3 +71,6 @@ context('block functionalites and relationships',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

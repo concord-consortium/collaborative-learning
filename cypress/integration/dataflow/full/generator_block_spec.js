@@ -8,16 +8,23 @@ const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 
 const testBlock = 'generator'
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(2000)
+
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Generator')
+    dfcanvas.openBlock('Transform')
+    dfblock.moveBlock('transform',0,250,5)
+    dfblock.connectBlocks(testBlock,0,'transform',0)
+    dfcanvas.scrollToTopOfTile();
+})
 context('Generator block tests',()=>{
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Generator')
-        dfcanvas.openBlock('Transform')
-        dfblock.moveBlock('transform',0,250,5)
-        dfblock.connectBlocks(testBlock,0,'transform',0)
-        dfcanvas.scrollToTopOfTile();
-    })
     describe('Generator block UI',()=>{
         it('verify UI',()=>{ //block should have dropdown, two text fields, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Generator');
@@ -58,3 +65,6 @@ context('Generator block tests',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

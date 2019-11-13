@@ -22,10 +22,19 @@ context('canvas test',()=>{
     const numButtons = buttons.length;
 
     before(()=>{
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("queryParams")}`;
+    
+        cy.visit(baseUrl+queryParams);
+        cy.wait(4000)
+        
         header.switchWorkspace('Workspace');
         cy.wait(1000);
     })
     describe('canvas ui',()=>{
+        it('verifies delete button is disabled',()=>{
+            canvas.getDeleteIcon().should('be.visible');
+        })
         it('verify Dataflow tile opens with program toolbar',()=>{
             buttons.push('Clear','Reset')
             dfcanvas.getDataFlowToolTile().should('exist');
@@ -157,3 +166,6 @@ context('canvas test',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

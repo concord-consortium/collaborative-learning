@@ -7,14 +7,20 @@ const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 
 const testBlock = 'number'
-context('Number block test',()=>{
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Number')
-        dfcanvas.scrollToTopOfTile();
-    })
 
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Number')
+    dfcanvas.scrollToTopOfTile();
+})
+
+context('Number block test',()=>{
     describe('Number block UI',()=>{
         it('verify UI',()=>{ //block should have one text field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Number');
@@ -47,6 +53,7 @@ context('Number block test',()=>{
         it('verify changing value in text field changes output node value',()=>{
             //use transform to verify output value?
             dfcanvas.openBlock('Transform');
+            dfblock.moveBlock('transform',0,300,100)
             dfblock.connectBlocks(testBlock,0,'transform')
             dfblock.getTransformValueTextField().should('contain','|-2.8| = 2.8')//TODO when dropdown default value changes
             dfblock.getNumberInput().click().type('{backspace}{backspace}{backspace}{backspace}1{enter}')
@@ -54,3 +61,6 @@ context('Number block test',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

@@ -7,18 +7,26 @@ const dfcanvas = new dfCanvas;
 const dfblock = new dfBlock;
 
 const testBlock = 'transform'
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Number')
+    dfcanvas.openBlock('Transform')
+    dfcanvas.openBlock('Math')
+    dfblock.moveBlock('math',0,250,100)
+    dfblock.connectBlocks('number',0,testBlock)
+    dfblock.connectBlocks(testBlock,0,'math',0);
+    dfblock.connectBlocks('number',0,'math',1);
+})
+
 context('Transform block test',()=>{
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Number')
-        dfcanvas.openBlock('Transform')
-        dfcanvas.openBlock('Math')
-        dfblock.moveBlock('math',0,250,100)
-        dfblock.connectBlocks('number',0,testBlock)
-        dfblock.connectBlocks(testBlock,0,'math',0);
-        dfblock.connectBlocks('number',0,'math',1);
-    })
+
     describe('transform block UI',()=>{//need 1 number block to connect inputs, transform block to connect output
         var num1=2,float=-2.4, negNum1 = num1*-1;
 
@@ -56,3 +64,6 @@ context('Transform block test',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

@@ -17,6 +17,14 @@ let header = new Header;
 const programTitle = 'Program-1';
 const dataTitle = "My Test Data"
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(3000)
+});
+
 context('single student functional test',()=>{
     describe('test header elements', function(){
         it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
@@ -97,3 +105,6 @@ context('single student functional test',()=>{
         })
     });    
 })
+after(function(){
+    cy.clearQAData('all');
+  });

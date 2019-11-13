@@ -9,7 +9,12 @@ function parseQueryParam(){
     //"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5" for Dataflow otherwise Null Problem is the problem title
     return userInfo
 }
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
 
+    cy.visit(baseUrl+queryParams);
+});
 context('Test header elements',()=>{
     describe('Test header UI',()=>{
         it('verify header ui existence',()=>{
@@ -24,3 +29,6 @@ context('Test header elements',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });
