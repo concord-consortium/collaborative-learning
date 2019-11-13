@@ -32,6 +32,9 @@ class TeacherDashboard {
     getSingleWorkspace() {
         return cy.get('.single-workspace')
     }
+    switchView(view) {
+        this.getViewToggle(view).click();
+    }
 
     // Dashboard Right Nav
     // type=["Current", "Published"]
@@ -65,6 +68,15 @@ class TeacherDashboard {
     }
     getGroupByName(groupName) {
         return cy.get('.teacher-group').contains(groupName)
+    }
+    getGroup(groupIndex) {
+        return cy.get('.group-0-'+groupIndex)
+    }
+    getDashboardSupportButton() {
+        return cy.get('#icon-support')
+    }
+    getExpandGroupViewButton() {
+        return cy.get('[data-test=expand-group-view-icon]')
     }
     getFourUpViews() {
         return cy.get('.four-up')
@@ -135,27 +147,6 @@ class TeacherDashboard {
 
 
     // Teacher Workspace Right Nav
-    getRightNavMyWorkTab() {
-        return cy.get('div#rightNavTab-my-work')
-    }
-    getRightNavClassWorkTab() {
-        return cy.get('div#rightNavTab-class-work')
-    }
-    getRightNavSupportsTab() {
-        return cy.get('div#rightNavTab-supports')
-    }
-    getClassWorkExtraWorkspaceTab() {
-        return cy.get('.section.personal.published')
-    }
-    getClassWorkProblemWorkspaceTab() {
-        return cy.get('.section.problem.published')
-    }
-    getClassWorkLearningLogsTab() {
-        return cy.get('.section.learning-log.published')
-    }
-    getClassWorkStarredTab() {
-        return cy.get('.section.problem.starred')
-    }
     getRightNavTabListHidden() {
         return cy.get('.class-work').find('.list').should('have.class', 'hidden')
     }
@@ -163,16 +154,11 @@ class TeacherDashboard {
         return cy.get('.class-work').find('.shown').should('have.class', 'list')
     }
 
-    verifyWorkForGroupReadOnly(group) {
+    verifyWorkForGroupReadOnly(group) { //table-tool does not get the .read-only class
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
                 this.getGroups().eq(group.groupIndex).within(() => {
                     this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.tableTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.table-tool')
                 })
             }
             if (group.students[i].tools.geometryTool > 0) {
@@ -193,38 +179,19 @@ class TeacherDashboard {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    // getGroupChooserTab(){
-    //     return cy.get('#teacher-dashboard-groups');
-    // }
-    // getGroupName(){
-    //     return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-title');
-    // }
-    // getStudentList(){
-    //     return cy.get('.teacher-student-tab > .user-list')
-    // }
-    // getStudentName(){
-    //     return cy.get('.teacher-student-tab > .user-list > .user')
-    // }
-    // joinGroup(){
-    //     cy.get('.teacher-group-tab > .selected-group > .title > .actions > span').should('contain','Join Group').click();
-    // }
-    // getGroupMembers(){
-    //     return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-users');
-    // }
-    getUserName() {
-        return cy.get('[data-test="user-name"]')
+    verifyPublishStatus(group){
+        console.log("students: "+group.students)
+        for(let i = 0; i < group.students.length; i++) {
+            if (group.students[i].published == 0) {
+                this.getGroup(0).within(() => {
+                    this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] span').should('contain','Not Published')
+                })
+            } else {
+                this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain',"Not Published")
+            }  
+        }
     }
+
     // getClassSupportsSectionDropdown(){
     //     return cy.get('.tab-contents > .teacher-supports > .teacher-support > .section-dropdown')
     // }

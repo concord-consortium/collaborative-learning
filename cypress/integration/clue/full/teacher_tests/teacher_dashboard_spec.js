@@ -1,5 +1,14 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 import RightNav from "../../../../support/elements/common/RightNav";
+import Header from "../../../../support/elements/common/Header";
+import ClueCanvas from "../../../../support/elements/clue/cCanvas";
+import TeacherWorkspace from "../../../../support/elements/clue/TeacherWorkspace";
+
+let dashboard = new TeacherDashboard();
+let rightNav = new RightNav();
+let header = new Header;
+let clueCanvas = new ClueCanvas
+let workspace = new TeacherWorkspace
 
 /**
  * Notes:
@@ -14,10 +23,8 @@ import RightNav from "../../../../support/elements/common/RightNav";
  *    all of the students in the dashboard's current view
  */
 
-context("Teacher Space", () => {
 
-    let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
+context("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -30,6 +37,8 @@ context("Teacher Space", () => {
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
         // cy.wait(1000)
         cy.waitForSpinner()
+        
+        cy.fixture("teacher-dash-data.json").as("clueData")
     })
 
     beforeEach(() => {
@@ -62,7 +71,7 @@ context("Teacher Space", () => {
                     dashboard.getViewToggle('Workspace').should('be.visible')
                     dashboard.getViewToggle('Workspace').parent().should('not.have.class', 'bp3-active')
                     // Check Teacher Username visibility and content
-                    dashboard.getUserName().should('be.visible').and('contain', clueData.teacherName)
+                    header.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 })
             })
             it('verifies six pack and group names', () => { //check this test again
@@ -180,7 +189,10 @@ context("Teacher Space", () => {
             })
         })
 
-        describe('6-pack view functionality - Current Work', () => {
+        describe.only('6-pack view functionality - Current Work', () => {
+            before(function(){
+                dashboard.getProblemDropdown().find('span').text().as('problemTitle');
+            })
             it('verifies students are in correct groups', () => {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups
@@ -207,6 +219,20 @@ context("Teacher Space", () => {
                     // cy.wait(500);
                 })
             })
+            it('clicking support button opens two up with group open', function() {
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.getDashboardSupportButton().click();
+                    clueCanvas.getLeftSideWorkspace().should('be.visible')
+                    clueCanvas.getLeftSideWorkspaceTitle().should('contain',this.problemTitle);
+                    clueCanvas.getRightSideWorkspace().should('be.visible')
+                    clueCanvas.getRightSideInvestigationTitle().should('have.class', 'group-title')
+                    clueCanvas.getRightSideWorkspace().within(()=>{
+                        workspace.getGroupNumberButton().should('be.visible').and('have.length',groups.length)
+                    })
+                })
+                dashboard.switchView('Dashboard') //switch back to continue tests
+            })
             it('verify clicking a students canvas in 4 up view zooms into students canvas', () => { 
                 cy.get('@clueData').then((clueData) => {
                     let groupIndex = 0
@@ -220,9 +246,7 @@ context("Teacher Space", () => {
                     })
 
                 })
-                it.skip('clicking support button opens two up with group open', () => {
-                    // TODO
-                })
+
                 it.skip('clicking expand group button will open that single group in teacher workspace', () => {
                     // TODO
                 })
@@ -263,15 +287,26 @@ context("Teacher Space", () => {
         })
         describe('6-pack view functionality - Published Work', () => {
             it('switches to published work tab and checks UI options', () => {
+                // not working - nocan't get to the right canvas
+                let classIndex = 0
+                let problemIndex = 0
+                let groupIndex = 0
+                let group
+
+                dashboard.switchWorkView("Published");
+                cy.get('@clueData').then((clueData) => {
+                    group = clueData.classes[classIndex].problems[problemIndex].groups[groupIndex]
+                    cy.wait(3000) //need to wait for canvases to load
+                    dashboard.verifyPublishStatus(group)
+                })
+
             })
             it('select stars for students', () => { // Want this to be for all students once it passes
                 let classIndex = 0
                 let problemIndex = 0
                 let groups
 
-                dashboard.switchWorkView("Published")
                 cy.get('@clueData').then((clueData) => {
-                    let dashboard = new TeacherDashboard()
                     groups = clueData.classes[classIndex].problems[problemIndex].groups
                     dashboard.starPublishedWork(groups)
                 })

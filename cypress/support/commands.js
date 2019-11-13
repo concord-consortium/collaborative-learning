@@ -86,5 +86,6 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
     cy.get("form").submit()
 })
 Cypress.Commands.add("waitForSpinner", () => {
+    cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })
