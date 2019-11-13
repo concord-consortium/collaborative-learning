@@ -14,7 +14,7 @@ import RightNav from "../../../../support/elements/common/RightNav";
  *    all of the students in the dashboard's current view
  */
 
-context("Teacher Space", () => {
+context.skip("Teacher Space", () => {
 
     let dashboard = new TeacherDashboard();
     let rightNav = new RightNav();
