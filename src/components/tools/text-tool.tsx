@@ -11,7 +11,7 @@ import { TextContentModelType } from "../../models/tools/text/text-content";
 import { autorun, IReactionDisposer } from "mobx";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
-import { hasSelectionModifier } from "../../utilities/event-utils";
+import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 import "./text-tool.sass";
 
@@ -101,16 +101,6 @@ interface IState {
   value?: Value;
   selectedButtons?: string[];
 }
-
-// create a global keylistener so that we know if the selection modifier keys are in use
-// when we get a change event
-let selectionModiferKeyDown = false;
-const globalOnKeyDown = (e: KeyboardEvent) => {
-  selectionModiferKeyDown = selectionModiferKeyDown || hasSelectionModifier(e);
-};
-const globalOnKeyUp = (e: KeyboardEvent) => selectionModiferKeyDown = false;
-window.addEventListener("keydown", globalOnKeyDown);
-window.addEventListener("keyup", globalOnKeyUp);
 
 @inject("stores")
 @observer
@@ -213,7 +203,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         // somehow detects the selection change before the click on the
         // delete button is processed by the workspace. For now, we just
         // disable focus change on deselection.
-        ui.setSelectedTile(model, {append: selectionModiferKeyDown});
+        ui.setSelectedTile(model, { append: isSelectionModifierKeyDown() });
       }
     }
 

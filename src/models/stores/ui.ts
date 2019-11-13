@@ -95,7 +95,7 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileId = (tileId?: string, options?: {append: boolean}) => {
+    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
       if (tileId) {
         if (options && options.append) {
           const index = self.selectedTileIds.indexOf(tileId);
@@ -133,10 +133,10 @@ export const UIModel = types
         self.activeRightNavTab = tab;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
-        setOrAppendTileId(tile && tile.id, options);
+        setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
-        setOrAppendTileId(tileId, options);
+        setOrAppendTileIdToSelection(tileId, options);
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;

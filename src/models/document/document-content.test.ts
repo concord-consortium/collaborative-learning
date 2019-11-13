@@ -592,20 +592,27 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         id: "textTool1",
         content: {
           type: "Text",
-          text: "{\"object\":\"value\",\"document\":{\"object\":\"document\",\"data\":{},\"nodes\":[{\"object\":\"block\",\"type\":\"line\",\"data\":{},\"nodes\":[{\"object\":\"text\",\"text\":\"\",\"marks\":[]}]}]}}",
-          format: "slate"
+          text: "Some text"
         }
       },
       tableTool: {
         id: "tableTool",
         content: {
           type: "Table",
-          isImported: true,
-          changes: [
-            "{\"action\":\"create\",\"target\":\"columns\",\"props\":{\"columns\":[{\"id\":\"u1nps1vXuDjQbGfY\",\"name\":\"x\"},{\"id\":\"kcRU7zz2Bc2cAYJz\",\"name\":\"y\"}]}}"
+          columns: [
+            {
+              name: "x",
+              type: "number",
+              values: [1, 2, 3]
+            },
+            {
+              name: "y",
+              type: "number",
+              values: [2, 4, 6]
+            }
           ]
         }
-      },
+      } as any,
       imageTool: {
         id: "imageTool",
         content: {
@@ -630,18 +637,14 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       graphTool: {
         id: "graphTool",
         content: {
-          type: "Geometry",
-          changes: [
-            "{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}"
-          ]
+          type: "Geometry"
         }
       },
       textTool2: {
         id: "textTool2",
         content: {
           type: "Text",
-          text: "{\"object\":\"value\",\"document\":{\"object\":\"document\",\"data\":{},\"nodes\":[{\"object\":\"block\",\"type\":\"line\",\"data\":{},\"nodes\":[{\"object\":\"text\",\"text\":\"\",\"marks\":[]}]}]}}",
-          format: "slate"
+          text: "More text"
         }
       },
       drawingTool2: {
