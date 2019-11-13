@@ -105,6 +105,9 @@ export const TeacherSupportModel = types
   .actions(self => ({
     setVisible(visible: boolean) {
       self.visible = visible;
+    },
+    setDeleted(deleted: boolean) {
+      self.deleted = deleted;
     }
   }));
 
@@ -176,7 +179,7 @@ export const SupportsModel = types
       if (afterTimestamp) {
         // true if there has been a teacher support after the last support tab open
         const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
-          return support.authoredTime > latest ? support.authoredTime : latest;
+          return !support.deleted && (support.authoredTime > latest) ? support.authoredTime : latest;
         }, 0);
         return latestAuthoredTime > afterTimestamp;
       } else {
@@ -277,6 +280,9 @@ function getSupportCaption(support: UnionSupportModelType, index: number,
 
 export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   const { db, documents, investigation, problem, supports, onDocumentCreated } = params;
+  if (!documents) {
+    return;
+  }
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
@@ -309,19 +315,29 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       }
     }
 
-    const content = await getDocumentContentForSupport(support.support, db);
-    if (content) {
-      const document = DocumentModel.create({
-                        uid: "curriculum",
-                        type: SupportPublication,
-                        key: supportKey,
-                        originDoc,
-                        properties,
-                        createdAt: Date.now(),
-                        content: getSnapshot(content)
-                      });
-      documents && documents.add(document);
-      onDocumentCreated && onDocumentCreated(support, document);
+    let document = documents.getDocument(supportKey);
+    if (document) {
+      // update existing document properties if a document exists
+      if (support.supportType === SupportType.teacher) {
+        support.setDeleted(!!properties.isDeleted);
+      }
+      document.setProperties(properties);
+    }
+    else {
+      const content = await getDocumentContentForSupport(support.support, db);
+      if (content) {
+        document = DocumentModel.create({
+                     uid: "curriculum",
+                     type: SupportPublication,
+                     key: supportKey,
+                     originDoc,
+                     properties,
+                     createdAt: Date.now(),
+                     content: getSnapshot(content)
+                   });
+        documents.add(document);
+        onDocumentCreated?.(support, document);
+      }
     }
   });
 }
