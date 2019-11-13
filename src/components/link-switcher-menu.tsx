@@ -36,12 +36,10 @@ function LinkMenuItem(props: ILinkProps) {
   const {title, disabled, current, link, onClick, extras, log } = props;
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
     if (!disabled && onClick) {
-      const clicked = () => onClick(link, extras);
       if (log) {
-        Logger.log(log.event, log.parameters, log.method, clicked);
-      } else {
-        clicked();
+        Logger.log(log.event, log.parameters, log.method);
       }
+      onClick(link, extras);
     }
   };
 

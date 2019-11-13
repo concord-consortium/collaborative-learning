@@ -5,7 +5,8 @@ import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
-import { ColumnApi, GridApi, GridReadyEvent, ValueGetterParams, ValueFormatterParams } from "ag-grid-community";
+import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
+        } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
@@ -69,6 +70,19 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
 
+    const { selection } = this.stores;
+    selection.observe(this.props.model.id, change => {
+      const rowId = change.name;
+      const isSharedRowSelected = change.type === "delete"
+              ? false
+              : (change.newValue as any).storedValue;
+      const rowNode = this.gridApi && this.gridApi.getRowNode(rowId);
+      const isRowNodeSelected = rowNode ? rowNode.isSelected() : false;
+      if (rowNode && (isSharedRowSelected !== isRowNodeSelected)) {
+        rowNode.setSelected(isSharedRowSelected, false);
+      }
+    });
+
     this.disposers.push(autorun(() => {
       const { model: { content } } = this.props;
       const tableContent = content as TableContentModelType;
@@ -91,14 +105,16 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly } = this.props;
-    const metadata = this.getContent().metadata;
+    const content = this.getContent();
+    const metadata = content.metadata;
     const itemFlags: IMenuItemFlags = {
             addAttribute: false,
             addCase: true,
             addRemoveDivider: false,
             renameAttribute: true,
             removeAttribute: false,
-            removeCases: true
+            removeCases: true,
+            unlinkGeometry: true
           };
     return (
       <div className="table-tool" ref={this.domRef}
@@ -108,20 +124,23 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           expressions={metadata.expressions}
           rawExpressions={metadata.rawExpressions}
           changeCount={this.syncedChanges}
-          autoSizeColumns={this.getContent().isImported}
+          autoSizeColumns={content.isImported}
           indexValueGetter={this.indexValueGetter}
           attrValueFormatter={this.attrValueFormatter}
           cellEditorComponent={LinkedTableCellEditor}
-          cellEditorParams={{ metadata: this.getContent().metadata }}
+          cellEditorParams={{ metadata }}
           defaultPrecision={1}
           itemFlags={itemFlags}
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
+          onRowSelectionChange={this.handleRowSelectionChange}
           onSetAttributeName={this.handleSetAttributeName}
           onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
           onSetCanonicalCaseValues={this.handleSetCanonicalCaseValues}
           onRemoveCases={this.handleRemoveCases}
+          onGetLinkedGeometries={this.handleGetLinkedGeometries}
+          onUnlinkGeometry={this.handleUnlinkGeometry}
         />
         {this.renderInvalidPasteAlert()}
       </div>
@@ -166,6 +185,12 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   private handleGridReady = (gridReadyParams: GridReadyEvent) => {
     this.gridApi = gridReadyParams.api || undefined;
     this.gridColumnApi = gridReadyParams.columnApi || undefined;
+  }
+
+  private handleRowSelectionChange = (e: SelectionChangedEvent) => {
+    const { selection } = this.stores;
+    const nodes = e.api.getSelectedNodes();
+    selection.setSelected(this.props.model.id, nodes.map(n => n.id));
   }
 
   private handleMouseDown: EventListener = (e: MouseEvent) => {
@@ -375,6 +400,23 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.getGeometryContent(id);
       if (geometryContent) {
         geometryContent.removeObjects(undefined, ids, geomActionLinks);
+      }
+    });
+  }
+
+  private handleGetLinkedGeometries = () => {
+    return this.getContent().metadata.linkedGeometries.toJS();
+  }
+
+  private handleUnlinkGeometry = () => {
+    const geometryIds = this.getContent().metadata.linkedGeometries.toJS();
+    const tableActionLinks = this.getTableActionLinks();
+    this.getContent().removeGeometryLinks(geometryIds, tableActionLinks);
+    const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
+    geometryIds.forEach(id => {
+      const geometryContent = this.getGeometryContent(id);
+      if (geometryContent) {
+        geometryContent.removeTableLink(undefined, this.props.model.id, geomActionLinks);
       }
     });
   }

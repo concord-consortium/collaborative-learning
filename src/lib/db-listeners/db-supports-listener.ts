@@ -1,6 +1,6 @@
 import { DB } from "../db";
 import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
-        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore
+        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore, SupportType
       } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
@@ -59,8 +59,9 @@ export class DBSupportsListener extends BaseListener {
           const newSupports = dbSupports[sectionTarget];
           Object.keys(newSupports).forEach((key) => {
             const dbSupport: DBSupport = newSupports[key];
+            const uid = dbSupport.uid;
             const audience = ClassAudienceModel.create();
-            const supportModel = this.createSupportModel(sectionTarget, dbSupport, audience);
+            const supportModel = this.createSupportModel(uid, sectionTarget, dbSupport, audience);
             supportModel && teacherSupports.push(supportModel);
           });
         });
@@ -71,10 +72,11 @@ export class DBSupportsListener extends BaseListener {
             const newSupports = dbSupports[audienceId][sectionTarget];
             Object.keys(newSupports).forEach((key) => {
               const dbSupport: DBSupport = newSupports[key];
+              const uid = dbSupport.uid;
               const audience = audienceType === AudienceEnum.group
                 ? GroupAudienceModel.create({identifier: audienceId})
                 : UserAudienceModel.create({identifier: audienceId});
-              const supportModel = this.createSupportModel(sectionTarget, dbSupport, audience);
+              const supportModel = this.createSupportModel(uid, sectionTarget, dbSupport, audience);
               supportModel && teacherSupports.push(supportModel);
             });
           });
@@ -83,17 +85,34 @@ export class DBSupportsListener extends BaseListener {
 
       supports.setAuthoredSupports(teacherSupports, audienceType);
 
-      const { unit, investigation, problem, documents } = this.db.stores;
-      addSupportDocumentsToStore({ unit, investigation, problem, documents, supports: teacherSupports, db: this.db });
+      const { unit, investigation, problem, documents, user } = this.db.stores;
+      addSupportDocumentsToStore({
+        unit, investigation, problem, documents, supports: teacherSupports, db: this.db,
+        onDocumentCreated: (support, document) => {
+          // teachers sync their support document properties to Firebase to track isDeleted
+          if (eventType === "child_added") {
+            const teacherSupport = support as TeacherSupportModelType;
+            if (teacherSupport.uid === user.id) {
+              const {audience, sectionTarget, key} = teacherSupport;
+              const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
+              this.db.listeners.syncDocumentProperties(document, path);
+            }
+          }
+        }
+      });
     }
   }
 
-  private createSupportModel(sectionTarget: string | undefined, dbSupport: DBSupport, audience: AudienceModelType) {
+  private createSupportModel(uid: string,
+                             sectionTarget: string | undefined,
+                             dbSupport: DBSupport,
+                             audience: AudienceModelType) {
     if (!dbSupport || !dbSupport.content) return;
     const supportContentType: ESupportType = (dbSupport.type as ESupportType) || ESupportType.text;
     const supportModel = SupportModel.create({ type: supportContentType, content: dbSupport.content });
     if (!supportModel) return;
     return TeacherSupportModel.create({
+      uid,
       key: dbSupport.self.key,
       support: supportModel,
       type: !sectionTarget || sectionTarget === "all" ? SupportTarget.problem : SupportTarget.section,

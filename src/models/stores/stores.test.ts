@@ -6,6 +6,7 @@ import { SectionModel, SectionType } from "../curriculum/section";
 import { AppConfigModel } from "./app-config-model";
 import { UserModel } from "./user";
 import { DB } from "../../lib/db";
+import { getSnapshot } from "mobx-state-tree";
 
 describe("stores object", () => {
 
@@ -70,7 +71,7 @@ describe("isFeatureSupported()", () => {
 
   it("can disable features at the section level", () => {
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["foo"] });
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", sections: [section] });
+    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", sections: [getSnapshot(section)] });
     const stores = createStores({ problem });
     expect(isFeatureSupported(stores, "foo")).toBe(true);
     expect(isFeatureSupported(stores, "foo", "introduction")).toBe(false);
@@ -88,7 +89,8 @@ describe("isFeatureSupported()", () => {
     const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] });
     const investigation = InvestigationModel.create({ ordinal: 1, title: "Investigation", disabled: ["!foo"] });
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["bar", "baz", "!foo"] });
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["foo"], sections: [section] });
+    const problem = ProblemModel.create(
+                      { ordinal: 1, title: "Problem", disabled: ["foo"], sections: [getSnapshot(section)] });
     const stores = createStores({ unit, investigation, problem });
     expect(isFeatureSupported(stores, "foo")).toBe(false);
     expect(isFeatureSupported(stores, "foo", "introduction")).toBe(true);

@@ -3,6 +3,8 @@ import "./jxg";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { assign, find, values } from "lodash";
 
+const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
+
 export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
@@ -62,17 +64,30 @@ function combineProperties(domElementID: string, defaults: any, changeProps: any
   return assign(defaults, otherProps, overrides);
 }
 
+function getCanvasScale(eltOrId: string | HTMLElement | null) {
+  let elt = typeof eltOrId === "string"
+              ? document.getElementById(eltOrId)
+              : eltOrId;
+  for ( ; elt != null; elt = elt.parentElement) {
+    if (kScalerClasses.some(_class => elt?.classList.contains(_class))) {
+      const transform = getComputedStyle(elt).transform;
+      const match = transform && /(scale|matrix)\((.+)\)/.exec(transform);
+      return match && match[2] ? parseFloat(match[2]) : 1;
+    }
+  }
+  return 1;
+}
+
 function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const elt = document.getElementById(domElementID);
-  let eltBounds = elt && elt.getBoundingClientRect();
-  if (!eltBounds || !(eltBounds.width > 0) || !(eltBounds.height > 0)) {
-    eltBounds = { width: kGeometryDefaultWidth, height: kGeometryDefaultHeight } as ClientRect;
-  }
+  const eltBounds = elt?.getBoundingClientRect();
+  const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
+  const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
   const { boundingBox } = changeProps;
-  const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
+  const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
-  const xMax = xMin + eltBounds.width / unitX;
-  const yMax = yMin + eltBounds.height / unitY;
+  const xMax = xMin + eltWidth / unitX;
+  const yMax = yMin + eltHeight / unitY;
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
@@ -86,26 +101,26 @@ export function guessUserDesiredBoundingBox(board: JXG.Board) {
   return [xMin + xBufferRange, yMax - yBufferRange, xMax - xBufferRange, yMin + yBufferRange];
 }
 
-function getAxisUnitsFromProps(changeProps?: JXGProperties) {
+function getAxisUnitsFromProps(changeProps?: JXGProperties, scale = 1) {
   const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
   const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
-  return [unitX, unitY];
+  return [unitX * scale, unitY * scale];
 }
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
-    const defaults = {
-            keepaspectratio: true,
-            showCopyright: false,
-            showNavigation: false,
-            minimizeReflow: "none"
-          };
-    const changeProps = properties && properties as JXGProperties;
-    const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
-    // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-    const overrides = { axis: false, keepaspectratio: unitX === unitY };
-    const props = combineProperties(domElementId, defaults, changeProps, overrides);
-    const board = JXG.JSXGraph.initBoard(domElementId, props);
-    return board;
+  const defaults = {
+          keepaspectratio: true,
+          showCopyright: false,
+          showNavigation: false,
+          minimizeReflow: "none"
+        };
+  const changeProps = properties && properties as JXGProperties;
+  const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
+  // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
+  const overrides = { axis: false, keepaspectratio: unitX === unitY };
+  const props = combineProperties(domElementId, defaults, changeProps, overrides);
+  const board = JXG.JSXGraph.initBoard(domElementId, props);
+  return board;
 }
 
 function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: JXG.BoundingBox) {
@@ -158,7 +173,8 @@ export const boardChangeAgent: JXGChangeAgent = {
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
     const updatedBoundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
-    const [unitX, unitY] = getAxisUnitsFromProps(props);
+    const scale = getCanvasScale(board ? board.container : boardDomId as string);
+    const [unitX, unitY] = getAxisUnitsFromProps(props, scale);
     const axes = addAxes(board, unitX, unitY, updatedBoundingBox);
     return [board, ...axes];
 },

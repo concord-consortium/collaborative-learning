@@ -12,9 +12,10 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
-import { JXGChange, ILinkProperties, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
+import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
+        } from "../../../models/tools/geometry/jxg-changes";
 import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
-import { getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
+import { getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
         } from "../../../models/tools/geometry/jxg-polygon";
 import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
@@ -27,14 +28,16 @@ import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { assign, castArray, debounce, each, filter, find, keys, size as _size, values } from "lodash";
+import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle,
+        size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
-  handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
+        handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
-import MovableLineDialog from "./movable-line-dialog";
 import AxisSettingsDialog from "./axis-settings-dialog";
+import LabelSegmentDialog from "./label-segment-dialog";
+import MovableLineDialog from "./movable-line-dialog";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
@@ -47,7 +50,12 @@ export interface IProps extends IGeometryProps {
   onUpdateToolbar: () => void;
 }
 
-interface IState extends SizeMeProps {
+// cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P]
+};
+
+interface IState extends Mutable<SizeMeProps> {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;
@@ -59,6 +67,7 @@ interface IState extends SizeMeProps {
   redoStack: string[][];
   selectedComment?: JXG.Text;
   selectedLine?: JXG.Line;
+  showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
   axisSettingsOpen: boolean;
 }
@@ -219,6 +228,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {
+        handleArrows: this.handleArrowKeys,
         handleCut: this.handleCut,
         handleCopy: this.handleCopy,
         handlePaste: this.handlePaste,
@@ -228,7 +238,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleRedo: this.handleRedo,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleCreateComment: this.handleCreateComment
+        handleCreateComment: this.handleCreateCommentOrLabel
       };
       onSetActionHandlers(handlers);
     }
@@ -379,6 +389,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       this.renderCommentEditor(),
       this.renderLineEditor(),
       this.renderSettingsEditor(),
+      this.renderSegmentLabelDialog(),
       <div id={this.elementId} key="jsxgraph"
           className={classes}
           ref={elt => this.domElement = elt}
@@ -438,6 +449,34 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private renderSegmentLabelDialog() {
+    const content = this.getContent();
+    const { board, showSegmentLabelDialog } = this.state;
+    if (board && showSegmentLabelDialog) {
+      const segment = content.getOneSelectedSegment(board);
+      const points = content.selectedObjects(board).filter(obj => isPoint(obj));
+      const polygon = segment && getAssociatedPolygon(segment);
+      if (!polygon || !segment || (points.length !== 2)) return;
+      const handleClose = () => this.setState({ showSegmentLabelDialog: false });
+      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) =>
+                            {
+                              this.handleLabelSegment(poly, pts, labelOption);
+                              handleClose();
+                            };
+      return (
+        <LabelSegmentDialog
+          key="editor"
+          board={board}
+          polygon={polygon}
+          points={points as [JXG.Point, JXG.Point]}
+          isOpen={showSegmentLabelDialog}
+          onAccept={handleAccept}
+          onClose={handleClose}
+        />
+      );
+    }
+  }
+
   private renderRotateHandle() {
     const { board, disableRotate } = this.state;
     const selectedPolygon = board && !disableRotate && !this.props.readOnly
@@ -490,6 +529,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private initializeContent() {
     const content = this.getContent();
+    content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
@@ -557,6 +597,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
+    const { board } = this.state;
+    const selectedObjects = board && this.getContent().selectedObjects(board);
+    const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
+    const hasSelectedPoints = selectedPoints ? selectedPoints.length > 0 : false;
+    let dx = 0;
+    let dy = 0;
+    switch (keys) {
+      case "left":  dx = -kSnapUnit; break;
+      case "right": dx =  kSnapUnit; break;
+      case "up":    dy =  kSnapUnit; break;
+      case "down":  dy = -kSnapUnit; break;
+    }
+    if (!e.repeat && hasSelectedPoints && (dx || dy)) {
+      const nudge = () => this.moveSelectedPoints(dx, dy);
+      (throttle(nudge, 250))();
+    }
+    return hasSelectedPoints;
+  }
+
   private handleToggleVertexAngle = () => {
     const { board } = this.state;
     const selectedObjects = board && this.getContent().selectedObjects(board);
@@ -607,6 +667,25 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ axisSettingsOpen: false });
   }
 
+  private handleCreateCommentOrLabel = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (board) {
+      // Currently, we don't allow commenting of polygon edges because the commenting feature
+      // requires that objects have persistent/unique IDs, but polygon edges don't have such
+      // IDs because their IDs are generated by JSXGraph. We take advantage of this to show
+      // the segment label dialog when the "comment" button is pressed and a segment is selected.
+      // If we ever support commenting on polygon segments, then another UI will be required.
+      const segment = content.getOneSelectedSegment(board);
+      if (segment) {
+        this.setState({ showSegmentLabelDialog: true });
+      }
+      else {
+        this.handleCreateComment();
+      }
+    }
+  }
+
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -627,6 +706,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.setState({ selectedComment: activeComment });
       }
     }
+  }
+
+  private handleLabelSegment =
+            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => {
+    this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
   }
 
   private handleOpenAxisSettings = () => {
@@ -837,7 +921,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // select newly pasted points
         if (newPointIds.length) {
           content.deselectAll(board);
-          content.selectObjects(newPointIds);
+          content.selectObjects(board, newPointIds);
         }
       }
       return true;
@@ -937,6 +1021,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 }
               });
               this.updateImageUrl(contentUrl);
+              if (this.props.size.height && image.height! > this.props.size.height) {
+                this.props.onRequestRowHeight(this.props.model.id, image.height!);
+              }
             });
         }
     }
@@ -1057,10 +1144,29 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
-  private beginDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement) {
+  private moveSelectedPoints(dx: number, dy: number) {
+    this.beginDragSelectedPoints();
+    if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy])) {
+      const { board } = this.state;
+      const content = this.getContent();
+      if (board) {
+        Object.keys(this.dragPts || {})
+              .forEach(id => {
+                const elt = board.objects[id];
+                if (elt && content.isSelected(id)) {
+                  board.updateInfobox(elt);
+                }
+              });
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private beginDragSelectedPoints(evt?: any, dragTarget?: JXG.GeometryElement) {
     const { board } = this.state;
     const content = this.getContent();
-    if (board && !hasSelectionModifier(evt)) {
+    if (board && !hasSelectionModifier(evt || {})) {
       content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj as JXG.Point : undefined;
@@ -1074,7 +1180,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
+  private dragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined, usrDiff: number[]) {
     const { board } = this.state;
     if (!board) return;
 
@@ -1092,15 +1198,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     });
 
-    const affectedObjects = keys(this.dragPts).map(id => board.objects[id]);
+    const affectedObjects = _keys(this.dragPts).map(id => board.objects[id]);
     updateVertexAnglesFromObjects(affectedObjects);
   }
 
-  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement, usrDiff: number[]) {
+  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined, usrDiff: number[]) {
     const { board } = this.state;
     const content = this.getContent();
-    if (!board || !content) return;
+    if (!board || !content) return false;
 
+    let didDragPoints = false;
     each(this.dragPts, (entry, id) => {
       const obj = board.objects[id];
       if (obj) {
@@ -1122,12 +1229,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const newUsrCoords = JXG.Math.Statistics.add(entry.initial.usrCoords, usrDiff) as number[];
             ids.push(id);
             props.push({ position: newUsrCoords });
+            didDragPoints = true;
           }
         }
       });
 
       this.applyChange(() => content.updateObjects(board, ids, props));
     }
+
+    return didDragPoints;
   }
 
   private endDragText(evt: any, dragTarget: JXG.Text, dragEntry: IDragPoint) {
@@ -1284,7 +1394,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // click on selected element - deselect if appropriate modifier key is down
         if (geometryContent.isSelected(id)) {
           if (hasSelectionModifier(evt)) {
-            geometryContent.deselectElement(id);
+            geometryContent.deselectElement(board, id);
           }
 
           if (isMovableLineControlPoint(point)) {
@@ -1297,7 +1407,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (!hasSelectionModifier(evt)) {
             geometryContent.deselectAll(board);
           }
-          geometryContent.selectElement(id);
+          geometryContent.selectElement(board, id);
         }
 
         if (isPointDraggable) {
@@ -1372,9 +1482,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (!hasSelectionModifier(evt)) {
           content.deselectAll(board);
         }
-        vertices.forEach(vertex => content.selectElement(vertex.id));
+        vertices.forEach(vertex => content.selectElement(board, vertex.id));
 
-        content.selectElement(line.id);
+        content.selectElement(board, line.id);
       }
       // we can't prevent JSXGraph from dragging the edge, so don't deselect
       // else if (hasSelectionModifier(evt)) {
@@ -1480,11 +1590,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       //   }
       // }
       if (selectPolygon) {
-        geometryContent.selectElement(polygon.id);
+        geometryContent.selectElement(board, polygon.id);
         each(polygon.ancestors, point => {
           const pt = point as JXG.Point;
           if (board && !inVertex) {
-            geometryContent.selectElement(pt.id);
+            geometryContent.selectElement(board, pt.id);
           }
         });
       }
@@ -1559,7 +1669,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             content.deselectAll(board);
           }
 
-          content.selectElement(text.id);
+          content.selectElement(board, text.id);
         }
       }
     };

@@ -2,7 +2,7 @@ import * as Adapter from "enzyme-adapter-react-16";
 import * as React from "react";
 
 import { configure, mount } from "enzyme";
-
+import { Provider } from "mobx-react";
 import { CanvasComponent } from "./canvas";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { DocumentContentComponent } from "./document-content";
@@ -43,7 +43,10 @@ describe("Canvas Component", () => {
       })
     });
     const stores = createStores();
-    const wrapper = mount(<CanvasComponent context="test" document={document} stores={stores} readOnly={true} />);
+    const wrapper = mount(
+      <Provider stores={stores}>
+        <CanvasComponent context="test" document={document} readOnly={true} />
+      </Provider>);
     expect(wrapper.find(DocumentContentComponent).length).toEqual(1);
     expect(wrapper.find(".text-tool").exists()).toBe(true);
   });
@@ -54,7 +57,10 @@ describe("Canvas Component", () => {
       text: "test"
     }));
     const stores = createStores();
-    const wrapper = mount(<CanvasComponent context="test" content={content} stores={stores} readOnly={true} />);
+    const wrapper = mount(
+      <Provider stores={stores}>
+        <CanvasComponent context="test" content={content} readOnly={true} />
+      </Provider>);
     expect(wrapper.find(DocumentContentComponent).length).toEqual(1);
     expect(wrapper.find(".text-tool").exists()).toBe(true);
   });

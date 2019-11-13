@@ -14,6 +14,7 @@ export interface IMenuItemFlags {
   renameAttribute?: boolean;
   removeAttribute?: boolean;
   removeCases?: boolean;
+  unlinkGeometry?: boolean;
 }
 
 interface IProps {
@@ -29,6 +30,8 @@ interface IProps {
   onNewCase: () => void;
   onRemoveAttribute: (id: string) => void;
   onRemoveCases: (ids: string[]) => void;
+  onGetLinkedGeometries: () => string[];
+  onUnlinkGeometry: () => void;
   onSampleData?: (name: string) => void;
 }
 
@@ -228,6 +231,10 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     }
   }
 
+  private handleUnlinkGeometry = () => {
+    this.props.onUnlinkGeometry && this.props.onUnlinkGeometry();
+  }
+
   private renderAttributeSubMenuItems(onClick: (evt: React.MouseEvent<HTMLElement>,
                                                 attrID: string, name?: string) => void) {
     if (!this.props.dataSet || !this.props.dataSet.attributes.length) { return null; }
@@ -329,6 +336,18 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                               disabled={!this.getSelectedRowNodeCount()}
                             />
                           : null;
+    const linkedGeometryCount = this.props.onGetLinkedGeometries
+                                  ? this.props.onGetLinkedGeometries().length
+                                  : 0;
+    const unlinkGeometry = itemFlags.unlinkGeometry !== false
+                            ? <MenuItem
+                                icon="th-disconnect"
+                                text={`Unlink Geometry`}
+                                data-test={`unlink-geometry-menu-item`}
+                                onClick={this.handleUnlinkGeometry}
+                                disabled={!linkedGeometryCount}
+                              />
+                            : null;
     return (
       <Menu>
         {addColumn}
@@ -338,6 +357,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         {removeColumn}
         {removeRows}
         {updateExpression}
+        {unlinkGeometry}
       </Menu>
     );
   }

@@ -29,6 +29,26 @@
       "initials": "DY",
       "title": "Did You Know?",
       "placeholder": "Work area for\nDid You Know? section"
+    },
+     "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
   "lookingAhead": {
@@ -126,6 +146,175 @@
     ]
   },
   "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you launch a problem, there are up to four standard tabs corresponding to the curriculum:<ul><li>Introduction</li><li>Initial Challenge</li><li>What If ...?</li><li>Now What Do You Know?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You will find text, graphs, images and other kinds of content in the tabs. These can be dragged into your workspace. Try to drag this text into your workspace now. You can drag any kind of content found in tabs on either side of the workspace. This will let you use useful parts from problems, supports from your teacher, and work you share with your fellow students."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/workspaceHelp.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Images are handy for recording work you do on paper. You can make an image either by choosing the image tool and choosing a file from your computer, or you can drag an image from your file list or desktop on to the browser window. Try this now."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Click on <strong>tool buttons</strong> on the side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "To <strong>delete tiles</strong>, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you are ready to <strong>share work</strong> with your group, click the Group Share eye icon, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/graphdoc.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Note: Points are connected in the order they were made, which can lead, for example, to an unexpected hourglass shape as in the example above. If this is not the intended shape, simply drag the points to the desired shape."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        }
+      ],
+      "supports": []
+    },
     {
       "description": "Investigation 1",
       "ordinal": 1,
@@ -603,44 +792,10 @@
                       ]
                     }
                   },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
+                   {
                     "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-1, -1],
-                          "axisRange": [20, 20]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "point",
-                          "parents": [0, 5]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [12, 5]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [2, 7]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [15, 1]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [16, 6]
-                        },
-                        {
-                          "type": "point",
-                          "parents": [15, 7]
-                        }
-                      ]
+                    "type": "Image",
+                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
                     }
                   }
                 ]
@@ -770,7 +925,10 @@
                     {
                       "content": {
                         "type": "Text",
-                        "text": "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. Do the rules create scale drawings? That is, are the two figures similar?"
+                        "format": "html",
+                        "text": [
+                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. <em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
+                          ]
                       }
                     }
                 ]
@@ -825,7 +983,7 @@
                         {
                           "name": "Mug Wump x",
                           "type": "number",
-                          "values": [0, 2, 2, 3, 2, 5, 5, 6, 6, 8, 6, 2, 0]
+                          "values": [0, 2, 2, 3, 3, 5, 5, 6, 6, 8, 6, 2, 0]
                         },
                          {
                           "name": "Mug Wump y",
@@ -835,7 +993,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 400
+                      "height": 380
                     }
                   },
                   {
@@ -855,7 +1013,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 200
+                      "height": 180
                     }
                   },
                   {
@@ -875,7 +1033,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 150
+                      "height": 145
                     }
                   },
                    {
@@ -895,7 +1053,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 400
+                      "height": 100
                     }
                   },
                   {
@@ -911,16 +1069,10 @@
               },
               "supports": [
                 {
-                  "text": "To create the coordinates for Zug, what must you multiply the coordinates of Mug by?"
-                },
-                {
-                  "text": "Describe the shape of Mug."
-                },
-                {
-                  "text": "What measures help you identify the impostors?"
-                },
-                {
                   "text": "What features are the same about Mug and the others? What features are different?"
+                },
+                {
+                  "text": "What features do you consider when you decide two figures are similar or not?"
                 }
               ]
             },
@@ -933,7 +1085,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Marta’s Claim</strong>\nMarta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
+                        "<h3>Situation A. Marta’s Claim</h3>Marta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
                       ]
                     }
                   },
@@ -942,7 +1094,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Jacob’s Claim</strong>\nJacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
+                        "<h3>Situation B. Jacob’s Claim</h3>Jacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
                       ]
                     }
                   },
@@ -951,13 +1103,15 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. New Rules</strong>\nMake a rule that would create a figure similar to Lug."
+                        "<h3>Situation C. New Rules</h3>Make a rule that would create a figure similar to Lug."
                       ]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "Consider the rules of Mug, Zug, Lug, Bug, and Glug. Mug (x, y), Zug (2x, 2y), Lug (3x, y), Bug (3x, 3y), Glug (x, 3y). Who are similar to Mug? What feature do these rules have in common?"}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1006,13 +1160,13 @@
                   },
                   {
                     "layout": {
-                      "height": 160
+                      "height": 200
                     },
                     "content": {
                       "type": "Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-5, -5],
+                          "axisMin": [-1, -1],
                           "axisRange": [15, 15]
                         }
                       },
@@ -1086,10 +1240,10 @@
               },
               "supports": [
                 {
-                  "text": "What do you need to do to each x coordinate? y coordinate?"
+                  "text": "To predict what will happen to the hat with rules, recall the relationship between the rules to draw Zug, Lug, Bug, and Glug and its similarity in Problem 2.1."
                 },
                 {
-                  "text": "Does adding or subtracting a number to the x or y coordinate make a difference?"
+                  "text": "In Problem 2.1, how is a rule with adding or subtracting a number to the x or y coordinate different from a rule with multiplying a number?"
                 }
               ]
             },
@@ -1128,10 +1282,10 @@
               },
               "supports": [
                 {
-                  "text": "How did adding to the coordinates change the hat?"
+                  "text": "What made the hat get smaller?"
                 },
                 {
-                  "text": "What made the hat get smaller?"
+                  "text": "How did adding to the coordinates change the hat?"
                 },
                 {
                   "text": "What did subtracting do to the hat?"
@@ -1153,14 +1307,7 @@
                   }
                 ]
               },
-              "supports": [
-                {
-                  "text": "If figures are similar, what changes and what stays the same?"
-                },
-                {
-                  "text": "How can you use the rule to predict the length of a corresponding side of the image?"
-                }
-              ]
+              "supports": [ ]
             }
           ],
           "supports": []
@@ -1608,10 +1755,7 @@
               },
               "supports": [
                 {
-                  "text": "Have you considered the corresponding angles?"
-                },
-                {
-                  "text": "How might you compare corresponding side lengths?"
+                  "text": "When you identify pairs of rectangles or triangles, what measurements do you compare? Angles, Side lengths, Perimeters, Areas, etc."
                 }
               ]
             },
@@ -1624,7 +1768,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In Situations A, B, and C Marta and Zack make claims. \n<strong>Situation A. Finding Scale Factors</strong>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
+                        "In Situations A, B, and C Marta and Zack make claims. <h3>Situation A. Finding Scale Factors</h3>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
                       ]
                     }
                   },
@@ -1633,7 +1777,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Predicting Perimeters in Similar Figures</strong>\nMarta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
+                        "<h3>Situation B. Predicting Perimeters in Similar Figures</h3>Marta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
                       ]
                     }
                   },
@@ -1642,7 +1786,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. Determining Similarity</strong>\nZack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
+                        "<h3>Situation C. Determining Similarity</h3>Zack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
                       ]
                     }
                   },
@@ -1657,7 +1801,10 @@
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "How can you find the scale factor if you used rubber bands to make similar figures?"},
+                {"text": "How can you find the scale factor if you used coordinate graphs to make similar figures?"}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1716,7 +1863,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In Shapes and Designs, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called tessellations."
+                        "In <em>Shapes and Designs</em>, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
                       ]
                     }
                   },
@@ -1737,17 +1884,17 @@
                   },
                   {
                     "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "You can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
                     }
                   },
                   {
@@ -1764,7 +1911,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "A shape is a rep-tile if you can put together congruent (same size and shape) copies of the shape to make a larger, similar shape. The congruent copies may be rotated in order to fit together. A square is a rep-tile, but a regular hexagon is not."
+                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile."
                       ]
                     }
                   }
@@ -1778,10 +1925,30 @@
                 "tiles": [
                   {
                     "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Quadrilaterals",
+                          "type": "string",
+                          "values": [ "A non-square rectangle", "A non-rectangular parallelogram"]
+                        },
+                         {
+                          "name": "Triangles",
+                          "type": "string",
+                          "values": ["A right triangle", "An isosceles triangle"]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 150
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Sketch or use your Shape Set to make several copies of these shapes: "
+                        "• Which shapes are rep-tiles? Make a sketch to show how the copies fit together."
                       ]
                     }
                   },
@@ -1790,7 +1957,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Quadrilaterals: a non-square rectangle, a non-rectangular parallelogram, and a trapezoid"
+                        "• For the shapes that rep-tile, what is the scale factor from the original figure to its image? Explain your reasoning."
                       ]
                     }
                   },
@@ -1799,7 +1966,16 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Triangles: a right triangle, an isosceles triangle, and a scalene triangle"
+                        "• How does the perimeter of the larger figure relate to the perimeter of the original figure?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• How does the area of the larger figure relate to the area of the original figure?"
                       ]
                     }
                   },
@@ -2057,7 +2233,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What if you extend one of the rep-tile patterns you drew in the Initial Challenge. You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. Show how the copies fit together."
+                        "<h3>Situation A. Extending a Rep-tile</h3> What if you extend one of the rep-tile patterns you drew in the Initial Challenge? You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. <ol><li>Show how the copies fit together.</li><li>What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?</li></ol>"
                       ]
                     }
                   },
@@ -2066,7 +2242,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?"
+                        "<h3>Situation B. Making Rep-tiles </h3>Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
                       ]
                     }
                   },
@@ -2075,7 +2251,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "2. Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                        "<h3>Situation C. Scale Factors and Rep-tiles</h3>It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and its image?"
                       ]
                     }
                   },
@@ -2084,7 +2260,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "3. It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and the image?"
+                        "<h3>Situation D. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). Explain why the smaller shapes are similar to the original."
                       ]
                     }
                   },
@@ -2093,31 +2269,106 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "4. Tomoko claims that all triangles are rep-tiles. Is this true? Explain."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "5. Make a sketch of a quadrilateral. Divide the quadrilateral into four congruent smaller quadrilaterals. Explain why the smaller quadrilaterals are similar to the original."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "6. Make a sketch of a triangle. Divide the triangle."
+                        "<h3>Situation E. Claims About Rep-tiles</h3>Tomoko claims that all triangles are rep-tiles. Is this true? Explain. Kazuko claims that if you want to show that two triangles with the same angle measures are similar, you can use a unit rep-tile. She used an equilateral triangle whose side lengths are one unit. Does her strategy work? Explain. "
                       ]
                     }
                   }
-                ],
-                "supports": []
-              }
+                ]
+              },
+              "supports": [
+                {
+                  "type": "document",
+                  "content": {
+                    "tiles": [
+                      {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "What is the scale factor from the smaller square to the larger square? "
+                            ]
+                        }
+                      },
+                      {
+                        "layout": {
+                          "height": 200
+                        },
+                        "content": {
+                          "type":"Geometry",
+                          "objects": [
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [1, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 2],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [1, 2],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [4, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 4],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [4, 4],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -2128,14 +2379,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How do rep-tiles show the relationship between the scale factor and the area of similar shape?"
+                        "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area?"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_500w.png"
                     }
                   }
                 ],
@@ -2149,7 +2394,7 @@
           "description": "Problem 3.2",
           "ordinal": 2,
           "title": "3.2 Designing Under Constraints",
-          "subtitle": "Scale Factors and Similar Shapes",
+          "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
           "sections": [
             {
               "type": "introduction",
@@ -2160,14 +2405,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The scale factor from one figure to a similar figure gives you information about how the side lengths, perimeters, and areas of the figures are related. In Problem 3.2, you will use what you learned to draw scale drawings."
+                        "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
                     }
                   }
                 ],
@@ -2178,6 +2417,21 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.<ul><li>Rectangle P. The scale factor from Rectangle A to Rectangle P is 2.5.</li></li>Rectangle Q. The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li>Rectangle R. The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+                      ]
+                    }
+                  },
                   {
                     "layout": {
                       "height": 260
@@ -2252,61 +2506,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Constraints for A: For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. The scale factor from Rectangle A to the new rectangle J is 2.5."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. The area of the new rectangle K is 1/4 the area of Rectangle A."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. The perimeter of the new rectangle L is three times the perimeter of Rectangle A."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Constraints for B: For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. The area of the new triangle W is 16 times the area of Triangle B."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. The scale factor from Triangle B to the new triangle X is 1/2."
+                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li>Triangle X. The area of Triangle X is 16 times the area of Triangle B.</li><li> Triangle Y. The scale factor from Triangle B to Triangle X is 1/2. </li><li> Triangle Z. The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
                       ]
                     }
                   }
@@ -2314,13 +2514,13 @@
               },
               "supports": [
                 {
-                  "text": "Can using corresponding sides help?"
+                  "text": "How do you find the scale factor between two similar figures?"
                 },
                 {
-                  "text": "Can using corresponding angles help?"
+                  "text": "If the scale factor from one shape to the other is 2, how do corresponding sides, perimeters, areas, and angles change from the original figure to its image?"
                 },
                 {
-                  "text": "What is the scale factor from one shape to the other?"
+                  "text": "What is the area of Rectangle A? What is the perimeter of Rectangle A?"
                 }
               ]
             },
@@ -2333,7 +2533,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What if you are given the following designs for similar figures."
+                        "<h3>Situation A. Similar Rectangles</h3>These two rectangles are similar. Is it possible to find the length of side AD? Explain your reasoning."
                       ]
                     }
                   },
@@ -2342,7 +2542,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Is it possible to find the length of side AD? Explain."
+                        "<h3>Situation B. Similar Triangles</h3>These two triangles are similar. Find all the missing side lengths and angles. Explain your reasoning."
                       ]
                     }
                   },
@@ -2390,16 +2590,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How can you use scale factors"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "- to draw similar figures? \n\n- to find missing information about angle measures? Areas? Perimeters?"
+                        "How can you use scale factors<ul><li>to draw similar figures?</li><li>to find missing information about angle measures? Areas? Perimeters?</li></ul>"
                       ]
                     }
                   }
@@ -2425,37 +2616,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Durell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The angles that look like right angles are right angles."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The triangles in the diagram are similar."
+                        "In this problem you will use similar triangles to find the distance across a river."
                       ]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [ ]
             },
             {
               "type": "initialChallenge",
@@ -2466,18 +2633,36 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
+                        "Durrell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, <strong>nested triangles</strong>, which are triangles that share a common angle.\n\nThe angles that look like right angles are right angles. The triangles in the diagram are similar."
                       ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "•  What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
                     }
                   }
                 ]
               },
               "supports": [
                 {
-                  "text": "What shapes do you see in the diagram?"
+                  "text": "What shapes do you see in the diagram? Are they similar? Why?"
                 },
                 {
-                  "text": "What measurements do we know?"
+                  "text": "What measurements in the diagram might be useful?"
+                },
+               {
+                  "text": "How can corresponding sides and angles in two similar triangles help find the missing measurements?"
                 }
               ]
             },
@@ -2511,7 +2696,9 @@
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "How is the new diagram in the <em>What If?</em> section different from the diagram in the <em>initialChallenge</em>? How is it the same?"}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -2531,64 +2718,11 @@
               "supports": []
             }
           ]
-        },
-        {
-          "description": "Reflection 3.4",
-          "ordinal": 4,
-          "title": "3.MR Mathematical Reflection 3",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Mathematical Reflection 3"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this Investigation, we explored similar polygons, scale factors and measures related to similar figures."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Now what do you know about similarity?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [
-              ]
-            }
-          ]
         }
       ],
       "supports": []
-    },
-     {
+    }, 
+    {
       "description": "Investigation 4",
       "ordinal": 4,
       "title": "Similarity and Ratios",
@@ -2634,7 +2768,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?"
+                        "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
                       ]
                     }
                   }, {
@@ -2642,18 +2776,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the Comparing Bits and Pieces unit, you used ratios to describe and compare quantities. A ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8."
+                        "Recall that a ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8.”\n\nThis table gives the ratios of height to width for the images."
                       ]
                     }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "This table gives the ratios of height to width for the images."
-                      ]
-                    }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
@@ -2663,7 +2790,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What do you notice about the height-to-width ratios? The comparisons “10 to 8” and “5 to 4” are equivalent ratios. Equivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal."
+                        "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. You can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or you could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
                       ]
                     }
                   }, {
@@ -2671,20 +2798,13 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "For this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal. Is this always true?"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+                        "<em>What information does each fraction represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal.\n\nYou know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios of adjacent side lengths within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
                       ]
                     }
                   }
@@ -2699,7 +2819,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Rectangles"
+                        "For each set of figures, which are similar? Why?\n\nIf two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
                       ]
                     }
                   }, {
@@ -2709,37 +2829,13 @@
                     }
                   }, {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Triangles"
-                      ]
-                    }
-                  }, {
-                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
                     }
                   }, {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Parallelograms"
-                      ]
-                    }
-                  }, {
-                    "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "For each set of shapes, which are similar? Why? If two figures are similar, how does the ratio of adjacent side lengths of one figure compare to the corresponding ratio of side lengths of the other figure?"
-                      ]
                     }
                   }
                 ]
@@ -2755,7 +2851,8 @@
                   "text": "How are rectangles different from other parallelograms?"
                 }
               ]
-            }, {
+            }, 
+            {
               "type": "whatIf",
               "content": {
                 "tiles": [
@@ -2764,12 +2861,43 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Find the scale factor from one figure to a similar figure. What information does the scale factor give you? \nn2.How does the scale factor relate to the proportions of the ratios of adjacent sides? \n\n3. Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why? \n\n4. Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain. \n\n5. Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal. Is this true? Explain."
+                        "<h3>Situation A. Using the Scale Factor</h3><ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Isaiah, Noah, and Anna’s Claims</h3><ol><li>Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why?</li><li>Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain.</li><li>Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal? Is that true? Explain.</li></ol>"
                       ]
                     }
                   }
                 ]
-              }
+              },
+              "supports" : [
+                {
+                  "text": "In the Initial Challenge, can you find a pair of similar figures that satisfies each person’s claims?"
+                }
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What information does the ratio of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports" : []
             }
           ]
         }, {
@@ -2787,7 +2915,22 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Similar figures are useful in determining missing measurements such as finding the distance across a river without crossing the river."
+                        "In the last problem you explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IN_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ratios of corresponding side lengths across figures</strong>\n\nRatio of height to height is 9 cm to 3 cm or 9cm/3cm = 3\nRatio of width to width is 4.5 cm to 1.5 cm or 4.5cm/1.5cm = 3 \n\nNote that the ratio of corresponding side lengths across the two rectangles are also equal. And this ratio is the scale factor between the two figures.\n\nSimilar figures are useful in determining missing measurements. In Problem 3.3, you used similar figures to find the distance across a river without crossing the river. In this problem, you will explore finding missing measures."
                       ]
                     }
                   }
@@ -2802,26 +2945,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The pairs of figures in A, B, and C are similar."
+                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct.</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
                       ]
                     }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. Find the missing side lengths in each pair. Explain how you know your answers are correct."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. What are the missing angle measures for each parallelogram?"
-                      ]
-                    }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
@@ -2831,15 +2959,26 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_36_Q2B_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_37_Q2C_350w.png"
                     }
-                  }
+                  },
+                  {
+                    "layout": {
+                      "height": 400
+                    },
+                    "content": 
+                   {"type":"Geometry","changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}","{\"operation\":\"create\",\"properties\":{\"id\":\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,18],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[13,17.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f2aafbcc-1804-4e0d-9604-ea484480310d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3,19.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"256679af-d72d-4b5c-b7aa-f6c90e3262c4\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"f2aafbcc-1804-4e0d-9604-ea484480310d\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,6.300000000000001]}","{\"operation\":\"create\",\"properties\":{\"id\":\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[1.1,1.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3.7,0.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.7,5.2]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d067f66c-ba4a-4334-a356-ab4430be843c\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a88e59a8-8b96-433e-b7ed-23dbe0d93852\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[5.817308417645462,0.6483504047306452]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9456f6f0-c71f-4091-a730-db092f41350d\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.669500594976327,0.6624620872369071]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18.193215922236906,6.8494638029196295]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[8.333707570993896,6.769491261270044]}","{\"operation\":\"create\",\"properties\":{\"id\":\"e80894ff-e77e-4cee-952e-718e09ad24c6\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c34e47b3-8769-465d-9caf-5c09194511e3\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"9456f6f0-c71f-4091-a730-db092f41350d\",\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[3.5,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c134b506-a474-477e-badd-6f3284e5f710\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[5.1000000000000005,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"738bc31d-087d-4249-bbf9-b1584656471b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"c134b506-a474-477e-badd-6f3284e5f710\",\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[8,14]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[8,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[18,13.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a72286d7-fac7-40a4-8e43-996de471d3d2\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"758ead0e-0d33-4daf-a707-622da638e34b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\"],\"endBatch\":true}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[15.06188023264823,20.20345894829196]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2c3e3378-b10b-4c44-9feb-6924de25d960\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"08cf2680-1c94-4f1c-9296-6ec2b779d23b\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"endBatch\":true}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,5.926598035131802,0.9762192571896611]},{\"position\":[1,15.778790212462667,0.990330939695923]},{\"position\":[1,18.302505539723246,7.177332655378645]},{\"position\":[1,8.442997188480236,7.09736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\"],\"properties\":[{\"position\":[1,1,1.8]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"snapToGrid\":false,\"position\":[3.0603141205063,11.865891487995759]},{\"snapToGrid\":false,\"position\":[3.0398895801024057,10.26602185638533]},{\"snapToGrid\":false,\"position\":[5.540962413268945,10.334100363979896]},{\"snapToGrid\":false,\"position\":[5.560110419897596,11.833978143614674]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a68b7cff-812f-41d0-b3fb-429c5547ba51\"],\"properties\":[{\"position\":[1,18.247860730980076,7.013398229149137]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\"],\"properties\":[{\"position\":[1,15.034984210144865,15.004098305593702]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a07874b-eeea-4853-a4df-03a995ad782e\"],\"properties\":[{\"position\":[1,15.00723542390506,20.20345894829196]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.595607222012115,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.76589148799576]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9603141205063004,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"position\":[1,5.490710382513662,11.90928961748634]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.486317604525776,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9510245030199616,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"c134b506-a474-477e-badd-6f3284e5f710\"],\"properties\":[{\"position\":[1,3.0000000000000004,10.3]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[28.087431693989064,8.688524590163937],\"properties\":{\"id\":\"ace52739-3491-4954-a913-ba153d6abc19\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"],\"properties\":[{\"position\":[1,28.1,8.8]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.841734885533623,11.811246679252589]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[1.5300546448087426,9.890710382513664],\"properties\":{\"id\":\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"],\"properties\":[{\"position\":[1,1.6,9.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"738bc31d-087d-4249-bbf9-b1584656471b\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.918032786885245,10.000000000000004],\"properties\":{\"id\":\"761a73cc-640c-4786-a55f-910f1343ef11\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.100000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.000000000000002]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.55191256830601,10.000000000000004],\"properties\":{\"id\":\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.7,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.6,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.5,10]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.4426229508196715,12.568306010928964],\"properties\":{\"id\":\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.972677595628414,12.677595628415304],\"properties\":{\"id\":\"5613b304-98e4-4ce8-8495-2917bc1ffd84\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.1000000000000005,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.55464480874317,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144865,14.949453496850532]},{\"position\":[1,15.00723542390506,20.14881413954879]},{\"position\":[1,15.987508722202124,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,16.073235576265084,14.949453496850532]},{\"position\":[1,16.04548679002528,20.14881413954879]},{\"position\":[1,17.025760088322343,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"],\"properties\":[{\"position\":[1,15.136612021857923,15.081967213114757]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144867,15.004098305593699]},{\"position\":[1,15.007235423905062,20.203458948291956]},{\"position\":[1,15.987508722202126,19.206639973262487]}]}","{\"operation\":\"create\",\"target\":\"polygon\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":{\"id\":\"229fdb45-3397-46be-88a9-6a811cff5c4c\"}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5,12.5]}]}","{\"operation\":\"create\",\"target\":\"vertexAngle\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":{\"id\":\"0c35873c-4134-4536-a3cd-0c93dd9e557f\",\"radius\":1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[26.065573770491802,10.491803278688527],\"properties\":{\"id\":\"a266b80a-c47a-4b0c-8429-31b9d1155e59\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a266b80a-c47a-4b0c-8429-31b9d1155e59\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"],\"properties\":[{\"position\":[1,18,14]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,8.442997188480236,6.99736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.8762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[32.349726775956285,10.819672131147543],\"properties\":{\"id\":\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[56.994535519125684,11.912568306010932],\"properties\":{\"id\":\"82b37f05-3244-4ce3-8750-b393d40ed41d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"],\"properties\":[{\"position\":[1,56.900000000000006,11.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"]}"]}
+                  }  
                 ]
               },
-              "supports" : []
+              "supports" : [
+                { "text": "What are the corresponding side lengths and corresponding angles?" },
+                { "text": "What are the scale factors or the ratios of adjacent side lengths?" }
+              ]
             }, {
               "type": "whatIf",
               "content": {
@@ -2849,7 +2988,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The two figures are similar. Each side length is in centimeters. "
+                        "<h3>Situation A. New Figures</h3>The two figures are similar. Each side length is in centimeters.<ol><li>Find the value of x. Explain how you found it.</li><li>Find the value of y. Explain how you found it.</li></ol>"
                       ]
                     }
                   }, {
@@ -2857,41 +2996,22 @@
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Find the value x. Explain how you found it."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. Find the value y. Explain."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. If you know the perimeter of one figure, how can you find the area of the other figure? Is there another way? Explain."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4. If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain."
+                        "<h3>Situation B. Predicting Perimeters and Areas</h3><ol><li>If you know the perimeter of one figure, how can you find the perimeter of the other figure? Is there another way? Explain.</li><li>If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain.</li></ol>"
                       ]
                     }
                   }
                 ]
-              }
+              },
+              "supports": [
+                { "text": "(1)  How do you know if these two figures are similar?"}, 
+                { "text": "Would the scale factors or the ratios of adjacent side lengths help you find the missing values?"}
+              ]
             }, {
               "type": "nowWhatDoYouKnow",
               "content": {
@@ -2901,7 +3021,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "If two shapes are similar, how can you use information about the shapes to find unknown side lengths, perimeters, areas, or angle measures?"
+                        "If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?"
                       ]
                     }
                   }
@@ -2928,37 +3048,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you found two ways to find missing lengths in pairs of similar figures."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Scale Factor Method: Use the scale factor from one figure to the other."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "OR"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Ratios of Side Lengths within Figures Method: Use the ratios of adjacent side lengths within each figure."
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths within each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
                       ]
                     }
                   }
                 ]
               }
-            }, {
+            }, 
+            {
               "type": "initialChallenge",
               "content": {
                 "tiles": [
@@ -2967,15 +3064,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly."
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram below shows two triangles."
+                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
                       ]
                     }
                   }, {
@@ -2988,7 +3077,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Examine the diagram of the shadow method. How can you use this method to find the height of the Statue of Liberty? What is the height?"
+                        "Examine the diagram of the shadow method. \nWhy are the measures of the corresponding angles of the large triangle and the small triangle equal? \nHow can you use this method to find the height of the Statue of Liberty? What is the height?"
                       ]
                     }
                   }, {
@@ -2996,14 +3085,17 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "If the sun is shining, try the shadow method to find the height of an object outside your building. You will need \n\n* A building, tree, or other object whose height you want to measure \n\n* A meter stick \n\n* The length of the shadow of the stick’s shadow \n\n* The length of the shadow of the building’s shadow"
+                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the stick’s shadow</li><li>The length of the shadow cast by the building, tree, or other object</li></ul>"
                       ]
                     }
                   }
                 ]
               },
-              "supports" : []
-            }, {
+              "supports" : [
+                {"text": "Are the two triangles similar? Why?"}
+              ]
+            }, 
+            {
               "type": "whatIf",
               "content": {
                 "tiles": [
@@ -3012,7 +3104,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. When you use the shadow method, what problems might affect the accuracy of your answers?"
+                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet long. How tall is the tree?"
                       ]
                     }
                   }, {
@@ -3020,18 +3112,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "2. A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow 4.5 feet length. How tall is the tree?"
+                        "<h3>Situation B. Using the &quot;Mirror Method&quot;</h3> Another method for finding heights of objects is called the “mirror method.” Ashton’s class experimented with the mirror method to understand how it worked by using it to measure the height of their principal. They knew from science class that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). Therefore, the two triangles are similar."
                       ]
                     }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. Ashton’s class used the mirror method to measure heights. The school principal visits Ashton’s class one day. Ashton uses the mirror method to estimate the principal’s height. This diagram shows the measurements he records."
-                      ]
-                    }
-                  }, {
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
@@ -3041,7 +3126,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "* Does this method work? Why?"
+                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li></ol>"
                       ]
                     }
                   }, {
@@ -3049,20 +3134,16 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "* What estimate should Ashton give for the principal’s height?"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4. What other ways have you used in this unit to create similar figures?"
+                        "<h3>Situation C. Creating Similar Figures</h3>Mario thought that the mirrors and shadows created similar figures. Is his claim correct? Explain. What other methods have you used in this unit to create similar figures?"
                       ]
                     }
                   }
                 ]
-              }
+              },
+              "supports": [ 
+                { "text": "Are the two triangles similar? Why?"},
+                { "text": "What are  the corresponding side lengths and corresponding angles?"}
+              ]
             }, {
               "type": "nowWhatDoYouKnow",
               "content": {
@@ -3080,14 +3161,23 @@
               }
             }
           ]
-        }, {
-          "description": "Reflection 4.4",
-          "ordinal": 4,
-          "title": "4.MR Mathematical Reflection 4",
+        }
+      ],
+      "supports": [
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
-              "type": "nowWhatDoYouKnow",
+              "type": "MathReflection1",
               "content": {
                 "tiles": [
                   {
@@ -3095,37 +3185,61 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Mathematical Reflection 4"
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
-                  },
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Investigation, we explored ways to use similar figures to find information about shapes."
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
-                  },
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Now what do you know about similarity?"
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
-                  },
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
-                  }
+                  } 
                 ]
               },
               "supports": [ ]

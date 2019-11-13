@@ -1,5 +1,59 @@
 # Changelog
 
+## Version 0.10.0 - released November 8, 2019
+
+- Support linked selection for linked geometry/table points
+- Add table menu item to unlink table from geometry tiles
+- Styles toolbar in text tool
+- Support labeling of polygon edges
+- Investigation 0 tutorial content
+- Numerous bug-fixes and minor enhancements
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 490,734 bytes | 11.8% |
+| index.js | 4,271,431 bytes | 1.0% |
+
+## Version 0.9.0 - released October 30, 2019
+
+- Workspace documents for each problem have separate sections with section headers
+- Improved tile placement heuristic for documents with sections
+- Teacher dashboard shows student progress through sections
+- Styled text in authored curriculum content
+- Stretching & Shrinking curriculum updates
+- Auto-size table columns on column label changes
+- Auto-scale geometry tile axes when a table is linked
+- Request taller geometry row on image drag if necessary
+- Geometry: arrow keys nudge selected points
+- Linked geometry/table icons
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 439,006 bytes | 4.1% |
+| index.js | 4,229,500 bytes | 2.5% |
+
+## Version 0.8.0 - released October 23, 2019
+
+- User documents associated with problems rather than sections
+- Users can create personal document workspaces
+- Users can rename/delete personal documents and learning logs
+- Teacher dashboard
+- Teacher switch classes & problems
+- Teacher workspace
+- Rich-content supports
+- Support Dataflow application
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 421,764 bytes | -15% |
+| index.js | 4,124,348 bytes | 2% |
+
 ## Version 0.7.1 - released May 29, 2019
 
 - Fixes listeners on loading empty document causing data loss

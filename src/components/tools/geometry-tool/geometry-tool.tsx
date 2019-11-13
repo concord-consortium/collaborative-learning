@@ -72,8 +72,11 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
     const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
     const disableVertexAngle = readOnly || !supportsVertexAngle;
     const disableDelete = readOnly || !board || !content.getDeletableSelectedIds(board).length;
-    const disableDuplicate = readOnly || !board || !content.getOneSelectedPolygon(board);
-    const disableComment = !content.getCommentAnchor(board) &&
+    const disableDuplicate = readOnly || !board ||
+                              (!content.getOneSelectedPoint(board) &&
+                                !content.getOneSelectedPolygon(board));
+    const disableComment = !content.getOneSelectedSegment(board) &&
+                            !content.getCommentAnchor(board) &&
                             !content.getOneSelectedComment(board);
 
     return (
@@ -158,6 +161,10 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
   private handleSetActionHandlers = (handlers: IActionHandlers) => {
     this.setState({ handlers }, () => {
       this.hotKeys.register({
+        "left": handlers.handleArrows,
+        "up": handlers.handleArrows,
+        "right": handlers.handleArrows,
+        "down":  handlers.handleArrows,
         "backspace": handlers.handleDelete,
         "delete": handlers.handleDelete,
         "cmd-c": handlers.handleCopy,
