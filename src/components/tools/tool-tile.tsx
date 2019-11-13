@@ -72,7 +72,7 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
 
 export interface IDragTileItem {
   rowIndex: number;
-  rowHeight: number;
+  rowHeight?: number;
   tileIndex: number;
   tileId: string;
   tileContent: string;
@@ -269,7 +269,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
         const rowId = content?.findRowContainingTile(tile.id);
         const rowIndex = rowId && content?.getRowIndex(rowId);
         const row = rowId && content?.getRow(rowId);
-        const rowHeight = row && row.height;
+        const rowHeight = row ? row.height : height;
         const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
         const tileContent = cloneDeep(getSnapshot(tile));
         delete tileContent.id;
@@ -283,8 +283,14 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       }
     };
 
+    // support dragging a tile without selecting it first
+    const dragTileIds = selectedTileIds.slice();
+    if (dragTileIds.indexOf(model.id) < 0) {
+      dragTileIds.push(model.id);
+    }
+
     // create a sorted array of selected tiles
-    selectedTileIds.forEach(selectedTileId => {
+    dragTileIds.forEach(selectedTileId => {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
         const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
@@ -292,7 +298,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
         delete tileSnapshotWithoutId.id;
         dragTiles.items.push({
           rowIndex: rowIndex || 0,
-          rowHeight: rowHeight || 0,
+          rowHeight,
           tileIndex: tileIndex || 0,
           tileId: tile.id,
           tileContent,
@@ -314,8 +320,8 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
     // and to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (selectedTileIds.length === 1) {
-      const tileInfo = getTileInfo(selectedTileIds[0]);
+    if (dragTileIds.length === 1) {
+      const tileInfo = getTileInfo(dragTileIds[0]);
       if (tileInfo) {
         const {tile, tileContent} = tileInfo;
         e.dataTransfer.setData(kDragTileId, tile.id);
