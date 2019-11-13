@@ -9,7 +9,7 @@ import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
-const Colors = Themes.Clue;
+const Colors = Themes.Default;
 
 export enum EPanelId {
   dashboard = "dashboard",
@@ -108,7 +108,7 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
       .filter(spec => spec.label.length > 0)
       .map(spec => {
         const { label, panelId } = spec;
-        const onClick = () => { onPanelChange && onPanelChange(panelId); };
+        const onClick = () => { onPanelChange?.(panelId); };
         const key = panelId;
         const selected = key === current;
         const colors = panelId === EPanelId.workspace

@@ -1,4 +1,5 @@
 @import ../../../components/vars
+@import ../../../components/mixins
 
 .sixpack-right-controls
   display: flex
@@ -17,10 +18,7 @@
     height: 0
     overflow-y: auto
     // visible scrollbars harm this tiny column 
-    -ms-overflow-style: none
-      scrollbar-width: none
-    &::-webkit-scrollbar
-      display: none
+    @include hideScrollbars
     overflow-x: hidden
     background-color: $sage
     padding: 10px
