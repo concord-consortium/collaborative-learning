@@ -24,6 +24,7 @@ before(()=>{
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
+    cy.wait(3000)
     
     header.switchWorkspace('Workspace');
     cy.wait(1000);
