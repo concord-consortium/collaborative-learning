@@ -14,7 +14,8 @@ let canvas = new Canvas,
     
         // cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
-        cy.wait(4000);
+        cy.waitForSpinner();
+        // cy.wait(4000);
     });    
 
 context('Table Tool Tile',function(){
@@ -85,15 +86,15 @@ context('Table Tool Tile',function(){
         it.skip('will add content to table', function(){
             tableToolTile.getTableCell().first().type('3');
             tableToolTile.getTableCell().last().click();
-            cy.wait(100);
+            // cy.wait(100);
             tableToolTile.getTableCell().first().should('contain','3');
             tableToolTile.getTableCell().last().type('2');
             tableToolTile.getTableCell().first().click();
-            cy.wait(100);
+            // cy.wait(100);
             tableToolTile.getTableCell().eq(1).should('contain', '2');
             tableToolTile.getTableCell().first().type('1');
             tableToolTile.getTableCell().last().click();
-            cy.wait(100);
+            // cy.wait(100);
             tableToolTile.getTableCell().first().should('contain','1');
             tableToolTile.getTableRow().should('have.length', 3);
         });

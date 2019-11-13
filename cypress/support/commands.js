@@ -40,6 +40,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     for (i=0;i<students.length;i++) {
         cy.wait(2000)
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        // cy.waitForSpinner(); // using this wait does not set up the groups
         cy.wait(3000);
     }
     //verify Group num and there are 4 students in the group

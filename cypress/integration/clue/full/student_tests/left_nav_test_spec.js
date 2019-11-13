@@ -7,7 +7,8 @@ before(function(){
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
-    cy.wait(4000);
+    cy.waitForSpinner()
+    // cy.wait(4000);
 });
 
 describe('Test Left tabs',function(){

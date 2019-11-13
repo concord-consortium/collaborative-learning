@@ -117,7 +117,7 @@ context("Teacher Space", () => {
                     dashboard.getGroups().should('have.length',6)
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
                         dashboard.getProblemList().contains(problems[tempProblemIndex].problemTitle).click({ force: true })
-                        cy.wait(1000)
+                        // cy.wait(1000)
                         cy.waitForSpinner()
                         tempProblemIndex += 1
                     })
@@ -127,7 +127,7 @@ context("Teacher Space", () => {
                     //switch back to original problem for later test
                     dashboard.getProblemDropdown().click({force:true})
                     dashboard.getProblemList().contains(problems[initProblemIndex].problemTitle).click({ force: true })
-                    cy.wait(1000)
+                    // cy.wait(1000)
                     cy.waitForSpinner()
                 })
             })
@@ -165,7 +165,7 @@ context("Teacher Space", () => {
                     dashboard.getGroups().should('have.length',6)
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true })
-                        cy.wait(1000)
+                        // cy.wait(1000)
                         cy.waitForSpinner()
                     })
                     dashboard.getClassDropdown().should('contain', className)
@@ -174,7 +174,7 @@ context("Teacher Space", () => {
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({force:true})
                     dashboard.getClassList().contains(initClassName).click({ force: true })
-                    cy.wait(1000)
+                    // cy.wait(1000)
                     cy.waitForSpinner()
                 })
             })
@@ -204,7 +204,7 @@ context("Teacher Space", () => {
                     let tempGroupIndex = 0
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
-                    cy.wait(500);
+                    // cy.wait(500);
                 })
             })
             it('verify clicking a students canvas in 4 up view zooms into students canvas', () => { 

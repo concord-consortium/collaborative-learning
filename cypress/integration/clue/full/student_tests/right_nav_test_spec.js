@@ -16,13 +16,14 @@ describe('Test right nav tabs', function(){
             const queryParams = `${Cypress.config("queryParams")}`;
         
             cy.visit(baseUrl+queryParams);
-            cy.wait(4000);
+            cy.waitForSpinner();
+            // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('My Work tab tests', function(){
         describe('Investigation section',function(){
             it('verify that opened content is listed in My Work/Investigations section', function(){ 
-                cy.wait(1000);
+                // cy.wait(1000);
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work', 'investigations');
                 rightNav.getCanvasItemTitle('my-work','investigations').contains(this.title).should('exist');

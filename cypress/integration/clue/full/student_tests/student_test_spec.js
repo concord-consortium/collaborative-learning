@@ -17,7 +17,8 @@ let student = '5',
     
         // cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
-        cy.wait(4000);
+        cy.waitForSpinner();
+        // cy.wait(4000);
     });
 describe('Check header area for correctness', function(){
     it('will verify if class name is correct', function(){

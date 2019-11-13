@@ -34,7 +34,7 @@ context('Test group functionalities', function(){
                     clueCanvas.addTile('draw');
                     clueCanvas.addImageTile('image');
                     clueCanvas.shareCanvas();//all students will share their canvas
-                    cy.wait(1000);
+                    // cy.wait(1000);
                 }
             });
             it('verify 4-up view comes up correctly with students', function(){

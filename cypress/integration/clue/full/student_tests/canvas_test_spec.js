@@ -30,7 +30,7 @@ context('Test Canvas', function(){
             const queryParams = `${Cypress.config("queryParams")}`;
         
             cy.visit(baseUrl+queryParams);
-            cy.wait(5000);
+            // cy.wait(5000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
 
@@ -364,7 +364,7 @@ context('Test Canvas', function(){
             // TODO: Unable to get elements
             it.skip('will drag an image from left nav to canvas',()=>{
                 leftNav.openToWorkspace('Extra Workspace');
-                cy.wait(1000);
+                // cy.wait(1000);
                 leftNav.openLeftNavTab('Introduction');
                 leftNav.getLeftNavExpandedSpace().find('.image-tool').first()
                     .trigger('dragstart', {dataTransfer});
