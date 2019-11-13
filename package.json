@@ -158,6 +158,7 @@
     "slate-react": "^0.22.8",
     "superagent": "^5.1.0",
     "uuid": "^3.3.3",
-    "whatwg-fetch": "^3.0.0"
+    "whatwg-fetch": "^3.0.0",
+    "@concord-consortium/react-components": "^0.1.14"
   }
 }
