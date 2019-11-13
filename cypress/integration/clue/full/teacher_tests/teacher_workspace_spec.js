@@ -48,11 +48,14 @@ context("Teacher Space", () => {
                 rightNav.getRightNavTab("class-work").should('be.visible')
                 rightNav.getRightNavTab("learning-log").should('be.visible')
                 rightNav.getRightNavTab("supports").should('be.visible')
+            })    
         })
         describe('teacher functionalities', () => {
             it('verify document curation', () => {//adding a star to a student document
+            //TODO
             })
             it('verify supports functionality', () => {//may need to break down even further between class, group, and student
+            //TODO
             })
         })
         describe('teacher functionality', () => {
