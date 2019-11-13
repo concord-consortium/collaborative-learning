@@ -6,6 +6,7 @@ import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
 import { BaseListener } from "./base-listener";
+import { isAlive } from "mobx-state-tree";
 
 export class DBSupportsListener extends BaseListener {
   private db: DB;
@@ -89,10 +90,11 @@ export class DBSupportsListener extends BaseListener {
       addSupportDocumentsToStore({
         unit, investigation, problem, documents, supports: teacherSupports, db: this.db,
         onDocumentCreated: (support, document) => {
-          // teachers sync their support document properties to Firebase to track isDeleted
-          if (eventType === "child_added") {
+          // since there are multiple async calls before we get here check if the support is still in the tree
+          if (isAlive(support)) {
             const teacherSupport = support as TeacherSupportModelType;
             if (teacherSupport.uid === user.id) {
+              // teachers sync their support document properties to Firebase to track isDeleted
               const {audience, sectionTarget, key} = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
               this.db.listeners.syncDocumentProperties(document, path);
