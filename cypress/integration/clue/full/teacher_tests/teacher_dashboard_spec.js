@@ -218,15 +218,15 @@ context("Teacher Space", () => {
             })
             it('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
-                dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
-                dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
+                // dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
+                // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
 
                 // Use when clue class has MORE than 6 groups
 
-                // dashboard.getPreviousPageButton().should('have.class', 'disabled')
-                // dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
-                // dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
-                // dashboard.getPreviousPageButton().should('have.class', 'disabled')
+                dashboard.getPreviousPageButton().should('have.class', 'disabled')
+                dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
+                dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
+                dashboard.getPreviousPageButton().should('have.class', 'disabled')
             })
         })
         describe('6-pack view functionality - Published Work', () => {
