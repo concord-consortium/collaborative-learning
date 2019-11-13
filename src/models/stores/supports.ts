@@ -277,6 +277,9 @@ function getSupportCaption(support: UnionSupportModelType, index: number,
 
 export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   const { db, documents, investigation, problem, supports, onDocumentCreated } = params;
+  if (!documents) {
+    return;
+  }
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
@@ -309,19 +312,26 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       }
     }
 
-    const content = await getDocumentContentForSupport(support.support, db);
-    if (content) {
-      const document = DocumentModel.create({
-                        uid: "curriculum",
-                        type: SupportPublication,
-                        key: supportKey,
-                        originDoc,
-                        properties,
-                        createdAt: Date.now(),
-                        content: getSnapshot(content)
-                      });
-      documents && documents.add(document);
-      onDocumentCreated && onDocumentCreated(support, document);
+    let document = documents.getDocument(supportKey);
+    if (document) {
+      // update existing document properties if a document exists
+      document.setProperties(properties);
+    }
+    else {
+      const content = await getDocumentContentForSupport(support.support, db);
+      if (content) {
+        document = DocumentModel.create({
+                     uid: "curriculum",
+                     type: SupportPublication,
+                     key: supportKey,
+                     originDoc,
+                     properties,
+                     createdAt: Date.now(),
+                     content: getSnapshot(content)
+                   });
+        documents.add(document);
+        onDocumentCreated?.(support, document);
+      }
     }
   });
 }
