@@ -21,6 +21,8 @@ import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { HotKeys } from "../../utilities/hot-keys";
 import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
+import { LinkIndicatorComponent } from "./link-indicator";
+import { IconButton } from "../utilities/icon-button";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -90,6 +92,13 @@ const kToolComponentMap: any = {
         [kTextToolID]: TextToolComponent
       };
 
+const DragTileButton = () => {
+  return (
+    <IconButton icon="select-tool" key={`select-tool`} className={`tool-tile-drag-handle tool select`}
+                innerClassName={`icon icon-select-tool`} />
+  );
+};
+
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
@@ -138,12 +147,9 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
+        <LinkIndicatorComponent type={model.content.type} id={model.id} />
         { ToolComponent !== PlaceholderToolComponent
-          ? <div className="tool-tile-drag-handle tool select">
-            <svg className={`icon icon-select-tool`}>
-              <use xlinkHref={`#icon-select-tool`} />
-            </svg>
-          </div>
+          ? <DragTileButton />
           : null
         }
         {this.renderTile(ToolComponent)}

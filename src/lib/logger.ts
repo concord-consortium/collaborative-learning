@@ -91,8 +91,6 @@ interface IDocumentInfo {
   properties?: { [prop: string]: string };
 }
 
-export type ILogCallback = () => void;
-
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
     if (DEBUG_LOGGER) {
@@ -107,12 +105,12 @@ export class Logger {
     this._instance.investigationTitle = investigation.title;
   }
 
-  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod, callback?: ILogCallback) {
+  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod) {
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-    sendToLoggingService(logMessage, callback);
+    sendToLoggingService(logMessage);
   }
 
   public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
@@ -243,19 +241,12 @@ export class Logger {
   }
 }
 
-function sendToLoggingService(data: LogMessage, callback?: ILogCallback) {
+function sendToLoggingService(data: LogMessage) {
   if (DEBUG_LOGGER) {
     // tslint:disable-next-line:no-console
     console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
   }
   const request = new XMLHttpRequest();
-  if (callback) {
-    request.onreadystatechange = () => {
-      if (request.readyState === 4) {
-        callback();
-      }
-    };
-  }
   request.open("POST", logManagerUrl, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));

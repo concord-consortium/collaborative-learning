@@ -56,38 +56,45 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ onClick }: { onClick: () => void }) => {
+const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
   return (
-    <IconButton icon="publish" key="publish-key" className="action icon-publish"
-                onClickButton={onClick} />
+    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
+                onClickButton={onClick} title="Publish Workspace" />
+  );
+};
+
+const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
+  return (
+    <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
+                onClickButton={onClick} title="Published Workspace" />
   );
 };
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="support" key="support" className="action icon-support"
-                onClickButton={onClick} />
+                onClickButton={onClick} title="Publish Support" />
   );
 };
 
 const NewButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="new" key="new" className="action icon-new"
-                onClickButton={onClick} />
+                onClickButton={onClick} title="Create New Workspace" />
   );
 };
 
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
-                onClickButton={onClick} />
+                onClickButton={onClick} title="Rename Workspace" />
   );
 };
 
 const CopyButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="copy" key="copy" className="action icon-copy"
-                onClickButton={onClick} />
+                onClickButton={onClick} title="Copy Workspace" />
   );
 };
 
@@ -96,7 +103,7 @@ const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: bool
     return (
       <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
                   enabled={enabled} innerClassName={enabledClass}
-                  onClickButton={enabled ? onClick : undefined} />
+                  onClickButton={enabled ? onClick : undefined} title="Delete Workspace" />
     );
 };
 
@@ -104,7 +111,24 @@ const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boo
   const visibility = isShared ? "public" : "private";
   return (
     <IconButton icon="share" key={`share-${visibility}`} className={`action icon-share`}
-                innerClassName={`visibility ${visibility}`} onClickButton={onClick}/>
+                innerClassName={`visibility ${visibility}`} onClickButton={onClick}
+                title={`${isShared ? "Unshare from" : "Share to"} Group`} />
+  );
+};
+
+const ViewModeButton = ({ onClick, icon, title }: { onClick: () => void, icon: string, title: string }) => {
+  return (
+    <IconButton icon={icon} key={icon} className={`action mode icon-${icon}`}
+                innerClassName={`${icon}`} onClickButton={onClick}
+                title={title} />
+  );
+};
+
+const TitleInfo = ({ docTitle, onClick }: { docTitle: string, onClick?: () => void }) => {
+  return (
+    <span onClick={onClick} className="title-info" id="titlebar-title">
+      {docTitle}
+    </span>
   );
 };
 
@@ -213,20 +237,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderMode() {
     const {workspace} = this.props;
-    const currMode = workspace.mode === "1-up" ? "up1" : "up4";
-    const nextMode = workspace.mode === "1-up" ? "up4" : "up1";
-    // render both icons and show the correct one with CSS
+    const mode = workspace.mode === "1-up" ? "up1" : "up4";
+    const modeTitle = workspace.mode === "1-up" ? "Join Group View" : "Return to Student View";
     return (
-      <div className="mode action">
-        <svg id="currMode" className={`mode icon icon-${currMode}`} onClick={this.handleToggleWorkspaceMode}>
-          <use xlinkHref={`#icon-${currMode}`} />
-        </svg>
-        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`}
-          onClick={this.handleToggleWorkspaceMode}
-        >
-          <use xlinkHref={`#icon-${nextMode}`} />
-        </svg>
-      </div>
+      <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
     );
   }
 
@@ -247,11 +261,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
-              <span className="title-info">Learning Log: {document.title}</span>
+              <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <span>{document.title}</span>
+              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
@@ -400,21 +414,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderTwoUpButton() {
     const {workspace} = this.props;
-    const currMode = workspace.comparisonVisible ? "up2" : "up1";
-    const nextMode = workspace.comparisonVisible ? "up1" : "up2";
-
+    const mode = workspace.comparisonVisible ? "up2" : "up1";
+    const modeTitle = workspace.comparisonVisible ? "Return to Student View" : "Open Workspace Compare View";
     return (
-      <div className="mode action">
-        <svg id="currMode" className={`mode icon icon-${currMode}`} data-test="two-up-curr-mode"
-             onClick={this.handleToggleTwoUp}>
-          <use xlinkHref={`#icon-${currMode}`} />
-        </svg>
-        <svg id="nextMode" key="nextMode" className={`mode icon icon-${nextMode}`} data-test="two-up-next-mode"
-             onClick={this.handleToggleTwoUp}
-        >
-          <use xlinkHref={`#icon-${nextMode}`} />
-        </svg>
-      </div>
+      <ViewModeButton onClick={this.handleToggleTwoUp} icon={mode} title={modeTitle} />
     );
   }
 

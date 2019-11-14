@@ -2,6 +2,13 @@ import dfHeader from "../../../support/elements/dataflow/dfHeader";
 
 const header = new dfHeader;
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000)
+});
 context('Workspace view',()=>{
     //Other UI elements are in Common tests
     describe('workspace ui',()=>{
@@ -16,3 +23,6 @@ context('Workspace view',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

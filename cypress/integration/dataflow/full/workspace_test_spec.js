@@ -8,6 +8,14 @@ const rightNav = new RightNav;
 const controlPanel= new dfControlPanels;
 const canvas = new Canvas;
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(3000)
+});
+
 context('Workspace view',()=>{
     describe('switch views',()=>{
         it('verify Click on Control Panel button shows the control panel',()=>{
@@ -23,3 +31,6 @@ context('Workspace view',()=>{
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

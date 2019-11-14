@@ -111,7 +111,9 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     qaClearError: undefined
   };
 
-  public UNSAFE_componentWillMount() {
+  constructor(props: IProps) {
+    super(props);
+
     authAndConnect(this.stores, (qaCleared, qaClearError) => {
       this.setState({qaCleared, qaClearError});
     });

@@ -18,7 +18,8 @@ export function getEventCoords(board: JXG.Board, evt: any, scale?: number, index
   return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
 }
 
-export function isDragTargetOrAncestor(elt: JXG.GeometryElement, dragTarget: JXG.GeometryElement) {
+export function isDragTargetOrAncestor(elt: JXG.GeometryElement, dragTarget?: JXG.GeometryElement) {
+  if (!dragTarget) return false;
   return (elt.id === dragTarget.id) ||
           (values(dragTarget.ancestors)
             .findIndex(ancestor => ancestor.id === elt.id) >= 0);

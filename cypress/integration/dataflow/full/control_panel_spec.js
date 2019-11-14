@@ -4,6 +4,12 @@ import dfHeader from "../../../support/elements/dataflow/dfHeader";
 const controlPanel= new dfControlPanels;
 const header = new dfHeader;
 before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(4000)
+    
     header.switchWorkspace('Control Panels');
     cy.wait(3000);
 })
@@ -35,3 +41,6 @@ context('control panel ui',()=>{
 
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });

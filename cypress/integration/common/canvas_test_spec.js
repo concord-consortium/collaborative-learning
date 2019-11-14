@@ -4,7 +4,14 @@ import Canvas from '../../support/elements/common/Canvas'
 
 let canvas = new Canvas;
 
-context.skip('test canvas tools', function(){
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+});
+
+context('test canvas tools', function(){
     describe('Test header elements UI', function(){
         it('verify publish button', function(){
                 //should have create new document
@@ -14,7 +21,6 @@ context.skip('test canvas tools', function(){
                 //should have publish document
             canvas.getPublishIcon().should('exist'); //Need to ask Avi to change the data-test attribute to just publish-icon
             canvas.getCopyIcon().should('exist');
-            canvas.getDeleteIcon().should('not.exist');//verify if this is true for DF
         });
     })
 
@@ -35,7 +41,10 @@ context.skip('test canvas tools', function(){
             canvas.publishCanvas();
             canvas.getPublishIcon().should('exist');
             canvas.getCopyIcon().should('exist');
-            canvas.getDeleteIcon().should('not.exist');//verify if this is true for DF
         });
     })
 })
+
+after(function(){
+  cy.clearQAData('all');
+});

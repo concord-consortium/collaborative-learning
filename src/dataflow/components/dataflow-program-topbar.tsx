@@ -21,7 +21,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   };
   return (
     <div className="program-editor-topbar">
-      <div className="duration">
+      <div className="duration" title="Duration">
         <div className="label-back">
           <div className="label">Duration</div>
         </div>
@@ -42,6 +42,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <button
         className="program-state-button"
+        title="Run"
         onClick={props.onRunProgramClick}
         disabled={!props.isRunEnabled || props.readOnly}
       >
@@ -50,6 +51,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </button>
       <button
         className="program-state-button"
+        title="Stop"
         onClick={props.onStopProgramClick}
         disabled={!props.runningProgram || !props.readOnly}
       >

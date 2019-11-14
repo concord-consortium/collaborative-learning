@@ -19,10 +19,10 @@ export const isMovableLineControlPoint = (v: any) => {
 export const handleControlPointClick = (point: JXG.Point, content: GeometryContentModelType) => {
   const line = find(point.descendants, el => isMovableLine(el));
   if (line) {
-    content.deselectElement(line.id);
+    content.deselectElement(undefined, line.id);
     each(line.ancestors, (parentPoint, parentId) => {
       if (parentId !== point.id) {
-        content.deselectElement(parentId);
+        content.deselectElement(undefined, parentId);
       }
     });
   }

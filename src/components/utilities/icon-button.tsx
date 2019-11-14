@@ -2,12 +2,14 @@ import * as React from "react";
 
 interface IconButtonProps {
   icon: string;
+  title?: string;
   key: string;
   className: string;
   innerClassName?: string;
   onClickButton?: () => void;
   enabled?: boolean;
   url?: string;
+  dataTestName?: string;
 }
 
 export const IconButton = (props: IconButtonProps) => {
@@ -16,10 +18,11 @@ export const IconButton = (props: IconButtonProps) => {
   };
   return (
     <button
+      title={props.title}
       id={`icon-${props.icon}`}
       className={`icon-button ${props.className}`}
       onClick={props.onClickButton}
-      data-test={`${props.icon}-icon`}
+      data-test={props.dataTestName || `${props.icon}-icon`}
     >
       <div
         className={`button-icon ${props.icon} ${props.innerClassName}`}

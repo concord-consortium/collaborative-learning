@@ -9,16 +9,24 @@ const dfblock = new dfBlock;
 const testBlock = 'relay'
 
 const input_1 = 1, input_0 = 0;
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(3000)
+    
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+    dfcanvas.openBlock('Number')
+    dfcanvas.openBlock('Relay')
+    dfblock.moveBlock(testBlock,0,250,5)
+    dfblock.connectBlocks('number',0,testBlock,0)
+    dfcanvas.scrollToTopOfTile();
+})
+
 context('Relay block tests',()=>{//Use number block and change the value manually for on/off
-    before(()=>{
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-        dfcanvas.openBlock('Number')
-        dfcanvas.openBlock('Relay')
-        dfblock.moveBlock(testBlock,0,250,5)
-        dfblock.connectBlocks('number',0,testBlock,0)
-        dfcanvas.scrollToTopOfTile();
-    })
     describe('Relay block UI',()=>{
         it('verify UI',()=>{ //block should have 1 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Relay');
@@ -39,3 +47,6 @@ context('Relay block tests',()=>{//Use number block and change the value manuall
         })
     })
 })
+after(function(){
+    cy.clearQAData('all');
+  });
