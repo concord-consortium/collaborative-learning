@@ -132,10 +132,11 @@
   "dependencies": {
     "@blueprintjs/core": "^3.18.1",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
+    "@concord-consortium/react-components": "^0.1.14",
     "ag-grid-community": "^21.2.1",
     "ag-grid-react": "^21.2.1",
     "classnames": "^2.2.6",
-    "expr-eval": "^1.2.3",
+    "expr-eval": "^2.0.2",
     "file-saver": "^2.0.2",
     "firebase": "^7.3.0",
     "immutable": "^3.8.2",
@@ -158,7 +159,6 @@
     "slate-react": "^0.22.8",
     "superagent": "^5.1.0",
     "uuid": "^3.3.3",
-    "whatwg-fetch": "^3.0.0",
-    "@concord-consortium/react-components": "^0.1.14"
+    "whatwg-fetch": "^3.0.0"
   }
 }
