@@ -2,13 +2,14 @@ import { GetLocalTimeStamp } from "./time";
 
 const time = 1573761933537; // Thu Nov 14 2019 12:05:33 GMT-0800 (Pacific Standard Time)
 const timestamp = GetLocalTimeStamp(time); // 14NOV19-12:05:33
+const localDaySecondDigit = timestamp[1];
 const localHourFirstDigit = timestamp[8];
 const localHourSecondDigit = timestamp[9];
 
 describe("Human Readable Timestamp", () => {
   it("can return the day", () => {
     expect(timestamp[0]).toContain("1");
-    expect(timestamp[1]).toContain("4");
+    expect(timestamp[1]).toContain(localDaySecondDigit);
   });
   it("can return the month", () => {
     expect(timestamp[2]).toContain("N");
@@ -39,7 +40,7 @@ describe("Human Readable Timestamp", () => {
     expect(timestamp[15]).toContain("3");
   });
   it("can return the correct format of the timestamp", () => {
-    expect(timestamp).toContain(`14NOV19-${localHourFirstDigit}${localHourSecondDigit}:05:33`);
+    expect(timestamp).toContain(`1${localDaySecondDigit}NOV19-${localHourFirstDigit}${localHourSecondDigit}:05:33`);
     expect(timestamp).toHaveLength(16);
   });
 });
