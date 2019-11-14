@@ -23,7 +23,6 @@ interface LogMessage {
   appMode: string;
   investigation?: string;
   problem?: string;
-  section?: string;
   group?: string;
   time: number;
   event: string;
@@ -44,6 +43,7 @@ export enum LogEventMethod {
 export enum LogEventName {
   CREATE_TILE,
   COPY_TILE,
+  MOVE_TILE,
   DELETE_TILE,
 
   VIEW_SHOW_DOCUMENT,
@@ -85,7 +85,6 @@ type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 interface IDocumentInfo {
   type: string;
   key?: string;
-  section?: string;
   uid?: string;
   title?: string;
   properties?: { [prop: string]: string };
@@ -126,8 +125,7 @@ export class Logger {
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
         documentKey: document.key,
-        documentType: document.type,
-        section: document.section
+        documentType: document.type
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -135,12 +133,11 @@ export class Logger {
         parameters = {
           ...parameters,
           sourceUsername: sourceDocument.uid,
-          souceObjectId: metaData.originalTileId,
+          sourceObjectId: metaData.originalTileId,
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {},
-          sourceSection: sourceDocument.section || document.section   // if it's instructions, use dest doc's section
+          sourceDocumentProperties: sourceDocument.properties || {}
         };
       }
     }

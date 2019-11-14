@@ -6,6 +6,20 @@ import * as uuid from "uuid/v4";
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
 
+export interface IDragTileItem {
+  rowIndex: number;
+  rowHeight?: number;
+  tileIndex: number;
+  tileId: string;
+  tileContent: string;
+  tileType: string;
+}
+
+export interface IDragTiles {
+  sourceDocId: string;
+  items: IDragTileItem[];
+}
+
 export function createToolTileModelFromContent(content: ToolContentUnionType) {
   return ToolTileModel.create({ content });
 }

@@ -1,8 +1,9 @@
 import * as React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { ToolTileModelType, IDragTiles } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
@@ -17,12 +18,11 @@ import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { HotKeys } from "../../utilities/hot-keys";
-import { cloneDeep } from "lodash";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 import { IconButton } from "../utilities/icon-button";
 import "../../utilities/dom-utils";
-import { hasSelectionModifier } from "../../utilities/event-utils";
 
 import "./tool-tile.sass";
 
@@ -68,21 +68,6 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
       if (result) return result[1];
     }
   }
-}
-
-export interface IDragTileItem {
-  rowIndex: number;
-  rowHeight?: number;
-  tileIndex: number;
-  tileId: string;
-  tileContent: string;
-  tileType: string;
-  // height?
-}
-
-export interface IDragTiles {
-  sourceDocId: string;
-  items: IDragTileItem[];
 }
 
 interface IProps {
