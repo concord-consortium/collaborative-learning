@@ -41,7 +41,7 @@ context("Teacher Space", () => {
 
     context('Teacher Dashboard View', () => {
         describe('UI visibility', () => {
-            it('verify header elements', () => {
+            it.skip('verify header elements', () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempClass = clueData.classes[0]
 
@@ -111,7 +111,7 @@ context("Teacher Space", () => {
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle)
                 })
             })
-            it('verify dashboard/workspace switch changes workspace view', () => {
+            it.skip('verify dashboard/workspace switch changes workspace view', () => {
                 dashboard.getDashboardViewToggle().should('be.visible').and('have.class', 'bp3-active')
                 dashboard.getSingleWorkspace().should('not.be.visible')
                 dashboard.getWorkspaceViewToggle().should('be.visible').and('not.have.class', 'bp3-active').click({ force: true })
@@ -119,7 +119,7 @@ context("Teacher Space", () => {
                 dashboard.getSingleWorkspace().should('be.visible')
                 dashboard.getDashboardViewToggle().click({ force: true })
             })
-            it('verify selected class is shown in class dropdown', () => {
+            it.skip('verify selected class is shown in class dropdown', () => {
                 cy.get('@clueData').then((clueData) => {
                     let initialClassIndex = 0
                     let tempClass = clueData.classes[initialClassIndex]
@@ -232,7 +232,7 @@ context("Teacher Space", () => {
         describe('6-pack view functionality - Published Work', () => {
             it('switches to published work tab and checks UI options', () => {
             })
-            it('select stars for students', () => { // Want this to be for all students once it passes
+            it.skip('select stars for students', () => { // Want this to be for all students once it passes
                 let classIndex = 0
                 let problemIndex = 0
                 let groups
