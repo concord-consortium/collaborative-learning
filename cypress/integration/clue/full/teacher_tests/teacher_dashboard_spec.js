@@ -37,8 +37,6 @@ context("Teacher Space", () => {
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
         // cy.wait(1000)
         cy.waitForSpinner()
-        
-        cy.fixture("teacher-dash-data.json").as("clueData")
     })
 
     beforeEach(() => {
@@ -214,6 +212,7 @@ context("Teacher Space", () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempGroupIndex = 0
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
+                    debugger
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
                     // cy.wait(500);
                 })
