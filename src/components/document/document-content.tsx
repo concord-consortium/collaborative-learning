@@ -8,7 +8,7 @@ import { DocumentTool } from "../../models/document/document";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { kDragTileSource, kDragTileId, kDragTileContent,
-        dragTileSrcDocId, kDragRowHeight, kDragTileCreate, IToolApiInterface } from "../tools/tool-tile";
+        dragTileSrcDocId, kDragRowHeight, kDragTileCreate, IToolApiInterface, IDragTiles, kDragTiles } from "../tools/tool-tile";
 
 import "./document-content.sass";
 
@@ -255,7 +255,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content || readOnly) return;
 
     const withinDocument = this.hasDragType(e.dataTransfer, dragTileSrcDocId(content.contentId));
-    const hasContent = this.hasDragType(e.dataTransfer, kDragTileContent) ;
+    const hasContent = this.hasDragType(e.dataTransfer, kDragTiles);
     const newTileCreation = this.hasDragType(e.dataTransfer, kDragTileCreate);
     if (hasContent || newTileCreation) {
       // Throttle calculation rate slightly to reduce load while dragging
@@ -356,25 +356,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleMoveTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
     const { content } = this.props;
     if (!content) return;
-    const dragTileId = e.dataTransfer.getData(kDragTileId);
     const dropRowInfo  = this.getDropRowInfo(e);
-    content.moveTile(dragTileId, dropRowInfo);
+    content.moveTiles(dragTiles.items, dropRowInfo);
   }
 
-  private handleCopyTileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
     const { content } = this.props;
-    const dragTileContent = e.dataTransfer.getData(kDragTileContent);
-    if (!content || !dragTileContent) return;
-    const dragTileId = e.dataTransfer.getData(kDragTileId);
+    if (!content) return;
     const { rowInsertIndex } = this.getDropRowInfo(e);
-    let dragRowHeight;
-    if (e.dataTransfer.getData(kDragRowHeight)) {
-      dragRowHeight = +e.dataTransfer.getData(kDragRowHeight);
-    }
-    content.copyTileIntoNewRow(dragTileContent, dragTileId, rowInsertIndex, dragRowHeight);
+    content.copyTilesIntoNewRows(dragTiles.items, rowInsertIndex);
   }
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -398,13 +391,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
-    if (!e.dataTransfer) return;
-    const dragSrc = e.dataTransfer.getData(kDragTileSource);
-    const dragTileId = e.dataTransfer.getData(kDragTileId);
-    const dragTileContent = e.dataTransfer.getData(kDragTileContent);
-    const dragCreateTileType = e.dataTransfer.getData(kDragTileCreate);
 
-    if (!content || readOnly) return;
+    if (!e.dataTransfer || !content || readOnly) return;
 
     if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
       this.handleRowResizeDrop(e);
@@ -413,18 +401,28 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     e.preventDefault();
 
-    // handle drop within document - reorder tiles/rows
-    if (dragTileId && (dragSrc === content.contentId) && !e.altKey) {
-      this.handleMoveTileDrop(e);
+    const dragTilesJson = e.dataTransfer.getData(kDragTiles);
+    if (dragTilesJson) {
+      try {
+        const dragTiles: IDragTiles = JSON.parse(dragTilesJson);
+        if ((dragTiles.sourceDocId === content.contentId) && !e.altKey) {
+          this.handleMoveTilesDrop(e, dragTiles);
+        }
+        else {
+          this.handleCopyTilesDrop(e, dragTiles);
+        }
+        return;
+      } catch (ex) {
+        // tslint:disable-next-line:no-console
+        console.error(ex);
+        return;
+      }
     }
 
-    // handle drop - copy contents to new row
-    else if (dragTileContent) {
-      this.handleCopyTileDrop(e);
-    }
+    const dragCreateTileType = e.dataTransfer.getData(kDragTileCreate);
 
     // handle drop to create new tile
-    else if (dragCreateTileType) {
+    if (dragCreateTileType) {
       this.handleInsertNewTile(e);
     }
 

@@ -18,6 +18,7 @@ import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { IDropRowInfo } from "../../components/document/document-content";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { IDragTileItem } from "../../components/tools/tool-tile";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -322,6 +323,27 @@ export const DocumentContentModel = types
 
       return { rowId: row.id, tileId: tile.id };
     },
+    addTileInExistingRow(content: ToolContentUnionType, options: INewTileOptions): INewRowTile | undefined {
+      const tile = createToolTileModelFromContent(content);
+      const o = options || {};
+      if (o.rowIndex === undefined) {
+        // by default, insert new tiles after last visible on screen
+        o.rowIndex = self.defaultInsertRow;
+      }
+      const row = self.getRowByIndex(o.rowIndex);
+      if (row) {
+        self.insertNewTileInRow(tile, row);
+        self.removeNeighboringPlaceholderRows(o.rowIndex);
+        if (o.rowHeight) {
+          row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
+        }
+
+        const action = o.action || LogEventName.CREATE_TILE;
+        Logger.logTileEvent(action, tile, o.loggingMeta);
+
+        return { rowId: row.id, tileId: tile.id };
+      }
+    },
     deleteRowAddingPlaceholderRowIfAppropriate(rowId: string) {
       const rowIndex = self.getRowIndex(rowId);
       self.deleteRow(rowId);
@@ -388,6 +410,37 @@ export const DocumentContentModel = types
           newRowOptions.rowHeight = originalRowHeight;
         }
         self.addTileInNewRow(snapshot.content, newRowOptions);
+      }
+    },
+    copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
+      if (tiles.length > 0) {
+        let rowDelta = 0;
+        let lastRowIndex = -1;
+        tiles.forEach(tile => {
+          const content = safeJsonParse(tile.tileContent).content;
+          if (content) {
+            const rowOptions: INewTileOptions = {
+              rowIndex: rowIndex + rowDelta,
+              action: LogEventName.COPY_TILE,
+              loggingMeta: {
+                originalTileId: tile.tileId
+              }
+            };
+            if (tile.rowHeight) {
+              rowOptions.rowHeight = tile.rowHeight;
+            }
+            if (tile.rowIndex !== lastRowIndex) {
+              self.addTileInNewRow(content, rowOptions);
+              if (lastRowIndex !== -1) {
+                rowDelta++;
+              }
+              lastRowIndex = tile.rowIndex;
+            }
+            else {
+              self.addTileInExistingRow(content, rowOptions);
+            }
+          }
+        });
       }
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
@@ -487,13 +540,13 @@ export const DocumentContentModel = types
         // delete tile
         self.tileMap.delete(tileId);
       },
-      moveTile(tileId: string, rowInfo: IDropRowInfo) {
+      moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex: number = 0) {
         const srcRowId = self.findRowContainingTile(tileId);
         if (!srcRowId) return;
         const srcRowIndex = self.getRowIndex(srcRowId);
         const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
         if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-          self.moveTileToRow(tileId, rowDropIndex, 0);
+          self.moveTileToRow(tileId, rowDropIndex, tileIndex);
           return;
         }
         if ((rowDropIndex != null) && (rowDropLocation === "right")) {
@@ -584,7 +637,70 @@ export const DocumentContentModel = types
       }
     };
     return actions;
-  });
+  })
+  .actions(self => ({
+    mergeRow(srcRow: TileRowModelType, rowInfo: IDropRowInfo) {
+      const rowId = srcRow.id;
+      srcRow.tiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+      self.deleteRow(rowId);
+    },
+    moveTilesToNewRowAtIndex(rowTiles: IDragTileItem[], rowIndex: number) {
+      rowTiles.forEach((tile, index) => {
+        if (index === 0) {
+          self.moveTileToNewRow(tile.tileId, rowIndex);
+        }
+        else {
+          self.moveTileToRow(tile.tileId, rowIndex);
+        }
+      });
+    },
+    moveTilesToExistingRowAtIndex(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      rowTiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+    }
+  }))
+  .actions(self => ({
+    moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      if (tiles.length > 0) {
+        // organize tiles by row
+        const tileRows: {[index: number]: IDragTileItem[]} = {};
+        tiles.forEach(tile => {
+          tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
+          tileRows[tile.rowIndex].push(tile);
+        });
+
+        // move each row
+        const { rowInsertIndex, rowDropLocation } = rowInfo;
+        Object.values(tileRows).forEach(rowTiles => {
+          const rowIndex = rowTiles[0].rowIndex;
+          const row = self.getRowByIndex(rowIndex);
+          if (row?.tiles.length === rowTiles.length) {
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // entire row is being merged with an existing row
+              self.mergeRow(row, rowInfo);
+            }
+            else {
+              // entire row is being moved to a new row
+              self.moveRowToIndex(rowIndex, rowInsertIndex);
+            }
+          }
+          else {
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // part of row is being moved to an existing row
+              self.moveTilesToExistingRowAtIndex(rowTiles, rowInfo);
+            }
+            else {
+              // part of row is being moved to a new row
+              self.moveTilesToNewRowAtIndex(rowTiles, rowInsertIndex);
+            }
+          }
+        });
+      }
+    }
+  }));
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {

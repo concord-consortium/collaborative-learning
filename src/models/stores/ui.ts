@@ -1,8 +1,10 @@
 import { types } from "mobx-state-tree";
+import { debounce } from "lodash";
 import { WorkspaceModel } from "./workspace";
-import { ToolTileModelType } from "../tools/tool-tile";
 import { DocumentModelType } from "../document/document";
+import { ToolTileModelType } from "../tools/tool-tile";
 import { ERightNavTab } from "../view/right-nav";
+import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
 
@@ -28,7 +30,7 @@ export const UIModel = types
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: ERightNavTab.kMyWork,
-    selectedTileId: types.maybe(types.string),
+    selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
     dialog: types.maybe(UIDialogModel),
@@ -41,7 +43,7 @@ export const UIModel = types
       return !self.rightNavExpanded && !self.leftNavExpanded;
     },
     isSelectedTile(tile: ToolTileModelType) {
-      return (tile.id === self.selectedTileId);
+      return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
@@ -95,6 +97,29 @@ export const UIModel = types
       self.dialog = undefined;
       dialogResolver = undefined;
     };
+
+    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
+      if (tileId) {
+        const tileIdIndex = self.selectedTileIds.indexOf(tileId);
+        const isCurrentlySelected = tileIdIndex >= 0;
+        const isExtendingSelection = options?.append;
+        if (isExtendingSelection) {
+          if (isCurrentlySelected) {
+            // clicking on a selected tile with a modifier key deselects it
+            self.selectedTileIds.splice(tileIdIndex, 1);
+          }
+          else {
+            self.selectedTileIds.push(tileId);
+          }
+        } else if (!isCurrentlySelected) {
+          self.selectedTileIds.replace([tileId]);
+        }
+        // clicking on an already-selected tile doesn't change selection
+      } else {
+        self.selectedTileIds.clear();
+      }
+    };
+
     return {
       contractAll,
       alert,
@@ -117,11 +142,11 @@ export const UIModel = types
       setActiveRightNavTab(tab: string) {
         self.activeRightNavTab = tab;
       },
-      setSelectedTile(tile?: ToolTileModelType) {
-        self.selectedTileId = tile ? tile.id : undefined;
+      setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
+        setOrAppendTileIdToSelection(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string) {
-        self.selectedTileId = tileId;
+      setSelectedTileId(tileId: string, options?: {append: boolean}) {
+        setOrAppendTileIdToSelection(tileId, options);
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
@@ -153,3 +178,12 @@ export const UIModel = types
 
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
+
+export function selectTile(ui: UIModelType, model: ToolTileModelType, isExtending?: boolean) {
+  const append = isExtending ?? isSelectionModifierKeyDown();
+  ui.setSelectedTile(model, { append });
+}
+
+// Sometimes we get multiple selection events for a single click.
+// We only want to respond once per such burst of selection events.
+export const debouncedSelectTile = debounce(selectTile, 50);

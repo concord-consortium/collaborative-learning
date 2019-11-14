@@ -378,11 +378,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleComment = () => {
-    const { ui: { selectedTileId } } = this.stores;
-    if (selectedTileId ) {
+    // TODO: how to handle comments when multiple tiles are selected?
+    //       currently it will select the first tile for commenting
+    const { ui: { selectedTileIds } } = this.stores;
+    if (selectedTileIds.length > 0) {
       this.setState({
         isCommentDialogOpen: true,
-        commentTileId: selectedTileId
+        commentTileId: selectedTileIds[0]
       });
     }
   }
