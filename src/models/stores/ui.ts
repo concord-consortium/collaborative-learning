@@ -1,8 +1,10 @@
 import { types } from "mobx-state-tree";
+import { debounce } from "lodash";
 import { WorkspaceModel } from "./workspace";
-import { ToolTileModelType } from "../tools/tool-tile";
 import { DocumentModelType } from "../document/document";
+import { ToolTileModelType } from "../tools/tool-tile";
 import { ERightNavTab } from "../view/right-nav";
+import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
 
@@ -97,14 +99,21 @@ export const UIModel = types
 
     const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
       if (tileId) {
-        if (options && options.append) {
-          const index = self.selectedTileIds.indexOf(tileId);
-          if (index === -1) {
+        const tileIdIndex = self.selectedTileIds.indexOf(tileId);
+        const isCurrentlySelected = tileIdIndex >= 0;
+        const isExtendingSelection = options?.append;
+        if (isExtendingSelection) {
+          if (isCurrentlySelected) {
+            // clicking on a selected tile with a modifier key deselects it
+            self.selectedTileIds.splice(tileIdIndex, 1);
+          }
+          else {
             self.selectedTileIds.push(tileId);
           }
-        } else {
+        } else if (!isCurrentlySelected) {
           self.selectedTileIds.replace([tileId]);
         }
+        // clicking on an already-selected tile doesn't change selection
       } else {
         self.selectedTileIds.clear();
       }
@@ -168,3 +177,12 @@ export const UIModel = types
 
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
+
+export function selectTile(ui: UIModelType, model: ToolTileModelType, isExtending?: boolean) {
+  const append = isExtending ?? isSelectionModifierKeyDown();
+  ui.setSelectedTile(model, { append });
+}
+
+// Sometimes we get multiple selection events for a single click.
+// We only want to respond once per such burst of selection events.
+export const debouncedSelectTile = debounce(selectTile, 50);

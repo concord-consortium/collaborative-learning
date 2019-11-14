@@ -1,15 +1,15 @@
 import * as React from "react";
-import { observer, inject } from "mobx-react";
-import CSS from "csstype";
-import { BaseComponent, IBaseProps } from "../base";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { gImageMap, ImageMapEntryType } from "../../models/image-map";
-import { debounce } from "lodash";
-const placeholderImage = require("../../assets/image_placeholder.png");
 import { autorun, IReactionDisposer } from "mobx";
+import { observer, inject } from "mobx-react";
+import { debounce } from "lodash";
+import { BaseComponent, IBaseProps } from "../base";
+import { debouncedSelectTile } from "../../models/stores/ui";
+import { ToolTileModelType } from "../../models/tools/tool-tile";
+import { gImageMap, ImageMapEntryType } from "../../models/image-map";
+import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+const placeholderImage = require("../../assets/image_placeholder.png");
 
 import "./image-tool.sass";
 
@@ -124,11 +124,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const inputClasses = `image-url ${selectedClass}`;
     const fileInputClasses = `image-file ${selectedClass}`;
     const imageToolControlContainerClasses = `image-tool-controls ${readOnly ? "readonly" : selectedClass}`;
-    const imageWidth = imageEntry && imageEntry.width || defaultImagePlaceholderSize.width;
-    const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
+    // const imageWidth = imageEntry && imageEntry.width || defaultImagePlaceholderSize.width;
+    // const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
-    const imageDisplayStyle: CSS.Properties = {
+    const imageDisplayStyle: React.CSSProperties = {
       backgroundImage: "url(" + imageToUseForDisplay + ")"
     };
     if (!imageEntry) {
@@ -195,7 +195,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.setSelectedTile(this.props.model, {append: hasSelectionModifier(e)});
+    debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
     if (this.state.isEditing && (e.target === e.currentTarget)) {
       this.setState({ isEditing: false });
     }

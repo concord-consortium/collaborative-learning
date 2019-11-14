@@ -1,17 +1,17 @@
 import * as Immutable from "immutable";
 import * as React from "react";
+import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { Operation, Value, Range } from "slate";
 import { Editor, Plugin } from "slate-react";
 import { isHotkey } from "is-hotkey";
 
 import { BaseComponent } from "../base";
+import { debouncedSelectTile } from "../../models/stores/ui";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
-import { autorun, IReactionDisposer } from "mobx";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
-import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 import "./text-tool.sass";
 
@@ -183,38 +183,6 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     this.slateMap.filter(entry => !!entry.hotKey)
       .map(entry => this.makeKeyDownHandler(entry));
 
-  public onChange = (change: SlateChange) => {
-    const { readOnly, model } = this.props;
-    const content = this.getContent();
-    const { ui } = this.stores;
-
-    // determine last focus state from list of operations
-    let isFocused: boolean | undefined;
-    change.operations.forEach(op => {
-      if (op && op.type === "set_selection") {
-        isFocused = op.properties.isFocused;
-      }
-    });
-
-    if (isFocused != null) {
-      // polarity is reversed from what one might expect
-      if (!isFocused) {
-        // only select - if we deselect, it breaks delete because Slate
-        // somehow detects the selection change before the click on the
-        // delete button is processed by the workspace. For now, we just
-        // disable focus change on deselection.
-        ui.setSelectedTile(model, { append: isSelectionModifierKeyDown() });
-      }
-    }
-
-    if (content.type === "Text") {
-      if (!readOnly) {
-        content.setSlate(change.value);
-        this.setState({ value: change.value });
-      }
-    }
-  }
-
   public componentDidMount() {
     const initialTextContent = this.props.model.content as TextContentModelType;
     this.prevText = initialTextContent.text;
@@ -323,18 +291,16 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         // somehow detects the selection change before the click on the
         // delete button is processed by the workspace. For now, we just
         // disable focus change on deselection.
-        ui.setSelectedTile(model);
+        debouncedSelectTile(ui, model);
       }
     }
 
     if (content.type === "Text" && !readOnly) {
       content.setSlate(change.value);
-      this.setState(
-        {
-          value: change.value,
-          selectedButtons: this.getSelectedIcons(change).sort()
-        }
-      );
+      this.setState({
+        value: change.value,
+        selectedButtons: this.getSelectedIcons(change).sort()
+      });
     }
   }
 
