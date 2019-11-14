@@ -299,8 +299,12 @@ export class Firebase {
     return this.ref(this.getUserPath(this.db.stores.user)).child("latestGroupId");
   }
 
-  public getLastSupportViewTimestampRef() {
-    return this.ref(this.getUserPath(this.db.stores.user)).child("lastSupportViewTimestamp");
+  public getLastDocumentSupportViewTimestampRef() {
+    return this.ref(this.getUserPath(this.db.stores.user)).child("lastDocumentSupportViewTimestamp");
+  }
+
+  public getLastTextSupportViewTimestampRef() {
+    return this.ref(this.getUserPath(this.db.stores.user)).child("lastTextSupportViewTimestamp");
   }
 
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {

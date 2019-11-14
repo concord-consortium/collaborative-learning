@@ -852,8 +852,12 @@ export class DB {
     });
   }
 
-  public setLastSupportViewTimestamp() {
-    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
+  public setLastDocumentSupportViewTimestamp() {
+    this.firebase.getLastDocumentSupportViewTimestampRef().set(Date.now());
+  }
+
+  public setLastTextSupportViewTimestamp() {
+    this.firebase.getLastTextSupportViewTimestampRef().set(Date.now());
   }
 
 }

@@ -81,6 +81,12 @@ export const TeacherSupportModel = types
     deleted: false
   })
   .views(self => ({
+    get isDocumentSupport() {
+      return !!self.originDoc;
+    },
+    get isTextSupport() {
+      return !self.originDoc;
+    },
     get sectionTarget() {
       return (self.type === SupportTarget.section) && self.sectionId
               ? self.sectionId
@@ -150,7 +156,16 @@ export const SupportsModel = types
     get teacherSupports() {
       return self.classSupports
         .concat(self.groupSupports)
-        .concat(self.userSupports);
+        .concat(self.userSupports)
+        .filter((support) => !support.deleted);
+    }
+  }))
+  .views((self) => ({
+    get teacherDocumentSupports() {
+      return self.teacherSupports.filter((support) => support.isDocumentSupport);
+    },
+    get teacherTextSupports() {
+      return self.teacherSupports.filter((support) => support.isTextSupport);
     }
   }))
   .views((self) => ({
@@ -174,20 +189,25 @@ export const SupportsModel = types
           return sectionId ? support.sectionId === sectionId : true;
         });
         return supports.concat(self.getTeacherSupportsForUserProblem(target));
-    }
-  }))
-  .views((self) => ({
-    hasNewSupports(afterTimestamp?: number) {
+    },
+
+    hasNewTeacherSupports(teacherSupports: TeacherSupportModelType[], afterTimestamp?: number) {
       if (afterTimestamp) {
-        // true if there has been a teacher support after the last support tab open
-        const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
-          return !support.deleted && (support.authoredTime > latest) ? support.authoredTime : latest;
+        const latestAuthoredTime = teacherSupports.reduce((latest, support) => {
+          return (support.authoredTime > latest) ? support.authoredTime : latest;
         }, 0);
         return latestAuthoredTime > afterTimestamp;
       } else {
-        // have not opened supports yet so true if any exist
-        return self.allSupports.length > 0;
+        return teacherSupports.length > 0;
       }
+    }
+  }))
+  .views((self) => ({
+    hasNewTeacherDocumentSupports(afterTimestamp?: number) {
+      return self.hasNewTeacherSupports(self.teacherDocumentSupports, afterTimestamp);
+    },
+    hasNewTeacherTextSupports(afterTimestamp?: number) {
+      return self.hasNewTeacherSupports(self.teacherTextSupports, afterTimestamp);
     }
   }))
   .actions((self) => {
@@ -288,6 +308,11 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
+    // skip teacher text supports
+    if ((support.supportType === SupportType.teacher) && support.isTextSupport) {
+      return;
+    }
+
     const { sectionId } = support;
     if (sectionId === lastSection) {
       ++index;

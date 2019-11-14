@@ -11,7 +11,8 @@ import { isAlive } from "mobx-state-tree";
 export class DBSupportsListener extends BaseListener {
   private db: DB;
   private supportsRef: firebase.database.Reference | null = null;
-  private lastSupportViewTimestampRef: firebase.database.Reference | null = null;
+  private lastDocumentSupportViewTimestampRef: firebase.database.Reference | null = null;
+  private lastTextSupportViewTimestampRef: firebase.database.Reference | null = null;
   private onChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
@@ -29,9 +30,13 @@ export class DBSupportsListener extends BaseListener {
     this.supportsRef.on("child_changed", this.onChildChanged = this.handleSupportsUpdate("child_changed"));
     this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
 
-    this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
-    this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
-    this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
+    this.lastDocumentSupportViewTimestampRef = this.db.firebase.getLastDocumentSupportViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastDocumentSupportViewTimestampRef);
+    this.lastDocumentSupportViewTimestampRef.on("value", this.handleLastDocumentSupportViewTimestampRef);
+
+    this.lastTextSupportViewTimestampRef = this.db.firebase.getLastTextSupportViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastTextSupportViewTimestampRef);
+    this.lastTextSupportViewTimestampRef.on("value", this.handleLastTextSupportViewTimestampRef);
   }
 
   public stop() {
@@ -40,14 +45,17 @@ export class DBSupportsListener extends BaseListener {
       this.supportsRef.off("child_changed", this.onChildChanged);
       this.supportsRef.off("child_added", this.onChildAdded);
     }
-    if (this.lastSupportViewTimestampRef) {
-      this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
-      this.lastSupportViewTimestampRef.off("value", this.handleLastSupportViewTimestampRef);
+    if (this.lastDocumentSupportViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastDocumentSupportViewTimestampRef);
+      this.lastDocumentSupportViewTimestampRef.off("value", this.handleLastDocumentSupportViewTimestampRef);
+    }
+    if (this.lastTextSupportViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastTextSupportViewTimestampRef);
+      this.lastTextSupportViewTimestampRef.off("value", this.handleLastTextSupportViewTimestampRef);
     }
   }
 
   private handleSupportsUpdate = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
-    debugger;
     const {supports} = this.db.stores;
     const dbSupports = snapshot.val();
     this.debugLogSnapshot("#handleSupportsUpdate", snapshot);
@@ -69,21 +77,16 @@ export class DBSupportsListener extends BaseListener {
         });
       } else {
 
-        THIS SEEMS TO BE BROKEN NOW
-
         // Logic is the same as above, but group + user supports are first keyed by ID
         Object.keys(dbSupports).forEach(audienceId => {
-          Object.keys(dbSupports[audienceId]).forEach(sectionTarget => {
-            const newSupports = dbSupports[audienceId][sectionTarget];
-            Object.keys(newSupports).forEach((key) => {
-              const dbSupport: DBSupport = newSupports[key];
-              const uid = dbSupport.uid;
-              const audience = audienceType === AudienceEnum.group
-                ? GroupAudienceModel.create({identifier: audienceId})
-                : UserAudienceModel.create({identifier: audienceId});
-              const supportModel = this.createSupportModel(uid, sectionTarget, dbSupport, audience);
-              supportModel && teacherSupports.push(supportModel);
-            });
+          Object.keys(dbSupports[audienceId]).forEach(key => {
+            const dbSupport: DBSupport = dbSupports[audienceId][key];
+            const uid = dbSupport.uid;
+            const audience = audienceType === AudienceEnum.group
+              ? GroupAudienceModel.create({identifier: audienceId})
+              : UserAudienceModel.create({identifier: audienceId});
+            const supportModel = this.createSupportModel(uid, key, dbSupport, audience);
+            supportModel && teacherSupports.push(supportModel);
           });
         });
       }
@@ -131,9 +134,15 @@ export class DBSupportsListener extends BaseListener {
     });
   }
 
-  private handleLastSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLastDocumentSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
     const val = snapshot.val() || undefined;
-    this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
-    this.db.stores.user.setLastSupportViewTimestamp(val);
+    this.debugLogSnapshot("#handleLastDocumentSupportViewTimestampRef", snapshot);
+    this.db.stores.user.setLastDocumentSupportViewTimestamp(val);
+  }
+
+  private handleLastTextSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+    const val = snapshot.val() || undefined;
+    this.debugLogSnapshot("#handleLastTextSupportViewTimestampRef", snapshot);
+    this.db.stores.user.setLastTextSupportViewTimestamp(val);
   }
 }

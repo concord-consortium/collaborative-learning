@@ -11,7 +11,8 @@ export interface DBPortalUser {
   latestGroupId: string;
   documentMetadata: DBDocumentMetadataMap;
   documents: DBDocumentMap;
-  lastSupportViewTimestamp?: number;
+  lastDocumentSupportViewTimestamp?: number;
+  lastTextSupportViewTimestamp?: number;
 }
 
 export interface DBDocumentMetadataMap {

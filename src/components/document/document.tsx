@@ -248,7 +248,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return;
     }
     const supports = this.stores.supports.getTeacherSupportsForUserProblem({userId: user.id});
-    console.log("supports", supports, this.stores.supports.teacherSupports);
     if (supports.length === 0) {
       return;
     }
