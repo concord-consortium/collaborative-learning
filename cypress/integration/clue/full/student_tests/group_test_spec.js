@@ -140,3 +140,7 @@ context('Test group functionalities', function(){
         });
     });
 });
+
+after(function(){
+    cy.clearQAData('all');
+  });
