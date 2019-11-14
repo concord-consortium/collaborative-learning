@@ -31,10 +31,6 @@
   border-bottom: 1px dotted silver;
 }
 
-.ag-theme-fresh .ag-row-selected {
-  background-color: #bde2e5;
-}
-
 .is-linked > .ag-theme-fresh .ag-row-selected {
   background-color: rgba(125, 40, 126, 0.3);
 }
