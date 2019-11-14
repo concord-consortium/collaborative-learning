@@ -306,7 +306,7 @@ context("Teacher Space", () => {
                 })
 
             })
-            it.skip('select stars for students', () => { // Want this to be for all students once it passes
+            it('select stars for students', () => { // Want this to be for all students once it passes
                 let classIndex = 0
                 let problemIndex = 0
                 let groups
