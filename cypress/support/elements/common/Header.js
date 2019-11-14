@@ -1,6 +1,6 @@
 class Header{
     getClassName(){
-        return cy.get('[data-test=user-class]');
+        return cy.get('.class[data-test=user-class]');
     }
     getUserName(){
         return cy.get('[data-test=user-name]')

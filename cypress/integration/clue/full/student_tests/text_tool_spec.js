@@ -15,7 +15,8 @@ before(function(){
 
     // cy.clearQAData('all');
     cy.visit(baseUrl+queryParams);
-    cy.wait(4000);
+    cy.waitForSpinner();
+    // cy.wait(4000);
 });
 
 context('Text tool tile functionalities', function(){

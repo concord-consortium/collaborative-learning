@@ -24,7 +24,8 @@ context('single student functional test',()=>{
             const queryParams = `${Cypress.config("queryParams")}`;
             // cy.clearQAData('all');
             cy.visit(baseUrl+queryParams);
-            cy.wait(4000);
+            cy.waitForSpinner();
+            // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('Left nav tabs open and close',()=>{
