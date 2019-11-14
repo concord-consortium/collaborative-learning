@@ -30,7 +30,7 @@ context('Test Canvas', function(){
             const queryParams = `${Cypress.config("queryParams")}`;
         
             cy.visit(baseUrl+queryParams);
-            // cy.wait(5000);
+            cy.waitForSpinner();
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
 

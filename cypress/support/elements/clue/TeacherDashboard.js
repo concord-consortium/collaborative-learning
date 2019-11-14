@@ -14,20 +14,19 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.problem[data-test="user-class"] .bp3-button')
+        return cy.get('.problem-dropdown[data-test="user-class"] .dropdown')
     }
     getClassDropdown() {
-        // return cy.get('.bp3-button').eq(3)
-        return cy.get('.class[data-test="user-class"] .bp3-button')
+        return cy.get('.class[data-test="user-class"] .dropdown')
     }
     getProblemList() {
-        return cy.get('.bp3-fill')
+        return cy.get('.problem-dropdown .dropdown')
     }
     getClassList() {
-        return cy.get('.bp3-fill')
+        return cy.get('.class .dropdown')
     }
     getViewToggle(view) { //view=["Dashboard", "Workspace"]
-        return cy.get('.bp3-button').contains(view)
+        return cy.get('.toggle-button').contains(view)
     }
     switchView(view) {
         this.getViewToggle(view).click();
