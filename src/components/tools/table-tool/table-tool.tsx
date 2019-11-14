@@ -117,8 +117,10 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
             unlinkGeometry: true
           };
     return (
-      <div className="table-tool" ref={this.domRef}
-          tabIndex={0} onKeyDown={this.handleKeyDown} >
+      <div className={`table-tool ${metadata.isLinked ? "is-linked" : ""}`}
+          ref={this.domRef}
+          tabIndex={0}
+          onKeyDown={this.handleKeyDown} >
         <DataTableComponent
           dataSet={this.state.dataSet}
           expressions={metadata.expressions}
