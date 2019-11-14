@@ -59,7 +59,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
     return (
       <button
         disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
-        key={i}
+        key={i} title={nodeType}
         onClick={handleAddNodeButtonClick}
       >
         <div className={iconClass}>{nodeIcons}</div>
