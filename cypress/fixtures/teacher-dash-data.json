@@ -25,8 +25,8 @@
                                         "textTool": 2,
                                         "tableTool": 1,
                                         "geometryTool": 1,
-                                        "drawingTool": 0,
-                                        "imageTool": 1
+                                        "drawingTool": 1,
+                                        "imageTool": 0
                                     }
                                 },
                                 {
