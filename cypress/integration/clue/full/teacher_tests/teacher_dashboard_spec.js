@@ -214,7 +214,7 @@ context("Teacher Space", () => {
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
                     debugger
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
-                    // cy.wait(500);
+                    cy.wait(1000)
                 })
             })
             it('clicking support button opens two up with group open', function() {
