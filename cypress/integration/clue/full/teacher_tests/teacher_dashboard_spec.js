@@ -45,7 +45,7 @@ context("Teacher Space", () => {
 
     context('Teacher Dashboard View', () => {
         describe('UI visibility', () => {
-            it.skip('verify header elements', () => {
+            it('verify header elements', () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempClass = clueData.classes[0]
 
@@ -150,7 +150,7 @@ context("Teacher Space", () => {
                 dashboard.getViewToggle("Dashboard").click({ force: true })
                 dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
             })
-            it.skip('verify selected class is shown in class dropdown', () => {
+            it('verify selected class is shown in class dropdown', () => {
                 cy.get('@clueData').then((clueData) => {
                     let initialClassIndex = 0
                     let tempClass = clueData.classes[initialClassIndex]
@@ -278,7 +278,7 @@ context("Teacher Space", () => {
 
 
             })
-            it.skip('can switch pages', () => {
+            it('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
                 // dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
                 // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
