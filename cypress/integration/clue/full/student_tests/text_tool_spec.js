@@ -24,7 +24,7 @@ context('Text tool tile functionalities', function(){
     before(()=>{
         clueCanvas.getInvestigationCanvasTitle()
             .then(($canvasTitle)=>{
-                title = $canvasTitle.text();
+                title = $canvasTitle.text().trim();
                 cy.log('title is: '+title)
             })
     })
