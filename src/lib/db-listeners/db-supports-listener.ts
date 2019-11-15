@@ -85,7 +85,7 @@ export class DBSupportsListener extends BaseListener {
             const audience = audienceType === AudienceEnum.group
               ? GroupAudienceModel.create({identifier: audienceId})
               : UserAudienceModel.create({identifier: audienceId});
-            const supportModel = this.createSupportModel(uid, key, dbSupport, audience);
+            const supportModel = this.createSupportModel(uid, "all", dbSupport, audience);
             supportModel && teacherSupports.push(supportModel);
           });
         });

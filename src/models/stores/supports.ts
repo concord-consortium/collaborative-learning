@@ -12,7 +12,6 @@ import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentCon
 import { DocumentModel, SupportPublication, DocumentModelType } from "../document/document";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { TeacherSupport } from "../../clue/components/teacher/teacher-support";
 
 export enum AudienceEnum {
   class = "class",
@@ -169,8 +168,8 @@ export const SupportsModel = types
     }
   }))
   .views((self) => ({
-    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-      return self.teacherSupports.filter(support => {
+    getTeacherTextSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherTextSupports.filter(support => {
         return support.showForUserProblem(target);
       });
     }
@@ -188,7 +187,7 @@ export const SupportsModel = types
         const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
           return sectionId ? support.sectionId === sectionId : true;
         });
-        return supports.concat(self.getTeacherSupportsForUserProblem(target));
+        return supports.concat(self.getTeacherTextSupportsForUserProblem(target));
     },
 
     hasNewTeacherSupports(teacherSupports: TeacherSupportModelType[], afterTimestamp?: number) {

@@ -15,6 +15,7 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
+import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 
 import "./document.sass";
 
@@ -44,6 +45,7 @@ interface IState {
   documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
   commentTileId: string;
+  stickyNotesVisible: boolean;
 }
 
 type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
@@ -156,6 +158,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
+  private stickyNoteIcon: HTMLDivElement | null;
+  private documentContainer: HTMLDivElement | null;
 
   constructor(props: IProps) {
     super(props);
@@ -175,7 +179,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     this.state = {
       documentKey: props.document.key,
       isCommentDialogOpen: false,
-      commentTileId: ""
+      commentTileId: "",
+      stickyNotesVisible: false
     };
   }
 
@@ -184,10 +189,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <DocumentContext.Provider value={this.state.documentContext}>
         {this.renderToolbar()}
-        <div key="document" className="document">
+        <div key="document" className="document" ref={(el) => this.documentContainer = el}>
           {this.renderTitleBar(type)}
           {this.renderCanvas()}
           {this.renderStatusBar(type)}
+          {this.renderStickyNotesPopup()}
         </div>
       </DocumentContext.Provider>
     );
@@ -225,7 +231,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           </div>
         }
         <div className="title" data-test="document-title">
-          {problemTitle} {this.renderStickyNoteIcon()}
+          {problemTitle} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
           <div className="actions" data-test="document-titlebar-actions">
@@ -242,16 +248,78 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderStickyNoteIcon() {
-    const { user } = this.stores;
+  private getStickyNoteData() {
     if (!this.isPrimary()) {
+      return {teacherTextSupports: [], hasNotes: false, showNotes: false};
+    }
+    const { user, supports } = this.stores;
+    const { stickyNotesVisible } = this.state;
+
+    const teacherTextSupports = supports.getTeacherTextSupportsForUserProblem({
+      userId: user.id,
+      groupId: user.latestGroupId
+    }).filter((support) => support.supportType === SupportType.teacher) as TeacherSupportModelType[];
+    teacherTextSupports.sort((a, b) => a.authoredTime - b.authoredTime);
+
+    const hasNotes = teacherTextSupports.length > 0;
+    const hasNewTeacherDocumentSupports = supports.hasNewTeacherTextSupports(user.lastTextSupportViewTimestamp);
+    const showNotes = hasNotes && (stickyNotesVisible || hasNewTeacherDocumentSupports);
+    return {teacherTextSupports, hasNotes, showNotes};
+  }
+
+  private renderStickyNotes() {
+    const {hasNotes, showNotes} = this.getStickyNoteData();
+    if (!hasNotes) {
       return;
     }
-    const supports = this.stores.supports.getTeacherSupportsForUserProblem({userId: user.id});
-    if (supports.length === 0) {
+    const onClick = showNotes ? this.handleViewStickyNoteClose : this.handleViewStickyNoteOpen;
+    return (
+      <div ref={(el) => this.stickyNoteIcon = el}>
+        <StickyNoteButton onClick={onClick} />
+      </div>
+    );
+  }
+
+  private renderStickyNotesPopup() {
+    const { user } = this.stores;
+    const {teacherTextSupports, showNotes} = this.getStickyNoteData();
+    if (!showNotes || !this.stickyNoteIcon || !this.documentContainer) {
       return;
     }
-    return <StickyNoteButton onClick={this.handleViewStickyNoteClick} />;
+    const title = teacherTextSupports.length === 1 ? "Note" : "Notes";
+    const documentRect = this.documentContainer.getBoundingClientRect();
+    const iconRect = this.stickyNoteIcon.getBoundingClientRect();
+    const maxWidth = 350;
+    const top = 55;
+    const left = (iconRect.left - documentRect.left) - (maxWidth / 2);
+    return (
+      <div className="sticky-note-popup" style={{top, left, maxWidth}}>
+        <div className="sticky-note-popup-titlebar">
+          <div className="sticky-note-popup-titlebar-title" >{title}</div>
+          <div className="sticky-note-popup-titlebar-close-icon" onClick={this.handleViewStickyNoteClose} />
+        </div>
+        <div className="sticky-note-popup-items">
+          {teacherTextSupports.map((teacherSupport, index) => {
+            const { support, audience, authoredTime } = teacherSupport;
+            const sentTo = audience.type === AudienceEnum.group
+              ? `Group ${audience.identifier}`
+              : user.name;
+            const authoredTimeAsDate = new Date(authoredTime);
+            const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
+            return (
+              <div key={index} className={`sticky-note-popup-item ${index > 0 ? "border-top" : ""} `}>
+                <div className="sticky-note-popup-item-meta">
+                  Sent to: {sentTo}, {sentOn}
+                </div>
+                <div className="sticky-note-popup-item-content">
+                  {support.content}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   }
 
   private renderMode() {
@@ -506,7 +574,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.props.side === "primary";
   }
 
-  private handleViewStickyNoteClick = () => {
+  private setStickyNotesVisible = (stickyNotesVisible: boolean) => {
+    this.setState({stickyNotesVisible});
+    this.stores.db.setLastTextSupportViewTimestamp();
+  }
+
+  // can't use single toggle handler here as the visibility state also depends on
+  // new supports automatically making the notes show
+  private handleViewStickyNoteOpen = () => {
+    this.setStickyNotesVisible(true);
+  }
+  private handleViewStickyNoteClose = () => {
+    this.setStickyNotesVisible(false);
   }
 
 }
