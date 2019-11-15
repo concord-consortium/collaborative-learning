@@ -21,7 +21,7 @@ describe('Test student join a group', function(){
 
     function setup(student){
         cy.visit(baseUrl+'?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
-        cy.wait(3000);
+        cy.waitForSpinner();
     }
 
     it('Student 1 will join and will verify Join Group Dialog comes up with welcome message to correct student', function(){
@@ -34,7 +34,7 @@ describe('Test student join a group', function(){
         //select a group 20 from the dropdown
         cy.get('select').select('Group ' + group1);
         cy.get('[value="Create Group"]').click();
-        cy.wait(1000);
+        // cy.wait(1000);
     });
     it('will verify student is an specified group', function(){
         clueHeader.getGroupName().should('contain','Group '+group1);
@@ -112,3 +112,7 @@ describe('Test student join a group', function(){
         clueHeader.getGroupMembers().should('contain','S'+student1).and('contain','S'+student2).and('contain','S'+student4).and('contain','S'+student6);
     });
 });
+
+after(function(){
+    cy.clearQAData('all');
+  });

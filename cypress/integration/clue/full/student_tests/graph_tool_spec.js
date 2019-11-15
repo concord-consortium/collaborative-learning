@@ -18,7 +18,7 @@ before(function(){
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
-    cy.wait(4000);
+    // cy.wait(4000);
 });
 context('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
@@ -29,7 +29,7 @@ context('Test graph tool functionalities', function(){
         });
         it('will add points to a graph', function(){
             canvas.createNewExtraDocument(doc2)
-            cy.wait(2000)
+            // cy.wait(2000)
             clueCanvas.addTile('geometry');
             graphToolTile.getGraphTile().last().click();
             graphToolTile.addPointToGraph(5,5);
@@ -38,7 +38,7 @@ context('Test graph tool functionalities', function(){
         });
         it('will add a polygon to a graph', function(){
             canvas.createNewExtraDocument(doc3)
-            cy.wait(2000)
+            // cy.wait(2000)
             clueCanvas.addTile('geometry');
             graphToolTile.getGraphTile().last().click();
             graphToolTile.addPointToGraph(3.2,4);

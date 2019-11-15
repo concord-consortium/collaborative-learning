@@ -1,5 +1,14 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 import RightNav from "../../../../support/elements/common/RightNav";
+import Header from "../../../../support/elements/common/Header";
+import ClueCanvas from "../../../../support/elements/clue/cCanvas";
+import TeacherWorkspace from "../../../../support/elements/clue/TeacherWorkspace";
+
+let dashboard = new TeacherDashboard();
+let rightNav = new RightNav();
+let header = new Header;
+let clueCanvas = new ClueCanvas
+let workspace = new TeacherWorkspace
 
 /**
  * Notes:
@@ -14,10 +23,8 @@ import RightNav from "../../../../support/elements/common/RightNav";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Space", () => {
 
-    let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
+context("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -28,10 +35,7 @@ context.skip("Teacher Space", () => {
         cy.login("https://learn.concord.org", clueTeacher)
         // insert offering number for your activity below
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
-        cy.wait(1000)
-        cy.waitForSpinner()
-        cy.reload()
-        cy.wait(1000)
+        // cy.wait(1000)
         cy.waitForSpinner()
     })
 
@@ -41,29 +45,32 @@ context.skip("Teacher Space", () => {
 
     context('Teacher Dashboard View', () => {
         describe('UI visibility', () => {
-            it.skip('verify header elements', () => {
+            it('verify header elements', () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempClass = clueData.classes[0]
 
                     // Check Investigation Name visibility
                     dashboard.getInvestigationTitle().should('be.visible').and('contain', clueData.investigationTitle)
                     // Check problem list  UI and visibility
-                    dashboard.getProblemList().should('not.exist')
+                    dashboard.getProblemList().should('not.have.attr','open')
                     dashboard.getProblemDropdown().should('be.visible').click({ force: true })
-                    dashboard.getProblemList().should('exist').and('have.length', tempClass.problemTotal)
+                    dashboard.getProblemList().should('exist').and('have.attr','open')
+                    dashboard.getProblemList().find('.Menuitem').should('have.length', tempClass.problemTotal)
                     dashboard.getProblemDropdown().click({ force: true })
-                    dashboard.getProblemList().should('not.exist')
+                    dashboard.getProblemList().should('not.have.attr','open')
                     // Check class list UI and visibility
-                    dashboard.getClassList().should('not.exist')
+                    dashboard.getClassList().should('not.have.attr','open')
+                    dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className)
                     dashboard.getClassDropdown().should('be.visible').click({ force: true })
-                    dashboard.getClassList().should('exist').and('have.length', clueData.classes.length) // FIX THIS
+                    dashboard.getClassList().should('exist').and('have.attr', 'open') 
+                    dashboard.getClassList().find('.Menuitem').should('have.length', clueData.classes.length) // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
                     dashboard.getClassDropdown().click({ force: true })
-                    dashboard.getClassList().children().should('not.exist')
+                    dashboard.getClassList().should('not.have.attr','open')
                     // Check Dashboard and Workspace toggle default
-                    dashboard.getDashboardViewToggle().should('be.visible').and('have.class', 'bp3-active')
-                    dashboard.getWorkspaceViewToggle().should('be.visible').and('not.have.class', 'bp3-active')
+                    dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
+                    dashboard.getViewToggle('Workspace').should('be.visible').and ('not.have.class', 'selected')
                     // Check Teacher Username visibility and content
-                    dashboard.getUserName().should('be.visible').and('contain', clueData.teacherName)
+                    // header.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 })
             })
             it('verifies six pack and group names', () => { //check this test again
@@ -77,49 +84,73 @@ context.skip("Teacher Space", () => {
                     dashboard.getGroupName().eq(group.groupIndex).should('contain', group.groupName)
                     // Check for group length (4Up Count)
                     dashboard.getSixPackView().then(() => {
-                        dashboard.getFourUpViews().should('have.length', groups.length)
+                        dashboard.getFourUpViews().should('have.length', 6)
                     })
                 })
             })
             it('verify current and published toggle button appear and work', () => {
-                dashboard.getCurrentWorkToggle().should('have.class', 'selected').and('be.visible')
-                dashboard.getPublishedWorkToggle().should('not.have.class', 'selected').and('be.visible').click({ force: true })
-                dashboard.getCurrentWorkToggle().should('not.have.class', 'selected')
-                dashboard.getPublishedWorkToggle().should('have.class', 'selected')
-                dashboard.getCurrentWorkToggle().click({ force: true })
+                dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible')
+                dashboard.getWorkToggle("Published").should('not.have.class', 'selected').and('be.visible').click({ force: true })
+                dashboard.getWorkToggle("Current").should('not.have.class', 'selected')
+                dashboard.getWorkToggle("Published").should('have.class', 'selected')
+                dashboard.getWorkToggle("Current").click({ force: true })
             })
-            it('displays progress icons', () => {
-                dashboard.getSectionProgressIcons('IN').should('be.visible')
-                dashboard.getSectionProgressIcons('IC').should('be.visible')
-                dashboard.getSectionProgressIcons('WI').should('be.visible')
-                dashboard.getSectionProgressIcons('NW').should('be.visible')
+            describe('Progress area',()=>{
+                let sectionIDArr = ["IN","IC","WI","NW"]
+                it('displays progress icons', () => {
+                    sectionIDArr.forEach((section)=>{
+                        dashboard.getSectionProgressIcons(section).should('be.visible')
+                    })
+                })
+                it('displays progress numbers', ()=>{
+                    sectionIDArr.forEach((section)=>{
+                        dashboard.getTotalProgressNumber(section).should('be.visible')
+                        dashboard.getCurrentProgressNumber(section).should('be.visible')
+                    })
+                })
+            })
+            it('verify six-pack page toggle',()=>{ //only passes if there are more 6 groups in the class
+                dashboard.getPreviousPageButton().should('be.visible').and('have.class','disabled')
+                dashboard.getNextPageButton().should('be.visible').and('not.have.class', 'disabled')
             })
         })
         describe('Header element functionality', () => {
-            it.skip('verify switching problems changes six pack content and problem title', () => {
+            it('verify switching problems changes six pack content and problem title', () => {
                 cy.get('@clueData').then((clueData) => {
                     let problems = clueData.classes[0].problems
+                    let initProblemIndex = 0
                     let tempProblemIndex = 1
 
-                    dashboard.getProblemDropdown().should('not.contain', problems[tempProblemIndex].problemTitle)
+                    dashboard.getProblemDropdown().text().should('not.contain', problems[tempProblemIndex].problemTitle)
+                    dashboard.getGroups().should('have.length',6)
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
-                        dashboard.getProblemList().contains(problems[tempProblemIndex].problemTitle).click({ force: true })
-                        cy.wait(1000)
+                        dashboard.getProblemList().should('have.attr','open')
+                        dashboard.getProblemList().find('.Menuitem').contains(problems[tempProblemIndex].problemTitle).click({ force: true })
+                        // cy.wait(1000)
                         cy.waitForSpinner()
                         tempProblemIndex += 1
                     })
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle)
+                    dashboard.getGroups().should('have.length',0)
+
+                    //switch back to original problem for later test
+                    dashboard.getProblemDropdown().click({force:true})
+                    dashboard.getProblemList().find('.Menuitem').contains(problems[initProblemIndex].problemTitle).click({ force: true })
+                    // cy.wait(1000)
+                    cy.waitForSpinner()
                 })
             })
-            it.skip('verify dashboard/workspace switch changes workspace view', () => {
-                dashboard.getDashboardViewToggle().should('be.visible').and('have.class', 'bp3-active')
-                dashboard.getSingleWorkspace().should('not.be.visible')
-                dashboard.getWorkspaceViewToggle().should('be.visible').and('not.have.class', 'bp3-active').click({ force: true })
-                dashboard.getWorkspaceViewToggle().should('have.class', 'bp3-active')
-                dashboard.getSingleWorkspace().should('be.visible')
-                dashboard.getDashboardViewToggle().click({ force: true })
+            it('verify dashboard/workspace switch changes workspace view', () => {
+                dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
+                clueCanvas.getSingleWorkspace().should('not.be.visible')
+                dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected')
+                dashboard.getViewToggle('Workspace').click({ force: true })
+                dashboard.getViewToggle("Workspace").should('have.class', 'selected')
+                clueCanvas.getSingleWorkspace().should('be.visible')
+                dashboard.getViewToggle("Dashboard").click({ force: true })
+                dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
             })
-            it.skip('verify selected class is shown in class dropdown', () => {
+            it('verify selected class is shown in class dropdown', () => {
                 cy.get('@clueData').then((clueData) => {
                     let initialClassIndex = 0
                     let tempClass = clueData.classes[initialClassIndex]
@@ -127,7 +158,7 @@ context.skip("Teacher Space", () => {
                     dashboard.getClassDropdown().should('contain', tempClass.className).and('be.visible')
                 })
             })
-            it.skip('verify switching classes changes six pack content', () => {
+            it('verify switching classes changes six pack content', () => {
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0
                     const tempClassIndex = 1
@@ -137,16 +168,28 @@ context.skip("Teacher Space", () => {
                     let initClassName = initClass.className
 
                     dashboard.getClassDropdown().should('contain', initClassName)
+                    dashboard.getGroups().should('have.length',6)
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true })
-                        cy.wait(1000)
+                        // cy.wait(1000)
                         cy.waitForSpinner()
                     })
                     dashboard.getClassDropdown().should('contain', className)
+                    dashboard.getGroups().should('have.length',0)
+
+                    //switch back to original problem for later test
+                    dashboard.getClassDropdown().click({force:true})
+                    dashboard.getClassList().find('.Menuitem').contains(initClassName).click({ force: true })
+                    // cy.wait(1000)
+                    cy.waitForSpinner()
                 })
             })
         })
+
         describe('6-pack view functionality - Current Work', () => {
+            before(function(){
+                dashboard.getProblemDropdown().text().as('problemTitle');
+            })
             it('verifies students are in correct groups', () => {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups
@@ -165,14 +208,44 @@ context.skip("Teacher Space", () => {
                     })
                 })
             })
-            it.skip('verify each canvas in a 4 up view is read only', () => {
+            it('verify each canvas in a 4 up view is read only', () => {
                 cy.get('@clueData').then((clueData) => {
                     let tempGroupIndex = 0
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
+                    debugger
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
+                    cy.wait(1000)
                 })
             })
-            it('verify clicking a students canvas in 4 up view zooms into students canvas', () => {
+            it('clicking support button opens two up with group open', function() {
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.getDashboardSupportButton().click();
+                    clueCanvas.getLeftSideWorkspace().should('be.visible')
+                    clueCanvas.getLeftSideWorkspaceTitle().should('contain',this.problemTitle);
+                    clueCanvas.getRightSideWorkspace().should('be.visible')
+                    clueCanvas.getRightSideInvestigationTitle().should('have.class', 'group-title')
+                    clueCanvas.getRightSideWorkspace().within(()=>{
+                        workspace.getGroupNumberButton().should('be.visible').and('have.length',groups.length)
+                    })
+                })
+                dashboard.switchView('Dashboard') //switch back to continue tests
+            })
+            it('clicking expand group button will open that single group in teacher workspace', () => {
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.getExpandGroupViewButton().eq(1).click();//hard coding clicking the first icon
+                    clueCanvas.getSingleWorkspace().should('be.visible');
+                    clueCanvas.getFourUpView().should('be.visible');
+                    clueCanvas.getInvestigationCanvasTitle().should('have.class', 'group-title')
+                    clueCanvas.getSingleWorkspace().within(()=>{
+                        workspace.getGroupNumberButton().should('be.visible').and('have.length',groups.length)
+                    })
+                })
+
+                dashboard.switchView('Dashboard') //switch back to continue tests
+            })
+            it('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => { 
                 cy.get('@clueData').then((clueData) => {
                     let groupIndex = 0
                     let studentIndex = 0
@@ -185,44 +258,32 @@ context.skip("Teacher Space", () => {
                     })
 
                 })
-                it('clicking support button opens two up with group open', () => {
-
-                })
-                it('clicking expand group button will open that single group in teacher workspace', () => {
-
-                })
-                it('verifies full student names are displayed when student canvas is expanded', () => {
-
-                })
             })
-            it.skip('verifies section tool progress', () => {
-                /**
-                 * We can currently figure out the number of tool tiles that
-                 * exist for each student in each section from the fixture file.
-                 * My idea was to see if we can use the fixture file to decide
-                 * the number of random tiles that are generated for each student
-                 * using your code for generating student data.
-                 * 
-                 * I am not sure what your code is yet (I should have looked at it)
-                 * But they data file can give you the total # of each tool tile.
-                 * 
-                 * The bigger question is that when testing against the document how
-                 * are we able to isolate sections in the DOM since the section 
-                 * headers are just tool tiles as well? It is hard to count which 
-                 * tool tiles will be associated with the sections.
-                 * 
-                 * Maybe we can just test the first section and only have tool 
-                 * tiles in the first section so that we know at least one of the
-                 * sections are accurately calculated in the 'progress'?
-                 */
+            it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
+                // total = 30, IN = 30, IC = 9, WI = 10, NW = 7
+                let progress = {"total":"30",
+                                 "IN":"30",
+                                 "IC":"9",
+                                 "WI":"10",
+                                 "NW":"7"
+                                }; 
+                dashboard.getTotalProgressNumber("IN").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("IC").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("WI").should('contain',progress["total"])
+                dashboard.getTotalProgressNumber("NW").should('contain',progress["total"])
+                dashboard.getCurrentProgressNumber("IN").should('contain',progress["IN"])
+                dashboard.getCurrentProgressNumber("IC").should('contain',progress["IC"])
+                dashboard.getCurrentProgressNumber("WI").should('contain',progress["WI"])
+                dashboard.getCurrentProgressNumber("NW").should('contain',progress["NW"])
+
+
             })
-            it.skip('can switch pages', () => {
+            it('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups
                 // dashboard.getPreviousPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
                 // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
 
                 // Use when clue class has MORE than 6 groups
-
                 dashboard.getPreviousPageButton().should('have.class', 'disabled')
                 dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
                 dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
@@ -231,21 +292,32 @@ context.skip("Teacher Space", () => {
         })
         describe('6-pack view functionality - Published Work', () => {
             it('switches to published work tab and checks UI options', () => {
+                // not working - nocan't get to the right canvas
+                let classIndex = 0
+                let problemIndex = 0
+                let groupIndex = 0
+                let group
+
+                dashboard.switchWorkView("Published");
+                cy.get('@clueData').then((clueData) => {
+                    group = clueData.classes[classIndex].problems[problemIndex].groups[groupIndex]
+                    cy.wait(3000) //need to wait for canvases to load
+                    dashboard.verifyPublishStatus(group)
+                })
+
             })
-            it.skip('select stars for students', () => { // Want this to be for all students once it passes
+            it('select stars for students', () => { // Want this to be for all students once it passes
                 let classIndex = 0
                 let problemIndex = 0
                 let groups
 
-                dashboard.switchToPublishedView()
                 cy.get('@clueData').then((clueData) => {
-                    let dashboard = new TeacherDashboard()
                     groups = clueData.classes[classIndex].problems[problemIndex].groups
                     dashboard.starPublishedWork(groups)
                 })
             })
-            //Skipping for now because need to investigate how many are starred prior to this test
-            it.skip('removes all stars from student published work', () => { 
+
+            it('removes all stars from student published work', () => { 
                 dashboard.getStarPublishIcon().should('have.class', 'starred')
                 dashboard.getStarPublishIcon().click({ force: true, multiple: true })
                 dashboard.getStarPublishIcon().should('not.have.class', 'starred')
@@ -259,43 +331,6 @@ context.skip("Teacher Space", () => {
                  * Do some work as student
                  * Verify that there were changes/new elements
                  */
-            })
-        })
-    })
-
-    context('Teacher Workspace', () => {
-        describe('UI visibility', () => {
-            it.skip('verify right nav elements', () => {
-                //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
-                const testSupportLabel = '1.2 Now What Do You Know? Support 2'
-
-                dashboard.getWorkspaceViewToggle().click({ force: true })
-                dashboard.getRightNavMyWorkTab().should('be.visible').and('have.attr', 'aria-selected', false)
-                dashboard.getRightNavClassWorkTab().should('be.visible').and('have.attr', 'aria-selected', false)
-                dashboard.getRightNavSupportsTab().should('be.visible').and('have.attr', 'aria-selected', false)
-                rightNav.getClassWorkTab().click({ force: true })
-            })
-        })
-        describe('teacher functionalities', () => {
-            it('verify document curation', () => {//adding a star to a student document
-            })
-            it('verify supports functionality', () => {//may need to break down even further between class, group, and student
-            })
-        })
-        describe('teacher functionality', () => {
-            /**
-             * Smoke test includes logging into LARA for verifying class + problem switching
-             * Verify how teacher workspace behaves when switching classes + problems
-             * Test the supports tab since the other tabs are testing in the student tests
-             */
-        })
-    })
-
-    context("Teacher Supports in student's view", () => {
-        describe("test visibility of teacher supports in student's workspace", () => {
-            it('verify support thumbnails are visible', () => {
-            })
-            it('verify supports open in 2up view righthand workspace', () => {
             })
         })
     })
