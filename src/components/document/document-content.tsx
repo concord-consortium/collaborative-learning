@@ -180,7 +180,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    return this.props.readOnly ? null : <div className="spacer" />;
+    return !this.props.readOnly &&
+            <div className="spacer" onClick={this.handleClick} />;
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
