@@ -10,6 +10,7 @@ import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
@@ -357,6 +358,10 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     if (e.target === this.wrapper.current) {
       this.editor.current && this.editor.current.focus();
       ui.setSelectedTile(model);
+      e.preventDefault();
+    }
+    else if (hasSelectionModifier(e)) {
+      ui.setSelectedTile(model, { append: true });
       e.preventDefault();
     }
   }
