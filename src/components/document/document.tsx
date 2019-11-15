@@ -17,6 +17,7 @@ import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
 
 import "./document.sass";
+import { Logger, LogEventName } from "../../lib/logger";
 
 export enum DocumentViewMode {
   Live,
@@ -428,7 +429,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleToggleVisibility = () => {
-    this.props.document.toggleVisibility();
+    const doc = this.props.document;
+    doc.toggleVisibility();
+    const op = doc.visibility && (doc.visibility === "public" ? "shared" : "unshared");
+    Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc, op);
   }
 
   private handleToggleTwoUp = () => {
