@@ -3,12 +3,12 @@ import * as React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentContentModelType } from "../../models/document/document-content";
-import { DocumentTool } from "../../models/document/document";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { kDragTileSource, kDragTileId, kDragTileContent,
-        dragTileSrcDocId, kDragRowHeight, kDragTileCreate, IToolApiInterface, IDragTiles, kDragTiles } from "../tools/tool-tile";
+import { DocumentContentModelType, IDropRowInfo } from "../../models/document/document-content";
+import { DocumentTool } from "../../models/document/document";
+import { IDragTiles } from "../../models/tools/tool-tile";
+import { dragTileSrcDocId, IToolApiInterface, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
 
 import "./document-content.sass";
 
@@ -27,13 +27,6 @@ interface IDragResizeRow {
   modelHeight?: number;
   domHeight?: number;
   deltaHeight: number;
-}
-
-export interface IDropRowInfo {
-  rowInsertIndex: number;
-  rowDropIndex?: number;
-  rowDropLocation?: string;
-  updateTimestamp?: number;
 }
 
 interface IState {
@@ -360,14 +353,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     if (!content) return;
     const dropRowInfo  = this.getDropRowInfo(e);
-    content.moveTiles(dragTiles.items, dropRowInfo);
+    content.userMoveTiles(dragTiles.items, dropRowInfo);
   }
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
     const { content } = this.props;
     if (!content) return;
     const { rowInsertIndex } = this.getDropRowInfo(e);
-    content.copyTilesIntoNewRows(dragTiles.items, rowInsertIndex);
+    content.userCopyTiles(dragTiles.items, rowInsertIndex);
   }
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -382,7 +375,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const isInsertingInExistingRow = insertRowInfo && insertRowInfo.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
     const addSidecarNotes = (createTileType === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.addTile(createTileType, {addSidecarNotes, insertRowInfo});
+    const rowTile = content.userAddTile(createTileType, {addSidecarNotes, insertRowInfo});
 
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);

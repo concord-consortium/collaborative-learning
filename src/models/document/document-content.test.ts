@@ -1,9 +1,8 @@
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds, DocumentContentSnapshotType } from "./document-content";
-import { defaultTextContent, TextContentModelType } from "../tools/text/text-content";
-import { IDragTiles, IDragTileItem } from "../../components/tools/tool-tile";
+import { IDropRowInfo } from "../../models/document/document-content";
+import { IDragTileItem } from "../../models/tools/tool-tile";
+import { defaultTextContent } from "../tools/text/text-content";
 import { getSnapshot } from "mobx-state-tree";
-import { IDropRowInfo } from "../../components/document/document-content";
-import { TileRowModelType } from "./tile-row";
 import { cloneDeep } from "lodash";
 
 describe("DocumentContentModel", () => {
