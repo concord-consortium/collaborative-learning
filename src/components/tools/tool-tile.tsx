@@ -134,12 +134,16 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     const { ui } = this.stores;
     const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
     const ToolComponent = kToolComponentMap[model.content.type];
+    const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
+    const placeholderClass = isPlaceholderTile ? " placeholder" : "";
+    const dragTileButton = !isPlaceholderTile &&
+                            <div ref={elt => this.dragElement = elt}><DragTileButton /></div>;
     const style: React.CSSProperties = {};
     if (widthPct) {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
     }
     return (
-      <div className={`tool-tile${selectedClass}`}
+      <div className={`tool-tile${selectedClass}${placeholderClass}`}
           ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
@@ -149,10 +153,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           draggable={true}
       >
         <LinkIndicatorComponent type={model.content.type} id={model.id} />
-        { ToolComponent !== PlaceholderToolComponent
-          ? <div ref={elt => this.dragElement = elt}> <DragTileButton /></div>
-          : null
-        }
+        {dragTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
