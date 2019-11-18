@@ -135,6 +135,13 @@ class TeacherDashboard {
         // subtract 4 because there are 4 published docs that are not in view
         this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
     }
+    clearAllStarsFromPublishedWork() {
+        return cy.get('.icon-star').each(star => {
+            if (star.hasClass('starred')) {
+                star.click({ force: true, multiple: true });
+            }
+        });
+    }
     clearAllStarred() {
         this.getRightNavTabListShown().within(() => {
             cy.get('svg.starred').click({ multiple: true })
