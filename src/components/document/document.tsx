@@ -15,6 +15,7 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
 
@@ -428,7 +429,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleToggleVisibility = () => {
-    this.props.document.toggleVisibility();
+    const doc = this.props.document;
+    doc.toggleVisibility();
+    Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc);
   }
 
   private handleToggleTwoUp = () => {

@@ -58,6 +58,11 @@ export enum LogEventName {
   CREATE_PERSONAL_DOCUMENT,
   CREATE_LEARNING_LOG,
 
+  SHOW_WORK,
+  SHOW_LEFT_TAB,
+  SHOW_RIGHT_TAB,
+  SHOW_FILTER,
+
   GRAPH_TOOL_CHANGE,
   DRAWING_TOOL_CHANGE,
   TABLE_TOOL_CHANGE,
@@ -68,7 +73,7 @@ export enum LogEventName {
   PUBLISH_DOCUMENT,
   PUBLISH_SUPPORT,
 
-  // the followng are for potential debugging purposes and are all marked "internal"
+  // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_FIREBASE_DISCONNECTED,
 
@@ -151,7 +156,8 @@ export class Logger {
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
-      documentProperties: document.properties && document.properties.toJSON() || {}
+      documentProperties: document.properties && document.properties.toJSON() || {},
+      documentVisibility: document.visibility
     };
     Logger.log(event, parameters);
   }
