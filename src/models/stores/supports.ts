@@ -3,7 +3,7 @@ import { cloneDeep } from "lodash";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { getSectionInitials, getSectionTitle, kAllSectionType, SectionType } from "../curriculum/section";
-import { ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
+import { ESupportMode, ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
 import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
@@ -80,11 +80,12 @@ export const TeacherSupportModel = types
     deleted: false
   })
   .views(self => ({
-    get isDocumentSupport() {
-      return !!self.originDoc;
+    // excludes sticky notes
+    get isTeacherSupport() {
+      return self.support.mode !== ESupportMode.stickyNote;
     },
-    get isTextSupport() {
-      return !self.originDoc;
+    get isStickyNote() {
+      return self.support.mode === ESupportMode.stickyNote;
     },
     get sectionTarget() {
       return (self.type === SupportTarget.section) && self.sectionId
@@ -144,6 +145,18 @@ export const CurricularSupportModel = types
 
 export const SupportItemModel = types.union(TeacherSupportModel, CurricularSupportModel);
 
+// utility function which finds authored teacher supports and sticky notes
+function hasNewTeacherSupports(teacherSupports: TeacherSupportModelType[], afterTimestamp?: number) {
+  if (afterTimestamp) {
+    const latestAuthoredTime = teacherSupports.reduce((latest, support) => {
+      return (support.authoredTime > latest) ? support.authoredTime : latest;
+    }, 0);
+    return latestAuthoredTime > afterTimestamp;
+  } else {
+    return teacherSupports.length > 0;
+  }
+}
+
 export const SupportsModel = types
   .model("Supports", {
     curricularSupports: types.array(CurricularSupportModel),
@@ -152,7 +165,8 @@ export const SupportsModel = types
     userSupports: types.array(TeacherSupportModel)
   })
   .views((self) => ({
-    get teacherSupports() {
+    // includes standard teacher supports and sticky notes
+    get allTeacherSupports() {
       return self.classSupports
         .concat(self.groupSupports)
         .concat(self.userSupports)
@@ -160,16 +174,22 @@ export const SupportsModel = types
     }
   }))
   .views((self) => ({
-    get teacherDocumentSupports() {
-      return self.teacherSupports.filter((support) => support.isDocumentSupport);
+    // standard supports (as opposed to sticky notes)
+    get teacherSupports() {
+      return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
     },
-    get teacherTextSupports() {
-      return self.teacherSupports.filter((support) => support.isTextSupport);
+    get teacherStickyNotes() {
+      return self.allTeacherSupports.filter((support) => support.isStickyNote);
     }
   }))
   .views((self) => ({
-    getTeacherTextSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-      return self.teacherTextSupports.filter(support => {
+    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherSupports.filter(support => {
+        return support.showForUserProblem(target);
+      });
+    },
+    getStickyNotesForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
       });
     }
@@ -187,26 +207,15 @@ export const SupportsModel = types
         const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
           return sectionId ? support.sectionId === sectionId : true;
         });
-        return supports.concat(self.getTeacherTextSupportsForUserProblem(target));
-    },
-
-    hasNewTeacherSupports(teacherSupports: TeacherSupportModelType[], afterTimestamp?: number) {
-      if (afterTimestamp) {
-        const latestAuthoredTime = teacherSupports.reduce((latest, support) => {
-          return (support.authoredTime > latest) ? support.authoredTime : latest;
-        }, 0);
-        return latestAuthoredTime > afterTimestamp;
-      } else {
-        return teacherSupports.length > 0;
-      }
+        return supports.concat(self.getTeacherSupportsForUserProblem(target));
     }
   }))
   .views((self) => ({
-    hasNewTeacherDocumentSupports(afterTimestamp?: number) {
-      return self.hasNewTeacherSupports(self.teacherDocumentSupports, afterTimestamp);
+    hasNewTeacherSupports(afterTimestamp?: number) {
+      return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
     },
-    hasNewTeacherTextSupports(afterTimestamp?: number) {
-      return self.hasNewTeacherSupports(self.teacherTextSupports, afterTimestamp);
+    hasNewStickyNotes(afterTimestamp?: number) {
+      return hasNewTeacherSupports(self.teacherStickyNotes, afterTimestamp);
     }
   }))
   .actions((self) => {
@@ -218,7 +227,7 @@ export const SupportsModel = types
           return (support: SupportModelType) => {
             supports.push(CurricularSupportModel.create({
               support: cloneDeep(support),
-              type: type as SupportTarget,
+              type,
               sectionId
             }));
           };
@@ -307,8 +316,8 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
-    // skip teacher text supports
-    if ((support.supportType === SupportType.teacher) && support.isTextSupport) {
+    // skip sticky notes
+    if ((support.supportType === SupportType.teacher) && support.isStickyNote) {
       return;
     }
 

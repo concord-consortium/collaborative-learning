@@ -7,7 +7,7 @@ import { FourUpComponent } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
 import { GroupVirtualDocument } from "../../../models/document/group-virtual-document";
 import { LogEventName, Logger } from "../../../lib/logger";
-import { createTextSupport } from "../../../models/curriculum/support";
+import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
 
@@ -59,14 +59,14 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
           ui.prompt(`Enter your message for ${focusedGroupUser.name}`, "", `Message ${focusedGroupUser.name}`, 5)
           .then((message) => {
             const audience = AudienceModel.create({type: AudienceEnum.user, identifier: focusedGroupUser.id});
-            db.createSupport(createTextSupport(message), "", audience);
+            db.createSupport(createStickyNote(message), "", audience);
           });
         }
         else {
           ui.prompt(`Enter your message for Group ${props.group.id}`, "", "Message Group", 5)
           .then((message) => {
             const audience = AudienceModel.create({type: AudienceEnum.group, identifier: props.group.id});
-            db.createSupport(createTextSupport(message), "", audience);
+            db.createSupport(createStickyNote(message), "", audience);
           });
         }
       };

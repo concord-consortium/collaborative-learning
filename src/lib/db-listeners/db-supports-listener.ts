@@ -1,6 +1,6 @@
 import { DB } from "../db";
 import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
-        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore, SupportType
+        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore
       } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
@@ -11,8 +11,8 @@ import { isAlive } from "mobx-state-tree";
 export class DBSupportsListener extends BaseListener {
   private db: DB;
   private supportsRef: firebase.database.Reference | null = null;
-  private lastDocumentSupportViewTimestampRef: firebase.database.Reference | null = null;
-  private lastTextSupportViewTimestampRef: firebase.database.Reference | null = null;
+  private lastSupportViewTimestampRef: firebase.database.Reference | null = null;
+  private lastStickyNoteViewTimestampRef: firebase.database.Reference | null = null;
   private onChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
@@ -30,13 +30,13 @@ export class DBSupportsListener extends BaseListener {
     this.supportsRef.on("child_changed", this.onChildChanged = this.handleSupportsUpdate("child_changed"));
     this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
 
-    this.lastDocumentSupportViewTimestampRef = this.db.firebase.getLastDocumentSupportViewTimestampRef();
-    this.debugLogHandler("#start", "adding", "on value", this.lastDocumentSupportViewTimestampRef);
-    this.lastDocumentSupportViewTimestampRef.on("value", this.handleLastDocumentSupportViewTimestampRef);
+    this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
+    this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
 
-    this.lastTextSupportViewTimestampRef = this.db.firebase.getLastTextSupportViewTimestampRef();
-    this.debugLogHandler("#start", "adding", "on value", this.lastTextSupportViewTimestampRef);
-    this.lastTextSupportViewTimestampRef.on("value", this.handleLastTextSupportViewTimestampRef);
+    this.lastStickyNoteViewTimestampRef = this.db.firebase.getLastStickyNoteViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastStickyNoteViewTimestampRef);
+    this.lastStickyNoteViewTimestampRef.on("value", this.handleLastStickyNoteViewTimestampRef);
   }
 
   public stop() {
@@ -45,13 +45,13 @@ export class DBSupportsListener extends BaseListener {
       this.supportsRef.off("child_changed", this.onChildChanged);
       this.supportsRef.off("child_added", this.onChildAdded);
     }
-    if (this.lastDocumentSupportViewTimestampRef) {
-      this.debugLogHandler("#stop", "removing", "on value", this.lastDocumentSupportViewTimestampRef);
-      this.lastDocumentSupportViewTimestampRef.off("value", this.handleLastDocumentSupportViewTimestampRef);
+    if (this.lastSupportViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
+      this.lastSupportViewTimestampRef.off("value", this.handleLastSupportViewTimestampRef);
     }
-    if (this.lastTextSupportViewTimestampRef) {
-      this.debugLogHandler("#stop", "removing", "on value", this.lastTextSupportViewTimestampRef);
-      this.lastTextSupportViewTimestampRef.off("value", this.handleLastTextSupportViewTimestampRef);
+    if (this.lastStickyNoteViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastStickyNoteViewTimestampRef);
+      this.lastStickyNoteViewTimestampRef.off("value", this.handleLastStickyNoteViewTimestampRef);
     }
   }
 
@@ -76,7 +76,6 @@ export class DBSupportsListener extends BaseListener {
           });
         });
       } else {
-
         // Logic is the same as above, but group + user supports are first keyed by ID
         Object.keys(dbSupports).forEach(audienceId => {
           Object.keys(dbSupports[audienceId]).forEach(key => {
@@ -117,8 +116,9 @@ export class DBSupportsListener extends BaseListener {
                              dbSupport: DBSupport,
                              audience: AudienceModelType) {
     if (!dbSupport || !dbSupport.content) return;
-    const supportContentType: ESupportType = (dbSupport.type as ESupportType) || ESupportType.text;
-    const supportModel = SupportModel.create({ type: supportContentType, content: dbSupport.content });
+    const { type, ...others } = dbSupport;
+    const supportContentType: ESupportType = (type as ESupportType) || ESupportType.text;
+    const supportModel = SupportModel.create({ type: supportContentType, ...others });
     if (!supportModel) return;
     return TeacherSupportModel.create({
       uid,
@@ -134,15 +134,15 @@ export class DBSupportsListener extends BaseListener {
     });
   }
 
-  private handleLastDocumentSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLastSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
     const val = snapshot.val() || undefined;
-    this.debugLogSnapshot("#handleLastDocumentSupportViewTimestampRef", snapshot);
-    this.db.stores.user.setLastDocumentSupportViewTimestamp(val);
+    this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
+    this.db.stores.user.setLastSupportViewTimestamp(val);
   }
 
-  private handleLastTextSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+  private handleLastStickyNoteViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
     const val = snapshot.val() || undefined;
-    this.debugLogSnapshot("#handleLastTextSupportViewTimestampRef", snapshot);
-    this.db.stores.user.setLastTextSupportViewTimestamp(val);
+    this.debugLogSnapshot("#handleLastStickyNoteViewTimestampRef", snapshot);
+    this.db.stores.user.setLastStickyNoteViewTimestamp(val);
   }
 }

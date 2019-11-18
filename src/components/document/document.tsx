@@ -6,16 +6,16 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument } from "../../models/document/document";
 import { ToolbarComponent } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
+import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
+         ProblemDocument } from "../../models/document/document";
+import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
-import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 
 import "./document.sass";
 
@@ -250,21 +250,21 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private getStickyNoteData() {
     if (!this.isPrimary()) {
-      return {teacherTextSupports: [], hasNotes: false, showNotes: false};
+      return {stickyNotes: [], hasNotes: false, showNotes: false};
     }
     const { user, supports } = this.stores;
     const { stickyNotesVisible } = this.state;
 
-    const teacherTextSupports = supports.getTeacherTextSupportsForUserProblem({
+    const stickyNotes = supports.getStickyNotesForUserProblem({
       userId: user.id,
       groupId: user.latestGroupId
     }).filter((support) => support.supportType === SupportType.teacher) as TeacherSupportModelType[];
-    teacherTextSupports.sort((a, b) => b.authoredTime - a.authoredTime);
+    stickyNotes.sort((a, b) => b.authoredTime - a.authoredTime);
 
-    const hasNotes = teacherTextSupports.length > 0;
-    const hasNewTeacherDocumentSupports = supports.hasNewTeacherTextSupports(user.lastTextSupportViewTimestamp);
-    const showNotes = hasNotes && (stickyNotesVisible || hasNewTeacherDocumentSupports);
-    return {teacherTextSupports, hasNotes, showNotes};
+    const hasNotes = stickyNotes.length > 0;
+    const hasNewStickyNotes = supports.hasNewStickyNotes(user.lastStickyNoteViewTimestamp);
+    const showNotes = hasNotes && (stickyNotesVisible || hasNewStickyNotes);
+    return {stickyNotes, hasNotes, showNotes};
   }
 
   private renderStickyNotes() {
@@ -282,11 +282,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderStickyNotesPopup() {
     const { user } = this.stores;
-    const {teacherTextSupports, showNotes} = this.getStickyNoteData();
+    const { stickyNotes, showNotes} = this.getStickyNoteData();
     if (!showNotes || !this.stickyNoteIcon || !this.documentContainer) {
       return;
     }
-    const title = teacherTextSupports.length === 1 ? "Note" : "Notes";
+    const title = stickyNotes.length === 1 ? "Note" : "Notes";
     const documentRect = this.documentContainer.getBoundingClientRect();
     const iconRect = this.stickyNoteIcon.getBoundingClientRect();
     const maxWidth = 350;
@@ -299,7 +299,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="sticky-note-popup-titlebar-close-icon" onClick={this.handleViewStickyNoteClose} />
         </div>
         <div className="sticky-note-popup-items">
-          {teacherTextSupports.map((teacherSupport, index) => {
+          {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
               ? `Group ${audience.identifier}`
@@ -576,7 +576,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private setStickyNotesVisible = (stickyNotesVisible: boolean) => {
     this.setState({stickyNotesVisible});
-    this.stores.db.setLastTextSupportViewTimestamp();
+    this.stores.db.setLastStickyNoteViewTimestamp();
   }
 
   // can't use single toggle handler here as the visibility state also depends on

@@ -28,8 +28,8 @@ export const UserModel = types
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
-    lastDocumentSupportViewTimestamp: types.maybe(types.number),
-    lastTextSupportViewTimestamp: types.maybe(types.number)
+    lastSupportViewTimestamp: types.maybe(types.number),
+    lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -64,11 +64,11 @@ export const UserModel = types
         self.portalClassOfferings.replace(user.portalClassOfferings);
       }
     },
-    setLastDocumentSupportViewTimestamp(timestamp: number) {
-      self.lastDocumentSupportViewTimestamp = timestamp;
+    setLastSupportViewTimestamp(timestamp: number) {
+      self.lastSupportViewTimestamp = timestamp;
     },
-    setLastTextSupportViewTimestamp(timestamp: number) {
-      self.lastTextSupportViewTimestamp = timestamp;
+    setLastStickyNoteViewTimestamp(timestamp: number) {
+      self.lastStickyNoteViewTimestamp = timestamp;
     }
   }))
   .views((self) => ({
