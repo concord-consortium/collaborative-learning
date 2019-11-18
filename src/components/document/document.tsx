@@ -259,7 +259,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       userId: user.id,
       groupId: user.latestGroupId
     }).filter((support) => support.supportType === SupportType.teacher) as TeacherSupportModelType[];
-    teacherTextSupports.sort((a, b) => a.authoredTime - b.authoredTime);
+    teacherTextSupports.sort((a, b) => b.authoredTime - a.authoredTime);
 
     const hasNotes = teacherTextSupports.length > 0;
     const hasNewTeacherDocumentSupports = supports.hasNewTeacherTextSupports(user.lastTextSupportViewTimestamp);
