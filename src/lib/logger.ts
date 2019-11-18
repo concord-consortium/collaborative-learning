@@ -59,6 +59,9 @@ export enum LogEventName {
   CREATE_LEARNING_LOG,
 
   SHOW_WORK,
+  SHOW_LEFT_TAB,
+  SHOW_RIGHT_TAB,
+  SHOW_FILTER,
 
   GRAPH_TOOL_CHANGE,
   DRAWING_TOOL_CHANGE,
@@ -90,6 +93,11 @@ interface IDocumentInfo {
   uid?: string;
   title?: string;
   properties?: { [prop: string]: string };
+}
+
+export enum LogPublishEvent {
+  SHARE = "share",
+  UNSHARE = "unshare"
 }
 
 export class Logger {
@@ -147,14 +155,14 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, operation?: string) {
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, publishEvent?: LogPublishEvent) {
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
       documentProperties: document.properties && document.properties.toJSON() || {},
-      operation: operation ? operation : ""
+      publishedVisibility: (publishEvent ? publishEvent : "")
     };
     Logger.log(event, parameters);
   }

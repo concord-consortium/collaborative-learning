@@ -108,6 +108,8 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
     this.props.onToggleExpansion?.(section);
+    !isExpanded && Logger.log(LogEventName.SHOW_FILTER,
+      { filter_name: section.title, filter_type: section.type });
   }
 
   private handleNewDocumentClick = async (section: NavTabSectionModelType) => {

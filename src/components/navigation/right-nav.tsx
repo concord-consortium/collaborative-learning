@@ -8,6 +8,7 @@ import { RightNavTabContents } from "../thumbnail/right-nav-tab-contents";
 import { ERightNavTab, NavTabSectionModelType, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
 import { map } from "lodash";
 import "./right-nav.sass";
+import { Logger, LogEventName } from "../../lib/logger";
 
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
@@ -172,19 +173,28 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private handleTabClick = (tab: ERightNavTab) => {
     const { ui } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
+    const logParameters = {
+      tab_name: tab.toString()
+    };
+    const logEvent = () => { Logger.log(LogEventName.SHOW_RIGHT_TAB, logParameters); };
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (!navDoneExpanding) {
         this.setState({navExpanding: true});
       }
+
       if (tab === ERightNavTab.kSupports) {
         this.updateStudentLastViewSupportTimestamp();
       }
+
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
-        this.stores.ui.toggleRightNav(true);
+        ui.toggleRightNav(true);
+        logEvent();
       } else {
-        this.stores.ui.toggleRightNav();
+        ui.toggleRightNav();
+        ui.rightNavExpanded && logEvent();
       }
+
       if (navDoneExpanding) {
         this.updateComponentLoadAllowedState();
       }

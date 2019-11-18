@@ -15,9 +15,9 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
+import { Logger, LogEventName, LogPublishEvent } from "../../lib/logger";
 
 import "./document.sass";
-import { Logger, LogEventName } from "../../lib/logger";
 
 export enum DocumentViewMode {
   Live,
@@ -431,8 +431,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleToggleVisibility = () => {
     const doc = this.props.document;
     doc.toggleVisibility();
-    const op = doc.visibility && (doc.visibility === "public" ? "shared" : "unshared");
-    Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc, op);
+    const publishEvent = doc.visibility &&
+      (doc.visibility === "public"
+        ? LogPublishEvent.SHARE
+        : LogPublishEvent.UNSHARE);
+    Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc, publishEvent);
   }
 
   private handleToggleTwoUp = () => {
