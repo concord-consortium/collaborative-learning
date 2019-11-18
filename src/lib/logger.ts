@@ -95,11 +95,6 @@ interface IDocumentInfo {
   properties?: { [prop: string]: string };
 }
 
-export enum LogPublishEvent {
-  SHARE = "share",
-  UNSHARE = "unshare"
-}
-
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
     if (DEBUG_LOGGER) {
@@ -155,14 +150,14 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, publishEvent?: LogPublishEvent) {
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
       documentProperties: document.properties && document.properties.toJSON() || {},
-      publishedVisibility: (publishEvent ? publishEvent : "")
+      documentVisibility: document.visibility
     };
     Logger.log(event, parameters);
   }

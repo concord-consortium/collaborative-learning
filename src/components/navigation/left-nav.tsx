@@ -5,9 +5,9 @@ import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "../base";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./left-nav.sass";
-import { Logger, LogEventName } from "../../lib/logger";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;

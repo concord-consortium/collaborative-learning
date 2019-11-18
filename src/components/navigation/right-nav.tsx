@@ -1,14 +1,15 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { map } from "lodash";
 
 import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { RightNavTabContents } from "../thumbnail/right-nav-tab-contents";
 import { ERightNavTab, NavTabSectionModelType, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
-import { map } from "lodash";
-import "./right-nav.sass";
 import { Logger, LogEventName } from "../../lib/logger";
+
+import "./right-nav.sass";
 
 // cf. right-nav.sass: $list-item-scale
 const kRightNavItemScale = 0.11;
