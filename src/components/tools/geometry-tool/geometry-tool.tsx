@@ -132,8 +132,8 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
       // requires non-empty tabIndex
       this.domElement.current.focus();
     }
-    // first click selects (or deselects) the tile
-    if (!ui.isSelectedTile(model) || hasSelectionModifier(e)) {
+    // first click selects the tile
+    if (!ui.isSelectedTile(model)) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
       this.didLastMouseDownSelectTile = true;
       // prevent the click from taking effect, e.g. creating a point
