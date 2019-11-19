@@ -231,11 +231,13 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return url ? url.startsWith("assets/") : false;
+    return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
   store(url: string) {
-    return Promise.resolve({ contentUrl: url, displayUrl: url });
+    // convert from prior path to new path
+    const _url = url.replace("assets/curriculum", "curriculum");
+    return Promise.resolve({ contentUrl: _url, displayUrl: _url });
   }
 };
 
