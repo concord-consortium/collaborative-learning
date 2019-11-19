@@ -96,7 +96,6 @@ class TeacherDashboard {
         dialog.getDialogTextInput().type(text)
         dialog.getDialogOKButton().click();
     }
-
     sendStudentNote(group, student, quadrant, text){
         this.getStudentCanvas(quadrant).click();
         this.getGroup(group).find(this.getStickyNoteIcon()).click();
@@ -104,7 +103,6 @@ class TeacherDashboard {
         dialog.getDialogTextInput().type(text)
         dialog.getDialogOKButton().click();
     }
-
     verifyWorkForGroupReadOnly(group) {
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {

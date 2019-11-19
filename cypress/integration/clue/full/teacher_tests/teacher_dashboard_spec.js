@@ -199,7 +199,6 @@ context("Teacher Space", () => {
                     let groupName = groups[groupIndex].groupName
                     let studentID = groups[groupIndex].students[studentIndex].studentID
 
-
                     dashboard.getGroupName().eq(groupIndex).should('contain', 'Group ' + groupName)
                     dashboard.getGroups().eq(groupIndex).within(() => {
                         //for (let i = 0; i < groups[tempGroupIndex].students.length; i++) {
@@ -214,6 +213,19 @@ context("Teacher Space", () => {
                     let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex]
                     dashboard.verifyWorkForGroupReadOnly(tempGroup)
                     cy.wait(1000)
+                })
+            })
+            it('verify message button opens message dialog to group',function(){
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.getDashboardSupportButton().click();
+                    clueCanvas.getLeftSideWorkspace().should('be.visible')
+                    clueCanvas.getLeftSideWorkspaceTitle().should('contain',this.problemTitle);
+                    clueCanvas.getRightSideWorkspace().should('be.visible')
+                    clueCanvas.getRightSideInvestigationTitle().should('have.class', 'group-title')
+                    clueCanvas.getRightSideWorkspace().within(()=>{
+                        workspace.getGroupNumberButton().should('be.visible').and('have.length',groups.length)
+                    })
                 })
             })
             it('clicking support button opens two up with group open', function() {
