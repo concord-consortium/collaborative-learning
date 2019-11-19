@@ -235,7 +235,9 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   store(url: string) {
-    return Promise.resolve({ contentUrl: url, displayUrl: url });
+    // convert from prior path to new path
+    const _url = url.replace("assets/curriculum", "curriculum");
+    return Promise.resolve({ contentUrl: _url, displayUrl: _url });
   }
 };
 
