@@ -153,7 +153,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private renderTabDecoration(tab: ERightNavTab) {
     if (tab === ERightNavTab.kSupports) {
       const {user, supports} = this.stores;
-      if (user.isStudent && supports.hasNewSupports(user.lastSupportViewTimestamp)) {
+      if (user.isStudent && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp)) {
         return <div className="support-badge" />;
       }
     }

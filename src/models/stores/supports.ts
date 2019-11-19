@@ -3,7 +3,7 @@ import { cloneDeep } from "lodash";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { getSectionInitials, getSectionTitle, kAllSectionType, SectionType } from "../curriculum/section";
-import { ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
+import { ESupportMode, ESupportType, SupportModel, SupportModelType } from "../curriculum/support";
 import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
@@ -12,7 +12,6 @@ import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentCon
 import { DocumentModel, SupportPublication, DocumentModelType } from "../document/document";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { TeacherSupport } from "../../clue/components/teacher/teacher-support";
 
 export enum AudienceEnum {
   class = "class",
@@ -81,6 +80,13 @@ export const TeacherSupportModel = types
     deleted: false
   })
   .views(self => ({
+    // excludes sticky notes
+    get isTeacherSupport() {
+      return self.support.mode !== ESupportMode.stickyNote;
+    },
+    get isStickyNote() {
+      return self.support.mode === ESupportMode.stickyNote;
+    },
     get sectionTarget() {
       return (self.type === SupportTarget.section) && self.sectionId
               ? self.sectionId
@@ -139,6 +145,18 @@ export const CurricularSupportModel = types
 
 export const SupportItemModel = types.union(TeacherSupportModel, CurricularSupportModel);
 
+// utility function which finds authored teacher supports and sticky notes
+function hasNewTeacherSupports(teacherSupports: TeacherSupportModelType[], afterTimestamp?: number) {
+  if (afterTimestamp) {
+    const latestAuthoredTime = teacherSupports.reduce((latest, support) => {
+      return (support.authoredTime > latest) ? support.authoredTime : latest;
+    }, 0);
+    return latestAuthoredTime > afterTimestamp;
+  } else {
+    return teacherSupports.length > 0;
+  }
+}
+
 export const SupportsModel = types
   .model("Supports", {
     curricularSupports: types.array(CurricularSupportModel),
@@ -147,10 +165,33 @@ export const SupportsModel = types
     userSupports: types.array(TeacherSupportModel)
   })
   .views((self) => ({
-    get teacherSupports() {
+    // includes standard teacher supports and sticky notes
+    get allTeacherSupports() {
       return self.classSupports
         .concat(self.groupSupports)
-        .concat(self.userSupports);
+        .concat(self.userSupports)
+        .filter((support) => !support.deleted);
+    }
+  }))
+  .views((self) => ({
+    // standard supports (as opposed to sticky notes)
+    get teacherSupports() {
+      return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
+    },
+    get teacherStickyNotes() {
+      return self.allTeacherSupports.filter((support) => support.isStickyNote);
+    }
+  }))
+  .views((self) => ({
+    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherSupports.filter(support => {
+        return support.showForUserProblem(target);
+      });
+    },
+    getStickyNotesForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherStickyNotes.filter(support => {
+        return support.showForUserProblem(target);
+      });
     }
   }))
   .views((self) => ({
@@ -166,26 +207,15 @@ export const SupportsModel = types
         const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
           return sectionId ? support.sectionId === sectionId : true;
         });
-
-        const teacherSupports = self.teacherSupports.filter(support => {
-          return support.showForUserProblem(target);
-        });
-
-        return supports.concat(teacherSupports);
+        return supports.concat(self.getTeacherSupportsForUserProblem(target));
     }
   }))
   .views((self) => ({
-    hasNewSupports(afterTimestamp?: number) {
-      if (afterTimestamp) {
-        // true if there has been a teacher support after the last support tab open
-        const latestAuthoredTime = self.teacherSupports.reduce((latest, support) => {
-          return !support.deleted && (support.authoredTime > latest) ? support.authoredTime : latest;
-        }, 0);
-        return latestAuthoredTime > afterTimestamp;
-      } else {
-        // have not opened supports yet so true if any exist
-        return self.allSupports.length > 0;
-      }
+    hasNewTeacherSupports(afterTimestamp?: number) {
+      return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
+    },
+    hasNewStickyNotes(afterTimestamp?: number) {
+      return hasNewTeacherSupports(self.teacherStickyNotes, afterTimestamp);
     }
   }))
   .actions((self) => {
@@ -197,7 +227,7 @@ export const SupportsModel = types
           return (support: SupportModelType) => {
             supports.push(CurricularSupportModel.create({
               support: cloneDeep(support),
-              type: type as SupportTarget,
+              type,
               sectionId
             }));
           };
@@ -286,6 +316,11 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
+    // skip sticky notes
+    if ((support.supportType === SupportType.teacher) && support.isStickyNote) {
+      return;
+    }
+
     const { sectionId } = support;
     if (sectionId === lastSection) {
       ++index;

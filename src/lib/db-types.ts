@@ -1,4 +1,4 @@
-import { ESupportType } from "../models/curriculum/support";
+import { ESupportMode, ESupportType } from "../models/curriculum/support";
 import { AudienceEnum, SectionTarget } from "../models/stores/supports";
 
 // NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
@@ -12,6 +12,7 @@ export interface DBPortalUser {
   documentMetadata: DBDocumentMetadataMap;
   documents: DBDocumentMap;
   lastSupportViewTimestamp?: number;
+  lastStickyNoteViewTimestamp?: number;
 }
 
 export interface DBDocumentMetadataMap {
@@ -272,6 +273,7 @@ export interface DBBaseSupport {
   properties: IDocumentProperties;
   timestamp: number;
   type: ESupportType;
+  mode?: ESupportMode;
   content: string;
   deleted: boolean;
 }
