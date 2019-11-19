@@ -13,11 +13,10 @@ install:
 - travis_retry gem install s3_website -v 3.4.0
 - travis_retry pip install awscli --upgrade --user
 - travis_retry npm ci
-- travis_retry cypress install
 script:
 - npm run build
 - npm run test:coverage -- --runInBand --forceExit
 - ./cypress/run_cypress_test.sh
-after_script:
+after_success:
 - ./s3_deploy.sh
 - ./rollbar_deploy.sh
