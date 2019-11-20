@@ -14,31 +14,45 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.bp3-button').eq(0)
+        return cy.get('.problem-dropdown[data-test="user-class"] .dropdown')
     }
     getClassDropdown() {
-        return cy.get('.bp3-button').eq(3)
+        return cy.get('.class[data-test="user-class"] .dropdown')
     }
     getProblemList() {
-        return cy.get('.bp3-fill')
+        return cy.get('.problem-dropdown .dropdown')
     }
     getClassList() {
-        return cy.get('.bp3-fill')
+        return cy.get('.class .dropdown')
     }
-    getDashboardViewToggle() {
-        return cy.get('.bp3-button').eq(1)
+    getViewToggle(view) { //view=["Dashboard", "Workspace"]
+        return cy.get('.toggle-button').contains(view)
     }
-    getSingleWorkspace() {
-        return cy.get('.single-workspace')
+    switchView(view) {
+        this.getViewToggle(view).click();
     }
-    getWorkspaceViewToggle() {
-        return cy.get('.bp3-button').eq(2)
+
+    // Dashboard Right Nav
+    // type=["Current", "Published"]
+    // sectionID = ["IN","IC","WI","NW"]
+    getWorkToggle(type) {
+        return cy.get('.toggle-button').contains(type+" Work")
+    }
+    switchWorkView(type) {
+        this.getWorkToggle(type).should('not.have.class', 'selected').click({ force: true }).should('have.class', 'selected')
+    }
+    getSectionProgressIcons(sectionID) {
+        return cy.get('.section-circle').should('contain', sectionID)
+    }
+    getTotalProgressNumber(sectionID) {
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-total');
+    }
+    getCurrentProgressNumber(sectionID) {
+        return cy.get('.section-circle').contains(sectionID).siblings('.section-progress').find('.section-current');
     }
 
     // Dashboard 6 - Pack (Current Work)
-    getCurrentWorkToggle() {
-        return cy.get('.toggle-button').eq(0)
-    }
+
     getSixPackView() {
         return cy.get('.teacher-group-six-pack')
     }
@@ -50,6 +64,15 @@ class TeacherDashboard {
     }
     getGroupByName(groupName) {
         return cy.get('.teacher-group').contains(groupName)
+    }
+    getGroup(groupIndex) {
+        return cy.get('.group-0-'+groupIndex)
+    }
+    getDashboardSupportButton() {
+        return cy.get('#icon-support')
+    }
+    getExpandGroupViewButton() {
+        return cy.get('[data-test=expand-group-view-icon]')
     }
     getFourUpViews() {
         return cy.get('.four-up')
@@ -92,13 +115,6 @@ class TeacherDashboard {
     }
 
     // Dashboard 6 - Pack (Published Work)
-    getPublishedWorkToggle() {
-        return cy.get('.toggle-button').eq(1)
-    }
-    switchToPublishedView() {
-        this.getPublishedWorkToggle().should('not.have.class', 'selected').click({ force: true }).should('have.class', 'selected')
-    }
-
     getStarPublishIcon() {
         return cy.get('.icon-star')
     }
@@ -116,7 +132,15 @@ class TeacherDashboard {
                 }
             }
         }
-        this.getStarPublishIcon().should('have.length', totalPublished).click({force:true,multiple:true})
+        // subtract 4 because there are 4 published docs that are not in view
+        this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
+    }
+    clearAllStarsFromPublishedWork() {
+        return cy.get('.icon-star').each(star => {
+            if (star.hasClass('starred')) {
+                star.click({ force: true, multiple: true });
+            }
+        });
     }
     clearAllStarred() {
         this.getRightNavTabListShown().within(() => {
@@ -125,31 +149,7 @@ class TeacherDashboard {
     }
 
 
-    // Workspace Right Nav
-    getRightNavMyWorkTab() {
-        return cy.get('div#rightNavTab-my-work')
-    }
-    getRightNavClassWorkTab() {
-        return cy.get('div#rightNavTab-class-work')
-    }
-    getRightNavSupportsTab() {
-        return cy.get('div#rightNavTab-supports')
-    }
-    getSectionProgressIcons(sectionID) {
-        return cy.get('.section-circle').should('contain', sectionID)
-    }
-    getClassWorkExtraWorkspaceTab() {
-        return cy.get('.section.personal.published')
-    }
-    getClassWorkProblemWorkspaceTab() {
-        return cy.get('.section.problem.published')
-    }
-    getClassWorkLearningLogsTab() {
-        return cy.get('.section.learning-log.published')
-    }
-    getClassWorkStarredTab() {
-        return cy.get('.section.problem.starred')
-    }
+    // Teacher Workspace Right Nav
     getRightNavTabListHidden() {
         return cy.get('.class-work').find('.list').should('have.class', 'hidden')
     }
@@ -157,16 +157,11 @@ class TeacherDashboard {
         return cy.get('.class-work').find('.shown').should('have.class', 'list')
     }
 
-    verifyWorkForGroupReadOnly(group) {
+    verifyWorkForGroupReadOnly(group) { //table-tool does not get the .read-only class
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
                 this.getGroups().eq(group.groupIndex).within(() => {
                     this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.tableTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.table-tool')
                 })
             }
             if (group.students[i].tools.geometryTool > 0) {
@@ -187,110 +182,24 @@ class TeacherDashboard {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    // getGroupChooserTab(){
-    //     return cy.get('#teacher-dashboard-groups');
-    // }
-    // getGroupName(){
-    //     return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-title');
-    // }
-    // getStudentList(){
-    //     return cy.get('.teacher-student-tab > .user-list')
-    // }
-    // getStudentName(){
-    //     return cy.get('.teacher-student-tab > .user-list > .user')
-    // }
-    // joinGroup(){
-    //     cy.get('.teacher-group-tab > .selected-group > .title > .actions > span').should('contain','Join Group').click();
-    // }
-    // getGroupMembers(){
-    //     return cy.get('.teacher-dashboard .teacher-group-tab > .group-list > .group > .group-users');
-    // }
-    getUserName() {
-        return cy.get('[data-test="user-name"]')
+    verifyPublishStatus(group){
+        console.log("students: "+group.students)
+        for(let i = 0; i < group.students.length; i++) {
+            if (group.students[i].published == 0) {
+                this.getGroup(0).within(() => {
+                    this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] span').should('contain','Not Published')
+                })
+            } else {
+                this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain',"Not Published")
+            }  
+        }
     }
-    // getClassSupportsSectionDropdown(){
-    //     return cy.get('.tab-contents > .teacher-supports > .teacher-support > .section-dropdown')
+    // selectStudent(student) {
+    //     this.getStudentName().contains(student).click();
     // }
-    // getClassSupportsSectionDropdownOptions(){
-    //     return cy.get('.tab-contents > .teacher-supports > .teacher-support > .section-dropdown > .option')
-    // }
-    // getClassSupportsMessageInput(){
-    //     return cy.get('[data-test=support-input-class]')
-    // }
-    // getClassSupportsMessage(){
-    //     return cy.get('.tab-contents > .teacher-supports > .teacher-support > div.content')
-    // }
-    // getGroupSupportsSectionDropdown(){
-    //     return cy.get('.teacher-group-tab > .selected-group .teacher-support > .section-dropdown')
-    // }
-    // getGroupSupportsSectionDropdownOptions(){
-    //     return cy.get('.teacher-group-tab > .selected-group .teacher-support > .section-dropdown > .option')
-    // }
-    // getGroupSupportsMessageInput(){
-    //     return cy.get('[data-test=support-input-group]')
-    // }
-    // getGroupSupportsMessage(){
-    //     return cy.get('.teacher-group-tab > .selected-group .teacher-support > div.content')
-    // }
-    // getStudentSupportsSectionDropdown(){
-    //     return cy.get('.teacher-student-tab > .selected-group .teacher-support > .section-dropdown')
-    // }
-    // getStudentSupportsSectionDropdownOptions(){
-    //     return cy.get('.teacher-student-tab > .selected-group .teacher-support > .section-dropdown > .option')
-    // }
-    // getStudentSupportsMessageInput(){
-    //     return cy.get('[data-test=support-input-student]')
-    // }
-    // getStudentSupportsMessage(){
-    //     return cy.get('.teacher-student-tab > .selected-group .teacher-support > div.content')
-    // }
-    // sendSupportMessage(level,text){
-    //     cy.get('[data-test=support-input-'+level+']').type(text);
-    //     cy.get('[data-test=support-submit-'+level+']').click();
-    // }
-    selectStudent(student) {
-        this.getStudentName().contains(student).click();
-    }
     selectGroup(group) {
         this.getGroupName().contains(group).click();
     }
-    selectSection(level, section) {
-        const sectionValue = { "All": "all", "Introduction": "introduction", "Initial Challenge": "initialChallenge", "What if...?": "whatIf", "Now What": "nowWhat", "Extra Workspace": "extraWorkspace" };
-        cy.log('in selectSection. level: ' + level + ' section: ' + section);
-        switch (level) {
-            case 'class':
-                this.getClassSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
-                cy.log('selected class');
-                break;
-            case 'group':
-                this.getGroupSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
-                cy.log('selected group');
-                break;
-            case 'user':
-                this.getStudentSupportsSectionDropdown().select(section).should('have.value', sectionValue[section]);
-                cy.log('selected student');
-                break;
-        }
-    }
-    // deleteClassSupportMessage () {
-    //     cy.get ('.tab-contents> .teacher-supports > .teacher-support > .icon-delete-tool').last().click();
-    // }
-    // deleteGroupSupportMessage () {
-    //     cy.get ('.teacher-group-tab > .selected-group .teacher-support > .icon-delete-tool').last().click();
-    // }
-    // deleteStudentSupportMessage () {
-    //     cy.get ('.teacher-student-tab > .selected-group .teacher-support > .icon-delete-tool').last().click();
-    // }
+
 }
 export default TeacherDashboard;

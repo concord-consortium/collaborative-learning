@@ -4,18 +4,16 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile'
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-const queryParam = `${Cypress.config("queryParams")}`
+const queryParams = `${Cypress.config("queryParams")}`
 let leftNav = new LeftNav,
     rightNav = new RightNav,
     clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
 
     before(function(){
-        const baseUrl = `${Cypress.config("baseUrl")}`;
-        const queryParams = `${Cypress.config("queryParams")}`;
-        // cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
-        cy.wait(4000);
+        cy.waitForSpinner();
+        // cy.wait(4000);
     });
 context('Test the overall workspace', function(){
     describe('Workspace UI',()=>{
@@ -36,8 +34,9 @@ context('Test the overall workspace', function(){
         });
 
         it('will verify that left nav area is closes when other tabs are opened', function(){ //should this be tab closes when no longer in that area? my work and left nav
-            cy.visit(baseUrl+queryParam);
-            cy.wait(2000)
+            cy.visit(baseUrl+queryParams);
+            cy.waitForSpinner();
+            // cy.wait(2000)
             leftNav.openLeftNavTab('Introduction'); //left nav expand area should be visible
             leftNav.getLeftNavExpandedSpace().should('be.visible');
             rightNav.getRightNavExpandedSpace().should('not.be.visible');
@@ -53,19 +52,22 @@ context('Test the overall workspace', function(){
             let tab1 ='Introduction';
 
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
-            cy.wait(3000);
+            cy.waitForSpinner();
+            // cy.wait(3000);
             
             clueCanvas.addTile('text');
             textToolTile.enterText('This is the '+tab1+ ' in Problem '+problem1);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);
 
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem2);
-            cy.wait(1000);
+            cy.waitForSpinner();
+            // cy.wait(1000);
             textToolTile.getTextTile().should('not.exist');
 
             //Shows student as disconnected and will not load the introduction canvas
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
-            cy.wait(2000);
+            cy.waitForSpinner();
+            // cy.wait(2000);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);
             clueCanvas.deleteTile('text')//clean up
         })

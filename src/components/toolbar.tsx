@@ -116,8 +116,8 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
 
   private handleDelete() {
     const { document } = this.props;
-    const { ui: { selectedTileId } } = this.stores;
-    if (selectedTileId) {
+    const { ui: { selectedTileIds } } = this.stores;
+    selectedTileIds.forEach(selectedTileId => {
       const toolApi = this.props.toolApiMap[selectedTileId];
       // if there is selected content inside the selected tile, delete it first
       if (toolApi && toolApi.hasSelection()) {
@@ -126,7 +126,7 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
       else {
         document.deleteTile(selectedTileId);
       }
-    }
+    });
   }
 
   private handleDragNewToolTile(tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) {

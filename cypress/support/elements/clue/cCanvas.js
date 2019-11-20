@@ -18,6 +18,10 @@ class ClueCanvas{
         return cy.get('[data-test=document-title]')
     }
 
+    getSingleWorkspace() {
+        return cy.get('.single-workspace')
+    }
+    
     getRowSectionHeader(){
         return cy.get('.row-section-header')
     }

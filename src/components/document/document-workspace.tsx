@@ -269,7 +269,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
           const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
-          primaryDocument.content.addTile("image", {
+          primaryDocument.content.userAddTile("image", {
             url,
             insertRowInfo: {
               rowInsertIndex

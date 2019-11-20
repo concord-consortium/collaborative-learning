@@ -78,7 +78,8 @@ export class DBProblemDocumentsListener extends BaseListener {
         const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
         const monitorRemote = currentUser.isTeacher || (!isOwnDocument && userInGroup);
         const monitorLocal = isOwnDocument;
-        const monitor = monitorRemote ? Monitor.Remote : (monitorLocal ? Monitor.Local : Monitor.None);
+        // Local changes take precident over remote changes …
+        const monitor = monitorLocal ? Monitor.Local : (monitorRemote ? Monitor.Remote : Monitor.None);
         this.db.createDocumentFromProblemDocument(document.self.uid, document, monitor)
           .then((doc) => {
             if (isOwnDocument) {

@@ -1,12 +1,14 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { map } from "lodash";
 
 import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { BaseComponent, IBaseProps } from "../base";
 import { RightNavTabContents } from "../thumbnail/right-nav-tab-contents";
 import { ERightNavTab, NavTabSectionModelType, RightNavTabMap, RightNavTabSpec } from "../../models/view/right-nav";
-import { map } from "lodash";
+import { Logger, LogEventName } from "../../lib/logger";
+
 import "./right-nav.sass";
 
 // cf. right-nav.sass: $list-item-scale
@@ -151,7 +153,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private renderTabDecoration(tab: ERightNavTab) {
     if (tab === ERightNavTab.kSupports) {
       const {user, supports} = this.stores;
-      if (user.isStudent && supports.hasNewSupports(user.lastSupportViewTimestamp)) {
+      if (user.isStudent && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp)) {
         return <div className="support-badge" />;
       }
     }
@@ -172,19 +174,28 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   private handleTabClick = (tab: ERightNavTab) => {
     const { ui } = this.stores;
     const navDoneExpanding = ui.rightNavExpanded;
+    const logParameters = {
+      tab_name: tab.toString()
+    };
+    const logEvent = () => { Logger.log(LogEventName.SHOW_RIGHT_TAB, logParameters); };
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (!navDoneExpanding) {
         this.setState({navExpanding: true});
       }
+
       if (tab === ERightNavTab.kSupports) {
         this.updateStudentLastViewSupportTimestamp();
       }
+
       if (ui.activeRightNavTab !== tab) {
         ui.setActiveRightNavTab(tab);
-        this.stores.ui.toggleRightNav(true);
+        ui.toggleRightNav(true);
+        logEvent();
       } else {
-        this.stores.ui.toggleRightNav();
+        ui.toggleRightNav();
+        ui.rightNavExpanded && logEvent();
       }
+
       if (navDoneExpanding) {
         this.updateComponentLoadAllowedState();
       }

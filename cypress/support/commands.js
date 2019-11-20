@@ -40,6 +40,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     for (i=0;i<students.length;i++) {
         cy.wait(2000)
         cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        // cy.waitForSpinner(); // using this wait does not set up the groups
         cy.wait(3000);
     }
     //verify Group num and there are 4 students in the group
@@ -73,7 +74,8 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
     const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data=='all') {
         cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=1&fakeUser=student:1');
-        cy.wait(3000);
+        // cy.wait(3000)
+        cy.waitForSpinner();
         cy.get('span').should('contain','QA Cleared: OK');
     }
 })
@@ -84,5 +86,6 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
     cy.get("form").submit()
 })
 Cypress.Commands.add("waitForSpinner", () => {
+    cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })

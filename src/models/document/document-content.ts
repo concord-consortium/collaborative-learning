@@ -13,17 +13,15 @@ import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOut
 import { cloneDeep, each } from "lodash";
 import * as uuid from "uuid/v4";
 import { Logger, LogEventName } from "../../lib/logger";
+import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
-import { IDropRowInfo } from "../../components/document/document-content";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
 import { safeJsonParse } from "../../utilities/js-utils";
 
 export interface INewTileOptions {
   rowHeight?: number;
   rowIndex?: number;
-  action?: LogEventName;
-  loggingMeta?: {};
 }
 
 export interface INewGeometryTileOptions extends INewTileOptions {
@@ -42,6 +40,14 @@ export interface INewRowTile {
   rowId: string;
   tileId: string;
   additionalTileIds?: string[];
+}
+export type NewRowTileArray = Array<INewRowTile | undefined>;
+
+export interface IDropRowInfo {
+  rowInsertIndex: number;
+  rowDropIndex?: number;
+  rowDropLocation?: string;
+  updateTimestamp?: number;
 }
 
 export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions {
@@ -84,6 +90,14 @@ export const DocumentContentModel = types
       },
       get contentId() {
         return contentId;
+      },
+      get firstTile(): ToolTileModelType | undefined {
+        for (const rowId of self.rowOrder) {
+          const row = rowId ? self.rowMap.get(rowId) : undefined;
+          const tileId = row?.getTileIdAtIndex(0);
+          const tile = tileId ? self.tileMap.get(tileId) : undefined;
+          if (tile) return tile;
+        }
       },
       getTile(tileId: string) {
         return tileId ? self.tileMap.get(tileId) : undefined;
@@ -316,11 +330,24 @@ export const DocumentContentModel = types
       if (o.rowHeight) {
         row.setRowHeight(o.rowHeight);
       }
-
-      const action = o.action || LogEventName.CREATE_TILE;
-      Logger.logTileEvent(action, tile, o.loggingMeta);
-
       return { rowId: row.id, tileId: tile.id };
+    },
+    addTileInExistingRow(content: ToolContentUnionType, options: INewTileOptions): INewRowTile | undefined {
+      const tile = createToolTileModelFromContent(content);
+      const o = options || {};
+      if (o.rowIndex === undefined) {
+        // by default, insert new tiles after last visible on screen
+        o.rowIndex = self.defaultInsertRow;
+      }
+      const row = self.getRowByIndex(o.rowIndex);
+      if (row) {
+        self.insertNewTileInRow(tile, row);
+        self.removeNeighboringPlaceholderRows(o.rowIndex);
+        if (o.rowHeight) {
+          row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
+        }
+        return { rowId: row.id, tileId: tile.id };
+      }
     },
     deleteRowAddingPlaceholderRowIfAppropriate(rowId: string) {
       const rowIndex = self.getRowIndex(rowId);
@@ -374,21 +401,36 @@ export const DocumentContentModel = types
                     defaultDrawingContent({stamps: defaultStamps}),
                     { rowHeight: kDrawingDefaultHeight, ...options });
     },
-    copyTileIntoNewRow(serializedTile: string, originalTileId: string, rowIndex: number, originalRowHeight?: number) {
-      const snapshot = safeJsonParse(serializedTile);
-      if (snapshot) {
-        const newRowOptions: INewTileOptions = {
-          rowIndex,
-          action: LogEventName.COPY_TILE,
-          loggingMeta: {
-            originalTileId
+    copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
+      const results: NewRowTileArray = [];
+      if (tiles.length > 0) {
+        let rowDelta = 0;
+        let lastRowIndex = -1;
+        tiles.forEach(tile => {
+          let result: INewRowTile | undefined;
+          const content = safeJsonParse(tile.tileContent).content;
+          if (content) {
+            const rowOptions: INewTileOptions = {
+              rowIndex: rowIndex + rowDelta
+            };
+            if (tile.rowHeight) {
+              rowOptions.rowHeight = tile.rowHeight;
+            }
+            if (tile.rowIndex !== lastRowIndex) {
+              result = self.addTileInNewRow(content, rowOptions);
+              if (lastRowIndex !== -1) {
+                rowDelta++;
+              }
+              lastRowIndex = tile.rowIndex;
+            }
+            else {
+              result = self.addTileInExistingRow(content, rowOptions);
+            }
           }
-        };
-        if (originalRowHeight) {
-          newRowOptions.rowHeight = originalRowHeight;
-        }
-        self.addTileInNewRow(snapshot.content, newRowOptions);
+          results.push(result);
+        });
       }
+      return results;
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
       if (newRowIndex === 0) {
@@ -465,8 +507,6 @@ export const DocumentContentModel = types
   .actions(self => {
     const actions = {
       deleteTile(tileId: string) {
-        Logger.logTileEvent(LogEventName.DELETE_TILE, self.tileMap.get(tileId));
-
         const rowsToDelete: TileRowModelType[] = [];
         self.rowMap.forEach(row => {
           // remove from row
@@ -487,13 +527,13 @@ export const DocumentContentModel = types
         // delete tile
         self.tileMap.delete(tileId);
       },
-      moveTile(tileId: string, rowInfo: IDropRowInfo) {
+      moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex: number = 0) {
         const srcRowId = self.findRowContainingTile(tileId);
         if (!srcRowId) return;
         const srcRowIndex = self.getRowIndex(srcRowId);
         const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
         if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-          self.moveTileToRow(tileId, rowDropIndex, 0);
+          self.moveTileToRow(tileId, rowDropIndex, tileIndex);
           return;
         }
         if ((rowDropIndex != null) && (rowDropLocation === "right")) {
@@ -584,7 +624,99 @@ export const DocumentContentModel = types
       }
     };
     return actions;
-  });
+  })
+  .actions(self => ({
+    mergeRow(srcRow: TileRowModelType, rowInfo: IDropRowInfo) {
+      const rowId = srcRow.id;
+      srcRow.tiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+      self.deleteRow(rowId);
+    },
+    moveTilesToNewRowAtIndex(rowTiles: IDragTileItem[], rowIndex: number) {
+      rowTiles.forEach((tile, index) => {
+        if (index === 0) {
+          self.moveTileToNewRow(tile.tileId, rowIndex);
+        }
+        else {
+          self.moveTileToRow(tile.tileId, rowIndex);
+        }
+      });
+    },
+    moveTilesToExistingRowAtIndex(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      rowTiles.forEach((tile, index) => {
+        self.moveTile(tile.tileId, rowInfo, index);
+      });
+    }
+  }))
+  .actions(self => ({
+    moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      if (tiles.length > 0) {
+        // organize tiles by row
+        const tileRows: {[index: number]: IDragTileItem[]} = {};
+        tiles.forEach(tile => {
+          tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
+          tileRows[tile.rowIndex].push(tile);
+        });
+
+        // move each row
+        const { rowInsertIndex, rowDropLocation } = rowInfo;
+        Object.values(tileRows).forEach(rowTiles => {
+          const rowIndex = rowTiles[0].rowIndex;
+          const row = self.getRowByIndex(rowIndex);
+          if (row?.tiles.length === rowTiles.length) {
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // entire row is being merged with an existing row
+              self.mergeRow(row, rowInfo);
+            }
+            else {
+              // entire row is being moved to a new row
+              self.moveRowToIndex(rowIndex, rowInsertIndex);
+            }
+          }
+          else {
+            if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
+              // part of row is being moved to an existing row
+              self.moveTilesToExistingRowAtIndex(rowTiles, rowInfo);
+            }
+            else {
+              // part of row is being moved to a new row
+              self.moveTilesToNewRowAtIndex(rowTiles, rowInsertIndex);
+            }
+          }
+        });
+      }
+    }
+  }))
+  .actions(self => ({
+    userAddTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+      const result = self.addTile(tool, options);
+      const newTile = result?.tileId && self.getTile(result.tileId);
+      if (newTile) {
+        Logger.logTileEvent(LogEventName.CREATE_TILE, newTile);
+      }
+      return result;
+    },
+    userDeleteTile(tileId: string) {
+      Logger.logTileEvent(LogEventName.DELETE_TILE, self.getTile(tileId));
+      self.deleteTile(tileId);
+    },
+    userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      tiles.forEach(tile => Logger.logTileEvent(LogEventName.MOVE_TILE, self.getTile(tile.tileId)));
+      self.moveTiles(tiles, rowInfo);
+    },
+    userCopyTiles(tiles: IDragTileItem[], rowIndex: number) {
+      const results = self.copyTilesIntoNewRows(tiles, rowIndex);
+      results.forEach((result, i) => {
+        const newTile = result?.tileId && self.getTile(result.tileId);
+        if (result && newTile) {
+          const originalTileId = tiles[i].tileId;
+          Logger.logTileEvent(LogEventName.COPY_TILE, newTile, { originalTileId });
+        }
+      });
+      return results;
+    }
+  }));
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {

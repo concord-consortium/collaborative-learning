@@ -3,6 +3,7 @@ import { BaseComponent, IBaseProps } from "../../base";
 import { observer, inject } from "mobx-react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import * as classNames from "classnames";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 interface IProps extends IBaseProps {
   model: ToolTileModelType;
@@ -152,7 +153,7 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const { model } = this.props;
     const { ui } = this.stores;
-    ui.setSelectedTile(model);
+    ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
   }
 
   private handleSettingsButton = () => {

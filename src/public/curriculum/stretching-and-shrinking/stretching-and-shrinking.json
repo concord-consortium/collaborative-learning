@@ -62,7 +62,7 @@
       {
         "content": {
           "type": "Image",
-          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_01_map_500w.png"
+          "url": "curriculum/stretching-and-shrinking/images/SS_LA_01_map_500w.png"
         }
       },
       {
@@ -74,7 +74,7 @@
       {
         "content": {
           "type": "Image",
-          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_02_river_500w.png"
+          "url": "curriculum/stretching-and-shrinking/images/SS_LA_02_river_500w.png"
         }
       },
       {
@@ -86,13 +86,13 @@
       {
         "content": {
           "type": "Image",
-          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_03_dog_500w.png"
+          "url": "curriculum/stretching-and-shrinking/images/SS_LA_03_dog_500w.png"
         }
       },
       {
         "content": {
           "type": "Image",
-          "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_500w.png"
+          "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_500w.png"
         }
       },
       {
@@ -185,7 +185,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/workspaceHelp.png"
+                      "url": "curriculum/stretching-and-shrinking/images/workspaceHelp.png"
                     }
                   },
                   {
@@ -261,7 +261,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/graphdoc.png"
+                      "url": "curriculum/stretching-and-shrinking/images/graphdoc.png"
                     }
                   },
                   {
@@ -276,7 +276,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
                     }
                   },
                   {
@@ -345,7 +345,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
                     }
                   }
                 ]
@@ -386,7 +386,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
                     }
                   },
                   {
@@ -527,7 +527,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
                     }
                   },
                   {
@@ -542,7 +542,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
                     }
                   },
                   {
@@ -690,7 +690,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
                     }
                   },
                   {
@@ -795,7 +795,7 @@
                    {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
                     }
                   }
                 ]
@@ -818,7 +818,7 @@
                   {
                     "content": {
                     "type": "Image",
-                    "url": "assets/curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
                     }
                   },
                   {
@@ -1155,7 +1155,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_2_In_15_mug_hat_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_15_mug_hat_500w.png"
                     }
                   },
                   {
@@ -1224,7 +1224,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_2_In_16_rules_mug_hat_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_16_rules_mug_hat_500w.png"
                     }
                   },
                   {
@@ -1334,7 +1334,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_3_In_17_three_characters_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_17_three_characters_500w.png"
                     }
                   },
                   {
@@ -1376,7 +1376,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_3_In_18_rectangles_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_18_rectangles_500w.png"
                     }
                   },
                   {
@@ -1408,7 +1408,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png"
                     }
                   },
                   {
@@ -1421,7 +1421,7 @@
                         {
                           "type": "image",
                           "parents": {
-                            "url": "assets/curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png",
+                            "url": "curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png",
                             "coords": [0, 0],
                             "size": [350, 368]
                           }
@@ -1870,7 +1870,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
                     }
                   },
                   {
@@ -1885,7 +1885,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
                     }
                   },
                   {
@@ -2420,7 +2420,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
                     }
                   },
                   {
@@ -2549,7 +2549,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
                     }
                   },
                   {
@@ -2564,7 +2564,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
                     }
                   }
                 ]
@@ -2649,7 +2649,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
                     }
                   }
                 ]
@@ -2691,7 +2691,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
                     }
                   }
                 ]
@@ -2748,7 +2748,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
                     }
                   }, {
                     "content": {
@@ -2761,7 +2761,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
                     }
                   }, {
                     "content": {
@@ -2783,7 +2783,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
                     }
                   }, {
                     "content": {
@@ -2796,7 +2796,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
                     }
                   }, 
                   {
@@ -2825,17 +2825,17 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
                     }
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
                     }
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
                     }
                   }
                 ]
@@ -2922,7 +2922,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IN_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IN_350w.png"
                     }
                   },
                   {
@@ -2952,18 +2952,18 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
                     }
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_36_Q2B_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_36_Q2B_350w.png"
                     }
                   }, 
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_37_Q2C_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_37_Q2C_350w.png"
                     }
                   },
                   {
@@ -2994,7 +2994,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
                     }
                   }, 
                   {
@@ -3070,7 +3070,7 @@
                   }, {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
                     }
                   }, {
                     "content": {
@@ -3119,7 +3119,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "assets/curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
                     }
                   }, {
                     "content": {

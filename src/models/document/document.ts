@@ -145,11 +145,11 @@ export const DocumentModel = types
     },
 
     addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
-      return self.content.addTile(tool, options);
+      return self.content.userAddTile(tool, options);
     },
 
     deleteTile(tileId: string) {
-      self.content.deleteTile(tileId);
+      self.content.userDeleteTile(tileId);
     },
 
     setTileComments(tileId: string, comments: TileCommentsModelType) {

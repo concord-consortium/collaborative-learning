@@ -23,7 +23,6 @@ interface LogMessage {
   appMode: string;
   investigation?: string;
   problem?: string;
-  section?: string;
   group?: string;
   time: number;
   event: string;
@@ -44,6 +43,7 @@ export enum LogEventMethod {
 export enum LogEventName {
   CREATE_TILE,
   COPY_TILE,
+  MOVE_TILE,
   DELETE_TILE,
 
   VIEW_SHOW_DOCUMENT,
@@ -58,6 +58,11 @@ export enum LogEventName {
   CREATE_PERSONAL_DOCUMENT,
   CREATE_LEARNING_LOG,
 
+  SHOW_WORK,
+  SHOW_LEFT_TAB,
+  SHOW_RIGHT_TAB,
+  SHOW_FILTER,
+
   GRAPH_TOOL_CHANGE,
   DRAWING_TOOL_CHANGE,
   TABLE_TOOL_CHANGE,
@@ -68,7 +73,7 @@ export enum LogEventName {
   PUBLISH_DOCUMENT,
   PUBLISH_SUPPORT,
 
-  // the followng are for potential debugging purposes and are all marked "internal"
+  // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_FIREBASE_DISCONNECTED,
 
@@ -85,7 +90,6 @@ type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
 interface IDocumentInfo {
   type: string;
   key?: string;
-  section?: string;
   uid?: string;
   title?: string;
   properties?: { [prop: string]: string };
@@ -126,8 +130,7 @@ export class Logger {
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
         documentKey: document.key,
-        documentType: document.type,
-        section: document.section
+        documentType: document.type
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -135,12 +138,11 @@ export class Logger {
         parameters = {
           ...parameters,
           sourceUsername: sourceDocument.uid,
-          souceObjectId: metaData.originalTileId,
+          sourceObjectId: metaData.originalTileId,
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {},
-          sourceSection: sourceDocument.section || document.section   // if it's instructions, use dest doc's section
+          sourceDocumentProperties: sourceDocument.properties || {}
         };
       }
     }
@@ -154,7 +156,8 @@ export class Logger {
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
-      documentProperties: document.properties && document.properties.toJSON() || {}
+      documentProperties: document.properties && document.properties.toJSON() || {},
+      documentVisibility: document.visibility
     };
     Logger.log(event, parameters);
   }

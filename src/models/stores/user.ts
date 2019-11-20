@@ -28,7 +28,8 @@ export const UserModel = types
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
-    lastSupportViewTimestamp: types.maybe(types.number)
+    lastSupportViewTimestamp: types.maybe(types.number),
+    lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
   .actions((self) => ({
     setName(name: string) {
@@ -65,6 +66,9 @@ export const UserModel = types
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;
+    },
+    setLastStickyNoteViewTimestamp(timestamp: number) {
+      self.lastStickyNoteViewTimestamp = timestamp;
     }
   }))
   .views((self) => ({

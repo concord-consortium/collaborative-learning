@@ -1,16 +1,18 @@
 import { DB } from "../db";
 import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
-        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore, SupportType
+        AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore
       } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
 import { BaseListener } from "./base-listener";
+import { isAlive } from "mobx-state-tree";
 
 export class DBSupportsListener extends BaseListener {
   private db: DB;
   private supportsRef: firebase.database.Reference | null = null;
   private lastSupportViewTimestampRef: firebase.database.Reference | null = null;
+  private lastStickyNoteViewTimestampRef: firebase.database.Reference | null = null;
   private onChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
@@ -31,6 +33,10 @@ export class DBSupportsListener extends BaseListener {
     this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
     this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
     this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
+
+    this.lastStickyNoteViewTimestampRef = this.db.firebase.getLastStickyNoteViewTimestampRef();
+    this.debugLogHandler("#start", "adding", "on value", this.lastStickyNoteViewTimestampRef);
+    this.lastStickyNoteViewTimestampRef.on("value", this.handleLastStickyNoteViewTimestampRef);
   }
 
   public stop() {
@@ -42,6 +48,10 @@ export class DBSupportsListener extends BaseListener {
     if (this.lastSupportViewTimestampRef) {
       this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
       this.lastSupportViewTimestampRef.off("value", this.handleLastSupportViewTimestampRef);
+    }
+    if (this.lastStickyNoteViewTimestampRef) {
+      this.debugLogHandler("#stop", "removing", "on value", this.lastStickyNoteViewTimestampRef);
+      this.lastStickyNoteViewTimestampRef.off("value", this.handleLastStickyNoteViewTimestampRef);
     }
   }
 
@@ -68,17 +78,14 @@ export class DBSupportsListener extends BaseListener {
       } else {
         // Logic is the same as above, but group + user supports are first keyed by ID
         Object.keys(dbSupports).forEach(audienceId => {
-          Object.keys(dbSupports[audienceId]).forEach(sectionTarget => {
-            const newSupports = dbSupports[audienceId][sectionTarget];
-            Object.keys(newSupports).forEach((key) => {
-              const dbSupport: DBSupport = newSupports[key];
-              const uid = dbSupport.uid;
-              const audience = audienceType === AudienceEnum.group
-                ? GroupAudienceModel.create({identifier: audienceId})
-                : UserAudienceModel.create({identifier: audienceId});
-              const supportModel = this.createSupportModel(uid, sectionTarget, dbSupport, audience);
-              supportModel && teacherSupports.push(supportModel);
-            });
+          Object.keys(dbSupports[audienceId]).forEach(key => {
+            const dbSupport: DBSupport = dbSupports[audienceId][key];
+            const uid = dbSupport.uid;
+            const audience = audienceType === AudienceEnum.group
+              ? GroupAudienceModel.create({identifier: audienceId})
+              : UserAudienceModel.create({identifier: audienceId});
+            const supportModel = this.createSupportModel(uid, "all", dbSupport, audience);
+            supportModel && teacherSupports.push(supportModel);
           });
         });
       }
@@ -89,10 +96,11 @@ export class DBSupportsListener extends BaseListener {
       addSupportDocumentsToStore({
         unit, investigation, problem, documents, supports: teacherSupports, db: this.db,
         onDocumentCreated: (support, document) => {
-          // teachers sync their support document properties to Firebase to track isDeleted
-          if (eventType === "child_added") {
+          // since there are multiple async calls before we get here check if the support is still in the tree
+          if (isAlive(support)) {
             const teacherSupport = support as TeacherSupportModelType;
             if (teacherSupport.uid === user.id) {
+              // teachers sync their support document properties to Firebase to track isDeleted
               const {audience, sectionTarget, key} = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
               this.db.listeners.syncDocumentProperties(document, path);
@@ -108,8 +116,9 @@ export class DBSupportsListener extends BaseListener {
                              dbSupport: DBSupport,
                              audience: AudienceModelType) {
     if (!dbSupport || !dbSupport.content) return;
-    const supportContentType: ESupportType = (dbSupport.type as ESupportType) || ESupportType.text;
-    const supportModel = SupportModel.create({ type: supportContentType, content: dbSupport.content });
+    const { type, ...others } = dbSupport;
+    const supportContentType: ESupportType = (type as ESupportType) || ESupportType.text;
+    const supportModel = SupportModel.create({ type: supportContentType, ...others });
     if (!supportModel) return;
     return TeacherSupportModel.create({
       uid,
@@ -121,7 +130,7 @@ export class DBSupportsListener extends BaseListener {
       authoredTime: dbSupport.timestamp,
       originDoc: dbSupport.type === ESupportType.publication ? dbSupport.originDoc : undefined,
       caption: dbSupport.properties && dbSupport.properties.caption,
-      deleted: dbSupport.deleted
+      deleted: dbSupport.deleted || !!(dbSupport.properties && dbSupport.properties.isDeleted)
     });
   }
 
@@ -129,5 +138,11 @@ export class DBSupportsListener extends BaseListener {
     const val = snapshot.val() || undefined;
     this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
     this.db.stores.user.setLastSupportViewTimestamp(val);
+  }
+
+  private handleLastStickyNoteViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
+    const val = snapshot.val() || undefined;
+    this.debugLogSnapshot("#handleLastStickyNoteViewTimestampRef", snapshot);
+    this.db.stores.user.setLastStickyNoteViewTimestamp(val);
   }
 }

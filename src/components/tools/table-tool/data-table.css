@@ -31,6 +31,10 @@
   border-bottom: 1px dotted silver;
 }
 
+.is-linked > .ag-theme-fresh .ag-row-selected {
+  background-color: rgba(125, 40, 126, 0.3);
+}
+
 .ag-cell-edit-input {
   font-size: 14px;
   text-align: center;

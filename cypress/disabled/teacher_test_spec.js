@@ -29,7 +29,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
         });
         it('will go to a teacher view of the setup class', function() {
             cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=teacher:'+teacher+'&problem='+problem);
-            cy.wait(3000)
+            // cy.wait(3000)
         });
         it('will verify if class name is correct', function(){
             header.getClassName().should('contain',''+'Class '+qaClass);

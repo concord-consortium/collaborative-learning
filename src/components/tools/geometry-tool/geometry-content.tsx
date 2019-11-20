@@ -881,7 +881,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (this.lastPasteCount > 0) {
           changes = changes.map((jsonChange) => {
             const change = safeJsonParse(jsonChange);
-            const delta = this.lastPasteCount * 0.8;
+            const kPixelOffset = 30 * this.lastPasteCount;
+            const xUserOffset = Math.round(10 * kPixelOffset / board.unitX) / 10;
+            const yUserOffset = Math.round(10 * kPixelOffset / board.unitY) / 10;
             switch (change && change.operation) {
               case "create":
                 // map ids of newly create object
@@ -895,8 +897,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 }
                 if (change.target === "point") {
                   // offset locations of points
-                  change.parents[0] += delta;
-                  change.parents[1] -= delta;
+                  change.parents[0] += xUserOffset;
+                  change.parents[1] -= yUserOffset;
                   newPointIds.push(change.properties.id);
                 }
                 else if (["polygon", "vertexAngle"].indexOf(change.target) >= 0) {
@@ -1324,12 +1326,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
-      return isVisiblePoint(elt)
-        || isVisibleEdge(elt)
-        || isVisibleMovableLine(elt)
-        || isAxisLabel(elt)
-        || isComment(elt)
-        || isMovableLineLabel(elt);
+      return isPolygon(elt)
+          || isVisiblePoint(elt)
+          || isVisibleEdge(elt)
+          || isVisibleMovableLine(elt)
+          || isAxisLabel(elt)
+          || isComment(elt)
+          || isMovableLineLabel(elt);
     };
 
     // synchronize initial selection
