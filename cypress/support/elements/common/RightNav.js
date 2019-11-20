@@ -13,11 +13,11 @@ class RightNav{
     }
 
     getRightNavTab(tab){
-        return cy.get('#rightNavTab'+tab+'.tab');
+        return cy.get('#rightNavTab-'+tab+'.tab');
     }
 
     openRightNavTab(tab){   
-        cy.get('#rightNavTab-'+tab+'.tab').click();
+        this.getRightNavTab(tab).click();
         cy.wait(2000);
     }
     closeRightNavTab(tab){   

@@ -73,7 +73,7 @@ class TeacherDashboard {
         return cy.get('.group-0-'+groupIndex)
     }
     getStickyNoteIcon(){
-        return cy.get('[data-test=sticky-note-icon]')
+        return '[data-test=sticky-note-icon]'
     }
     getDashboardSupportButton() {
         return cy.get('#icon-support')
@@ -155,9 +155,10 @@ class TeacherDashboard {
         this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
     }
     clearAllStarsFromPublishedWork() {
-        return cy.get('.icon-star').each(star => {
+        cy.get('.icon-star').each(star => {
+            console.log(star)
             if (star.hasClass('starred')) {
-                star.click({ force: true, multiple: true });
+                cy.wrap(star).click({ force: true, multiple: true });
             }
         });
     }
