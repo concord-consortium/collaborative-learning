@@ -585,9 +585,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // can't use single toggle handler here as the visibility state also depends on
   // new supports automatically making the notes show
   private handleViewStickyNoteOpen = () => {
+    Logger.log(LogEventName.OPEN_STICKY_NOTES);
     this.setStickyNotesVisible(true);
   }
   private handleViewStickyNoteClose = () => {
+    Logger.log(LogEventName.CLOSE_STICKY_NOTES);
     this.setStickyNotesVisible(false);
   }
 

@@ -8,6 +8,7 @@ import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/
 import { defaultTextContent } from "../models/tools/text/text-content";
 import { createToolTileModelFromContent, IDragTileItem, ToolTileModelType } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
+import { UserModel } from "../models/stores/user";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -22,7 +23,8 @@ describe("logger", () => {
   beforeEach(() => {
     mock.setup();
     stores = createStores({
-      appMode: "test"
+      appMode: "test",
+      user: UserModel.create({id: "0", portal: "test"})
     });
 
     Logger.initializeLogger(stores, investigation, problem);
@@ -41,7 +43,7 @@ describe("logger", () => {
         const request = JSON.parse(req.body());
 
         expect(request.application).toBe("CLUE");
-        expect(request.username).toBe("0");
+        expect(request.username).toBe("0@test");
         expect(request.investigation).toBe("Investigation 1");
         expect(request.problem).toBe("Problem 1.1");
         expect(request.session).toEqual(expect.anything());
