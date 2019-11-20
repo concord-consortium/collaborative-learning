@@ -149,6 +149,9 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
       .then(ok => {
         if (ok) {
           document.setProperty("isDeleted", "true");
+          if (document.type === SupportPublication) {
+            Logger.logDocumentEvent(LogEventName.DELETE_SUPPORT, document);
+          }
         }
       });
   }

@@ -60,6 +60,11 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
           .then((message) => {
             const audience = AudienceModel.create({type: AudienceEnum.user, identifier: focusedGroupUser.id});
             db.createSupport(createStickyNote(message), "", audience);
+            Logger.log(LogEventName.CREATE_STICKY_NOTE, {
+              type: "user",
+              targetUserId: focusedGroupUser.id,
+              text: message
+            });
           });
         }
         else {
@@ -67,6 +72,11 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
           .then((message) => {
             const audience = AudienceModel.create({type: AudienceEnum.group, identifier: props.group.id});
             db.createSupport(createStickyNote(message), "", audience);
+            Logger.log(LogEventName.CREATE_STICKY_NOTE, {
+              type: "group",
+              targetGroupId: props.group.id,
+              text: message
+            });
           });
         }
       };

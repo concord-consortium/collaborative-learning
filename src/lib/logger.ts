@@ -72,6 +72,11 @@ export enum LogEventName {
 
   PUBLISH_DOCUMENT,
   PUBLISH_SUPPORT,
+  DELETE_SUPPORT,
+
+  CREATE_STICKY_NOTE,
+  CLOSE_STICKY_NOTES,
+  OPEN_STICKY_NOTES,
 
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
