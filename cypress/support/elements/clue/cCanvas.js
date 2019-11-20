@@ -4,18 +4,29 @@ import DrawToolTile from './DrawToolTile'
 import TextToolTile from './TextToolTile'
 import TableToolTile from './TableToolTile'
 import Canvas from '../common/Canvas'
+import Dialog from '../common/Dialog'
 
 let graphToolTile = new GraphToolTile,
     imageToolTile = new ImageToolTile,
     drawToolTile = new DrawToolTile,
     textToolTile = new TextToolTile,
     tableToolTile = new TableToolTile,
-    canvas = new Canvas;
+    canvas = new Canvas,
+    dialog = new Dialog;
 
 class ClueCanvas{
     //canvas header
     getInvestigationCanvasTitle(){
         return cy.get('[data-test=document-title]')
+    }
+
+    getPublishSupport(){
+        return cy.get('[data-test=publish-support-icon]')
+    }
+    publishSupportDoc(){
+        this.getPublishSupport().click();
+        dialog.getDialogTitle().should('be.visible').and('contain','Support Published');
+        dialog.getDialogOKButton().click();
     }
 
     getSingleWorkspace() {

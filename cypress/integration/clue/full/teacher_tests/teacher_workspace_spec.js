@@ -30,7 +30,7 @@ context("Teacher Space", () => {
     let teacherWorkspace = 'My Teacher Test Workspace';
     let teacherDoc = "Teacher Investigation Copy"
     const testSupportLabel = '1.2 Now What Do You Know? Support 2'
-
+    const offeringId = "40557"
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -39,8 +39,7 @@ context("Teacher Space", () => {
 
     before(function() {
         cy.login("https://learn.concord.org", clueTeacher)
-        // insert offering number for your activity below
-        cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
+        cy.visit('https://learn.concord.org/portal/offerings/'+offeringId+'/external_report/25')
         cy.waitForSpinner();
     })
 
@@ -204,25 +203,65 @@ context("Teacher Space", () => {
             })
 
             describe('verify supports functionality', () => {//may need to break down even further between class, group, and student
-
+                before(function(){
+                    dashboard.switchView("Workspace")
+                    cy.wait(2000)
+                    // clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
+                })
+                it('will verify publish of support appears in Support>Teacher Workspace',function(){
+                    let canvasTitle = ((this.investigationTitle).split('1.1')[1]).trim()
+                    cy.log('Canvas title: '+canvasTitle)
+                    clueCanvas.addTile('table');
+                    clueCanvas.publishSupportDoc();
+                    rightNav.openRightNavTab('supports');
+                    rightNav.openSection('supports','teacher-supports');
+                    rightNav.getCanvasItemTitle('supports','teacher-supports').should('contain',teacherDoc)
+                })
             })
-        })
-        describe.skip('teacher functionality', () => {
-            /**
-             * Smoke test includes logging into LARA for verifying class + problem switching
-             * Verify how teacher workspace behaves when switching classes + problems
-             * Test the supports tab since the other tabs are testing in the student tests
-             */
         })
     })
 
-    context.skip("Teacher Supports in student's view", () => {
-        describe("test visibility of teacher supports in student's workspace", () => {
-            it('verify support thumbnails are visible', () => {
+    context.skip("Teacher Supports in student's view", function() { //going to student page is not working
+        const clueStudent = {
+            username: "ctesting1",
+            password: "password",
+            studentUid: "345979"
+        }
+        before(function(){
+            cy.login("https://learn.concord.org", clueStudent)
+            cy.visit("https://learn.concord.org/users/" + studentUid + "/portal/offerings/"+offeringId+".run_resource_html")
+            cy.waitForSpinner();
+        })
+        describe("test visibility of teacher supports in student's workspace", function() {
+            it('verify badge on Support Tab',function(){
+                rightNav.getSupportBadge().should('be.visible')
+            })
+            it('verify teacher support isvisible in student rightnav', function() {
+                let canvasTitle = ((this.investigationTitle).split('1.1')[1]).trim()
+                rightNav.openRightNavTab('supports');
+                rightNav.openSection('supports', 'teacher-supports');
+                rightNav.getCanvasItemTitle('supports', 'teacher-supports', teacherDoc).should('be.visible')
             })
             it('verify supports open in 2up view righthand workspace', () => {
+                let canvasTitle = ((this.investigationTitle).split('1.1')[1]).trim()
+                rightNav.openCanvasItem('supports', 'teacher-supports', teacherDoc);
+                clueCanvas.getRightSideInvestigationTitle().should('contain',teacherDoc)
             })
         })
+    })
+
+    after(function(){
+        // cy.login("https://learn.concord.org", clueTeacher)
+        // cy.visit('https://learn.concord.org/portal/offerings/'+offeringId+'/external_report/25')
+        // cy.waitForSpinner();
+
+        let canvasTitle = ((this.investigationTitle).split('1.1')[1]).trim()
+
+        dashboard.switchView('Workspace');
+        clueCanvas.deleteTile('table');
+        rightNav.openRightNavTab('supports');
+        rightNav.openSection('supports','teacher-supports');
+        rightNav.deleteTeacherSupport('supports','teacher-supports',teacherDoc)
     })
 })
 

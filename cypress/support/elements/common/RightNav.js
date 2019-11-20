@@ -68,5 +68,12 @@ class RightNav{
     getCanvasStarIcon(tab,section,title){
         return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
     }
+    getSupportBadge(){
+        return cy.get('.support-badge')
+    }
+    deleteTeacherSupport(tab, section, title){
+        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-delete-document').click()
+
+    }
 }
 export default RightNav;
