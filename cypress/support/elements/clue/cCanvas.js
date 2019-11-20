@@ -120,7 +120,7 @@ class ClueCanvas{
     deleteTile(tile){
         switch(tile) {
             case 'text':
-                textToolTile.getTextTile().first()
+                textToolTile.getTextTile().last().click({force:true})
                     .invoke('attr', 'class', 'selected');
                 break;
             case 'graph':

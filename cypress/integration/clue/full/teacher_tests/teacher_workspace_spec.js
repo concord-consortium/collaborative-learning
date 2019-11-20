@@ -2,10 +2,8 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import RightNav from "../../../../support/elements/common/RightNav";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import Canvas from "../../../../support/elements/common/Canvas";
-import TextToolTile from "../../../../support/elements/clue/TextToolTile";
-import GraphToolTile from "../../../../support/elements/clue/GraphToolTile";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
-
+import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
 
 /**
  * Notes:
@@ -26,9 +24,8 @@ context("Teacher Space", () => {
     let rightNav = new RightNav();
     let clueCanvas = new ClueCanvas;
     let canvas = new Canvas;
-    let textToolTile = new TextToolTile;
-    let graphToolTile = new GraphToolTile;
     let tableToolTile = new TableToolTile;
+    let drawToolTile = new DrawToolTile;
 
     let teacherWorkspace = 'My Teacher Test Workspace';
     let teacherDoc = "Teacher Investigation Copy"
@@ -69,14 +66,14 @@ context("Teacher Space", () => {
         })
         describe('teacher document functionality',function(){
             before(function(){
-                clueCanvas.addTile('geometry');
                 clueCanvas.addTile('table');
-                textToolTile.addText('this is ' + teacherWorkspace);
+                clueCanvas.addTile('drawing');
+                // textToolTile.addText('this is ' + teacherWorkspace);
                 rightNav.openRightNavTab("my-work");
                 rightNav.openSection('my-work','workspaces')
                 rightNav.openCanvasItem('my-work','workspaces',teacherDoc)
-                clueCanvas.addTile('text')
-                textToolTile.addText('this is a my workspace');
+                clueCanvas.addTile('table')
+                // textToolTile.addText('this is a my workspace');
             })
             it('verify save and restore investigation',function(){
                 rightNav.openRightNavTab("my-work");
@@ -84,16 +81,15 @@ context("Teacher Space", () => {
                 rightNav.getCanvasItemTitle("my-work","investigations",this.investigationTitle).should('exist');
                 rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
                 cy.wait(2000);
-                graphToolTile.getGraphTile().should('exist')
                 tableToolTile.getTableTile().should('exist')
-                textToolTile.getTextTile().should('exist').and('contain','this is ' + teacherWorkspace)
+                drawToolTile.getDrawTile().should('exist')
             })
             it('verify save and restore extra workspace',function(){
                 rightNav.openRightNavTab("my-work");
                 rightNav.getCanvasItemTitle("my-work","workspaces",teacherDoc).should('exist');
                 rightNav.openCanvasItem("my-work","workspaces",teacherDoc);
                 cy.wait(2000);
-                textToolTile.getTextTile().should('exist').and('contain','this is a my workspace')
+                tableToolTile.getTableTile().should('exist')
             })
             it('verify restore after switching classes', function(){
                 cy.get('@clueData').then((clueData) => {
@@ -110,23 +106,21 @@ context("Teacher Space", () => {
                     })
                     dashboard.getClassDropdown().should('contain', className)
                     dashboard.switchView('Workspace')
-                    graphToolTile.getGraphTile().should('not.exist')
                     tableToolTile.getTableTile().should('not.exist')
-                    textToolTile.getTextTile().should('not.exist')
+                    drawToolTile.getDrawTile().should('not.exist')
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({force:true})
                     dashboard.getClassList().find('.Menuitem').contains(initClassName).click({ force: true })
                     cy.waitForSpinner()
                     dashboard.switchView('Workspace')
-                    graphToolTile.getGraphTile().should('exist')
                     tableToolTile.getTableTile().should('exist')
-                    textToolTile.getTextTile().should('exist').and('contain','this is ' + teacherWorkspace)
+                    drawToolTile.getDrawTile().should('exist')
                     rightNav.openRightNavTab("my-work");
                     rightNav.openSection('my-work', 'workspaces')
                     rightNav.getCanvasItemTitle("my-work","workspaces",teacherDoc).should('exist');
                     rightNav.openCanvasItem("my-work","workspaces",teacherDoc);
                     cy.wait(2000);
-                    textToolTile.getTextTile().should('exist').and('contain','this is a my workspace') 
+                    tableToolTile.getTableTile().should('exist')
                 })
 
             })
@@ -145,42 +139,71 @@ context("Teacher Space", () => {
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle)
                     dashboard.switchView('Workspace')
                     clueCanvas.getInvestigationCanvasTitle().should('contain',problems[tempProblemIndex].problemTitle)
-                    graphToolTile.getGraphTile().should('not.exist')
                     tableToolTile.getTableTile().should('not.exist')
-                    textToolTile.getTextTile().should('not.exist')
+                    drawToolTile.getDrawTile().should('not.exist')
                     //switch back to original problem to verify restore
                     dashboard.getProblemDropdown().click({force:true})
                     dashboard.getProblemList().find('.Menuitem').contains(problems[initProblemIndex].problemTitle).click({ force: true })
                     cy.waitForSpinner()
                     dashboard.switchView('Workspace')
                     clueCanvas.getInvestigationCanvasTitle().should('contain',problems[initProblemIndex].problemTitle)
-                    graphToolTile.getGraphTile().should('exist')
                     tableToolTile.getTableTile().should('exist')
-                    textToolTile.getTextTile().should('exist').and('contain','this is ' + teacherWorkspace)
+                    drawToolTile.getDrawTile().should('exist')
                     rightNav.openRightNavTab("my-work");
                     rightNav.openSection('my-work', 'workspaces')
                     rightNav.getCanvasItemTitle("my-work","workspaces",teacherDoc).should('exist');
                     rightNav.openCanvasItem("my-work","workspaces",teacherDoc);
                     cy.wait(2000);
-                    textToolTile.getTextTile().should('exist').and('contain','this is a my workspace')
+                    tableToolTile.getTableTile().should('exist')
                 })
             })
             after(function(){
-                clueCanvas.deleteTile('text')
+                clueCanvas.deleteTile('table')
                 rightNav.openRightNavTab("my-work");
                 rightNav.openSection('my-work','investigations')
                 rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
-                clueCanvas.deleteTile('geometry');
                 clueCanvas.deleteTile('table');
-                clueCanvas.deleteTile('text');
+                clueCanvas.deleteTile('drawing');
             })
         })
         describe('teacher only functionalities', () => {
+            describe('verify document curation', () => {//adding a star to a student document
+                let studentDoc = "clue testing5: 1.1 Solving a Mystery"
 
-            it('verify document curation', () => {//adding a star to a student document
-            
+                it('verify starring a student published investigation',function(){
+                    rightNav.openRightNavTab('class-work')
+                    rightNav.openSection('class-work','published')
+                    rightNav.starCanvasItem('class-work','published',studentDoc)
+                    rightNav.getCanvasStarIcon('class-work','published',studentDoc).should('have.class','starred')
+                    //make sure only one canvas is starred, 
+                    // but length 2 because there is one in published section and one in Starred section
+                    cy.get('.icon-star.starred').should('have.length',2)
+
+                })
+                it('verify starred document appears in Starred section in right nav',function(){
+                    rightNav.closeSection('class-work','published')
+                    rightNav.openSection('class-work','starred')
+                    cy.wait(1000)
+                    rightNav.getCanvasItemTitle('class-work','starred',studentDoc)
+                })
+                it('verify starred document has a star in the dashboard', function(){
+                    dashboard.switchView('Dashboard');
+                    dashboard.switchWorkView('Published');
+                    dashboard.getGroup(1).find('.four-up-overlay .icon-star').should('have.class', 'starred')
+                })
+                it('verify unstar in dashboard unstars in workspace', function(){
+                    dashboard.clearAllStarsFromPublishedWork()
+                    cy.wait(1000)
+                    dashboard.switchView('Workspace')
+                    rightNav.openRightNavTab('class-work')
+                    rightNav.openSection('class-work','starred')
+                    rightNav.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist')
+                    rightNav.openSection('class-work','published')
+                    rightNav.getCanvasStarIcon('class-work','published',studentDoc).should('not.have.class','starred')
+                })
             })
-            it('verify supports functionality', () => {//may need to break down even further between class, group, and student
+
+            describe('verify supports functionality', () => {//may need to break down even further between class, group, and student
 
             })
         })

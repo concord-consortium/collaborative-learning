@@ -61,5 +61,12 @@ class RightNav{
     openCanvasItem(tab, section, title){
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
+
+    starCanvasItem(tab,section,title){
+        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click()
+    }
+    getCanvasStarIcon(tab,section,title){
+        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
+    }
 }
 export default RightNav;
