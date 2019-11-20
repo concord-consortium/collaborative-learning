@@ -213,7 +213,7 @@ export class Logger {
 
     const logMessage: LogMessage = {
       application: applicationName,
-      username:  user.id,
+      username:  `${user.id}@${user.portal}`,
       classHash: user.classHash,
       session: this.session,
       appMode: this.stores.appMode,
