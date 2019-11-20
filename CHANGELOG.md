@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 1.0.0 - released November 19, 2019
+
+- Document supports selection of multiple tiles
+- Drag/drop multiple tiles in document
+- Teacher can publish document as support
+- Teacher dashboard styling improvements
+- Teacher can send "sticky notes" to individual students/groups
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 499,791 bytes | 1.8% |
+| index.js | 4,365,192 bytes | 2.2% |
+
 ## Version 0.10.0 - released November 8, 2019
 
 - Support linked selection for linked geometry/table points
