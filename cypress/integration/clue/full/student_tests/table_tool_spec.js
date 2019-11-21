@@ -12,10 +12,8 @@ let canvas = new Canvas,
         const baseUrl = `${Cypress.config("baseUrl")}`;
         const queryParams = `${Cypress.config("queryParams")}`;
     
-        // cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-        // cy.wait(4000);
     });    
 
 context('Table Tool Tile',function(){
@@ -78,7 +76,9 @@ context('Table Tool Tile',function(){
             clueCanvas.openOneUpViewFromTwoUp();
             let singleCanvas = canvas.singleCanvas();
             let table = tableToolTile.tableToolTile();
-            cy.get(singleCanvas + ' ' + table).should('be.visible');
+            // cy.get(singleCanvas + ' ' + table).should('be.visible');
+            cy.get(table).should('be.visible');
+
         })
     });
     describe('edit table entries', function(){
@@ -115,6 +115,12 @@ context('Table Tool Tile',function(){
             // need to verify that it is in the Class Work right nav
         });
     });
+    describe('delete table', function(){
+        it('verify delete table',function(){
+            tableToolTile.getTableTile().click()
+            clueCanvas.deleteTile('table');
+        })
+    })
 });
 
 after(function(){

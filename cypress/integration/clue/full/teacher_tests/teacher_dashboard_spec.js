@@ -35,8 +35,11 @@ context("Teacher Space", () => {
         cy.login("https://learn.concord.org", clueTeacher)
         // insert offering number for your activity below
         cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25')
-        // cy.wait(1000)
         cy.waitForSpinner()
+
+        dashboard.switchWorkView('Published');
+        dashboard.clearAllStarsFromPublishedWork();
+        dashboard.switchWorkView('Current')
     })
 
     beforeEach(() => {
@@ -199,7 +202,6 @@ context("Teacher Space", () => {
                     let groupName = groups[groupIndex].groupName
                     let studentID = groups[groupIndex].students[studentIndex].studentID
 
-
                     dashboard.getGroupName().eq(groupIndex).should('contain', 'Group ' + groupName)
                     dashboard.getGroups().eq(groupIndex).within(() => {
                         //for (let i = 0; i < groups[tempGroupIndex].students.length; i++) {
@@ -216,7 +218,13 @@ context("Teacher Space", () => {
                     cy.wait(1000)
                 })
             })
-            it('clicking support button opens two up with group open', function() {
+            it('verify message button opens message dialog to group',function(){
+                cy.get('@clueData').then((clueData) => {
+                    let groups = clueData.classes[0].problems[0].groups
+                    dashboard.sendGroupNote(2,"This is a note to Group 2");
+                })
+            })
+            it('verify clicking support button opens two up with group open', function() {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups
                     dashboard.getDashboardSupportButton().click();
@@ -283,10 +291,17 @@ context("Teacher Space", () => {
                 // dashboard.getNextPageButton().should('exist').and('not.be.visible').and('have.class', 'disabled')
 
                 // Use when clue class has MORE than 6 groups
+                dashboard.getGroups().should('have.length',6)
+                dashboard.getPreviousPageButton().should('have.class', 'disabled').and('be.visible')
+                dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible')
+                dashboard.getNextPageButton().click({force:true});
+                dashboard.getGroups().should('have.length',3)
+                dashboard.getNextPageButton().should('have.class', 'disabled')
+                dashboard.getPreviousPageButton().should('not.have.class', 'disabled')
+                dashboard.getPreviousPageButton().click({force:true})
                 dashboard.getPreviousPageButton().should('have.class', 'disabled')
-                dashboard.getNextPageButton().should('not.have.class', 'disabled').and('be.visible').click({force:true})
-                dashboard.getPreviousPageButton().should('not.have.class', 'disabled').click({force:true})
-                dashboard.getPreviousPageButton().should('have.class', 'disabled')
+                dashboard.getGroups().should('have.length',6)
+                dashboard.getNextPageButton().should('not.have.class', 'disabled')
             })
         })
         describe('6-pack view functionality - Published Work', () => {
