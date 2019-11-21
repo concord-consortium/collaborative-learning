@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.0.1 - released November 20, 2019
+
+- Improved teacher dashboard logging
+- Curriculum content updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 499,791 bytes | 0.0% |
+| index.js | 4,365,755 bytes | 0.0% |
+
 ## Version 1.0.0 - released November 19, 2019
 
 - Document supports selection of multiple tiles
