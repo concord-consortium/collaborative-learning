@@ -1,6 +1,6 @@
 class TableToolTile{
     tableToolTile(){
-        return '.neo-codap-case-table'
+        return '.canvas-area .neo-codap-case-table'
     }
     getTableTile(){
         return cy.get(this.tableToolTile());

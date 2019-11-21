@@ -131,8 +131,7 @@ class ClueCanvas{
     deleteTile(tile){
         switch(tile) {
             case 'text':
-                textToolTile.getTextTile().last().click({force:true})
-                    .invoke('attr', 'class', 'selected');
+                textToolTile.getTextTile().last().click({force:true}).invoke('attr', 'class', 'selected');
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({force:true});
@@ -140,7 +139,7 @@ class ClueCanvas{
             case 'image':
                 imageToolTile.getImageTile().last().click({force:true});
                 break;
-            case 'draw':
+            case 'drawing':
                 drawToolTile.getDrawTile().last().click({force:true});
                 break;
             case 'table':
