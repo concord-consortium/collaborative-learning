@@ -313,15 +313,6 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    afterCreate() {
-      self.rowMap.forEach(row => {
-        row.updateLayout(self.tileMap);
-      });
-      // fix any "collapsed" sections
-      for (let i = 1; i < self.rowCount; ++i) {
-        self.addPlaceholderRowIfAppropriate(i);
-      }
-    },
     addTileInNewRow(content: ToolContentUnionType, options?: INewTileOptions): INewRowTile {
       const tile = createToolTileModelFromContent(content);
       const o = options || {};
@@ -456,7 +447,7 @@ export const DocumentContentModel = types
       const dstRowId = self.rowOrder[rowIndex];
       const dstRow = dstRowId && self.rowMap.get(dstRowId);
       const tile = self.getTile(tileId);
-      if (srcRow && dstRow && tile && !dstRow.isSectionHeader) {
+      if (dstRow && tile && !dstRow.isSectionHeader) {
         if (srcRow === dstRow) {
           // move a tile within a row
           const srcIndex = srcRow.indexOfTile(tileId);
@@ -469,13 +460,15 @@ export const DocumentContentModel = types
             self.deleteTilesFromRow(dstRow);
           }
           dstRow.insertTileInRow(tile, tileIndex);
-          if (srcRow.height && tile.isUserResizable &&
-              (!dstRow.height || (srcRow.height > dstRow.height))) {
-            dstRow.height = srcRow.height;
-          }
-          srcRow.removeTileFromRow(tileId);
-          if (!srcRow.tiles.length) {
-            self.deleteRowAddingPlaceholderRowIfAppropriate(srcRow.id);
+          if (srcRow) {
+            if (srcRow.height && tile.isUserResizable &&
+                (!dstRow.height || (srcRow.height > dstRow.height))) {
+              dstRow.height = srcRow.height;
+            }
+            srcRow.removeTileFromRow(tileId);
+            if (!srcRow.tiles.length) {
+              self.deleteRowAddingPlaceholderRowIfAppropriate(srcRow.id);
+            }
           }
         }
       }
@@ -484,11 +477,11 @@ export const DocumentContentModel = types
       const srcRowId = self.findRowContainingTile(tileId);
       const srcRow = srcRowId && self.rowMap.get(srcRowId);
       const tile = self.getTile(tileId);
-      if (!srcRowId || !srcRow || !tile) return;
+      if (!tile) return;
 
       // create tile, insert tile, insert row
       const rowSpec: TileRowSnapshotType = {};
-      if (tile.isUserResizable) {
+      if (tile.isUserResizable && srcRow) {
         rowSpec.height = srcRow.height;
       }
       const dstRow = TileRowModel.create(rowSpec);
@@ -497,13 +490,15 @@ export const DocumentContentModel = types
       self.removeNeighboringPlaceholderRows(rowIndex);
 
       // remove tile from source row
-      srcRow.removeTileFromRow(tileId);
-      if (!srcRow.tiles.length) {
-        self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
-      }
-      else {
-        if (!srcRow.isUserResizable) {
-          srcRow.height = undefined;
+      if (srcRowId && srcRow) {
+        srcRow.removeTileFromRow(tileId);
+        if (!srcRow.tiles.length) {
+          self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
+        }
+        else {
+          if (!srcRow.isUserResizable) {
+            srcRow.height = undefined;
+          }
         }
       }
     }
@@ -532,9 +527,6 @@ export const DocumentContentModel = types
         self.tileMap.delete(tileId);
       },
       moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex: number = 0) {
-        const srcRowId = self.findRowContainingTile(tileId);
-        if (!srcRowId) return;
-        const srcRowIndex = self.getRowIndex(srcRowId);
         const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
         if ((rowDropIndex != null) && (rowDropLocation === "left")) {
           self.moveTileToRow(tileId, rowDropIndex, tileIndex);
@@ -544,7 +536,9 @@ export const DocumentContentModel = types
           self.moveTileToRow(tileId, rowDropIndex);
           return;
         }
-        if ((srcRowIndex >= 0)) {
+        const srcRowId = self.findRowContainingTile(tileId);
+        const srcRowIndex = srcRowId ? self.getRowIndex(srcRowId) : undefined;
+        if (srcRowId && (srcRowIndex != null) && (srcRowIndex >= 0)) {
           // if only one tile in source row, move the entire row
           if (self.numTilesInRow(srcRowId) === 1) {
             if (rowInsertIndex !== srcRowIndex) {
@@ -654,6 +648,52 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
+    afterCreate() {
+      const ownedTiles = new Set<string>();
+      self.rowMap.forEach(row => {
+        row.tiles.forEach(tile => ownedTiles.add(tile.tileId));
+        row.updateLayout(self.tileMap);
+      });
+      // identify orphaned non-placeholder tiles
+      let orphanedTiles: IDragTileItem[] = [];
+      self.tileMap.forEach(tile => {
+        if (!ownedTiles.has(tile.id) && !tile.isPlaceholder) {
+          orphanedTiles.push({
+                          rowIndex: -1,
+                          tileIndex: orphanedTiles.length,
+                          tileId: tile.id,
+                          tileContent: JSON.stringify(tile.content),
+                          tileType: tile.content.type
+                        });
+        }
+      });
+      // fix any "collapsed" sections
+      for (let i = 1; i < self.rowCount; ++i) {
+        const prevRow = self.getRowByIndex(i - 1);
+        const currRow = self.getRowByIndex(i);
+        if (prevRow?.isSectionHeader && currRow?.isSectionHeader) {
+          // found collapsed section - add orphaned tiles or add placeholder
+          if (orphanedTiles.length > 0) {
+            self.moveTilesToNewRowAtIndex(orphanedTiles, i);
+            orphanedTiles = [];
+          }
+          else {
+            self.addPlaceholderRowIfAppropriate(i);
+          }
+        }
+      }
+      // add any remaining orphaned tiles to the first placeholder row
+      if (orphanedTiles.length > 0) {
+        for (let i = 0; i < self.rowCount; ++i) {
+          const row = self.getRowByIndex(i);
+          if (row && self.isPlaceholderRow(row)) {
+            self.moveTilesToNewRowAtIndex(orphanedTiles, i);
+            self.removeNeighboringPlaceholderRows(i);
+            break;
+          }
+        }
+      }
+    },
     moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       if (tiles.length > 0) {
         // organize tiles by row
