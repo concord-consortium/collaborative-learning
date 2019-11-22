@@ -251,11 +251,6 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    afterCreate() {
-      self.rowMap.forEach(row => {
-        row.updateLayout(self.tileMap);
-      });
-    },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
       if ((index != null) && (index < self.rowOrder.length)) {
@@ -318,6 +313,15 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
+    afterCreate() {
+      self.rowMap.forEach(row => {
+        row.updateLayout(self.tileMap);
+      });
+      // fix any "collapsed" sections
+      for (let i = 1; i < self.rowCount; ++i) {
+        self.addPlaceholderRowIfAppropriate(i);
+      }
+    },
     addTileInNewRow(content: ToolContentUnionType, options?: INewTileOptions): INewRowTile {
       const tile = createToolTileModelFromContent(content);
       const o = options || {};
