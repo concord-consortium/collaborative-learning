@@ -667,11 +667,16 @@ export const DocumentContentModel = types
           if (row?.tiles.length === rowTiles.length) {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
               // entire row is being merged with an existing row
-              self.mergeRow(row, rowInfo);
+              const dstRow = rowInfo.rowDropIndex ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
+              if ((rowIndex !== rowInfo.rowDropIndex) && (dstRow && !dstRow.isSectionHeader)) {
+                self.mergeRow(row, rowInfo);
+              }
             }
             else {
               // entire row is being moved to a new row
-              self.moveRowToIndex(rowIndex, rowInsertIndex);
+              if ((rowInsertIndex < rowIndex) || (rowInsertIndex > rowIndex + 1)) {
+                self.moveRowToIndex(rowIndex, rowInsertIndex);
+              }
             }
           }
           else {
