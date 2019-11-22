@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 1.0.2 - released November 22, 2019
+
+- Bug fixes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 499,791 bytes | 0.0% |
+| index.js | 4,365,952 bytes | 0.0% |
+
 ## Version 1.0.1 - released November 20, 2019
 
 - Improved teacher dashboard logging
