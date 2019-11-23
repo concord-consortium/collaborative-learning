@@ -7,4 +7,3 @@ serviceAccountKey.json
 .idea
 .vscode
 cypress/screenshots
-package-lock.json
