@@ -48,6 +48,10 @@ context('Text tool tile functionalities', function(){
         textToolTile.addText('Adding more text to delete');
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
     });
+    it('delete text tile',()=>{
+        clueCanvas.deleteTile('text');
+        textToolTile.getTextTile().should('not.exist');
+    })
 })
 
 after(function(){

@@ -1,3 +1,7 @@
+import Dialog from "../common/Dialog";
+
+const dialog = new Dialog
+
 class TeacherDashboard {
     // Global
     getTeacherDashboard() {
@@ -68,6 +72,9 @@ class TeacherDashboard {
     getGroup(groupIndex) {
         return cy.get('.group-0-'+groupIndex)
     }
+    getStickyNoteIcon(){
+        return '[data-test=sticky-note-icon]'
+    }
     getDashboardSupportButton() {
         return cy.get('#icon-support')
     }
@@ -83,7 +90,19 @@ class TeacherDashboard {
     getStudentID() {
         return cy.get('.member')
     }
-
+    sendGroupNote(group,text){
+        this.getGroup(group).find(this.getStickyNoteIcon()).click();
+        dialog.getDialogTitle().should('contain','Message Group');
+        dialog.getDialogTextInput().type(text)
+        dialog.getDialogOKButton().click();
+    }
+    sendStudentNote(group, student, quadrant, text){
+        this.getStudentCanvas(quadrant).click();
+        this.getGroup(group).find(this.getStickyNoteIcon()).click();
+        dialog.getDialogTitle().should('contain','Message Student '+ student);
+        dialog.getDialogTextInput().type(text)
+        dialog.getDialogOKButton().click();
+    }
     verifyWorkForGroupReadOnly(group) {
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
@@ -136,9 +155,10 @@ class TeacherDashboard {
         this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true})
     }
     clearAllStarsFromPublishedWork() {
-        return cy.get('.icon-star').each(star => {
+        cy.get('.icon-star').each(star => {
+            console.log(star)
             if (star.hasClass('starred')) {
-                star.click({ force: true, multiple: true });
+                cy.wrap(star).click({ force: true, multiple: true });
             }
         });
     }
