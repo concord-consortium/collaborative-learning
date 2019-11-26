@@ -66,6 +66,22 @@
           "dataTestItem": "my-work-list-items",
           "documentTypes": ["personal"],
           "properties": ["dfHasData", "!isDeleted"]
+        },
+        {
+          "title": "Filter 3",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["dfHasData", "!isDeleted"]
+        },
+        {
+          "title": "Filter 4",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["dfHasData", "!isDeleted"]
         }
       ]
     },
