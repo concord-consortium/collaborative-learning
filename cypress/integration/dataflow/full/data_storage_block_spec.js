@@ -13,8 +13,8 @@ before(()=>{
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
-    
+    cy.wait(2000);
+        
     header.switchWorkspace('Workspace');
     cy.wait(1000);
     dfcanvas.openBlock('Number')

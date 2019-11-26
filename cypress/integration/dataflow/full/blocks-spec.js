@@ -15,12 +15,12 @@ context('block functionalites and relationships',()=>{
     before(()=>{
             const baseUrl = `${Cypress.config("baseUrl")}`;
             const queryParams = `${Cypress.config("queryParams")}`;
-        
+
             cy.visit(baseUrl+queryParams);
-            cy.waitForSpinner();
-                        
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
+            cy.wait(2000)
+        
+            header.switchWorkspace('Workspace');
+            cy.wait(1000);
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Math');

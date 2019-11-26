@@ -17,20 +17,22 @@ const dfblock = new dfBlock;
 const canvas = new Canvas;
 const rightNav = new RightNav
 
+
+before(()=>{
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+
+    cy.visit(baseUrl+queryParams);
+    cy.wait(2000)
+
+    header.switchWorkspace('Workspace');
+    cy.wait(1000);
+})
+
 context('canvas test',()=>{
     var buttons = ['Sensor','Number','Generator','Math','Logic','Transform','Relay', 'Data Storage'];
     const numButtons = buttons.length;
 
-    before(()=>{
-        const baseUrl = `${Cypress.config("baseUrl")}`;
-        const queryParams = `${Cypress.config("queryParams")}`;
-    
-        cy.visit(baseUrl+queryParams);
-        cy.waitForSpinner();
-                
-        header.switchWorkspace('Workspace');
-        cy.wait(1000);
-    })
     describe('canvas ui',()=>{
         it('verifies delete button is disabled',()=>{
             canvas.getDeleteIcon().should('be.visible');
