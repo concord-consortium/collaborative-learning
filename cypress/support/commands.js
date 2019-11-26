@@ -27,10 +27,12 @@ import 'cypress-file-upload';
 import 'cypress-commands';
 
 Cypress.Commands.add("waitForSpinner", () => {
+    cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })
 
 Cypress.Commands.add("waitForGraphSpinner", () => {
+    cy.wait(2000);
     cy.get('.graph-loading', { timeout: 60000 }).should('not.exist')
 })
 

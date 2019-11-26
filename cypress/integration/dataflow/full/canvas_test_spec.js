@@ -26,8 +26,8 @@ context('canvas test',()=>{
         const queryParams = `${Cypress.config("queryParams")}`;
     
         cy.visit(baseUrl+queryParams);
-        cy.wait(4000)
-        
+        cy.waitForSpinner();
+                
         header.switchWorkspace('Workspace');
         cy.wait(1000);
     })
