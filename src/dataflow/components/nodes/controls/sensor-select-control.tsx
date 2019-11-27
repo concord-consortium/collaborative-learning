@@ -134,13 +134,17 @@ export class SensorSelectControl extends Rete.Control {
       if (!options.length) {
         options.push("none");
       }
-      const titleClass = getChannelString(selectedChannel).includes(kSensorSelectMessage)
+      const channelString = getChannelString(selectedChannel);
+      const titleClass = channelString.includes(kSensorSelectMessage)
                          ? "label unselected"
                          : "label";
+      const topItemClass = channelString.includes("Finding")
+                         ? "item top missing"
+                         : "item top";
       return (
         <div className="node-select sensor-select" ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <div className={titleClass}>{getChannelString(selectedChannel)}</div>
+          <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
+            <div className={titleClass}>{channelString}</div>
             <div className="dropdown-caret-holder">
               <svg className="icon dropdown-caret">
                 <use xlinkHref="#icon-dropdown-caret"/>

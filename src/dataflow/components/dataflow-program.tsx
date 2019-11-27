@@ -51,6 +51,11 @@ interface NodeSequenceUnitsMap {
   [key: number]: string;
 }
 
+interface MissingDevice {
+  id: string;
+  type: string;
+}
+
 enum ProgramRunStates {
   Ready,
   Running,
@@ -464,7 +469,56 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return true;
   }
 
+  private hasValidInputNodes = () => {
+    const missingDevices: MissingDevice[] = [];
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Sensor" && n.data.sensor) {
+        const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+        if (!chInfo && n.data.sensor !== "none") {
+          if (typeof n.data.sensor === "string" && typeof n.data.type === "string") {
+            const missingDevice: MissingDevice = { id: n.data.sensor, type: n.data.type};
+            missingDevices.push(missingDevice);
+          }
+        }
+      } else if (n.name === "Relay" && n.data.relayList) {
+        const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
+        if (!chInfo && n.data.relayList !== "none") {
+          if (typeof n.data.relayList === "string") {
+            const missingDevice: MissingDevice = { id: n.data.relayList, type: "relay"};
+            missingDevices.push(missingDevice);
+          }
+        }
+      }
+    });
+    return missingDevices;
+  }
+
   private prepareToRunProgram = () => {
+    if (!this.hasValidOutputNodes()) {
+      return;
+    }
+    const missingDevices: MissingDevice[] = this.hasValidInputNodes();
+    if (missingDevices.length) {
+      let message = "";
+      missingDevices.forEach((md) => {
+        const upperType = md.type.charAt(0).toUpperCase() + md.type.substring(1);
+        message = message + (md.type === "relay"
+          ? `Relay "${md.id}" cannot be found. `
+          : `${upperType} sensor "${md.id}" cannot be found. `);
+      });
+      message = message + "Do you still want to run this program?";
+      this.stores.ui.confirm(message, "Devices cannot be found")
+      .then(ok => {
+        if (ok) {
+          this.requestProgramName();
+        }
+      });
+    } else {
+      this.requestProgramName();
+    }
+  }
+
+  private requestProgramName = () => {
     const dialogPrompt = this.hasDataStorage()
                           ? "Save dataset as"
                           : "Save program as";
@@ -477,9 +531,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private runProgram = (programTitle: string) => {
-    if (!this.hasValidOutputNodes()) {
-      return;
-    }
     const programData: any = this.generateProgramData(programTitle);
     uploadProgram(programData);
     const sequenceInfo = this.getNodeSequenceNamesAndUnits();
@@ -501,9 +552,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramRunTimeChange(time);
   }
   private generateProgramData = (programTitle: string) => {
-    const { ui } = this.stores;
-    let missingRelay = false;
-    let missingSensor = false;
     let interval: number =  1;
     let datasetName = "";
     const programStartTime = Date.now();
@@ -523,8 +571,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             // only add sensors once
             sensors.push(chInfo.channelId);
           }
-        } else if (!chInfo && n.data.sensor !== "none") {
-          missingSensor = true;
         }
       } else if (n.name === "Relay" && n.data.relayList) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
@@ -532,22 +578,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           if (hubs.indexOf(chInfo.hubId) === -1) {
             hubs.push(chInfo.hubId);
           }
-        } else if (!chInfo && n.data.relayList !== "none") {
-          missingRelay = true;
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
         datasetName = programTitle;
       }
     });
-
-    if (missingRelay) {
-      ui.alert("Selected relay cannot be found. Try plugging your relay in.", "Relay Not Found");
-      return;
-    } else if (missingSensor) {
-      ui.alert("Selected sensor cannot be found. Try plugging your sensor in.", "Sensor Not Found");
-      return;
-    }
 
     const rawProgram = this.programEditor.toJSON();
     // strip out recentValues for each node - not needed on the server
