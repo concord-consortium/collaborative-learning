@@ -107,15 +107,18 @@ $list-item-scale: 0.1
   width: 50px
   top: 62px
   right: 0px
+
   height: 100vh
+  display: flex
+
   background-color: #ffffff
   background-image: url("../assets/program-icon.svg")
   background-position: 10px 17px
   background-repeat: no-repeat
 
   .expanded-area
-    right: -100px
-    width: 150px
+    right: -110px // -100px
+    width: 160px     // 150px
     top: 0px
     border-radius: 0px
     background-color: #ffffff
@@ -148,7 +151,7 @@ $list-item-scale: 0.1
       .container
         border-radius: 0px
         background-color: #ffffff
-        width: 100px
+        width: 115px // 100px
         margin-left: 50px
         &.enabled
           height: 100%
@@ -215,6 +218,13 @@ $list-item-scale: 0.1
               z-index: 2
               position: absolute
               top: 50px
+        .my-work, .class-work
+          // border: solid green 2px;
+          display: flex
+          flex-direction: column
+          justify-content: flex-start space-even
+          height: 100%
+
         .my-work
           background-color: #ffffff
           margin-top: -1px
@@ -249,7 +259,7 @@ $list-item-scale: 0.1
   .tabs
     right: -100px
     top: 0px
-    width: 150px
+    width: 160px
     border-radius: 0
     z-index: 2
     flex-direction: row
@@ -279,7 +289,7 @@ $list-item-scale: 0.1
         border-bottom: 1px solid #ffffff
         margin-top: 6px
         margin-bottom: 2px
-        width: 49px
+        width: 53px          //  49px
         padding-left: 0px
         text-align: center
         padding: 6px
@@ -314,3 +324,30 @@ $list-item-scale: 0.1
     border-radius: 12px
     .dialog-title
       background-color: $gray-light
+
+.section-tab-container
+  // border: solid red 3px
+  // max-height: -50px
+  overflow-y: auto
+  // flex-basis: auto
+
+.section-header
+  height: 27px
+  // &.collapsed
+  //   height: 30px
+  //   // border: solid purple 3px
+  // &.expanded
+  //   height: 26px
+  //   // border: solid green 3px
+
+.list-container
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+  height: 100%
+
+
+.list
+  &.shown
+    // border: solid yellow 4px
+    overflow-y: scroll
