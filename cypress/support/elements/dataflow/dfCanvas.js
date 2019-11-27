@@ -18,9 +18,6 @@ class dfCanvas{
     openBlock(blockType){ //blockType=[]
         cy.get('.single-workspace [data-test=program-toolbar] button').contains(blockType).click();
     }
-    resetPlots(){
-        cy.get('.single-workspace [data-test=program-toolbar] button').contains('Reset').click();
-    }
     clearCanvas(){
         cy.get('.single-workspace [data-test=program-toolbar] button').contains('Clear').click();
     }

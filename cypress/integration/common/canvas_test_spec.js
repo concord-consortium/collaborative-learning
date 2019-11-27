@@ -24,18 +24,6 @@ context('test canvas tools', function(){
         });
     })
 
-    describe('Test document creation',()=>{
-
-    })
-
-    describe('Test delete document',()=>{
-
-    })
-
-    describe('Test edit title',()=>{
-        
-    })
-
     describe('Test publish documents', function(){
         it('verify publish button', function(){
             canvas.publishCanvas();
