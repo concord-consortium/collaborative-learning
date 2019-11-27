@@ -13,15 +13,15 @@ before(()=>{
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
-    cy.wait(3000)
-    
+    cy.wait(2000);
+        
     header.switchWorkspace('Workspace');
     cy.wait(1000);
-    dfcanvas.openBlock('Generator')
+    dfcanvas.openBlock('Number')
     dfcanvas.openBlock('Data Storage')
     dfblock.moveBlock(testBlock,0,250,5);
     dfcanvas.scrollToTopOfTile();
-    dfblock.selectGeneratorType('Square');
+    dfblock.getNumberInput().type('9');
 })
 
 context('Data Storage block tests',()=>{//Use generator block on square wave for on/off
@@ -51,14 +51,14 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.getStorageIntervalDropdown().should('contain', interval);
         })
         it('verify sequence name can be entered',()=>{
-            var sequenceName = 'input generator'
+            var sequenceName = 'input number'
             dfblock.getStorageSequenceTextField().should('have.value','my-sequence');
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+sequenceName);
             dfblock.getStorageSequenceTextField().should('have.value',sequenceName);
         })
         it('verify a new input node is added when a block is connected to an input',()=>{
             dfblock.getInputNodesNum(testBlock).should('have.length',1);
-            dfblock.connectBlocks('generator',0,testBlock,0)
+            dfblock.connectBlocks('number',0,testBlock,0)
             dfblock.getInputNodesNum(testBlock).should('have.length',2);
         })
     })

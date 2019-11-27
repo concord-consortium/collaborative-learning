@@ -195,24 +195,26 @@ export const NodeSensorTypes = [
 export const NodeGeneratorTypes = [
   {
     name: "Sine",
-    method: (t: number, p: number, a: number, v: number) => Math.round(Math.sin(t * Math.PI / (p / 2)) * a * 100) / 100,
+    method: (t: number, p: number, a: number) => Math.round(Math.sin(t * Math.PI / (p / 2)) * a * 100) / 100,
     icon: "icon-sine-generator"
   },
   {
     name: "Square",
-    method: (t: number, p: number, a: number, v: number) => t % p < p / 2 ? 1 * a : 0,
+    method: (t: number, p: number, a: number) => t % p < p / 2 ? 1 * a : 0,
     icon: "icon-square-generator"
   },
   {
     name: "Triangle",
-    method: (t: number, p: number, a: number, v: number) => (2 * a / p) * Math.abs(t % p - p / 2),
+    method: (t: number, p: number, a: number) => (2 * a / p) * Math.abs(t % p - p / 2),
     icon: "icon-triangle-generator"
   },
+  /*
   {
     name: "Noise",
-    method: (t: number, p: number, a: number, v: number) => Math.random() * a,
+    method: (t: number, p: number, a: number) => Math.random() * a,
     icon: "icon-noise-generator"
   },
+  */
 ];
 
 export interface NodeChannelInfo {

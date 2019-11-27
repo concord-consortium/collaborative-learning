@@ -597,6 +597,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
   }
+
+  // OBSOLETE: this function no longer works as expected
+  // Setting ticks=0 no longer resets generators
+  // Generators now determine current value using Date.Now()
   private resetNodes = () => {
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.data.recentValues) {
@@ -760,13 +764,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
     const amplitude = Number(n.data.amplitude);
-    let ticks: any = n.data.ticks || 0;
     const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
     if (nodeGeneratorType && period && amplitude) {
-      ticks = ticks + 1;
-      n.data.ticks = ticks;
-      const prevVal: any = n.data.nodeValue || 0;
-      const val = nodeGeneratorType.method(ticks, period, amplitude, prevVal);
+      const time = Date.now();
+      // note: period is given in s, but we're passing in ms for time, need to adjust
+      const val = nodeGeneratorType.method(time, period * 1000, amplitude);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);

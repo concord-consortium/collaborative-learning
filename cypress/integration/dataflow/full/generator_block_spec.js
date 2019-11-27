@@ -36,32 +36,59 @@ context('Generator block tests',()=>{
         })
         it('verify changing type changes the plot type',()=>{
             dfblock.selectGeneratorType('Square');
-            dfcanvas.resetPlots();
-            dfblock.getGeneratorValueTextField().should('contain','1');
-            cy.wait(6000);
-            dfblock.getGeneratorValueTextField().should('contain','0')
+            cy.wait(1000);
+            dfblock.getGeneratorValueTextField().text().then((value)=>{
+                if(value==1){
+                    dfblock.getGeneratorValueTextField().should('contain','1');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "0")
+                } else if(value==0){
+                    dfblock.getGeneratorValueTextField().should('contain','0');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "1")
+                }
+            })
             cy.wait(5000)
-
         })
         it('verify changing amplitude changes the values generated',()=>{
-            dfblock.enterAmplitude('0{enter}'); //makes the amplitude 10
-            dfcanvas.resetPlots();
-            dfblock.getGeneratorValueTextField().should('contain','0');
-            cy.wait(6000);
-            dfblock.getGeneratorValueTextField().should('contain','10')
+            dfblock.enterAmplitude('{backspace}9{enter}'); //makes the amplitude 9
+            cy.wait(1000);
+            dfblock.getGeneratorValueTextField().text().then((value)=>{
+                if(value==9){
+                    dfblock.getGeneratorValueTextField().should('contain','9');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "0")
+                } else if(value==0){
+                    dfblock.getGeneratorValueTextField().should('contain','0');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "9")
+                }
+            })
             cy.wait(5000)
         })
         it('verify changing period changes the values generated',()=>{
             dfblock.enterPeriod('{backspace}'); //makes the period 1
-            dfcanvas.resetPlots();
-            dfblock.getGeneratorValueTextField().should('contain','0');
-            cy.wait(6000);
-            dfblock.getGeneratorValueTextField().should('contain','10')
-            cy.wait(5000)
+            cy.wait(1000)
+            dfblock.getGeneratorValueTextField().text().then((value)=>{
+                if(value==9){
+                    dfblock.getGeneratorValueTextField().should('contain','9');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "9")
+                } else if(value==0){
+                    dfblock.getGeneratorValueTextField().should('contain','0');
+                    cy.wait(6000);
+                    dfblock.getGeneratorValueTextField().should('contain', "0")
+                }
+            })
         })
         it('verify output node behaves corectly',()=>{
-            dfblock.getTransformValueTextField().should('contain','|10| = 10')//TODO when dropdown default value changes
-
+            dfblock.getGeneratorValueTextField().text().then((value)=>{
+                if(value==9){
+                    dfblock.getTransformValueTextField().should('contain','|9| = 9')
+                } else if(value==0){
+                    dfblock.getTransformValueTextField().should('contain','|0| = 0')
+                }
+            })
         })
     })
 })
