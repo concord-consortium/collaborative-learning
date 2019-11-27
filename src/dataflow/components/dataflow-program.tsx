@@ -1,11 +1,11 @@
 import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without this
 import { inject, observer } from "mobx-react";
-import { BaseComponent, IBaseProps } from "./dataflow-base";
+import { BaseComponent } from "./dataflow-base";
 import * as React from "react";
 import Rete, { NodeEditor, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
-import { autorun, observable } from "mobx";
+import { autorun } from "mobx";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "./nodes/controls/relay-select-control";
 import { NumberReteNodeFactory } from "./nodes/factories/number-rete-node-factory";
@@ -19,6 +19,7 @@ import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
          DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
+import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -26,13 +27,13 @@ import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 import { DataflowProgramCover } from "./dataflow-program-cover";
 import { SizeMeProps } from "react-sizeme";
+import { DocumentContext } from "../../components/document/document-context";
 import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./dataflow-program-graph";
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
-import { GetLocalTimeStamp } from "../utilities/time";
+import { getLocalTimeStamp } from "../utilities/time";
 
 import "./dataflow-program.sass";
-import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 
 interface NodeNameValuePair {
   name: string;
@@ -102,6 +103,8 @@ const MIN_ZOOM = .1;
 @inject("stores")
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
+  public static contextType = DocumentContext;
+
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
   private sequenceNames: NodeSequenceNameMap;
@@ -131,7 +134,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
         {!this.isComplete() && <DataflowProgramTopbar
-          onRunProgramClick={this.runProgram}
+          onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
           onProgramTimeSelectClick={this.setProgramRunTime}
           programRunTimes={ProgramRunTimes}
@@ -255,7 +258,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
         const result = await this.programEditor.fromJSON(program);
-        if (this.getNodeCount("Data Storage")) {
+        if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }
       }
@@ -271,7 +274,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           await this.programEngine.abort();
           const programJSON = this.programEditor.toJSON();
           await this.programEngine.process(programJSON);
-          if (!this.getNodeCount("Data Storage")) {
+          if (!this.hasDataStorage()) {
             this.setState({disableDataStorage: false});
           }
           this.props.onProgramChange(programJSON);
@@ -351,7 +354,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateRunAndGraphStates() {
     const programRunState: ProgramRunStates = this.getRunState();
-    const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+    const hasDataStorage = this.hasDataStorage();
     const programDisplayState = (programRunState !== ProgramRunStates.Ready) && hasDataStorage
                                   ? programRunState === ProgramRunStates.Running
                                                         ? ProgramDisplayStates.SideBySide
@@ -450,10 +453,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasValidOutputNodes = () => {
     const { ui } = this.stores;
-    if (!this.getNodeCount("Relay") && !this.getNodeCount("Data Storage")) {
+    if (!this.hasRelay() && !this.hasDataStorage()) {
       ui.alert("Program must contain a Relay or Data Storage node before it can be run.", "No Program Output");
       return false;
-    } else if (!this.getNodeCount("Relay") &&
+    } else if (!this.hasRelay() &&
                 this.programEditor.nodes.filter(n => (n.name === "Data Storage" && n.inputs.size <= 1)).length) {
       ui.alert("Data Storage node needs data inputs before program can be run.", "Missing Data Storage Inputs");
       return false;
@@ -461,11 +464,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return true;
   }
 
-  private runProgram = () => {
+  private prepareToRunProgram = () => {
+    const dialogPrompt = this.hasDataStorage()
+                          ? "Save dataset as"
+                          : "Save program as";
+    const baseTitle = this.getDatasetName() || this.context?.title || "program";
+    const programTitle = `${baseTitle}_${getLocalTimeStamp(Date.now())}`;
+    this.stores.ui.prompt(dialogPrompt, programTitle, "Run Program")
+    .then((title: string) => {
+      this.runProgram(title);
+    });
+  }
+
+  private runProgram = (programTitle: string) => {
     if (!this.hasValidOutputNodes()) {
       return;
     }
-    const programData: any = this.generateProgramData();
+    const programData: any = this.generateProgramData(programTitle);
     uploadProgram(programData);
     const sequenceInfo = this.getNodeSequenceNamesAndUnits();
     this.sequenceNames = sequenceInfo.names;
@@ -477,7 +492,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     deleteProgram(this.props.programEndTime);
     const programEndTime = Date.now();
     this.props.onSetProgramEndTime(programEndTime);
-    const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+    const hasDataStorage = this.hasDataStorage();
     const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
     this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
     this.props.onCheckProgramRunState(programEndTime);
@@ -485,14 +500,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
   }
-  private generateProgramData = () => {
+  private generateProgramData = (programTitle: string) => {
     const { ui } = this.stores;
     let missingRelay = false;
     let missingSensor = false;
     let interval: number =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    const programName = `dataflow-program_${GetLocalTimeStamp(programStartTime)}`;
     const programEndTime = programStartTime + (1000 * this.props.programRunTime);
 
     const hubs: string[] = [];
@@ -523,7 +537,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
-        datasetName = `${n.data.datasetName as string}_${GetLocalTimeStamp(programStartTime)}`;
+        datasetName = `${n.data.datasetName as string}_${getLocalTimeStamp(programStartTime)}`;
       }
     });
 
@@ -557,13 +571,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         endTime: programEndTime,
         hubs,
         program: editedProgram,
-        programId: programName,
+        programId: programTitle,
         runInterval: interval * 1000,
         sensors
       }
     };
 
-    this.props.onStartProgram(datasetName, programName, programStartTime, programEndTime);
+    this.props.onStartProgram(datasetName, programTitle, programStartTime, programEndTime);
 
     return programData;
   }
@@ -612,6 +626,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       }
     });
+  }
+
+  private getDatasetName() {
+    let datasetName: string | undefined;
+    this.programEditor.nodes.forEach((n: Node) => {
+      if (n.name === "Data Storage") {
+        datasetName = n.data.datasetName as string | undefined;
+      }
+    });
+    return datasetName;
+  }
+
+  private hasDataStorage() {
+    return this.getNodeCount("Data Storage") > 0;
+  }
+
+  private hasRelay() {
+    return this.getNodeCount("Relay") > 0;
   }
 
   private getNodeCount = (type?: string) => {
@@ -779,7 +811,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateRunState = () => {
     if (this.isRunning()) {
       if (this.props.programEndTime && (Date.now() >= this.props.programEndTime)) {
-        const hasDataStorage = this.getNodeCount("Data Storage") > 0;
+        const hasDataStorage = this.hasDataStorage();
         const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
         this.props.onCheckProgramRunState(this.props.programEndTime);
         this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });

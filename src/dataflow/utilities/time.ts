@@ -1,4 +1,4 @@
-export const GetLocalTimeStamp = (time: number) => {
+export const getLocalTimeStamp = (time: number) => {
   const start = new Date(time);
   const year = start.getFullYear();
   const month = start.getMonth();

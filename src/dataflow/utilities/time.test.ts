@@ -1,7 +1,7 @@
-import { GetLocalTimeStamp } from "./time";
+import { getLocalTimeStamp } from "./time";
 
 const time = 1573761933537; // Thu Nov 14 2019 12:05:33 GMT-0800 (Pacific Standard Time)
-const timestamp = GetLocalTimeStamp(time); // 14NOV19-12:05:33
+const timestamp = getLocalTimeStamp(time); // 14NOV19-12:05:33
 const localDaySecondDigit = timestamp[1];
 const localHourFirstDigit = timestamp[8];
 const localHourSecondDigit = timestamp[9];
