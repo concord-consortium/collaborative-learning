@@ -537,7 +537,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
-        datasetName = `${n.data.datasetName as string}_${getLocalTimeStamp(programStartTime)}`;
+        datasetName = programTitle;
       }
     });
 
