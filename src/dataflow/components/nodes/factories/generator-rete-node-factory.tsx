@@ -27,8 +27,8 @@ export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
         .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
         .addControl(new NumControl(this.editor, "amplitude", node, false, "Amplitude", 1, .01))
         .addControl(new NumControl(this.editor, "period", node, false, "Period", 10, 1))
-        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
     }
   }

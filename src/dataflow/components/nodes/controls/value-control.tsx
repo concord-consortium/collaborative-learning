@@ -14,8 +14,11 @@ export class ValueControl extends Rete.Control {
     this.emitter = emitter;
     this.key = key;
 
-    this.component = (compProps: { value: number; sentence: string }) => (
-      <div className="value-container">
+    this.component = (compProps: { value: number; sentence: string, class: string }) => (
+      <div className={`value-container
+                       ${compProps.class.toLowerCase().replace(/ /g, "-")}
+                       ${compProps.sentence.length > 12 ? "small" : ""}
+                       `}>
         {compProps.sentence ? compProps.sentence : roundNodeValue(compProps.value)}
       </div>
     );
@@ -25,7 +28,8 @@ export class ValueControl extends Rete.Control {
 
     this.props = {
       value: initial,
-      sentence: ""
+      sentence: "",
+      class: node.name,
     };
   }
 

@@ -16,7 +16,7 @@ export class NumberReteNodeFactory extends DataflowReteNodeFactory {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       const ctrl = new NumControl(this.editor, "nodeValue", node);
       const plot = new PlotButtonControl(this.editor, "plot", node);
-      return node.addControl(ctrl).addControl(plot).addOutput(out1) as any;
+      return node.addControl(plot).addControl(ctrl).addOutput(out1) as any;
     }
   }
 

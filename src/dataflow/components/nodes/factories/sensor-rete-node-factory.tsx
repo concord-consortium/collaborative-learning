@@ -17,8 +17,8 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       return node
         .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
-        .addControl(new SensorValueControl(this.editor, "nodeValue", node, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
+        .addControl(new SensorValueControl(this.editor, "nodeValue", node, true))
         .addOutput(out1) as any;
     }
   }

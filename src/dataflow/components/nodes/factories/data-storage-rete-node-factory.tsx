@@ -21,11 +21,11 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       this.inputCount = 1;
-      node.addControl(new TextControl(this.editor, "datasetName", node, "name", "my-dataset"));
+      node.addControl(new TextControl(this.editor, "datasetName", node, "Name", "my-dataset"));
       const intervalTimeOptions = IntervalTimes.map(option => ({
         name: option.text, val: option.val
       }));
-      node.addControl(new DropdownListControl(this.editor, "interval", node, intervalTimeOptions, true, "interval"));
+      node.addControl(new DropdownListControl(this.editor, "interval", node, intervalTimeOptions, true, "Interval"));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
         keys.forEach((key: string) => {

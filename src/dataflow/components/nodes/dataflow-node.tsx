@@ -60,14 +60,16 @@ export class DataflowNode extends Node {
             ))}
           </div>
           <div className="output-controls">
-            {outputControls.map((control: any) => (
-              <Control
-                className="control"
-                key={control.key}
-                control={control}
-                innerRef={bindControl}
-              />
-            ))}
+            <div className={`output-container ${node.name.toLowerCase().replace(/ /g, "-")}`}>
+              {outputControls.map((control: any) => (
+                <Control
+                  className="control"
+                  key={control.key}
+                  control={control}
+                  innerRef={bindControl}
+                />
+              ))}
+            </div>
           </div>
           <div className="outputs">
             {outputs.map((output: any) => (

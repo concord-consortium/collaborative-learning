@@ -16,7 +16,7 @@ before(()=>{
 
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
-    
+
     header.switchWorkspace('Workspace');
     cy.wait(1000);
     dfcanvas.openBlock('Number')
@@ -41,7 +41,7 @@ context('Math block test',()=>{
         before(()=>{
             dfblock.getNumberInput(0).type('{backspace}'+input1+'{enter}');
             dfblock.getNumberInput(1).type('{backspace}'+input2+'{enter}');
-            dfcanvas.scrollToTopOfTile();            
+            dfcanvas.scrollToTopOfTile();
             dfcanvas.openBlock('Transform')
             dfblock.connectBlocks(testBlock,0,'transform',0)
         })
@@ -79,7 +79,7 @@ context('Math block test',()=>{
         it('verify output is correct',()=>{
             dfblock.getTransformValueTextField().should('contain','|'+(input3/input2)+'| = '+Math.abs(input3/input2))
         })
-    })    
+    })
 
     describe('Divide by 0',()=>{//divide by 0 outputs infinity, and 0/0 outputs NaN
             var inf='Infinity', input_0=0;
@@ -94,13 +94,13 @@ context('Math block test',()=>{
             dfblock.getTransformValueTextField().should('contain','|'+(input_0)+'| = '+input_0)
         })
     })
-    describe('test when only one node is connected',()=>{ 
+    describe('test when only one node is connected',()=>{
         before(()=>{
             dfblock.deleteBlock('number',1) //lose one of the inputs
             dfblock.getNumberInput(0).type('{backspace}'+input3+'{enter}')
         })
         it('verify block shows correct equation',()=>{ //3 / ___ = 0
-            dfblock.getMathValueTextField().should('contain',input3+' / ___ = 0')
+            dfblock.getMathValueTextField().should('contain',input3+' / __ = 0')
         })
         it('verify block outputs correct value',()=>{
             dfblock.getTransformValueTextField().should('contain','|0| = 0')

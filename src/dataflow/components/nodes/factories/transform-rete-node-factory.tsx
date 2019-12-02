@@ -29,8 +29,8 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
       return node
         .addInput(inp1)
         .addControl(new DropdownListControl(this.editor, "transformOperator", node, dropdownOptions, true))
-        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
       }
   }
@@ -49,7 +49,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
         result = 0;
       }
 
-      const n1Str = n1 === undefined ? "___" : "" + n1;
+      const n1Str = n1 === undefined ? "__" : "" + n1;
       resultSentence = nodeOperationTypes.numberSentence(n1Str, "") + result;
    }
 

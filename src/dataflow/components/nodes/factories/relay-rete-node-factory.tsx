@@ -19,8 +19,8 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
 
       return node
         .addControl(new RelaySelectControl(this.editor, "relayList", node, true))
-        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addInput(inp1) as any;
     }
   }
