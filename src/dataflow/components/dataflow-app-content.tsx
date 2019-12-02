@@ -1,7 +1,8 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { AppHeaderComponent, EPanelId, IPanelGroupSpec } from "../../components/app-header";
+import { DataflowAppHeaderComponent } from "./dataflow-app-header";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
+import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { HubListComponent } from "./hub-list";
@@ -51,7 +52,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className={dfContainerClass}>
-        <AppHeaderComponent isGhostUser={isGhostUser} panels={panels}
+        <DataflowAppHeaderComponent isGhostUser={isGhostUser} panels={panels}
           current={this.state.current} onPanelChange={this.handlePanelChange}
           showGroup={false} />
         <div className="dataflow-panel">
