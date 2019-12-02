@@ -3,7 +3,7 @@
   "pageTitle": "%unitTitle%",
   "demoProblemTitle": "%investigationTitle%",
   "units": {
-    "dataflow": "assets/curriculum/dataflow/dataflow.json"
+    "dataflow": "curriculum/dataflow/dataflow.json"
   },
   "defaultProblemOrdinal": "1",
   "defaultUnit": "dataflow",
