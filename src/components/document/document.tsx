@@ -42,7 +42,6 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
-  documentKey: string;
   documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
   commentTileId: string;
@@ -149,12 +148,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
     const { document } = nextProps;
     const documentContext: IDocumentContext = {
+            type: document.type,
+            key: document.key,
+            title: document.title,
+            originDoc: document.originDoc,
             getProperty: (key: string) => document.properties.get(key),
             setProperties: (properties: ISetProperties) => document.setProperties(properties)
           };
-    return document.key === prevState.documentKey
+    return document.key === prevState.documentContext?.key
             ? {}
-            : { documentKey: document.key, documentContext };
+            : { documentContext };
   }
 
   private toolApiMap: IToolApiMap = {};
@@ -178,7 +181,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     };
 
     this.state = {
-      documentKey: props.document.key,
       isCommentDialogOpen: false,
       commentTileId: "",
       stickyNotesVisible: false

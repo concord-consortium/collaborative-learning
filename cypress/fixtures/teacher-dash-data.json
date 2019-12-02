@@ -20,7 +20,7 @@
                                     "studentID": "ct",
                                     "fullName": "c testing1",
                                     "quadrant": ".north-west",
-                                    "published" : 0,
+                                    "published" : 1,
                                     "tools": {
                                         "textTool": 2,
                                         "tableTool": 1,
