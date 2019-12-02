@@ -315,11 +315,11 @@ describe("supports model", () => {
     expect(generalClassSupports.length).toEqual(1);
     expect((generalClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
 
-    const setionClassSupports = supports.getSupportsForUserProblem(
+    const sectionClassSupports = supports.getSupportsForUserProblem(
                                   { sectionId: "introduction", groupId: "group0", userId: "user0" });
-    expect(setionClassSupports.length).toEqual(2);
-    expect((setionClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
-    expect((setionClassSupports[1] as TeacherSupportModelType).key).toEqual(classSupportIntro.key);
+    expect(sectionClassSupports.length).toEqual(2);
+    expect((sectionClassSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
+    expect((sectionClassSupports[1] as TeacherSupportModelType).key).toEqual(classSupportIntro.key);
 
     const groupSupports = supports.getSupportsForUserProblem(
                             { sectionId: "didYouKnow", groupId: "group1", userId: "user0" });

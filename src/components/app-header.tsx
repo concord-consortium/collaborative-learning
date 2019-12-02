@@ -4,10 +4,12 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { ClassMenuContainer } from "./class-menu-container";
 import { ProblemMenuContainer } from "./problem-menu-container";
+import { ToggleGroup, Themes } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 
 import "./utilities/blueprint.sass";
 import "./app-header.sass";
+const Colors = Themes.Default;
 
 export enum EPanelId {
   controlPanel = "control-panels",
@@ -67,14 +69,20 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderTeacherHeader(userTitle: string | undefined) {
-    const { investigation, user } = this.stores;
+    const { investigation, unit } = this.stores;
     return (
       <div className="app-header">
         <div className="left">
           <div className="problem" data-test="investigation-title">
-            {investigation.title}
+            <div className="unit">
+              {unit.title}
+            </div>
+            <div className="investigation">
+              {investigation.title}
+            </div>
           </div>
-          <div className="problem" data-test="user-class">
+          <div className="spacer" />
+          <div className="problem-dropdown" data-test="user-class">
             <ProblemMenuContainer />
           </div>
         </div>
@@ -85,8 +93,8 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
           <div className="class" data-test="user-class">
             <ClassMenuContainer />
           </div>
-          <div className="name" title={userTitle} data-test="user-name">
-            {user.name}
+          <div className="profile-icon">
+            <div className="profile-icon-inner"/>
           </div>
         </div>
       </div>
@@ -94,46 +102,35 @@ export class AppHeaderComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderPanelButtons() {
-    const { panels } = this.props;
+    const { panels, onPanelChange, current} = this.props;
     if (!panels || (panels.length < 2)) return;
-
-    interface IPanelButtonProps {
-      panelId: string;
-      label: string;
-      current: string;
-      onPanelChange: (panel: string) => void;
-    }
-
-    const PanelButton: React.FC<IPanelButtonProps> = (props) => {
-      const { panelId, label, current, onPanelChange } = props;
-      const handlePanelChange = () => { onPanelChange && onPanelChange(panelId); };
-      return (
-        <Button active={current === panelId}
-                disabled={(current !== panelId) && !onPanelChange}
-                onClick={handlePanelChange}>
-          {label}
-        </Button>
-      );
-    };
 
     const panelButtons = panels
       .filter(spec => spec.label.length > 0)
       .map(spec => {
-      return (
-        <PanelButton
-          key={spec.panelId}
-          panelId={spec.panelId}
-          label={spec.label}
-          current={this.props.current}
-          onPanelChange={this.props.onPanelChange} />
-      );
-    });
-
-    return (
-      <ButtonGroup>
-        {panelButtons}
-      </ButtonGroup>
-    );
+        const { label, panelId } = spec;
+        const onClick = () => { onPanelChange?.(panelId); };
+        const key = panelId;
+        const selected = key === current;
+        const colors = panelId === EPanelId.workspace
+          ? {
+            unselectedColor: {
+              color: Colors.Sky["sky-dark-5"],
+              background: Colors.Sky["sky-light-1"]
+            },
+            hoverColor: {
+              color: Colors.Sky["sky-dark-5"],
+              background: Colors.Sky["sky-dark-1"]
+            },
+            selectedColor: {
+              color: Colors.Sky["sky-light-2"],
+              background: Colors.Sky["sky-dark-5"]
+            }
+          }
+          : undefined;
+        return { label, onClick, key, selected, colors };
+      });
+    return <ToggleGroup options={panelButtons} />;
   }
 
   private renderGroup(group: GroupModelType) {

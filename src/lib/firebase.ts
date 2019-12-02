@@ -303,6 +303,10 @@ export class Firebase {
     return this.ref(this.getUserPath(this.db.stores.user)).child("lastSupportViewTimestamp");
   }
 
+  public getLastStickyNoteViewTimestampRef() {
+    return this.ref(this.getUserPath(this.db.stores.user)).child("lastStickyNoteViewTimestamp");
+  }
+
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
     if (snapshot) {
       const connected = snapshot.val();

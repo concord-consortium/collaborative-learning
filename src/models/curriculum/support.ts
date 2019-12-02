@@ -11,6 +11,11 @@ export enum ESupportType {
   publication = "publication"
 }
 
+// standard teacher supports have mode undefined
+export enum ESupportMode {
+  stickyNote = "sticky"
+}
+
 interface LegacySupportSnapshot {
   text: string;
 }
@@ -24,9 +29,14 @@ export function createTextSupport(text: string) {
   return SupportModel.create({ type: ESupportType.text, content: text });
 }
 
+export function createStickyNote(text: string) {
+  return SupportModel.create({ type: ESupportType.text, mode: ESupportMode.stickyNote, content: text });
+}
+
 export const SupportModel = types
   .model("Support", {
     type: types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)),
+    mode: types.maybe(types.enumeration<ESupportMode>("SupportMode", Object.values(ESupportMode))),
     // text string or path to document
     content: types.string
   })

@@ -5,6 +5,7 @@ import { TabComponent } from "../tab";
 import { TabSetComponent } from "../tab-set";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 import { BaseComponent, IBaseProps } from "../base";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./left-nav.sass";
 
@@ -76,14 +77,20 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTabClick = (sectionIndex: number) => {
-    const { ui } = this.stores;
+    const { problem: {sections}, ui } = this.stores;
+    const logParameters = {
+      tab_name: sections[sectionIndex].title,
+      tab_type: sections[sectionIndex].type
+    };
+    const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
     return (e: React.MouseEvent<HTMLDivElement>) => {
       if (ui.activeSectionIndex !== sectionIndex) {
         ui.setActiveSectionIndex(sectionIndex);
-        this.stores.ui.toggleLeftNav(true);
-      }
-      else {
-        this.stores.ui.toggleLeftNav();
+        ui.toggleLeftNav(true);
+        logEvent();
+      } else {
+        ui.toggleLeftNav();
+        ui.leftNavExpanded && logEvent();
       }
       this.updateTabLoadAllowedState(sectionIndex);
     };

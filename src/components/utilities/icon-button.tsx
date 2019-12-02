@@ -25,7 +25,7 @@ export const IconButton = (props: IconButtonProps) => {
       data-test={props.dataTestName || `${props.icon}-icon`}
     >
       <div
-        className={`button-icon ${props.icon} ${props.innerClassName}`}
+        className={`button-icon ${props.icon} ${props.innerClassName || ""}`}
         style={props.url ? styleIcon : undefined}
       />
     </button>

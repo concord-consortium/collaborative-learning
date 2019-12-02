@@ -176,7 +176,7 @@ context('Tests for graph and table integration', function(){
                 imageToolTile.getImageTile().scrollIntoView().click();
                 imageToolTile.getImageToolControl().click();
                 cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/png')
-                cy.wait(2000)
+                // cy.wait(2000)
                 imageToolTile.getImageTile()
                     .trigger('dragstart', {dataTransfer});
                 graphToolTile.getGraphTile()

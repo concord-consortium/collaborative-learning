@@ -1,5 +1,5 @@
-//Tabs: ['my-work','class-work','learning-log','supports']
-//Sections: [['workspaces','investigations'],
+//Tabs: ['my-work','class-work','learning-log','supports', 'student-work'] *student-work is teacher only
+//Sections: [['workspaces','investigations', 'starred'], *starred is teacher only
 //           ['personal', 'published', 'learning-log', 'starred']
 //           [''],
 //           ['jit','teacher-supports']]
@@ -13,11 +13,11 @@ class RightNav{
     }
 
     getRightNavTab(tab){
-        return cy.get('#rightNavTab'+tab+'.tab');
+        return cy.get('#rightNavTab-'+tab+'.tab');
     }
 
     openRightNavTab(tab){   
-        cy.get('#rightNavTab-'+tab+'.tab').click();
+        this.getRightNavTab(tab).click();
         cy.wait(2000);
     }
     closeRightNavTab(tab){   
@@ -64,5 +64,13 @@ class RightNav{
     openCanvasItem(tab, section='', title){
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
+
+    starCanvasItem(tab,section,title){
+        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click()
+    }
+    getCanvasStarIcon(tab,section,title){
+        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
+    }
+
 }
 export default RightNav;

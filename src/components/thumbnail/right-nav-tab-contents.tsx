@@ -108,6 +108,13 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     this.state.showSection.set(sectionId, !isExpanded);
     this.setState(state => ({ showSection: this.state.showSection }));
     this.props.onToggleExpansion?.(section);
+    Logger.log(LogEventName.SHOW_FILTER,
+      {
+        filter_state: (isExpanded ? "close" : "open"),
+        filter_name: section.title,
+        filter_type: section.type
+      }
+    );
   }
 
   private handleNewDocumentClick = async (section: NavTabSectionModelType) => {
@@ -142,6 +149,9 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
       .then(ok => {
         if (ok) {
           document.setProperty("isDeleted", "true");
+          if (document.type === SupportPublication) {
+            Logger.logDocumentEvent(LogEventName.DELETE_SUPPORT, document);
+          }
         }
       });
   }
