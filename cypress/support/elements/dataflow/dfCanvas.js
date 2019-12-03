@@ -40,11 +40,16 @@ class dfCanvas{
     getStopButton(){
         return cy.get('.single-workspace .program-editor-topbar button').contains('Stop')
     }
+    getRunDialogOkButton(){
+        return cy.get('.dialog .dialog-container .dialog-contents .dialog-buttons #okButton').contains('Ok');
+    }
     selectDuration(duration){
         this.getDurationDropdown().select(duration)
     }
     runProgram(){
-        this.getRunButton().click();
+        this.getRunButton().click().then(() => {
+            this.getRunDialogOkButton().click();
+        })
     }
     stopProgram(){
         this.getStopButton().click();
