@@ -55,7 +55,8 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/fonts/[name].[hash:6].[ext]'
+            name: 'assets/fonts/[name].[hash:6].[ext]',
+            esModule: false
           }
         },
         {
@@ -63,7 +64,8 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/images/[name].[hash:6].[ext]'
+            name: 'assets/images/[name].[hash:6].[ext]',
+            esModule: false
           }
         }
       ]
