@@ -835,8 +835,7 @@ export class DB {
       properties: {},
       originDoc: "",
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-      type: supportModel.type,
-      content: supportModel.content,
+      ...supportModel,
       deleted: false
     };
     supportRef.set(support);
@@ -854,6 +853,10 @@ export class DB {
 
   public setLastSupportViewTimestamp() {
     this.firebase.getLastSupportViewTimestampRef().set(Date.now());
+  }
+
+  public setLastStickyNoteViewTimestamp() {
+    this.firebase.getLastStickyNoteViewTimestampRef().set(Date.now());
   }
 
 }

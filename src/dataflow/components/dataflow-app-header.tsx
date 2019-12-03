@@ -1,26 +1,14 @@
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { BaseComponent, IBaseProps } from "./base";
-import { ClassMenuContainer } from "./class-menu-container";
-import { ProblemMenuContainer } from "./problem-menu-container";
-import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
+import { IPanelGroupSpec } from "../../components/app-header";
+import { BaseComponent, IBaseProps } from "../../components/base";
+import { ClassMenuContainer } from "../../components/class-menu-container";
+import { ProblemMenuContainer } from "../../components/problem-menu-container";
+import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 
-import "./utilities/blueprint.sass";
-import "./app-header.sass";
-
-export enum EPanelId {
-  controlPanel = "control-panels",
-  dashboard = "dashboard",
-  workspace = "workspace"
-}
-
-export interface IPanelSpec {
-  panelId: EPanelId;
-  label: string;
-  content: JSX.Element;
-}
-export type IPanelGroupSpec = IPanelSpec[];
+import "../../components/utilities/blueprint.sass";
+import "./dataflow-app-header.sass";
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;
@@ -32,7 +20,7 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class AppHeaderComponent extends BaseComponent<IProps, {}> {
+export class DataflowAppHeaderComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { showGroup } = this.props;

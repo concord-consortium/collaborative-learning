@@ -10,6 +10,7 @@ import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { HotKeys } from "../../../utilities/hot-keys";
 import * as classNames from "classnames";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 import "./geometry-tool.sass";
 
@@ -133,7 +134,7 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
     }
     // first click selects the tile
     if (!ui.isSelectedTile(model)) {
-      ui.setSelectedTile(model);
+      ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
       this.didLastMouseDownSelectTile = true;
       // prevent the click from taking effect, e.g. creating a point
       e.preventDefault();

@@ -1,14 +1,16 @@
 import * as Immutable from "immutable";
 import * as React from "react";
+import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { Operation, Value, Range } from "slate";
 import { Editor, Plugin } from "slate-react";
 import { isHotkey } from "is-hotkey";
 
 import { BaseComponent } from "../base";
+import { debouncedSelectTile } from "../../models/stores/ui";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
-import { autorun, IReactionDisposer } from "mobx";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextStyleBarComponent } from "./text-style-bar";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
@@ -290,18 +292,16 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         // somehow detects the selection change before the click on the
         // delete button is processed by the workspace. For now, we just
         // disable focus change on deselection.
-        ui.setSelectedTile(model);
+        debouncedSelectTile(ui, model);
       }
     }
 
     if (content.type === "Text" && !readOnly) {
       content.setSlate(change.value);
-      this.setState(
-        {
-          value: change.value,
-          selectedButtons: this.getSelectedIcons(change).sort()
-        }
-      );
+      this.setState({
+        value: change.value,
+        selectedButtons: this.getSelectedIcons(change).sort()
+      });
     }
   }
 
@@ -358,6 +358,10 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     if (e.target === this.wrapper.current) {
       this.editor.current && this.editor.current.focus();
       ui.setSelectedTile(model);
+      e.preventDefault();
+    }
+    else if (hasSelectionModifier(e)) {
+      ui.setSelectedTile(model, { append: true });
       e.preventDefault();
     }
   }

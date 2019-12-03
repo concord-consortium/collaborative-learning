@@ -1,14 +1,14 @@
 import mock from "xhr-mock";
-import { IStores, createStores } from "../models/stores/stores";
 import { Logger, LogEventName } from "./logger";
-import { createToolTileModelFromContent, ToolTileModelType } from "../models/tools/tool-tile";
-import { defaultTextContent } from "../models/tools/text/text-content";
 import { ProblemDocument, DocumentModel, DocumentModelType } from "../models/document/document";
-import { createSingleTileContent } from "../utilities/test-utils";
 import { DocumentContentModel } from "../models/document/document-content";
-import { getSnapshot } from "mobx-state-tree";
 import { InvestigationModel } from "../models/curriculum/investigation";
+import { IStores, createStores } from "../models/stores/stores";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/stores/workspace";
+import { defaultTextContent } from "../models/tools/text/text-content";
+import { createToolTileModelFromContent, IDragTileItem, ToolTileModelType } from "../models/tools/tool-tile";
+import { createSingleTileContent } from "../utilities/test-utils";
+import { UserModel } from "../models/stores/user";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -23,7 +23,8 @@ describe("logger", () => {
   beforeEach(() => {
     mock.setup();
     stores = createStores({
-      appMode: "test"
+      appMode: "test",
+      user: UserModel.create({id: "0", portal: "test"})
     });
 
     Logger.initializeLogger(stores, investigation, problem);
@@ -42,7 +43,7 @@ describe("logger", () => {
         const request = JSON.parse(req.body());
 
         expect(request.application).toBe("CLUE");
-        expect(request.username).toBe("0");
+        expect(request.username).toBe("0@test");
         expect(request.investigation).toBe("Investigation 1");
         expect(request.problem).toBe("Problem 1.1");
         expect(request.session).toEqual(expect.anything());
@@ -55,7 +56,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await Logger.log(LogEventName.CREATE_TILE, {foo: "bar"});
+      Logger.log(LogEventName.CREATE_TILE, { foo: "bar" });
     });
 
     it("can log tile creation", async (done) => {
@@ -77,10 +78,10 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
+      Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
 
-    it.skip("can log tile creation in a document", async (done) => {
+    it("can log tile creation in a document", async (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -99,19 +100,19 @@ describe("logger", () => {
         expect(request.parameters.objectType).toBe("Text");
         expect(request.parameters.serializedObject).toEqual({
           type: "Text",
-          text: "test"
+          text: ""
         });
         expect(request.parameters.documentKey).toBe("source-document");
-        expect(request.parameters.documentType).toBe("section");
+        expect(request.parameters.documentType).toBe("problem");
 
         done();
         return res.status(201);
       });
 
-      await document.content.addTextTile({ text: "test" });
+      document.content.userAddTile("text");
     });
 
-    it.skip("can log copying tiles between documents", async (done) => {
+    it("can log copying tiles between documents", async (done) => {
       const sourceDocument = DocumentModel.create({
         type: ProblemDocument,
         uid: "source-user",
@@ -148,28 +149,28 @@ describe("logger", () => {
           text: "test"
         });
         expect(request.parameters.documentKey).toBe("destination-document");
-        expect(request.parameters.documentType).toBe("section");
+        expect(request.parameters.documentType).toBe("problem");
         expect(request.parameters.objectId).not.toBe(tileToCopy.id);
         expect(request.parameters.sourceDocumentKey).toBe("source-document");
-        expect(request.parameters.sourceDocumentType).toBe("section");
-        expect(request.parameters.souceObjectId).toBe(tileToCopy.id);
+        expect(request.parameters.sourceDocumentType).toBe("problem");
+        expect(request.parameters.sourceObjectId).toBe(tileToCopy.id);
         expect(request.parameters.sourceUsername).toBe("source-user");
-        expect(request.parameters.sourceSection).toBe("source-section");
-
-        expect(request.section).toBe("destination-section");
 
         done();
         return res.status(201);
       });
 
-      // annoying way to get a tile...
-      const firstRow = sourceDocument.content.getRowByIndex(0);
-      const tileIdToCopy = firstRow!.tiles[0].tileId;
-      tileToCopy = sourceDocument.content.getTile(tileIdToCopy) as ToolTileModelType;
+      tileToCopy = sourceDocument.content.firstTile!;
 
-      const serialized = JSON.stringify(getSnapshot(tileToCopy));
+      const copyTileInfo: IDragTileItem = {
+        rowIndex: 0,
+        tileIndex: 0,
+        tileId: tileToCopy.id,
+        tileContent: JSON.stringify(tileToCopy),
+        tileType: tileToCopy.content.type
+      };
 
-      await destinationDocument.content.copyTileIntoNewRow(serialized, tileToCopy.id, 0);
+      destinationDocument.content.userCopyTiles([copyTileInfo], 0);
     });
 
   });
@@ -203,34 +204,34 @@ describe("logger", () => {
       });
     });
 
-    it.skip("can log opening the primary document", async (done) => {
+    it("can log opening the primary document", async (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_SHOW_DOCUMENT");
         expect(request.parameters.documentKey).toBe("test1");
-        expect(request.parameters.documentType).toBe("section");
+        expect(request.parameters.documentType).toBe("problem");
 
         done();
         return res.status(201);
       });
 
-      await workspace.setPrimaryDocument(doc1);
+      workspace.setPrimaryDocument(doc1);
     });
 
-    it.skip("can log opening the comparison document", async (done) => {
+    it("can log opening the comparison document", async (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_SHOW_COMPARISON_DOCUMENT");
         expect(request.parameters.documentKey).toBe("test2");
-        expect(request.parameters.documentType).toBe("section");
+        expect(request.parameters.documentType).toBe("problem");
 
         done();
         return res.status(201);
       });
 
-      await workspace.setComparisonDocument(doc2);
+      workspace.setComparisonDocument(doc2);
     });
 
     it("can log toggling the comparison panel", async (done) => {
@@ -243,7 +244,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await workspace.toggleComparisonVisible();
+      workspace.toggleComparisonVisible();
     });
 
     it("can log toggling of mode", async (done) => {
@@ -256,7 +257,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      await workspace.toggleMode();
+      workspace.toggleMode();
     });
   });
 });

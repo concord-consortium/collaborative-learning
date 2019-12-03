@@ -73,7 +73,7 @@ class dfCanvas{
     createNewProgram(title){
         canvas.getNewDocumentIcon().click()
             .then(()=>{
-                // dialog.getDialogTitle().should('exist').and('contains','Create New Dataset');
+                dialog.getDialogTitle().should('exist').and('contain','Create ');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
