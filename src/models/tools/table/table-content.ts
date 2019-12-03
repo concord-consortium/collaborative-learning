@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { registerToolContentInfo } from "../tool-content-info";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
@@ -567,3 +568,13 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
   });
   return snapshot;
 }
+
+registerToolContentInfo({
+  id: kTableToolID,
+  tool: "table",
+  modelClass: TableContentModel,
+  metadataClass: TableMetadataModel,
+  defaultHeight: kTableDefaultHeight,
+  defaultContent: defaultTableContent,
+  snapshotPostProcessor: mapTileIdsInTableSnapshot
+});

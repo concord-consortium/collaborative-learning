@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { SelectionStoreModelType } from "../../stores/selection";
+import { registerToolContentInfo } from "../tool-content-info";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
           kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
@@ -1239,3 +1240,14 @@ export function getImageUrl(change?: JXGChange) {
     return change.properties.url;
   }
 }
+
+registerToolContentInfo({
+  id: kGeometryToolID,
+  tool: "geometry",
+  modelClass: GeometryContentModel,
+  metadataClass: GeometryMetadataModel,
+  addSidecarNotes: true,
+  defaultHeight: kGeometryDefaultHeight,
+  defaultContent: defaultGeometryContent,
+  snapshotPostProcessor: mapTileIdsInGeometrySnapshot
+});
