@@ -3,6 +3,7 @@ import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
 import SlateHtmlSerializer from "./slate-html-serializer";
+import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 
 export const kTextToolID = "Text";
@@ -96,3 +97,10 @@ export const TextContentModel = types
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
+
+registerToolContentInfo({
+  id: kTextToolID,
+  tool: "text",
+  modelClass: TextContentModel,
+  defaultContent: defaultTextContent
+});

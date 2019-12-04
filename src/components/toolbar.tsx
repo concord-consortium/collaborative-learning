@@ -4,6 +4,7 @@ import * as React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions } from "../models/document/document-content";
+import { getToolContentInfoByTool } from "../models/tools/tool-content-info";
 import { ToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
 
@@ -100,8 +101,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
   private handleAddToolTile(tool: DocumentTool) {
     const { document } = this.props;
     const { ui } = this.stores;
+    const toolContentInfo = getToolContentInfoByTool(tool);
     const newTileOptions: IDocumentContentAddTileOptions = {
-            addSidecarNotes: tool === "geometry",
+            addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content.defaultInsertRow }
           };
     const rowTile = document.addTile(tool, newTileOptions);
