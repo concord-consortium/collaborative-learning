@@ -1,13 +1,12 @@
-import { types, getSnapshot, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { defaultDataflowContent, kDataflowDefaultHeight } from "../../dataflow/models/tools/dataflow/dataflow-content";
-import { defaultDrawingContent, kDrawingDefaultHeight, StampModelType } from "../tools/drawing/drawing-content";
-import { defaultGeometryContent, kGeometryDefaultHeight, GeometryContentModelType, mapTileIdsInGeometrySnapshot
-        } from "../tools/geometry/geometry-content";
-import { defaultImageContent } from "../tools/image/image-content";
-import { defaultPlaceholderContent } from "../tools/placeholder/placeholder-content";
-import { defaultTableContent, kTableDefaultHeight, TableContentModelType, mapTileIdsInTableSnapshot
-        } from "../tools/table/table-content";
-import { defaultTextContent } from "../tools/text/text-content";
+import { kDrawingToolID, StampModelType } from "../tools/drawing/drawing-content";
+import { kGeometryToolID } from "../tools/geometry/geometry-content";
+import { kImageToolID } from "../tools/image/image-content";
+import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
+import { kTableToolID } from "../tools/table/table-content";
+import { kTextToolID } from "../tools/text/text-content";
+import { getToolContentInfoById } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
@@ -171,18 +170,8 @@ export const DocumentContentModel = types
           return _tileMap;
         })(snapshot.tileMap);
 
-        each(snapshot.tileMap, (tile, id) => {
-          const tileContent = tile.content;
-          switch (tileContent.type) {
-            case "Geometry":
-              const geometryContentSnapshot: SnapshotOut<GeometryContentModelType> = tileContent;
-              mapTileIdsInGeometrySnapshot(geometryContentSnapshot, idMap);
-              break;
-            case "Table":
-              const tableContentSnapshot: SnapshotOut<TableContentModelType> = tileContent;
-              mapTileIdsInTableSnapshot(tableContentSnapshot, idMap);
-              break;
-          }
+        each(snapshot.tileMap, tile => {
+          getToolContentInfoById(tile.content.type)?.snapshotPostProcessor?.(tile.content, idMap);
         });
 
         snapshot.rowMap = (rowMap => {
@@ -308,7 +297,8 @@ export const DocumentContentModel = types
       const afterRow = (rowIndex < self.rowCount) && self.getRowByIndex(rowIndex);
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const tile = ToolTileModel.create({ content: defaultPlaceholderContent(beforeSectionId) });
+        const placeholderContentInfo = getToolContentInfoById(kPlaceholderToolID);
+        const tile = ToolTileModel.create({ content: placeholderContentInfo?.defaultContent(beforeSectionId) });
         self.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
     }
@@ -365,18 +355,21 @@ export const DocumentContentModel = types
   }))
   .actions((self) => ({
     addPlaceholderTile(sectionId?: string) {
-      const content = defaultPlaceholderContent(sectionId);
+      const placeholderContentInfo = getToolContentInfoById(kPlaceholderToolID);
+      const content = placeholderContentInfo?.defaultContent(sectionId);
       return self.addTileInNewRow(content, { rowIndex: self.rowCount });
     },
     addGeometryTile(options?: INewGeometryTileOptions) {
+      const geometryContentInfo = getToolContentInfoById(kGeometryToolID);
       const result = self.addTileInNewRow(
-                            defaultGeometryContent(),
-                            { rowHeight: kGeometryDefaultHeight, ...options });
-      if (options && options.addSidecarNotes) {
+                            geometryContentInfo?.defaultContent(),
+                            { rowHeight: geometryContentInfo?.defaultHeight, ...options });
+      if (options?.addSidecarNotes) {
         const { rowId } = result;
         const row = self.rowMap.get(rowId);
-        if (row) {
-          const tile = createToolTileModelFromContent(defaultTextContent());
+        const textContentInfo = getToolContentInfoById(kTextToolID);
+        if (row && textContentInfo) {
+          const tile = createToolTileModelFromContent(textContentInfo.defaultContent());
           self.insertNewTileInRow(tile, row, 1);
           result.additionalTileIds = [ tile.id ];
         }
@@ -384,15 +377,18 @@ export const DocumentContentModel = types
       return result;
     },
     addTableTile(options?: INewTileOptions) {
+      const tableContentInfo = getToolContentInfoById(kTableToolID);
       return self.addTileInNewRow(
-                    defaultTableContent(),
-                    { rowHeight: kTableDefaultHeight, ...options });
+                    tableContentInfo?.defaultContent(),
+                    { rowHeight: tableContentInfo?.defaultHeight, ...options });
     },
     addTextTile(options?: INewTextTileOptions) {
-      return self.addTileInNewRow(defaultTextContent(options && options.text), options);
+      const textContentInfo = getToolContentInfoById(kTextToolID);
+      return self.addTileInNewRow(textContentInfo?.defaultContent(options?.text), options);
     },
     addImageTile(options?: INewImageTileOptions) {
-      return self.addTileInNewRow(defaultImageContent(options && options.url), options);
+      const imageContentInfo = getToolContentInfoById(kImageToolID);
+      return self.addTileInNewRow(imageContentInfo?.defaultContent(options?.url), options);
     },
     addDrawingTile(options?: INewTileOptions) {
       let defaultStamps: StampModelType[];
@@ -402,9 +398,10 @@ export const DocumentContentModel = types
       } else {
         defaultStamps = [];
       }
+      const drawingContentInfo = getToolContentInfoById(kDrawingToolID);
       return self.addTileInNewRow(
-                    defaultDrawingContent({stamps: defaultStamps}),
-                    { rowHeight: kDrawingDefaultHeight, ...options });
+                    drawingContentInfo?.defaultContent({stamps: defaultStamps}),
+                    { rowHeight: drawingContentInfo.defaultHeight, ...options });
     },
     addDataflowTile() {
       return self.addTileInNewRow(defaultDataflowContent(),
