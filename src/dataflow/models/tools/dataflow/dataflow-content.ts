@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { each } from "lodash";
 import { DEFAULT_PROGRAM_TIME } from "../../../../dataflow/utilities/node";
-import { registerToolContentInfo } from "../../../../models/tools/tool-content-info";
+import { registerToolContentInfo, IDMap } from "../../../../models/tools/tool-content-info";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -129,12 +129,14 @@ function processImport(snapshot: any) {
   return { program: JSON.stringify(newProgram), ...contentOthers };
 }
 
-export function copyProgramDocumentContent(content: any) {
+export function copyProgramDocumentContent(content: any, idMap: IDMap, asTemplate?: boolean) {
   const dfContent = content as SnapshotIn<typeof DataflowContentModel>;
-  // delete dfContent.programRunId;
-  // delete dfContent.programStartTime;
-  // delete dfContent.programEndTime;
-  // delete dfContent.programIsRunning;
+  if (asTemplate) {
+    delete dfContent.programRunId;
+    delete dfContent.programStartTime;
+    delete dfContent.programEndTime;
+    delete dfContent.programIsRunning;
+  }
   return dfContent;
 }
 
