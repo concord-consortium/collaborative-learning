@@ -88,6 +88,14 @@ export const WorkspaceModel = types
         self.primaryDocumentKey = createGhostSectionDocumentKey(section.type);
       },
     };
-  });
+  })
+  .actions(self => ({
+    viewComparisonDocument(document?: DocumentModelType) {
+      if (!self.comparisonVisible) {
+        self.toggleComparisonVisible({ override: true });
+      }
+      self.setComparisonDocument(document);
+    }
+  }));
 
 export type WorkspaceModelType = typeof WorkspaceModel.Type;

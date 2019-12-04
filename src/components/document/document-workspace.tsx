@@ -150,6 +150,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
             onPublishDocument={this.handlePublishDocument}
             toolbar={toolbar}
             side="comparison"
+            readOnly={true}
             isGhostUser={isGhostUser}
           />
         : this.renderComparisonPlaceholder();
@@ -240,11 +241,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         const {problemWorkspace} = ui;
         const document = documents.getDocument(documentKey);
         if (document) {
-          if (side === "primary") {
+          if ((side === "primary") && !document.isPublished) {
             problemWorkspace.setPrimaryDocument(document);
           }
           else {
-            problemWorkspace.setComparisonDocument(document);
+            problemWorkspace.viewComparisonDocument(document);
           }
         }
       }
