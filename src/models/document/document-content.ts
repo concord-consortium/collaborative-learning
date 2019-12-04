@@ -1,5 +1,5 @@
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
-import { defaultDataflowContent, kDataflowDefaultHeight } from "../../dataflow/models/tools/dataflow/dataflow-content";
+import { kDataflowToolID } from "../../dataflow/models/tools/dataflow/dataflow-content";
 import { kDrawingToolID, StampModelType } from "../tools/drawing/drawing-content";
 import { kGeometryToolID } from "../tools/geometry/geometry-content";
 import { kImageToolID } from "../tools/image/image-content";
@@ -401,11 +401,13 @@ export const DocumentContentModel = types
       const drawingContentInfo = getToolContentInfoById(kDrawingToolID);
       return self.addTileInNewRow(
                     drawingContentInfo?.defaultContent({stamps: defaultStamps}),
-                    { rowHeight: drawingContentInfo.defaultHeight, ...options });
+                    { rowHeight: drawingContentInfo?.defaultHeight, ...options });
     },
     addDataflowTile() {
-      return self.addTileInNewRow(defaultDataflowContent(),
-                                    { rowHeight: kDataflowDefaultHeight });
+      const dataflowContentInfo = getToolContentInfoById(kDataflowToolID);
+      return self.addTileInNewRow(
+                    dataflowContentInfo?.defaultContent(),
+                    { rowHeight: dataflowContentInfo?.defaultHeight });
     },
     copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
       const results: NewRowTileArray = [];
