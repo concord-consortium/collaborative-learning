@@ -327,7 +327,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
     const { db, ui: { problemWorkspace } } = this.stores;
-    const copyDocument = await db.copyOtherDocument(document, title);
+    const copyDocument = await db.copyOtherDocument(document, { title, asTemplate: true });
     if (copyDocument) {
       problemWorkspace.setPrimaryDocument(copyDocument);
     }
