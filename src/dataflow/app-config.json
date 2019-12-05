@@ -44,6 +44,7 @@
       }
     }
   },
+  "copyPreferOriginTitle": true,
   "rightNavTabs": [
     {
       "tab": "my-work",
