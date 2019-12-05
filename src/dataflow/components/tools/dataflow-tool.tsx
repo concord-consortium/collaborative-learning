@@ -90,7 +90,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             programContent.setRunningStatus(endTime);
           }
         });
-        const properties: IDocumentProperties = { dfRunId: id };
+        const originTitle = primaryDocument.title
+                              ? { originTitle: primaryDocument.title }
+                              : undefined;
+        const properties: IDocumentProperties = { dfRunId: id, ...originTitle };
         if (datasetName.length > 0) {
           properties.dfHasData = "true";
         }
