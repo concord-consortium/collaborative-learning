@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { registerToolContentInfo } from "../tool-content-info";
 
 export const kPlaceholderToolID = "Placeholder";
 
@@ -22,3 +23,10 @@ export const PlaceholderContentModel = types
 
 export type PlaceholderContentModelType = Instance<typeof PlaceholderContentModel>;
 export type PlaceholderContentSnapshotOutType = SnapshotOut<typeof PlaceholderContentModel>;
+
+registerToolContentInfo({
+  id: kPlaceholderToolID,
+  tool: "placeholder",
+  modelClass: PlaceholderContentModel,
+  defaultContent: defaultPlaceholderContent
+});

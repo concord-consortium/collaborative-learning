@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 const placeholderImage = require("../../../assets/image_placeholder.png");
 
@@ -79,3 +80,10 @@ export const ImageContentModel = types
 
 export type ImageContentModelType = Instance<typeof ImageContentModel>;
 export type ImageContentSnapshotOutType = SnapshotOut<typeof ImageContentModel>;
+
+registerToolContentInfo({
+  id: kImageToolID,
+  tool: "image",
+  modelClass: ImageContentModel,
+  defaultContent: defaultImageContent
+});
