@@ -476,16 +476,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
         if (!chInfo && n.data.sensor !== "none") {
           if (typeof n.data.sensor === "string" && typeof n.data.type === "string") {
-            const missingDevice: MissingDevice = { id: n.data.sensor, type: n.data.type};
-            missingDevices.push(missingDevice);
+            missingDevices.push({ id: n.data.sensor, type: n.data.type});
           }
         }
       } else if (n.name === "Relay" && n.data.relayList) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
         if (!chInfo && n.data.relayList !== "none") {
           if (typeof n.data.relayList === "string") {
-            const missingDevice: MissingDevice = { id: n.data.relayList, type: "relay"};
-            missingDevices.push(missingDevice);
+            missingDevices.push({ id: n.data.relayList, type: "relay"});
           }
         }
       }
@@ -497,7 +495,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.hasValidOutputNodes()) {
       return;
     }
-    const missingDevices: MissingDevice[] = this.hasValidInputNodes();
+    const missingDevices = this.hasValidInputNodes();
     if (missingDevices.length) {
       let message = "";
       missingDevices.forEach((md) => {
@@ -510,15 +508,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.stores.ui.confirm(message, "Devices cannot be found")
       .then(ok => {
         if (ok) {
-          this.requestProgramName();
+          this.requestNameAndRunProgram();
         }
       });
     } else {
-      this.requestProgramName();
+      this.requestNameAndRunProgram();
     }
   }
 
-  private requestProgramName = () => {
+  private requestNameAndRunProgram = () => {
     const dialogPrompt = this.hasDataStorage()
                           ? "Save dataset as"
                           : "Save program as";

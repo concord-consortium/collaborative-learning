@@ -11,7 +11,7 @@ const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 const OWNER_ID = "123";
 const SEND_INTERVAL = 1;
 const MAX_HUBS = 200;
-const HUB_RESPONSE_TIME = 60 * 1000;
+const HUB_RESPONSE_TIMEOUT = 60 * 1000;
 
 type RelayValue = 0 | 1;
 
@@ -85,7 +85,7 @@ export class IoT {
     const  { hubStore } = this.stores;
     // check for hubs that have not responded recently
     hubStore.hubs.forEach(hub => {
-      if ((Date.now() - hub.hubUpdateTime) > HUB_RESPONSE_TIME && hub.hubChannels.length) {
+      if ((Date.now() - hub.hubUpdateTime) > HUB_RESPONSE_TIMEOUT && hub.hubChannels.length) {
         hub.removeAllHubChannels();
         this.requestHubChannelInfo(hub.hubId);
       }
