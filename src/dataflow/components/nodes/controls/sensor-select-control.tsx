@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { NodeSensorTypes, NodeChannelInfo, kSensorSelectMessage } from "../../../utilities/node";
+import { NodeSensorTypes, NodeChannelInfo,
+         kSensorSelectMessage, kSensorMissingMessage } from "../../../utilities/node";
 import { useStopEventPropagation } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
@@ -124,7 +125,7 @@ export class SensorSelectControl extends Rete.Control {
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
-        if (!ch) return "Finding " + id;
+        if (!ch) return `${kSensorMissingMessage} ${id}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
@@ -134,13 +135,17 @@ export class SensorSelectControl extends Rete.Control {
       if (!options.length) {
         options.push("none");
       }
-      const titleClass = getChannelString(selectedChannel).includes(kSensorSelectMessage)
+      const channelString = getChannelString(selectedChannel);
+      const titleClass = channelString.includes(kSensorSelectMessage)
                          ? "label unselected"
                          : "label";
+      const topItemClass = channelString.includes(kSensorMissingMessage)
+                         ? "item top missing"
+                         : "item top";
       return (
         <div className="node-select sensor-select" ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <div className={titleClass}>{getChannelString(selectedChannel)}</div>
+          <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
+            <div className={titleClass}>{channelString}</div>
             <div className="dropdown-caret-holder">
               <svg className="icon dropdown-caret">
                 <use xlinkHref="#icon-dropdown-caret"/>

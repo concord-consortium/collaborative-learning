@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { NodeChannelInfo, kRelaySelectMessage } from "../../../utilities/node";
+import { NodeChannelInfo, kRelaySelectMessage, kRelayMissingMessage } from "../../../utilities/node";
 import { useStopEventPropagation } from "./custom-hooks";
 import "./sensor-select-control.sass";
 
@@ -52,20 +52,26 @@ export class RelaySelectControl extends Rete.Control {
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
         if (!ch && (!id || id === "none")) return kRelaySelectMessage;
         if (ch === "none") return "None Available";
-        if (!ch) return "Searching for " + id;
+        if (!ch) return `${kRelayMissingMessage} ${id}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
       };
-      const titleClass = getChannelString(selectedChannel).includes(kRelaySelectMessage) ? "label unselected" : "label";
       const options: any = [...channelsForType];
       if (!options.length) {
         options.push("none");
       }
+      const channelString = getChannelString(selectedChannel);
+      const titleClass = channelString.includes(kRelaySelectMessage)
+                         ? "label unselected"
+                         : "label";
+      const topItemClass = channelString.includes(kRelayMissingMessage)
+                         ? "item top missing"
+                         : "item top";
       return (
         <div className="node-select relay-select" ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
-            <div className={titleClass}>{getChannelString(selectedChannel)}</div>
+          <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
+            <div className={titleClass}>{channelString}</div>
             <svg className="icon dropdown-caret">
               <use xlinkHref="#icon-dropdown-caret"/>
             </svg>

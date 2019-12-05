@@ -11,6 +11,7 @@ const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
 const OWNER_ID = "123";
 const SEND_INTERVAL = 1;
 const MAX_HUBS = 200;
+const HUB_RESPONSE_TIMEOUT = 60 * 1000;
 
 type RelayValue = 0 | 1;
 
@@ -82,6 +83,14 @@ export class IoT {
 
   private updateHubs = () => {
     const  { hubStore } = this.stores;
+    // check for hubs that have not responded recently
+    hubStore.hubs.forEach(hub => {
+      if ((Date.now() - hub.hubUpdateTime) > HUB_RESPONSE_TIMEOUT && hub.hubChannels.length) {
+        hub.removeAllHubChannels();
+        this.requestHubChannelInfo(hub.hubId);
+      }
+    });
+
     const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS };
     this.iotCore.listThings(requestParams).promise().then(data => {
       if (data && data.things) {
@@ -153,6 +162,7 @@ export class IoT {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
     if (hub) {
+      hub.setHubUpdateTime(Date.now());
       const devices = Object.values(message);
       const deviceKeys = Object.keys(message);
       let rids: string[] = [];
@@ -203,12 +213,35 @@ export class IoT {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
     const time = message.time ? parseFloat(message.time) * 1000 : Date.now();
+    let hubStoreSensors = 0;
     if (hub) {
+      hub.setHubUpdateTime(Date.now());
+      let messageChannels = 0;
+      let unmatchedChannel = false;
       for (const key in message) {
         if (message.hasOwnProperty(key) && key !== "time") {
-          hub.setHubChannelValue(key, String(message[key]));
-          hub.setHubChannelTime(key, time);
+          messageChannels++;
+          if (hub.getHubChannel(key)) {
+            hub.setHubChannelValue(key, String(message[key]));
+            hub.setHubChannelTime(key, time);
+          } else {
+            unmatchedChannel = true;
+          }
         }
+      }
+
+      // WTD simulator doesn't currently return relay value in sensors message
+      // until fixed, need to handle both the hub and hub sim cases
+      hub.hubChannels.forEach(ch => {
+        if (ch.type !== "relay") {
+          hubStoreSensors++;
+        }
+      });
+
+      // WTD change to below once we fix the simulator so that it returns relay value with sensors message
+      // if (messageChannels !== hub.hubChannels.length || unmatchedChannel) {
+      if ((messageChannels !== hub.hubChannels.length && messageChannels !== hubStoreSensors) || unmatchedChannel) {
+        this.requestHubChannelInfo(hub.hubId);
       }
     }
   }

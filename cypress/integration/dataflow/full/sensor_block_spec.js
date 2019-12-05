@@ -25,7 +25,7 @@ before(()=>{
 
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
-    
+
     header.switchWorkspace('Workspace');
     cy.wait(1000);
     dfcanvas.openBlock('Sensor')
@@ -58,24 +58,25 @@ context('Sensor block tests',()=>{
                     }
                     else {
                         expect($option).to.contain(sensor.toLowerCase());
-                    } 
-                }) 
-            })       
+                    }
+                })
+            })
         })
         it('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
             var sensorTypes=['Humidity','Temeprature'];
             var hub ='cc-west-office-hub'; //use cc-west-hub since it has two temp and two humidity
-
+            var plugIndex = 1;
             dfblock.selectSensorType(sensorTypes[0]);
             cy.wait(10000);
             dfblock.openHubSensorComboListDropdown();
             dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
                 console.log($option.text()+' length: '+ $optionList.length)
                 if ($option.text().includes(hub)){ //cc-west-office-hub:humidity(plug 1),cc-west-office-hub:humidity(plug 1)
-                    console.log("hub name: "+hub+':'+(sensorTypes[0].toLowerCase())+'(plug '+(index+1)+')');
-                            expect($option).to.contain(hub+':'+sensorTypes[0].toLowerCase()+'(plug '+(index+1)+')');
+                    console.log("hub name: "+hub+':'+(sensorTypes[0].toLowerCase())+'(plug '+(plugIndex)+')');
+                    expect($option).to.contain(hub+':'+sensorTypes[0].toLowerCase()+'(plug '+(plugIndex)+')');
+                    plugIndex++;
                 }
-            }) 
+            })
         })
         it('verify sensor type matches units shown in text field',()=>{
             var sensorTypes=[
@@ -91,7 +92,7 @@ context('Sensor block tests',()=>{
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
                 dfblock.selectSensorType(sensor.type)
                 dfblock.getSensorValueTextField().should('contain',sensor.unit)
-            })       
+            })
         })
         it('verify sensor blocks outputs correctly',()=>{
             var sensor = "Humidity";

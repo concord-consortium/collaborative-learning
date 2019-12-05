@@ -97,13 +97,13 @@ context('single student functional test',()=>{
 
             })
             it('verify student name appears under thumbnail',()=>{
- 
+
             } )
             it('verify restore of published canvas', ()=>{
 
             })
         })
-    });    
+    });
 })
 after(function(){
     cy.clearQAData('all');

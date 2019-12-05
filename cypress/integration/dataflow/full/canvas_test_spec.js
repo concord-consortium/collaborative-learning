@@ -58,7 +58,7 @@ context('canvas test',()=>{
             for(var i=0;i<=buttons.length-1;i++) {
                 dfcanvas.openBlock(buttons[i]);
                 dfblock.getBlock(buttons[i].toLowerCase().replace(' ','-')).should('exist');
-            }    
+            }
         })
     })
     describe('verify run program toolbar functionality', ()=>{
@@ -82,7 +82,7 @@ context('canvas test',()=>{
     })
     describe('deletion',()=>{
         describe('delete a block',()=>{
-            before(()=>{ 
+            before(()=>{
                 dfcanvas.createNewProgram('Delete Block Program'); //start with clean canvas
                 dfcanvas.openBlock('Number');
                 dfcanvas.openBlock('Relay')
@@ -132,7 +132,7 @@ context('canvas test',()=>{
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+seqName);
             cy.wait(3000) //wait to finish typing into element before reloading page
         })
-        it('verify program is restored when reopened',()=>{ 
+        it('verify program is restored when reopened',()=>{
             //get values before close
             const input1 = Cypress.$(dfblock.numberInputEl(0)).val()
             const input2 = Cypress.$(dfblock.numberInputEl(1)).val()
