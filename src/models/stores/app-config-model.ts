@@ -45,6 +45,7 @@ export const AppConfigModel = types
     autoSectionProblemDocuments: false,
     documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
+    copyPreferOriginTitle: false,
     showClassSwitcher: false,
     rightNavTabs: types.array(RightNavTabModel),
     toolbar: types.array(ToolButtonModel)

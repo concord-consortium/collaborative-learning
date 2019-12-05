@@ -317,8 +317,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { appConfig } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const originTitle = document?.properties?.get("originTitle");
+    const baseTitle = appConfig.copyPreferOriginTitle && originTitle
+                        ? originTitle
+                        : document.title || this.stores.problem.title;
     this.stores.ui.prompt(`Give your ${docTypeStringL} copy a new name:`,
-                          `Copy of ${document.title || this.stores.problem.title}`, `Copy ${docTypeString}`)
+                          `Copy of ${baseTitle}`, `Copy ${docTypeString}`)
       .then((title: string) => {
         this.handleCopyDocumentOpen(document, title)
         .catch(this.stores.ui.setError);
