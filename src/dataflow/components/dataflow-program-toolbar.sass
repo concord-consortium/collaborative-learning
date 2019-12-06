@@ -8,6 +8,7 @@ $toolbar-background: $gray-light
 $button-sensor: $sensor-blue
 $button-number: $number-blue
 $button-generator: $generator-blue
+$button-timer: $timer-blue
 $button-math: $math-green
 $button-logic: $logic-green
 $button-transform: $transform-green
@@ -42,6 +43,8 @@ $button-label-text: $gray-text
       background-color: $button-click
     &:disabled
       opacity: 0.6
+    &.qa
+      height: 15px
 
     .label
       text-align: center
@@ -69,6 +72,8 @@ $button-label-text: $gray-text
         background-color: $button-number
       &.generator
         background-color: $button-generator
+      &.timer
+        background-color: $button-timer
       &.math
         background-color: $button-math
       &.logic

@@ -25,8 +25,8 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
             this.renderAddNodeButton(nt.name, i)
           ))
         }
-        { isTesting && <button onClick={this.props.onClearClick}>Clear</button> }
-        { isTesting && <button onClick={this.props.onResetClick}>Reset</button> }
+        { isTesting && <button className={"qa"} onClick={this.props.onClearClick}>Clear</button> }
+        { isTesting && <button className={"qa"} onClick={this.props.onResetClick}>Reset</button> }
       </div>
     );
   }
@@ -39,6 +39,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
       case "Number":
       case "Sensor":
       case "Generator":
+      case "Timer":
         nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         break;
       case "Math":

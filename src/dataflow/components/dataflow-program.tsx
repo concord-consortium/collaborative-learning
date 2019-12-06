@@ -15,9 +15,10 @@ import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory"
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
+import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
-         DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, NodeGeneratorPeriodUnits, ProgramRunTimes,
+         NodeTimerInfo, NodeTimerPeriodUnits, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
@@ -246,6 +247,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket),
         new GeneratorReteNodeFactory(numSocket),
+        new TimerReteNodeFactory(numSocket),
         new DataStorageReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
@@ -687,6 +689,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private heartBeat = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
             Generator: this.updateGeneratorNode,
+            Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
                       this.updateNodeChannelInfo(n);
                       this.updateNodeSensorValue(n);
@@ -829,12 +832,31 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateGeneratorNode = (n: Node) => {
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
+    const units = n.data.units;
     const amplitude = Number(n.data.amplitude);
     const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
     if (nodeGeneratorType && period && amplitude) {
+      const periodUnits = NodeGeneratorPeriodUnits.find((u: any) => u.unit === units);
+      const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
       const time = Date.now();
       // note: period is given in s, but we're passing in ms for time, need to adjust
-      const val = nodeGeneratorType.method(time, period * 1000, amplitude);
+      const val = nodeGeneratorType.method(time, period * 1000 * periodUnitsInSeconds, amplitude);
+      const nodeValue = n.controls.get("nodeValue") as NumControl;
+      if (nodeValue) {
+        nodeValue.setValue(val);
+      }
+    }
+  }
+
+  private updateTimerNode = (n: Node) => {
+    const period = Number(n.data.period);
+    if (period) {
+      const units = n.data.units;
+      const periodUnits = NodeTimerPeriodUnits.find((u: any) => u.unit === units);
+      const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
+      const time = Date.now();
+      // note: period is given in s, but we're passing in ms for time, need to adjust
+      const val = NodeTimerInfo.method(time, period * 1000 * periodUnitsInSeconds, 1);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);

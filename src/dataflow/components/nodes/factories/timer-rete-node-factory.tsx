@@ -5,27 +5,19 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeGeneratorTypes, NodeGeneratorPeriodUnits } from "../../../utilities/node";
+import { NodeTimerPeriodUnits } from "../../../utilities/node";
 
-export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
+export class TimerReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
-    super("Generator", numSocket);
+    super("Timer", numSocket);
   }
 
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
       const out = new Rete.Output("num", "Number", this.numSocket);
-      const units = NodeGeneratorPeriodUnits.map(u => u.unit);
-      const dropdownOptions = NodeGeneratorTypes
-        .map((nodeOp) => {
-          return { name: nodeOp.name, icon: nodeOp.icon };
-        });
-
+      const units = NodeTimerPeriodUnits.map(u => u.unit);
       return node
-        .addControl(new DropdownListControl(this.editor, "generatorType", node, dropdownOptions, true))
-        .addControl(new NumControl(this.editor, "amplitude", node, false, "Amplitude", 1, .01))
         .addControl(new NumControl(this.editor, "period", node, false, "Period", 10, 1, units))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
@@ -35,5 +27,14 @@ export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
 
   public worker(node: NodeData, inputs: any, outputs: any) {
     outputs.num = node.data.nodeValue;
+    const result = node.data.nodeValue !== 0;
+    if (this.editor) {
+      const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
+      if (_node) {
+        const nodeValue = _node.controls.get("nodeValue") as ValueControl;
+        nodeValue && nodeValue.setSentence(+result === 0 ? "off" : "on");
+        this.editor.view.updateConnections( {node: _node} );
+      }
+    }
   }
 }
