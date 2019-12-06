@@ -84,6 +84,7 @@ export class DataflowAppHeaderComponent extends BaseComponent<IProps, {}> {
   private renderPanelButtons() {
     const { panels } = this.props;
     if (!panels || (panels.length < 2)) return;
+    if (!this.stores.user.isTeacher) return;
 
     interface IPanelButtonProps {
       panelId: string;
