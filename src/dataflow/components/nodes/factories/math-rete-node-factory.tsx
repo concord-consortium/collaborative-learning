@@ -29,8 +29,8 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(inp1)
         .addInput(inp2)
         .addControl(new DropdownListControl(this.editor, "mathOperator", node, dropdownOptions, true))
-        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
+        .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
     }
   }
@@ -50,8 +50,8 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
         result = 0;
       }
 
-      const n1Str = n1 === undefined ? "___" : "" + n1;
-      const n2Str = n2 === undefined ? "___" : "" + n2;
+      const n1Str = n1 === undefined ? "__" : "" + n1;
+      const n2Str = n2 === undefined ? "__" : "" + n2;
       resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + roundNodeValue(result);
     }
 

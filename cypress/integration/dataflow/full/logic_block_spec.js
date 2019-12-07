@@ -16,7 +16,7 @@ before(()=>{
 
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
-    
+
     header.switchWorkspace('Workspace');
     cy.wait(1000);
     dfcanvas.openBlock('Number')
@@ -40,9 +40,9 @@ context('Logic block test',()=>{
         })
         it('verify correct equation when only one node is connected',()=>{
             dfblock.getNumberInput(0).type('{backspace}'+input1+'{enter}');
-            dfblock.getLogicValueTextField().should('contain', input1+' > ___ ⇒ 0')//0 > ___ ⇒ 0
+            dfblock.getLogicValueTextField().should('contain', input1+' > __ ⇒ 0')//0 > ___ ⇒ 0
         })
-        it('verify greater than',()=>{ 
+        it('verify greater than',()=>{
             dfblock.connectBlocks('number',1,testBlock,1)
             // dfblock.getLogicValueTextField().should('contain', input1+' > 0 ⇒ '+((input1>0)?1:0))//0 > 0 ⇒ 0
             dfblock.getNumberInput(1).type('{backspace}'+input2+'{enter}');

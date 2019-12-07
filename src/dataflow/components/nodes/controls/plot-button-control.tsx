@@ -46,6 +46,7 @@ export class PlotButtonControl extends Rete.Control {
     const show = !this.props.showgraph;
     this.props.showgraph = show;
     this.putData(this.key, show);
+    (this as any).update();
     this.node.update();
   }
 

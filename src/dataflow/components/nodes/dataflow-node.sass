@@ -11,86 +11,129 @@ $node-inner-width: 140px
     align-items: center
     width: $node-width
     min-width: $node-width
-    padding-bottom: 8px
+    padding-bottom: 16px
     border-radius: 5px
     font-size: 11px
+    box-sizing: border-box
+    color: $gray-text
 
     &.sensor
       background-color: $sensor-blue
       border-color: $sensor-blue-outline
       .main-color
         color: $sensor-blue
+        border: 2px solid $sensor-blue
+        &:hover
+          background-color: $sensor-blue-outline
       .control-color
         color: $sensor-blue-control
       .control-color-hoverable:hover
         color: $sensor-blue-node
+      .active
+        background-color: $sensor-blue-control
     &.number
       background-color: $number-blue
       border-color: $number-blue-outline
       .main-color
         color: $number-blue
+        border: 2px solid $number-blue
+        &:hover
+          background-color: $number-blue-outline
       .control-color
         color: $number-blue-control
       .control-color-hoverable:hover
         color: $number-blue-node
+      .active
+        background-color: $number-blue-control
     &.generator
       background-color: $generator-blue
       border-color: $generator-blue-outline
       .main-color
         color: $generator-blue
+        border: 2px solid $generator-blue
+        &:hover
+          background-color: $generator-blue-outline
       .control-color
         color: $generator-blue-control
       .control-color-hoverable:hover
         color: $generator-blue-node
+      .active
+        background-color: $generator-blue-control
     &.math
       background-color: $math-green
       border-color: $math-green-outline
       .main-color
         color: $math-green
+        border: 2px solid $math-green
+        &:hover
+          background-color: $math-green-outline
       .control-color
         color: $math-green-control
       .control-color-hoverable:hover
         color: $math-green-node
+      .active
+        background-color: $math-green-control
     &.logic
       background-color: $logic-green
       border-color: $logic-green-outline
       .main-color
         color: $logic-green
+        border: 2px solid $logic-green
+        &:hover
+          background-color: $logic-green-outline
       .control-color
         color: $logic-green-control
       .control-color-hoverable:hover
         color: $logic-green-node
+      .active
+        background-color: $logic-green-control
     &.transform
       background-color: $transform-green
       border-color: $transform-green-outline
       .main-color
         color: $transform-green
+        border: 2px solid $transform-green
+        &:hover
+          background-color: $transform-green-outline
       .control-color
         color: $transform-green-control
       .control-color-hoverable:hover
         color: $transform-green-node
+      .active
+        background-color: $transform-green-control
     &.relay
       background-color: $relay-orange
       border-color: $relay-orange-outline
       .main-color
         color: $relay-orange
+        border: 2px solid $relay-orange
+        &:hover
+          background-color: $relay-orange-outline
       .control-color
         color: $relay-orange-control
       .control-color-hoverable:hover
         color: $relay-orange-node
+      .active
+        background-color: $relay-orange-control
     &.data-storage
       background-color: $data-storage-orange
       border-color: $data-storage-orange-outline
       .main-color
         color: $data-storage-orange
+        border: 2px solid $data-storage-orange
+        &:hover
+          background-color: $data-storage-orange-outline
       .control-color
         color: $data-storage-orange-control
       .control-color-hoverable:hover
         color: $data-storage-orange-node
+      .active
+        background-color: $data-storage-orange-control
 
     .top-bar
       display: flex
       width: $node-inner-width
+      height: 21px
       padding: 4px 0 2px 0
 
       .node-title
@@ -101,10 +144,10 @@ $node-inner-width: 140px
 
       .close-node-button
         position: absolute
-        right: 5px
-        top: 3px
-        width: 12px
-        height: 12px
+        right: 4px
+        top: 1px
+        width: 8px
+        height: 8px
         svg
           width: 8px
           height: 8px
@@ -116,17 +159,17 @@ $node-inner-width: 140px
       height: 20px
 
     .control
-      padding: 3px
+      padding: 0px
       max-width: $node-inner-width
 
     select, input
       font-family: 'Ubuntu', sans-serif
       font-weight: 400
-      font-size: 11px
+      font-size: 14px
       border-radius: 30px
       background-color: white
       padding: 2px 6px
-      border: 1px solid #999
+      border: 0px solid #999
       &.sensor
         color: #0592AF
 
@@ -171,6 +214,34 @@ $node-inner-width: 140px
         display: flex
         justify-content: space-evenly
         min-width: 151px
+
+        .output-container
+          margin: 0 3px 0 10px
+          padding: 3px
+          display: flex
+          justify-content: center
+          align-items: center
+          background-color: white
+          border-radius: 3px 15px 15px 3px
+          width: 140px
+          height: 30px
+          box-sizing: border-box
+          border: solid 2px white
+          &.sensor, &.number
+            background-color: $sensor-blue-readout
+          &.generator
+            background-color: $generator-blue-readout
+          &.math
+            background-color: $math-green-readout
+          &.logic
+            background-color: $logic-green-readout
+          &.transform
+            background-color: $transform-green-readout
+          &.relay
+            background-color: $relay-orange-readout
+            margin-left: 0px
+          &.data-storage
+            display: none
 
     .decorated-inputs
       width: $node-width

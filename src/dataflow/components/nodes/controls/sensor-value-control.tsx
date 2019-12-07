@@ -29,7 +29,7 @@ export class SensorValueControl extends Rete.Control {
         <div className="value-container">
           {compProps.value}
         </div>
-        <div className="units-container">
+        <div className={`units-container ${compProps.units.length > 4 ? "small" : ""}`}>
           {compProps.units}
         </div>
       </div>

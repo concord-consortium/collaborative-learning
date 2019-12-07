@@ -1,36 +1,36 @@
 
 @import ../../../vars
 
-
 .node-select-container
   display: flex
   line-height: 24px
+  margin-top: 3px
+  margin-bottom: 3px
 
   .node-select-label
     color: white
     margin-right: 5px
 
 .node-select
-  color: black
-  // color: #2DA343
   width: 140px
   height: 24px
-  box-sizing: border-box
   &.sensor-type, &.generatorType
-    // color: #0592AF
-    margin-bottom: 6px
+    margin-bottom: 3px
+    margin-top: 3px
+    font-size: 14px
+    .label
+      margin-left: 2px
 
   .item
     display: flex
     align-items: center
-    height: 24px
+    height: 26px
+    box-sizing: border-box
     background-color: white
     padding: 0 0 0 4px
     &.top
       padding: 0 6px 0 6px
-      margin-bottom: 5px
-      border-radius: 30px
-      border: 1px solid #999
+      border-radius: 3px
       &.missing
         background-color: pink
     &.selected
@@ -85,8 +85,8 @@
     .icon
       position: static
       z-index: 0
-      width: 14px
-      height: 14px
+      width: 16px
+      height: 16px
       margin: 0 4px 0 0
       &.top
         margin: 0 2px 0 0
@@ -100,13 +100,15 @@
     position: relative
     z-index: 2
     left: 0
-    top: -6px
-    border: 1px solid #1E90FF
+    top: 0
+    border: 1px solid $gray-text
     background-color: white
     &.logicOperator
       width: 160px
 
   &.sensor-select
+    margin-bottom: 3px
+    margin-top: 3px
     .option-list
       width: 212px
       text-align: left
@@ -146,3 +148,5 @@
   .label
     &.unselected
       font-style: italic
+      font-size: 11px
+      margin-left: 0px
