@@ -273,18 +273,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         area.zoom(programZoom.scale, programZoom.dx, programZoom.dy, "wheel");
       }
 
-      (this.programEditor as any).on(
-        "process nodecreated noderemoved connectioncreated connectionremoved",
-        async () => {
-          await this.programEngine.abort();
-          const programJSON = this.programEditor.toJSON();
-          await this.programEngine.process(programJSON);
-          if (!this.hasDataStorage()) {
-            this.setState({disableDataStorage: false});
-          }
-          this.props.onProgramChange(programJSON);
-        }
-      );
+      (this.programEditor as any).on("process noderemoved connectioncreated connectionremoved", () => {
+        this.processAndSave();
+      });
+
+      this.programEditor.on("nodecreated", node => {
+        this.processAndSave();
+        this.moveNodeToFront(node, true);
+      });
+
+      this.programEditor.on("selectnode", ( { node } ) => {
+        this.moveNodeToFront(node, false);
+      });
 
       this.programEditor.on("nodedraged", node => {
         this.props.onProgramChange(this.programEditor.toJSON());
@@ -355,6 +355,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
     })();
+  }
+
+  private processAndSave = async () => {
+    await this.programEngine.abort();
+    const programJSON = this.programEditor.toJSON();
+    await this.programEngine.process(programJSON);
+    if (!this.hasDataStorage()) {
+      this.setState({disableDataStorage: false});
+    }
+    this.props.onProgramChange(programJSON);
   }
 
   private updateRunAndGraphStates() {
@@ -639,6 +649,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                      * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
                      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
     return nodePos;
+  }
+
+  private moveNodeToFront = (node: any, newNode: boolean) => {
+    const totalNodes = this.programEditor.nodes.length;
+    const selectedNodeView = this.programEditor.view.nodes.get(node);
+    let selectedNodeZ = 0;
+    if (selectedNodeView) {
+      selectedNodeZ = selectedNodeView.el.style.zIndex ? parseInt(selectedNodeView.el.style.zIndex, 10) : selectedNodeZ;
+    }
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeView = this.programEditor.view.nodes.get(n);
+      if (nodeView) {
+        if (node.id === n.id) {
+          nodeView.el.style.zIndex = totalNodes.toString();
+        } else if (nodeView.el.style.zIndex) {
+          const nodeZ = parseInt(nodeView.el.style.zIndex, 10);
+          if (nodeZ > selectedNodeZ && !newNode) {
+            nodeView.el.style.zIndex = (nodeZ - 1).toString();
+          }
+        }
+      }
+    });
   }
 
   private clearProgram = () => {
