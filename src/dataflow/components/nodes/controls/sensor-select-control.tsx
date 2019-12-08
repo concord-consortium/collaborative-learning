@@ -19,6 +19,8 @@ export class SensorSelectControl extends Rete.Control {
     this.key = key;
     this.node = node;
 
+    window.addEventListener("pointerdown", this.handlePointerDown, true);
+
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
@@ -219,6 +221,12 @@ export class SensorSelectControl extends Rete.Control {
       showTypeList: false,
       channels: []
     };
+  }
+
+  public handlePointerDown = () => {
+    this.props.showSensorList = false;
+    this.props.showTypeList = false;
+    (this as any).update();
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {

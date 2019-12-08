@@ -23,6 +23,8 @@ export class DropdownListControl extends Rete.Control {
     this.emitter = emitter;
     this.key = key;
 
+    window.addEventListener("pointerdown", this.handlePointerDown, true);
+
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
@@ -131,6 +133,11 @@ export class DropdownListControl extends Rete.Control {
       label,
       isDisabled: null
     };
+  }
+
+  public handlePointerDown = () => {
+    this.props.showList = false;
+    (this as any).update();
   }
 
   public setValue = (val: any) => {
