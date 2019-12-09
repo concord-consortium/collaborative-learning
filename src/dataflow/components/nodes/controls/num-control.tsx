@@ -62,7 +62,7 @@ export class NumControl extends Rete.Control {
             onChange={handleChange(compProps.onChange)}
             onBlur={handleBlur(compProps.onBlur)}
           />
-          { compProps.units && compProps.units.length
+          { compProps.units?.length
             ? <div className="type-options-back">
                 <HTMLSelect className="type-options"
                   onChange={handleSelectChange}
