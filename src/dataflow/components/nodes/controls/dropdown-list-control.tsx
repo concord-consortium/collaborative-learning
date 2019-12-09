@@ -18,6 +18,7 @@ export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
+  private listRef: any;
   constructor(emitter: NodeEditor, key: string, node: Node, optionArray: ListOption[], readonly = false, label = "") {
     super(key);
     this.emitter = emitter;
@@ -79,7 +80,7 @@ export class DropdownListControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className={`option-list ${listClass}`}>
+          <div className={`option-list ${listClass}`} ref={listRef => this.listRef = listRef}>
             {options.map((ops: any, i: any) => {
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
@@ -135,9 +136,11 @@ export class DropdownListControl extends Rete.Control {
     };
   }
 
-  public handlePointerDown = () => {
-    this.props.showList = false;
-    (this as any).update();
+  public handlePointerDown = (e: PointerEvent) => {
+    if (this.listRef && !this.listRef.contains(e.target) && this.props.showList) {
+      this.props.showList = false;
+      (this as any).update();
+    }
   }
 
   public setValue = (val: any) => {

@@ -12,6 +12,8 @@ export class SensorSelectControl extends Rete.Control {
   private component: any;
   private props: any;
   private node: Node;
+  private typeListRef: any;
+  private sensorListRef: any;
 
   constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
     super(key);
@@ -86,7 +88,7 @@ export class SensorSelectControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className="option-list">
+          <div className="option-list" ref={typeListRef => this.typeListRef = typeListRef}>
             {NodeSensorTypes.map((val: any, i: any) => (
               <div
                 className={
@@ -155,7 +157,7 @@ export class SensorSelectControl extends Rete.Control {
             </div>
           </div>
           {showList ?
-          <div className="option-list">
+          <div className="option-list" ref={sensorListRef => this.sensorListRef = sensorListRef}>
             {options.map((ch: NodeChannelInfo, i: any) => (
               <div
                 className={
@@ -223,10 +225,15 @@ export class SensorSelectControl extends Rete.Control {
     };
   }
 
-  public handlePointerDown = () => {
-    this.props.showSensorList = false;
-    this.props.showTypeList = false;
-    (this as any).update();
+  public handlePointerDown = (e: PointerEvent) => {
+    if (this.sensorListRef && !this.sensorListRef.contains(e.target) && this.props.showSensorList) {
+      this.props.showSensorList = false;
+      (this as any).update();
+    }
+    if (this.typeListRef && !this.typeListRef.contains(e.target) && this.props.showTypeList) {
+      this.props.showTypeList = false;
+      (this as any).update();
+    }
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {

@@ -10,7 +10,7 @@ export class RelaySelectControl extends Rete.Control {
   private component: any;
   private props: any;
   private node: Node;
-
+  private listRef: any;
   constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
     super(key);
     this.emitter = emitter;
@@ -79,7 +79,7 @@ export class RelaySelectControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className="option-list">
+          <div className="option-list" ref={listRef => this.listRef = listRef}>
             {options.map((ch: NodeChannelInfo, i: any) => (
               <div
                 className={
@@ -122,9 +122,11 @@ export class RelaySelectControl extends Rete.Control {
     };
   }
 
-  public handlePointerDown = () => {
-    this.props.showList = false;
-    (this as any).update();
+  public handlePointerDown = (e: PointerEvent) => {
+    if (this.listRef && !this.listRef.contains(e.target) && this.props.showList) {
+      this.props.showList = false;
+      (this as any).update();
+    }
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {
