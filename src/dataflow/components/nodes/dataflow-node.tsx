@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
+import { NodeType, NodeTypes } from "../../utilities/node";
 import "./dataflow-node.sass";
 
 export class DataflowNode extends Node {
@@ -19,12 +20,14 @@ export class DataflowNode extends Node {
 
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton ? plotButton.props.showgraph : false;
+    const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+    const displayName = nodeType ? nodeType.displayName : node.name;
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")}`}>
         <div className="top-bar">
           <div className="node-title">
-            {node.name}
+            {displayName}
           </div>
           {deleteControl &&
             <Control

@@ -1,27 +1,44 @@
-export const NodeTypes = [
+export interface NodeType {
+  name: string;
+  displayName: string;
+}
+
+export const NodeTypes: NodeType[] = [
   {
     name: "Sensor",
+    displayName: "Sensor",
   },
   {
     name: "Number",
+    displayName: "Number",
   },
   {
     name: "Generator",
+    displayName: "Generator",
+  },
+  {
+    name: "Timer",
+    displayName: "Timer (on/off)"
   },
   {
     name: "Math",
+    displayName: "Math",
   },
   {
     name: "Logic",
+    displayName: "Logic",
   },
   {
     name: "Transform",
+    displayName: "Transform",
   },
   {
     name: "Relay",
+    displayName: "Relay",
   },
   {
     name: "Data Storage",
+    displayName: "Data Storage",
   },
 ];
 
@@ -215,6 +232,42 @@ export const NodeGeneratorTypes = [
     icon: "icon-noise-generator"
   },
   */
+];
+
+export const NodeGeneratorPeriodUnits = [
+  {
+    unit: "sec",
+    lengthInSeconds: 1
+  },
+  {
+    unit: "min",
+    lengthInSeconds: 60
+  },
+  {
+    unit: "hour",
+    lengthInSeconds: 3600
+  },
+];
+
+export const NodeTimerInfo =
+{
+  name: "Timer",
+  method: (t: number, p: number, a: number) => t % p < p / 2 ? 1 * a : 0,
+};
+
+export const NodeTimerPeriodUnits = [
+  {
+    unit: "sec",
+    lengthInSeconds: 1
+  },
+  {
+    unit: "min",
+    lengthInSeconds: 60
+  },
+  {
+    unit: "hour",
+    lengthInSeconds: 3600
+  },
 ];
 
 export interface NodeChannelInfo {

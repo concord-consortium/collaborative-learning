@@ -31,6 +31,10 @@ $node-inner-width: 140px
         color: $sensor-blue-node
       .active
         background-color: $sensor-blue-control
+      .type-options select
+        background-color: $sensor-blue-outline
+      .type-options span
+        border-top-color: $sensor-blue
     &.number
       background-color: $number-blue
       border-color: $number-blue-outline
@@ -45,6 +49,10 @@ $node-inner-width: 140px
         color: $number-blue-node
       .active
         background-color: $number-blue-control
+      .type-options select
+        background-color: $number-blue-outline
+      .type-options span
+        border-top-color: $number-blue
     &.generator
       background-color: $generator-blue
       border-color: $generator-blue-outline
@@ -59,6 +67,28 @@ $node-inner-width: 140px
         color: $generator-blue-node
       .active
         background-color: $generator-blue-control
+      .type-options select
+        background-color: $generator-blue-outline
+      .type-options span
+        border-top-color: $generator-blue
+    &.timer
+      background-color: $timer-blue
+      border-color: $timer-blue-outline
+      .main-color
+        color: $timer-blue
+        border: 2px solid $timer-blue
+        &:hover
+          background-color: $timer-blue-outline
+      .control-color
+        color: $timer-blue-control
+      .control-color-hoverable:hover
+        color: $timer-blue-node
+      .active
+        background-color: $timer-blue-control
+      .type-options select
+        background-color: $timer-blue-outline
+      .type-options span
+        border-top-color: $timer-blue
     &.math
       background-color: $math-green
       border-color: $math-green-outline
@@ -73,6 +103,10 @@ $node-inner-width: 140px
         color: $math-green-node
       .active
         background-color: $math-green-control
+      .type-options select
+        background-color: $math-green-outline
+      .type-options span
+        border-top-color: $math-green
     &.logic
       background-color: $logic-green
       border-color: $logic-green-outline
@@ -87,6 +121,10 @@ $node-inner-width: 140px
         color: $logic-green-node
       .active
         background-color: $logic-green-control
+      .type-options select
+        background-color: $logic-green-outline
+      .type-options span
+        border-top-color: $logic-green
     &.transform
       background-color: $transform-green
       border-color: $transform-green-outline
@@ -101,6 +139,10 @@ $node-inner-width: 140px
         color: $transform-green-node
       .active
         background-color: $transform-green-control
+      .type-options select
+        background-color: $transform-green-outline
+      .type-options span
+        border-top-color: $transform-green
     &.relay
       background-color: $relay-orange
       border-color: $relay-orange-outline
@@ -115,6 +157,10 @@ $node-inner-width: 140px
         color: $relay-orange-node
       .active
         background-color: $relay-orange-control
+      .type-options select
+        background-color: $relay-orange-outline
+      .type-options span
+        border-top-color: $relay-orange
     &.data-storage
       background-color: $data-storage-orange
       border-color: $data-storage-orange-outline
@@ -129,6 +175,10 @@ $node-inner-width: 140px
         color: $data-storage-orange-node
       .active
         background-color: $data-storage-orange-control
+      .type-options select
+        background-color: $data-storage-orange-outline
+      .type-options span
+        border-top-color: $data-storage-orange
 
     .top-bar
       display: flex
@@ -166,7 +216,6 @@ $node-inner-width: 140px
       font-family: 'Ubuntu', sans-serif
       font-weight: 400
       font-size: 14px
-      border-radius: 30px
       background-color: white
       padding: 2px 6px
       border: 0px solid #999
@@ -181,7 +230,6 @@ $node-inner-width: 140px
       height: 24px
       box-sizing: border-box
       flex: 1
-      border-radius: 3px
 
     .hr
       border: 1px solid
