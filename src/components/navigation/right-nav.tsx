@@ -59,8 +59,14 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
+
+    const allowed: any = {};
+    props.tabs?.forEach(tab => {
+      allowed[tab.tab] = true;
+    });
+    
     this.state = {
-      tabLoadAllowed: {},
+      tabLoadAllowed: allowed,
       navExpanding: false
     };
   }
