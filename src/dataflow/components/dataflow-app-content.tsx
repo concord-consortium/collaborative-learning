@@ -23,8 +23,11 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = { current: EPanelId.workspace };
 
   public componentWillMount() {
-    const { iot } = this.stores;
+    const { ui, iot } = this.stores;
     iot.connect(this.stores);
+
+    // For dataflow, only, force the right nav open on load.
+    ui.toggleRightNav(true);
   }
 
   public componentWillUnmount() {
