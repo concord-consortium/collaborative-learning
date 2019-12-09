@@ -60,14 +60,6 @@
           "properties": ["!dfHasData", "!isDeleted"]
         },
         {
-          "title": "Program Runs",
-          "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["dfHasData", "!isDeleted"]
-        },
-        {
           "title": "Data",
           "type": "personal-documents",
           "dataTestHeader": "my-work-section",
@@ -77,6 +69,14 @@
         },
         {
           "title": "Data Stories",
+          "type": "personal-documents",
+          "dataTestHeader": "my-work-section",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["personal"],
+          "properties": ["dfHasData", "!isDeleted"]
+        },
+        {
+          "title": "Relay Programs",
           "type": "personal-documents",
           "dataTestHeader": "my-work-section",
           "dataTestItem": "my-work-list-items",
@@ -100,15 +100,6 @@
         },
         {
           "className": "section personal published",
-          "title": "Program Runs",
-          "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
-          "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "properties": ["dfHasData"]
-        },
-        {
-          "className": "section personal published",
           "title": "Data",
           "type": "published-personal-documents",
           "dataTestHeader": "class-work-section",
@@ -119,6 +110,15 @@
         {
           "className": "section personal published",
           "title": "Data Stories",
+          "type": "published-personal-documents",
+          "dataTestHeader": "class-work-section",
+          "dataTestItem": "class-work-list-items",
+          "documentTypes": ["personalPublication"],
+          "properties": ["dfHasData"]
+        },
+        {
+          "className": "section personal published",
+          "title": "Relay Programs",
           "type": "published-personal-documents",
           "dataTestHeader": "class-work-section",
           "dataTestItem": "class-work-list-items",
