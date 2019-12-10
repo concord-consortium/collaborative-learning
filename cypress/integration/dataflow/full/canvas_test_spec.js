@@ -132,7 +132,7 @@ context('canvas test',()=>{
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+seqName);
             cy.wait(3000) //wait to finish typing into element before reloading page
         })
-        it('verify program is restored when reopened',()=>{
+        it.skip('verify program is restored when reopened',()=>{ 
             //get values before close
             const input1 = Cypress.$(dfblock.numberInputEl(0)).val()
             const input2 = Cypress.$(dfblock.numberInputEl(1)).val()

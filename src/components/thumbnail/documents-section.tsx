@@ -78,6 +78,10 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
         sectionDocs.push(...Object.values(publishedDocs));
       }
     });
+
+    // Reverse the order to approximate a most-recently-used ordering.
+    sectionDocs = sectionDocs.reverse();
+
     // filter by additional properties
     if (section.properties && section.properties.length) {
       sectionDocs = sectionDocs.filter(doc => {
@@ -105,60 +109,61 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     return (
-      <div className={`${section.className}`} key={`${tab}-${section.type}`}>
+      <div className={`${section.className} section-tab-container`} key={`${tab}-${section.type}`}>
         <CollapsibleSectionHeader
           sectionTitle={sectionTitle} dataTestName={section.dataTestHeader}
           isExpanded={isExpanded} onClick={handleSectionHeaderClick}/>
+        <div className="list-container">
+          <div className={"list " + (isExpanded ? "shown" : "hidden")}>
+            {sectionDocs.map(document => {
 
-        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
-          {sectionDocs.map(document => {
+              function handleDocumentClick() {
+                onDocumentClick && onDocumentClick(document);
+              }
+              function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
+                onDocumentDragStart && onDocumentDragStart(e, document);
+              }
+              function handleDocumentStarClick() {
+                onDocumentStarClick && onDocumentStarClick(document);
+              }
+              function handleDocumentDeleteClick() {
+                onDocumentDeleteClick && onDocumentDeleteClick(document);
+              }
 
-            function handleDocumentClick() {
-              onDocumentClick && onDocumentClick(document);
-            }
-            function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-              onDocumentDragStart && onDocumentDragStart(e, document);
-            }
-            function handleDocumentStarClick() {
-              onDocumentStarClick && onDocumentStarClick(document);
-            }
-            function handleDocumentDeleteClick() {
-              onDocumentDeleteClick && onDocumentDeleteClick(document);
-            }
-
-            // pass function so logic stays here but access occurs from child
-            // so that mobx-react triggers child render not parent render.
-            const onIsStarred = () => {
-              return section.showStarsForUser(user)
-                      ? user.isTeacher
-                        ? document.isStarredByUser(user.id)
-                        : document.isStarred
-                      : false;
-            };
-            const _handleDocumentStarClick = section.showStarsForUser(user)
-                                              ? handleDocumentStarClick
-                                              : undefined;
-            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                                              ? handleDocumentDeleteClick
-                                              : undefined;
-            return (
-              <ThumbnailDocumentItem
-                key={document.key}
-                dataTestName={`${tab}-list-items`}
-                canvasContext={tab}
-                document={document}
-                scale={scale}
-                captionText={getDocumentCaption(section, stores, document)}
-                onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred}
-                onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
-              />
-            );
-          })}
-          {section.addDocument
-            ? <NewDocumentButtonComponent onClick={handleNewDocumentClick} />
-            : null}
+              // pass function so logic stays here but access occurs from child
+              // so that mobx-react triggers child render not parent render.
+              const onIsStarred = () => {
+                return section.showStarsForUser(user)
+                        ? user.isTeacher
+                          ? document.isStarredByUser(user.id)
+                          : document.isStarred
+                        : false;
+              };
+              const _handleDocumentStarClick = section.showStarsForUser(user)
+                                                ? handleDocumentStarClick
+                                                : undefined;
+              const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+                                                ? handleDocumentDeleteClick
+                                                : undefined;
+              return (
+                <ThumbnailDocumentItem
+                  key={document.key}
+                  dataTestName={`${tab}-list-items`}
+                  canvasContext={tab}
+                  document={document}
+                  scale={scale}
+                  captionText={getDocumentCaption(section, stores, document)}
+                  onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+                  onIsStarred={onIsStarred}
+                  onDocumentStarClick={_handleDocumentStarClick}
+                  onDocumentDeleteClick={_handleDocumentDeleteClick}
+                />
+              );
+            })}
+            {section.addDocument
+              ? <NewDocumentButtonComponent onClick={handleNewDocumentClick} />
+              : null}
+          </div>
         </div>
       </div>
     );

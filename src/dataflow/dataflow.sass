@@ -9,10 +9,10 @@ $list-item-scale: 0.1
 
 .document-workspace
   .single-workspace
-    left: 0px
-    right: 50px
-    top: 60px
-    bottom: 0px
+    left: -4px
+    right: 140px
+    top: 56px
+    bottom: -4px
 
     .document
       border-radius: 0px
@@ -99,6 +99,7 @@ $list-item-scale: 0.1
 
     .statusbar
       display: none
+
 .left-nav
   display: none
 
@@ -108,14 +109,12 @@ $list-item-scale: 0.1
   top: 62px
   right: 0px
   height: 100vh
-  background-color: #ffffff
-  background-image: url("../assets/program-icon.svg")
-  background-position: 10px 17px
-  background-repeat: no-repeat
+  display: flex
+  background: none
 
   .expanded-area
-    right: -100px
-    width: 150px
+    right: -110px
+    width: 145px
     top: 0px
     border-radius: 0px
     background-color: #ffffff
@@ -128,31 +127,25 @@ $list-item-scale: 0.1
       padding-bottom: 60px
       border-radius: 0px
       background-color: #ffffff
-      background-image: url("../assets/program-icon.svg")
       background-position: 10px 17px
       background-repeat: no-repeat
       border-top: 2px solid white
       ::-webkit-scrollbar
-        width: 2px
+        width: 6px
       ::-webkit-scrollbar-thumb
         background: rgba(240,240,240,0)
-        border-radius: 0
+        border-radius: 3px
         &:hover
           background: $gray-mid
-
-      .loading
-        margin-left: 50px
-        border-left: 2px solid $gray-light-click
-        height: 100vh
 
       .container
         border-radius: 0px
         background-color: #ffffff
-        width: 100px
+        width: 140px
         margin-left: 50px
         &.enabled
           height: 100%
-          margin-left: 49px
+          margin-left: 0
           border-left: 2px solid $gray-light-click
           margin-top: -2px
           border-top: 3px solid white
@@ -215,6 +208,12 @@ $list-item-scale: 0.1
               z-index: 2
               position: absolute
               top: 50px
+        .my-work, .class-work
+          display: flex
+          flex-direction: column
+          justify-content: flex-start space-even
+          height: 100%
+
         .my-work
           background-color: #ffffff
           margin-top: -1px
@@ -249,7 +248,7 @@ $list-item-scale: 0.1
   .tabs
     right: -100px
     top: 0px
-    width: 150px
+    width: 180px
     border-radius: 0
     z-index: 2
     flex-direction: row
@@ -273,16 +272,15 @@ $list-item-scale: 0.1
         opacity: 1
         background-color: $gray-light-hover
     &.expanded
-      right: -50px
+      right: -35px
       opacity: 1
       .tab
         border-bottom: 1px solid #ffffff
         margin-top: 6px
         margin-bottom: 2px
-        width: 49px
-        padding-left: 0px
+        width: 70px
         text-align: center
-        padding: 6px
+        padding: 10px
         background-color: $gray-light-2
         &.active
           background: #ffffff
@@ -314,3 +312,24 @@ $list-item-scale: 0.1
     border-radius: 12px
     .dialog-title
       background-color: $gray-light
+
+.section-tab-container
+  overflow-y: hidden
+
+.section-header
+  height: 27px
+  flex-shrink: 0
+  flex-grow: 0
+
+.list-container
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+  height: 100%
+  flex-shrink: 0
+  flex-grow: 0
+
+.list
+  &.shown
+    overflow-x: hidden
+    overflow-y: scroll
