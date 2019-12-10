@@ -60,6 +60,13 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
+    // TODO: Just for dataflow, this code forces the documents in
+    // the right tab to load. This is necessary since in dataflow, the
+    // right nav is fixed open and needs this to cause the document
+    // thumbnails to load. This should also be made controllable under
+    // some settings in app-confg such that the code between df and
+    // Clue can use the same logic. See ui.ts, contractAll() for a related
+    // issue.
     const allowed: any = {};
     props.tabs?.forEach(tab => {
       allowed[tab.tab] = true;
@@ -198,6 +205,8 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
         ui.toggleRightNav(true);
         logEvent();
       } else {
+        // TODO: Again, this is for dataflow only. By using the override,
+        // and not simply toggling, we prevent the right-nav from closing.
         this.stores.ui.toggleRightNav(true);
       }
 

@@ -48,6 +48,10 @@ export const UIModel = types
   }))
   .actions((self) => {
     const contractAll = () => {
+      // TODO: for Clue, this needs to be set to false. Best approach is
+      // to add app-config control that defines the "default" open/close
+      // states of the right/left navs. Perhaps, rename contractAll() to
+      // something like resetToDefaults().
       self.rightNavExpanded = true;
       self.leftNavExpanded = false;
     };
