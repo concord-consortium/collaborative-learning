@@ -35,7 +35,7 @@ before(()=>{
     dfcanvas.scrollToTopOfTile();
 })
 
-context('Sensor block tests',()=>{
+context.skip('Sensor block tests',()=>{
     describe('Sensor block UI',()=>{
         it('verify UI',()=>{ //block should have 2 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Sensor');
