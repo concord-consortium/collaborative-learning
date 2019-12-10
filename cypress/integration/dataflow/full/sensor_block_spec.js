@@ -45,7 +45,7 @@ context('Sensor block tests',()=>{
             dfblock.getOutputNode(testBlock).should('be.visible');
             dfblock.getInputNodesNum(testBlock).should('not.exist');
         })
-        it('verify changing sensor type changes the hub list selection',()=>{
+        it.skip('verify changing sensor type changes the hub list selection',()=>{
             var sensorTypes=['Humidity','Temperature','Particulates'];
 
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
