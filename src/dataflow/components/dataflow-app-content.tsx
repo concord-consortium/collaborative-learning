@@ -27,7 +27,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
     iot.connect(this.stores);
 
     // For dataflow, only, force the right nav open on load. See comment
-    // in contractAll() in ui.ts. 
+    // in contractAll() in ui.ts
     ui.toggleRightNav(true);
   }
 
