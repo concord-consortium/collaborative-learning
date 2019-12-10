@@ -15,6 +15,46 @@ $duration-label-back: $gray-mid
   background-color: $topbar-color
   border: solid 2px #ffffff
 
+  .running-container
+    display: flex
+    flex-direction: row
+    &.countdown
+      position: relative
+      width: 208px
+    .total
+      display: flex
+      flex-direction: column
+      align-items: flex-start
+      justify-content: center
+      background-color: #bcbcbc
+      width: 130px
+      height: 28px
+      border-radius: 3px
+      font-size: 14px
+      padding-left: 5px
+      color: white
+    .remaining
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: center
+      position: absolute
+      left: 118px
+      width: 84px
+      height: 28px
+      border-radius: 12px 0 0 12px
+      color: black
+      background-color: white
+      border: solid 2px #bcbcbc
+      .progress-bar
+        position: absolute
+        left: 2px
+        height: 20px
+        background-color: #fde5c1
+        border-radius: 10px 0 0 10px
+      .progress-time
+        position: absolute
+
   .duration
     position: relative
     width: 152px

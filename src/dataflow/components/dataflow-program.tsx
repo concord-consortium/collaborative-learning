@@ -97,6 +97,7 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
+  remainingTime: number;
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -127,7 +128,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       programRunState: ProgramRunStates.Ready,
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
-      programDisplayState: ProgramDisplayStates.Program
+      programDisplayState: ProgramDisplayStates.Program,
+      remainingTime: 0,
     };
   }
 
@@ -147,6 +149,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !this.props.readOnly}
+          remainingTime={this.state.remainingTime}
           readOnly={this.props.readOnly || !this.isReady()}
         />}
         <div className={toolbarEditorContainerClass}>
@@ -904,6 +907,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onCheckProgramRunState(this.props.programEndTime);
         this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
         clearInterval(this.intervalHandle);
+      } else if (this.props.programEndTime && (Date.now() < this.props.programEndTime)) {
+        const remainingTime = Math.ceil((this.props.programEndTime - Date.now()) / 1000);
+        this.setState({ remainingTime });
       }
     }
   }
