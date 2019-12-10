@@ -29,6 +29,26 @@
       "initials": "DY",
       "title": "Did You Know?",
       "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
   "defaultStamps": [
@@ -72,8 +92,8 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "MSA 1.1 Walk Marathons",
-          "subtitle": "Finding and Using Rates",
+          "title": "MSA 1.1 Walking Marathons",
+          "subtitle": "Using Rates",
           "disabled": ["GeometryMovableLineEquation"],
           "sections": [
             {
@@ -83,7 +103,10 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Investigation 1: Walking Rates\n\nIn Variables and Patterns, you read about a bicycle touring business. You used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. You looked at some linear relationships, like the relationship between cost and number of rental bikes represented in this graph: "
+                      "format": "html",
+                      "text": [
+                        "In the <em>Variables and Patterns</em> Unit, you investigated a bicycle touring business. You used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. You looked at some linear relationships, like the relationship between cost and number of rental bikes represented in this graph:"
+                      ]
                     }
                   },
                   {
@@ -95,18 +118,16 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship.\n\nIn this Unit, consider these questions:\n\n  • How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?\n\n  • How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?\n\n  • If I know the value of one variable, how can I find the value of the other variable? (What kinds of problems can I solve using linear relationships?)"
-                    }
-                  },{
-                    "content": {
-                      "type": "Text",
-                      "text": "Introduction Problem 1.1\n\nMs. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and a stopwatch for her walking experiment."
+                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship. In this Unit, consider these questions:"
                     }
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_1_1_In_walkathon_350w.png"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li>If the relationship is linear, how can you determine if it is a proportional relationship?</li><li>How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?</li><li>If I know the value of one variable, how can I find the value of the other variable? </li></ul>"
+                      ]
                     }
                   }
                 ]
