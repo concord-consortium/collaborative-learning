@@ -10,11 +10,11 @@ before(()=>{
     cy.visit(baseUrl+queryParams);
     cy.wait(4000)
     
-    header.switchWorkspace('Control Panels');
-    cy.wait(3000);
+    // header.switchWorkspace('Control Panels');
+    // cy.wait(3000);
 })
 
-context('control panel ui',()=>{
+context.skip('control panel ui',()=>{
     describe('control panel shows registered hubs', ()=>{
         it('verify Registered Hub List is visible',()=>{
             controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');

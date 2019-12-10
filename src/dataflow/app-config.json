@@ -15,11 +15,6 @@
         "content": {
           "type": "Dataflow"
         }
-      },
-      {
-        "content": {
-          "type": "Text"
-        }
       }
     ]
   },
