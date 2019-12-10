@@ -78,6 +78,10 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
         sectionDocs.push(...Object.values(publishedDocs));
       }
     });
+
+    // Reverse the order to approximate a most-recently-used ordering.
+    sectionDocs = sectionDocs.reverse();
+
     // filter by additional properties
     if (section.properties && section.properties.length) {
       sectionDocs = sectionDocs.filter(doc => {
