@@ -9,7 +9,7 @@ before(function(){
     cy.visit(baseUrl+queryParams);
     cy.wait(4000)
 });
-context('Workspace view',()=>{
+context.skip('Workspace view',()=>{
     //Other UI elements are in Common tests
     describe('workspace ui',()=>{
         it('verify Dataflow workspace switch',()=>{

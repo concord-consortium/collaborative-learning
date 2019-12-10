@@ -27,7 +27,7 @@ before(function(){
 
 context('single student functional test',()=>{
     describe('test header elements', function(){
-        it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
+        it.skip('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
             dfheader.switchWorkspace('Control Panels');
             controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');
             dfheader.switchWorkspace('Workspace');
