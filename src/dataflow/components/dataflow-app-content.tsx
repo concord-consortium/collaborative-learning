@@ -22,13 +22,9 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = { current: EPanelId.workspace };
 
-  public componentWillMount() {
+  public componentDidMount() {
     const { ui, iot } = this.stores;
     iot.connect(this.stores);
-
-    // For dataflow, only, force the right nav open on load. See comment
-    // in contractAll() in ui.ts
-    ui.toggleRightNav(true);
   }
 
   public componentWillUnmount() {
@@ -68,8 +64,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePanelChange = (panelId: string) => {
-    const { ui } = this.stores;
-    ui.contractAll();
+    this.stores.ui.restoreDefaultNavExpansion();
     this.setState({ current: panelId as EPanelId });
   }
 

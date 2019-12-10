@@ -3,7 +3,14 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
-import undefined = require("firebase/empty-import");
+
+export const RightNavAppConfigModel = types
+  .model("RightNavAppConfig", {
+    defaultExpanded: false,
+    preventExpandCollapse: false,
+    lazyLoadTabContents: false,
+    tabSpecs: types.array(RightNavTabModel)
+  });
 
 export const DocumentLabelModel = types
   .model("DocumentLabel", {
@@ -47,7 +54,7 @@ export const AppConfigModel = types
     documentLabels: types.map(DocumentLabelModel),
     copyPreferOriginTitle: false,
     showClassSwitcher: false,
-    rightNavTabs: types.array(RightNavTabModel),
+    rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel)
   })
   .views(self => ({

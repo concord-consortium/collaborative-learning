@@ -107,7 +107,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         if (newPersonalDocument) {
           problemWorkspace.toggleComparisonVisible({ override: false });
           problemWorkspace.setPrimaryDocument(newPersonalDocument);
-          ui.contractAll();
         }
       }
     }

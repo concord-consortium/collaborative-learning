@@ -154,7 +154,7 @@ context('canvas test',()=>{
             cy.wait(5000)
 
             rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','','Program');
+            rightNav.openSection('my-work','','Programs');
             rightNav.openCanvasItem('my-work','',title)
             cy.wait(5000)
             //compare before and after values

@@ -54,6 +54,7 @@ export function createStores(params?: ICreateStores): IStores {
     problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
     ui: params && params.ui || UIModel.create({
+      rightNavExpanded: appConfig.rightNav.defaultExpanded,
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
