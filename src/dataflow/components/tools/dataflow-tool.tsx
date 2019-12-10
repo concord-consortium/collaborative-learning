@@ -105,7 +105,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
               };
         const newPersonalDocument = await db.createPersonalDocument(params);
         if (newPersonalDocument) {
-          problemWorkspace.setAvailableDocument(newPersonalDocument);
+          problemWorkspace.toggleComparisonVisible({ override: false });
+          problemWorkspace.setPrimaryDocument(newPersonalDocument);
           ui.contractAll();
         }
       }
