@@ -335,25 +335,19 @@ $list-item-scale: 0.1
 
 .section-header
   height: 27px
-  min-height: 27px
-  max-height: 27px
-  // &.collapsed
-  //   height: 30px
-  border: solid purple 3px
-  // &.expanded
-  //   height: 26px
-  //   // border: solid green 3px
+  flex-shrink: 0
+  flex-grow: 0
 
 .list-container
   display: flex
   flex-direction: column
   justify-content: flex-start
   height: 100%
-
+  flex-shrink: 0
+  flex-grow: 0
 
 .list
   &.shown
     // border: solid yellow 4px
     overflow-x: hidden
     overflow-y: scroll
-    

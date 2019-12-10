@@ -68,8 +68,7 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
 
   private handlePanelChange = (panelId: string) => {
     const { ui } = this.stores;
-    ui.toggleLeftNav(false);
-    ui.toggleRightNav(false);
+    ui.contractAll();
     this.setState({ current: panelId as EPanelId });
   }
 

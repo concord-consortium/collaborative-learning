@@ -48,7 +48,7 @@ export const UIModel = types
   }))
   .actions((self) => {
     const contractAll = () => {
-      self.rightNavExpanded = false;
+      self.rightNavExpanded = true;
       self.leftNavExpanded = false;
     };
 

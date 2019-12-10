@@ -64,7 +64,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
     props.tabs?.forEach(tab => {
       allowed[tab.tab] = true;
     });
-    
+
     this.state = {
       tabLoadAllowed: allowed,
       navExpanding: false
@@ -198,8 +198,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
         ui.toggleRightNav(true);
         logEvent();
       } else {
-        ui.toggleRightNav();
-        ui.rightNavExpanded && logEvent();
+        this.stores.ui.toggleRightNav(true);
       }
 
       if (navDoneExpanding) {
