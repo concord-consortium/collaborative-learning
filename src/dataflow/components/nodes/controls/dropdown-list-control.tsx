@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { useStopEventPropagation } from "./custom-hooks";
+import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import "./dropdown-list-control.sass";
 
 export interface ListOption {
@@ -18,13 +18,10 @@ export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
-  private listRef: any;
   constructor(emitter: NodeEditor, key: string, node: Node, optionArray: ListOption[], readonly = false, label = "") {
     super(key);
     this.emitter = emitter;
     this.key = key;
-
-    window.addEventListener("pointerdown", this.handlePointerDown, true);
 
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
@@ -62,6 +59,11 @@ export class DropdownListControl extends Rete.Control {
                                 isDisabled?: DisabledChecker) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      const listRef = useRef<HTMLDivElement>(null);
+      useCloseDropdownOnOutsideEvent(listRef, () => this.props.showList, () => {
+                                      this.props.showList = false;
+                                      (this as any).update();
+                                    });
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option ? option.name : val;
       const icon = option && option.icon ? `#${option.icon}` : null;
@@ -80,7 +82,7 @@ export class DropdownListControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className={`option-list ${listClass}`} ref={listRef => this.listRef = listRef}>
+          <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
@@ -134,13 +136,6 @@ export class DropdownListControl extends Rete.Control {
       label,
       isDisabled: null
     };
-  }
-
-  public handlePointerDown = (e: PointerEvent) => {
-    if (this.listRef && !this.listRef.contains(e.target) && this.props.showList) {
-      this.props.showList = false;
-      (this as any).update();
-    }
   }
 
   public setValue = (val: any) => {

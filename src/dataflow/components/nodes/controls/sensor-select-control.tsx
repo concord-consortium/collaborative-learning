@@ -3,7 +3,7 @@ import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../../utilities/node";
-import { useStopEventPropagation } from "./custom-hooks";
+import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
@@ -12,16 +12,12 @@ export class SensorSelectControl extends Rete.Control {
   private component: any;
   private props: any;
   private node: Node;
-  private typeListRef: any;
-  private sensorListRef: any;
 
   constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;
     this.node = node;
-
-    window.addEventListener("pointerdown", this.handlePointerDown, true);
 
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
@@ -63,6 +59,11 @@ export class SensorSelectControl extends Rete.Control {
     const renderSensorTypeList = (type: string, showList: boolean, onDropdownClick: any, onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      const listRef = useRef<HTMLDivElement>(null);
+      useCloseDropdownOnOutsideEvent(listRef, () => this.props.showTypeList, () => {
+                                      this.props.showTypeList = false;
+                                      (this as any).update();
+                                    });
       let icon = "";
       let name = "";
       const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
@@ -88,7 +89,7 @@ export class SensorSelectControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className="option-list" ref={typeListRef => this.typeListRef = typeListRef}>
+          <div className="option-list" ref={listRef}>
             {NodeSensorTypes.map((val: any, i: any) => (
               <div
                 className={
@@ -120,6 +121,11 @@ export class SensorSelectControl extends Rete.Control {
         onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      const listRef = useRef<HTMLDivElement>(null);
+      useCloseDropdownOnOutsideEvent(listRef, () => this.props.showSensorList, () => {
+                                      this.props.showSensorList = false;
+                                      (this as any).update();
+                                    });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
         return (ch.type === type) || (type === "none" && ch.type !== "relay");
@@ -157,7 +163,7 @@ export class SensorSelectControl extends Rete.Control {
             </div>
           </div>
           {showList ?
-          <div className="option-list" ref={sensorListRef => this.sensorListRef = sensorListRef}>
+          <div className="option-list" ref={listRef}>
             {options.map((ch: NodeChannelInfo, i: any) => (
               <div
                 className={
@@ -223,17 +229,6 @@ export class SensorSelectControl extends Rete.Control {
       showTypeList: false,
       channels: []
     };
-  }
-
-  public handlePointerDown = (e: PointerEvent) => {
-    if (this.sensorListRef && !this.sensorListRef.contains(e.target) && this.props.showSensorList) {
-      this.props.showSensorList = false;
-      (this as any).update();
-    }
-    if (this.typeListRef && !this.typeListRef.contains(e.target) && this.props.showTypeList) {
-      this.props.showTypeList = false;
-      (this as any).update();
-    }
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {

@@ -2,7 +2,7 @@ import * as React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeChannelInfo, kRelaySelectMessage, kRelayMissingMessage } from "../../../utilities/node";
-import { useStopEventPropagation } from "./custom-hooks";
+import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import "./sensor-select-control.sass";
 
 export class RelaySelectControl extends Rete.Control {
@@ -10,14 +10,12 @@ export class RelaySelectControl extends Rete.Control {
   private component: any;
   private props: any;
   private node: Node;
-  private listRef: any;
+
   constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;
     this.node = node;
-
-    window.addEventListener("pointerdown", this.handlePointerDown, true);
 
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
@@ -47,6 +45,11 @@ export class RelaySelectControl extends Rete.Control {
         onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      const listRef = useRef<HTMLDivElement>(null);
+      useCloseDropdownOnOutsideEvent(listRef, () => this.props.showList, () => {
+                                      this.props.showList = false;
+                                      (this as any).update();
+                                    });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => (ch.type === "relay"));
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
@@ -79,7 +82,7 @@ export class RelaySelectControl extends Rete.Control {
             </svg>
           </div>
           {showList ?
-          <div className="option-list" ref={listRef => this.listRef = listRef}>
+          <div className="option-list" ref={listRef}>
             {options.map((ch: NodeChannelInfo, i: any) => (
               <div
                 className={
@@ -120,13 +123,6 @@ export class RelaySelectControl extends Rete.Control {
       },
       channels: []
     };
-  }
-
-  public handlePointerDown = (e: PointerEvent) => {
-    if (this.listRef && !this.listRef.contains(e.target) && this.props.showList) {
-      this.props.showList = false;
-      (this as any).update();
-    }
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {
