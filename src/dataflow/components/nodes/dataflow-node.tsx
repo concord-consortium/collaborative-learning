@@ -17,7 +17,6 @@ export class DataflowNode extends Node {
 
     const undecoratedInputs = inputs.filter(isDecoratedInput(false));
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
-
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton ? plotButton.props.showgraph : false;
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
@@ -51,7 +50,7 @@ export class DataflowNode extends Node {
         }
         <div className="inputs-outputs">
           <div className="inputs">
-            {undecoratedInputs.map((input: any) => (
+            {this.props.node.name !== "Data Storage" && undecoratedInputs.map((input: any) => (
               <div className="input" key={input.key}>
                 <Socket
                   type="input"
@@ -101,6 +100,16 @@ export class DataflowNode extends Node {
                 control={input.control}
                 key={input.control.key}
                 innerRef={bindControl}
+              />
+            </div>
+          ))}
+          {this.props.node.name === "Data Storage" && undecoratedInputs.map((input: any) => (
+            <div className="input" key={input.key}>
+              <Socket
+                type="input"
+                socket={input.socket}
+                io={input}
+                innerRef={bindSocket}
               />
             </div>
           ))}
