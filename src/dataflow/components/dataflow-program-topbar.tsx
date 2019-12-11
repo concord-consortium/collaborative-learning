@@ -12,15 +12,50 @@ interface TopbarProps {
   onProgramTimeSelectClick: (type: number) => void;
   isRunEnabled: boolean;
   runningProgram: boolean;
+  remainingTimeInSeconds: number;
   readOnly: boolean;
 }
 
-export const DataflowProgramTopbar = (props: TopbarProps) => {
+const kProgressWidth = 76;
+
+interface CountdownTimerProps {
+  duration: string;
+  width: number;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
+const CountdownTimerComponent: React.SFC<CountdownTimerProps> = (props: CountdownTimerProps) => {
+  return (
+    <div className="running-container countdown">
+      <div className="total">
+        {`Duration: ${props.duration}`}
+      </div>
+      <div className="remaining">
+        <div className="progress-bar" style={{width: props.width.toString() + "px"}}/>
+        <div className="progress-time">
+        {`${props.hours}:${props.minutes}:${props.seconds}`}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface DurationSelectorProps {
+  onRunProgramClick: () => void;
+  programRunTimes: ProgramRunTime[];
+  programDefaultRunTime: number;
+  onProgramTimeSelectClick: (type: number) => void;
+  isRunEnabled: boolean;
+  readOnly: boolean;
+}
+
+const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: DurationSelectorProps) => {
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     props.onProgramTimeSelectClick(Number(event.target.value));
   };
   return (
-    <div className="program-editor-topbar">
+    <div className="running-container">
       <div className="duration" title="Duration">
         <div className="label-back">
           <div className="label">Duration</div>
@@ -49,6 +84,38 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="icon run" />
         <div className="text">Run</div>
       </button>
+    </div>
+  );
+};
+
+export const DataflowProgramTopbar = (props: TopbarProps) => {
+  const runTime = props.programRunTimes.find( (rt: ProgramRunTime) => rt.val === props.programDefaultRunTime );
+  const remainingHours = Math.floor(props.remainingTimeInSeconds / 3600);
+  const remainingMinutes = Math.floor((props.remainingTimeInSeconds - remainingHours * 3600) / 60);
+  const remainingSeconds = (props.remainingTimeInSeconds - (remainingHours * 3600) - (remainingMinutes * 60) ) % 60;
+  const progressWidth = (kProgressWidth * props.remainingTimeInSeconds / props.programDefaultRunTime);
+  const hoursString = String(remainingHours).padStart(2, "0");
+  const minutesString = String(remainingMinutes).padStart(2, "0");
+  const secondsString = String(remainingSeconds).padStart(2, "0");
+  return (
+    <div className="program-editor-topbar">
+      { props.runningProgram
+        ? <CountdownTimerComponent
+            duration={runTime ? runTime.text.toString() : ""}
+            width={progressWidth}
+            hours={hoursString}
+            minutes={minutesString}
+            seconds={secondsString}
+            />
+        : <DurationSelectorComponent
+            onRunProgramClick={props.onRunProgramClick}
+            programRunTimes={props.programRunTimes}
+            programDefaultRunTime={props.programDefaultRunTime}
+            onProgramTimeSelectClick={props.onProgramTimeSelectClick}
+            isRunEnabled={props.isRunEnabled}
+            readOnly={props.readOnly}
+          />
+      }
       <button
         className="program-state-button"
         title="Stop"

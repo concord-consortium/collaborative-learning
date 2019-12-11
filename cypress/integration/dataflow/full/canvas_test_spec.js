@@ -74,7 +74,6 @@ context('canvas test',()=>{
         it('verify Stop button is disable after running a program',()=>{
             dfcanvas.runProgram();
             cy.wait(1500);
-            dfcanvas.getRunButton().parent().should('have.attr','disabled');
             dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
             dfcanvas.stopProgram();
             dfcanvas.getProgramToolbar().should('not.exist')
