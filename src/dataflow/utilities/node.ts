@@ -252,10 +252,10 @@ export const NodeGeneratorPeriodUnits = [
 export const NodeTimerInfo =
 {
   name: "Timer",
-  method: (t: number, p: number, a: number) => t % p < p / 2 ? 1 * a : 0,
+  method: (t: number, tOn: number, tOff: number) => t % (tOn + tOff) < tOn ? 1 : 0,
 };
 
-export const NodeTimerPeriodUnits = [
+export const NodeTimerIntervalUnits = [
   {
     unit: "sec",
     lengthInSeconds: 1

@@ -35,7 +35,7 @@ export class NumControl extends Rete.Control {
     };
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       this.props.currentUnits = event.target.value;
-      this.putData("units", this.props.currentUnits);
+      this.putData(this.key + "Units", this.props.currentUnits);
       (this as any).update();
     };
     this.component = (compProps: { readonly: any,
@@ -84,7 +84,7 @@ export class NumControl extends Rete.Control {
     const initial = node.data[key] || initVal;
     node.data[key] = initial;
 
-    const unitsKey = "units";
+    const unitsKey = key + "Units";
     const initialUnits = node.data[unitsKey] || (units?.length ? units[0] : "");
     node.data[unitsKey] = initialUnits;
 
