@@ -46,12 +46,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { appConfig, user } = this.stores;
-    const { rightNavTabs } = appConfig;
-    const studentTabs = rightNavTabs.filter((t) => !t.teacherOnly);
+    const { appConfig : { rightNav: { tabSpecs } }, user } = this.stores;
+    const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
     const isTeacher = user.isTeacher;
-    const tabsToDisplay = isTeacher ? rightNavTabs : studentTabs;
+    const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -71,7 +70,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           onDrop={this.handleImageDrop}
         />
         <RightNavComponent
-          tabs={appConfig.rightNavTabs}
+          tabs={tabsToDisplay}
           isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
@@ -189,8 +188,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { appConfig } = this.stores;
-    const hasRightNavTabs = appConfig.rightNavTabs && (appConfig.rightNavTabs.length > 0);
+    const hasRightNavTabs = this.stores.appConfig.rightNav.tabSpecs.length > 0;
     const style = hasRightNavTabs ? undefined : { right: 0 };
     return (
       <div
@@ -284,7 +282,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.contractAll();
+    this.stores.ui.restoreDefaultNavExpansion();
   }
 
   private handleNewDocument = (document: DocumentModelType) => {
