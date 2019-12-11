@@ -572,6 +572,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const hubs: string[] = [];
     const sensors: string[] = [];
+    const relays: string[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
@@ -590,6 +591,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (chInfo) {
           if (hubs.indexOf(chInfo.hubId) === -1) {
             hubs.push(chInfo.hubId);
+          }
+          if (relays.indexOf(chInfo.channelId) === -1) {
+            // only add relays once
+            relays.push(chInfo.channelId);
           }
         }
       } else if (n.name === "Data Storage") {
@@ -622,7 +627,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         program: editedProgram,
         programId: programTitle,
         runInterval: interval * 1000,
-        sensors
+        sensors,
+        relays
       }
     };
 
