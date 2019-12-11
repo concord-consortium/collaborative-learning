@@ -1218,6 +1218,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
 
     this.dragSelectedPoints(evt, dragTarget, usrDiff);
+    this.dragPts = {};
 
     // only create a change object if there's actually a change
     if (usrDiff[1] || usrDiff[2]) {
