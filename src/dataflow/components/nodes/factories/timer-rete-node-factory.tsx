@@ -5,7 +5,7 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { NodeTimerPeriodUnits } from "../../../utilities/node";
+import { NodeTimerIntervalUnits } from "../../../utilities/node";
 
 export class TimerReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -16,9 +16,10 @@ export class TimerReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       const out = new Rete.Output("num", "Number", this.numSocket);
-      const units = NodeTimerPeriodUnits.map(u => u.unit);
+      const units = NodeTimerIntervalUnits.map(u => u.unit);
       return node
-        .addControl(new NumControl(this.editor, "period", node, false, "Period", 10, 1, units))
+        .addControl(new NumControl(this.editor, "timeOn", node, false, "time on", 5, 1, units))
+        .addControl(new NumControl(this.editor, "timeOff", node, false, "time off", 5, 1, units))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;

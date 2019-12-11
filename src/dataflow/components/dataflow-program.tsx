@@ -18,7 +18,7 @@ import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-
 import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, NodeGeneratorPeriodUnits, ProgramRunTimes,
-         NodeTimerInfo, NodeTimerPeriodUnits, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+         NodeTimerInfo, NodeTimerIntervalUnits, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
@@ -884,14 +884,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateTimerNode = (n: Node) => {
-    const period = Number(n.data.period);
-    if (period) {
-      const units = n.data.units;
-      const periodUnits = NodeTimerPeriodUnits.find((u: any) => u.unit === units);
-      const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
+    const timeOn = Number(n.data.timeOn);
+    const timeOff = Number(n.data.timeOff);
+    if (timeOn && timeOff) {
+      const timeOnUnits = n.data.timeOnUnits;
+      const timeOffUnits = n.data.timeOffUnits;
+      const timeOnIntervalUnits = NodeTimerIntervalUnits.find((u: any) => u.unit === timeOnUnits);
+      const timeOffIntervalUnits = NodeTimerIntervalUnits.find((u: any) => u.unit === timeOffUnits);
+      const timeOnIntervalUnitsInMs = (timeOnIntervalUnits ? timeOnIntervalUnits.lengthInSeconds : 1) * 1000;
+      const timeOffIntervalUnitsInMs = (timeOffIntervalUnits ? timeOffIntervalUnits.lengthInSeconds : 1) * 1000;
       const time = Date.now();
-      // note: period is given in s, but we're passing in ms for time, need to adjust
-      const val = NodeTimerInfo.method(time, period * 1000 * periodUnitsInSeconds, 1);
+      const val = NodeTimerInfo.method(time, timeOn * timeOnIntervalUnitsInMs, timeOff * timeOffIntervalUnitsInMs);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);
