@@ -267,7 +267,7 @@ context("Teacher Space", () => {
             clueCanvas.deleteTile('table');
             rightNav.openRightNavTab('supports');
             rightNav.openSection('supports','teacher-supports');
-            clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
+            // clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
         })
     })
 })
