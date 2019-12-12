@@ -50,6 +50,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
         if (groupIndex < numberOfGroups) {
           const group = groups.allGroups[groupIndex];
           const fourUp = <TeacherGroupSixPackFourUp
+                            key={group.id}
                             group={group}
                             row={row}
                             column={column}
