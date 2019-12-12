@@ -17,8 +17,8 @@ import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory"
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
-import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, NodeGeneratorPeriodUnits, ProgramRunTimes,
-         NodeTimerInfo, NodeTimerIntervalUnits, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
+         NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
 import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
@@ -867,15 +867,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateGeneratorNode = (n: Node) => {
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
-    const units = n.data.units;
     const amplitude = Number(n.data.amplitude);
     const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
     if (nodeGeneratorType && period && amplitude) {
-      const periodUnits = NodeGeneratorPeriodUnits.find((u: any) => u.unit === units);
-      const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
       const time = Date.now();
       // note: period is given in s, but we're passing in ms for time, need to adjust
-      const val = nodeGeneratorType.method(time, period * 1000 * periodUnitsInSeconds, amplitude);
+      const val = nodeGeneratorType.method(time, period * 1000, amplitude);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);
@@ -887,14 +884,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const timeOn = Number(n.data.timeOn);
     const timeOff = Number(n.data.timeOff);
     if (timeOn && timeOff) {
-      const timeOnUnits = n.data.timeOnUnits;
-      const timeOffUnits = n.data.timeOffUnits;
-      const timeOnIntervalUnits = NodeTimerIntervalUnits.find((u: any) => u.unit === timeOnUnits);
-      const timeOffIntervalUnits = NodeTimerIntervalUnits.find((u: any) => u.unit === timeOffUnits);
-      const timeOnIntervalUnitsInMs = (timeOnIntervalUnits ? timeOnIntervalUnits.lengthInSeconds : 1) * 1000;
-      const timeOffIntervalUnitsInMs = (timeOffIntervalUnits ? timeOffIntervalUnits.lengthInSeconds : 1) * 1000;
       const time = Date.now();
-      const val = NodeTimerInfo.method(time, timeOn * timeOnIntervalUnitsInMs, timeOff * timeOffIntervalUnitsInMs);
+      // note: time on/off is given in s, but we're passing in ms for time, need to adjust
+      const val = NodeTimerInfo.method(time, timeOn * 1000, timeOff * 1000);
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);

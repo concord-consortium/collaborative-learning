@@ -6,7 +6,7 @@ import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeGeneratorTypes, NodeGeneratorPeriodUnits } from "../../../utilities/node";
+import { NodeGeneratorTypes, NodePeriodUnits } from "../../../utilities/node";
 
 export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -17,7 +17,7 @@ export class GeneratorReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       const out = new Rete.Output("num", "Number", this.numSocket);
-      const units = NodeGeneratorPeriodUnits.map(u => u.unit);
+      const units = NodePeriodUnits.map(u => u.unit);
       const dropdownOptions = NodeGeneratorTypes
         .map((nodeOp) => {
           return { name: nodeOp.name, icon: nodeOp.icon };
