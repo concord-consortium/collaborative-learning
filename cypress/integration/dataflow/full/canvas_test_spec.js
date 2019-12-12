@@ -21,6 +21,7 @@ const rightNav = new RightNav
 before(()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);
     cy.wait(2000)
@@ -68,11 +69,19 @@ context('canvas test',()=>{
             dfcanvas.getRunButton().parent().should('not.have.attr','disabled');
             dfcanvas.getStopButton().parent().should('have.attr','disabled');
         })
-        it('verify Stop button is disable after running a program',()=>{
+        it('verify Duration is visible when program is running',()=>{
             dfcanvas.runProgram();
             cy.wait(1500);
-            dfcanvas.getRunButton().parent().should('have.attr','disabled');
+            dfcanvas.getDurationContainer().should('be.visible');
+            dfcanvas.getProgressTime().should('be.visible');
+        })
+        it('verify Run button is not visible',()=>{
+            dfcanvas.getRunButton().should('not.exist');
+        })
+        it('verify Stop button is enabled when program is running',()=>{
             dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
+        })
+        it('verify Program toolbar does not exist after running a program',()=>{
             dfcanvas.stopProgram();
             dfcanvas.getProgramToolbar().should('not.exist')
         })
