@@ -35,6 +35,7 @@ before(()=>{
     dfcanvas.openBlock('Data Storage')
     dfblock.getNumberInput().type('9');
     dfblock.connectBlocks('number',0,'data-storage',0)
+    canvas.editTitle(dataset1)
 })
 
 context('Data Canvas tests',function(){
@@ -51,16 +52,23 @@ context('Data Canvas tests',function(){
     })
 
     it('restore program',()=>{
-        
+        rightNav.openRightNavTab('my-work');
+        rightNav.openSection('my-work','','Programs')
+        rightNav.openCanvasItem('my-work','',dataset1)
+        canvas.getPersonalDocTitle().should('contain',dataset1)
     })
     it('verify data collection runs to the end of the duration',()=>{
-        dfcanvas.createNewProgram(dataset2)
-
+        dfcanvas.createNewProgram(dataset2);
+        dfcanvas.openBlock('Number')
+        dfcanvas.openBlock('Data Storage')
+        dfblock.getNumberInput().type('5');
+        dfblock.connectBlocks('number',0,'data-storage',0)
         dfcanvas.selectDuration('60')
-        dfcanvas.runProgram();
-        cy.wait(1000);
+        dfcanvas.runProgram(dataset2);
+        cy.wait(10000);
+        rightNav.openSection('my-work','','Data')
         dfrightnav.getRunningBadge().should('exist');
-        cy.wait(60000);
+        cy.wait(50000);
         dfcanvas.getFullGraph().should('be.visible');
         dfcanvas.getDataFlowProgramEditorTopControl().should('not.exist')
         canvas.getPersonalDocTitle().should('contain',dataset2)

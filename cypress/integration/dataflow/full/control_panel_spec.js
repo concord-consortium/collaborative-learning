@@ -5,7 +5,9 @@ const controlPanel= new dfControlPanels;
 const header = new dfHeader;
 before(()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    const queryParams = `${Cypress.config("teacherQueryParams")}`;
+
+    cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);//Change this one to bring up a teacher link
     cy.wait(4000)

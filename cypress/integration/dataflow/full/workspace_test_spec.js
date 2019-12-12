@@ -10,7 +10,7 @@ const canvas = new Canvas;
 
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
