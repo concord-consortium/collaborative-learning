@@ -105,12 +105,14 @@
     &.logicOperator
       width: 160px
 
-  &.sensor-select
+  &.sensor-select, &.relay-select
     margin-bottom: 3px
     margin-top: 3px
     .option-list
-      width: 212px
+      width: 240px
       text-align: left
+      max-height: 250px
+      overflow-y: auto
 
 .node-select
   &.sensor-type, &.sensor-select
