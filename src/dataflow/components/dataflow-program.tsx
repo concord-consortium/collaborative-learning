@@ -19,7 +19,7 @@ import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory"
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
          NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
-import { uploadProgram, fetchProgramData, deleteProgram } from "../utilities/aws";
+import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
@@ -484,6 +484,30 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return true;
   }
 
+  private checkActiveRelaysAndRunProgram = () => {
+    const { ui } = this.stores;
+    fetchActiveRelays().then((result: any) => {
+      if (result.relays) {
+          let relayInUse = false;
+          this.programEditor.nodes.forEach((n: Node) => {
+            if (n.name === "Relay" && n.data.relayList) {
+              if (result.relays.includes(n.data.relayList)) {
+                relayInUse = true;
+              }
+            }
+          });
+          if (relayInUse) {
+            ui.alert("A selected relay is already in use. \
+              Verify that you have selected the correct relay. \
+              To run this program, update your program with an \
+              available relay or wait until this relay becomes available.", "Relay In Use");
+            return;
+          }
+      }
+      this.checkDevicesAndRunProgram();
+    });
+  }
+
   private hasValidInputNodes = () => {
     const missingDevices: MissingDevice[] = [];
     this.programEditor.nodes.forEach((n: Node) => {
@@ -510,6 +534,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.hasValidOutputNodes()) {
       return;
     }
+    this.checkActiveRelaysAndRunProgram();
+  }
+  private checkDevicesAndRunProgram = () => {
     const missingDevices = this.hasValidInputNodes();
     if (missingDevices.length) {
       let message = "";
