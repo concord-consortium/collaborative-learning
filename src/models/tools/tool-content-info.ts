@@ -2,7 +2,7 @@ export interface IDMap {
   [id: string]: string;
 }
 export type ToolTileModelContentSnapshotPostProcessor =
-              (content: any, idMap: IDMap) => any;
+              (content: any, idMap: IDMap, asTemplate?: boolean) => any;
 
 export interface IToolContentInfo {
   id: string;
