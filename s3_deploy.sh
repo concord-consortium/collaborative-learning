@@ -1,8 +1,8 @@
 #!/bin/bash
 SRC_DIR='dist'
-DISTRIBUTION_ID='E1YPVV3YLYS4J7'
+DISTRIBUTION_ID='E19ZMERPBB60R3'
 # name of branch to deploy to root of site
-PRODUCTION_BRANCH='production'
+PRODUCTION_BRANCH='dataflow-production'
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
 	echo "skipping deploy to S3: this is a pull request"
