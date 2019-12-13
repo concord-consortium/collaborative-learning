@@ -198,8 +198,6 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
         ui.toggleRightNav(true);
         logEvent();
       } else {
-        // TODO: Again, this is for dataflow only. By using the override,
-        // and not simply toggling, we prevent the right-nav from closing.
         const toggleState = !!this.stores.appConfig.rightNav.preventExpandCollapse || undefined;
         this.stores.ui.toggleRightNav(toggleState);
       }
