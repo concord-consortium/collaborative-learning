@@ -60,18 +60,7 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
     const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data=='all') {
         cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=1&fakeUser=student:1');
-        // cy.wait(3000)
-        cy.waitForSpinner();
+        cy.wait(3000);
         cy.get('span').should('contain','QA Cleared: OK');
     }
-})
-Cypress.Commands.add("login", (baseUrl, testTeacher) => {
-    cy.visit(baseUrl + "/users/sign_in")
-    cy.get("input#user_login").type(testTeacher.username)
-    cy.get("input#user_password").type(testTeacher.password)
-    cy.get("form").submit()
-})
-Cypress.Commands.add("waitForSpinner", () => {
-    cy.wait(2000);
-    cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })

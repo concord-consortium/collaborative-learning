@@ -10,15 +10,17 @@ const canvas = new Canvas;
 
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
 });
 
+//Add test for 2 up view?
+
 context('Workspace view',()=>{
     describe('switch views',()=>{
-        it.skip('verify Click on Control Panel button shows the control panel',()=>{
+        it('verify Click on Control Panel button shows the control panel',()=>{
             header.switchWorkspace('Control Panels');
             controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');
             canvas.getSingleCanvas().should('not.exist')

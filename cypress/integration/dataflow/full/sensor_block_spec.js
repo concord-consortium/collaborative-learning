@@ -23,11 +23,10 @@ before(()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
 
+    cy.clearQAData('all');
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
 
-    header.switchWorkspace('Workspace');
-    cy.wait(1000);
     dfcanvas.openBlock('Sensor')
     dfcanvas.openBlock('Transform')
     dfblock.moveBlock('transform',0,255,5)
@@ -35,7 +34,7 @@ before(()=>{
     dfcanvas.scrollToTopOfTile();
 })
 
-context.skip('Sensor block tests',()=>{
+context('Sensor block tests',()=>{
     describe('Sensor block UI',()=>{
         it('verify UI',()=>{ //block should have 2 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Sensor');
@@ -45,7 +44,7 @@ context.skip('Sensor block tests',()=>{
             dfblock.getOutputNode(testBlock).should('be.visible');
             dfblock.getInputNodesNum(testBlock).should('not.exist');
         })
-        it.skip('verify changing sensor type changes the hub list selection',()=>{
+        it('verify changing sensor type changes the hub list selection',()=>{
             var sensorTypes=['Humidity','Temperature','Particulates'];
 
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{

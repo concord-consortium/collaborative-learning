@@ -1,25 +1,31 @@
-import dfHeader from "../../../support/elements/dataflow/dfHeader";
+import dfHeader from "../../../support/elements/dataflow/dfHeader"
+import Header from "../../../support/elements/common/Header";
 
-const header = new dfHeader;
+
+const dfheader = new dfHeader;
+const header = new Header;
 
 before(function(){
+    //need to change url to teacher query param
     const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    const queryParams = `${Cypress.config("teacherQueryParams")}`;
+
+    cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);
     cy.wait(4000)
 });
-context.skip('Workspace view',()=>{
+context('Workspace view',()=>{
     //Other UI elements are in Common tests
     describe('workspace ui',()=>{
         it('verify Dataflow workspace switch',()=>{
-            header.getDataflowWorkspaceSwitch().each(($switch,index,$switchList)=>{
+            dfheader.getDataflowWorkspaceSwitch().each(($switch,index,$switchList)=>{
                 var switches=['Control Panels','Workspace']
                 expect($switch.text()).to.contain(switches[index]);        
             })
         })
         it('verify Problem name is Dataflow',function(){
-
+            header.getProblemTitle().should('contain', 'Dataflow')
         })
     })
 })

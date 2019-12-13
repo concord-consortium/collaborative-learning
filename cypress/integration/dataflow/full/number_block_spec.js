@@ -15,8 +15,6 @@ before(()=>{
     cy.visit(baseUrl+queryParams);
     cy.wait(3000)
     
-    header.switchWorkspace('Workspace');
-    cy.wait(1000);
     dfcanvas.openBlock('Number')
     dfcanvas.scrollToTopOfTile();
 })

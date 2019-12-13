@@ -204,5 +204,16 @@ class dfBlock{
     getStorageSequenceTextField(sequenceNum=1){
         return cy.get(this.storageSequenceTextFieldEl(sequenceNum));
     }
+
+    //Timer Block
+    getTimeTextField(state){
+        return cy.get('.single-workspace [title=time'+state+'] .number-input')
+    }
+    enterTimerDuration(state, time){ //state=['On','Off']
+        this.getTimeTextField(state).type('{backspace}'+time)
+    }
+    getTimerOutputState(){
+        return cy.get('.output-container.timer .value-container.timer')
+    }
 }
 export default dfBlock;

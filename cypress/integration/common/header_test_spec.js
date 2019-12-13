@@ -24,7 +24,8 @@ context('Test header elements',()=>{
             header.getVersionNumber().should('exist');
         })
         it('verify correct information is in header elements',()=>{
-            //user query params to get class, user name, and problem info
+            //user query params to get class, user name, and version info. 
+            //Problem title is tested in Dataflow header_test_spec
 
         })
     })
