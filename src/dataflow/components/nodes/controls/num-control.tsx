@@ -4,6 +4,7 @@ import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { HTMLSelect } from "@blueprintjs/core";
 import "./num-control.sass";
+import { NodePeriodUnits } from "../../../utilities/node";
 
 // cf. https://codesandbox.io/s/retejs-react-render-t899c
 export class NumControl extends Rete.Control {
@@ -36,7 +37,12 @@ export class NumControl extends Rete.Control {
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       this.props.currentUnits = event.target.value;
       this.putData(this.key + "Units", this.props.currentUnits);
+      const pUnits = NodePeriodUnits.find((u: any) => u.unit === this.props.currentUnits);
+      const pUnitsInSecs = pUnits ? pUnits.lengthInSeconds : 1;
+      this.putData(this.key, this.props.value * pUnitsInSecs);
+
       (this as any).update();
+      this.emitter.trigger("process");
     };
     this.component = (compProps: { readonly: any,
                                    value: any;
@@ -80,18 +86,19 @@ export class NumControl extends Rete.Control {
       );
     };
 
-    this.min = minVal;
-    const initial = node.data[key] || initVal;
-    node.data[key] = initial;
-
     const unitsKey = key + "Units";
     const initialUnits = node.data[unitsKey] || (units?.length ? units[0] : "");
     node.data[unitsKey] = initialUnits;
+    const periodUnits = NodePeriodUnits.find((u: any) => u.unit === initialUnits);
+    const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
+    this.min = minVal;
+    const initial = Number(node.data[key] || initVal);
+    node.data[key] = initial;
 
     this.props = {
       readonly,
-      value: initial,
-      inputValue: initial,
+      value: initial / periodUnitsInSeconds,
+      inputValue: initial / periodUnitsInSeconds,
       onChange: (v: any) => {
         this.setInputValue(v);
       },
@@ -120,7 +127,9 @@ export class NumControl extends Rete.Control {
     }
     this.props.inputValue = val;
     this.props.value = val;
-    this.putData(this.key, val);
+    const periodUnits = NodePeriodUnits.find((u: any) => u.unit === this.props.currentUnits);
+    const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
+    this.putData(this.key, val * periodUnitsInSeconds);
     (this as any).update();
   }
 

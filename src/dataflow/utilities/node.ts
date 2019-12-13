@@ -234,7 +234,7 @@ export const NodeGeneratorTypes = [
   */
 ];
 
-export const NodeGeneratorPeriodUnits = [
+export const NodePeriodUnits = [
   {
     unit: "sec",
     lengthInSeconds: 1
@@ -251,24 +251,8 @@ export const NodeGeneratorPeriodUnits = [
 
 export const NodeTimerInfo =
 {
-  name: "Timer",
   method: (t: number, tOn: number, tOff: number) => t % (tOn + tOff) < tOn ? 1 : 0,
 };
-
-export const NodeTimerIntervalUnits = [
-  {
-    unit: "sec",
-    lengthInSeconds: 1
-  },
-  {
-    unit: "min",
-    lengthInSeconds: 60
-  },
-  {
-    unit: "hour",
-    lengthInSeconds: 3600
-  },
-];
 
 export interface NodeChannelInfo {
   hubId: string;
