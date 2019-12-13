@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
-import { AppHeaderComponent, EPanelId, IPanelGroupSpec } from "../../components/app-header";
+import { ClueAppHeaderComponent } from "./clue-app-header";
+import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
@@ -48,7 +49,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
 
     return (
       <div className="clue-app-content">
-        <AppHeaderComponent isGhostUser={isGhostUser} panels={panels}
+        <ClueAppHeaderComponent isGhostUser={isGhostUser} panels={panels}
                             current={teacherPanelKey} onPanelChange={this.handlePanelChange}
                             showGroup={true} />
         {currentPanelContent}

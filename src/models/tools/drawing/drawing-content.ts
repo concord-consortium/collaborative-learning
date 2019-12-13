@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { Point, DrawingObjectDataType } from "./drawing-objects";
+import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 
@@ -270,3 +271,11 @@ export const DrawingContentModel = types
   });
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
+
+registerToolContentInfo({
+  id: kDrawingToolID,
+  tool: "drawing",
+  modelClass: DrawingContentModel,
+  defaultHeight: kDrawingDefaultHeight,
+  defaultContent: defaultDrawingContent
+});

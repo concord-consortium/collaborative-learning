@@ -2,6 +2,10 @@ import * as React from "react";
 import { ISetProperties } from "../../models/document/document";
 
 export interface IDocumentContext {
+  type: string;
+  key: string;
+  title?: string;
+  originDoc?: string;
   getProperty: (key: string) => string | undefined;
   setProperties: (properties: ISetProperties) => void;
 }
