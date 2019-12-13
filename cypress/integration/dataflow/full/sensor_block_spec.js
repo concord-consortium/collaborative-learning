@@ -61,16 +61,16 @@ context('Sensor block tests',()=>{
                 })
             })
         })
-        it.skip('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
+        it('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
             var sensorTypes=['Humidity','Temeprature'];
-            var hub ='cc-west-office-hub'; //use cc-west-hub since it has two temp and two humidity
+            var hub ='codap-server-hub-sim'; //use cc-west-hub since it has two temp and two humidity
             var plugIndex = 1;
             dfblock.selectSensorType(sensorTypes[0]);
             cy.wait(10000);
             dfblock.openHubSensorComboListDropdown();
             dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
                 console.log($option.text()+' length: '+ $optionList.length)
-                if ($option.text().includes(hub)){ //cc-west-office-hub:humidity(plug 1),cc-west-office-hub:humidity(plug 1)
+                if ($option.text().includes(hub)){ //codap-server-hub-sim:humidity(plug 1),codap-server-hub-sim:humidity(plug 1)
                     console.log("hub name: "+hub+':'+(sensorTypes[0].toLowerCase())+'(plug '+(plugIndex)+')');
                     expect($option).to.contain(hub+':'+sensorTypes[0].toLowerCase()+'(plug '+(plugIndex)+')');
                     plugIndex++;
@@ -93,10 +93,10 @@ context('Sensor block tests',()=>{
                 dfblock.getSensorValueTextField().should('contain',sensor.unit)
             })
         })
-        it.skip('verify sensor blocks outputs correctly',()=>{
+        it('verify sensor blocks outputs correctly',()=>{
             var sensor = "Humidity";
             var hubcce = 'cceast-sim-hub:humidity'
-            var hubccw = "cc-west-office-hub:humidity(plug 2)";
+            var hubccw = "codap-server-hub-sim:humidity(plug 2)";
             dfblock.selectSensorType(sensor);
             cy.wait(10000)
             dfblock.selectHubSensorCombo(hubccw);
