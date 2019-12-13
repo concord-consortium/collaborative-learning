@@ -9,6 +9,8 @@ cache:
     - "$HOME/.npm"
     - "$HOME/.cache"
 # cf. https://stackoverflow.com/a/52387639
+before_install:
+- pyenv local 3.6
 install:
 - travis_retry gem install s3_website -v 3.4.0
 - travis_retry pip install awscli --upgrade --user
