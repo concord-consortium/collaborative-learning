@@ -24,9 +24,6 @@ before(()=>{
 
     cy.visit(baseUrl+queryParams);
     cy.wait(2000)
-
-    header.switchWorkspace('Workspace');
-    cy.wait(1000);
 })
 
 context('canvas test',()=>{
@@ -74,6 +71,7 @@ context('canvas test',()=>{
         it('verify Stop button is disable after running a program',()=>{
             dfcanvas.runProgram();
             cy.wait(1500);
+            dfcanvas.getRunButton().parent().should('have.attr','disabled');
             dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
             dfcanvas.stopProgram();
             dfcanvas.getProgramToolbar().should('not.exist')
@@ -131,7 +129,7 @@ context('canvas test',()=>{
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+seqName);
             cy.wait(3000) //wait to finish typing into element before reloading page
         })
-        it.skip('verify program is restored when reopened',()=>{ 
+        it('verify program is restored when reopened',()=>{
             //get values before close
             const input1 = Cypress.$(dfblock.numberInputEl(0)).val()
             const input2 = Cypress.$(dfblock.numberInputEl(1)).val()

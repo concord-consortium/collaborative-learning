@@ -3,13 +3,14 @@ import dfHeader from "../../../support/elements/dataflow/dfHeader";
 const header = new dfHeader;
 
 before(function(){
+    //need to change url to teacher query param
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
 
     cy.visit(baseUrl+queryParams);
     cy.wait(4000)
 });
-context.skip('Workspace view',()=>{
+context('Workspace view',()=>{
     //Other UI elements are in Common tests
     describe('workspace ui',()=>{
         it('verify Dataflow workspace switch',()=>{

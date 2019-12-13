@@ -19,8 +19,6 @@ context('block functionalites and relationships',()=>{
             cy.visit(baseUrl+queryParams);
             cy.wait(2000)
         
-            header.switchWorkspace('Workspace');
-            cy.wait(1000);
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Math');

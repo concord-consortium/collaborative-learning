@@ -1,5 +1,5 @@
-//Tabs: ['my-work','class-work','learning-log','supports', 'student-work'] *student-work is teacher only
-//Sections: [['workspaces','investigations', 'starred'], *starred is teacher only
+//Tabs: ['my-work','class-work','learning-log','supports']
+//Sections: [['workspaces','investigations'],
 //           ['personal', 'published', 'learning-log', 'starred']
 //           [''],
 //           ['jit','teacher-supports']]
@@ -13,11 +13,11 @@ class RightNav{
     }
 
     getRightNavTab(tab){
-        return cy.get('#rightNavTab-'+tab+'.tab');
+        return cy.get('#rightNavTab'+tab+'.tab');
     }
 
     openRightNavTab(tab){   
-        this.getRightNavTab(tab).click();
+        cy.get('#rightNavTab-'+tab+'.tab').click();
         cy.wait(2000);
     }
     closeRightNavTab(tab){   
@@ -54,9 +54,9 @@ class RightNav{
 
     getCanvasItemTitle(tab,section){
         if ((tab=='learning-log')||(section==='')){
-            return cy.get('[data-test='+tab+'-section]').siblings('.list.shown').find('.footer .info div')
+            return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div')
         } else {
-            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list.shown').find('.footer .info div')
+            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div')
 
         }
     }
@@ -64,13 +64,5 @@ class RightNav{
     openCanvasItem(tab, section='', title){
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
-
-    starCanvasItem(tab,section,title){
-        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click()
-    }
-    getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
-    }
-
 }
 export default RightNav;

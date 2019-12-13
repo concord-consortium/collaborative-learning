@@ -15,15 +15,13 @@ before(()=>{
     cy.visit(baseUrl+queryParams);
     cy.wait(2000);
         
-    header.switchWorkspace('Workspace');
-    cy.wait(1000);
     dfcanvas.openBlock('Number')
     dfcanvas.openBlock('Data Storage')
     dfblock.moveBlock(testBlock,0,250,5);
     dfcanvas.scrollToTopOfTile();
     dfblock.getNumberInput().type('9');
 })
-
+//add test that colors of plots
 context('Data Storage block tests',()=>{//Use generator block on square wave for on/off
 
     describe('Data Storage block UI',()=>{
@@ -52,7 +50,7 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
         })
         it('verify sequence name can be entered',()=>{
             var sequenceName = 'input number'
-            dfblock.getStorageSequenceTextField().should('have.value','my-sequence');
+            dfblock.getStorageSequenceTextField().should('have.value','my-sequence'); //This should now not exist
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+sequenceName);
             dfblock.getStorageSequenceTextField().should('have.value',sequenceName);
         })
@@ -61,6 +59,8 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.connectBlocks('number',0,testBlock,0)
             dfblock.getInputNodesNum(testBlock).should('have.length',2);
         })
+        //add test for when connection is made, the text field exists, and default name should be reasonable
+        //add test for disconnection to node. expected is the text field should disappear.
     })
 })
 after(function(){

@@ -27,7 +27,7 @@ before(function(){
 
 context('single student functional test',()=>{
     describe('test header elements', function(){
-        it.skip('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
+        it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
             dfheader.switchWorkspace('Control Panels');
             controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');
             dfheader.switchWorkspace('Workspace');
@@ -80,12 +80,12 @@ context('single student functional test',()=>{
     });
     context('save and restore of canvas', function(){
         describe('Program save and restore', function(){
-            it.skip('verify program is saved and restored', function() {
+            it('verify program is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work', '','Programs')
                 rightNav.openCanvasItem('my-work', '', programTitle );
             });
-            it.skip('verify data collected is saved and restored', function() {
+            it('verify data collected is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work', '','Data')
                 rightNav.openCanvasItem('my-work', '', dataTitle );

@@ -40,15 +40,26 @@ class dfCanvas{
     getStopButton(){
         return cy.get('.single-workspace .program-editor-topbar button').contains('Stop')
     }
-    getRunDialogOkButton(){
-        return cy.get('.dialog .dialog-container .dialog-contents .dialog-buttons #okButton').contains('Ok');
+    getDurationContainer(){
+        return cy.get('.running-container.countdown')
     }
+    getProgressTime(){
+        return cy.get('.progress-time')
+    }
+    // getRunDialogOkButton(){
+    //     return cy.get('.dialog .dialog-container .dialog-contents .dialog-buttons #okButton').contains('Ok');
+    // }
     selectDuration(duration){
         this.getDurationDropdown().select(duration)
     }
-    runProgram(){
-        this.getRunButton().click().then(() => {
-            this.getRunDialogOkButton().click();
+    runProgram(title=''){
+        this.getRunButton().click()
+            .then(() => {
+            // dialog.getDialogTitle().should('exist').and('contain','Run Program');
+            if (title!='') {
+                dialog.getDialogTextInput().type('{selectall}{backspace}'+title)
+            }
+            dialog.getDialogOKButton().click();
         })
     }
     stopProgram(){
@@ -75,11 +86,13 @@ class dfCanvas{
         this.getZoomOutButton().click().click().click().click().click();
     }
 
-    createNewProgram(title){
+    createNewProgram(title=''){
         canvas.getNewDocumentIcon().click()
             .then(()=>{
-                dialog.getDialogTitle().should('exist').and('contain','Create ');
-                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                // dialog.getDialogTitle().should('exist').and('contains','Create ');
+                if (title!='') {
+                    dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                }
                 dialog.getDialogOKButton().click();
             })
         cy.wait(3000)    

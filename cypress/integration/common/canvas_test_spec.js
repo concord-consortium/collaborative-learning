@@ -25,7 +25,7 @@ context('test canvas tools', function(){
     })
 
     describe('Test publish documents', function(){
-        it('verify publish button', function(){
+        it('verify publish and copy button come back up after publish', function(){
             canvas.publishCanvas();
             canvas.getPublishIcon().should('exist');
             canvas.getCopyIcon().should('exist');

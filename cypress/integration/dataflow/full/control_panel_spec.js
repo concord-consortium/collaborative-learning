@@ -7,14 +7,14 @@ before(()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
 
-    cy.visit(baseUrl+queryParams);
+    cy.visit(baseUrl+queryParams);//Change this one to bring up a teacher link
     cy.wait(4000)
     
-    // header.switchWorkspace('Control Panels');
-    // cy.wait(3000);
+    header.switchWorkspace('Control Panels');
+    cy.wait(3000);
 })
 
-context.skip('control panel ui',()=>{
+context('control panel ui',()=>{
     describe('control panel shows registered hubs', ()=>{
         it('verify Registered Hub List is visible',()=>{
             controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');

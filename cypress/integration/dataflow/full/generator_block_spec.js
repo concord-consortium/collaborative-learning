@@ -16,8 +16,6 @@ before(()=>{
     cy.visit(baseUrl+queryParams);
     cy.wait(2000)
 
-    header.switchWorkspace('Workspace');
-    cy.wait(1000);
     dfcanvas.openBlock('Generator')
     dfcanvas.openBlock('Transform')
     dfblock.moveBlock('transform',0,250,5)
