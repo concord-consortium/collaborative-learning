@@ -37,7 +37,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
           node.addInput(inp);
           const tc = inp.control as TextControl;
           if (tc) {
-            tc.setColor(ChartPlotColors[node.inputs.size - 1]);
+            tc.setColor(ChartPlotColors[node.inputs.size - 1 % ChartPlotColors.length]);
           }
         });
       } else {
@@ -116,7 +116,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
         sequenceName));
       const tc = lastInput.control as TextControl;
       if (tc) {
-        tc.setColor(ChartPlotColors[node.inputs.size - 1]);
+        tc.setColor(ChartPlotColors[node.inputs.size - 1 % ChartPlotColors.length]);
       }
       this.addInput(node);
     }
