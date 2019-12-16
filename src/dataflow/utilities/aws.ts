@@ -107,6 +107,33 @@ interface ProgramDataPoint{
 
 const allProgramsCache: {[programId: string]: ProgramDataCache} = {};
 
+export const fetchActiveRelays = () => {
+  const lambda = new AWS.Lambda({ region: "us-east-1", apiVersion: "2015-03-31" });
+  const params = {
+    FunctionName: "arn:aws:lambda:us-east-1:816253370536:function:fetchActiveRelays",
+    Payload: JSON.stringify({}),
+    InvocationType: "RequestResponse",
+    LogType: "Tail"
+  };
+  return new Promise((resolve, reject) => {
+    lambda.invoke(params, (error, data) => {
+      if (error) {
+        reject(error);
+      }
+      if (data && data.Payload) {
+        let payload: any;
+        try {
+          payload = JSON.parse(data.Payload as string);
+        } catch (e) {
+          // In case of strange messages in MQTT, handle a glitch gracefully
+          resolve({});
+        }
+        resolve(payload);
+      }
+    });
+  });
+};
+
 export const fetchProgramData = (programId: string, time?: number, endTime?: number) => {
   // Omitting the time parameter returns all program data from the start
   // Omitting the endTime returns all data from the start time and now
