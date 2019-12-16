@@ -12,6 +12,8 @@ before(()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
 
+    cy.clearQAData('all');
+
     cy.visit(baseUrl+queryParams);
     cy.wait(2000);
         
@@ -29,7 +31,7 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.getBlockTitle(testBlock).should('contain','Data Storage');
             dfblock.getStorageNameTextField().should('be.visible');
             dfblock.getStorageIntervalDropdown().should('be.visible');
-            dfblock.getStorageSequenceTextField().should('be.visible');
+            dfblock.getStorageSequenceTextField().should('not.exist');
             dfblock.getOutputNodesNum(testBlock).should('not.exist');
             dfblock.getInputNode(testBlock).should('be.visible');
         })
@@ -48,16 +50,20 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.selectStorageIntervalTime(interval);
             dfblock.getStorageIntervalDropdown().should('contain', interval);
         })
-        it('verify sequence name can be entered',()=>{
-            var sequenceName = 'input number'
-            dfblock.getStorageSequenceTextField().should('have.value','my-sequence'); //This should now not exist
-            dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+sequenceName);
-            dfblock.getStorageSequenceTextField().should('have.value',sequenceName);
-        })
+        // it('verify sequence name does not exist before connection',()=>{
+        //     var sequenceName = 'input number'
+        //     dfblock.getStorageSequenceTextField().should('not.exist');
+        // })
         it('verify a new input node is added when a block is connected to an input',()=>{
             dfblock.getInputNodesNum(testBlock).should('have.length',1);
             dfblock.connectBlocks('number',0,testBlock,0)
             dfblock.getInputNodesNum(testBlock).should('have.length',2);
+        })
+        it('verify sequence name can be entered',()=>{
+            var sequenceName = 'input number'
+            dfblock.getStorageSequenceTextField().should('be.visible').and('have.length', 1); 
+            dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+sequenceName);
+            dfblock.getStorageSequenceTextField().should('have.value',sequenceName);
         })
         //add test for when connection is made, the text field exists, and default name should be reasonable
         //add test for disconnection to node. expected is the text field should disappear.
