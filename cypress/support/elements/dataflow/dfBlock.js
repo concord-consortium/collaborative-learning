@@ -39,7 +39,7 @@ class dfBlock{
     }
     connectBlocks(outputBlock, whichBlock=0, inputBlock, whichInput=0){
         this.getOutputNode(outputBlock, whichBlock).trigger('pointerdown').trigger('pointerup');
-        this.getInputNode(inputBlock,whichInput).trigger('pointerdown').trigger('pointerup');
+        this.getInputNode(inputBlock,whichInput).trigger('pointerdown').trigger('pointerup',{force:true});
     }
     connectionLine(){
         return cy.get('.single-workspace .connection .main-path');

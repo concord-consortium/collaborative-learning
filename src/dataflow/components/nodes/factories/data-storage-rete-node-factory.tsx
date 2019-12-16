@@ -2,11 +2,10 @@ import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
-import { NumControl } from "../controls/num-control";
 import { TextControl } from "../controls/text-control";
-import { PlotButtonControl } from "../controls/plot-button-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { IntervalTimes } from "../../../utilities/node";
+import { NodeSensorTypes, ChartPlotColors } from "../../../utilities/node";
 
 export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   private inputCount = 1;
@@ -28,18 +27,21 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
       node.addControl(new DropdownListControl(this.editor, "interval", node, intervalTimeOptions, true, "Interval"));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
-        keys.forEach((key: string) => {
+        keys.forEach((key: string, index: number) => {
           const inp = new Rete.Input(key, "sequence", this.numSocket);
           const keyNum = parseInt(key.substring(this.inputPrefix.length), 10);
           this.inputCount = Math.max(this.inputCount, keyNum);
-          if (this.editor) {
+          if (this.editor && index !== keys.length - 1) {
             inp.addControl(new TextControl(this.editor, this.textPrefix + this.inputCount, node, "", "my-sequence"));
           }
           node.addInput(inp);
+          const tc = inp.control as TextControl;
+          if (tc) {
+            tc.setColor(ChartPlotColors[node.inputs.size - 1 % ChartPlotColors.length]);
+          }
         });
       } else {
         const inp = new Rete.Input(this.inputPrefix + this.inputCount, "sequence", this.numSocket);
-        inp.addControl(new TextControl(this.editor, this.textPrefix + this.inputCount, node, "", "my-sequence"));
         node.addInput(inp);
       }
 
@@ -77,8 +79,45 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
   private addInputs(node: Node) {
     const lastKey = Array.from(node.inputs.keys())[node.inputs.size - 1];
     const lastInput = node.inputs.get(lastKey);
-    if (lastInput && lastInput.connections.length > 0) {
+    if (lastInput && lastInput.connections.length > 0 && this.editor) {
       // final input has a connection, add an additional input
+      const name = lastInput.connections[0].output.node?.name;
+      let sequenceName = "my-sequence";
+      if (name === "Number" || name === "Timer") {
+        sequenceName = name;
+      } else if (name === "Sensor") {
+        if (lastInput.connections[0].output.node) {
+          const nodeType = String(lastInput.connections[0].output.node.data.type);
+          const sensorType = NodeSensorTypes.find((s: any) => s.type === nodeType);
+          sequenceName = nodeType === "none" ? name : (sensorType ? sensorType.name : sequenceName);
+        }
+      } else if (name === "Generator") {
+        if (lastInput.connections[0].output.node) {
+          sequenceName = String(lastInput.connections[0].output.node.data.generatorType);
+        }
+      } else if (name === "Math") {
+        if (lastInput.connections[0].output.node) {
+          sequenceName = String(lastInput.connections[0].output.node.data.mathOperator);
+        }
+      } else if (name === "Logic") {
+        if (lastInput.connections[0].output.node) {
+          sequenceName = String(lastInput.connections[0].output.node.data.logicOperator);
+        }
+      } else if (name === "Transform") {
+        if (lastInput.connections[0].output.node) {
+          sequenceName = String(lastInput.connections[0].output.node.data.transformOperator);
+        }
+      }
+
+      lastInput.addControl(new TextControl(this.editor,
+        this.textPrefix + this.inputCount,
+        node,
+        "",
+        sequenceName));
+      const tc = lastInput.control as TextControl;
+      if (tc) {
+        tc.setColor(ChartPlotColors[node.inputs.size - 1 % ChartPlotColors.length]);
+      }
       this.addInput(node);
     }
   }
@@ -87,11 +126,6 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       this.inputCount++;
       const input = new Rete.Input(this.inputPrefix + this.inputCount, "sequence", this.numSocket);
-      input.addControl(new TextControl(this.editor,
-                                       this.textPrefix + this.inputCount,
-                                       node,
-                                       "",
-                                       "my-sequence"));
       node.addInput(input);
       node.data.inputKeys = Array.from(node.inputs.keys());
       node.update();
