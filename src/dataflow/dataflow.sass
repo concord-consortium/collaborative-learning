@@ -314,20 +314,21 @@ $list-item-scale: 0.1
       background-color: $gray-light
 
 .section-tab-container
+  display: flex
+  flex-direction: column
   overflow-y: hidden
+  min-height: 27px
 
 .section-header
   height: 27px
-  flex-shrink: 0
-  flex-grow: 0
+  &.collapsed
+    min-height: 27px
 
 .list-container
   display: flex
   flex-direction: column
   justify-content: flex-start
   height: 100%
-  flex-shrink: 0
-  flex-grow: 0
 
 .list
   &.shown
