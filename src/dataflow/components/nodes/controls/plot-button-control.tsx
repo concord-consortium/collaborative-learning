@@ -37,13 +37,12 @@ export class PlotButtonControl extends Rete.Control {
     this.props = {
       showgraph: initial,
       onGraphButtonClick: () => {
-        this.setGraph();
+        this.setGraph(!this.props.showgraph);
       }
     };
   }
 
-  public setGraph = () => {
-    const show = !this.props.showgraph;
+  public setGraph = (show: boolean) => {
     this.props.showgraph = show;
     this.putData(this.key, show);
     (this as any).update();

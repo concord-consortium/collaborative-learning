@@ -267,6 +267,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
+        if (this.getRunState() === ProgramRunStates.Complete) {
+          Object.keys(program.nodes).forEach(id => {
+            if (program.nodes[id].data && program.nodes[id].data.plot) {
+              program.nodes[id].data.plot = false;
+            }
+          });
+        }
         const result = await this.programEditor.fromJSON(program);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
@@ -570,6 +577,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   }
 
+  private closeNodePlots = () => {
+    this.programEditor.nodes.forEach((n: Node) => {
+      const plotControl = n.controls.get("plot") as PlotButtonControl;
+      if (plotControl) {
+        plotControl.setGraph(false);
+      }
+    });
+  }
+
   private runProgram = (programTitle: string) => {
     const programData: any = this.generateProgramData(programTitle);
     uploadProgram(programData);
@@ -587,6 +603,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
     this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
     this.props.onCheckProgramRunState(programEndTime);
+    this.closeNodePlots();
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
@@ -934,6 +951,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
         this.props.onCheckProgramRunState(this.props.programEndTime);
         this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
+        this.closeNodePlots();
         clearInterval(this.intervalHandle);
       } else if (this.props.programEndTime && (Date.now() < this.props.programEndTime)) {
         const remainingTimeInSeconds = Math.ceil((this.props.programEndTime - Date.now()) / 1000);
