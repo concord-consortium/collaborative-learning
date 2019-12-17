@@ -33,6 +33,7 @@ import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./dataflow-program-graph";
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
 import { getLocalTimeStamp } from "../utilities/time";
+import { forEach } from "lodash";
 
 import "./dataflow-program.sass";
 
@@ -267,13 +268,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
-        if (this.getRunState() === ProgramRunStates.Complete) {
-          Object.keys(program.nodes).forEach(id => {
-            if (program.nodes[id].data && program.nodes[id].data.plot) {
-              program.nodes[id].data.plot = false;
-            }
-          });
-        }
+        this.closeCompletedRunProgramNodePlots(program);
         const result = await this.programEditor.fromJSON(program);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
@@ -577,7 +572,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   }
 
-  private closeNodePlots = () => {
+  private closeCompletedRunProgramNodePlots = (program: any) => {
+    if (this.getRunState() === ProgramRunStates.Complete) {
+      forEach(program.nodes, (node: any) => { node.data?.plot && (node.data.plot = false); });
+    }
+  }
+
+  private closeEditorNodePlots = () => {
     this.programEditor.nodes.forEach((n: Node) => {
       const plotControl = n.controls.get("plot") as PlotButtonControl;
       if (plotControl) {
@@ -603,7 +604,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
     this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
     this.props.onCheckProgramRunState(programEndTime);
-    this.closeNodePlots();
+    this.closeEditorNodePlots();
     clearInterval(this.intervalHandle);
   }
   private setProgramRunTime = (time: number) => {
@@ -952,7 +953,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const programDisplayState = hasDataStorage ? ProgramDisplayStates.Graph : ProgramDisplayStates.Program;
         this.props.onCheckProgramRunState(this.props.programEndTime);
         this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
-        this.closeNodePlots();
+        this.closeEditorNodePlots();
         clearInterval(this.intervalHandle);
       } else if (this.props.programEndTime && (Date.now() < this.props.programEndTime)) {
         const remainingTimeInSeconds = Math.ceil((this.props.programEndTime - Date.now()) / 1000);
