@@ -573,7 +573,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private closeCompletedRunProgramNodePlots = (program: any) => {
-    if (this.getRunState() === ProgramRunStates.Complete) {
+    if (this.props.programRunId && (this.getRunState() === ProgramRunStates.Complete)) {
       forEach(program.nodes, (node: any) => { node.data?.plot && (node.data.plot = false); });
     }
   }
