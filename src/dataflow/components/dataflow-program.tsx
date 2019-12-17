@@ -604,6 +604,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
     this.props.onCheckProgramRunState(programEndTime);
     this.closeNodePlots();
+    clearInterval(this.intervalHandle);
   }
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
