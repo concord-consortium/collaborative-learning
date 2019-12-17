@@ -40,87 +40,92 @@
     }
   },
   "copyPreferOriginTitle": true,
-  "rightNavTabs": [
-    {
-      "tab": "my-work",
-      "label": "My Work",
-      "hideGhostUser": true,
-      "sections": [
-        {
-          "title": "Programs",
-          "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["!dfHasData", "!isDeleted"]
-        },
-        {
-          "title": "Data",
-          "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["dfHasData", "!isDeleted"]
-        },
-        {
-          "title": "Data Stories",
-          "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["dfIsDataStory", "!isDeleted"]
-        },
-        {
-          "title": "Relay Programs",
-          "type": "personal-documents",
-          "dataTestHeader": "my-work-section",
-          "dataTestItem": "my-work-list-items",
-          "documentTypes": ["personal"],
-          "properties": ["dfHasRelayNoData", "!isDeleted"]
-        }
-      ]
-    },
-    {
-      "tab": "class-work",
-      "label": "Shared Work",
-      "sections": [
-        {
-          "className": "section personal published",
-          "title": "Programs",
-          "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
-          "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "properties": ["!dfHasData"]
-        },
-        {
-          "className": "section personal published",
-          "title": "Data",
-          "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
-          "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "properties": ["dfHasData"]
-        },
-        {
-          "className": "section personal published",
-          "title": "Data Stories",
-          "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
-          "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "properties": ["dfIsDataStory"]
-        },
-        {
-          "className": "section personal published",
-          "title": "Relay Programs",
-          "type": "published-personal-documents",
-          "dataTestHeader": "class-work-section",
-          "dataTestItem": "class-work-list-items",
-          "documentTypes": ["personalPublication"],
-          "properties": ["dfHasRelayNoData"]
-        }
-      ]
-    }
-  ]
+  "rightNav": {
+    "defaultExpanded": true,
+    "preventExpandCollapse": true,
+    "lazyLoadTabContents": false,
+    "tabSpecs": [
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "hideGhostUser": true,
+        "sections": [
+          {
+            "title": "Programs",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!dfHasData", "!isDeleted"]
+          },
+          {
+            "title": "Data",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["dfHasData", "!isDeleted"]
+          },
+          {
+            "title": "Data Stories",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["dfIsDataStory", "!isDeleted"]
+          },
+          {
+            "title": "Relay Programs",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["dfHasRelayNoData", "!isDeleted"]
+          }
+        ]
+      },
+      {
+        "tab": "class-work",
+        "label": "Shared Work",
+        "sections": [
+          {
+            "className": "section personal published",
+            "title": "Programs",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["!dfHasData"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Data",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["dfHasData"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Data Stories",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["dfIsDataStory"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Relay Programs",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["dfHasRelayNoData"]
+          }
+        ]
+      }
+    ]
+  }
 }

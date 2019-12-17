@@ -25,8 +25,8 @@ export const UIDialogModel = types
 
 export const UIModel = types
   .model("UI", {
-    rightNavExpanded: false,
     leftNavExpanded: false,
+    rightNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: ERightNavTab.kMyWork,
@@ -38,23 +38,24 @@ export const UIModel = types
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
   })
+  .volatile(self => ({
+    defaultLeftNavExpanded: false,
+    defaultRightNavExpanded: false
+  }))
   .views((self) => ({
-    get allContracted() {
-      return !self.rightNavExpanded && !self.leftNavExpanded;
+    get allDefaulted() {
+      return (self.leftNavExpanded === self.defaultLeftNavExpanded) &&
+              (self.rightNavExpanded === self.defaultRightNavExpanded);
     },
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
-    const contractAll = () => {
-      // TODO: for Clue, this needs to be set to false. Best approach is
-      // to add app-config control that defines the "default" open/close
-      // states of the right/left navs. Perhaps, rename contractAll() to
-      // something like resetToDefaults().
-      self.rightNavExpanded = true;
-      self.leftNavExpanded = false;
-    };
+    function restoreDefaultNavExpansion() {
+      self.leftNavExpanded = self.defaultLeftNavExpanded;
+      self.rightNavExpanded = self.defaultRightNavExpanded;
+    }
 
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
       const expanded = typeof override !== "undefined" ? override : !self[toggle];
@@ -125,12 +126,16 @@ export const UIModel = types
     };
 
     return {
-      contractAll,
+      restoreDefaultNavExpansion,
       alert,
       prompt,
       confirm,
       resolveDialog,
 
+      afterCreate() {
+        self.defaultLeftNavExpanded = self.leftNavExpanded;
+        self.defaultRightNavExpanded = self.rightNavExpanded;
+      },
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },
@@ -171,7 +176,7 @@ export const UIModel = types
         // my work
         else {
           self.problemWorkspace.setAvailableDocument(document);
-          contractAll();
+          restoreDefaultNavExpansion();
         }
       },
       setTeacherPanelKey(key: string) {
