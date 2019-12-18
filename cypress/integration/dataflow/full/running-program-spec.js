@@ -57,7 +57,7 @@ context('Data Canvas tests',function(){
         rightNav.openCanvasItem('my-work','',dataset1)
         canvas.getPersonalDocTitle().should('contain',dataset1)
     })
-    it.skip('verify data collection runs to the end of the duration',()=>{
+    it('verify data collection runs to the end of the duration',()=>{
         dfcanvas.createNewProgram(dataset2);
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Data Storage')
@@ -74,14 +74,17 @@ context('Data Canvas tests',function(){
         canvas.getPersonalDocTitle().should('contain',dataset2)
         dfrightnav.getRunningBadge().should('not.exist');
     })
-    it('verify data collected from a run program appears in My Work>Data section',()=>{
-
-
-    })
     it('verify data collected from a run program does not appear in My Work>Programs section',()=>{
+        
+    })
+    it('verify data collected from a run program appears in My Work>Data section',()=>{
+        
 
     })
+    it('verify restore of data canvas',()=>{
 
+    })
+    it('verify program toolbar is not present')
 })
 after(function(){
     cy.clearQAData('all');
