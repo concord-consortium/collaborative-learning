@@ -75,6 +75,7 @@ interface IProps extends SizeMeProps {
   readOnly?: boolean;
   program?: string;
   onProgramChange: (program: any) => void;
+  onShowOriginalProgram: () => void;
   onStartProgram: (title: string, id: string, startTime: number, endTime: number) => void;
   onSetProgramRunId: (id: string) => void;
   programRunId: string;
@@ -180,8 +181,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             {!this.isProgramOnly() &&
               <DataflowProgramGraph
                 dataSet={this.state.graphDataSet}
-                onToggleShowProgram={this.toggleShowProgram}
                 programVisible={this.isSideBySide()}
+                onToggleShowProgram={this.toggleShowProgram}
+                onShowOriginalProgram={this.props.onShowOriginalProgram}
               />
             }
           </div>

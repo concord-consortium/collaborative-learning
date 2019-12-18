@@ -22,8 +22,9 @@ export interface DataSet {
 
 interface IProps {
   dataSet: DataSet;
-  onToggleShowProgram: () => void;
   programVisible: boolean;
+  onToggleShowProgram: () => void;
+  onShowOriginalProgram: () => void;
 }
 interface IState {
   stacked: boolean;
@@ -77,6 +78,10 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
             <button className="graph-button program split" onClick={this.handleShowProgramClick} />
             :
             <button className="graph-button program" onClick={this.handleShowProgramClick} />
+          }
+          {
+            this.props.onShowOriginalProgram &&
+              <button className="graph-button show-original" onClick={this.props.onShowOriginalProgram} />
           }
           {this.props.programVisible ?
             <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
