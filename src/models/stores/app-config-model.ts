@@ -42,6 +42,7 @@ export const AppConfigModel = types
     units: types.map(types.string),
     defaultProblemOrdinal: "",
     defaultUnit: "",
+    autoAssignStudentsToIndividualGroups: false,
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
     // clients should use the defaultDocumentContent() method below
