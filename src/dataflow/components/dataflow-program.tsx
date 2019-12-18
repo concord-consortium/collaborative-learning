@@ -382,7 +382,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                                                         ? ProgramDisplayStates.SideBySide
                                                         : ProgramDisplayStates.Graph
                                   : ProgramDisplayStates.Program;
-    this.setState({ programRunState, programDisplayState });
+    const remainingTimeInSeconds = programRunState === ProgramRunStates.Running
+                                    ? Math.max(0, Math.round((this.props.programEndTime - Date.now()) / 1000))
+                                    : 0;
+    this.setState({ programRunState, programDisplayState, remainingTimeInSeconds });
     this.updateGraphDataSet();
     const sequenceInfo = this.getNodeSequenceNamesAndUnits();
     this.sequenceNames = sequenceInfo.names;
@@ -594,7 +597,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.sequenceNames = sequenceInfo.names;
     this.sequenceUnits = sequenceInfo.units;
     this.setState({programRunState: ProgramRunStates.Running,
-                   programDisplayState: ProgramDisplayStates.Graph});
+                   programDisplayState: ProgramDisplayStates.Graph,
+                   remainingTimeInSeconds: this.props.programRunTime || DEFAULT_PROGRAM_TIME});
   }
   private stopProgram = () => {
     deleteProgram(this.props.programEndTime);
