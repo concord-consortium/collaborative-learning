@@ -30,8 +30,8 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const { appConfig: { rightNavTabs }, user } = this.stores;
-    const myTabSpec = rightNavTabs && rightNavTabs.find(tab => tab.tab === this.props.tabId);
+    const { appConfig: { rightNav }, user } = this.stores;
+    const myTabSpec = rightNav.tabSpecs.find(spec => spec.tab === this.props.tabId);
 
     const renderDocumentsSection = (section: NavTabSectionModelType) => {
       const sectionId = navTabSectionId(section);
@@ -103,18 +103,24 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   }
 
   private handleToggleExpansion = (section: NavTabSectionModelType) => {
-    const sectionId = navTabSectionId(section);
-    const isExpanded = this.state.showSection.get(sectionId);
-    this.state.showSection.set(sectionId, !isExpanded);
-    this.setState(state => ({ showSection: this.state.showSection }));
+    const { ui: { activeRightNavTab }, appConfig: { rightNav } } = this.stores;
+    const sections = rightNav.tabSpecs.filter( t => t.tab === activeRightNavTab)[0].sections;
+    const currentSectionId = navTabSectionId(section);
+    let isCurrentSectionExpanded = false;
+
+    sections.forEach( (sec) => {
+      const sectionId = navTabSectionId(sec);
+      const isExpanded = (sectionId === currentSectionId) ? this.state.showSection.get(sectionId) : true;
+      if (sectionId === currentSectionId) isCurrentSectionExpanded = isExpanded;
+      this.state.showSection.set(sectionId, !isExpanded);
+    });
     this.props.onToggleExpansion?.(section);
-    Logger.log(LogEventName.SHOW_FILTER,
-      {
-        filter_state: (isExpanded ? "close" : "open"),
-        filter_name: section.title,
-        filter_type: section.type
-      }
-    );
+    this.setState( () => ({ showSection: this.state.showSection }));
+    Logger.log(LogEventName.SHOW_FILTER, {
+                filter_state: isCurrentSectionExpanded ? "close" : "open",
+                filter_name: section.title,
+                filter_type: section.type
+              });
   }
 
   private handleNewDocumentClick = async (section: NavTabSectionModelType) => {
@@ -125,7 +131,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
                           : await db.createLearningLogDocument();
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);
-      ui.contractAll();
+      ui.restoreDefaultNavExpansion();
     }
   }
 
