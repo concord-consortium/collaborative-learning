@@ -93,7 +93,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const remainingHours = Math.floor(props.remainingTimeInSeconds / 3600);
   const remainingMinutes = Math.floor((props.remainingTimeInSeconds - remainingHours * 3600) / 60);
   const remainingSeconds = (props.remainingTimeInSeconds - (remainingHours * 3600) - (remainingMinutes * 60) ) % 60;
-  const progressWidth = (kProgressWidth * props.remainingTimeInSeconds / props.programDefaultRunTime);
+  const completedTimeInSeconds = props.programDefaultRunTime - props.remainingTimeInSeconds;
+  const progressWidth = (kProgressWidth * completedTimeInSeconds / props.programDefaultRunTime);
   const hoursString = String(remainingHours).padStart(2, "0");
   const minutesString = String(remainingMinutes).padStart(2, "0");
   const secondsString = String(remainingSeconds).padStart(2, "0");
