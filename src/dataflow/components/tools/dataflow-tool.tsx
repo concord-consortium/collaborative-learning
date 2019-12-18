@@ -4,6 +4,7 @@ import { getSnapshot } from "mobx-state-tree";
 import { BaseComponent } from "../../../components/base";
 import { ICreateOtherDocumentParams } from "../../../lib/db";
 import { IDocumentProperties } from "../../../lib/db-types";
+import { DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
@@ -46,6 +47,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 readOnly={readOnly}
                 program={program}
                 onProgramChange={this.handleProgramChange}
+                onShowOriginalProgram={this.handleShowOriginalProgram}
                 onStartProgram={this.handleStartProgram}
                 onSetProgramRunId={this.handleSetProgramRunId}
                 programRunId={programRunId}
@@ -70,50 +72,66 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     );
   }
 
+  private getDocument() {
+    const { documents, ui: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
+    return primaryDocumentKey && documents.getDocument(primaryDocumentKey);
+  }
+
+  private switchToDocument(document: DocumentModelType) {
+    if (document) {
+      const { ui: { problemWorkspace } } = this.stores;
+      problemWorkspace.toggleComparisonVisible({ override: false });
+      problemWorkspace.setPrimaryDocument(document);
+    }
+  }
+
   private handleStartProgram = async (datasetName: string, id: string, startTime: number, endTime: number) => {
-    const {documents, db, ui} = this.stores;
-    const {problemWorkspace} = ui;
+    const { db } = this.stores;
     // get the currently loaded document, we're going to spawn a new document based on it
-    if (problemWorkspace.primaryDocumentKey) {
-      const primaryDocument = documents.getDocument(problemWorkspace.primaryDocumentKey);
-      if (primaryDocument) {
-        // get snapshot of DocumentContent
-        const contentSnapshot = cloneDeep(getSnapshot(primaryDocument.content));
-        // make a new DocumentContentModel from the snapshot
-        const documentContent = DocumentContentModel.create(contentSnapshot);
-        // find the program tile (should only be 1) and apply the program run info
-        documentContent.tileMap.forEach(tile => {
-          if (tile.content.type === "Dataflow") {
-            const programContent = tile.content as DataflowContentModelType;
-            programContent.setProgramRunId(id);
-            programContent.setProgramStartEndTime(startTime, endTime);
-            programContent.setRunningStatus(endTime);
-          }
-        });
-        const originTitle = primaryDocument.title
-                              ? { originTitle: primaryDocument.title }
-                              : undefined;
-        const properties: IDocumentProperties = { dfRunId: id, ...originTitle };
-        if (datasetName.length > 0) {
-          properties.dfHasData = "true";
+    const document = this.getDocument();
+    if (document) {
+      // get snapshot of DocumentContent
+      const contentSnapshot = cloneDeep(getSnapshot(document.content));
+      // make a new DocumentContentModel from the snapshot
+      const documentContent = DocumentContentModel.create(contentSnapshot);
+      // find the program tile (should only be 1) and apply the program run info
+      documentContent.tileMap.forEach(tile => {
+        if (tile.content.type === "Dataflow") {
+          const programContent = tile.content as DataflowContentModelType;
+          programContent.setProgramRunId(id);
+          programContent.setProgramStartEndTime(startTime, endTime);
+          programContent.setRunningStatus(endTime);
         }
-        // create and load the new document
-        const params: ICreateOtherDocumentParams = {
-                title: datasetName || `${primaryDocument.title}-${getLocalTimeStamp(Date.now())}` ,
-                properties,
-                content: JSON.parse(documentContent.publish())
-              };
-        const newPersonalDocument = await db.createPersonalDocument(params);
-        if (newPersonalDocument) {
-          problemWorkspace.toggleComparisonVisible({ override: false });
-          problemWorkspace.setPrimaryDocument(newPersonalDocument);
-        }
+      });
+      const dfProgramId = document.key;
+      const originTitle = document.title
+                            ? { originTitle: document.title }
+                            : undefined;
+      const properties: IDocumentProperties = { dfProgramId, dfRunId: id, ...originTitle };
+      if (datasetName.length > 0) {
+        properties.dfHasData = "true";
       }
+      // create and load the new document
+      const params: ICreateOtherDocumentParams = {
+              title: datasetName || `${document.title}-${getLocalTimeStamp(Date.now())}`,
+              properties,
+              content: JSON.parse(documentContent.publish())
+            };
+      const newPersonalDocument = await db.createPersonalDocument(params);
+      this.switchToDocument(newPersonalDocument);
     }
   }
 
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);
+  }
+
+  private handleShowOriginalProgram = () => {
+    const { documents } = this.stores;
+    const document = this.getDocument();
+    const originDocumentId = document && document.properties.get("dfProgramId");
+    const originDocument = originDocumentId && documents.getDocument(originDocumentId);
+    originDocument && this.switchToDocument(originDocument);
   }
 
   private handleSetProgramRunId = (id: string) => {

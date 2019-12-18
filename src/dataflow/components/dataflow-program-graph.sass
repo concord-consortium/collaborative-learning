@@ -76,6 +76,18 @@
     &.program.split
       left: -100%
       background-image: url("../../assets/dataflow/graph.png")
+    &.show-original
+      position: absolute
+      width: 132px
+      height: 28px
+      left: -50%
+      background-size: contain
+      background-repeat: no-repeat
+      background-image: url("../../assets/dataflow/open-program-default.png")
+      &:hover
+        background-image: url("../../assets/dataflow/open-program-hover.png")
+      &:active
+        background-image: url("../../assets/dataflow/open-program-active.png")
     &.data
       margin-left: auto
     &:hover
