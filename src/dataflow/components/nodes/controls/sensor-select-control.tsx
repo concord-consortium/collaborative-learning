@@ -202,16 +202,19 @@ export class SensorSelectControl extends Rete.Control {
         this.emitter.trigger("process");
       },
       onSensorDropdownClick: (v: any) => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showSensorList = !this.props.showSensorList;
         this.props.showTypeList = false;
         (this as any).update();
       },
       onTypeDropdownClick: (v: any) => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showTypeList = !this.props.showTypeList;
         this.props.showSensorList = false;
         (this as any).update();
       },
       onTypeOptionClick: (v: any) => () => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showTypeList = !this.props.showTypeList;
         this.props.showSensorList = false;
         (this as any).update();
@@ -219,6 +222,7 @@ export class SensorSelectControl extends Rete.Control {
         this.emitter.trigger("process");
       },
       onSensorOptionClick: (v: any) => () => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showSensorList = !this.props.showSensorList;
         this.props.showTypeList = false;
         (this as any).update();

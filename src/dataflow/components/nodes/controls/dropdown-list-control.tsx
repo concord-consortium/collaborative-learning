@@ -121,10 +121,12 @@ export class DropdownListControl extends Rete.Control {
       readonly,
       value: initial,
       onItemClick: (v: any) => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         (this as any).update();
       },
       onListClick: (v: any) => () => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         (this as any).update();
         this.setValue(v);

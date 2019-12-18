@@ -112,10 +112,12 @@ export class RelaySelectControl extends Rete.Control {
       value: initial,
       showList: false,
       onRelayDropdownClick: () => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         (this as any).update();
       },
       onRelayOptionClick: (v: any) => () => {
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = false;
         (this as any).update();
         this.setValue(v);
