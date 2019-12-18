@@ -103,14 +103,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
           programContent.setRunningStatus(endTime);
         }
       });
-      const dfProgramId = document.key;
-      const originTitle = document.title
-                            ? { originTitle: document.title }
-                            : undefined;
-      const properties: IDocumentProperties = { dfProgramId, dfRunId: id, ...originTitle };
-      if (datasetName.length > 0) {
-        properties.dfHasData = "true";
-      }
+      const properties: IDocumentProperties = { dfProgramId: document.key, dfRunId: id };
+      if (document.title) properties.originTitle = document.title;
+      if (datasetName.length > 0) properties.dfHasData = "true";
       // create and load the new document
       const params: ICreateOtherDocumentParams = {
               title: datasetName || `${document.title}-${getLocalTimeStamp(Date.now())}`,
