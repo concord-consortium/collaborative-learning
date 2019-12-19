@@ -108,5 +108,8 @@ class dfCanvas{
     getFullGraph(){
         return cy.get('.program-graph.full')
     }
+    getGraphButton(button){
+        return cy.get('.graph-button.'+button)
+    }
 }
 export default dfCanvas;

@@ -13,6 +13,8 @@ const canvas = new Canvas;
 const rightNav = new RightNav;
 const dfrightnav = new dfRightNav
 
+const program1 = 'Program-1'
+const program2 = 'Program-2'
 const dataset1 = 'stopped dataset'
 const dataset2 = '1 minute dataset'
 const dataset3 = '10 minute dataset'
@@ -35,11 +37,12 @@ before(()=>{
     dfcanvas.openBlock('Data Storage')
     dfblock.getNumberInput().type('9');
     dfblock.connectBlocks('number',0,'data-storage',0)
-    canvas.editTitle(dataset1)
+    canvas.editTitle(program1)
 })
 
-context('Data Canvas tests',function(){
+context('Program Canvas tests',function(){
     it('verify data collection stops when Stop button is clicked',()=>{
+        dfcanvas.selectDuration('300')
         dfcanvas.runProgram(dataset1);
         cy.wait(15000); //on first run sometimes it takes 10 seconds for graph to start
         dfcanvas.getProgramGraph().should('be.visible');
@@ -54,17 +57,18 @@ context('Data Canvas tests',function(){
     it('restore program',()=>{
         rightNav.openRightNavTab('my-work');
         rightNav.openSection('my-work','','Programs')
-        rightNav.openCanvasItem('my-work','',dataset1)
-        canvas.getPersonalDocTitle().should('contain',dataset1)
+        rightNav.openCanvasItem('my-work','',program1)
+        dfcanvas.getDurationDropdown().should('contain', '5 mins')
     })
     it('verify data collection runs to the end of the duration',()=>{
-        dfcanvas.createNewProgram(dataset2);
+        dfcanvas.createNewProgram(program2);
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Data Storage')
         dfblock.getNumberInput().type('5');
         dfblock.connectBlocks('number',0,'data-storage',0)
         dfcanvas.selectDuration('60')
         dfcanvas.runProgram(dataset2);
+        dfcanvas.getDurationContainer().find('.total').should('contain', '1 min')
         cy.wait(10000);
         rightNav.openSection('my-work','','Data')
         dfrightnav.getRunningBadge().should('exist');
@@ -74,17 +78,39 @@ context('Data Canvas tests',function(){
         canvas.getPersonalDocTitle().should('contain',dataset2)
         dfrightnav.getRunningBadge().should('not.exist');
     })
-    it('verify data collected from a run program does not appear in My Work>Programs section',()=>{
-        
-    })
     it('verify data collected from a run program appears in My Work>Data section',()=>{
-        
+        rightNav.getCanvasItemTitle('my-work','','Data').contains(program1).should('not.be.visible')
+    })
+    it('verify data collected from a run program does not appear in My Work>Programs section',()=>{
+        rightNav.openSection('my-work','','Programs')
+        rightNav.getCanvasItemTitle('my-work','','Programs').contains(dataset1).should('not.be.visible')
+    })
+    it('verify re-running a previously ran program creates a new dataset',()=>{
 
     })
+})
+context('Data Canvas tests',()=>{   
     it('verify restore of data canvas',()=>{
+        rightNav.openSection('my-work','','Data')
+        rightNav.openCanvasItem('my-work','',dataset2)
+        dfcanvas.getFullGraph().should('be.visible');
+        dfcanvas.getFullGraph().find('.chartjs-render-monitor').should('be.visible')
+        dfcanvas.getGraphButton('program').should('be.visible')
+        dfcanvas.getGraphButton('export').should('be.visible')
+        dfcanvas.getGraphButton('data').should('be.visible')
+        dfcanvas.getGraphButton('layout').should('be.visible')
+        dfcanvas.getGraphButton('type').should('be.visible')
 
     })
-    it('verify program toolbar is not present')
+    it('verify program toolbar is not present',()=>{
+        dfcanvas.getProgramToolbar().should('not.be.visible')
+    })
+    it('verify new program can be created from a dataset',()=>{
+
+    })
+    it('verify copy of a dataset creates a copy of a dateset',()=>{
+
+    })
 })
 after(function(){
     cy.clearQAData('all');
