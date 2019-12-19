@@ -124,7 +124,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {user, ui, db, groups} = this.stores;
+    const {appConfig, user, ui, db, groups} = this.stores;
 
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponment />);
@@ -147,8 +147,16 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       );
     }
 
-    if (user.isStudent && !groups.groupForUser(user.id)) {
-      return this.renderApp(<GroupChooserComponent />);
+    if (user.isStudent) {
+      if (!groups.groupForUser(user.id)) {
+        if (appConfig.autoAssignStudentsToIndividualGroups) {
+          // use userId as groupId
+          db.joinGroup(user.id);
+        }
+        else {
+          return this.renderApp(<GroupChooserComponent />);
+        }
+      }
     }
 
     return this.renderApp(<AppContentContainerComponent />);
