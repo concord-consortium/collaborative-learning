@@ -52,8 +52,12 @@ class RightNav{
         return cy.get('[data-test='+tab+'-section-'+section).siblings('[data-test=my-work-list-items]');
     }
 
-    getCanvasItemTitle(tab,section){
-        if ((tab=='learning-log')||(section==='')){
+    getCanvasItemTitle(tab,section,sectionTitle=''){
+        // if (section===''){
+        //     cy.get('[data-test='+tab+'-section]').find('.title').contains(sectionTitle).siblings('.list-container').find('.footer .info div')
+        // }
+        // else 
+        if ((tab=='learning-log')||(section=='')){
             return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div')
         } else {
             return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div')
