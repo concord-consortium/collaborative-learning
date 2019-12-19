@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>CLUE</title>
-    <meta name="description" content="Collaborative Learning User Environment">
+    <title><%= pageTitle %></title>
+    <meta name="description" content="<%= pageDescription %>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,900&display=swap" rel="stylesheet">
@@ -11,8 +11,8 @@
     <script>
       var hostPath = window.location.hostname + window.location.pathname,
           isLocalhost = /(localhost|127\.0\.0\.1)/i.test(window.location.hostname),
-          isBranchOrTag = /collaborative-learning\.concord\.org\/(branch|tag)(\/|$)/i.test(hostPath),
-          isMasterBranch = /collaborative-learning\.concord\.org\/branch\/master(\/|$)/i.test(hostPath),
+          isBranchOrTag = <%= branchTagRegEx %>.test(hostPath),
+          isMasterBranch = <%= masterBranchRegEx %>.test(hostPath),
           isAuthed = !/appMode=(dev|demo|qa|test)/.test(window.location.search),
           isDemo = /appMode=demo/.test(window.location.search),
           isProduction = !isLocalhost && !isBranchOrTag && isAuthed;
