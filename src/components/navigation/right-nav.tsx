@@ -197,9 +197,9 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
         ui.setActiveRightNavTab(tab);
         ui.toggleRightNav(true);
         logEvent();
-      } else {
-        const toggleState = !!this.stores.appConfig.rightNav.preventExpandCollapse || undefined;
-        this.stores.ui.toggleRightNav(toggleState);
+      } else if (!this.stores.appConfig.rightNav.preventExpandCollapse) {
+        ui.toggleRightNav();
+        ui.rightNavExpanded && logEvent();
       }
 
       if (navDoneExpanding) {

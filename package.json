@@ -1,8 +1,14 @@
 {
-  "name": "collaborative-learning",
-  "version": "1.0.2",
-  "description": "Collaborative Learning environment",
+  "name": "@concord-consortium/dataflow",
+  "version": "3.0.0-pre.20191106",
+  "description": "A digital tool for experimental control and data acquisition using Internet-of-Things sensors.",
   "main": "index.js",
+  "config": {
+    "pageTitle": "Dataflow",
+    "pageDescription": "Create Data. Control Your World.",
+    "branchTagRegEx": "/dataflow-app\\.concord\\.org\\/(branch|tag)(\\/|$)/i",
+    "masterBranchRegEx": "/dataflow-app\\.concord\\.org\\/branch\\/master(\\/|$)/i"
+  },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
