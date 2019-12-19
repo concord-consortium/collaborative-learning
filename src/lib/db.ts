@@ -58,6 +58,11 @@ export interface ICreateOtherDocumentParams {
   content?: DocumentContentModelType;
 }
 
+export interface ICopyOtherDocumentParams {
+  title?: string;
+  asTemplate?: boolean;
+}
+
 export interface OpenDocumentOptions {
   documentKey: string;
   type: DocumentType;
@@ -581,10 +586,16 @@ export class DB {
     });
   }
 
-  public copyOtherDocument(document: DocumentModelType, title: string) {
-    const content = cloneContentWithUniqueIds(document.content);
+  public copyOtherDocument(document: DocumentModelType, options?: ICopyOtherDocumentParams) {
+    const content = cloneContentWithUniqueIds(document.content, options?.asTemplate);
     const copyType = document.type === ProblemDocument ? PersonalDocument : document.type as OtherDocumentType;
-    return this.createOtherDocument(copyType, { title, content });
+    const originTitle = document.title
+                          ? { properties: { originTitle: document.title } }
+                          : undefined;
+    const titleProps = options?.title
+                        ? { title: options?.title, ...originTitle }
+                        : undefined;
+    return this.createOtherDocument(copyType, { content, ...titleProps });
   }
 
   public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {

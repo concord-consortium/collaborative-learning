@@ -21,7 +21,7 @@ describe("ui model", () => {
   });
 
   it("has default values", () => {
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.error).toBe(null);
@@ -31,7 +31,7 @@ describe("ui model", () => {
     expect(ui.dialog).toBe(undefined);
   });
 
-  it("uses overtide values", () => {
+  it("uses override values", () => {
     ui = UIModel.create({
       rightNavExpanded: true,
       showDemoCreator: true,
@@ -45,7 +45,7 @@ describe("ui model", () => {
         mode: "1-up"
       },
     });
-    expect(ui.allContracted).toBe(false);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.rightNavExpanded).toBe(true);
     expect(ui.leftNavExpanded).toBe(false);
     expect(ui.error).toBe("test");
@@ -54,37 +54,37 @@ describe("ui model", () => {
 
   it("allows the left nav to be toggled", () => {
     ui.toggleLeftNav();
-    expect(ui.allContracted).toBe(false);
+    expect(ui.allDefaulted).toBe(false);
     expect(ui.leftNavExpanded).toBe(true);
     ui.toggleLeftNav();
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.leftNavExpanded).toBe(false);
   });
 
   it("allows the left nav to be explicitly set", () => {
     ui.toggleLeftNav(false);
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.leftNavExpanded).toBe(false);
     ui.toggleLeftNav(true);
-    expect(ui.allContracted).toBe(false);
+    expect(ui.allDefaulted).toBe(false);
     expect(ui.leftNavExpanded).toBe(true);
   });
 
   it("allows the right nav to be toggled", () => {
     ui.toggleRightNav();
-    expect(ui.allContracted).toBe(false);
+    expect(ui.allDefaulted).toBe(false);
     expect(ui.rightNavExpanded).toBe(true);
     ui.toggleRightNav();
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
   });
 
   it("allows the right nav to be explicitly set", () => {
     ui.toggleRightNav(false);
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(true);
     expect(ui.rightNavExpanded).toBe(false);
     ui.toggleRightNav(true);
-    expect(ui.allContracted).toBe(false);
+    expect(ui.allDefaulted).toBe(false);
     expect(ui.rightNavExpanded).toBe(true);
   });
 
@@ -98,11 +98,11 @@ describe("ui model", () => {
     expect(ui.rightNavExpanded).toBe(true);
   });
 
-  it("allows all components to be contracted", () => {
+  it("allows all components to be defaulted", () => {
     ui.toggleLeftNav();
-    expect(ui.allContracted).toBe(false);
-    ui.contractAll();
-    expect(ui.allContracted).toBe(true);
+    expect(ui.allDefaulted).toBe(false);
+    ui.restoreDefaultNavExpansion();
+    expect(ui.allDefaulted).toBe(true);
   });
 
   it("allows error to be set", () => {

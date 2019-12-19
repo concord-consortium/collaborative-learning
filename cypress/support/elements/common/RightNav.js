@@ -50,10 +50,10 @@ class RightNav{
     }
 
     getCanvasItemTitle(tab,section){
-        if (tab=='learning-log'){
-            return cy.get('[data-test='+tab+'-section]').siblings('.list.shown').find('.footer .info div')
+        if ((tab=='learning-log')||(section==='')){
+            return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div')
         } else {
-            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list.shown').find('.footer .info div')
+            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div')
 
         }
     }
