@@ -1161,7 +1161,7 @@
                 "tiles": [{
                     "content": {
                       "type": "Text",
-                      "text": "Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. You can express this plan with the equation A = 5 + 0.5d. "
+                      "text": "Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. You can express this plan with the equation <em>A</em> = 5 + 0.5<em>d</em>. "
                     }
                   },
                   {
@@ -1192,7 +1192,10 @@
                             },
                             {
                               "type": "point",
-                              "parents": [14, 12]
+                              "parents": [14, 12],
+                              "properties": {
+                                "name": "(14, 12)"
+                              }
                             }
                           ]
                         }
@@ -1202,7 +1205,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Kilometers Walked\n\n  • Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n\n  • Write a question you could answer by locating this point. \n\n  • How can you use the equation for Alana’s pledge plan to check the answer to the question you made up?\n\n  • How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question? \n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."
+                      "format": "html",
+                      "text": ["<strong>Kilometers Walked</strong>\n <em>Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n Write a question you could answer by locating this point. \n How can you use the equation for Alana’s pledge plan to check the answer to the question you made up?\n How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question?</em>\n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."]
                     }
                   }
                 ]
@@ -1216,13 +1220,15 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Consider the following pledge plans. In each equation, y is the amount pledged in dollars by each sponsor and x is the distance walked in kilometers.\n\nPlan 1\ny = 5x - 3\n\nPlan 2\ny = - x + 6\n\nPlan 3\ny = 2"
+                      "format": "html",
+                      "text": ["Consider the following pledge plans. In each equation, <em>y</em> is the amount pledged in dollars by each sponsor and <em>x</em> is the distance walked in kilometers.\n\n<strong>Plan 1</strong> <em>y</em> = 5<em>x</em> - 3\n<strong>Plan 2</strong> <em>y</em> = - <em>x</em> + 6\n <strong>Plan 3</strong> <em>y</em> = 2"]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "What information does the equation give about the pledge plan? Does the plan make sense? \n\nHow might a table or graph of the equation help answer questions about the pledge plans."
+                      "format": "html",
+                      "text": ["<ul><li>What information does the equation give about the pledge plan? Does the plan make sense?</li><li>How might a table or graph of the equation help answer questions about the pledge plans.</li></ul>"]
                     }
                   }
                 ]
@@ -1236,14 +1242,38 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                   "content": {
                     "type": "Text",
-                    "text": "1. Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point. \n\n2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you? \n\n3. All of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n\n   (-7, 13)    (1.2, ?)    (?, -4)\n\n • Find the missing coordinate. Explain how you found it.\n • Write a question you could answer by finding the missing coordinate.\n\n4. For the relationship y = 5x - 3 \n   a. find the value of y when x = 7?\n   b. find the value of x when y = 23? \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."
+                    "format": "html",
+                    "text": ["<strong>Situation A. Connecting Equations and Graphs</strong><ol><li>Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point.</li><li>Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you about the situation? </li></ol>"]
                   }
-                }]
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["<strong>Situation B. Connecting Equations and Tables</strong>\nAll of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n(-7, 13)    (1.2, ?)    (?, -4)<ol><li>Find the missing value. Explain how you found it.</li><li>Write a question you could answer by finding the missing value.</li></ol>"]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["<strong>Situation C. Finding Solutions</strong>\nFor Plan 1 <em>y</em> = 5<em>x</em> - 3 <ol><li>Find the value of <em>y</em> when <em>x</em> = 7</li><li>Find the value of <em>x</em> when <em>y</em> = 32.</li></ol> \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["<strong>Situation D. Linear or Non-linear</strong><ol><li>Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?</li><li>Yvonne thinks that all the plans are proportional? Do you agree? Explain why.</li></ol>"]
+                  }
+                }
+              ]
               },
-              "supports": []
+              "supports": [{"text": "Can you explain the meaning of (2, 4) in terms of dollars and distance?"}]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1251,7 +1281,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "How does any point on a graph relate to a table and an equation that represent the same relationship?"
+                    "text": "Describe the advantages and disadvantages of using tables, graphs, and equations to solve problems."
                   }
                 }]
               },
@@ -1259,33 +1289,6 @@
             }
           ],
           "supports": []
-        },
-        {
-          "description": "Reflection 2.4",
-          "ordinal": 4,
-          "title": "MSA 2.MR Mathematical Reflections",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Think about what you have learned about the following question:\n \n What do you know about linear expressions, equations, and relationships?"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Discuss your ideas with other students and your teachers. Then write a summary in your notebook."
-                    }
-                  }
-                ]
-              }
-            }
-          ]
         }
       ]
     },
@@ -1307,7 +1310,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Investigation 3: Solving Equations Symbolically\n\n Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph.\n\nYou will learn to use symbolic methods to solve a linear equation.\n\nIn the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance d and money earned A in the walkathon."
+                      "format": "html",
+                      "text": ["Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph or numeric reasoning. You will also learn to use <em>symbolic</em> methods to solve a linear equation. In the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance <em>d</em> and money earned <em>A</em> in the walkathon."]
                     }
                   },
                   {
@@ -1332,8 +1336,9 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_graph_350w.png"
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Walkathon Earnings"]
                     }
                   },
                   {
@@ -1354,11 +1359,17 @@
                           "parents": [
                             {
                               "type": "point",
-                              "parents": [3, 6.5]
+                              "parents": [3, 6.5],
+                              "properties": {
+                                "name": "(3, 6.5)"
+                              }
                             },
                             {
                               "type": "point",
-                              "parents": [30, 20]
+                              "parents": [30, 20],
+                              "properties": {
+                                "name": "(30, 20)"
+                              }
                             }
                           ]
                         }
@@ -1368,7 +1379,32 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A = 5 + 0.5d\n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are solutions to the equation.\n\nIn a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk?\n• Using the graph:\nLocate the point with the value $20 which is (30,20). So, she walked 30 kilometers.\n• Using the table:\nFind the coordinate that corresponds to 20 for the amount earned, which is 30 km in the distance kilometer.\n• Using the equation:\nThis question can also be represented in the equation as 20 = 5 + 0.5d.\n\nHow could you use an equation to find the distance that Alana walks if she earns $20? $60?\n\nIntroduction: Problem 3.1\n\nMs. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins."
+                      "format": "html",
+                      "text": ["A = 5 + 0.5d\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, A = 5 + 0.5d. The coordinates of these points are <strong>solutions to the equation</strong>."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, suppose Alana raises $20 from a sponsor, how many kilometers did she walk? <ul><li>Using numeric reasoning: Subtract $5 from $20 to get $15. This is the amount earned for walking d kilometers. So 15 = 0.5 d or 15/0.5 = 30 = d.</li><li>Using the graph: Locate the point with the value $20, which is (30,20). So she walked 30 kilometers.</li><li>Using the table: Find the coordinate that corresponds to $20 for the amount earned, which is 30 km. So she walked 30 kilometers. </li><li>Using the equation: This question can also be represented by the equation as 20 = 5 + 0.5d and then the properties of equality can be used to solve the equation, which is similar to numeric reasoning. </li></ul><em>How could you use an equation to find the distance that Alana walks if she earns $20?</em>\n\nIn this Investigation you will develop strategies for solving equations of the form y = ax + b symbolically."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["To raise more money, Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a clue for the amount of money in the pouch. The clue consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins.  "]
                     }
                   },
                   {
@@ -1392,21 +1428,14 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• How much money was in each pouch?\n• How much money did the winner receive?\nThe class made up several other clues… Can you find out how many coins are in each pouch?\n• How much money was in each pouch?\n• How much money did the winner receive?\nThe class made up several other clues… Can you find out how many coins are in each pouch?"
+                      "format": "html",
+                      "text": "<em>How much money was in each pouch?\nHow much money did the winner receive?</em>\nThe class made up several other clues. For each clue the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.<ul><li>What is the number of gold coins in each pouch? </li><li>How can you check your answer?</li></ul>Write down your steps so that someone else could follow your steps to find the number of coins in a pouch. "
                     }
-                  }
-                ]
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
+                  },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "For each of the situations below, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.\n\n  • What is the number of gold coins in each pouch? \n\n  • How can you check your answer?\n\nWrite down your steps so that someone else could follow your steps to find the number of coins in a pouch.\n\n1."
+                      "text": "1."
                     }
                   },
                   {
@@ -1477,7 +1506,10 @@
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "What does the sign “=” mean?"},
+                {"text": "Can you represent each clue in a different way?"}
+              ]
             },
             {
               "type": "whatIf",
@@ -1486,7 +1518,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. In the second situation, Nicole thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. She visualized the following steps to help her find the number of coins in a pouch. "}
+                      "format": "html",
+                      "text": "<strong>Situation A. Nicole’s Strategy</strong>\nIn Clue 2, Nicole thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. She visualized the following steps to help her find the number of coins in a pouch. \n1.  What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?"}
                   },
                   {
                     "content": {
@@ -1497,24 +1530,29 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?\n\n  • Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.\n\n  • Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
+                      "text": "2. Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.\n\n3. Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "2. Ahman forgot the code he made. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.\n\n  • What might the pouches and coin picture look like?\n\n  • How many dollars are in a pouch?"
+                      "format": "html",
+                      "text": ["<strong>Situation B. Aman’s Clue</strong>Aman made up another clue, but then he forgot the number of coins he put in the pouches. But he remembered that there were 5 pouches and 10 coins with a total of 35 dollars.<ol><li>What might the pouches and coin picture look like? </li><li>How many dollars are in a pouch?</li></ol>"]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "3. A local band donates $200 for the Walkathon. If a single pouch holds $20, one clue could be 9P + $20 = $200. Decide how much money will be in a single pouch, and then design a clue for a partner to figure out."
+                      "format": "html",
+                      "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the walkathon. <ol><li>They suggested the following clue:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?</li><li>Mateo wrote two expressions that represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20</li><li>Design another clue that the merchant could use. Give it to a classmate to solve. </li></ol>"]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "What information do we have? "},
+                {"text": "What are we trying to find? "}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1522,7 +1560,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
+                    "text": "Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
                   }
                 }]
               },
