@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useState, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
+import { onSnapshot } from "mobx-state-tree";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
@@ -44,6 +46,11 @@ function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, do
   return `${namePrefix}${title}`;
 }
 
+interface IAutoExpandDocKeys {
+  primary?: string;
+  comparison?: string;
+}
+
 export const DocumentsSection = observer(({ tab, section, stores, scale,
                                   isExpanded, onToggleExpansion,
                                   onDocumentClick, onDocumentDragStart,
@@ -53,6 +60,9 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     const { documents, user } = stores;
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
+    const [autoExpandToDocKey, setAutoExpandToDocKey] = useState<string|undefined>();
+    const [autoExpandDocKeys, setAutoExpandDocKeys] = useState<IAutoExpandDocKeys>({});
+    const listRef = useRef<HTMLDivElement>(null);
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -101,6 +111,37 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
       });
     }
 
+    // listen for changes to the primary and comparison docs
+    useEffect(() => {
+      const disposer = onSnapshot(stores.ui.problemWorkspace, (workspace) => {
+        setAutoExpandDocKeys({
+          primary: workspace.primaryDocumentKey,
+          comparison: workspace.comparisonDocumentKey
+        });
+      });
+      return () => disposer();
+    }, []);
+
+    useEffect(() => {
+      // try to find the primary document and fall back to the comparison document
+      const docKey = sectionDocs.find(doc => autoExpandDocKeys.primary === doc.key)?.key
+                  || sectionDocs.find(doc => autoExpandDocKeys.comparison === doc.key)?.key;
+      if (!isExpanded && docKey && (docKey !== autoExpandToDocKey)) {
+        // autoexpand when not expanded and the section contains a doc key we haven't expanded to yet
+        setAutoExpandToDocKey(docKey);
+        onToggleExpansion(section);
+      } else if (isExpanded && docKey) {
+        // auto scroll to documents when we are expanded and we have a primary or comparison doc in the section
+        const thumbnail = listRef.current?.querySelector(`.list-item[data-thumbnail-key="${docKey}"]`);
+        if (thumbnail && thumbnail.parentElement) {
+          const parentRect = thumbnail.parentElement.getBoundingClientRect();
+          const thumbnailRect = thumbnail.getBoundingClientRect();
+          const top = thumbnailRect.top - parentRect.top;
+          listRef.current?.scrollTo({ behavior: "smooth", top });
+        }
+      }
+    }, [sectionDocs, isExpanded, autoExpandToDocKey, autoExpandDocKeys]);
+
     function handleSectionHeaderClick() {
       onToggleExpansion && onToggleExpansion(section);
     }
@@ -114,7 +155,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
           sectionTitle={sectionTitle} dataTestName={section.dataTestHeader}
           isExpanded={isExpanded} onClick={handleSectionHeaderClick}/>
         <div className="list-container">
-          <div className={"list " + (isExpanded ? "shown" : "hidden")}>
+          <div className={"list " + (isExpanded ? "shown" : "hidden")} ref={listRef}>
             {sectionDocs.map(document => {
 
               function handleDocumentClick() {
@@ -153,6 +194,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
                   document={document}
                   scale={scale}
                   captionText={getDocumentCaption(section, stores, document)}
+                  stores={stores}
                   onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
                   onIsStarred={onIsStarred}
                   onDocumentStarClick={_handleDocumentStarClick}
