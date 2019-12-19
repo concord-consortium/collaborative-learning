@@ -68,14 +68,6 @@
             "properties": ["dfHasData", "!isDeleted"]
           },
           {
-            "title": "Data Stories",
-            "type": "personal-documents",
-            "dataTestHeader": "my-work-section",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["personal"],
-            "properties": ["dfIsDataStory", "!isDeleted"]
-          },
-          {
             "title": "Relay Programs",
             "type": "personal-documents",
             "dataTestHeader": "my-work-section",
@@ -106,15 +98,6 @@
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["personalPublication"],
             "properties": ["dfHasData"]
-          },
-          {
-            "className": "section personal published",
-            "title": "Data Stories",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"],
-            "properties": ["dfIsDataStory"]
           },
           {
             "className": "section personal published",
