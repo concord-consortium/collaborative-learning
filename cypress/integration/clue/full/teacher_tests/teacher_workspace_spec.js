@@ -19,7 +19,7 @@ import ClueRightNav from "../../../../support/elements/clue/cRightNav";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Space", () => {
+context("Teacher Space", () => {
 
     let dashboard = new TeacherDashboard();
     let rightNav = new RightNav();

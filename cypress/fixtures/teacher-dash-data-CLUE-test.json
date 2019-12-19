@@ -1,0 +1,572 @@
+{
+    "teacherName": "clue teacher",
+    "investigationTitle": "Enlarging and Reducing Shapes",
+    "classes": [
+        {
+            "classIndex": 0,
+            "className": "CLUE",
+            "problemTotal": 14,
+            "problems": [
+                {
+                    "problem": 2.1,
+                    "problemTitle": "2.1 Drawing Wumps: Making Similar Figures",
+                    "pageCount": 1,
+                    "groups": [
+                        {
+                            "groupIndex": 0,
+                            "groupName": "1",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing1",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing2",
+                                    "quadrant": ".north-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing3",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing4",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 1,
+                            "groupName": "2",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing5",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 4
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing6",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing7",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing8",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 3,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing9",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing10",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 4
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing11",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 2,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing12",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 3,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing13",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing14",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing15",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing16",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 4,
+                            "groupName": "5",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing17",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 4
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing18",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing19",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing20",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 5,
+                            "groupName": "6",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing21",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing22",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing23",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing24",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 6,
+                            "groupName": "7",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing25",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing26",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 7,
+                            "groupName": "8",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing27",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing28",
+                                    "quadrant": ".north-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing29",
+                                    "quadrant": ".south-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 7,
+                            "groupName": "8",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing30",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "problem": 1.2,
+                    "problemTitle": "1.2 Stretching a Figure",
+                    "pageCount": 1,
+                    "children": [
+                        {
+                            "groupIndex": 3,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing13",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing14",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing15",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "ct",
+                                    "fullName": "c testing16",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 1,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "a2",
+                                    "fullName": "a 20",
+                                    "quadrant": ".north-west",
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 2
+                        },
+                        {
+                            "groupIndex": 3
+                        },
+                        {
+                            "groupIndex": 4
+                        },
+                        {
+                            "groupIndex": 5
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "classIndex" : 1,
+            "className": "CLUE 2"
+        },
+        {
+            "classIndex" : 2
+        },
+        {
+            "classIndex" : 3
+        },
+        {
+            "classIndex" : 4
+        }
+    ]
+}
