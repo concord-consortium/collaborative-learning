@@ -126,10 +126,14 @@ export const DocumentContentModel = types
         return row ? row.tiles.length : 0;
       },
       isPlaceholderRow(row: TileRowModelType) {
-        if (row.tileCount !== 1) return false;
-        const tileId = row.getTileIdAtIndex(0);
-        const tile = tileId && self.tileMap.get(tileId);
-        return tile ? tile.isPlaceholder : false;
+        // Note that more than one placeholder tile in a row shouldn't happen
+        // in theory, but it has been known to happen as a result of bugs.
+        return (row.tileCount > 0) &&
+                row.tiles.every((entry, index) => {
+                  const tileId = row.getTileIdAtIndex(index);
+                  const tile = tileId && self.tileMap.get(tileId);
+                  return tile ? tile.isPlaceholder : false;
+                });
       },
       getRowsInSection(sectionId: string): TileRowModelType[] {
         let sectionRowIndex: number | undefined;

@@ -1,8 +1,14 @@
 {
   "name": "collaborative-learning",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Collaborative Learning environment",
   "main": "index.js",
+  "config": {
+    "pageTitle": "CLUE",
+    "pageDescription": "Collaborative Learning User Environment",
+    "branchTagRegEx": "/collaborative-learning\\.concord\\.org\\/(branch|tag)(\\/|$)/i",
+    "masterBranchRegEx": "/collaborative-learning\\.concord\\.org\\/branch\\/master(\\/|$)/i"
+  },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"

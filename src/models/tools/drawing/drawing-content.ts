@@ -276,5 +276,6 @@ registerToolContentInfo({
   id: kDrawingToolID,
   tool: "drawing",
   modelClass: DrawingContentModel,
+  defaultHeight: kDrawingDefaultHeight,
   defaultContent: defaultDrawingContent
 });
