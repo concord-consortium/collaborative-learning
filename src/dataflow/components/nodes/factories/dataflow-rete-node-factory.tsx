@@ -3,6 +3,8 @@ import { Node, Socket } from "rete";
 import { DataflowNode } from "../dataflow-node";
 import { DeleteControl } from "../controls/delete-control";
 
+export const kEmptyValueString = "__";
+
 export abstract class DataflowReteNodeFactory extends Rete.Component {
   protected numSocket: Socket;
   constructor(name: string, numSocket: Socket) {
