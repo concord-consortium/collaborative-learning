@@ -38,7 +38,7 @@ context('Logic block test',()=>{
         })
         it('verify correct equation when only one node is connected',()=>{
             dfblock.getNumberInput(0).type('{backspace}'+input1+'{enter}');
-            dfblock.getLogicValueTextField().should('contain', input1+' > __ ⇒ 0')//0 > ___ ⇒ 0
+            dfblock.getLogicValueTextField().should('contain', input1+' > __ ⇒ __')
         })
         it('verify greater than',()=>{
             dfblock.connectBlocks('number',1,testBlock,1)

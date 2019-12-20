@@ -98,10 +98,10 @@ context('Math block test',()=>{
             dfblock.getNumberInput(0).type('{backspace}'+input3+'{enter}')
         })
         it('verify block shows correct equation',()=>{ //3 / ___ = 0
-            dfblock.getMathValueTextField().should('contain',input3+' / __ = 0')
+            dfblock.getMathValueTextField().should('contain',input3+' / __ = __')
         })
         it('verify block outputs correct value',()=>{
-            dfblock.getTransformValueTextField().should('contain','|0| = 0')
+            dfblock.getTransformValueTextField().should('contain','|__| = __')
         })
     })
 })
