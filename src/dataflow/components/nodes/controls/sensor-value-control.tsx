@@ -1,9 +1,9 @@
 import * as React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes } from "../../../utilities/node";
+import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
 import "./sensor-value-control.sass";
 import "./value-control.sass";
-import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
 
 export class SensorValueControl extends Rete.Control {
   private component: any;

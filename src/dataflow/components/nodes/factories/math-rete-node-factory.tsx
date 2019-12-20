@@ -44,7 +44,13 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
     if (nodeOperationTypes) {
-      result = nodeOperationTypes.method(n1, n2);
+      if (isNaN(n1) || isNaN(n2)) {
+        result = NaN;
+      } else {
+        // NaNs are for propogating lack of values. Actual math erros like
+        // divide-by-zero should output 0.
+        result = nodeOperationTypes.method(n1, n2) || 0;
+      }
 
       const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
       const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
