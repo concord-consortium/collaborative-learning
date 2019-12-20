@@ -41,6 +41,7 @@
     }
   },
   "copyPreferOriginTitle": true,
+  "disableTileDrags": true,
   "rightNav": {
     "defaultExpanded": true,
     "preventExpandCollapse": true,
