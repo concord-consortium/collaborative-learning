@@ -4,13 +4,18 @@ import { DocumentModelType } from "../../models/document/document";
 import { observer } from "mobx-react";
 import { IStores } from "../../models/stores/stores";
 
+export enum ThumbnailDocumentItemRole {
+  PrimaryDoc = "primary-doc",
+  ComparisonDoc = "comparison-doc"
+}
+
 interface IProps {
   dataTestName: string;
   canvasContext: string;
   document: DocumentModelType;
   scale: number;
   captionText: string;
-  stores: IStores;
+  role?: ThumbnailDocumentItemRole;
   onIsStarred: () => boolean;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -21,8 +26,7 @@ interface IProps {
 export const ThumbnailDocumentItem = observer((props: IProps) => {
   const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
-        onDocumentDeleteClick,
-        stores: { ui: { problemWorkspace: { primaryDocumentKey, comparisonDocumentKey }}} } = props;
+        onDocumentDeleteClick, role } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick && onDocumentClick(document);
   };
@@ -35,9 +39,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
   const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentDeleteClick && onDocumentDeleteClick(document);
   };
-  const isPrimaryDoc = document.key === primaryDocumentKey;
-  const isComparisonDoc = document.key === comparisonDocumentKey;
-  const className = `list-item${isPrimaryDoc ? " primary-doc" : ""}${isComparisonDoc ? " comparison-doc" : ""}`;
+  const className = `list-item${role ? ` ${role}` : ""}`;
   return (
     <div
       className={className}

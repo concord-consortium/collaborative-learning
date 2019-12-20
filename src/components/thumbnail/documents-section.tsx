@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
-import { ThumbnailDocumentItem } from "./thumbnail-document-item";
+import { ThumbnailDocumentItem, ThumbnailDocumentItemRole } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
@@ -57,7 +57,8 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
                                   onNewDocumentClick, onDocumentStarClick,
                                   onDocumentDeleteClick }: IProps) => {
     const sectionTitle = getSectionTitle(section, stores);
-    const { documents, user } = stores;
+    const { documents, user, ui: { problemWorkspace: { primaryDocumentKey, comparisonDocumentKey }} } = stores;
+
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
     const [autoExpandToDocKey, setAutoExpandToDocKey] = useState<string|undefined>();
@@ -133,11 +134,11 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
       } else if (isExpanded && docKey) {
         // auto scroll to documents when we are expanded and we have a primary or comparison doc in the section
         const thumbnail = listRef.current?.querySelector(`.list-item[data-thumbnail-key="${docKey}"]`);
-        if (thumbnail && thumbnail.parentElement) {
-          const parentRect = thumbnail.parentElement.getBoundingClientRect();
+        if (thumbnail && listRef.current) {
+          const listRect = listRef.current.getBoundingClientRect();
           const thumbnailRect = thumbnail.getBoundingClientRect();
-          const top = thumbnailRect.top - parentRect.top;
-          listRef.current?.scrollTo({ behavior: "smooth", top });
+          const top = thumbnailRect.top - listRect.top;
+          listRef.current.scrollTo({ behavior: "smooth", top });
         }
       }
     }, [sectionDocs, isExpanded, autoExpandToDocKey, autoExpandDocKeys]);
@@ -186,6 +187,11 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
               const _handleDocumentDeleteClick = section.showDeleteForUser(user)
                                                 ? handleDocumentDeleteClick
                                                 : undefined;
+
+              const role = document.key === primaryDocumentKey
+                ? ThumbnailDocumentItemRole.PrimaryDoc
+                : (document.key === comparisonDocumentKey ? ThumbnailDocumentItemRole.ComparisonDoc : undefined);
+
               return (
                 <ThumbnailDocumentItem
                   key={document.key}
@@ -194,7 +200,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
                   document={document}
                   scale={scale}
                   captionText={getDocumentCaption(section, stores, document)}
-                  stores={stores}
+                  role={role}
                   onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
                   onIsStarred={onIsStarred}
                   onDocumentStarClick={_handleDocumentStarClick}
