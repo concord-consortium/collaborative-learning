@@ -1,15 +1,15 @@
 {
-    "teacherName": "clue teacher",
-    "investigationTitle": "Enlarging and Reducing Shapes",
+    "teacherName": "Teacher 5",
+    "investigationTitle": "Similar Figures",
     "classes": [
         {
             "classIndex": 0,
-            "className": "CLUE",
+            "className": "Class Menu",
             "problemTotal": 14,
             "problems": [
                 {
                     "problem": 2.1,
-                    "problemTitle": "2.1 Drawing Wumps: Making Similar Figures",
+                    "problemTitle": "2.1 Drawing Wumps (N/A)",
                     "pageCount": 1,
                     "groups": [
                         {
@@ -17,8 +17,8 @@
                             "groupName": "1",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing1",
+                                    "studentID": "S1",
+                                    "fullName": "Student 1",
                                     "quadrant": ".north-west",
                                     "published" : 1,
                                     "tools": {
@@ -30,8 +30,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing2",
+                                    "studentID": "S2",
+                                    "fullName": "Student 2",
                                     "quadrant": ".north-east",
                                     "published" : 1,
                                     "tools": {
@@ -43,8 +43,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing3",
+                                    "studentID": "S3",
+                                    "fullName": "Student 3",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -56,8 +56,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing4",
+                                    "studentID": "S4",
+                                    "fullName": "Student 4",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -75,8 +75,8 @@
                             "groupName": "2",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing5",
+                                    "studentID": "S5",
+                                    "fullName": "Student 5",
                                     "quadrant": ".north-west",
                                     "published" : 1,
                                     "tools": {
@@ -88,8 +88,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing6",
+                                    "studentID": "S6",
+                                    "fullName": "Student 6",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -101,8 +101,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing7",
+                                    "studentID": "S7",
+                                    "fullName": "Student 7",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -114,8 +114,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing8",
+                                    "studentID": "S8",
+                                    "fullName": "Student 8",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -133,8 +133,8 @@
                             "groupName": "4",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing9",
+                                    "studentID": "S9",
+                                    "fullName": "Student 9",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -146,8 +146,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing10",
+                                    "studentID": "S10",
+                                    "fullName": "Student 10",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -159,8 +159,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing11",
+                                    "studentID": "S11",
+                                    "fullName": "Student 11",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -172,8 +172,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing12",
+                                    "studentID": "S12",
+                                    "fullName": "Student 12",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -191,8 +191,8 @@
                             "groupName": "4",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing13",
+                                    "studentID": "S13",
+                                    "fullName": "Student 13",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -204,8 +204,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing14",
+                                    "studentID": "S14",
+                                    "fullName": "Student 14",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -217,8 +217,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing15",
+                                    "studentID": "S15",
+                                    "fullName": "Student 15",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -230,8 +230,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing16",
+                                    "studentID": "S16",
+                                    "fullName": "Student 16",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -249,8 +249,8 @@
                             "groupName": "5",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing17",
+                                    "studentID": "S17",
+                                    "fullName": "Student 17",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -262,8 +262,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing18",
+                                    "studentID": "S18",
+                                    "fullName": "Student 18",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -275,8 +275,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing19",
+                                    "studentID": "S19",
+                                    "fullName": "Student 19",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -288,8 +288,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing20",
+                                    "studentID": "S20",
+                                    "fullName": "Student 20",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -307,8 +307,8 @@
                             "groupName": "6",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing21",
+                                    "studentID": "S21",
+                                    "fullName": "Student 21",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -320,8 +320,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing22",
+                                    "studentID": "S22",
+                                    "fullName": "Student 22",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -333,8 +333,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing23",
+                                    "studentID": "S23",
+                                    "fullName": "Student 23",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -346,8 +346,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing24",
+                                    "studentID": "S24",
+                                    "fullName": "Student 24",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
@@ -365,8 +365,8 @@
                             "groupName": "7",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing25",
+                                    "studentID": "S25",
+                                    "fullName": "Student 25",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -378,8 +378,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing26",
+                                    "studentID": "S26",
+                                    "fullName": "Student 26",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -397,8 +397,8 @@
                             "groupName": "8",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing27",
+                                    "studentID": "S27",
+                                    "fullName": "Student 27",
                                     "quadrant": ".north-west",
                                     "published" : 1,
                                     "tools": {
@@ -410,8 +410,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing28",
+                                    "studentID": "S28",
+                                    "fullName": "Student 28",
                                     "quadrant": ".north-east",
                                     "published" : 1,
                                     "tools": {
@@ -423,8 +423,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing29",
+                                    "studentID": "S29",
+                                    "fullName": "Student 29",
                                     "quadrant": ".south-east",
                                     "published" : 1,
                                     "tools": {
@@ -438,12 +438,12 @@
                             ]
                         },
                         {
-                            "groupIndex": 7,
-                            "groupName": "8",
+                            "groupIndex": 8,
+                            "groupName": "9",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing30",
+                                    "studentID": "S30",
+                                    "fullName": "Student 30",
                                     "quadrant": ".north-west",
                                     "published" : 1,
                                     "tools": {
@@ -468,8 +468,8 @@
                             "groupName": "4",
                             "students": [
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing13",
+                                    "studentID": "S13",
+                                    "fullName": "Student 13",
                                     "quadrant": ".north-west",
                                     "published" : 0,
                                     "tools": {
@@ -481,8 +481,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing14",
+                                    "studentID": "S14",
+                                    "fullName": "Student 14",
                                     "quadrant": ".north-east",
                                     "published" : 0,
                                     "tools": {
@@ -494,8 +494,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing15",
+                                    "studentID": "S15",
+                                    "fullName": "Student 15",
                                     "quadrant": ".south-east",
                                     "published" : 0,
                                     "tools": {
@@ -507,8 +507,8 @@
                                     }
                                 },
                                 {
-                                    "studentID": "ct",
-                                    "fullName": "c testing16",
+                                    "studentID": "S16",
+                                    "fullName": "Student 16",
                                     "quadrant": ".south-west",
                                     "published" : 0,
                                     "tools": {
