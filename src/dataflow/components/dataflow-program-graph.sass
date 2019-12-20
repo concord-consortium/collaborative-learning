@@ -3,9 +3,14 @@
 .program-graph
   height: 100%
   width: 50%
+  flex: 0 0 auto
   padding: 5px 5px 25px 5px
   border: 2px solid $data-storage-orange
+  border-left-width: 6px
   position: relative
+
+  &.most
+    width: 80%
 
   &.full
     width: 100%
@@ -80,10 +85,13 @@
       position: absolute
       width: 132px
       height: 28px
-      left: -50%
+      left: -152px
+      bottom: 0
       background-size: contain
       background-repeat: no-repeat
       background-image: url("../../assets/dataflow/open-program-default.png")
+      &.wide
+        left: 0
       &:hover
         background-image: url("../../assets/dataflow/open-program-hover.png")
       &:active

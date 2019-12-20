@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
+import { SplitViewButtons } from "./split-view-buttons";
 import { ChartPlotColors } from "./../utilities/node";
 import { exportCSV } from "../utilities/export";
 import "./dataflow-program-graph.sass";
@@ -20,10 +21,18 @@ export interface DataSet {
   endTime: number;
 }
 
+export enum ProgramDisplayStates {
+  Program,    // 100% program -- editable program only
+  Graph,      // 100% graph -- dataset document only
+  Graph80,    //  80% graph -- dataset document only
+  SideBySide  //  50% graph -- dataset document only
+}
+
 interface IProps {
   dataSet: DataSet;
-  programVisible: boolean;
-  onToggleShowProgram: () => void;
+  programDisplayState: ProgramDisplayStates;
+  onClickSplitLeft?: () => void;
+  onClickSplitRight?: () => void;
   onShowOriginalProgram: () => void;
 }
 interface IState {
@@ -53,40 +62,38 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     const fullRun = !this.state.fullRun;
     this.setState({fullRun});
   }
-  public handleShowProgramClick = () => {
-    this.props.onToggleShowProgram();
-  }
   public handleExport = () => {
     const {dataSet} = this.props;
     exportCSV(dataSet.sequences);
   }
 
   public render() {
-    const {dataSet} = this.props;
-    const graphClass = `program-graph ${(!this.props.programVisible && "full")}`;
+    const { dataSet, programDisplayState } = this.props;
+    const graphClass = programDisplayState === ProgramDisplayStates.Graph
+                        ? "full"
+                        : (programDisplayState === ProgramDisplayStates.Graph80
+                            ? "most"
+                            : "half");
+    const wideClass = programDisplayState === ProgramDisplayStates.Graph ? "wide" : "";
     return (
-      <div className={graphClass} data-test="program-graph">
-        {dataSet.sequences.length === 0 &&
-          <div className="graph-loading" />
-        }
+      <div className={`program-graph ${graphClass}`} data-test="program-graph">
+        {dataSet.sequences.length === 0 && <div className="graph-loading" />}
         { this.state.stacked
           ? this.renderStackedGraphs()
           : this.renderOverlappedGraphs()
         }
+        <SplitViewButtons splitClass={graphClass}
+                          onClickSplitLeft={this.props.onClickSplitLeft}
+                          onClickSplitRight={this.props.onClickSplitRight} />
         <div className="graph-buttons">
-          {this.props.programVisible ?
-            <button className="graph-button program split" onClick={this.handleShowProgramClick} />
-            :
-            <button className="graph-button program" onClick={this.handleShowProgramClick} />
-          }
           {
             this.props.onShowOriginalProgram &&
-              <button className="graph-button show-original" onClick={this.props.onShowOriginalProgram} />
+              <button className={`graph-button show-original ${wideClass}`}
+                      onClick={this.props.onShowOriginalProgram} />
           }
-          {this.props.programVisible ?
-            <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
-            :
-            <button className="graph-button export wide" onClick={this.handleExport}>Export Data (csv)</button>
+          {this.props.programDisplayState !== ProgramDisplayStates.Graph
+            ? <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
+            : <button className="graph-button export wide" onClick={this.handleExport}>Export Data (csv)</button>
           }
           <button className="graph-button data" onClick={this.handleDataModeClick}>
             { this.state.fullRun ? "All Data" : "Full Run" }
