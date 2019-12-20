@@ -189,7 +189,7 @@ export class SensorSelectControl extends Rete.Control {
     const initialSensor = node.data.sensor || "none";
     node.data.type = initialType;
     node.data.sensor = initialSensor;
-    node.data.nodeValue = 0;
+    node.data.nodeValue = NaN;
 
     this.props = {
       readonly,
@@ -251,7 +251,7 @@ export class SensorSelectControl extends Rete.Control {
 
   public setSensor = (val: any) => {
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
-    this.setSensorValue(nch ? nch.value : 0);
+    this.setSensorValue(nch ? nch.value : NaN);
 
     if (nch && nch.type && this.getData("type") !== nch.type) {
       this.props.type = nch.type;

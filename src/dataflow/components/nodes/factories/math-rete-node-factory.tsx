@@ -1,7 +1,7 @@
 import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
-import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
+import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeOperationTypes, roundNodeValue } from "../../../utilities/node";
@@ -44,15 +44,18 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
     if (nodeOperationTypes) {
-      result = nodeOperationTypes.method(n1, n2);
-
-      if (isNaN(result)) {
-        result = 0;
+      if (isNaN(n1) || isNaN(n2)) {
+        result = NaN;
+      } else {
+        // NaNs are for propogating lack of values. Actual math erros like
+        // divide-by-zero should output 0.
+        result = nodeOperationTypes.method(n1, n2) || 0;
       }
 
-      const n1Str = n1 === undefined ? "__" : "" + n1;
-      const n2Str = n2 === undefined ? "__" : "" + n2;
-      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + roundNodeValue(result);
+      const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
+      const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
+      const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
     }
 
     if (this.editor) {

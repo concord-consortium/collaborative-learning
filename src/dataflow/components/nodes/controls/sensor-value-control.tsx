@@ -1,6 +1,7 @@
 import * as React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes } from "../../../utilities/node";
+import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
 import "./sensor-value-control.sass";
 import "./value-control.sass";
 
@@ -27,7 +28,7 @@ export class SensorValueControl extends Rete.Control {
     this.component = (compProps: { value: number; units: string; }) => (
       <div className="sensor-value">
         <div className="value-container">
-          {compProps.value}
+          {isNaN(compProps.value) ? kEmptyValueString : compProps.value}
         </div>
         <div className={`units-container ${compProps.units.length > 4 ? "small" : ""}`}>
           {compProps.units}

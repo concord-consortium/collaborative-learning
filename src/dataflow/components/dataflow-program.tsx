@@ -835,6 +835,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
+      } else {
+        sensorSelect.setSensorValue(NaN);
       }
     }
   }

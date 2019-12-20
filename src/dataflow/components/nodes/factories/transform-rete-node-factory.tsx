@@ -1,7 +1,7 @@
 import Rete from "rete";
 import { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
-import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
+import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
 import { NumControl } from "../controls/num-control";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
@@ -43,14 +43,15 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === transformOperator);
     if (nodeOperationTypes) {
-      result = nodeOperationTypes.method(n1, 0);
-
-      if (isNaN(result)) {
-        result = 0;
+      if (isNaN(n1)) {
+        result = NaN;
+      } else {
+        result = nodeOperationTypes.method(n1, 0);
       }
 
-      const n1Str = n1 === undefined ? "__" : "" + n1;
-      resultSentence = nodeOperationTypes.numberSentence(n1Str, "") + result;
+      const n1Str = isNaN(n1)  ? kEmptyValueString : "" + n1;
+      const resultStr = isNaN(result) ? kEmptyValueString : result;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, "") + resultStr;
    }
 
     if (this.editor) {
