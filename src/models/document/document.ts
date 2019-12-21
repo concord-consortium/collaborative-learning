@@ -107,6 +107,22 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
+    matchProperties(properties: string[]) {
+      return properties.every(p => {
+        const match = /(!)?(.*)/.exec(p);
+        const property = match && match[2];
+        const wantsProperty = !(match && match[1]); // not negated => has property
+        // treat "starred" as a virtual property
+        if (property === "starred") {
+          return self.isStarred === wantsProperty;
+        }
+        if (property) {
+          return !!self.getProperty(property) === wantsProperty;
+        }
+        // ignore empty strings, etc.
+        return true;
+      });
+    },
     getLabel(appConfig: AppConfigModelType, count: number, lowerCase?: boolean) {
       const props = appConfig.documentLabelProperties || [];
       let docStr = self.type as string;
@@ -114,6 +130,11 @@ export const DocumentModel = types
         docStr += self.getProperty(prop) ? `:${prop}` : `:!${prop}`;
       });
       return appConfig.getDocumentLabel(docStr, count, lowerCase);
+    }
+  }))
+  .views(self => ({
+    isMatchingSpec(type: DocumentType, properties: string[]) {
+      return (type === self.type) && self.matchProperties(properties);
     }
   }))
   .actions((self) => ({

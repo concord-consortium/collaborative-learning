@@ -219,8 +219,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document: { visibility }, workspace} = this.props;
-    const isShared = visibility === "public";
+    const {document, workspace} = this.props;
+    const isShared = document.visibility === "public";
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
@@ -240,15 +240,28 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              isTeacher && <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
-              <PublishButton key="publish" onClick={this.handlePublishDocument} />,
-              !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
+              isTeacher &&
+                <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
+              this.showPublishButton(document) &&
+                <PublishButton key="publish" onClick={this.handlePublishDocument} />,
+              !isTeacher &&
+                <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
             {show4up && this.renderMode()}
           </div>
         }
       </div>
     );
+  }
+
+  private showPublishButton(document: DocumentModelType) {
+    const { appConfig } = this.stores;
+    if (!appConfig.disablePublish) return true;
+    return appConfig.disablePublish
+            .findIndex(spec => {
+              return (document.type === spec.documentType) &&
+                      document.matchProperties(spec.properties);
+            }) < 0;
   }
 
   private getStickyNoteData() {
@@ -363,7 +376,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
+              {this.showPublishButton(document) &&
+                <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
             </div>
           }
         </div>
