@@ -4,7 +4,13 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
 
-export const RightNavAppConfigModel = types
+const DocumentSpecModel = types
+  .model("DocumentSpec", {
+    documentType: types.string,
+    properties: types.array(types.string)
+  });
+
+const RightNavAppConfigModel = types
   .model("RightNavAppConfig", {
     defaultExpanded: false,
     preventExpandCollapse: false,
@@ -12,7 +18,7 @@ export const RightNavAppConfigModel = types
     tabSpecs: types.array(RightNavTabModel)
   });
 
-export const DocumentLabelModel = types
+const DocumentLabelModel = types
   .model("DocumentLabel", {
     labels: types.map(types.string)
   })
@@ -53,6 +59,7 @@ export const AppConfigModel = types
     autoSectionProblemDocuments: false,
     documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
+    disablePublish: types.array(DocumentSpecModel),
     copyPreferOriginTitle: false,
     showClassSwitcher: false,
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),

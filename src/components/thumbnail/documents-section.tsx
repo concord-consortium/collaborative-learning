@@ -95,21 +95,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
 
     // filter by additional properties
     if (section.properties && section.properties.length) {
-      sectionDocs = sectionDocs.filter(doc => {
-        return section.properties.every(p => {
-          const match = /(!)?(.*)/.exec(p);
-          const property = match && match[2];
-          const wantsProperty = !(match && match[1]); // not negated => has property
-          if (property === "starred") {
-            return doc.isStarred === wantsProperty;
-          }
-          if (property) {
-            return !!doc.getProperty(property) === wantsProperty;
-          }
-          // ignore empty strings, etc.
-          return true;
-        });
-      });
+      sectionDocs = sectionDocs.filter(doc => doc.matchProperties(section.properties));
     }
 
     // listen for changes to the primary and comparison docs
