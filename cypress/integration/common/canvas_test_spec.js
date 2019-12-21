@@ -11,7 +11,7 @@ before(function(){
     cy.visit(baseUrl+queryParams);
 });
 
-context('test canvas tools', function(){
+context.skip('test canvas tools', function(){
     describe('Test header elements UI', function(){
         it('verify publish button', function(){
                 //should have create new document
