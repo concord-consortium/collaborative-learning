@@ -1835,7 +1835,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In Problem 2.3, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. Cn represents the costs of the No-Shrink Tee. Cm represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two T-shirt plans are equal."
+                      "text": "In Problem 2.2, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. Cn represents the costs of the No-Shrink Tee. Cm represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two T-shirt plans are equal."
                     }
                   },
                   {
@@ -1847,7 +1847,22 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• What information do the coordinates of the point of intersection of the two lines give you about this situation?\n  • Show how you could use the two equations to find the coordinates of the point of intersection of the two lines. That is, for what number of T-shirts n is C_m = C_n or    49+n = 4.5n?\n\nBusinesses are usually interested in making a profit. But to make a profit they have to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. After a company determines their expenses, they decide on a selling price. The money a company gets from selling an item is called the revenue or income. The difference between the income and expenses is the profit. The following is a situation where expenses, income, and profit occur. "
+                      "format": "html",
+                      "text": ["<em>What information do the coordinates of the point of intersection of the two lines give you about this situation? \nHow could you use the two equations to find the coordinates of the point of intersection of the two lines? That is, for what number of T-shirts n is Cm = Cn or 49+n = 4.5n? How could you use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, what values of n is \n \u00a0 \u00a0 C<sub>mighty</sub> < 60?   Or \u00a0 \u00a0 49 + n < $60</em>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<em>When either the value of x or y is known, what strategies do you have for solving  \n •  equations of the form y = ax+ b? \n • inequalities of the form  ax +b < y  or ax +b > y?</em>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["A local bakery, Fabulous Fabian’s Bakery, wants to set up a snack booth at the walkathon. They will donate their profits to the school. To make a profit the business has to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. For a bakery the cost might include cost of ingredients, labor charges, advertising, etc."]
                     }
                   }
                 ]
@@ -1861,40 +1876,84 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n         E = 825 + 3.25n\n\nThe income I for selling n cakes is given by the equation: \n\n         I = 8.20 n\n\nHow many cakes does Fabian need to sell in order to start making a profit?"
+                      "format": "html",
+                      "text": ["At Fabulous Fabian’s Bakery, the expenses E to make n cakes per month is given by the equation: \n\n         E = 825 + 3.25<em>n</em>\n\nThe income <em>I</em> for selling <em>n</em> cakes is given by the equation: \n\n         <em>I</em> = 8.20 <em>n</em><ul><li>What information do the numbers in each equation represent?</li><li>How many cakes does Fabian need to sell in order to start making a profit?</li></ul>"]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "Can you explain the meaning of the equation in your own words?  "},
+                {"text": "How much will it cost Fabian to make 1 cake? 2 cakes?  "},
+                {"text": "What does it mean by “making a profit”? "}
+              ]
             },
             {
               "type": "whatIf",
               "content": {
                 "tiles": [
-                {
-                  "content": {
-                    "type": "Text",
-                    "text": "1. Kevin drew the following graph."
-                  }
-                },
-                {
-                  "content": {
+                  {
+                    "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_3_4_WI_bakery_350w.png"
-                  }
-                 },
-                 {
-                  "content": {
+                    }
+                  },
+                  {
+                    "content": {
                     "type": "Text",
-                    "text": "  • Explain how Kevin could use his graph to determine Fabian’s profit.\n  • Kevin highlighted the vertical distance 330 between the two graphs. What does the -330 represent on the graph? What does it represent in the real world?\n• What are coordinates of the point of intersection of the two lines? What information does this point represent?\n  • Adia claims she can find the coordinates of the point of intersection by solving the equation, 8.20n = 825 + 3.25n. Is this possible? Explain.\n\n2. Fabian uses the equation P = 4.95n – 825 to predict the profit.\n  • Does this equation make sense? Explain.\n  • How many cakes does Fabian need to make to keep his expenses less than $2,400 a month? Where is this located on the graph?\n  • How many cakes does he need to sell if he wants his income to be greater than $2,400 a month? Where is this located on the graph?"
-                  }
-                }
+                    "format":"html",
+                    "text": ["<strong>Situation A. Kevin’s Graph</strong>\nKevin drew the graph above to help him find the number of cakes sold to make a profit. <ol><li>Explain how Kevin could use his graph to determine Fabian’s profit.</li><li>Kevin highlighted the vertical distance 330 between the two lines on the graphs. What does the 330 represent on the graph? What does it represent in the real world?</li><li>Adia claims she can find the coordinates of the point of intersection by solving the equation 8.20<em>n</em> = 825 + 3.25<em>n</em>. Is this possible? Explain. How does it help?</li></ol>"]
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Text",
+                    "format":"html",
+                    "text": ["<strong>Situation B. Fabian’s Profit Equation</strong><ol><li>Fabian uses the equation P = Income – Expenses to predict the profit. He wrote P = 8.20<em>n</em> – (825 + 3.25). Does this make sense? Explain. </li><li>Adia rewrites Fabian’s profit equation as P = 4.95<em>n</em> – 825. Is she correct? Explain.</li></ol>"]
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Text",
+                    "format":"html",
+                    "text": ["<strong>Situation C. Fabian’s Profit Inequality</strong> Fabian and his sister are looking for other ways to express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.", 
+                      "Fabian's representation: Inequality Statement P > 4.95<em>n</em> - 825",
+                      "His Sister's representation: Number Line"]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 60
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [160, -1],
+                          "axisRange": [175, 1]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [166.7, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [172, 0]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
               ]
               },
               "supports": [
                 {"text": "What are his expenses and his income for the month?"},
-                {"text": "In the equations for I and E, what information do the y-intercepts give you?"},
                 {"text": "What do the coefficients of n represent?"}
               ]
             },
@@ -1904,7 +1963,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "How can you solve equations of the form c = ax+ b graphically or symbolically? \nHow can you solve equations like ax + b = dx + e graphically or symbolically? "
+                    "text": "Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form ax + b < c or ax + b > c? "
                   }
                 }]
               },
