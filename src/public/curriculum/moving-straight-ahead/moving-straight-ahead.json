@@ -1949,7 +1949,7 @@
                         }
                       ]
                     }
-                  },
+                  }
               ]
               },
               "supports": [
@@ -1963,7 +1963,8 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form ax + b < c or ax + b > c? "
+                    "format": "html",
+                    "text": ["Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form <em>ax + b < c</em> or <em>ax + b > c</em>? "]
                   }
                 }]
               },
@@ -1992,7 +1993,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Investigation 4: Connecting Rates and Ratios\n\nAll of the patterns of change you have explored in this Unit involved constant rates. For example, you worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, you found that the rate a affects the following things in a linear relationship represented by y = ax + b: \n  • the steepness of the graph \n  • the coefficient a of x in the equation y = ax + b represents the constant of proportionality in the equation y = ax, b = 0\n  • how the y-values in the table change for each unit change in the x-values \n\nIn this Investigation, you will explore another way to express the constant rate. "
+                      "format": "html",
+                      "text": ["All of the patterns of change you have explored in this Unit involved rates of change. For example, you worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, you found that the rate a affects the following things in a linear relationship represented by <em>y = ax + b</em>:<ul><li>the steepness of the graph </li><li>if the linear situation is represented by the equation y = ax, then the situation is also proportional and a represents the constant of proportionality </li><li>how the y-values in the table change for each unit change in the x-values </li></ul>In this Investigation, you will explore another way to express the rates of change. "]
                     }
                   },
                   {
@@ -2000,8 +2002,16 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_In_skiing_350w.png"
                     }
-                  },
-                  {
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
                     "content": {
 
                       "type": "Text",
@@ -2013,27 +2023,17 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_1_In_running_stairs_350w.png"
                     }
-                  }
-                ]
-              },
-              "supports": []
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
+                  },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Determine the steepness of a set of stairs in your school or home. \n\n  • How can you describe the steepness of the stairs?\n  • Is the steepness the same between any two consecutive steps? \n  • How do the stairs you measured compare to the carpenters’ guidelines on the previous page? "
+                      "text": "Determine the steepness of a set of stairs in your school or home. \n\n  •\u00a0 How can you describe the steepness of the stairs?\n  • Is the steepness the same between any two consecutive steps? \n  •\u00a0 How do the stairs you measured compare to the carpenters’ guidelines on the previous page? "
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "How do really steep stairs compare to stairs that are not steep?"},
-                {"text": "What does it feel like to walk or run on steep stairs?"},
-                {"text": "If you put a board on steep stairs and rode down on a skateboard, how would that compare to doing the same thing on stairs that are not steep?"}
+                {"text": "How can you use rise and run to explain the steepness of stairs?"}
               ]
             },
             {
@@ -2043,11 +2043,21 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "A set of stairs is being built for the front of the new Arch Middle School. The ratio of rise to run is 7 to 11. \n\n1. Is this ratio within the carpenters’ guidelines?\n2. Make a sketch of a set of stairs that meet this ratio. Label the lengths of the rise and run of a step.\n3. Does everyone in your class have the same graph? Explain why.\n4. Write an equation that represents the relationship.\n5. How is the ratio of rise to run represented in the graph? Equation?\n6. Does your graph represent a proportional relationship? Explain why."}
+                      "format": "html",
+                      "text": ["<strong>Situation A. Arch Middle School Stairs</strong>\nA set of stairs is being built for the front of the new Arch Middle School. The ratio of rise to run is 7 to 11. <ol><li> Is this ratio within the carpenters’ guidelines?</li><li> Make a sketch of a set of stairs that meet this ratio. Label the lengths of the rise and run of a step.</li><li> Does everyone in your class have the same sketch? Explain why.</li><li> Write an equation that represents the relationship between rise and run.</li><li>  How is the ratio of rise to run represented in the equation?</li><li>  How is the ratio of rise to run represented in a graph of the equation?</li><li>  Does your graph represent a proportional relationship? Explain why. </li></ol>"]}
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation B. Anna’s Claim</strong><ol><li> Anna claims that the ratio of rise to run is another way to express the pattern of change between the two variables in a linear situation. Is she correct? Explain why.</li><li> Is the ratio the same between any two steps? Explain.</li><li> Does the ratio change if we take two steps at a time? Explain why.</li></ol>"]}
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "How do you know if a relationship is linear? "},
+                {"text": "How do you know if a relationship is proportional? "}
+              ]
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -2089,7 +2099,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for this step. We call this ratio the rate of change or slope of the line. "
+                      "format": "html",
+                      "text":[ "The steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for this step. We call this ratio the <strong>rate of change</strong> or <strong>slope</strong> of the line. "]
                     }
                   },
                   {
@@ -2101,7 +2112,11 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant upward from left to right have positive rate of change. Lines that slant downward from left to right have negative rate of change."
+                      "format": "html",
+                      "text": [
+                        "Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
+                        "Recall that proportional relationships can be represented by a multiplicative comparison statement between two quantities x and y. They can also be represented by the equation y = ax. The graph of this equation is a straight line through the origin. The coefficient a in the equation <em>y = ax</em> is the <em>constant of proportionality</em>."
+                      ]
                     }
                   },
                   {
@@ -2213,6 +2228,13 @@
                         }
                       ]
                     }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<em>What is the constant of proportionality for the proportional relationship represented in the table?</em>"]
+                    }
                   }
                 ]
               },
@@ -2225,12 +2247,112 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "• Is the rate of change different if we take two stairs at a time? Explain.\n• Is the rate of change the same between any two points on a line? Explain.• How is rate of change related to the constant of proportionality?"
+                      "format": "html",
+                      "text": ["The graphs and tables below represent proportional situations. For each representation:<ul><li>What is the constant of proportionality?</li><li>How is rate of change related to the constant of proportionality?</li></ul>Pick one situation and write an application or story that could be represented with this representation. "]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Representation 1"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 200
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                           "axisMin": [-2, -6],
+                           "axisRange": [2, 6]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [-2, 6]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [2, -6]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Representation 2"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 200
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-4, -2],
+                          "axisRange": [4, 2]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [-4, -2]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [4, 2]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Representation 3"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [-2, -1, 0, 1, 2]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [-1, -0.5, 0, 0.5, 1]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [
+                {"text": "Would an equation help find the constant of proportionality?"},
+                {"text": "What is the rate of change in the graphs and the table? "}
+              ]
             },
             {
               "type": "whatIf",
@@ -2239,7 +2361,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "1. The graphs, tables, and equations represent linear relationships."
+                      "format": "html",
+                      "text": ["<strong>Situation A. Representing Rates of Change</strong>\nThe graphs, tables, and equations represent linear relationships. "]
                     }
                   },
                   {
@@ -2271,13 +2394,29 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "  • What is the constant rate of change and y-intercept associated with each representation?\n  • Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality. \n\n2. The points (3, 5) and (-2, 10) lie on a line.\n\n  • What is the rate of change of the line?\n  • Find two more points that lie on this line. Explain your method.\n  • Does this line represent a proportional relationship? Explain.\n\n3. What is the rate of change of a horizontal line? A vertical line? Explain your reasoning.\n\n4. John noticed that if the points (0,0) and (1, m) are on a line, then the line represents a proportional relationship, and m is the constant of proportionality. Is he correct? Explain."
+                      "format": "html",
+                      "text": ["1. What is the rate of change and y-intercept associated with each representation?\n2.  Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality? "]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation B.  John’s Claims</strong>\n1. John noticed that if the points (0,0) and (1, a) are on a line, then the line represents a proportional relationship, and a is the constant of proportionality. Is he correct? Explain.\n2.  John also claims that the constant of proportionality is the unit rate. Is he correct? Explain why. "]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation C. More Lines</strong>\nThe points (3, 5) and (-2, 10) lie on a line.<ol><li>What is the rate of change or slope of the line?</li><li>Find two more points that lie on this line. Explain your method.</li><li>Does this line represent a proportional relationship? Explain.</li><li>What is the rate of change or slope of a horizontal line? A vertical line? Explain your reasoning.</li></ul>"]
                   }
                 }
               ]
               },
               "supports": [
-                {"text": "Are the graphs steep?  What will that mean about the rate of change?"}
+                {"text": "Are the graphs steep?  What will that mean about the rate of change?"},
+                {"text": "How do you find the rate of change in a graph, table, or equation?"}
               ]
             },
             {
@@ -2286,7 +2425,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "How is the constant rate of change of a linear relationship related to the rate of change of the line that represents that relationship? How is rate of change related to the constant of proportionality?"
+                    "text": "How is the rate of change of a linear relationship related to the constant of proportionality?"
                   }
                 }]
               },
