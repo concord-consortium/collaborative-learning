@@ -297,8 +297,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ol><li>Make a table showing the distance walked by each student for the first ten seconds.</li><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person.</li><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ol> ",
-                      ["<ul><li>How are the different walking rates represented in the different equations, tables, and graphs? </li><li>Is one representation more useful than another to solve a problem about walking? Explain. </li></ul> "]]
+                      "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ol><li>Make a table showing the distance walked by each student for the first ten seconds.</li><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person.</li><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ol><ul><li>How are the different walking rates represented in the different equations, tables, and graphs? </li><li>Is one representation more useful than another to solve a problem about walking? Explain.</li></ul>"
                     }
                   }
                 ]
