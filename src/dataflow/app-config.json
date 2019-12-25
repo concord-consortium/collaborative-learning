@@ -40,6 +40,10 @@
       }
     }
   },
+  "disablePublish": [{
+    "documentType": "personal",
+    "properties": ["!dfHasData"]
+  }],
   "copyPreferOriginTitle": true,
   "disableTileDrags": true,
   "rightNav": {
