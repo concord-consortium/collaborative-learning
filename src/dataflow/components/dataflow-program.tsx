@@ -524,12 +524,43 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasValidOutputNodes = () => {
     const { ui } = this.stores;
-    if (!this.hasRelay() && !this.hasDataStorage()) {
+    const hasRelay = this.hasRelay();
+    const hasDataStorage = this.hasDataStorage();
+    let hasValidRelay = false;
+    let hasValidDataStorage = false;
+    if (hasRelay || hasDataStorage) {
+      this.programEditor.nodes.forEach((n: Node) => {
+        if (n.name === "Relay" && n.data.recentValues) {
+          const input = n.inputs.get(Array.from(n.inputs.keys())[0]);
+          const inputNode = input && input.connections[0] && input.connections[0].output.node;
+          const recentVals: any = inputNode && inputNode.data.recentValues;
+          if (recentVals && !isNaN(recentVals[recentVals.length - 1].nodeValue.val) && n.data.relayList !== "none") {
+            hasValidRelay = true;
+          }
+        } else if (n.name === "Data Storage") {
+          if (n.inputs.size > 1) {
+            const recentValues: any = n.data.recentValues;
+            const lastValue = recentValues[recentValues.length - 1];
+            forEach(lastValue, (value: any) => {
+              if (!isNaN(value.val)) {
+                hasValidDataStorage = true;
+              }
+            });
+          }
+        }
+      });
+    }
+    if (!hasRelay && !hasDataStorage) {
       ui.alert("Program must contain a Relay or Data Storage node before it can be run.", "No Program Output");
       return false;
-    } else if (!this.hasRelay() &&
-                this.programEditor.nodes.filter(n => (n.name === "Data Storage" && n.inputs.size <= 1)).length) {
-      ui.alert("Data Storage node needs data inputs before program can be run.", "Missing Data Storage Inputs");
+    } else if (!hasValidRelay && !hasValidDataStorage) {
+      const relayMessage = hasRelay && !hasValidRelay
+                            ? "Relay nodes need a valid selected relay and valid input before program can be run. "
+                            : "";
+      const dataStorageMessage = hasDataStorage && !hasValidDataStorage
+                            ? "Data Storage node needs a valid data input before program can be run. "
+                            : "";
+      ui.alert(relayMessage + dataStorageMessage, "Invalid or Missing Node Inputs");
       return false;
     }
     return true;
