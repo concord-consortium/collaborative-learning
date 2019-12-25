@@ -1,19 +1,22 @@
 @import ../vars
 
-.cover
-  position: absolute
-  width: calc(50% - 42px)
-  height: 100%
-  background-color: rgba(255, 255, 255, .5)
-  display: flex
-  align-items: center
-  justify-content: center
-  top: 0px
-  &.running
-    top: $dataflow-topbar-height
-  &.full
+.editor
+  .cover
+    position: absolute
     width: 100%
+    height: 100%
+    background-color: rgba(255, 255, 255, .5)
+    display: flex
+    align-items: center
+    justify-content: center
+    top: 0px
+    &.running
+      top: $dataflow-topbar-height
+    &.half
+      width: calc(50% - #{$dataflow-toolbar-width / 2})
+    &.some
+      width: calc(20% - #{$dataflow-toolbar-width / 5})
 
-  .stop
-    width: 150px
-    height: 50px
+    .stop
+      width: 150px
+      height: 50px

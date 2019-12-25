@@ -1,0 +1,43 @@
+$split-view-button-width: 18px
+  
+.program-graph
+  .split-view-buttons
+    position: absolute
+    left: -$split-view-button-width - 3px
+    top: calc(50% - #{$split-view-button-width})
+    width: 36px
+    height: 36px
+
+    .split-view-button
+      position: absolute
+      width: $split-view-button-width
+      height: 100%
+      border: none
+      background-repeat: no-repeat
+      outline: none
+
+      &.split-view-left
+        left: 0
+        background-image: url("../../assets/dataflow/icons/split-view/split view left default.svg")
+
+        &.full
+          visibility: hidden
+
+        &:hover
+          background-image: url("../../assets/dataflow/icons/split-view/split view left hover.svg")
+
+        &:active
+          background-image: url("../../assets/dataflow/icons/split-view/split view left select.svg")
+
+      &.split-view-right
+        right: 0
+        background-image: url("../../assets/dataflow/icons/split-view/split view right default.svg")
+
+        &.half
+          visibility: hidden
+
+        &:hover
+          background-image: url("../../assets/dataflow/icons/split-view/split view right hover.svg")
+
+        &:active
+          background-image: url("../../assets/dataflow/icons/split-view/split view right select.svg")

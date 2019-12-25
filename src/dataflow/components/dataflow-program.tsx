@@ -30,8 +30,9 @@ import { DataflowProgramCover } from "./dataflow-program-cover";
 import { SizeMeProps } from "react-sizeme";
 import { DocumentContext } from "../../components/document/document-context";
 import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
-import { DataflowProgramGraph, DataPoint, DataSequence, DataSet } from "./dataflow-program-graph";
+import { DataflowProgramGraph, DataPoint, DataSequence, DataSet, ProgramDisplayStates } from "./dataflow-program-graph";
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
+import { Rect, scaleRect, unionRect } from "../../utilities/rect";
 import { getLocalTimeStamp } from "../utilities/time";
 import { forEach } from "lodash";
 
@@ -62,12 +63,6 @@ enum ProgramRunStates {
   Ready,
   Running,
   Complete
-}
-
-enum ProgramDisplayStates {
-  Program,
-  Graph,
-  SideBySide
 }
 
 interface IProps extends SizeMeProps {
@@ -136,10 +131,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const editorClass = `editor ${(this.isSideBySide() ? "half" : "full")} ${(this.isGraphOnly() && "hidden")}`;
+    const editorClassForDisplayState = this.getEditorClassForDisplayState();
+    const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
-
+    const showProgramToolbar = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
+                                !this.props.readOnly;
+    const showZoomControl = showProgramToolbar;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -155,7 +153,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           readOnly={this.props.readOnly || !this.isReady()}
         />}
         <div className={toolbarEditorContainerClass}>
-          { !this.isGraphOnly() && <DataflowProgramToolbar
+          { showProgramToolbar && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onResetClick={this.resetNodes}
             onClearClick={this.clearProgram}
@@ -169,23 +167,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+              {showZoomControl &&
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
                   disabled={this.props.readOnly || !this.isReady()}
-                />
-                { (this.isSideBySide() || (!this.isReady() && this.isProgramOnly()) || this.props.readOnly) &&
-                  <DataflowProgramCover sideBySide={this.isSideBySide()} isRunning={this.isRunning()}/>
-                }
+                /> }
+              { this.shouldShowProgramCover() &&
+                <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
             </div>
             {!this.isProgramOnly() &&
               <DataflowProgramGraph
                 dataSet={this.state.graphDataSet}
-                programVisible={this.isSideBySide()}
-                onToggleShowProgram={this.toggleShowProgram}
+                programDisplayState={this.state.programDisplayState}
+                onClickSplitLeft={this.handleClickSplitLeft}
+                onClickSplitRight={this.handleClickSplitRight}
                 onShowOriginalProgram={this.props.onShowOriginalProgram}
-              />
-            }
+              /> }
           </div>
         </div>
       </div>
@@ -440,42 +438,88 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return (this.state.programDisplayState === ProgramDisplayStates.SideBySide);
   }
 
-  private toggleShowProgram = () => {
-    const programDisplayState = this.state.programDisplayState === ProgramDisplayStates.SideBySide
-                                ? ProgramDisplayStates.Graph
-                                : ProgramDisplayStates.SideBySide;
+  private getEditorClassForDisplayState() {
+    return {
+      [ProgramDisplayStates.Program]: "full",
+      [ProgramDisplayStates.SideBySide]: "half",
+      [ProgramDisplayStates.Graph80]: "some",
+      [ProgramDisplayStates.Graph]: "hidden"
+    }[this.state.programDisplayState];
+  }
+
+  private shouldShowProgramCover() {
+    switch (this.state.programDisplayState) {
+      case ProgramDisplayStates.Program:
+        return this.props.readOnly || !this.isReady();
+      case ProgramDisplayStates.Graph:
+        return false;
+    }
+    return true;
+  }
+
+  private setProgramDisplayState(programDisplayState: ProgramDisplayStates) {
     this.setState({programDisplayState});
-    // process is needed or rete doesn't redrawn node connections when showing editor
+    // process is needed or rete doesn't redraw node connections when showing editor
     (async () => {
       await this.programEngine.abort();
       await this.programEngine.process(this.programEditor.toJSON());
     })();
   }
 
+  private handleClickSplitLeft = () => {
+    const programDisplayState = {
+            [ProgramDisplayStates.Program]: ProgramDisplayStates.SideBySide,
+            // [ProgramDisplayStates.SideBySide]: ProgramDisplayStates.Graph80, // disable 80/20 view for now
+            [ProgramDisplayStates.SideBySide]: ProgramDisplayStates.Graph,
+            [ProgramDisplayStates.Graph80]: ProgramDisplayStates.Graph,
+            [ProgramDisplayStates.Graph]: ProgramDisplayStates.Graph
+          }[this.state.programDisplayState];
+    this.setProgramDisplayState(programDisplayState);
+  }
+
+  private handleClickSplitRight = () => {
+    const programDisplayState = {
+            [ProgramDisplayStates.Graph]: ProgramDisplayStates.SideBySide,
+            // [ProgramDisplayStates.Graph]: ProgramDisplayStates.Graph80,  // disable 80/20 view for now
+            [ProgramDisplayStates.Graph80]: ProgramDisplayStates.SideBySide,
+            [ProgramDisplayStates.SideBySide]: ProgramDisplayStates.SideBySide,
+            [ProgramDisplayStates.Program]: ProgramDisplayStates.Program
+          }[this.state.programDisplayState];
+    this.setProgramDisplayState(programDisplayState);
+  }
+
   private keepNodesInView = () => {
     const margin = 5;
     const { k } = this.programEditor.view.area.transform;
     const rect = this.getBoundingRectOfNodes();
-    const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rect.right + margin),
-                             k * this.programEditor.view.container.clientHeight / ( rect.bottom + margin));
-    if (newZoom < k && rect.right > 0 && newZoom > 0) {
-      const currentTransform = this.programEditor.view.area.transform;
-      this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
-      this.programEditor.view.area.update();
+    if (rect?.isValid) {
+      const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rect.right + margin),
+                               k * this.programEditor.view.container.clientHeight / ( rect.bottom + margin));
+      if (newZoom < k && rect.right > 0 && newZoom > 0) {
+        const currentTransform = this.programEditor.view.area.transform;
+        this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
+        this.programEditor.view.area.update();
+      }
     }
   }
 
-  private getBoundingRectOfNodes = () => {
+  private getBoundingRectOfNode(n: Node): Rect | undefined {
     const { k } = this.programEditor.view.area.transform;
-    const rect: ClientRect = {bottom: 0, top: 0, left: 0, right: 0, height: 0, width: 0};
+    const nodeView = this.programEditor.view.nodes.get(n);
+    if (!nodeView) return;
+    return scaleRect(new Rect(nodeView.node.position[0], nodeView.node.position[1],
+                              nodeView.el.clientWidth, nodeView.el.clientHeight), k);
+  }
+
+  private getBoundingRectOfNodes(): Rect | undefined {
+    let bounds: Rect | undefined;
     this.programEditor.nodes.forEach((n: Node) => {
-      const nodeView = this.programEditor.view.nodes.get(n);
-      if (nodeView) {
-        rect.right = Math.max (rect.right, (nodeView.node.position[0] + nodeView.el.clientWidth) * k);
-        rect.bottom = Math.max (rect.bottom, (nodeView.node.position[1] + nodeView.el.clientHeight) * k);
+      const nodeBounds = this.getBoundingRectOfNode(n);
+      if (nodeBounds?.isValid) {
+        bounds = bounds ? unionRect(bounds, nodeBounds) : nodeBounds;
       }
     });
-    return rect;
+    return bounds;
   }
 
   private hasValidOutputNodes = () => {

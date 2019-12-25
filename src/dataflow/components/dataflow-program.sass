@@ -33,6 +33,13 @@ $dataflow-topbar-height: 40px
     flex: 1
     overflow: hidden
 
+    .editor
+      flex: 0 0 auto
+      &.half
+        width: calc(50% - #{$dataflow-toolbar-width / 2})
+      &.some
+        width: calc(20% - #{$dataflow-toolbar-width / 5})
+
   .half
     width: 50%
   .full
