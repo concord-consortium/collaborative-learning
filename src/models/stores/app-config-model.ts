@@ -54,6 +54,7 @@ export const AppConfigModel = types
     documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
     copyPreferOriginTitle: false,
+    disableTileDrags: false,
     showClassSwitcher: false,
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel)
