@@ -534,7 +534,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           const input = n.inputs.get(Array.from(n.inputs.keys())[0]);
           const inputNode = input && input.connections[0] && input.connections[0].output.node;
           const recentVals: any = inputNode && inputNode.data.recentValues;
-          if (recentVals && !isNaN(recentVals[recentVals.length - 1].nodeValue.val) && n.data.relayList !== "none") {
+          if (recentVals && isFinite(recentVals[recentVals.length - 1].nodeValue.val) && n.data.relayList !== "none") {
             hasValidRelay = true;
           }
         } else if (n.name === "Data Storage") {
@@ -542,7 +542,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             const recentValues: any = n.data.recentValues;
             const lastValue = recentValues[recentValues.length - 1];
             forEach(lastValue, (value: any) => {
-              if (!isNaN(value.val)) {
+              if (isFinite(value.val)) {
                 hasValidDataStorage = true;
               }
             });
@@ -555,12 +555,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       return false;
     } else if (!hasValidRelay && !hasValidDataStorage) {
       const relayMessage = hasRelay && !hasValidRelay
-                            ? "Relay nodes need a valid selected relay and valid input before program can be run. "
+                            ? "Relay nodes need a valid selected relay and valid input before the program can be run. "
                             : "";
       const dataStorageMessage = hasDataStorage && !hasValidDataStorage
-                            ? "Data Storage node needs a valid data input before program can be run. "
+                            ? "Data Storage nodes need a valid data input before the program can be run. "
                             : "";
-      ui.alert(relayMessage + dataStorageMessage, "Invalid or Missing Node Inputs");
+      ui.alert(relayMessage + dataStorageMessage, "Invalid Program Output");
       return false;
     }
     return true;
