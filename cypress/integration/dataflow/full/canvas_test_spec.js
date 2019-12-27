@@ -66,6 +66,7 @@ context('canvas test',()=>{
             dfcanvas.getDurationDropdown().should('have.value', '300');
         })
         it('verify Stop button is disabled when Run button is enabled',()=>{
+            dfblock.connectBlocks('number',0,'data-storage',0) // ensure we have a valid output
             dfcanvas.getRunButton().parent().should('not.have.attr','disabled');
             dfcanvas.getStopButton().parent().should('have.attr','disabled');
         })
