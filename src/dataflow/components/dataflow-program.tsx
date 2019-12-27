@@ -65,13 +65,22 @@ enum ProgramRunStates {
   Complete
 }
 
+export interface IStartProgramParams {
+  runId: string;
+  startTime: number;
+  endTime: number;
+  hasRelay: boolean;
+  title: string;
+}
+​
 interface IProps extends SizeMeProps {
   modelId: string;
   readOnly?: boolean;
+  documentProperties?: { [key: string]: string };
   program?: string;
   onProgramChange: (program: any) => void;
   onShowOriginalProgram: () => void;
-  onStartProgram: (title: string, id: string, startTime: number, endTime: number) => void;
+  onStartProgram: (params: IStartProgramParams) => void;
   onSetProgramRunId: (id: string) => void;
   programRunId: string;
   onSetProgramStartTime: (time: number) => void;
@@ -131,12 +140,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    const { readOnly, documentProperties, onShowOriginalProgram, programRunTime } = this.props;
     const editorClassForDisplayState = this.getEditorClassForDisplayState();
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showProgramToolbar = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
-                                !this.props.readOnly;
+                                !readOnly && !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
     const showZoomControl = showProgramToolbar;
     return (
       <div className="dataflow-program-container">
@@ -146,11 +156,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onStopProgramClick={this.stopProgram}
           onProgramTimeSelectClick={this.setProgramRunTime}
           programRunTimes={ProgramRunTimes}
-          programDefaultRunTime={this.props.programRunTime || DEFAULT_PROGRAM_TIME}
+          programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
           isRunEnabled={this.isReady()}
-          runningProgram={this.isRunning() && !this.props.readOnly}
+          runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
-          readOnly={this.props.readOnly || !this.isReady()}
+          readOnly={readOnly || !this.isReady()}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -159,7 +169,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onClearClick={this.clearProgram}
             isTesting={isTesting}
             isDataStorageDisabled={this.state.disableDataStorage}
-            disabled={this.props.readOnly || !this.isReady()}
+            disabled={readOnly || !this.isReady()}
           /> }
           <div className="editor-graph-container" style={this.getEditorStyle()}>
             <div
@@ -171,7 +181,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={this.props.readOnly || !this.isReady()}
+                  disabled={readOnly || !this.isReady()}
                 /> }
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
@@ -182,7 +192,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 programDisplayState={this.state.programDisplayState}
                 onClickSplitLeft={this.handleClickSplitLeft}
                 onClickSplitRight={this.handleClickSplitRight}
-                onShowOriginalProgram={this.props.onShowOriginalProgram}
+                onShowOriginalProgram={onShowOriginalProgram}
               /> }
           </div>
         </div>
@@ -669,6 +679,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const hubs: string[] = [];
     const sensors: string[] = [];
     const relays: string[] = [];
+    let hasValidRelay = false;
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
@@ -691,6 +702,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           if (relays.indexOf(chInfo.channelId) === -1) {
             // only add relays once
             relays.push(chInfo.channelId);
+            if (this.isValidRelay(chInfo.channelId)) {
+              hasValidRelay = true;
+              datasetName = programTitle;
+            }
           }
         }
       } else if (n.name === "Data Storage") {
@@ -728,7 +743,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     };
 
-    this.props.onStartProgram(datasetName, programTitle, programStartTime, programEndTime);
+    this.props.onStartProgram({
+                title: datasetName,
+                runId: programTitle,
+                startTime: programStartTime,
+                endTime: programEndTime,
+                hasRelay: hasValidRelay
+              });
 
     return programData;
   }
@@ -817,6 +838,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasRelay() {
     return this.getNodeCount("Relay") > 0;
+  }
+
+  private isValidRelay(id: string) {
+    // placeholder for more complete validation
+    return true;
   }
 
   private getNodeCount = (type?: string) => {

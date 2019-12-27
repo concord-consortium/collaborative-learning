@@ -62,7 +62,7 @@
             "dataTestHeader": "my-work-section",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
-            "properties": ["!dfHasData", "!isDeleted"]
+            "properties": ["!dfHasData", "!dfHasRelay", "!isDeleted"]
           },
           {
             "title": "Data",
@@ -78,7 +78,7 @@
             "dataTestHeader": "my-work-section",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
-            "properties": ["dfHasRelayNoData", "!isDeleted"]
+            "properties": ["dfHasRelay", "!dfHasData", "!isDeleted"]
           }
         ]
       },
@@ -93,7 +93,7 @@
             "dataTestHeader": "class-work-section",
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["personalPublication"],
-            "properties": ["!dfHasData"]
+            "properties": ["!dfHasData", "!dfHasRelay"]
           },
           {
             "className": "section personal published",
@@ -111,7 +111,7 @@
             "dataTestHeader": "class-work-section",
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["personalPublication"],
-            "properties": ["dfHasRelayNoData"]
+            "properties": ["dfHasRelay", "!dfHasData"]
           }
         ]
       }
