@@ -8,7 +8,7 @@ import { DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
-import { DataflowProgram } from "../dataflow-program";
+import { DataflowProgram, IStartProgramParams } from "../dataflow-program";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
@@ -45,6 +45,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
               <DataflowProgram
                 modelId={model.id}
                 readOnly={readOnly}
+                documentProperties={this.getDocumentProperties()}
                 program={program}
                 onProgramChange={this.handleProgramChange}
                 onShowOriginalProgram={this.handleShowOriginalProgram}
@@ -74,7 +75,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
   private getDocument() {
     const { documents, ui: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
-    return primaryDocumentKey && documents.getDocument(primaryDocumentKey);
+    return primaryDocumentKey ? documents.getDocument(primaryDocumentKey) : undefined;
+  }
+
+  private getDocumentProperties() {
+    const document = this.getDocument();
+    return document && document.properties.toJSON();
   }
 
   private switchToDocument(document: DocumentModelType) {
@@ -85,7 +91,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     }
   }
 
-  private handleStartProgram = async (datasetName: string, id: string, startTime: number, endTime: number) => {
+  private handleStartProgram = async (startParams: IStartProgramParams) => {
     const { db } = this.stores;
     // get the currently loaded document, we're going to spawn a new document based on it
     const document = this.getDocument();
@@ -98,21 +104,22 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
       documentContent.tileMap.forEach(tile => {
         if (tile.content.type === "Dataflow") {
           const programContent = tile.content as DataflowContentModelType;
-          programContent.setProgramRunId(id);
-          programContent.setProgramStartEndTime(startTime, endTime);
-          programContent.setRunningStatus(endTime);
+          programContent.setProgramRunId(startParams.runId);
+          programContent.setProgramStartEndTime(startParams.startTime, startParams.endTime);
+          programContent.setRunningStatus(startParams.endTime);
         }
       });
-      const properties: IDocumentProperties = { dfProgramId: document.key, dfRunId: id };
+      const properties: IDocumentProperties = { dfProgramId: document.key, dfRunId: startParams.runId };
       if (document.title) properties.originTitle = document.title;
-      if (datasetName.length > 0) properties.dfHasData = "true";
+      if (startParams.title.length > 0) properties.dfHasData = "true";
+      if (startParams.hasRelay) properties.dfHasRelay = "true";
       // create and load the new document
-      const params: ICreateOtherDocumentParams = {
-              title: datasetName || `${document.title}-${getLocalTimeStamp(Date.now())}`,
+      const createParams: ICreateOtherDocumentParams = {
+              title: startParams.title || `${document.title}-${getLocalTimeStamp(Date.now())}`,
               properties,
               content: JSON.parse(documentContent.publish())
             };
-      const newPersonalDocument = await db.createPersonalDocument(params);
+      const newPersonalDocument = await db.createPersonalDocument(createParams);
       this.switchToDocument(newPersonalDocument);
     }
   }
