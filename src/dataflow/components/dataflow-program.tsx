@@ -704,6 +704,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             relays.push(chInfo.channelId);
             if (this.isValidRelay(chInfo.channelId)) {
               hasValidRelay = true;
+              datasetName = programTitle;
             }
           }
         }
