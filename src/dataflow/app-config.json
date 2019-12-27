@@ -10,6 +10,7 @@
   "autoAssignStudentsToIndividualGroups": true,
   "defaultDocumentType": "personal",
   "defaultDocumentTitle": "Program",
+  "docTimeStampPropertyName": "dfStartTime",
   "defaultDocumentTemplate": {
     "tiles": [
       {

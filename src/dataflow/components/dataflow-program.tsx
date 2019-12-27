@@ -33,7 +33,6 @@ import { ProgramZoomType } from "../models/tools/dataflow/dataflow-content";
 import { DataflowProgramGraph, DataPoint, DataSequence, DataSet, ProgramDisplayStates } from "./dataflow-program-graph";
 import { DataflowProgramZoom } from "./dataflow-program-zoom";
 import { Rect, scaleRect, unionRect } from "../../utilities/rect";
-import { getLocalTimeStamp } from "../utilities/time";
 import { forEach } from "lodash";
 
 import "./dataflow-program.sass";
@@ -69,6 +68,7 @@ export interface IStartProgramParams {
   runId: string;
   startTime: number;
   endTime: number;
+  hasData: boolean;
   hasRelay: boolean;
   title: string;
 }
@@ -623,8 +623,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const dialogPrompt = this.hasDataStorage()
                           ? "Save dataset as"
                           : "Save program as";
-    const baseTitle = this.getDatasetName() || this.context?.title || "program";
-    const programTitle = `${baseTitle}_${getLocalTimeStamp(Date.now())}`;
+    const programTitle = this.getDatasetName() || this.context?.title || "program";
     this.stores.ui.prompt(dialogPrompt, programTitle, "Run Program")
     .then((title: string) => {
       this.runProgram(title);
@@ -679,6 +678,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const hubs: string[] = [];
     const sensors: string[] = [];
     const relays: string[] = [];
+    let hasValidData = false;
     let hasValidRelay = false;
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor) {
@@ -710,6 +710,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
+        hasValidData = true;
         datasetName = programTitle;
       }
     });
@@ -748,6 +749,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 runId: programTitle,
                 startTime: programStartTime,
                 endTime: programEndTime,
+                hasData: hasValidData,
                 hasRelay: hasValidRelay
               });
 
