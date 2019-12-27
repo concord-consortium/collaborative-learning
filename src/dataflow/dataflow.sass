@@ -4,6 +4,8 @@ $list-item-height: 480px
 $list-item-width: 720px
 $list-item-scale: 0.1
 
+$section-header-height: 27px
+
 #app
   background-color: $gray-mid !important
 
@@ -320,32 +322,23 @@ $list-item-scale: 0.1
   display: flex
   flex-direction: column
   overflow-y: hidden
-  min-height: 27px
+  min-height: $section-header-height
 
 .section-header
-  height: 27px
+  height: $section-header-height
   &.collapsed
-    min-height: 26px
+    min-height: $section-header-height - 1
 
 .list-container
   display: flex
   flex-direction: column
   justify-content: flex-start
-  height: 100%
+  height: calc(100% - #{$section-header-height})
 
 .list
   &.shown
     overflow-x: hidden
     overflow-y: scroll
-    // What follows is a hacky way of making sure the last document in the
-    // list has a little extra padding so the whole of the tile can be seen
-    // when there are a enough documents to cause the accordion to scroll. The
-    // less hacky ways to solve this problem would have some impact to the div
-    // structure and would, in turn, impact Clue. This way may not be perfect,
-    // but it is isolated to dataflow, only.
     .list-item
       &:first-child
           padding-top: 5px
-      &:last-child
-        .footer
-          padding-bottom: 15px
