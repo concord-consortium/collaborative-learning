@@ -62,7 +62,7 @@ context('single student functional test',()=>{
             dfcanvas.getDurationContainer().should('exist')
             dfcanvas.getProgressTime().should('exist')
         });
-        it('verify data view is generated', function(){
+        it.skip('verify data view is generated', function(){
             cy.waitForGraphSpinner();
             cy.wait(3000)
             dfcanvas.getProgramGraph().should('be.visible').and('not.have.class','full')
