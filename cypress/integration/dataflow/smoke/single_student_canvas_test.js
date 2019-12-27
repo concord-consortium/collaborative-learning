@@ -55,7 +55,7 @@ context('single student functional test',()=>{
         it('verify connect blocks', function(){
             dfblock.connectBlocks('generator',0,'data-storage',0);
         });
-        it('verify run program', function(){
+        it.skip('verify run program', function(){
             dfcanvas.runProgram();
             cy.wait(10000);
             dfcanvas.getProgramRunningCover().should('be.visible')
@@ -67,7 +67,7 @@ context('single student functional test',()=>{
             cy.wait(3000)
             dfcanvas.getProgramGraph().should('be.visible').and('not.have.class','full')
         });
-        it('verify graph is visible after data collection',function(){
+        it.skip('verify graph is visible after data collection',function(){
             cy.clock()
             cy.tick(40000);
             dfcanvas.stopProgram();
@@ -81,12 +81,12 @@ context('single student functional test',()=>{
     });
     context('save and restore of canvas', function(){
         describe('Program save and restore', function(){
-            it('verify program is saved and restored', function() {
+            it.skip('verify program is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work', '','Programs')
                 rightNav.openCanvasItem('my-work', '', programTitle );
             });
-            it('verify data collected is saved and restored', function() {
+            it.skip('verify data collected is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work', '','Data')
                 rightNav.openCanvasItem('my-work', '', dataTitle );

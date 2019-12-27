@@ -57,7 +57,7 @@ context('Data Canvas tests',function(){
         rightNav.openCanvasItem('my-work','',dataset1)
         canvas.getPersonalDocTitle().should('contain',dataset1)
     })
-    it('verify data collection runs to the end of the duration',()=>{
+    it.skip('verify data collection runs to the end of the duration',()=>{
         dfcanvas.createNewProgram(dataset2);
         dfcanvas.openBlock('Number')
         dfcanvas.openBlock('Data Storage')
@@ -79,9 +79,9 @@ context('Data Canvas tests',function(){
 
     })
     it('verify data collected from a run program does not appear in My Work>Programs section',()=>{
-        
+
     })
-    
+
 })
 after(function(){
     cy.clearQAData('all');
