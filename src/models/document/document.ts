@@ -1,10 +1,11 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { forEach } from "lodash";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
+import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
 import { IDocumentProperties } from "../../lib/db-types";
-import { AppConfigModelType } from "../stores/app-config-model";
-import { forEach } from "lodash";
+import { getLocalTimeStamp } from "../../utilities/time";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
 
@@ -130,7 +131,19 @@ export const DocumentModel = types
         docStr += self.getProperty(prop) ? `:${prop}` : `:!${prop}`;
       });
       return appConfig.getDocumentLabel(docStr, count, lowerCase);
-    }
+    },
+    getDisplayTitle(appConfig: AppConfigModelType) {
+      const timeStampPropName = appConfig.docTimeStampPropertyName || undefined;
+      const timeStampProp = timeStampPropName && self.getProperty(timeStampPropName);
+      const timeStamp = timeStampProp
+                          ? parseFloat(timeStampProp)
+                          : undefined;
+      const timeStampStr = timeStamp ? getLocalTimeStamp(timeStamp) : undefined;
+      return timeStampStr
+              ? `${self.title} (${timeStampStr})`
+              : self.title;
+  }
+
   }))
   .views(self => ({
     isMatchingSpec(type: DocumentType, properties: string[]) {

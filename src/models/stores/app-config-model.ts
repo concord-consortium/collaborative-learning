@@ -51,6 +51,7 @@ export const AppConfigModel = types
     autoAssignStudentsToIndividualGroups: false,
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
+    docTimeStampPropertyName: "",
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
