@@ -36,13 +36,13 @@ function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
 }
 
 function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, document: DocumentModelType) {
-  const { problem, class: _class } = stores;
+  const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
   const user = _class && _class.getUserById(uid);
   const userName = user && user.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type) ? problem.title : document.title;
+  const title = isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   return `${namePrefix}${title}`;
 }
 

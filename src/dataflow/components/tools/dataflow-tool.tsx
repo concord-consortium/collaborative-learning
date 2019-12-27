@@ -9,7 +9,6 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
 import { DataflowProgram, IStartProgramParams } from "../dataflow-program";
-import { getLocalTimeStamp } from "../../utilities/time";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import "./dataflow-tool.sass";
@@ -111,11 +110,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
       });
       const properties: IDocumentProperties = { dfProgramId: document.key, dfRunId: startParams.runId };
       if (document.title) properties.originTitle = document.title;
-      if (startParams.title.length > 0) properties.dfHasData = "true";
+      if (startParams.hasData) properties.dfHasData = "true";
       if (startParams.hasRelay) properties.dfHasRelay = "true";
+      if (startParams.startTime) properties.dfStartTime = String(startParams.startTime);
       // create and load the new document
       const createParams: ICreateOtherDocumentParams = {
-              title: startParams.title || `${document.title}-${getLocalTimeStamp(Date.now())}`,
+              title: startParams.title || document.title,
               properties,
               content: JSON.parse(documentContent.publish())
             };
