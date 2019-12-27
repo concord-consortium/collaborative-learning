@@ -16,6 +16,7 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
+import { getLocalTimeStamp } from "../../utilities/time";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -347,7 +348,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const {document} = this.props;
-    const { user: { isTeacher }, documents, user } = this.stores;
+    const { appConfig, user: { isTeacher }, documents, user } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     return (
@@ -366,7 +367,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename} />
+              <TitleInfo docTitle={`${document.getDisplayTitle(appConfig)}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
