@@ -155,9 +155,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             getProperty: (key: string) => document.properties.get(key),
             setProperties: (properties: ISetProperties) => document.setProperties(properties)
           };
-    return document.key === prevState.documentContext?.key
-            ? {}
-            : { documentContext };
+    return { documentContext };
   }
 
   private toolApiMap: IToolApiMap = {};
