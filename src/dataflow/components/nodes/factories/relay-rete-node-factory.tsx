@@ -27,18 +27,18 @@ export class RelayReteNodeFactory extends DataflowReteNodeFactory {
 
   public worker(node: NodeData, inputs: any, outputs: any) {
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
-    const result = +(n1 !== 0);   // convert all non-zero to 1
-
+    const recentValues: any = node.data.recentValues;
+    const mostRecentValue = recentValues?.[recentValues.length - 1];
+    const lastValue = (mostRecentValue?.nodeValue) ? mostRecentValue.nodeValue.val : 1;
+    // if there is not a valid input, use last value
+    // otherwise convert all non-zero to 1
+    const result = isNaN(n1) ? lastValue : +(n1 !== 0);
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue && nodeValue.setValue(result);
-        if (isNaN(n1)) {
-          nodeValue && nodeValue.setSentence(kEmptyValueString);
-        } else {
-          nodeValue && nodeValue.setSentence(result === 0 ? "off" : "on");
-        }
+        nodeValue?.setSentence(result === 0 ? "off" : "on");
         this.editor.view.updateConnections( {node: _node} );
       }
     }
