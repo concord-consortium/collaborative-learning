@@ -109,6 +109,8 @@ class Canvas{
     publishPersonalCanvas(){
         this.getPersonalPublishIcon().click()
             .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Publish ');
+                dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('exist').contains('Published');
                 dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('not.exist');
@@ -118,6 +120,8 @@ class Canvas{
     publishCanvas(){
         this.getPublishIcon().click()
             .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Publish ');
+                dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('exist').contains('Published');
                 dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('not.exist');

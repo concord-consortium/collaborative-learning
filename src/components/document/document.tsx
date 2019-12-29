@@ -396,7 +396,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons &&
             <div className="actions">
               {this.showPublishButton(document) &&
-                <PublishButton onClick={this.handlePublishDocument} />}
+                <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
                 {supportStackedTwoUpView && isPrimary &&
                   <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
                 {supportStackedTwoUpView && isPrimary &&
