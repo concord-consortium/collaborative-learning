@@ -101,6 +101,24 @@ const CopyButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+const OneUpButton = ({ onClick, selected }: { onClick: () => void, selected: boolean }) => {
+  const selectedClass = selected ? "selected" : "";
+  return (
+    <IconButton icon="one-up" key="one-up" className={"action icon-one-up"}
+                innerClassName={selectedClass}
+                onClickButton={onClick} title="One-Up View" />
+  );
+};
+
+const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, selected: boolean }) => {
+  const selectedClass = selected ? "selected" : "";
+  return (
+    <IconButton icon="two-up-stacked" key="two-up-stacked" className={"action icon-two-up-stacked"}
+                innerClassName={selectedClass}
+                onClickButton={onClick} title="Two-Up View" />
+  );
+};
+
 const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
     const enabledClass = enabled ? "enabled" : "disabled";
     return (
@@ -347,10 +365,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
-    const {document} = this.props;
+    const { document, workspace } = this.props;
     const { appConfig, user: { isTeacher }, documents, user } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
+    const { supportStackedTwoUpView } = appConfig;
+    const isPrimary = this.isPrimary();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -377,6 +397,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <div className="actions">
               {this.showPublishButton(document) &&
                 <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
+                {supportStackedTwoUpView && isPrimary &&
+                  <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
+                {supportStackedTwoUpView && isPrimary &&
+                  <TwoUpStackedButton onClick={this.handleShowTwoUp} selected={workspace.comparisonVisible} />}
             </div>
           }
         </div>
@@ -434,6 +458,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderStatusBar(type: string) {
+    const { appConfig: { supportStackedTwoUpView }} = this.stores;
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === ProblemPublication);
@@ -444,7 +469,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {null}
         </div>
         <div className="actions">
-          {isPrimary ? this.renderTwoUpButton() : null}
+          {!supportStackedTwoUpView && isPrimary && this.renderTwoUpButton()}
           {showComment ? this.renderCommentButton() : null}
         </div>
         {this.renderCommentDialog()}
@@ -538,6 +563,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleToggleTwoUp = () => {
     this.props.workspace.toggleComparisonVisible();
+  }
+  private handleShowTwoUp = () => {
+    this.props.workspace.toggleComparisonVisible({override: true});
+  }
+  private handleHideTwoUp = () => {
+    this.props.workspace.toggleComparisonVisible({override: false});
   }
 
   private handleDownloadTileJson = () => {
