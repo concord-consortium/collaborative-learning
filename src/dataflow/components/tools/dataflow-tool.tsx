@@ -49,7 +49,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 onProgramChange={this.handleProgramChange}
                 onShowOriginalProgram={this.handleShowOriginalProgram}
                 onStartProgram={this.handleStartProgram}
-                onSetProgramRunId={this.handleSetProgramRunId}
                 programRunId={programRunId}
                 programIsRunning={programIsRunning}
                 onCheckProgramRunState={this.handleCheckProgramRunState}
@@ -134,10 +133,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const originDocumentId = document && document.properties.get("dfProgramId");
     const originDocument = originDocumentId && documents.getDocument(originDocumentId);
     originDocument && this.switchToDocument(originDocument);
-  }
-
-  private handleSetProgramRunId = (id: string) => {
-    this.getContent().setProgramRunId(id);
   }
 
   private handleSetProgramStartTime = (time: number) => {

@@ -81,7 +81,6 @@ interface IProps extends SizeMeProps {
   onProgramChange: (program: any) => void;
   onShowOriginalProgram: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
-  onSetProgramRunId: (id: string) => void;
   programRunId: string;
   onSetProgramStartTime: (time: number) => void;
   programStartTime: number;
@@ -763,12 +762,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     }
 
+    const programRunId = this.generateProgramRunId(programTitle, programStartTime);
     const programData = {
       program: {
         endTime: programEndTime,
         hubs,
         program: editedProgram,
-        programId: programTitle,
+        programId: programRunId,  // TODO: remove after lambda function changed to use "programRunId"
+        programRunId,
         runInterval: interval * 1000,
         sensors,
         relays
@@ -777,7 +778,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     this.props.onStartProgram({
                 title: datasetName,
-                runId: programTitle,
+                runId: programRunId,
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
@@ -785,6 +786,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               });
 
     return programData;
+  }
+
+  private generateProgramRunId(programTitle: string, programStartTime: number) {
+    return `${programTitle}-${programStartTime}`;
   }
 
   private addNode = async (nodeType: string) => {
