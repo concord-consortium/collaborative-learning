@@ -1,9 +1,10 @@
 import * as React from "react";
 import { Line } from "react-chartjs-2";
-import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
+import { ChartOptions, ChartData, ChartDataSets, Chart } from "chart.js";
 import { SplitViewButtons } from "./split-view-buttons";
 import { ChartPlotColors } from "./../utilities/node";
 import { exportCSV } from "../utilities/export";
+import { isEqual } from "lodash";
 import "./dataflow-program-graph.sass";
 
 export interface DataPoint {
@@ -39,6 +40,7 @@ interface IState {
   stacked: boolean;
   scatter: boolean;
   fullRun: boolean;
+  dataSetHidden: boolean[];
 }
 
 export class DataflowProgramGraph extends React.Component<IProps, IState> {
@@ -47,7 +49,8 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     this.state = {
       stacked: true,
       scatter: true,
-      fullRun: true
+      fullRun: true,
+      dataSetHidden: Array(this.props.dataSet.sequences.length).fill(false),
     };
   }
   public handleLayoutClick = () => {
@@ -65,6 +68,15 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public handleExport = () => {
     const {dataSet} = this.props;
     exportCSV(dataSet.sequences);
+  }
+
+  public shouldComponentUpdate(nextProps: IProps, nextState: IState) {
+    if (!isEqual(nextState.dataSetHidden, this.state.dataSetHidden)) {
+      // prevent render since allowing render after setting hidden state throws error:
+      // Uncaught TypeError: Cannot read property 'clearRect' of null
+      return false;
+    }
+    return true;
   }
 
   public render() {
@@ -111,12 +123,11 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
 
   public renderOverlappedGraphs() {
     const chartData = this.chartDataOverlapped();
-    const chartOptions = this.chartOptions();
     return (
       <div className="overlapped-graph-container">
         <Line
           data={chartData}
-          options={chartOptions}
+          options={this.chartOptions(0)}
           redraw={true}
         />
       </div>
@@ -125,7 +136,6 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
 
   public renderStackedGraphs() {
     const chartDataStacked = this.chartDataStacked();
-    const chartOptions = this.chartOptions();
     return (
       <div className="stacked-graph-container">
       {chartDataStacked.map((chartData: ChartData, index) => (
@@ -133,7 +143,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           <Line
             key={index}
             data={chartData}
-            options={chartOptions}
+            options={this.chartOptions(index)}
             redraw={true}
           />
         </div>
@@ -192,6 +202,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           lineTension: 0,
           data: [0],
           fill: false,
+          hidden: this.state.dataSetHidden[i],
         };
         chartDataSets.push(chartDataSet);
         const chdata: any[] = [];
@@ -206,8 +217,18 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
     return chartDataSets;
   }
 
-  private chartOptions() {
+  private setDataSetHiddenState(i: number, hidden: boolean) {
+    const dataSetHidden = this.state.dataSetHidden.slice();
+    dataSetHidden[i] = hidden;
+    this.setState({dataSetHidden});
+  }
+
+  private chartOptions(indexOffset: number) {
     const {dataSet} = this.props;
+    const setDataSetHidden = (i: number, hidden: boolean) => {
+      this.setDataSetHiddenState(i, hidden);
+    };
+
     let dataMin = 0;
     let dataMax = 0;
     if (this.state.fullRun) {
@@ -223,6 +244,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         dataMax = dataSet.sequences[0].data[dataSet.sequences[0].data.length - 1].x;
       }
     }
+
     const options: ChartOptions = {
       animation: {
         duration: 0
@@ -235,6 +257,21 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           boxWidth: 6,
           fontSize: 12,
           fontFamily: "'Ubuntu', 'Arial', sans-serif"
+        },
+        // TODO: this approach detects the legend click and then keeps
+        // track of which dataset sequence is shown/hidden in the component state.
+        // to prevents error, we must also stop thge subsequent render in shouldComponentUpdate.
+        // in the future, we should investigate an alternative approach that doesn't require
+        // keeping track of chart.js state in our component state.
+        onClick(e, legendItem) {
+          const index = legendItem.datasetIndex + indexOffset;
+          const defaultLegendClickHandler = Chart.defaults.global.legend && Chart.defaults.global.legend.onClick;
+          if (defaultLegendClickHandler) {
+            defaultLegendClickHandler.call(this, e, legendItem);
+          }
+          if (legendItem.hidden !== undefined) {
+            setDataSetHidden(index, !legendItem.hidden);
+          }
         }
       },
       maintainAspectRatio: false,
