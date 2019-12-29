@@ -389,12 +389,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { appConfig, db, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    // TODO: Disable publish button while publishing
-    const dbPublishDocumentFunc = document.type === ProblemDocument
-                                    ? db.publishProblemDocument
-                                    : db.publishOtherDocument;
-    dbPublishDocumentFunc.call(db, document)
-      .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
+      .then((confirm: boolean) => {
+        if (confirm) {
+          const dbPublishDocumentFunc = document.type === ProblemDocument
+                                          ? db.publishProblemDocument
+                                          : db.publishOtherDocument;
+          dbPublishDocumentFunc.call(db, document)
+            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+        }
+      });
   }
 
   private getPrimaryDocument(documentKey?: string) {
