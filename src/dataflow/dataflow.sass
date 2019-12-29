@@ -10,12 +10,37 @@ $section-header-height: 27px
   background-color: $gray-mid !important
 
 .document-workspace
+  .left-workspace
+    position: absolute
+    top: $dataflow-app-header
+    left: -4px
+    right: 140px
+    bottom: calc(50% - #{$dataflow-app-header / 2})
+
+  .right-workspace
+    position: absolute
+    top: calc(50% + #{$dataflow-app-header / 2})
+    left: -4px
+    right: 140px
+    bottom: 0px
+
+    .comparison-placeholder
+      color: #242424
+      background-color: #f5f5f5
+      border-color: #ffffff
+      border-radius: 0px
+      border-top-left-radius: 3px
+      border-top-right-radius: 3px
+      display: flex
+      flex-direction: column
+
   .single-workspace
     left: -4px
     right: 140px
     top: 56px
     bottom: -4px
 
+  .left-workspace, .right-workspace, .single-workspace
     .document
       border-radius: 0px
       border-top-left-radius: 3px
@@ -47,6 +72,26 @@ $section-header-height: 27px
                 background-image: url("../assets/dataflow/icons/publish/publish-hover.svg")
               &:active
                 background-image: url("../assets/dataflow/icons/publish/publish-active.svg")
+          .icon-two-up-stacked
+            margin-left: 0
+            .two-up-stacked
+              background-image: url("../assets/dataflow/icons/two-up-stacked/two-up-stacked.svg")
+              &:hover
+                background-image: url("../assets/dataflow/icons/two-up-stacked/two-up-stacked-hover.svg")
+              &:active
+                background-image: url("../assets/dataflow/icons/two-up-stacked/two-up-stacked-active.svg")
+              &.selected
+                background-image: url("../assets/dataflow/icons/two-up-stacked/two-up-stacked-selected.svg")
+          .icon-one-up
+            margin-left: 0
+            .one-up
+              background-image: url("../assets/dataflow/icons/one-up/one-up.svg")
+              &:hover
+                background-image: url("../assets/dataflow/icons/one-up/one-up-hover.svg")
+              &:active
+                background-image: url("../assets/dataflow/icons/one-up/one-up-active.svg")
+              &.selected
+                background-image: url("../assets/dataflow/icons/one-up/one-up-selected.svg")
           .icon-copy
             margin-left: 0
             .copy

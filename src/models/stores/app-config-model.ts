@@ -64,6 +64,8 @@ export const AppConfigModel = types
     copyPreferOriginTitle: false,
     disableTileDrags: false,
     showClassSwitcher: false,
+    supportStackedTwoUpView: false,
+    comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel)
   })
