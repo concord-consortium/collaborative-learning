@@ -344,6 +344,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               const nci: NodeChannelInfo = {hubId: hub.hubId,
                                             hubName: hub.hubName,
                                             channelId: ch.id,
+                                            missing: ch.missing,
                                             type: ch.type,
                                             units: ch.units,
                                             plug: ch.plug,

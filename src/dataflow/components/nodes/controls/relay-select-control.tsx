@@ -87,14 +87,14 @@ export class RelaySelectControl extends Rete.Control {
               <div
                 className={
                   (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
-                    ? "item relay-type-option selected"
-                    : "item relay-type-option selectable"
+                    ? ("item relay-type-option selected " + (ch.missing ? "missing" : ""))
+                    : ("item relay-type-option selectable " + (ch.missing ? "missing" : ""))
                 }
                 key={i}
                 onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
               >
                 <div className="label">
-                  { getChannelString(ch) }
+                  { ch.missing ? `${kRelayMissingMessage} ${getChannelString(ch)}` : getChannelString(ch) }
                 </div>
               </div>
             ))}

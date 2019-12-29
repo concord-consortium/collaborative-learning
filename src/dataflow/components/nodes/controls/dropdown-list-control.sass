@@ -35,8 +35,12 @@
     &.selected
       &.sensor-type-option
         background-color: $sensor-blue-control
+        &.missing
+          background-color: pink
       &.relay-type-option
         background-color: $relay-orange-control
+        &.missing
+          background-color: pink
       &.generatorType
         background-color: $generator-blue-control
       &.mathOperator
@@ -48,11 +52,17 @@
       &.interval
         background-color: $data-storage-orange-control
     &.selectable
+      &.missing
+        background-color: pink
       &:hover
         &.sensor-type-option
           background-color: $sensor-blue-outline
+          &.missing
+            background-color: #ffb8c6
         &.relay-type-option
           background-color: $relay-orange-outline
+          &.missing
+            background-color: #ffb8c6
         &.generatorType
           background-color: $generator-blue-outline
         &.mathOperator

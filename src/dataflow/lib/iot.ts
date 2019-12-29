@@ -7,11 +7,12 @@ import * as AWS from "aws-sdk";
 const AWS_REGION = "us-east-1";
 const COGNITO_POOL = "us-east-1:153d6337-3421-4c34-a21f-d1d2143a5091";
 const AWS_IOT_ENDPOINT_HOST = "a2zxjwmcl3eyqd-ats.iot.us-east-1.amazonaws.com";
-// WTD This is for testing purposes only. Remove when we add users and hub owners.
+// TODO: This is for testing purposes only. Remove when we add users and hub owners.
 const OWNER_ID = "123";
 const SEND_INTERVAL = 1;
 const MAX_HUBS = 200;
-const HUB_RESPONSE_TIMEOUT = 60 * 1000;
+const HUB_RESPONSE_TIMEOUT = 30 * 1000;
+const CHANNEL_REMOVE_TIMEOUT = 300 * 1000;
 
 type RelayValue = 0 | 1;
 
@@ -86,9 +87,19 @@ export class IoT {
     // check for hubs that have not responded recently
     hubStore.hubs.forEach(hub => {
       if ((Date.now() - hub.hubUpdateTime) > HUB_RESPONSE_TIMEOUT && hub.hubChannels.length) {
+        hub.setAllHubChannelsMissingState(true);
+        this.requestHubChannelInfo(hub.hubId);
+      } else if ((Date.now() - hub.hubUpdateTime) > CHANNEL_REMOVE_TIMEOUT && hub.hubChannels.length) {
         hub.removeAllHubChannels();
         this.requestHubChannelInfo(hub.hubId);
       }
+      const rids: string[] = [];
+      hub.hubChannels.forEach(ch => {
+        if ((Date.now() - ch.lastUpdateTime) > CHANNEL_REMOVE_TIMEOUT && ch.missing) {
+          rids.push(ch.id);
+        }
+      });
+      rids.forEach(id => { hub.removeHubChannel(id); });
     });
 
     const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS };
@@ -188,13 +199,17 @@ export class IoT {
               units,
               value: "",
               lastUpdateTime: Date.now(),
+              missing: false,
               plug}));
+          } else {
+            hub.setHubChannelMissingState(id, false);
+            hub.setHubChannelTime(id, Date.now());
           }
         });
       });
-      // remove unused channels
+      // set unused channels to missing state
       rids.forEach(id => {
-        hub.removeHubChannel(id);
+        hub.setHubChannelMissingState(id, true);
       });
     }
     this.startSendingSensorValues(hubId);
@@ -230,7 +245,7 @@ export class IoT {
         }
       }
 
-      // WTD simulator doesn't currently return relay value in sensors message
+      // TODO: simulator doesn't currently return relay value in sensors message
       // until fixed, need to handle both the hub and hub sim cases
       hub.hubChannels.forEach(ch => {
         if (ch.type !== "relay") {
@@ -238,7 +253,7 @@ export class IoT {
         }
       });
 
-      // WTD change to below once we fix the simulator so that it returns relay value with sensors message
+      // TODO: change to below once we fix the simulator so that it returns relay value with sensors message
       // if (messageChannels !== hub.hubChannels.length || unmatchedChannel) {
       if ((messageChannels !== hub.hubChannels.length && messageChannels !== hubStoreSensors) || unmatchedChannel) {
         this.requestHubChannelInfo(hub.hubId);
