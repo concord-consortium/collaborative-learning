@@ -225,7 +225,6 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
 
   private chartOptions(indexOffset: number) {
     const {dataSet} = this.props;
-    const defaultLegendClickHandler = Chart.defaults.global.legend?.onClick;
     const setDataSetHidden = (i: number, hidden: boolean) => {
       this.setDataSetHiddenState(i, hidden);
     };
@@ -259,16 +258,18 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           fontSize: 12,
           fontFamily: "'Ubuntu', 'Arial', sans-serif"
         },
-        // onClick: (e, legendItem) => {
+        // TODO: this approach detects the legend click and then keeps
+        // track of which dataset sequence is shown/hidden in the component state.
+        // to prevents error, we must also stop thge subsequent render in shouldComponentUpdate.
+        // in the future, we should investigate an alternative approach that doesn't require
+        // keeping track of chart.js state in our component state.
+        // tslint:disable-next-line
         onClick: function(e, legendItem) {
-          // keep track of the index of the dataset that is hidden
           const index = legendItem.datasetIndex + indexOffset;
-          // call the default legend click handler
+          const defaultLegendClickHandler = Chart.defaults.global.legend && Chart.defaults.global.legend.onClick;
           if (defaultLegendClickHandler) {
-            // defaultLegendClickHandler(e, legendItem);
             defaultLegendClickHandler.call(this, e, legendItem);
           }
-          // set state, this will not force a rerender
           if (legendItem.hidden !== undefined) {
             setDataSetHidden(index, !legendItem.hidden);
           }
