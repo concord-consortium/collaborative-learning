@@ -16,6 +16,7 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
+import { getLocalTimeStamp } from "../../utilities/time";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -100,6 +101,24 @@ const CopyButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+const OneUpButton = ({ onClick, selected }: { onClick: () => void, selected: boolean }) => {
+  const selectedClass = selected ? "selected" : "";
+  return (
+    <IconButton icon="one-up" key="one-up" className={"action icon-one-up"}
+                innerClassName={selectedClass}
+                onClickButton={onClick} title="One-Up View" />
+  );
+};
+
+const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, selected: boolean }) => {
+  const selectedClass = selected ? "selected" : "";
+  return (
+    <IconButton icon="two-up-stacked" key="two-up-stacked" className={"action icon-two-up-stacked"}
+                innerClassName={selectedClass}
+                onClickButton={onClick} title="Two-Up View" />
+  );
+};
+
 const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
     const enabledClass = enabled ? "enabled" : "disabled";
     return (
@@ -155,9 +174,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             getProperty: (key: string) => document.properties.get(key),
             setProperties: (properties: ISetProperties) => document.setProperties(properties)
           };
-    return document.key === prevState.documentContext?.key
-            ? {}
-            : { documentContext };
+    return { documentContext };
   }
 
   private toolApiMap: IToolApiMap = {};
@@ -219,8 +236,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document: { visibility }, workspace} = this.props;
-    const isShared = visibility === "public";
+    const {document, workspace} = this.props;
+    const isShared = document.visibility === "public";
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
@@ -240,15 +257,28 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions" data-test="document-titlebar-actions">
             {[
               downloadButton,
-              isTeacher && <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
-              <PublishButton key="publish" onClick={this.handlePublishDocument} />,
-              !isTeacher && <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
+              isTeacher &&
+                <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
+              this.showPublishButton(document) &&
+                <PublishButton key="publish" onClick={this.handlePublishDocument} />,
+              !isTeacher &&
+                <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
             ]}
             {show4up && this.renderMode()}
           </div>
         }
       </div>
     );
+  }
+
+  private showPublishButton(document: DocumentModelType) {
+    const { appConfig } = this.stores;
+    if (!appConfig.disablePublish) return true;
+    return appConfig.disablePublish
+            .findIndex(spec => {
+              return (document.type === spec.documentType) &&
+                      document.matchProperties(spec.properties);
+            }) < 0;
   }
 
   private getStickyNoteData() {
@@ -335,10 +365,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
-    const {document} = this.props;
-    const { user: { isTeacher }, documents, user } = this.stores;
+    const { document, workspace } = this.props;
+    const { appConfig, user: { isTeacher }, documents, user } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
+    const { supportStackedTwoUpView } = appConfig;
+    const isPrimary = this.isPrimary();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -355,7 +387,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <TitleInfo docTitle={`${document.title}`} onClick={this.handleDocumentRename} />
+              <TitleInfo docTitle={`${document.getDisplayTitle(appConfig)}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
@@ -363,7 +395,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {!hideButtons &&
             <div className="actions">
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
+              {this.showPublishButton(document) &&
+                <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
+                {supportStackedTwoUpView && isPrimary &&
+                  <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
+                {supportStackedTwoUpView && isPrimary &&
+                  <TwoUpStackedButton onClick={this.handleShowTwoUp} selected={workspace.comparisonVisible} />}
             </div>
           }
         </div>
@@ -421,6 +458,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderStatusBar(type: string) {
+    const { appConfig: { supportStackedTwoUpView }} = this.stores;
     const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === ProblemPublication);
@@ -431,7 +469,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {null}
         </div>
         <div className="actions">
-          {isPrimary ? this.renderTwoUpButton() : null}
+          {!supportStackedTwoUpView && isPrimary && this.renderTwoUpButton()}
           {showComment ? this.renderCommentButton() : null}
         </div>
         {this.renderCommentDialog()}
@@ -525,6 +563,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleToggleTwoUp = () => {
     this.props.workspace.toggleComparisonVisible();
+  }
+  private handleShowTwoUp = () => {
+    this.props.workspace.toggleComparisonVisible({override: true});
+  }
+  private handleHideTwoUp = () => {
+    this.props.workspace.toggleComparisonVisible({override: false});
   }
 
   private handleDownloadTileJson = () => {

@@ -34,13 +34,13 @@ function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
 }
 
 function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, document: DocumentModelType) {
-  const { problem, class: _class } = stores;
+  const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
   const user = _class && _class.getUserById(uid);
   const userName = user && user.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type) ? problem.title : document.title;
+  const title = isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   return `${namePrefix}${title}`;
 }
 
@@ -84,21 +84,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
 
     // filter by additional properties
     if (section.properties && section.properties.length) {
-      sectionDocs = sectionDocs.filter(doc => {
-        return section.properties.every(p => {
-          const match = /(!)?(.*)/.exec(p);
-          const property = match && match[2];
-          const wantsProperty = !(match && match[1]); // not negated => has property
-          if (property === "starred") {
-            return doc.isStarred === wantsProperty;
-          }
-          if (property) {
-            return !!doc.getProperty(property) === wantsProperty;
-          }
-          // ignore empty strings, etc.
-          return true;
-        });
-      });
+      sectionDocs = sectionDocs.filter(doc => doc.matchProperties(section.properties));
     }
 
     function handleSectionHeaderClick() {

@@ -4,7 +4,13 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
 
-export const RightNavAppConfigModel = types
+const DocumentSpecModel = types
+  .model("DocumentSpec", {
+    documentType: types.string,
+    properties: types.array(types.string)
+  });
+
+const RightNavAppConfigModel = types
   .model("RightNavAppConfig", {
     defaultExpanded: false,
     preventExpandCollapse: false,
@@ -12,7 +18,7 @@ export const RightNavAppConfigModel = types
     tabSpecs: types.array(RightNavTabModel)
   });
 
-export const DocumentLabelModel = types
+const DocumentLabelModel = types
   .model("DocumentLabel", {
     labels: types.map(types.string)
   })
@@ -45,6 +51,7 @@ export const AppConfigModel = types
     autoAssignStudentsToIndividualGroups: false,
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
+    docTimeStampPropertyName: "",
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
@@ -53,8 +60,12 @@ export const AppConfigModel = types
     autoSectionProblemDocuments: false,
     documentLabelProperties: types.array(types.string),
     documentLabels: types.map(DocumentLabelModel),
+    disablePublish: types.array(DocumentSpecModel),
     copyPreferOriginTitle: false,
+    disableTileDrags: false,
     showClassSwitcher: false,
+    supportStackedTwoUpView: false,
+    comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel)
   })
