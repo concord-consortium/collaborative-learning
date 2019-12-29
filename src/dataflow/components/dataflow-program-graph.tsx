@@ -263,8 +263,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         // to prevents error, we must also stop thge subsequent render in shouldComponentUpdate.
         // in the future, we should investigate an alternative approach that doesn't require
         // keeping track of chart.js state in our component state.
-        // tslint:disable-next-line
-        onClick: function(e, legendItem) {
+        onClick(e, legendItem) {
           const index = legendItem.datasetIndex + indexOffset;
           const defaultLegendClickHandler = Chart.defaults.global.legend && Chart.defaults.global.legend.onClick;
           if (defaultLegendClickHandler) {
