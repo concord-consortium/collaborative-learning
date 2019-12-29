@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
-import { onSnapshot } from "mobx-state-tree";
+import { autorun } from "mobx";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem, ThumbnailDocumentItemRole } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
@@ -17,7 +17,7 @@ interface IProps {
   stores: IStores;
   scale: number;
   isExpanded: boolean;
-  onToggleExpansion: (section: NavTabSectionModelType) => void;
+  onToggleExpansion: (section: NavTabSectionModelType, byUser?: boolean) => void;
   onNewDocumentClick?: (section: NavTabSectionModelType) => void;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -61,8 +61,7 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
 
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
-    const [autoExpandToDocKey, setAutoExpandToDocKey] = useState<string|undefined>();
-    const [autoExpandDocKeys, setAutoExpandDocKeys] = useState<IAutoExpandDocKeys>({});
+    const [autoExpandDocKey, setAutoExpandDocKey] = useState<string|undefined>();
     const listRef = useRef<HTMLDivElement>(null);
 
     (section.documentTypes || []).forEach(type => {
@@ -98,39 +97,39 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
       sectionDocs = sectionDocs.filter(doc => doc.matchProperties(section.properties));
     }
 
-    // listen for changes to the primary and comparison docs
+    // listen for changes to the primary document
     useEffect(() => {
-      const disposer = onSnapshot(stores.ui.problemWorkspace, (workspace) => {
-        setAutoExpandDocKeys({
-          primary: workspace.primaryDocumentKey,
-          comparison: workspace.comparisonDocumentKey
-        });
+      const disposer = autorun(() => {
+        setAutoExpandDocKey(stores.ui.problemWorkspace.primaryDocumentKey);
       });
       return () => disposer();
     }, []);
 
     useEffect(() => {
-      // try to find the primary document and fall back to the comparison document
-      const docKey = sectionDocs.find(doc => autoExpandDocKeys.primary === doc.key)?.key
-                  || sectionDocs.find(doc => autoExpandDocKeys.comparison === doc.key)?.key;
-      if (!isExpanded && docKey && (docKey !== autoExpandToDocKey)) {
-        // autoexpand when not expanded and the section contains a doc key we haven't expanded to yet
-        setAutoExpandToDocKey(docKey);
-        onToggleExpansion(section);
-      } else if (isExpanded && docKey) {
-        // auto scroll to documents when we are expanded and we have a primary or comparison doc in the section
-        const thumbnail = listRef.current?.querySelector(`.list-item[data-thumbnail-key="${docKey}"]`);
-        if (thumbnail && listRef.current) {
-          const listRect = listRef.current.getBoundingClientRect();
-          const thumbnailRect = thumbnail.getBoundingClientRect();
-          const top = thumbnailRect.top - listRect.top;
-          listRef.current.scrollTo({ behavior: "smooth", top });
+      // try to find the primary document
+      const docKey = autoExpandDocKey && sectionDocs.find(doc => autoExpandDocKey === doc.key)?.key;
+      if (docKey) {
+        if (!isExpanded) {
+          // autoexpand when not expanded and the section contains a doc key we haven't expanded to yet
+          setAutoExpandDocKey(docKey);
+          onToggleExpansion(section);
+        } else {
+          // auto scroll to documents when we are expanded and we have a primary doc in the section
+          const thumbnail = listRef.current?.querySelector(`.list-item[data-thumbnail-key="${docKey}"]`);
+          if (thumbnail && listRef.current) {
+            const listRect = listRef.current.getBoundingClientRect();
+            const thumbnailRect = thumbnail.getBoundingClientRect();
+            const top = thumbnailRect.top - listRect.top;
+            listRef.current.scrollTo({ behavior: "smooth", top });
+          }
         }
+        // clear the request once we've attempted to satisfy it
+        setAutoExpandDocKey(undefined);
       }
-    }, [sectionDocs, isExpanded, autoExpandToDocKey, autoExpandDocKeys]);
+    }, [sectionDocs, isExpanded, autoExpandDocKey]);
 
     function handleSectionHeaderClick() {
-      onToggleExpansion && onToggleExpansion(section);
+      onToggleExpansion && onToggleExpansion(section, true);
     }
     function handleNewDocumentClick() {
       onNewDocumentClick && onNewDocumentClick(section);

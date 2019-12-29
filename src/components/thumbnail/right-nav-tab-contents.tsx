@@ -45,7 +45,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
         <DocumentsSection
           key={sectionId} tab={myTabSpec!.tab} section={section}
           stores={this.stores} scale={this.props.scale}
-          isExpanded={this.state.showSection.get(sectionId)}
+          isExpanded={!!this.state.showSection.get(sectionId)}
           onToggleExpansion={this.handleToggleExpansion}
           onNewDocumentClick={this.handleNewDocumentClick}
           onDocumentClick={this.handleDocumentClick}
@@ -102,7 +102,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleToggleExpansion = (section: NavTabSectionModelType) => {
+  private handleToggleExpansion = (section: NavTabSectionModelType, byUser = false) => {
     const { ui: { activeRightNavTab }, appConfig: { rightNav } } = this.stores;
     const sections = rightNav.tabSpecs.filter( t => t.tab === activeRightNavTab)[0].sections;
     const currentSectionId = navTabSectionId(section);
@@ -116,11 +116,13 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
     });
     this.props.onToggleExpansion?.(section);
     this.setState( () => ({ showSection: this.state.showSection }));
-    Logger.log(LogEventName.SHOW_FILTER, {
-                filter_state: isCurrentSectionExpanded ? "close" : "open",
-                filter_name: section.title,
-                filter_type: section.type
-              });
+    if (byUser) {
+      Logger.log(LogEventName.SHOW_FILTER, {
+                  filter_state: isCurrentSectionExpanded ? "close" : "open",
+                  filter_name: section.title,
+                  filter_type: section.type
+                });
+    }
   }
 
   private handleNewDocumentClick = async (section: NavTabSectionModelType) => {
