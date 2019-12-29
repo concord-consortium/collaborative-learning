@@ -4,6 +4,7 @@ import { ChartOptions, ChartData, ChartDataSets, Chart } from "chart.js";
 import { SplitViewButtons } from "./split-view-buttons";
 import { ChartPlotColors } from "./../utilities/node";
 import { exportCSV } from "../utilities/export";
+import { isEqual } from "lodash";
 import "./dataflow-program-graph.sass";
 
 export interface DataPoint {
@@ -67,6 +68,15 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public handleExport = () => {
     const {dataSet} = this.props;
     exportCSV(dataSet.sequences);
+  }
+
+  public shouldComponentUpdate(nextProps: IProps, nextState: IState) {
+    if (!isEqual(nextState.dataSetHidden, this.state.dataSetHidden)) {
+      // prevent render since allowing render after setting hidden state throws error:
+      // Uncaught TypeError: Cannot read property 'clearRect' of null
+      return false;
+    }
+    return true;
   }
 
   public render() {
@@ -249,22 +259,20 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           fontSize: 12,
           fontFamily: "'Ubuntu', 'Arial', sans-serif"
         },
+        // onClick: (e, legendItem) => {
         onClick: function(e, legendItem) {
-          // log the legend item
-          console.log(legendItem);
           // keep track of the index of the dataset that is hidden
           const index = legendItem.datasetIndex + indexOffset;
-          // call the defaul legend click handler
+          // call the default legend click handler
           if (defaultLegendClickHandler) {
+            // defaultLegendClickHandler(e, legendItem);
             defaultLegendClickHandler.call(this, e, legendItem);
           }
-          // we are calling our function to store state incorrectly
-          // this works, but throws the following error in the console:
-          // Uncaught TypeError: Cannot read property 'clearRect' of null
+          // set state, this will not force a rerender
           if (legendItem.hidden !== undefined) {
             setDataSetHidden(index, !legendItem.hidden);
           }
-        },
+        }
       },
       maintainAspectRatio: false,
       responsive: true,
