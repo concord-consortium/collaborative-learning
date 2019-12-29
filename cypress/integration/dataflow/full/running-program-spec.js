@@ -97,38 +97,42 @@ context('Program Canvas tests',function(){
 
         })
         it('verify program cannot be run if data storage or relay block is not in the canvas',()=>{
-            dfcanvas.createNewProgram("Can't run program")
-            dfcanvas.runProgram()
-            dialog.getDialogTitle().should('contain','No Program Output')
-            dialog.getDialogOKButton.click();
+            dfcanvas.createNewProgram("Can't run program");
+            dfcanvas.runProgram();
+            cy.wait(1000)
+            dialog.getDialogTitle().should('exist').and('contain','No Program Output');
+            dialog.getDialogOKButton().click();
         })
         it('verify program cannot be run when data storage has no connections',()=>{
             dfcanvas.openBlock('Data Storage');
             dfcanvas.runProgram();
-            dialog.getDialogTitle().should('contain', "Missing Data Storage Inputs");
+            dialog.getDialogTitle().should('exist').and('contain', "Missing Data Storage Inputs");
             dialog.getDialogOKButton().click();
         })
         it('verify program runs after error',()=>{
             dfcanvas.openBlock('Number');
-            dfcanvas.connectBlocks('number',0,'data-storage',0)
+            dfcanvas.moveBlock('number',0,250,5)
+            dfblock.connectBlocks('number',0,'data-storage',0)
             dfcanvas.runProgram();
             dialog.getDialogTitle().should('not.exist')
             dfcanvas.getDurationContainer().should('be.visible');
+            cy.wait(1500);
             dfcanvas.stopProgram();
         })
     }) 
-    describe('Relay tests',()=>{
+    describe.only('Relay tests',()=>{
         const relayTestProgram = "Relay test program"
         it('verify relay that is already in us is not available to another user',()=>{
             dfcanvas.createNewProgram(relayTestProgram)
             dfcanvas.openBlock('Relay');
             dfblock.selectRelayOperator('codap-server-hub-sim');
             dfcanvas.runProgram();
-            canvas.copyDocument('Second Relay Program');
-            dfcanvas.openBlock('Relay');
-            dfblock.selectRelayOperator('codap-server-hub-sim');
-            dfcanvas.runProgram();
-            dialog.getDialogTitle().should('contain','Relay In Use')
+            // canvas.copyDocument('Second Relay Program');
+            cy.wait(2000)
+            // dfcanvas.openBlock('Relay');
+            // dfblock.selectRelayOperator('codap-server-hub-sim');
+            // dfcanvas.runProgram();
+            dialog.getDialogTitle().should('contain','Relay In Use');
             dialog.getDialogOKButton().click();
         })
         it('verify running relay program is in My Work>Relay Program',()=>{

@@ -169,10 +169,10 @@ class dfBlock{
 
     //Relay block
     getRelayListDropDown(){
-        return cy.get('.single-workspace .node.relay [title=relayList]')
+        return cy.get('.single-workspace .node.relay .relay-select')
     }
     selectRelayOperator(hub){
-        this.getRelayListDropDown().find('select').select(hub);
+        this.getRelayListDropDown().click().find('.label').contains(hub).click();
     }
     getRelayValueTextField(){
         return cy.get('.single-workspace .node.relay [title=nodeValue] .value-container')

@@ -2,6 +2,9 @@ class Dialog{// popup dialog box
     getDialogTitle(){
         return cy.get('[data-test=dialog-title]');
     }
+    getDialogTitleEl(){
+        return ('[data-test=dialog-title]');
+    }
 
     getDialogTextInput(){
         return cy.get('[data-test=dialog-text-input]');
