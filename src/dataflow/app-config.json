@@ -47,6 +47,11 @@
   }],
   "copyPreferOriginTitle": true,
   "disableTileDrags": true,
+  "supportStackedTwoUpView": true,
+  "comparisonPlaceholderContent": [
+    "Comparison View:",
+    "Select another data file to view it here."
+  ],
   "rightNav": {
     "defaultExpanded": true,
     "preventExpandCollapse": true,

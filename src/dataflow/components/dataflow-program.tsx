@@ -240,11 +240,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const style: React.CSSProperties = {};
     const documentElt = document.querySelector(".document-content");
     const kBottomResizeHandleHeight = 10;
-    const kTextTileHeight = 60;
     const kProgramTopbarHeight = 44;
     const topbarHeight = this.isComplete() ? 0 : kProgramTopbarHeight;
     const editorHeight = documentElt
-                         ? documentElt.clientHeight - topbarHeight - kTextTileHeight - kBottomResizeHandleHeight
+                         ? documentElt.clientHeight - topbarHeight - kBottomResizeHandleHeight
                          : 500;
     if (!this.props.tileHeight) {
       style.height = `${editorHeight}px`;
