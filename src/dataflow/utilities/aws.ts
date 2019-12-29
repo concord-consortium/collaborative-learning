@@ -52,7 +52,8 @@ export const getSignedUrl = (
     return requestUrl;
 };
 
-export function uploadProgram(programData: NodeEditor): string {
+// TODO: define interface type for programData
+export function uploadProgram(programData: any): string {
   if (!programData) {
     return "failed";
   }
