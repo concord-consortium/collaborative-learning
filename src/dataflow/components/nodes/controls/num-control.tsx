@@ -103,7 +103,7 @@ export class NumControl extends Rete.Control {
         this.setInputValue(v);
       },
       onBlur: (v: any) => {
-        if (!isNaN(v)) {
+        if (isFinite(v)) {
           this.setValue(Number(v));
           this.emitter.trigger("process");
         } else {
@@ -134,8 +134,7 @@ export class NumControl extends Rete.Control {
   }
 
   public restoreValue = () => {
-    this.props.inputValue = this.props.value;
-    (this as any).update();
+    this.setInputValue(this.props.value);
   }
 
   public getValue = () => {
