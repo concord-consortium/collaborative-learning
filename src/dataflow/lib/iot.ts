@@ -84,18 +84,19 @@ export class IoT {
 
   private updateHubs = () => {
     const  { hubStore } = this.stores;
+    const currentTime = Date.now();
     // check for hubs that have not responded recently
     hubStore.hubs.forEach(hub => {
-      if ((Date.now() - hub.hubUpdateTime) > HUB_RESPONSE_TIMEOUT && hub.hubChannels.length) {
+      if ((currentTime - hub.hubUpdateTime) > HUB_RESPONSE_TIMEOUT && hub.hubChannels.length) {
         hub.setAllHubChannelsMissingState(true);
         this.requestHubChannelInfo(hub.hubId);
-      } else if ((Date.now() - hub.hubUpdateTime) > CHANNEL_REMOVE_TIMEOUT && hub.hubChannels.length) {
+      } else if ((currentTime - hub.hubUpdateTime) > CHANNEL_REMOVE_TIMEOUT && hub.hubChannels.length) {
         hub.removeAllHubChannels();
         this.requestHubChannelInfo(hub.hubId);
       }
       const rids: string[] = [];
       hub.hubChannels.forEach(ch => {
-        if ((Date.now() - ch.lastUpdateTime) > CHANNEL_REMOVE_TIMEOUT && ch.missing) {
+        if ((currentTime - ch.lastUpdateTime) > CHANNEL_REMOVE_TIMEOUT && ch.missing) {
           rids.push(ch.id);
         }
       });
