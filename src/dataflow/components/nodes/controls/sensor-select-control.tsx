@@ -168,14 +168,14 @@ export class SensorSelectControl extends Rete.Control {
               <div
                 className={
                   (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
-                    ? "item sensor-type-option selected"
-                    : "item sensor-type-option selectable"
+                    ? ("item sensor-type-option selected " + (ch.missing ? "missing" : ""))
+                    : ("item sensor-type-option selectable " + (ch.missing ? "missing" : ""))
                 }
                 key={i}
                 onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
               >
                 <div className="label">
-                  { getChannelString(ch) }
+                  {(ch.missing ? `${kSensorMissingMessage} ` : "") + getChannelString(ch)}
                 </div>
               </div>
             ))}

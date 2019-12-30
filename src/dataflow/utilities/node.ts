@@ -258,6 +258,7 @@ export interface NodeChannelInfo {
   hubId: string;
   hubName: string;
   channelId: string;
+  missing: boolean;
   type: string;
   units: string;
   plug: number;

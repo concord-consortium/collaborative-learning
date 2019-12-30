@@ -8,6 +8,7 @@ export const HubChannelModel = types.model({
   units: types.string,
   value: types.string,
   lastUpdateTime: types.number,
+  missing: types.boolean,
   plug: types.number,
 });
 export type HubChannelType = typeof HubChannelModel.Type;
@@ -51,6 +52,17 @@ export const HubModel = types
     removeAllHubChannels() {
       self.hubChannels.clear();
     },
+    setHubChannelMissingState(id: string, missing: boolean) {
+      const ch = self.getHubChannel(id);
+      if (ch) {
+        ch.missing = missing;
+      }
+    },
+    setAllHubChannelsMissingState(missing: boolean) {
+      self.hubChannels.forEach(ch => {
+        ch.missing = missing;
+      });
+    },
     setHubChannelValue(id: string, value: string) {
       const ch = self.getHubChannel(id);
       if (ch) {
@@ -61,11 +73,10 @@ export const HubModel = types
       self.hubUpdateTime = newTime;
     },
     setHubChannelTime(id: string, newTime: number) {
-      self.hubChannels.forEach(ch => {
-        if (ch.id === id) {
-          ch.lastUpdateTime = newTime;
-        }
-      });
+      const ch = self.getHubChannel(id);
+      if (ch) {
+        ch.lastUpdateTime = newTime;
+      }
     },
     addHubGroup(group: string) {
       self.hubGroups.push(group);
