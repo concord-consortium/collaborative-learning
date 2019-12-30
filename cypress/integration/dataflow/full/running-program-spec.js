@@ -106,13 +106,14 @@ context('Program Canvas tests',function(){
         it('verify program cannot be run when data storage has no connections',()=>{
             dfcanvas.openBlock('Data Storage');
             dfcanvas.runProgram();
-            dialog.getDialogTitle().should('exist').and('contain', "Missing Data Storage Inputs");
+            dialog.getDialogTitle().should('exist').and('contain', "Invalid Program Output");
             dialog.getDialogOKButton().click();
         })
         it('verify program runs after error',()=>{
             dfcanvas.openBlock('Number');
             dfcanvas.moveBlock('number',0,250,5)
             dfblock.connectBlocks('number',0,'data-storage',0)
+            cy.wait(1500);
             dfcanvas.runProgram();
             dialog.getDialogTitle().should('not.exist')
             dfcanvas.getDurationContainer().should('be.visible');
@@ -120,24 +121,32 @@ context('Program Canvas tests',function(){
             dfcanvas.stopProgram();
         })
     }) 
-    describe.only('Relay tests',()=>{
+    describe('Relay tests',()=>{
         const relayTestProgram = "Relay test program"
+        const secondRelayTest = 'Second Relay Program'
+
         it('verify relay that is already in us is not available to another user',()=>{
             dfcanvas.createNewProgram(relayTestProgram)
             dfcanvas.openBlock('Relay');
+            dfcanvas.openBlock('Number');
+            dfcanvas.moveBlock('relay',0,250,5);
+            dfblock.connectBlocks('number',0,'relay',0)
             dfblock.selectRelayOperator('codap-server-hub-sim');
+            dfcanvas.selectDuration('60')
             dfcanvas.runProgram();
-            // canvas.copyDocument('Second Relay Program');
+            canvas.copyDocument(secondRelayTest);
             cy.wait(2000)
             // dfcanvas.openBlock('Relay');
             // dfblock.selectRelayOperator('codap-server-hub-sim');
-            // dfcanvas.runProgram();
+            dfcanvas.runProgram();
             dialog.getDialogTitle().should('contain','Relay In Use');
             dialog.getDialogOKButton().click();
         })
-        it('verify running relay program is in My Work>Relay Program',()=>{
-            rightNav.openSection('my-work','','Relay Programs');
-            rightNav.getCanvasItemTitle('my-work','','',relayTestProgram).should(exist);
+        it('verify running relay program is not in My Work>Data',()=>{
+            // rightNav.openSection('my-work','','Data');
+            // rightNav.getCanvasItemTitle('my-work','','Data').should('not.be.visible',relayTestProgram);
+            // rightNav.getCanvasItemTitle('my-work','','Data').should('not.be.visible', secondRelayTest);
+
         })
     }) 
 })
