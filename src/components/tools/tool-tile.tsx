@@ -131,12 +131,12 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { model, widthPct } = this.props;
-    const { ui } = this.stores;
+    const { appConfig, ui } = this.stores;
     const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
     const ToolComponent = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const placeholderClass = isPlaceholderTile ? " placeholder" : "";
-    const dragTileButton = !isPlaceholderTile &&
+    const dragTileButton = !isPlaceholderTile && !appConfig.disableTileDrags &&
                             <div ref={elt => this.dragElement = elt}><DragTileButton /></div>;
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -217,11 +217,20 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // tile dragging can be disabled globally via appConfig
+    if (this.stores.appConfig.disableTileDrags) {
+      e.preventDefault();
+      return;
+    }
+
+    // tile dragging can be disabled for individual tiles
     const target: HTMLElement | null = e.target as HTMLElement;
     if (!target || target.querySelector(".disable-tile-drag")) {
       e.preventDefault();
       return;
     }
+    // tile dragging can be disabled for individual tile contents,
+    // which only allows those tiles to be dragged by their drag handle
     if (target && target.querySelector(".disable-tile-content-drag")) {
       const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
       if (!eltTarget || !eltTarget.closest(".tool-tile-drag-handle")) {

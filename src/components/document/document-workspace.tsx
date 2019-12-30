@@ -204,6 +204,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderComparisonPlaceholder() {
+    const { appConfig } = this.stores;
+    const placeholderContent = Array.isArray(appConfig.comparisonPlaceholderContent)
+                                ? appConfig.comparisonPlaceholderContent.map(str => <div key={str}>{str}</div>)
+                                : appConfig.comparisonPlaceholderContent;
     return (
       <div
         className="comparison-placeholder"
@@ -211,7 +215,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         onDrop={this.handleDropSide("comparison")}
         onClick={this.handleClick}
       >
-        Click or drag an item in the right tabs to show it here
+        {placeholderContent}
       </div>
     );
   }
@@ -389,12 +393,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { appConfig, db, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    // TODO: Disable publish button while publishing
-    const dbPublishDocumentFunc = document.type === ProblemDocument
-                                    ? db.publishProblemDocument
-                                    : db.publishOtherDocument;
-    dbPublishDocumentFunc.call(db, document)
-      .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
+      .then((confirm: boolean) => {
+        if (confirm) {
+          const dbPublishDocumentFunc = document.type === ProblemDocument
+                                          ? db.publishProblemDocument
+                                          : db.publishOtherDocument;
+          dbPublishDocumentFunc.call(db, document)
+            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+        }
+      });
   }
 
   private getPrimaryDocument(documentKey?: string) {
