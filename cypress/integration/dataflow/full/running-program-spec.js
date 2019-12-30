@@ -57,9 +57,8 @@ context('Program Canvas tests',function(){
         })
 
         it('restore program',()=>{
-            rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','','Programs')
-            rightNav.openCanvasItem('my-work','',program1)
+            rightNav.openCanvasItem('my-work','','Programs',program1)
             dfcanvas.getDurationDropdown().should('contain', '5 mins')
         })
         it('verify data collection runs to the end of the duration',()=>{
@@ -141,22 +140,24 @@ context('Program Canvas tests',function(){
             dfcanvas.runProgram();
             dialog.getDialogTitle().should('contain','Relay In Use');
             dialog.getDialogOKButton().click();
+            rightNav.openSection('my-work','','Programs')
+            rightNav.openCanvasItem('my-work','','Programs',relayTestProgram);
+            dfcanvas.stopProgram();
         })
         it('verify running relay program is not in My Work>Data',()=>{
-            // rightNav.openSection('my-work','','Data');
-            // rightNav.getCanvasItemTitle('my-work','','Data').should('not.be.visible',relayTestProgram);
-            // rightNav.getCanvasItemTitle('my-work','','Data').should('not.be.visible', secondRelayTest);
-
+            rightNav.openSection('my-work','','Data');
+            rightNav.getCanvasItemTitle('my-work','','Data').find(relayTestProgram).should('not.be.visible');
+            rightNav.getCanvasItemTitle('my-work','','Data').find(secondRelayTest).should('not.be.visible');
         })
     }) 
 })
 context('Data Canvas tests',()=>{   
     it('verify restore of data canvas',()=>{
-        rightNav.openSection('my-work','','Data')
-        rightNav.openCanvasItem('my-work','',dataset2)
+        // rightNav.openSection('my-work','','Data' -- section already open)
+        rightNav.openCanvasItem('my-work','','Data',dataset2)
         dfcanvas.getFullGraph().should('be.visible');
         dfcanvas.getFullGraph().find('.chartjs-render-monitor').should('be.visible')
-        dfcanvas.getGraphButton('program').should('be.visible')
+        dfcanvas.getGraphButton('show-original').should('be.visible')
         dfcanvas.getGraphButton('export').should('be.visible')
         dfcanvas.getGraphButton('data').should('be.visible')
         dfcanvas.getGraphButton('layout').should('be.visible')
@@ -165,11 +166,19 @@ context('Data Canvas tests',()=>{
     it('verify program toolbar is not present',()=>{
         dfcanvas.getProgramToolbar().should('not.be.visible')
     })
-    it('verify new program can be created from a dataset',()=>{
-
+    it('verify copy of a dataset creates a copy of the program that created the dataset',()=>{
+        canvas.copyDocument(dataset2+' copy');
+        dfblock.getBlock('number').should('be.visible');
+        dfblock.getNumberInput().text().should('contain','5')
+        dfblock.getBlock('data-storage').should('be.visible');
+        dfblock.connectionLine().should('be.visible')
     })
-    it('verify copy of a dataset creates a copy of a dateset',()=>{
-
+    it('verify new program can be created from a dataset',()=>{
+        rightNav.openCanvasItem('my-work','','Data',dataset2)
+        dfcanvas.createNewProgram();
+        dfblock.getBlock('number').should('not.be.visible');
+        dfblock.getBlock('data-storage').should('not.be.visible');
+        dfblock.connectionLine().should('not.be.visible')
     })
 })
 after(function(){
