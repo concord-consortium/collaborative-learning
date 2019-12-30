@@ -94,7 +94,7 @@ export class RelaySelectControl extends Rete.Control {
                 onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
               >
                 <div className="label">
-                  { ch.missing ? `${kRelayMissingMessage} ${getChannelString(ch)}` : getChannelString(ch) }
+                  {(ch.missing ? `${kRelayMissingMessage} ` : "") + getChannelString(ch)}
                 </div>
               </div>
             ))}

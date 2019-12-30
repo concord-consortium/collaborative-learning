@@ -172,8 +172,9 @@ export class IoT {
   private processHubChannelInfoMessage(hubId: string, message: any) {
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
+    const currentTime = Date.now();
     if (hub) {
-      hub.setHubUpdateTime(Date.now());
+      hub.setHubUpdateTime(currentTime);
       const devices = Object.values(message);
       const deviceKeys = Object.keys(message);
       let rids: string[] = [];
@@ -198,12 +199,12 @@ export class IoT {
               model,
               units,
               value: "",
-              lastUpdateTime: Date.now(),
+              lastUpdateTime: currentTime,
               missing: false,
               plug}));
           } else {
             hub.setHubChannelMissingState(id, false);
-            hub.setHubChannelTime(id, Date.now());
+            hub.setHubChannelTime(id, currentTime);
           }
         });
       });
