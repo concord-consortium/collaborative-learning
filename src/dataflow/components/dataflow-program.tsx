@@ -276,6 +276,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
+        forEach(program.nodes, (n: any) => {
+          if (n.data.recentValues) {
+            n.data.recentValues = [];
+          }
+        });
         this.closeCompletedRunProgramNodePlots(program);
         const result = await this.programEditor.fromJSON(program);
         if (this.hasDataStorage()) {
