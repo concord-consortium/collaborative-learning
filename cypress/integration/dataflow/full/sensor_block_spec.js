@@ -61,7 +61,7 @@ context('Sensor block tests',()=>{
                 })
             })
         })
-        it('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
+        it.skip('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
             var sensorTypes=['Humidity','Temeprature'];
             var hub ='cc-west-office-hub'; //use cc-west-hub since it has two temp and two humidity
             var plugIndex = 1;
@@ -93,7 +93,7 @@ context('Sensor block tests',()=>{
                 dfblock.getSensorValueTextField().should('contain',sensor.unit)
             })
         })
-        it('verify sensor blocks outputs correctly',()=>{
+        it.skip('verify sensor blocks outputs correctly',()=>{
             var sensor = "Humidity";
             var hubcce = 'cceast-sim-hub:humidity'
             var hubccw = "cc-west-office-hub:humidity(plug 2)";
