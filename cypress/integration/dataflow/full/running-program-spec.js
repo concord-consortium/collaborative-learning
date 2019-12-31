@@ -169,9 +169,8 @@ context('Data Canvas tests',()=>{
     it('verify copy of a dataset creates a copy of the program that created the dataset',()=>{
         canvas.copyDocument(dataset2+' copy');
         dfblock.getBlock('number').should('be.visible');
-        dfblock.getNumberInput().text().should('contain','5')
+        dfblock.getNumberInput().should('have.value','5')
         dfblock.getBlock('data-storage').should('be.visible');
-        dfblock.connectionLine().should('be.visible')
     })
     it('verify new program can be created from a dataset',()=>{
         rightNav.openCanvasItem('my-work','','Data',dataset2)
