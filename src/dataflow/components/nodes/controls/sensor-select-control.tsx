@@ -73,7 +73,7 @@ export class SensorSelectControl extends Rete.Control {
       }
 
       return (
-        <div className="node-select sensor-type" ref={divRef}>
+        <div className="node-select sensor-type" ref={divRef} title={"Select Sensor Type"}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             { type === "none"
               ? <div className="label unselected">Select a sensor type</div>
@@ -153,7 +153,7 @@ export class SensorSelectControl extends Rete.Control {
                          ? "item top missing"
                          : "item top";
       return (
-        <div className="node-select sensor-select" ref={divRef}>
+        <div className="node-select sensor-select" ref={divRef} title={"Select Sensor"}>
           <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
             <div className={titleClass}>{channelString}</div>
             <div className="dropdown-caret-holder">

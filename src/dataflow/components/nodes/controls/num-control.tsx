@@ -19,7 +19,8 @@ export class NumControl extends Rete.Control {
               label = "",
               initVal = 0,
               minVal: number | null = null,
-              units: string[] | null = null) {
+              units: string[] | null = null,
+              tooltip = "") {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -51,11 +52,12 @@ export class NumControl extends Rete.Control {
                                    onBlur: any;
                                    label: string;
                                    currentUnits: string;
-                                   units: string[] | null}) => {
+                                   units: string[] | null,
+                                   tooltip: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (
-        <div className="number-container">
+        <div className="number-container" title={compProps.tooltip}>
           { label
             ? <label className="number-label">{compProps.label}</label>
             : null
@@ -112,7 +114,8 @@ export class NumControl extends Rete.Control {
       },
       label,
       currentUnits: initialUnits,
-      units
+      units,
+      tooltip
     };
   }
 

@@ -28,7 +28,7 @@ export class DeleteControl extends Rete.Control {
       useStopEventPropagation(inputRef, "pointerdown");
       return (
         <div className="close-node-button control-color control-color-hoverable"
-          onClick={handleClick(compProps.onClick)}>
+          onClick={handleClick(compProps.onClick)} title={"Delete Node"}>
           <svg className="icon">
             <use xlinkHref="#icon-delete-node" />
           </svg>

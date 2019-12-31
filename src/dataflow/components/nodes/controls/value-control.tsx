@@ -18,7 +18,8 @@ export class ValueControl extends Rete.Control {
       <div className={`value-container
                        ${compProps.class.toLowerCase().replace(/ /g, "-")}
                        ${compProps.sentence.length > 12 ? "small" : ""}
-                       `}>
+                       `}
+            title={"Value"}>
         {compProps.sentence
           ? compProps.sentence
           : isFinite(compProps.value) ? roundNodeValue(compProps.value) : ""}
