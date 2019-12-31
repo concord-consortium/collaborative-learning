@@ -30,7 +30,7 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
                                               intervalTimeOptions,
                                               true,
                                               "Interval",
-                                              "Set Interval"));
+                                              "Select Interval"));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
         keys.forEach((key: string, index: number) => {

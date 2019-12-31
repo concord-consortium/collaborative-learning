@@ -23,7 +23,8 @@ export class PlotButtonControl extends Rete.Control {
     };
 
     this.component = (compProps: {showgraph: any; onGraphButtonClick: any; }) => (
-      <div className="node-graph-container">
+      <div className="node-graph-container"
+           title={compProps.showgraph ? "Hide Node Value Graph" : "Show Node Value Graph"}>
         <div
           className={`graph-button main-color ${compProps.showgraph ? "active" : ""}`}
           onClick={handleChange(compProps.onGraphButtonClick)}>
