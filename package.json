@@ -75,7 +75,7 @@
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^4.1.1",
     "@firebase/app-types": "^0.4.8",
-    "@types/chart.js": "^2.8.5",
+    "@types/chart.js": "^2.9.7",
     "@types/classnames": "^2.2.9",
     "@types/enzyme": "^3.10.3",
     "@types/enzyme-adapter-react-16": "^1.0.5",
@@ -145,7 +145,7 @@
     "ag-grid-community": "^21.2.1",
     "ag-grid-react": "^21.2.1",
     "aws-sdk": "^2.528.0",
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.2",
