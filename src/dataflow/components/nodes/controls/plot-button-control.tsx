@@ -45,6 +45,8 @@ export class PlotButtonControl extends Rete.Control {
   public setGraph = (show: boolean) => {
     this.props.showgraph = show;
     this.putData(this.key, show);
+    // this update is needed to ensure that we redraw the plot
+    // in the proper state after the button is pressed
     this.node.update();
     this.emitter.trigger("process");
   }
