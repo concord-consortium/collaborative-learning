@@ -27,9 +27,9 @@ context('control panel ui',()=>{
             controlPanel.getHubStatus(hubName).should('contain','status').and('contain', 'offline');
             controlPanel.getHubChannelStatus(hubName).should('contain','channels').and('contain','no channels available');
         })
-        it.skip('verify a hub card has status and channel info when hub is online', ()=>{ 
-            //need to make sure cc-west-office-hub is running
-            var hubName='cc-west-office-hub'
+        it('verify a hub card has status and channel info when hub is online', ()=>{ 
+            //need to make sure codap-server-hub-sim is running
+            var hubName='codap-server-hub-sim'
             controlPanel.getHubStatus(hubName).should('contain','status');
             cy.wait(5000)
             controlPanel.getHubStatus(hubName).should('contain', 'online');
