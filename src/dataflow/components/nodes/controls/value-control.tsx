@@ -14,17 +14,24 @@ export class ValueControl extends Rete.Control {
     this.emitter = emitter;
     this.key = key;
 
-    this.component = (compProps: { value: number; sentence: string, class: string }) => (
-      <div className={`value-container
-                       ${compProps.class.toLowerCase().replace(/ /g, "-")}
-                       ${compProps.sentence.length > 12 ? "small" : ""}
-                       `}
-           title={"Node Value"}>
-        {compProps.sentence
-          ? compProps.sentence
-          : isFinite(compProps.value) ? roundNodeValue(compProps.value) : ""}
-      </div>
-    );
+    this.component = (compProps: { value: number; sentence: string, class: string }) => {
+      let sizeClass = "";
+      if (compProps.sentence.length > 15) {
+        sizeClass = "smallest";
+      } else if (compProps.sentence.length > 13) {
+        sizeClass = "small";
+      } else if (compProps.sentence.length > 11) {
+        sizeClass = "medium";
+      }
+      return (
+        <div className={`value-container ${compProps.class.toLowerCase().replace(/ /g, "-")} ${sizeClass}`}
+             title={"Node Value"}>
+          {compProps.sentence
+            ? compProps.sentence
+            : isFinite(compProps.value) ? roundNodeValue(compProps.value) : ""}
+        </div>
+      );
+    };
 
     const initial = node.data[key] || 0;
     node.data[key] = initial;
