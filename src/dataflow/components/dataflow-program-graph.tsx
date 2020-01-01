@@ -93,11 +93,11 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         destCtx.fillStyle = "#FFFFFF";
         destCtx.fillRect(0, 0, destWidth, destHeight);
         // draw each graph canvas onto the destination canvas
-        let currX = 0;
+        let currY = 0;
         Array.from(charts).forEach((chart, index) => {
           const src = chart as HTMLCanvasElement;
-          destCtx.drawImage(src, 0, currX);
-          currX += src.height;
+          destCtx.drawImage(src, 0, currY);
+          currY += src.height;
         });
       }
       const image = destinationCanvas.toDataURL("image/jpg");
