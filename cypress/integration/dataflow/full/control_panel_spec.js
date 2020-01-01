@@ -27,7 +27,7 @@ context('control panel ui',()=>{
             controlPanel.getHubStatus(hubName).should('contain','status').and('contain', 'offline');
             controlPanel.getHubChannelStatus(hubName).should('contain','channels').and('contain','no channels available');
         })
-        it('verify a hub card has status and channel info when hub is online', ()=>{ 
+        it.skip('verify a hub card has status and channel info when hub is online', ()=>{ 
             //need to make sure cc-west-office-hub is running
             var hubName='cc-west-office-hub'
             controlPanel.getHubStatus(hubName).should('contain','status');

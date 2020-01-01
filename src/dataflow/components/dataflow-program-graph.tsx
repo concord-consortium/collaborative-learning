@@ -245,6 +245,25 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
       }
     }
 
+    // By default, Chart.js often leaves the first vertical gridline unlabeled, even when there
+    // is room for such a label. This function allows us to post-process the rendered ticks to
+    // add the "missing" tick/label if there is room for it.
+    function afterBuildTicks(axis: any, ticks: any): any {
+      if ((axis?.type === "time") && (ticks?.length > 2)) {
+        const tick0Value = ticks[0].value;
+        const tickDiff = ticks[1].value - tick0Value;
+        // only add the new tick if there's room
+        if (dataMin < tick0Value - tickDiff / 2) {
+          const _ticks = ticks.slice();
+          _ticks.unshift({ value: tick0Value - tickDiff, major: false });
+          return _ticks;
+        }
+      }
+      return ticks;
+    }
+    // cast to any to override incorrect type declaration for afterBuildTicks() in @types/chart.js
+    const _afterBuildTicks = afterBuildTicks as any;
+
     const options: ChartOptions = {
       animation: {
         duration: 0
@@ -264,6 +283,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         // in the future, we should investigate an alternative approach that doesn't require
         // keeping track of chart.js state in our component state.
         onClick(e, legendItem) {
+          if (!legendItem?.datasetIndex) return;
           const index = legendItem.datasetIndex + indexOffset;
           const defaultLegendClickHandler = Chart.defaults.global.legend && Chart.defaults.global.legend.onClick;
           if (defaultLegendClickHandler) {
@@ -296,15 +316,13 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           type: "time",
           distribution: "linear",
           ticks: {
+            min: new Date(dataMin).toISOString(),
+            max: new Date(dataMax).toISOString(),
             source: "auto",
             fontSize: 9,
             display: true,
             minRotation: 0,
             maxRotation: 0,
-          },
-          time: {
-            min: new Date(dataMin).toISOString(),
-            max: new Date(dataMax).toISOString(),
           },
           scaleLabel: {
             display: true,
@@ -314,7 +332,8 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
           },
           gridLines: {
             display: true
-          }
+          },
+          afterBuildTicks: _afterBuildTicks
         }]
       },
     };
