@@ -44,6 +44,7 @@ interface IState {
 }
 
 export class DataflowProgramGraph extends React.Component<IProps, IState> {
+  private graphContainerRef = React.createRef<HTMLDivElement>();
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -68,6 +69,46 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public handleExport = () => {
     const {dataSet} = this.props;
     exportCSV(dataSet.sequences);
+  }
+
+  public handleExportImage = () => {
+    const node = this.graphContainerRef.current;
+    // only get children of component container to avoid other graphs (thumbnails, 2-up)
+    const charts = node && node.getElementsByClassName("chartjs-render-monitor");
+    if (charts && charts.length) {
+      let destHeight = 0;
+      let destWidth = 0;
+      Array.from(charts).forEach((chart, index) => {
+        const src = chart as HTMLCanvasElement;
+        destHeight += src.height;
+        destWidth = Math.max(destWidth, src.width);
+      });
+
+      // create canvas to stitch together multiple graphs and display background color
+      const destinationCanvas = document.createElement("canvas");
+      destinationCanvas.width = destWidth;
+      destinationCanvas.height = destHeight;
+      const destCtx = destinationCanvas.getContext("2d");
+      if (destCtx) {
+        destCtx.fillStyle = "#FFFFFF";
+        destCtx.fillRect(0, 0, destWidth, destHeight);
+        // draw each graph canvas onto the destination canvas
+        let currY = 0;
+        Array.from(charts).forEach((chart, index) => {
+          const src = chart as HTMLCanvasElement;
+          destCtx.drawImage(src, 0, currY);
+          currY += src.height;
+        });
+      }
+      const image = destinationCanvas.toDataURL("image/jpg");
+      const imageFilename = "dataflow-image-" + Date.now() + ".jpg";
+      const link = document.createElement("a");
+      link.href = image;
+      link.setAttribute("download", imageFilename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
   public shouldComponentUpdate(nextProps: IProps, nextState: IState) {
@@ -107,6 +148,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
             ? <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>
             : <button className="graph-button export wide" onClick={this.handleExport}>Export Data (csv)</button>
           }
+          <button className="graph-button export" onClick={this.handleExportImage}>Export Image</button>
           <button className="graph-button data" onClick={this.handleDataModeClick}>
             { this.state.fullRun ? "All Data" : "Full Run" }
           </button>
@@ -124,7 +166,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public renderOverlappedGraphs() {
     const chartData = this.chartDataOverlapped();
     return (
-      <div className="overlapped-graph-container">
+      <div className="overlapped-graph-container" ref={this.graphContainerRef}>
         <Line
           data={chartData}
           options={this.chartOptions(0)}
@@ -137,7 +179,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   public renderStackedGraphs() {
     const chartDataStacked = this.chartDataStacked();
     return (
-      <div className="stacked-graph-container">
+      <div className="stacked-graph-container" ref={this.graphContainerRef}>
       {chartDataStacked.map((chartData: ChartData, index) => (
         <div className="stacked-graph" key={index}>
           <Line
