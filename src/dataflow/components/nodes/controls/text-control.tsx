@@ -12,18 +12,19 @@ export class TextControl extends Rete.Control {
               key: string,
               node: Node,
               label = "",
-              initVal = "") {
+              initVal = "",
+              tooltip = "") {
     super(key);
     this.emitter = emitter;
     this.key = key;
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    this.component = (compProps: { value: any; onChange: any; label: any, color: string}) => {
+    this.component = (compProps: { value: any; onChange: any; label: any, color: string, tooltip: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (
-        <div className="text-container">
+        <div className="text-container" title={compProps.tooltip}>
           { label
             ? <label className="text-label">{compProps.label}</label>
             : null
@@ -51,7 +52,8 @@ export class TextControl extends Rete.Control {
         this.setValue(v);
         this.emitter.trigger("process");
       },
-      label
+      label,
+      tooltip
     };
   }
 

@@ -18,7 +18,13 @@ export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
-  constructor(emitter: NodeEditor, key: string, node: Node, optionArray: ListOption[], readonly = false, label = "") {
+  constructor(emitter: NodeEditor,
+              key: string,
+              node: Node,
+              optionArray: ListOption[],
+              readonly = false,
+              label = "",
+              tooltip = "Select Type") {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -34,9 +40,10 @@ export class DropdownListControl extends Rete.Control {
                                     optionArray: ListOption[];
                                     listClass: string;
                                     label: string;
-                                    isDisabled?: DisabledChecker;
+                                    isDisabled?: DisabledChecker,
+                                    tooltip: string;
                                   }) => (
-      <div className="node-select-container">
+      <div className="node-select-container" title={compProps.tooltip}>
         { label &&
         <div className="node-select-label">{label}</div>
         }
@@ -135,7 +142,8 @@ export class DropdownListControl extends Rete.Control {
       optionArray,
       listClass: key,
       label,
-      isDisabled: null
+      isDisabled: null,
+      tooltip
     };
   }
 

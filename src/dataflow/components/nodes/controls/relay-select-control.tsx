@@ -74,7 +74,7 @@ export class RelaySelectControl extends Rete.Control {
                          ? "item top missing"
                          : "item top";
       return (
-        <div className="node-select relay-select" ref={divRef}>
+        <div className="node-select relay-select" ref={divRef} title={"Select Relay"}>
           <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
             <div className={titleClass}>{channelString}</div>
             <svg className="icon dropdown-caret">

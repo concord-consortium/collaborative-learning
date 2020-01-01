@@ -20,11 +20,17 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       this.inputCount = 1;
-      node.addControl(new TextControl(this.editor, "datasetName", node, "Name", "my-dataset"));
+      node.addControl(new TextControl(this.editor, "datasetName", node, "Name", "my-dataset", "Set Dataset Name"));
       const intervalTimeOptions = IntervalTimes.map(option => ({
         name: option.text, val: option.val
       }));
-      node.addControl(new DropdownListControl(this.editor, "interval", node, intervalTimeOptions, true, "Interval"));
+      node.addControl(new DropdownListControl(this.editor,
+                                              "interval",
+                                              node,
+                                              intervalTimeOptions,
+                                              true,
+                                              "Interval",
+                                              "Select Interval"));
       if (node.data.inputKeys) {
         const keys: any = node.data.inputKeys;
         keys.forEach((key: string, index: number) => {
@@ -32,7 +38,12 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
           const keyNum = parseInt(key.substring(this.inputPrefix.length), 10);
           this.inputCount = Math.max(this.inputCount, keyNum);
           if (this.editor && index !== keys.length - 1) {
-            inp.addControl(new TextControl(this.editor, this.textPrefix + this.inputCount, node, "", "my-sequence"));
+            inp.addControl(new TextControl(this.editor,
+                                           this.textPrefix + this.inputCount,
+                                           node,
+                                           "",
+                                           "my-sequence",
+                                           "Set Sequence Name"));
           }
           node.addInput(inp);
           const tc = inp.control as TextControl;
@@ -113,7 +124,8 @@ export class DataStorageReteNodeFactory extends DataflowReteNodeFactory {
         this.textPrefix + this.inputCount,
         node,
         "",
-        sequenceName));
+        sequenceName,
+        "Set Sequence Name"));
       const tc = lastInput.control as TextControl;
       if (tc) {
         tc.setColor(ChartPlotColors[node.inputs.size - 1 % ChartPlotColors.length]);

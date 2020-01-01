@@ -56,7 +56,7 @@ const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: Dura
   };
   return (
     <div className="running-container">
-      <div className="duration" title="Duration">
+      <div className="duration" title="Set Program Duration">
         <div className="label-back">
           <div className="label">Duration</div>
         </div>
@@ -77,7 +77,7 @@ const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: Dura
       </div>
       <button
         className="program-state-button"
-        title="Run"
+        title="Run Program"
         onClick={props.onRunProgramClick}
         disabled={!props.isRunEnabled || props.readOnly}
       >
@@ -119,7 +119,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       }
       <button
         className="program-state-button"
-        title="Stop"
+        title="Stop Program"
         onClick={props.onStopProgramClick}
         disabled={!props.runningProgram || !props.readOnly}
       >

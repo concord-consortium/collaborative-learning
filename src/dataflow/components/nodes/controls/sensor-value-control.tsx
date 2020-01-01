@@ -26,7 +26,7 @@ export class SensorValueControl extends Rete.Control {
     this.updateUnits();
 
     this.component = (compProps: { value: number; units: string; }) => (
-      <div className="sensor-value">
+      <div className="sensor-value" title={"Node Value"}>
         <div className="value-container">
           {isNaN(compProps.value) ? kEmptyValueString : compProps.value}
         </div>
