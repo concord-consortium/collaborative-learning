@@ -33,7 +33,7 @@ context('canvas test',()=>{
 
     describe('canvas ui',()=>{
         it('verifies delete button is disabled',()=>{
-            canvas.getDeleteIcon().should('be.visible');
+            canvas.getDeleteIcon().should('have.class', 'delete-disabled');
         })
         it('verify Dataflow tile opens with program toolbar',()=>{
             buttons.push('Clear','Reset')
