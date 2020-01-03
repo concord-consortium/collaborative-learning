@@ -67,6 +67,7 @@ context('Program Canvas tests',function(){
             dfcanvas.openBlock('Data Storage')
             dfblock.getNumberInput().type('5');
             dfblock.connectBlocks('number',0,'data-storage',0)
+            cy.wait(2000)
             dfcanvas.selectDuration('60')
             dfcanvas.runProgram(dataset2);
             dfcanvas.getDurationContainer().find('.total').should('contain', '1 min')
@@ -130,13 +131,12 @@ context('Program Canvas tests',function(){
             dfcanvas.openBlock('Number');
             dfcanvas.moveBlock('relay',0,250,5);
             dfblock.connectBlocks('number',0,'relay',0)
+            cy.wait(2000)
             dfblock.selectRelayOperator('codap-server-hub-sim');
             dfcanvas.selectDuration('60')
             dfcanvas.runProgram();
             canvas.copyDocument(secondRelayTest);
             cy.wait(2000)
-            // dfcanvas.openBlock('Relay');
-            // dfblock.selectRelayOperator('codap-server-hub-sim');
             dfcanvas.runProgram();
             dialog.getDialogTitle().should('contain','Relay In Use');
             dialog.getDialogOKButton().click();
