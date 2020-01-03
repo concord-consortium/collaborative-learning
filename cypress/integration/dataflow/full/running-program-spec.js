@@ -121,7 +121,7 @@ context('Program Canvas tests',function(){
             dfcanvas.stopProgram();
         })
     }) 
-    describe('Relay tests',()=>{
+    describe.skip('Relay tests',()=>{
         const relayTestProgram = "Relay test program"
         const secondRelayTest = 'Second Relay Program'
 
