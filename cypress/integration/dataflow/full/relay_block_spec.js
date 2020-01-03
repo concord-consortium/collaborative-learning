@@ -28,7 +28,7 @@ context('Relay block tests',()=>{//Use number block and change the value manuall
     describe('Relay block UI',()=>{
         it('verify UI',()=>{ //block should have 1 dropdowns, one value field, no input node, one output mode
             dfblock.getBlockTitle(testBlock).should('contain','Relay');
-            dfblock.getRelayListDropDown().should('be.visible');
+            dfblock.getRelayListDropdown().should('be.visible');
             dfblock.getRelayValueTextField().should('be.visible');
             dfblock.getOutputNodesNum(testBlock).should('not.exist');
             dfblock.getInputNode(testBlock).should('be.visible');

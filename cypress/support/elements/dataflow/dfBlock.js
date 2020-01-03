@@ -56,7 +56,7 @@ class dfBlock{
         return cy.get('.single-workspace .node-select.sensor-type')
     }
     openSensorTypeListDropdown(){
-        this.getSensorTypeListDropdown().click()
+        this.getSensorTypeListDropdown().find('.dropdown-caret').click()
     }
     getSensorOptionList(){//gets the label element for list of sensors in dropdwon
         return cy.get('.single-workspace .node-select.sensor-type .label')
@@ -73,7 +73,7 @@ class dfBlock{
         return cy.get('.single-workspace .sensor-select')
     }
     openHubSensorComboListDropdown(){
-        this.getHubSensorComboListDropdown().click();
+        this.getHubSensorComboListDropdown().find('.dropdown-caret').click();
     }
     getHubSensorComboOptionList(){
         return cy.get('.single-workspace .sensor-select .sensor-type-option .label');
@@ -99,7 +99,7 @@ class dfBlock{
         return cy.get('.single-workspace .node.generator .generatorType')
     }
     openGeneratorTypeListDropdown(){
-        this.getGeneratorTypeListDropdown().click();
+        this.getGeneratorTypeListDropdown().find('.dropdown-caret').click();
     }
     selectGeneratorType(type){
         this.openGeneratorTypeListDropdown()
@@ -126,7 +126,7 @@ class dfBlock{
         return cy.get('.single-workspace .node.math .mathOperator');
     }
     openMathOperatorDropdown(){
-        this.getMathOperatorDropdown().click();
+        this.getMathOperatorDropdown().find('.dropdown-caret').click();
     }
     selectMathOperator(operator){
         this.getMathOperatorDropdown().find('.option-list').contains(operator).click();
@@ -143,7 +143,7 @@ class dfBlock{
         return cy.get('.single-workspace .node.logic .logicOperator');
     }
     openLogicOperatorDropdown(){
-        this.getLogicOperatorDropdown().click();
+        this.getLogicOperatorDropdown().find('.dropdown-caret').click();
     }
     selectLogicOperator(operator){
         this.getLogicOperatorDropdown().find('.option-list .label').contains(operator).click();
@@ -157,7 +157,7 @@ class dfBlock{
         return cy.get('.single-workspace .node.transform .transformOperator')
     }
     openTransformOperatorDropdown(){
-        this.getTransformOperatorDropdown().click();
+        this.getTransformOperatorDropdown().find('.dropdown-caret').click();
     }
     selectTransformOperator(operator){
         this.getTransformOperatorDropdown().find('.option-list').contains(operator).click({force:true});
@@ -168,11 +168,15 @@ class dfBlock{
     }
 
     //Relay block
-    getRelayListDropDown(){
+    getRelayListDropdown(){
         return cy.get('.single-workspace .node.relay .relay-select')
     }
+    openRelayListDropdown(){
+        this.getRelayListDropdown().find('.dropdown-caret').click();
+    }
     selectRelayOperator(hub){
-        this.getRelayListDropDown().click().find('.label').contains(hub).click();
+        this.openRelayListDropdown()
+        this.getRelayListDropdown().find('.label').contains(hub).click();
     }
     getRelayValueTextField(){
         return cy.get('.single-workspace .node.relay [title=nodeValue] .value-container')
@@ -195,7 +199,7 @@ class dfBlock{
         return cy.get('.interval.selectable .label')
     }
     selectStorageIntervalTime(interval){
-        this.getStorageIntervalDropdown().click();
+        this.getStorageIntervalDropdown().find('.dropdown-caret').click();
         this.getStorageIntervalDropdownSelection().contains(interval).click();
     }
     storageSequenceTextFieldEl(sequenceNum=1){
