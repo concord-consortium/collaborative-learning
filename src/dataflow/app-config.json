@@ -48,6 +48,7 @@
   "copyPreferOriginTitle": true,
   "disableTileDrags": true,
   "supportStackedTwoUpView": true,
+  "showPublishedDocsInPrimaryWorkspace": true,
   "comparisonPlaceholderContent": [
     "Comparison View:",
     "Select another data file to view it here."

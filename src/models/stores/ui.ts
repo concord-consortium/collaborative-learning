@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { debounce } from "lodash";
+import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
@@ -162,9 +163,12 @@ export const UIModel = types
       },
       closeDialog,
 
-      rightNavDocumentSelected(document: DocumentModelType) {
-        // class work or log
-        if (document.isPublished) {
+      rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
+        if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
+          self.problemWorkspace.setAvailableDocument(document);
+          restoreDefaultNavExpansion();
+        }
+        else if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {
             self.problemWorkspace.setComparisonDocument(document);
             self.problemWorkspace.toggleComparisonVisible({override: true});
@@ -172,11 +176,7 @@ export const UIModel = types
           else {
             alert("Please select a primary document first.", "Select Primary Document");
           }
-        }
-        // my work
-        else {
-          self.problemWorkspace.setAvailableDocument(document);
-          restoreDefaultNavExpansion();
+          return;
         }
       },
       setTeacherPanelKey(key: string) {
