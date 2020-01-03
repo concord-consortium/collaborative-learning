@@ -58,9 +58,11 @@ export class HubListComponent extends BaseComponent<IProps, IState> {
 
   private renderHubChannel(ch: HubChannelType, showPlug: boolean) {
     const plug = ch.plug > 0 && showPlug ? ` (plug ${ch.plug})` : "";
+    const channelClass = "channel " + (ch.missing ? "missing" : "");
+    const channelText = `${ch.type}${plug}: ` + (ch.missing ? "Finding device" : `${ch.value} ${ch.units}`);
     return (
-      <div className="channel" key={ch.id}>
-        <div className="label">{ `${ch.type}${plug}: ${ch.value} ${ch.units}` }</div>
+      <div className={channelClass} key={ch.id}>
+        <div className="label">{channelText}</div>
       </div>
     );
   }
