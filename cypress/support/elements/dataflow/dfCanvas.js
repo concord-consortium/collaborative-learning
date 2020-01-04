@@ -46,20 +46,20 @@ class dfCanvas{
     getProgressTime(){
         return cy.get('.progress-time')
     }
-    // getRunDialogOkButton(){
-    //     return cy.get('.dialog .dialog-container .dialog-contents .dialog-buttons #okButton').contains('Ok');
-    // }
     selectDuration(duration){
         this.getDurationDropdown().select(duration)
     }
     runProgram(title=''){
         this.getRunButton().click()
             .then(() => {
-            // dialog.getDialogTitle().should('exist').and('contain','Run Program');
-            if (title!='') {
-                dialog.getDialogTextInput().type('{selectall}{backspace}'+title)
-            }
-            dialog.getDialogOKButton().click();
+                dialog.getDialogTitle().text().then((dialogTitle)=>{
+                    if (dialogTitle.includes('Run')) {  
+                            if (title!='') {
+                                dialog.getDialogTextInput().type('{selectall}{backspace}'+title)
+                            }
+                            dialog.getDialogOKButton().click();
+                        }
+                })
         })
     }
     stopProgram(){
@@ -107,6 +107,9 @@ class dfCanvas{
 
     getFullGraph(){
         return cy.get('.program-graph.full')
+    }
+    getGraphButton(button){
+        return cy.get('.graph-button.'+button)
     }
 }
 export default dfCanvas;

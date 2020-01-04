@@ -29,7 +29,9 @@ context('Workspace view',()=>{
         it('verify click on Workspace button shows the dataflow workspace',()=>{
             header.switchWorkspace('Workspace');
             canvas.getSingleCanvas().should('be.visible')
-            rightNav.getRightNavTabs().should('exist')
+            rightNav.getRightNavTabs().should('be.visible')
+            rightNav.getRightNavTab('my-work').should('be.visible')
+            rightNav.getRightNavTab('class-work').should('be.visible')
         })
     })
 })

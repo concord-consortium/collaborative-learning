@@ -13,7 +13,7 @@ class RightNav{
     }
 
     getRightNavTab(tab){
-        return cy.get('#rightNavTab'+tab+'.tab');
+        return cy.get('#rightNavTab-'+tab+'.tab');
     }
 
     openRightNavTab(tab){   
@@ -35,7 +35,7 @@ class RightNav{
 
     openSection(tab,section,title=''){ 
         if (section===''){
-            cy.get('[data-test='+tab+'-section]').find('.title').contains(title).click()
+            cy.get('[data-test='+tab+'-section]').find('[title='+title+']').click()
         }
         else if (tab=='learning-log'){
             cy.get('[data-test='+tab+'-section]').click();
@@ -52,8 +52,16 @@ class RightNav{
         return cy.get('[data-test='+tab+'-section-'+section).siblings('[data-test=my-work-list-items]');
     }
 
-    getCanvasItemTitle(tab,section){
-        if ((tab=='learning-log')||(section==='')){
+    getCanvasItemTitle(tab,section,sectionTitle=''){
+        if (section===''){
+            cy.log("in section==''")
+            return cy.get('[data-test='+tab+'-section]').find('[title="'+sectionTitle+'"]').parent().parent().within(($section)=>{
+                return cy.get('.list-container').find('.footer .info div')
+            })
+        }
+        else 
+        // if ((tab=='learning-log')||(section=='')){
+        if ((tab=='learning-log')){
             return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div')
         } else {
             return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div')
@@ -61,8 +69,8 @@ class RightNav{
         }
     }
 
-    openCanvasItem(tab, section='', title){
-        this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+    openCanvasItem(tab, section='', sectionTitle,title){
+        this.getCanvasItemTitle(tab,section,sectionTitle).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
     }
 }
 export default RightNav;

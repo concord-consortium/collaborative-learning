@@ -38,7 +38,7 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
         it('verify only one Data Storage block can be opened',()=>{
             dfcanvas.getProgramToolbarButtons().contains('Data Storage').parent().should('have.attr', 'disabled')
         })
-        it('verify name can be entered',()=>{
+        it('verify data set name can be entered',()=>{
             var datasetName = 'test dataset'
             dfblock.getStorageNameTextField().should('have.value','my-dataset');
             dfblock.getStorageNameTextField().type('{selectall}{backspace}'+datasetName);
@@ -50,10 +50,9 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.selectStorageIntervalTime(interval);
             dfblock.getStorageIntervalDropdown().should('contain', interval);
         })
-        // it('verify sequence name does not exist before connection',()=>{
-        //     var sequenceName = 'input number'
-        //     dfblock.getStorageSequenceTextField().should('not.exist');
-        // })
+        it('verify sequence name does not exist before connection',()=>{
+            dfblock.getStorageSequenceTextField().should('not.exist');
+        })
         it('verify a new input node is added when a block is connected to an input',()=>{
             dfblock.getInputNodesNum(testBlock).should('have.length',1);
             dfblock.connectBlocks('number',0,testBlock,0)
@@ -65,8 +64,13 @@ context('Data Storage block tests',()=>{//Use generator block on square wave for
             dfblock.getStorageSequenceTextField().type('{selectall}{backspace}'+sequenceName);
             dfblock.getStorageSequenceTextField().should('have.value',sequenceName);
         })
-        //add test for when connection is made, the text field exists, and default name should be reasonable
-        //add test for disconnection to node. expected is the text field should disappear.
+        it('verify sequence text field disappears when blocks are disconnected',()=>{
+            dfblock.deleteBlock('number');
+            dfblock.getStorageSequenceTextField().should('not.exist')
+        })
+        it('verify there is only one input node after disconnect',()=>{
+            dfblock.getInputNode('data-storage').should('have.length', 1)
+        })
     })
 })
 after(function(){
