@@ -5,7 +5,7 @@ wait-on http://localhost:8080
 
 if [[ "$TRAVIS_COMMIT_MESSAGE" == *"[dev-build]"* ]]; then 
     npm run test:cypress:smoke
-elif [["$TRAVIS_BRANCH" != "master"]]; then
+elif [["$TRAVIS_BRANCH" == "branch"]]; then
     npm run test:cypress:branch   
 else 
     npm run test:cypress

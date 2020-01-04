@@ -2,6 +2,7 @@ sudo: false
 dist: trusty
 language: node_js
 node_js: lts/*
+env: branch
 cache:
   bundler: true
   pip: true
