@@ -2,6 +2,8 @@ sudo: false
 dist: trusty
 language: node_js
 node_js: lts/*
+env:
+  TRAVIS_BRANCH = branch
 cache:
   bundler: true
   pip: true
