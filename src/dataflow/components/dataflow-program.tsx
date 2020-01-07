@@ -1047,6 +1047,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             });
           });
           this.setState({ graphDataSet });
+        } else {
+          this.getRunState() === ProgramRunStates.Complete && this.setState({ graphDataSet });
         }
       });
     }
