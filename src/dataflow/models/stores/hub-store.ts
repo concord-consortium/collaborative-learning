@@ -56,11 +56,13 @@ export const HubModel = types
       const ch = self.getHubChannel(id);
       if (ch) {
         ch.missing = missing;
+        missing && (ch.value = "NaN");
       }
     },
     setAllHubChannelsMissingState(missing: boolean) {
       self.hubChannels.forEach(ch => {
         ch.missing = missing;
+        missing && (ch.value = "NaN");
       });
     },
     setHubChannelValue(id: string, value: string) {
