@@ -135,7 +135,7 @@ export class SensorSelectControl extends Rete.Control {
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
-        if (!ch) return `${kSensorMissingMessage} ${id}`;
+        if (!ch || ch.missing) return `${kSensorMissingMessage} ${id}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         return `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
