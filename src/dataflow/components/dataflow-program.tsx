@@ -154,6 +154,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
           onProgramTimeSelectClick={this.setProgramRunTime}
+          onRefreshDevices={this.deviceRefresh}
           programRunTimes={ProgramRunTimes}
           programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
           isRunEnabled={this.isReady()}
@@ -840,6 +841,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             nodeView.el.style.zIndex = (nodeZ - 1).toString();
           }
         }
+      }
+    });
+  }
+
+  private deviceRefresh = () => {
+    const message = "Refresh will update the list of sensor and relay devices that appear in the node selection menus. \
+                     Please wait 5-10 seconds for refresh to complete. \
+                     If your device does not appear in the node selection after refresh, \
+                     check if the device is plugged in and the hub is turned on.";
+    this.stores.ui.confirm(message, "Refresh Sensors and Relays?")
+    .then(ok => {
+      if (ok) {
+        const { iot } = this.stores;
+        iot.requestAllHubsChannelInfo();
       }
     });
   }

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ProgramRunTime } from "../utilities/node";
 import { HTMLSelect } from "@blueprintjs/core";
+import { IconButton } from "../../components/utilities/icon-button";
 
 import "./dataflow-program-topbar.sass";
 
@@ -10,6 +11,7 @@ interface TopbarProps {
   programRunTimes: ProgramRunTime[];
   programDefaultRunTime: number;
   onProgramTimeSelectClick: (type: number) => void;
+  onRefreshDevices: () => void;
   isRunEnabled: boolean;
   runningProgram: boolean;
   remainingTimeInSeconds: number;
@@ -100,6 +102,10 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const secondsString = String(remainingSeconds).padStart(2, "0");
   return (
     <div className="program-editor-topbar">
+      <div className="refresh">
+        <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
+                  onClickButton={props.onRefreshDevices} title="Refresh Devices" />
+      </div>
       { props.runningProgram
         ? <CountdownTimerComponent
             duration={runTime ? runTime.text.toString() : ""}

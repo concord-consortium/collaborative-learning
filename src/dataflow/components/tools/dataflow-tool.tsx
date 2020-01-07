@@ -8,6 +8,7 @@ import { DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataflowContentModelType } from "../../models/tools/dataflow/dataflow-content";
+import { ERightNavTab } from "../../../models/view/right-nav";
 import { DataflowProgram, IStartProgramParams } from "../dataflow-program";
 import { cloneDeep } from "lodash";
 import { SizeMe, SizeMeProps } from "react-sizeme";
@@ -83,9 +84,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
   private switchToDocument(document: DocumentModelType) {
     if (document) {
-      const { ui: { problemWorkspace } } = this.stores;
-      problemWorkspace.toggleComparisonVisible({ override: false });
-      problemWorkspace.setPrimaryDocument(document);
+      const { ui } = this.stores;
+      ui.problemWorkspace.toggleComparisonVisible({ override: false });
+      ui.problemWorkspace.setPrimaryDocument(document);
+      ui.setActiveRightNavTab(ERightNavTab.kMyWork);
     }
   }
 

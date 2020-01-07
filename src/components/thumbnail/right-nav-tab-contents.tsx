@@ -138,8 +138,8 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   }
 
   private handleDocumentClick = (document: DocumentModelType) => {
-    const {ui} = this.stores;
-    ui.rightNavDocumentSelected(document);
+    const { appConfig, ui } = this.stores;
+    ui.rightNavDocumentSelected(appConfig, document);
   }
 
   private handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {

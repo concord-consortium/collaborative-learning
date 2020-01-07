@@ -83,7 +83,7 @@ class Canvas{
     copyDocument(title){
         this.getCopyIcon().click()
             .then(function(){
-                dialog.getDialogTitle().should('exist').contains('Copy Problem Workspace');
+                dialog.getDialogTitle().should('exist').and('contain','Copy');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click(); 
             })
