@@ -22,6 +22,8 @@ export interface QueryParams {
   token?: string;
   // The domain of the portal opening the app
   domain?: string;
+  // the user ID of the user launching from the portal domain
+  domain_uid?: string;
 
   // If this exists then the demo ui is shown
   demo?: boolean;
