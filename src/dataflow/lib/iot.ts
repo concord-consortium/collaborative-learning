@@ -69,6 +69,13 @@ export class IoT {
     }
   }
 
+  public requestAllHubsChannelInfo() {
+    const  { hubStore } = this.stores;
+    hubStore.hubs.forEach(hub => {
+      this.requestHubChannelInfo(hub.hubId);
+    });
+  }
+
   private startThingListener(credentials: AWS.Credentials) {
     const { accessKeyId, secretAccessKey, sessionToken } = credentials;
 
