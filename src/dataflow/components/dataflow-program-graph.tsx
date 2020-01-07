@@ -128,12 +128,12 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
                             ? "most"
                             : "half");
     const wideClass = programDisplayState === ProgramDisplayStates.Graph ? "wide" : "";
-    const hasValidTime = dataSet.startTime !== 0 || dataSet.endTime !== 0;
+    const hasValidTime = dataSet.startTime > 0 || dataSet.endTime > 0;
     return (
       <div className={`program-graph ${graphClass}`} data-test="program-graph">
         {dataSet.sequences.length === 0 && (!hasValidTime
                                             ? <div className="graph-loading"/>
-                                            : <div className="graph-error">Error loading dataset</div>)}
+                                            : <div className="graph-error">Dataset contains no data</div>)}
         { this.state.stacked
           ? this.renderStackedGraphs()
           : this.renderOverlappedGraphs()
