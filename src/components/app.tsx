@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import * as React from "react";
+import { Alert } from "@blueprintjs/core";
 import { authenticate } from "../lib/auth";
 import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
@@ -96,7 +97,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       let errorMessage = error.toString();
       if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
           (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-        errorMessage = "Your authorization has expired.  Please close this window and re-run the activity.";
+        errorMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
       }
       ui.setError(errorMessage);
     });
@@ -182,8 +183,21 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   private renderError(error: string) {
     return (
       <div className="error">
-        {error.toString()}
+        <Alert
+          icon="error"
+          canEscapeKeyCancel={false}
+          canOutsideClickCancel={false}
+          className="error"
+          confirmButtonText="Proceed"
+          isOpen={true}
+          onConfirm={this.handlePortalLoginRedirect} >
+          <p>{error.toString()}</p>
+        </Alert>
       </div>
     );
+  }
+
+  private handlePortalLoginRedirect() {
+    window.location.href = urlParams.domain || "https://learn.concord.org";
   }
 }
