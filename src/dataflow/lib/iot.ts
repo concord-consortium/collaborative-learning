@@ -1,8 +1,9 @@
 import { MqttClient, connect } from "mqtt";
+import * as AWS from "aws-sdk";
 import { IStores } from "../models/stores/dataflow-stores";
 import { getSignedUrl } from "../utilities/aws";
 import { HubChannelModel } from "../models/stores/hub-store";
-import * as AWS from "aws-sdk";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 const AWS_REGION = "us-east-1";
 const COGNITO_POOL = "us-east-1:153d6337-3421-4c34-a21f-d1d2143a5091";
@@ -279,15 +280,22 @@ export class IoT {
       sessionToken
     });
     this.client = connect(url);
-    this.client.on("message", (topic, rawMessage) => {
-      const message = JSON.parse(rawMessage as any);
+    this.client.on("message", this.handleMqttMessage);
+  }
+
+  private handleMqttMessage = (topic: string, payload: Buffer) => {
+    const message = safeJsonParse(payload as any);
+    if (message) {
       const { hubId, leafLevel } = this.parseTopic(topic);
       if (leafLevel === "devices") {
         this.processHubChannelInfoMessage(hubId, message);
       } else if (leafLevel === "sensors") {
         this.processSensorValuesMessage(hubId, message);
       }
-    });
+    }
+    else {
+      console.error("IoT.handleMqttMessage: Invalid message -- topic:", topic, "payload:", payload);
+    }
   }
 
   private parseTopic(topic: string) {
