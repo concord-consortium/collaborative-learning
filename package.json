@@ -7,7 +7,8 @@
     "pageTitle": "Dataflow",
     "pageDescription": "Create Data. Control Your World.",
     "branchTagRegEx": "/dataflow-app\\.concord\\.org\\/(branch|tag)(\\/|$)/i",
-    "masterBranchRegEx": "/dataflow-app\\.concord\\.org\\/branch\\/master(\\/|$)/i"
+    "masterBranchRegEx": "/dataflow-app\\.concord\\.org\\/branch\\/dataflow(\\/|$)/i",
+    "rollbarAccessToken": "e9d3071af1a44af0b8be3ba6f9a6e455"
   },
   "jest": {
     "transform": {

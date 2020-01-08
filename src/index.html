@@ -18,7 +18,7 @@
           isDemo = /appMode=demo/.test(window.location.search),
           isProduction = !isLocalhost && !isBranchOrTag && isAuthed;
       var _rollbarConfig = {
-          accessToken: "fb9dd070b7344cc7a5e529d8fa25e765",
+          accessToken: "<%= rollbarAccessToken %>",
           captureUncaught: true,
           captureUnhandledRejections: true,
           enabled: !isLocalhost && (isAuthed || (isDemo && isMasterBranch)),
