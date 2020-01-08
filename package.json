@@ -1,13 +1,14 @@
 {
   "name": "@concord-consortium/dataflow",
-  "version": "3.0.0-pre.20200106",
+  "version": "3.0.0",
   "description": "A digital tool for experimental control and data acquisition using Internet-of-Things sensors.",
   "main": "index.js",
   "config": {
     "pageTitle": "Dataflow",
     "pageDescription": "Create Data. Control Your World.",
     "branchTagRegEx": "/dataflow-app\\.concord\\.org\\/(branch|tag)(\\/|$)/i",
-    "masterBranchRegEx": "/dataflow-app\\.concord\\.org\\/branch\\/master(\\/|$)/i"
+    "masterBranchRegEx": "/dataflow-app\\.concord\\.org\\/branch\\/dataflow(\\/|$)/i",
+    "rollbarAccessToken": "e9d3071af1a44af0b8be3ba6f9a6e455"
   },
   "jest": {
     "transform": {

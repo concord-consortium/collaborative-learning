@@ -610,14 +610,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
-        if (!chInfo && n.data.sensor !== "none") {
+        if ((!chInfo && n.data.sensor !== "none") || (chInfo && chInfo.missing)) {
           if (typeof n.data.sensor === "string" && typeof n.data.type === "string") {
             missingDevices.push({ id: n.data.sensor, type: n.data.type});
           }
         }
       } else if (n.name === "Relay" && n.data.relayList) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.relayList);
-        if (!chInfo && n.data.relayList !== "none") {
+        if ((!chInfo && n.data.relayList !== "none") || (chInfo && chInfo.missing)) {
           if (typeof n.data.relayList === "string") {
             missingDevices.push({ id: n.data.relayList, type: "relay"});
           }
@@ -1047,6 +1047,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             });
           });
           this.setState({ graphDataSet });
+        } else {
+          (this.getRunState() === ProgramRunStates.Complete) && this.setState({ graphDataSet });
         }
       });
     }

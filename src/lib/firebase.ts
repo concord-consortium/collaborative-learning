@@ -54,8 +54,7 @@ export class Firebase {
 
   public getRootFolder() {
     // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
-    const { appMode, user } = this.db.stores;
-    const { demoName } = urlParams;
+    const { appMode, demo: { name: demoName }, user } = this.db.stores;
 
     const parts = [];
     if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
