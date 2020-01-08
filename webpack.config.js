@@ -5,6 +5,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJson = require('./package.json');
+const fs = require('fs');
+const path = require('path');
+const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
+const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
@@ -90,7 +94,10 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         filename: 'index.html',
         template: 'src/index.html',
-        templateParameters: packageJson.config
+        templateParameters: {
+          rollbarSnippet,
+          ...packageJson.config
+        }
       }),
       new CopyWebpackPlugin([
         {from: 'src/public'}
