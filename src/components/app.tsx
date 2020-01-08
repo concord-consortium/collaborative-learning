@@ -97,7 +97,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       let errorMessage = error.toString();
       if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
           (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-        errorMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
+        errorMessage = "We're sorry, but you need to start again at the Concord site.";
       }
       ui.setError(errorMessage);
     });
@@ -188,7 +188,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
           canEscapeKeyCancel={false}
           canOutsideClickCancel={false}
           className="error"
-          confirmButtonText="Proceed"
+          confirmButtonText="Return to Concord"
           isOpen={true}
           onConfirm={this.handlePortalLoginRedirect} >
           <p>{error.toString()}</p>
