@@ -1,5 +1,5 @@
-import Rete from "rete";
-import { Node, Socket } from "rete";
+import Rete from "@concord-consortium/rete";
+import { Node, Socket } from "@concord-consortium/rete";
 import { DataflowNode } from "../dataflow-node";
 import { DeleteControl } from "../controls/delete-control";
 

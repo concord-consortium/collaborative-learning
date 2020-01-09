@@ -2,8 +2,8 @@ import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without t
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "./dataflow-base";
 import * as React from "react";
-import Rete, { NodeEditor, Node, Input } from "rete";
-import ConnectionPlugin from "rete-connection-plugin";
+import Rete, { NodeEditor, Node, Input } from "@concord-consortium/rete";
+import ConnectionPlugin from "@concord-consortium/rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
 import { SensorSelectControl } from "./nodes/controls/sensor-select-control";

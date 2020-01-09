@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useRef } from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node } from "@concord-consortium/rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { HTMLSelect } from "@blueprintjs/core";
 import "./num-control.sass";

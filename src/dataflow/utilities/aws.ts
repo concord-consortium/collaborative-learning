@@ -1,5 +1,5 @@
 import * as AWS from "aws-sdk";
-import { NodeEditor } from "rete";
+import { NodeEditor } from "@concord-consortium/rete";
 
 const getUtils = () => {
   return (AWS as any).util;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node } from "@concord-consortium/rete";
 import { NodeSensorTypes } from "../../../utilities/node";
 import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
 import "./sensor-value-control.sass";

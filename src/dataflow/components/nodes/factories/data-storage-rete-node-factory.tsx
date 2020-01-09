@@ -1,6 +1,6 @@
-import Rete from "rete";
-import { Node, Socket } from "rete";
-import { NodeData } from "rete/types/core/data";
+import Rete from "@concord-consortium/rete";
+import { Node, Socket } from "@concord-consortium/rete";
+import { NodeData } from "@concord-consortium/rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { TextControl } from "../controls/text-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";

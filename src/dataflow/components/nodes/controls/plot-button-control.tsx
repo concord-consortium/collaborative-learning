@@ -1,5 +1,5 @@
 import * as React from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node } from "@concord-consortium/rete";
 import "./plot-button-control.sass";
 
 export class PlotButtonControl extends Rete.Control {

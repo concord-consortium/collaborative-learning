@@ -72,6 +72,9 @@ module.exports = (env, argv) => {
       ]
     },
     resolve: {
+      // alias: {
+      //   rete$: '@concord-consortium/rete'
+      // },
       extensions: [ '.ts', '.tsx', '.js' ]
     },
     stats: {

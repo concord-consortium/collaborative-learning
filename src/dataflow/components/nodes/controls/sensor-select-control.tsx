@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useRef } from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node } from "@concord-consortium/rete";
 import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../../utilities/node";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
