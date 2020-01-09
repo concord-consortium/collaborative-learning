@@ -95,30 +95,12 @@
         "sections": [
           {
             "className": "section personal published",
-            "title": "Programs",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"],
-            "properties": ["!dfHasData", "!dfHasRelay"]
-          },
-          {
-            "className": "section personal published",
             "title": "Data",
             "type": "published-personal-documents",
             "dataTestHeader": "class-work-section",
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["personalPublication"],
             "properties": ["dfHasData"]
-          },
-          {
-            "className": "section personal published",
-            "title": "Relay Programs",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"],
-            "properties": ["dfHasRelay", "!dfHasData"]
           }
         ]
       }
