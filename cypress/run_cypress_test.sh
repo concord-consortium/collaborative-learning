@@ -10,6 +10,6 @@ elif [[ "$TRAVIS_BRANCH" != "master" ]]; then
     npm run test:cypress:branch
 else 
     echo "else TRAVIS_BRANCH=$TRAVIS_BRANCH"
-    # npm run test:cypress
+    npm run test:cypress
 fi  
    
