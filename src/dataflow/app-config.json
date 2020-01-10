@@ -11,6 +11,7 @@
   "defaultDocumentType": "personal",
   "defaultDocumentTitle": "Program",
   "docTimeStampPropertyName": "dfStartTime",
+  "docDisplayIdPropertyName": "dfRunId",
   "defaultDocumentTemplate": {
     "tiles": [
       {
