@@ -34,7 +34,7 @@ interface IProps {
   programDisplayState: ProgramDisplayStates;
   onClickSplitLeft?: () => void;
   onClickSplitRight?: () => void;
-  onShowOriginalProgram: () => void;
+  onShowOriginalProgram?: () => void;
 }
 interface IState {
   stacked: boolean;

@@ -37,6 +37,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const classes = `dataflow-tool disable-tile-drag disable-tile-content-drag ${editableClass}`;
     const { program, programRunId, programIsRunning, programStartTime, programEndTime, programRunTime, programZoom }
       = this.getContent();
+    const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <div className={classes}>
         <SizeMe monitorHeight={true}>
@@ -48,7 +49,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 documentProperties={this.getDocumentProperties()}
                 program={program}
                 onProgramChange={this.handleProgramChange}
-                onShowOriginalProgram={this.handleShowOriginalProgram}
+                onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
                 onStartProgram={this.handleStartProgram}
                 programRunId={programRunId}
                 programIsRunning={programIsRunning}
@@ -129,11 +130,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     this.getContent().setProgram(program);
   }
 
-  private handleShowOriginalProgram = () => {
+  private getOriginalProgramDocument = () => {
     const { documents } = this.stores;
     const document = this.getDocument();
     const originDocumentId = document && document.properties.get("dfProgramId");
-    const originDocument = originDocumentId && documents.getDocument(originDocumentId);
+    const originDocument = originDocumentId ? documents.getDocument(originDocumentId) : undefined;
+    return originDocument?.getProperty("isDeleted") ? undefined : originDocument;
+  }
+
+  private handleShowOriginalProgram = () => {
+    const originDocument = this.getOriginalProgramDocument();
     originDocument && this.switchToDocument(originDocument);
   }
 
