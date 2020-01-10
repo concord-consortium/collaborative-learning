@@ -302,7 +302,7 @@ export class IoT {
     else {
       console.error("IoT.handleMqttMessage: Skipped invalid message -- topic:", topic, "payload:", rawMessage);
     }
-    if (!message || wasMalformed) {
+    if ((!message || wasMalformed) && hubId) {
       this.requestHubChannelInfo(hubId);
     }
   }
