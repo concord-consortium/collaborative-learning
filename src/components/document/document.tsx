@@ -371,6 +371,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     const { supportStackedTwoUpView } = appConfig;
     const isPrimary = this.isPrimary();
+    const displayId = document.getDisplayId(appConfig);
+    const hasDisplayId = !!displayId;
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -380,6 +382,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
           </div>
         }
+        {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
@@ -391,6 +394,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }
+        {hasDisplayId && <div className="display-id">{displayId}</div>}
         <div className="actions">
           {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {(!hideButtons || supportStackedTwoUpView) &&

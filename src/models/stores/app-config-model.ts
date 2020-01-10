@@ -52,6 +52,7 @@ export const AppConfigModel = types
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
     docTimeStampPropertyName: "",
+    docDisplayIdPropertyName: "",
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",

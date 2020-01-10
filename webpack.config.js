@@ -6,6 +6,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJson = require('./package.json');
 
+const patchRete = require('./scripts/patch-rete');
+const path = require('path');
+const reteRelPath = 'node_modules/rete/build/rete.esm.js';
+const retePath = path.join(__dirname, reteRelPath);
+patchRete(retePath);
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
