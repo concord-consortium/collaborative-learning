@@ -143,7 +143,13 @@ export const DocumentModel = types
       return timeStampStr
               ? `${self.title} (${timeStampStr})`
               : self.title;
-  }
+    },
+    getDisplayId(appConfig: AppConfigModelType) {
+      const { docDisplayIdPropertyName } = appConfig;
+      if (!docDisplayIdPropertyName) return undefined;
+      if (docDisplayIdPropertyName === "key") return self.key;
+      return self.getProperty(docDisplayIdPropertyName);
+    }
 
   }))
   .views(self => ({
