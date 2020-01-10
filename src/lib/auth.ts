@@ -1,7 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import * as superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
+import { QueryParams, DefaultUrlParams, removeUrlParameter } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";
@@ -14,6 +14,7 @@ const initials = require("initials");
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
 export const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
+const rowPortalJWTSessionKey = "rawPortalJWT";
 
 export const DEV_STUDENT: StudentUser = {
   type: "student",
@@ -191,6 +192,18 @@ export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacher
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
+
+    const sessionRawPortalJWT = window.sessionStorage.getItem(rowPortalJWTSessionKey);
+    if (sessionRawPortalJWT) {
+      const portalJWT = sessionRawPortalJWT && jwt.decode(sessionRawPortalJWT) as PortalJWT;
+      if (portalJWT) {
+        resolve([sessionRawPortalJWT, portalJWT]);
+      } else {
+        reject("Invalid portal token");
+      }
+      return;
+    }
+
     const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}`;
     superagent
       .get(url)
@@ -325,14 +338,15 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     // when launched as a report, the params will not contain the problemOrdinal
     const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
     const bearerToken = urlParams.token;
-    let basePortalUrl: string;
 
+    let basePortalUrl: string;
     let {fakeClass, fakeUser} = urlParams;
+    const sessionRawPortalJWT = window.sessionStorage.getItem(rowPortalJWTSessionKey);
 
     // handle preview launch from portal
-    if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
+    if (urlParams.domain && urlParams.domain_uid && !bearerToken && !sessionRawPortalJWT) {
       appMode = "demo";
-      fakeClass = `preview-${urlParams.domain_uid}`;
+      fakeClass = `Preview-${urlParams.domain_uid}`;
       fakeUser = `student:${urlParams.domain_uid}`;
     }
 
@@ -386,6 +400,10 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
         if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
           throw new Error("Only student and teacher logins are currently supported!");
         }
+
+        // store rawPortalJWT in sessionStorage; remove "token" URL parameter
+        window.sessionStorage.setItem(rowPortalJWTSessionKey, rawPortalJWT);
+        removeUrlParameter("token");
 
         const portal = parseUrl(basePortalUrl).host;
         let classInfoUrl: string | undefined;
