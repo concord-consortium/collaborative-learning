@@ -284,9 +284,15 @@ export class IoT {
   }
 
   private handleMqttMessage = (topic: string, payload: Buffer) => {
-    const message = safeJsonParse(payload as any);
+    const { hubId, leafLevel } = this.parseTopic(topic);
+    const rawMessage = payload.toString();
+    const fixedMessage = rawMessage.replace(/"":{"version":, "plug":\d, "components": \[\]},?/g, "");
+    const wasMalformed = fixedMessage !== rawMessage;
+    const message = safeJsonParse(fixedMessage);
     if (message) {
-      const { hubId, leafLevel } = this.parseTopic(topic);
+      if (wasMalformed) {
+        console.warn("IoT.handleMqttMessage: Fixed invalid message -- topic:", topic, "payload:", rawMessage);
+      }
       if (leafLevel === "devices") {
         this.processHubChannelInfoMessage(hubId, message);
       } else if (leafLevel === "sensors") {
@@ -294,7 +300,10 @@ export class IoT {
       }
     }
     else {
-      console.error("IoT.handleMqttMessage: Invalid message -- topic:", topic, "payload:", payload);
+      console.error("IoT.handleMqttMessage: Skipped invalid message -- topic:", topic, "payload:", rawMessage);
+    }
+    if ((!message || wasMalformed) && hubId) {
+      this.requestHubChannelInfo(hubId);
     }
   }
 
