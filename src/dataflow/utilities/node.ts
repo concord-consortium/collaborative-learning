@@ -284,7 +284,7 @@ export interface ProgramRunTime {
 export interface IntervalTime extends ProgramRunTime {
   maxProgramRunTime: number;
 }
-export const DEFAULT_PROGRAM_TIME = 600;
+export const DEFAULT_PROGRAM_TIME = 300;
 export const ProgramRunTimes: ProgramRunTime[] = [
   {
     text: "1 min",
