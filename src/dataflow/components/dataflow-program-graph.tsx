@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets, Chart } from "chart.js";
+import { DataflowOpenProgramButton } from "./dataflow-open-program-button";
 import { SplitViewButtons } from "./split-view-buttons";
 import { ChartPlotColors } from "./../utilities/node";
 import { exportCSV } from "../utilities/export";
@@ -144,8 +145,8 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
         <div className="graph-buttons">
           {
             this.props.onShowOriginalProgram &&
-              <button className={`graph-button show-original ${wideClass}`}
-                      onClick={this.props.onShowOriginalProgram} />
+              <DataflowOpenProgramButton className={`graph-button ${wideClass}`}
+                                         onClick={this.props.onShowOriginalProgram} />
           }
           {this.props.programDisplayState !== ProgramDisplayStates.Graph
             ? <button className="graph-button export" onClick={this.handleExport}>Export (csv)</button>

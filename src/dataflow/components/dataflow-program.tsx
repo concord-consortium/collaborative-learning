@@ -24,6 +24,7 @@ import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
 import { NumControl } from "./nodes/controls/num-control";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { DataflowOpenProgramButton } from "./dataflow-open-program-button";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 import { DataflowProgramCover } from "./dataflow-program-cover";
@@ -186,6 +187,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
             </div>
+            {this.isProgramOnly() && onShowOriginalProgram &&
+              <DataflowOpenProgramButton className="program-editor" onClick={onShowOriginalProgram} /> }
             {!this.isProgramOnly() &&
               <DataflowProgramGraph
                 dataSet={this.state.graphDataSet}

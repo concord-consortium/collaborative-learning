@@ -30,6 +30,7 @@ $dataflow-toolbar-height: 364px
       height: 100%
 
   .editor-graph-container
+    position: relative
     display: flex
     flex: 1
     overflow: hidden
@@ -41,6 +42,11 @@ $dataflow-toolbar-height: 364px
         width: 50%
       &.some
         width: calc(20% - #{$dataflow-toolbar-width / 5})
+
+    .open-program.program-editor
+      position: absolute
+      left: 20px
+      bottom: 10px
 
   .half
     width: 50%
