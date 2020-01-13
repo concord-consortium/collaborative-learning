@@ -42,7 +42,7 @@ before(()=>{
 })
 
 context('Program Canvas tests',function(){
-    describe.skip('Data Storage tests',()=>{
+    describe('Data Storage tests',()=>{
         it('verify data collection stops when Stop button is clicked',()=>{
             dfcanvas.selectDuration('300')
             dfcanvas.runProgram(dataset1);
@@ -74,7 +74,9 @@ context('Program Canvas tests',function(){
             cy.wait(10000);
             rightNav.openSection('my-work','','Data')
             dfrightnav.getRunningBadge().should('exist');
-            cy.wait(50000);
+            cy.wait(55000);
+            dialog.getDialogTitle().should('exist').and('contain','Run Complete');
+            dialog.getDialogOKButton().click();
             dfcanvas.getFullGraph().should('be.visible');
             dfcanvas.getDataFlowProgramEditorTopControl().should('not.exist')
             canvas.getPersonalDocTitle().should('contain',dataset2)
@@ -151,7 +153,7 @@ context('Program Canvas tests',function(){
         })
     }) 
 })
-context.skip('Data Canvas tests',()=>{   
+context('Data Canvas tests',()=>{   
     it('verify restore of data canvas',()=>{
         // rightNav.openSection('my-work','','Data' -- section already open)
         rightNav.openCanvasItem('my-work','','Data',dataset2)
