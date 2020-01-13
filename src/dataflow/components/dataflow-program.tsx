@@ -335,37 +335,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       // Can this be in a control with stores injected?
-      autorun(() => {
-        const { hubStore } = this.stores;
-        // remove any channels that are no longer active
-        this.channels = this.channels.filter(ch => {
-          const hub = hubStore.hubs.get(ch.hubId);
-          return hub && hub.hubChannels.find(hCh => hCh.id = ch.channelId);
-        });
-
-        hubStore.hubs.forEach(hub => {
-          hub.hubChannels.forEach(ch => {
-            // add channel if it is new
-            if (!this.channels.find( ci => ci.hubId === hub.hubId && ci.channelId === ch.id )) {
-              const nci: NodeChannelInfo = {hubId: hub.hubId,
-                                            hubName: hub.hubName,
-                                            channelId: ch.id,
-                                            missing: ch.missing,
-                                            type: ch.type,
-                                            units: ch.units,
-                                            plug: ch.plug,
-                                            value: Number(ch.value)};
-              this.channels.push(nci);
-            }
-            // store sensor value for channel
-            const chValue = Number.parseFloat(ch.value);
-            const chInfo = this.channels.find(ci => ci.channelId === ch.id);
-            if (chInfo && Number.isFinite(chValue)) {
-              chInfo.value = chValue;
-            }
-          });
-        });
-      });
+      if (!this.props.readOnly) {
+        autorun(this.updateChannels);
+      }
 
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
@@ -387,6 +359,34 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.setState({disableDataStorage: false});
     }
     this.props.onProgramChange(programJSON);
+  }
+
+  private updateChannels = () => {
+    const { hubStore } = this.stores;
+    this.channels = [];
+
+    function parseValue(value: string) {
+      const chValue = Number.parseFloat(value);
+      return Number.isFinite(chValue) ? chValue : NaN;
+    }
+
+    hubStore.hubs.forEach(hub => {
+      hub.hubChannels.forEach(ch => {
+        // add channel if it is new
+        let chInfo = this.channels.find(ci => ci.channelId === ch.id);
+        if (!chInfo || (chInfo.hubId !== hub.hubId)) {
+          chInfo = {hubId: hub.hubId,
+                    hubName: hub.hubName,
+                    channelId: ch.id,
+                    missing: ch.missing,
+                    type: ch.type,
+                    units: ch.units,
+                    plug: ch.plug,
+                    value: parseValue(ch.value)};
+          this.channels.push(chInfo);
+        }
+      });
+    });
   }
 
   private updateRunAndGraphStates() {
