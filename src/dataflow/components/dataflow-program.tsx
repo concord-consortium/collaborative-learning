@@ -79,7 +79,7 @@ interface IProps extends SizeMeProps {
   documentProperties?: { [key: string]: string };
   program?: string;
   onProgramChange: (program: any) => void;
-  onShowOriginalProgram: () => void;
+  onShowOriginalProgram?: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
   programRunId: string;
   onSetProgramStartTime: (time: number) => void;
