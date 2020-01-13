@@ -28,6 +28,8 @@ context('Test Canvas', function(){
     before(function(){
             const baseUrl = `${Cypress.config("baseUrl")}`;
             const queryParams = `${Cypress.config("queryParams")}`;
+            cy.clearQAData('all');
+
         
             cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
@@ -77,9 +79,9 @@ context('Test Canvas', function(){
                 tableToolTile.getTableTile().should('be.visible');
                 textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace);
             })
-            it('verify rename of workspace title', function(){
-                let renameTitle = "Renamed Title";
-                canvas.editTitle(renameTitle);
+            it('verify rename of workspace title with edit icon', function(){
+                let renameTitle = "Renamed Title pencil";
+                canvas.editTitlewithPencil(renameTitle);
                 canvas.getPersonalDocTitle().should("contain",renameTitle);
                 rightNav.openRightNavTab('my-work')
                 rightNav.openSection('my-work','workspaces');
@@ -99,6 +101,17 @@ context('Test Canvas', function(){
                 rightNav.openRightNavTab('class-work')
                 rightNav.openSection('class-work','personal');
                 rightNav.getCanvasItemTitle('class-work','personal').should('contain',newDocTitle)
+            })
+            it('verify rename of workspace title with edit icon', function(){
+                let renameTitle = "Renamed Title title";
+                canvas.editTitle(renameTitle)
+                canvas.getPersonalDocTitle().should("contain",renameTitle);
+                rightNav.openRightNavTab('my-work')
+                // rightNav.openSection('my-work','workspaces');
+                rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',renameTitle);
+            })
+            after(()=>{
+                rightNav.closeRightNavTab('my-work');
             })
         })
         
@@ -296,17 +309,18 @@ context('Test Canvas', function(){
 
         context('test footer elements', function(){
             describe('Test the 2-up view', function(){
-                it.skip('verify 2 up button, and correct corresponding view comes up', function(){
+                it('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.openTwoUpView();
                     clueCanvas.openOneUpViewFromTwoUp();
-                    clueCanvas.getRightSideWorkspace().should('not.be.visible');
-                    clueCanvas.getLeftSideWorkspace().should('not.be.visible');
+                    clueCanvas.getRightSideWorkspace().should('not.exist');
+                    clueCanvas.getLeftSideWorkspace().should('not.exist');
                     canvas.getSingleCanvas().should('be.visible');
                 });
 
-                it.skip('verify 2-up view is visible when canvas is in 4-up view', function(){
+                it('verify 2-up view is visible when canvas is in 4-up view', function(){
                     //single canvas 4up button and 2up button is visible
+                    clueCanvas.openFourUpView()
                     clueCanvas.getNorthEastCanvas().should('be.visible');
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
 
@@ -316,7 +330,7 @@ context('Test Canvas', function(){
                     clueCanvas.getLeftSideFourUpView().should('be.visible');
                     //Verify that user can get back to 4 up view
                     clueCanvas.getTwoToOneUpViewToggle().should('be.visible').click();
-                    clueCanvas.getRightSideWorkspace().should('not.be.visible');
+                    clueCanvas.getRightSideWorkspace().should('not.exist');
                     clueCanvas.getFourUpView().should('be.visible');
                     //Verify user can get back to single canvas
                     clueCanvas.getFourToOneUpViewToggle().should('be.visible').click();
@@ -364,6 +378,9 @@ context('Test Canvas', function(){
                 //from https://www.pivotaltracker.com/story/show/160826065
             });
         });
+        after(()=>{
+            clueCanvas.openOneUpViewFromTwoUp();
+        })
     });
 
     context('Dragging elements from different locations to canvas', function(){
@@ -391,7 +408,10 @@ context('Test Canvas', function(){
 
     // TODO: Unable to get and return the delete methods in Canvas
     context('delete elements from canvas', function(){
-        it.skip('will delete elements from canvas', function(){
+        before(()=>{
+            rightNav.openCanvasItem('my-work','workspaces','copy of 1.2');
+        })
+        it('will delete elements from canvas', function(){
             // //Delete elements in the canvas
             clueCanvas.deleteTile('graph');
             clueCanvas.deleteTile('image');

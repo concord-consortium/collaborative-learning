@@ -62,8 +62,17 @@ class Canvas{
         cy.wait(3000)    
     }
 
-    editTitle(title){
+    editTitlewithPencil(title){
         this.getEditTitleIcon().click()
+            .then(function(){
+                dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
+                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                dialog.getDialogOKButton().click();
+            })
+    }
+
+    editTitle(title){
+        this.getPersonalDocTitle().find('#titlebar-title').click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);

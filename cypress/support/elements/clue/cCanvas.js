@@ -139,7 +139,7 @@ class ClueCanvas{
             case 'image':
                 imageToolTile.getImageTile().last().click({force:true});
                 break;
-            case 'drawing':
+            case 'draw':
                 drawToolTile.getDrawTile().last().click({force:true});
                 break;
             case 'table':
