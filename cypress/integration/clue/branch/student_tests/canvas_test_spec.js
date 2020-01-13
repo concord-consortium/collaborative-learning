@@ -77,6 +77,14 @@ context('Test Canvas', function(){
                 tableToolTile.getTableTile().should('be.visible');
                 textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace);
             })
+            it('verify rename of workspace title', function(){
+                let renameTitle = "Renamed Title";
+                canvas.editTitle(renameTitle);
+                canvas.getPersonalDocTitle().should("contain",renameTitle);
+                rightNav.openRightNavTab('my-work')
+                rightNav.openSection('my-work','workspaces');
+                rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',renameTitle);
+            })
             it('verify create new document', function(){
                 let newDocTitle = 'New User Doc To Publish';
                 canvas.createNewExtraDocument(newDocTitle);
