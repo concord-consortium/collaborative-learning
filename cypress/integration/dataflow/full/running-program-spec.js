@@ -42,7 +42,7 @@ before(()=>{
 })
 
 context('Program Canvas tests',function(){
-    describe('Data Storage tests',()=>{
+    describe.skip('Data Storage tests',()=>{
         it('verify data collection stops when Stop button is clicked',()=>{
             dfcanvas.selectDuration('300')
             dfcanvas.runProgram(dataset1);
@@ -151,7 +151,7 @@ context('Program Canvas tests',function(){
         })
     }) 
 })
-context('Data Canvas tests',()=>{   
+context.skip('Data Canvas tests',()=>{   
     it('verify restore of data canvas',()=>{
         // rightNav.openSection('my-work','','Data' -- section already open)
         rightNav.openCanvasItem('my-work','','Data',dataset2)
