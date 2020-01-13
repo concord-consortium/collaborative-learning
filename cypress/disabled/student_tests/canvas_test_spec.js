@@ -1,12 +1,12 @@
-import LeftNav from '../../../../support/elements/clue/LeftNav'
-import Canvas from '../../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../../support/elements/clue/cCanvas'
-import RightNav from '../../../../support/elements/common/RightNav'
-import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
-import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
-import DrawToolTile from '../../../../support/elements/clue/DrawToolTile'
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
-import TableToolTile from '../../../../support/elements/clue/TableToolTile'
+import LeftNav from '../../support/elements/clue/LeftNav'
+import Canvas from '../../support/elements/common/Canvas'
+import ClueCanvas from '../../support/elements/clue/cCanvas'
+import RightNav from '../../support/elements/common/RightNav'
+import GraphToolTile from '../../support/elements/clue/GraphToolTile'
+import ImageToolTile from '../../support/elements/clue/ImageToolTile'
+import DrawToolTile from '../../support/elements/clue/DrawToolTile'
+import TextToolTile from '../../support/elements/clue/TextToolTile'
+import TableToolTile from '../../support/elements/clue/TableToolTile'
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;

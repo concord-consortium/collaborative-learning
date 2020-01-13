@@ -230,13 +230,6 @@ context("Teacher Space", () => {
         }
         let title = "Drawing Wumps"
 
-        // let title = ((this.investigationTitle).split('1.1 ')[1]).trim();
-
-        // before(function(){
-        //     cy.login("https://learn.concord.org", clueStudent)
-        //     cy.visit("https://learn.concord.org/users/" + clueStuden.studentUid + "/portal/offerings/"+offeringId+".run_resource_html")
-        //     cy.waitForSpinner();
-        // })
         describe("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('1.1')[1]).trim()
             it('verify badge on Support Tab',function(){

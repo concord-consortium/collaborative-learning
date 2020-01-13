@@ -1,6 +1,6 @@
-import RightNav from '../../../../support/elements/common/RightNav'
-import Canvas from '../../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import RightNav from '../../support/elements/common/RightNav'
+import Canvas from '../../support/elements/common/Canvas'
+import ClueCanvas from '../../support/elements/clue/cCanvas';
 
 const rightNav = new RightNav;
 const canvas = new Canvas;
