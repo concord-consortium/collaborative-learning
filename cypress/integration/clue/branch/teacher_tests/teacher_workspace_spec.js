@@ -165,7 +165,7 @@ context("Teacher Space", () => {
             after(function(){
                 clueCanvas.deleteTile('table')
                 rightNav.openRightNavTab("my-work");
-                rightNav.openSection('my-work','investigations')
+                rightNav.openSection('my-work','investigations');
                 rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
                 clueCanvas.deleteTile('table');
                 clueCanvas.deleteTile('drawing');
