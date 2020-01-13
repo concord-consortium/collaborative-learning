@@ -1023,7 +1023,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateGraphDataSet = () => {
-    if (this.props.programRunId) {
+    if (this.props.programRunId && this.hasDataStorage()) {
       fetchProgramData(this.props.programRunId).then((result: any) => {
         // make a new dataset
         const graphDataSet: DataSet = {
