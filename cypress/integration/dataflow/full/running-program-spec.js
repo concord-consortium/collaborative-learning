@@ -74,7 +74,9 @@ context('Program Canvas tests',function(){
             cy.wait(10000);
             rightNav.openSection('my-work','','Data')
             dfrightnav.getRunningBadge().should('exist');
-            cy.wait(50000);
+            cy.wait(55000);
+            dialog.getDialogTitle().should('exist').and('contain','Run Complete');
+            dialog.getDialogOKButton().click();
             dfcanvas.getFullGraph().should('be.visible');
             dfcanvas.getDataFlowProgramEditorTopControl().should('not.exist')
             canvas.getPersonalDocTitle().should('contain',dataset2)

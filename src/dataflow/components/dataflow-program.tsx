@@ -1093,6 +1093,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.setState({ programRunState: ProgramRunStates.Complete, programDisplayState });
         this.closeEditorNodePlots();
         clearInterval(this.intervalHandle);
+        !this.props.readOnly && this.stores.ui.alert("Your run is complete.", "Run Complete");
       } else if (this.props.programEndTime && (Date.now() < this.props.programEndTime)) {
         const remainingTimeInSeconds = Math.ceil((this.props.programEndTime - Date.now()) / 1000);
         this.setState({ remainingTimeInSeconds });
