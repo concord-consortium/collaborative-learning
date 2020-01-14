@@ -3,16 +3,19 @@ import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
 import TableToolTile from '../../../../support/elements/clue/TableToolTile'
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
 import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import DrawToolTile from '../../../../support/elements/clue/DrawToolTile'
 
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const imageToolTile = new ImageToolTile;
 const textToolTile = new TextToolTile;
+const drawToolTile = new DrawToolTile;
 
-function addTableAndGraph() {
+function addTiles() {
     clueCanvas.addTile('text');
     clueCanvas.addTile('table');
+    clueCanvas.addTile('drawing')
 }
 
 function dragAndDropTile(movingTile, targetTile, dropZoneDirection) {
@@ -34,21 +37,29 @@ function dragAndDropTile(movingTile, targetTile, dropZoneDirection) {
             textToolTile.getTextTile().eq(0)
                 .trigger('dragstart', { dataTransfer });
             break;
-        case ('table'):
+        case ('image'):
             imageToolTile.getImageTile().eq(0).click()
             imageToolTile.getImageTile().eq(0)
                 .trigger('dragstart', { dataTransfer });
             break;
+            case ('draw'):
+                drawToolTile.getDrawTile().eq(0).click()
+                drawToolTile.getDrawTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
+                break;
+        
     }
     if (targetTile == "text") {
         cy.get('.' + targetTile + '-tool').eq(0).parent().parent().parent().within(() => {
             cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
-                .trigger('drop', { dataTransfer, force: true });
+                .trigger('drop', { dataTransfer, force: true })
+                .trigger('dragend', {dataTransfer, force:true})
         })
     } else {
         cy.get('.' + targetTile + '-tool').eq(0).parent().parent().within(() => {
             cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
-                .trigger('drop', { dataTransfer, force: true });
+                .trigger('drop', { dataTransfer, force: true })
+                .trigger('dragend', {dataTransfer, force:true})
         })
     }
 }
@@ -67,8 +78,9 @@ context('single student functional test', () => {
     describe('test header elements', function () {
         it.only('setup graph and table', function () {
             let target = 'bottom' //Determines direction of drop based on target tile [top, left, right, bottom]
-            addTableAndGraph();
-            dragAndDropTile('table', 'text', 'top');
+            addTiles();
+            dragAndDropTile('table', 'text', 'right');
+            dragAndDropTile('draw', 'table', 'left');
         })
     });
 })
