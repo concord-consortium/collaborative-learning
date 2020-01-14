@@ -81,3 +81,10 @@ export const DefaultUrlParams: QueryParams = {
 };
                                                     // allows use of ?demo for url
 export const urlParams: QueryParams = { ...params, ...{ demo: typeof params.demo !== "undefined" } };
+
+// adapted from Geniventure/geniblocks
+export function removeUrlParameter(param: string) {
+  const regExp = new RegExp(param + "(.+?)(&|$)", "g");
+  const newUrl = window.location.href.replace(regExp, "");
+  window.history.replaceState("", "", newUrl);
+}

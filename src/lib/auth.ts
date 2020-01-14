@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
+import { QueryParams, DefaultUrlParams, removeUrlParameter } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";
@@ -14,6 +14,8 @@ const initials = require("initials");
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
 export const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
+const rawPortalJWTSessionKey = "rawPortalJWT";
+const rawFirebaseJWTSessionKey = "rawFirebaseJWT";
 
 export const DEV_STUDENT: StudentUser = {
   type: "student",
@@ -120,13 +122,19 @@ export interface PortalStudentJWT extends BasePortalJWT {
   offering_id: number;
 }
 
-// An explicitly set appMode takes priority
-// Otherwise, assume that local users are devs, unless a token is specified,
-// in which authentication is likely being tested
 export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string) => {
-  return appModeParam != null
-           ? appModeParam
-           : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
+  // explicitly set appMode takes priority
+  if (appModeParam != null) return appModeParam;
+  // url/session tokens => authentication
+  if (token ||
+      window.sessionStorage.getItem(rawPortalJWTSessionKey) ||
+      window.sessionStorage.getItem(rawFirebaseJWTSessionKey)) {
+    return "authed";
+  }
+  // localhost => development
+  if ((host === "localhost" || host === "127.0.0.1")) return "dev";
+  // authentication without credentials => error
+  return "authed";
 };
 
 export type UserType = "student" | "teacher";
@@ -189,8 +197,21 @@ export interface PortalFirebaseTeacherJWT extends BasePortalFirebaseJWT {
 
 export type PortalFirebaseJWT = PortalFirebaseStudentJWT | PortalFirebaseTeacherJWT;
 
-export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
+export const getPortalJWTWithBearerToken =
+              (basePortalUrl: string, type: string, rawToken?: string): Promise<[string, PortalJWT]> => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
+
+    const sessionRawPortalJWT = window.sessionStorage.getItem(rawPortalJWTSessionKey);
+    if (sessionRawPortalJWT) {
+      const portalJWT = sessionRawPortalJWT && jwt.decode(sessionRawPortalJWT) as PortalJWT;
+      if (portalJWT) {
+        resolve([sessionRawPortalJWT, portalJWT]);
+      } else {
+        reject("Invalid portal token");
+      }
+      return;
+    }
+
     const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}`;
     superagent
       .get(url)
@@ -202,9 +223,9 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
           reject("No token found in JWT request response");
         } else {
           const rawJWT = res.body.token;
-          const portalJWT = jwt.decode(rawJWT);
+          const portalJWT = jwt.decode(rawJWT) as PortalJWT;
           if (portalJWT) {
-            resolve([rawJWT, portalJWT as PortalJWT]);
+            resolve([rawJWT, portalJWT]);
           } else {
             reject("Invalid portal token");
           }
@@ -218,8 +239,20 @@ export const getFirebaseJWTParams = (classHash?: string) => {
 };
 
 export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
-                                              rawToken: string, classHash?: string) => {
+                                              rawToken?: string, classHash?: string) => {
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
+
+    const sessionRawFirebaseJWT = window.sessionStorage.getItem(rawFirebaseJWTSessionKey);
+    if (sessionRawFirebaseJWT) {
+      const firebaseJWT = sessionRawFirebaseJWT && jwt.decode(sessionRawFirebaseJWT) as PortalFirebaseJWT;
+      if (firebaseJWT) {
+        resolve([sessionRawFirebaseJWT, firebaseJWT]);
+      } else {
+        reject("Invalid Firebase token");
+      }
+      return;
+    }
+
     const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
     superagent
       .get(url)
@@ -233,9 +266,9 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
         }
         else {
           const {token} = res.body;
-          const firebaseJWT = jwt.decode(token);
+          const firebaseJWT = jwt.decode(token) as PortalFirebaseJWT;
           if (firebaseJWT) {
-            resolve([token, firebaseJWT as PortalFirebaseJWT]);
+            resolve([token, firebaseJWT]);
           }
           else {
             reject("Invalid Firebase token");
@@ -311,155 +344,158 @@ export const getClassInfo = (params: GetClassInfoParams) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
-  interface IAuthenticateResponse {
-    appMode?: AppMode;
-    authenticatedUser: AuthenticatedUser;
-    classInfo?: ClassInfo;
-    problemId?: string;
-    unitCode?: string;
+interface IAuthenticateResponse {
+  appMode?: AppMode;
+  authenticatedUser: AuthenticatedUser;
+  classInfo?: ClassInfo;
+  problemId?: string;
+  unitCode?: string;
+}
+type AuthenticatePromise = Promise<IAuthenticateResponse>;
+
+export const authenticate =
+        async (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams): AuthenticatePromise => {
+
+  urlParams = urlParams || DefaultUrlParams;
+  const unitCode = urlParams.unit || "";
+  // when launched as a report, the params will not contain the problemOrdinal
+  const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
+  const bearerToken = urlParams.token;
+  // extract JWTs from session storage (if available)
+  const sessionRawPortalJWT = window.sessionStorage.getItem(rawPortalJWTSessionKey);
+  const sessionRawFirebaseJWT = window.sessionStorage.getItem(rawFirebaseJWTSessionKey);
+
+  let basePortalUrl: string;
+  let {fakeClass, fakeUser} = urlParams;
+
+  // handle preview launch from portal
+  if (urlParams.domain && urlParams.domain_uid && !bearerToken && !sessionRawPortalJWT) {
+    appMode = "demo";
+    fakeClass = `Preview-${urlParams.domain_uid}`;
+    fakeUser = `student:${urlParams.domain_uid}`;
   }
-  // tslint:disable-next-line:max-line-length
-  return new Promise<IAuthenticateResponse>((resolve, reject) => {
-    urlParams = urlParams || DefaultUrlParams;
-    const unitCode = urlParams.unit || "";
-    // when launched as a report, the params will not contain the problemOrdinal
-    const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
-    const bearerToken = urlParams.token;
-    let basePortalUrl: string;
 
-    let {fakeClass, fakeUser} = urlParams;
-
-    // handle preview launch from portal
-    if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
-      appMode = "demo";
-      fakeClass = `preview-${urlParams.domain_uid}`;
-      fakeUser = `student:${urlParams.domain_uid}`;
+  if ((appMode === "demo") || (appMode === "qa")) {
+    if (!fakeClass || !fakeUser) {
+      throw new Error("Missing fakeClass or fakeUser parameter for demo!");
     }
-
-    if ((appMode === "demo") || (appMode === "qa")) {
-      if (!fakeClass || !fakeUser) {
-        return reject("Missing fakeClass or fakeUser parameter for demo!");
-      }
-      const [userType, userId, ...rest] = fakeUser.split(":");
-      if (((userType !== "student") && (userType !== "teacher")) || !userId) {
-        return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
-      }
-      return resolve({
-              appMode,
-              ...createFakeAuthentication({
-                  appMode,
-                  classId: fakeClass,
-                  userType, userId,
-                  unitCode,
-                  problemOrdinal
-                })
-            });
+    const [userType, userId, ...rest] = fakeUser.split(":");
+    if (((userType !== "student") && (userType !== "teacher")) || !userId) {
+      throw new Error("fakeUser must be in the form of student:<id> or teacher:<id>");
     }
-
-    if (appMode !== "authed") {
-      return resolve(generateDevAuthentication(unitCode, problemOrdinal));
-    }
-
-    if (!bearerToken) {
-      return reject("No token provided for authentication (must launch from Portal)");
-    }
-
-    if (urlParams.reportType) {
-      if (urlParams.reportType !== "offering") {
-        return reject("Sorry, only external reports at the offering level are supported");
-      }
-      if (!urlParams.class) {
-        return reject("Missing class parameter!");
-      }
-      if (!urlParams.offering) {
-        return reject("Missing offering parameter!");
-      }
-      const {protocol, host} = parseUrl(urlParams.class);
-      basePortalUrl = `${protocol}//${host}/`;
-    }
-    else if (urlParams.domain) {
-      basePortalUrl = urlParams.domain;
-    }
-    else {
-      return reject("Missing domain query parameter!");
-    }
-
-    return getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken)
-      .then(([rawPortalJWT, portalJWT]) => {
-        if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-          throw new Error("Only student and teacher logins are currently supported!");
-        }
-
-        const portal = parseUrl(basePortalUrl).host;
-        let classInfoUrl: string | undefined;
-        let offeringId: string | undefined;
-        let portalClassOfferings: any;
-
-        if (portalJWT.user_type === "learner") {
-          classInfoUrl = portalJWT.class_info_url;
-          offeringId = `${portalJWT.offering_id}`;
-        }
-        else if (urlParams && urlParams.class && urlParams.offering) {
-          classInfoUrl = urlParams.class;
-          offeringId = urlParams.offering.split("/").pop() as string;
-        }
-
-        if (!classInfoUrl || !offeringId) {
-          throw new Error("Unable to get classInfoUrl or offeringId");
-        }
-
-        return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
-          .then((classInfo) => {
-            return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
-              .then(([rawFirebaseJWT, firebaseJWT]) => {
-                getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
-                  .then(result => {
-                    portalClassOfferings = getPortalClassOfferings(result, appConfig, urlParams);
-                    const uidAsString = `${portalJWT.uid}`;
-                    let authenticatedUser: AuthenticatedUser | undefined;
-
-                    if (portalJWT.user_type === "learner") {
-                      authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                    } else {
-                      authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                    }
-
-                    if (!authenticatedUser) {
-                      throw new Error("Current user not found in class roster");
-                    }
-
-                    authenticatedUser.portalJWT = portalJWT;
-                    authenticatedUser.rawPortalJWT = rawPortalJWT;
-                    authenticatedUser.firebaseJWT = firebaseJWT;
-                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                    authenticatedUser.id = uidAsString;
-                    authenticatedUser.portal = portal;
-                    if (portalClassOfferings) {
-                      authenticatedUser.portalClassOfferings = portalClassOfferings;
-                    }
-                    getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams)
-                      .then(({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
-                        if (authenticatedUser) {
-                          Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
-                          resolve({
-                            authenticatedUser,
-                            classInfo,
-                            unitCode: newUnitCode,
-                            problemId: newProblemOrdinal
-                          });
-                        }
-                      })
-                      .catch(reject);
-                  })
-                  .catch(reject);
-              })
-              .catch(reject);
+    return {
+      appMode,
+      ...createFakeAuthentication({
+          appMode,
+          classId: fakeClass,
+          userType, userId,
+          unitCode,
+          problemOrdinal
         })
-        .catch(reject);
-    })
-    .catch(reject);
-  });
+    };
+  }
+
+  if (appMode !== "authed") {
+    return generateDevAuthentication(unitCode, problemOrdinal);
+  }
+
+  if (!bearerToken && (!sessionRawPortalJWT || !sessionRawFirebaseJWT)) {
+    throw new Error("No token provided for authentication (must launch from Portal)");
+  }
+
+  if (urlParams.reportType) {
+    if (urlParams.reportType !== "offering") {
+      throw new Error("Sorry, only external reports at the offering level are supported");
+    }
+    if (!urlParams.class) {
+      throw new Error("Missing class parameter!");
+    }
+    if (!urlParams.offering) {
+      throw new Error("Missing offering parameter!");
+    }
+    const {protocol, host} = parseUrl(urlParams.class);
+    basePortalUrl = `${protocol}//${host}/`;
+  }
+  else if (urlParams.domain) {
+    basePortalUrl = urlParams.domain;
+  }
+  else {
+    throw new Error("Missing domain query parameter!");
+  }
+
+  try {
+
+    const [rawPortalJWT, portalJWT] = await getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken);
+    if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
+      throw new Error("Only student and teacher logins are currently supported!");
+    }
+
+    // store rawPortalJWT in sessionStorage
+    window.sessionStorage.setItem(rawPortalJWTSessionKey, rawPortalJWT);
+
+    const portal = parseUrl(basePortalUrl).host;
+    let classInfoUrl: string | undefined;
+    let offeringId: string | undefined;
+    let portalClassOfferings: any;
+
+    if (portalJWT.user_type === "learner") {
+      classInfoUrl = portalJWT.class_info_url;
+      offeringId = `${portalJWT.offering_id}`;
+    }
+    else if (urlParams?.class && urlParams.offering) {
+      classInfoUrl = urlParams.class;
+      offeringId = urlParams.offering.split("/").pop() as string;
+    }
+
+    if (!classInfoUrl || !offeringId) {
+      throw new Error("Unable to get classInfoUrl or offeringId");
+    }
+
+    const classInfo = await getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId});
+    const [rawFirebaseJWT, firebaseJWT] =
+            await getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash);
+
+    // store rawFirebaseJWT in sessionStorage
+    window.sessionStorage.setItem(rawFirebaseJWTSessionKey, rawFirebaseJWT);
+    // remove "token" URL parameter
+    removeUrlParameter("token");
+
+    const offerings = await getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT);
+    portalClassOfferings = getPortalClassOfferings(offerings, appConfig, urlParams);
+    const uidAsString = `${portalJWT.uid}`;
+    const authenticatedUser = portalJWT.user_type === "learner"
+                                ? classInfo.students.find(user => user.id === uidAsString)
+                                : classInfo.teachers.find(user => user.id === uidAsString);
+    if (!authenticatedUser) {
+      throw new Error("Current user not found in class roster");
+    }
+
+    authenticatedUser.portalJWT = portalJWT;
+    authenticatedUser.rawPortalJWT = rawPortalJWT;
+    authenticatedUser.firebaseJWT = firebaseJWT;
+    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+    authenticatedUser.id = uidAsString;
+    authenticatedUser.portal = portal;
+    if (portalClassOfferings) {
+      authenticatedUser.portalClassOfferings = portalClassOfferings;
+    }
+
+    const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } =
+            await getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams);
+    Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+    return {
+      authenticatedUser,
+      classInfo,
+      unitCode: newUnitCode,
+      problemId: newProblemOrdinal
+    };
+  }
+  catch (error) {
+    // on any error, clear session storage so we re-authenticate from portal
+    window.sessionStorage.removeItem(rawPortalJWTSessionKey);
+    window.sessionStorage.removeItem(rawFirebaseJWTSessionKey);
+    throw error;
+  }
 };
 
 export const generateDevAuthentication = (unitCode: string, problemOrdinal: string) => {

@@ -96,6 +96,10 @@ const PARTIAL_RAW_OFFERING_INFO = {
   activity_url: "https://foo.bar/?problem=3.2"
 };
 
+beforeEach(() => {
+  window.sessionStorage.clear();
+});
+
 describe("dev mode", () => {
   it("should be in dev mode on a local machine", () => {
     const mode = getAppMode(undefined, undefined, "localhost");
