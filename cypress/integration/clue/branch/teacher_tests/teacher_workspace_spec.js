@@ -5,6 +5,7 @@ import Canvas from "../../../../support/elements/common/Canvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
 import ClueRightNav from "../../../../support/elements/clue/cRightNav";
+import TextToolTile from "../../../../support/elements/clue/TextToolTile";
 
 /**
  * Notes:
@@ -39,9 +40,12 @@ context("Teacher Space", () => {
         password: "password"
     }
 
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+
     before(function() {
-        cy.login("https://learn.concord.org", clueTeacher)
-        cy.visit('https://learn.concord.org/portal/offerings/'+offeringId+'/external_report/25')
+        const queryParams = `${Cypress.config("teacherQueryParams")}`;
+    
+        cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
         dashboard.switchView("Workspace")
         cy.wait(2000)
@@ -49,16 +53,12 @@ context("Teacher Space", () => {
     })
 
     beforeEach(() => {
-        cy.fixture("teacher-dash-data.json").as("clueData")
+        cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData")
     })
 
     context('Teacher Workspace', function() {
-        // before(function(){
-        //     dashboard.switchView("Workspace")
-        //     cy.wait(2000)
-        //     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
-        // })
-        describe('UI visibility', () => {
+
+        describe.skip('UI visibility', () => {
             it('verify right nav elements', function() {
                 //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
                 rightNav.getRightNavTab("student-work").should('be.visible')
@@ -72,7 +72,8 @@ context("Teacher Space", () => {
             before(function(){
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('drawing');
-                // textToolTile.addText('this is ' + teacherWorkspace);
+                clueCanvas.addTile('text');
+                canvas.copyDocument(teacherDoc)
                 rightNav.openRightNavTab("my-work");
                 rightNav.openSection('my-work','workspaces')
                 rightNav.openCanvasItem('my-work','workspaces',teacherDoc)
@@ -95,7 +96,7 @@ context("Teacher Space", () => {
                 cy.wait(2000);
                 tableToolTile.getTableTile().should('exist')
             })
-            it('verify restore after switching classes', function(){
+            it.skip('verify restore after switching classes', function(){
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0
                     const tempClassIndex = 1
@@ -128,7 +129,7 @@ context("Teacher Space", () => {
                 })
 
             })
-            it('verify restore after switching investigation',function(){
+            it.skip('verify restore after switching investigation',function(){
                 cy.get('@clueData').then((clueData) => {
                     let problems = clueData.classes[0].problems
                     let initProblemIndex = 0
@@ -164,7 +165,7 @@ context("Teacher Space", () => {
             after(function(){
                 clueCanvas.deleteTile('table')
                 rightNav.openRightNavTab("my-work");
-                rightNav.openSection('my-work','investigations')
+                rightNav.openSection('my-work','investigations');
                 rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
                 clueCanvas.deleteTile('table');
                 clueCanvas.deleteTile('drawing');
@@ -172,7 +173,7 @@ context("Teacher Space", () => {
         })
         describe('teacher only functionalities', function() {
             describe('verify document curation', function() {//adding a star to a student document
-                let studentDoc = "clue testing5: 1.1 Solving a Mystery"
+                let studentDoc = "Student 5: 2.1 Drawing Wumps"
 
                 it('verify starring a student published investigation',function(){
                     rightNav.openRightNavTab('class-work')
@@ -208,12 +209,9 @@ context("Teacher Space", () => {
             })
 
             describe('verify supports functionality', function() {//may need to break down even further between class, group, and student
-                before(function(){
-                    dashboard.switchView("Workspace")
-                    cy.wait(2000)
-                })
+
                 it('will verify publish of support appears in Support>Teacher Workspace',function(){
-                    let title = ((this.investigationTitle).split('1.1')[1]).trim()
+                    let title = ((this.investigationTitle).split('2.1')[1]).trim()
                     clueCanvas.addTile('table');
                     clueCanvas.publishSupportDoc();
                     rightNav.openRightNavTab('supports');
@@ -230,20 +228,14 @@ context("Teacher Space", () => {
             password: "password",
             studentUid: "345979"
         }
-        let title = "Solving a Mystery"
+        let title = "Drawing Wumps"
 
-        // let title = ((this.investigationTitle).split('1.1 ')[1]).trim();
-
-        // before(function(){
-        //     cy.login("https://learn.concord.org", clueStudent)
-        //     cy.visit("https://learn.concord.org/users/" + clueStuden.studentUid + "/portal/offerings/"+offeringId+".run_resource_html")
-        //     cy.waitForSpinner();
-        // })
         describe("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('1.1')[1]).trim()
             it('verify badge on Support Tab',function(){
-                cy.login("https://learn.concord.org", clueStudent)
-                cy.visit("https://learn.concord.org/users/" + clueStudent.studentUid + "/portal/offerings/"+offeringId+".run_resource_html")
+                const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=6&problem=2.1&fakeUser=student:3";
+            
+                cy.visit(baseUrl+queryParams);
                 cy.waitForSpinner();
                 clueRightNav.getSupportBadge().should('be.visible')
             })
@@ -259,15 +251,17 @@ context("Teacher Space", () => {
         })
 
         after(function(){
-            cy.login("https://learn.concord.org", clueTeacher)
-            cy.visit('https://learn.concord.org/portal/offerings/'+offeringId+'/external_report/25')
+            const baseUrl = `${Cypress.config("baseUrl")}`;
+            const queryParams = `${Cypress.config("teacherQueryParams")}`;
+        
+            cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
     
             dashboard.switchView('Workspace');
             clueCanvas.deleteTile('table');
             rightNav.openRightNavTab('supports');
             rightNav.openSection('supports','teacher-supports');
-            // clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
+            clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
         })
     })
 })
