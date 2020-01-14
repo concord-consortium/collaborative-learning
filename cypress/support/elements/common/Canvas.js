@@ -100,7 +100,7 @@ class Canvas{
 
     deleteDocument(){
         this.getDeleteIcon().click().then(()=>{
-            dialog.getDialogTitle().should('exist').contains('Delete Workspace');
+            dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
         })
     cy.wait(3000)    

@@ -68,6 +68,19 @@ describe('Test right nav tabs', function(){
                 canvas.getPersonalDocTitle().should('contain',copyDocumentTitle);
             });
         })
+        describe('Starred section', function(){
+            before(()=>{
+                rightNav.openRightNavTab('my-work');
+                rightNav.starCanvasItem('my-work','workspaces',copyDocumentTitle);
+            })
+            it('verify starred document star is highlighted',function(){
+                rightNav.getCanvasStarIcon().should('have.class','starred')
+            })
+            it('verify starred document appears in the Starred section',function(){
+                rightNav.openSection('my-work','starred');
+                rightNav.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
+            })
+        })
         after(function(){
             rightNav.closeRightNavTab('my-work'); // clean up
         })
