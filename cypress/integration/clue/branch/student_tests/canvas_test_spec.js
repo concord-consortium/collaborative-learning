@@ -268,8 +268,8 @@ context('Test Canvas', function(){
         });
 
         describe('save and restore of tool tiles', function(){
-            describe.skip('verify that tool tiles is saved from various locations', function(){
-                it('will restore from My Work tab', function() {
+            describe('verify that tool tiles is saved from various locations', function(){
+                it('will restore from My Work/Extra Workspaces tab', function() {
                     //Open personal workspace
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','workspaces',studentWorkspace)
@@ -277,35 +277,43 @@ context('Test Canvas', function(){
                     graphToolTile.getGraphTile().should('be.visible');
                     tableToolTile.getTableTile().should('be.visible');
                     textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace)
-                    
+                })
+                it('will restore from My Work/Investigation tab', function() {    
                     //Open Investigation
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','investigations',this.title);
                     clueCanvas.getInvestigationCanvasTitle().should('contain', this.title)
                     textToolTile.getTextTile().should('be.visible').and('contain', this.title);
-                    graphToolTile.getGraphTile().should('be.visible');
+                    graphToolTile.getGraphTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
                     imageToolTile.getImageTile().should('exist');
                     tableToolTile.getTableTile().should('exist');
-                    clueCanvas.openFourUpView()//for later test on restore of 4up view
-                    clueCanvas.getNorthWestCanvas().should('be.visible')
                 });
             });
 
-            describe.skip('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
-                it('verify restore in 4 up view',function(){
+            describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
+                before(()=>{
+                    clueCanvas.openFourUpView()//for later test on restore of 4up view
+                    clueCanvas.getNorthWestCanvas().should('be.visible')
+                })
+                it('verify restore in 4 up view from Extra Workspace',function(){
                     //Open Personal Workspace
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','workspaces',studentWorkspace)
                     rightNav.closeRightNavTab('my-work')
                     canvas.getPersonalDocTitle().should('contain',studentWorkspace)
-                
+                })
+                it('verify restore in 4 up view from Investigation',function(){
                     //Open Investigation should be in 4up view
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','investigations',this.title);
                     rightNav.closeRightNavTab('my-work');
                     clueCanvas.getInvestigationCanvasTitle().should('contain',this.title)
                     clueCanvas.getNorthWestCanvas().should('be.visible')
+                })
+                after(()=>{ //restore to 1up view
+                    rightNav.closeRightNavTab('my-work')
+                    clueCanvas.openOneUpViewFromFourUp();
                 })
             });
         });
