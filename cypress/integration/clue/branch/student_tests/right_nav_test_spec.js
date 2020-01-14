@@ -74,7 +74,7 @@ describe('Test right nav tabs', function(){
                 rightNav.starCanvasItem('my-work','workspaces',copyDocumentTitle);
             })
             it('verify starred document star is highlighted',function(){
-                rightNav.getCanvasStarIcon().should('have.class','starred')
+                rightNav.getCanvasStarIcon('my-work','workspaces',copyDocumentTitle).should('have.class','starred')
             })
             it('verify starred document appears in the Starred section',function(){
                 rightNav.openSection('my-work','starred');
