@@ -74,7 +74,9 @@ context('Program Canvas tests',function(){
             cy.wait(10000);
             rightNav.openSection('my-work','','Data')
             dfrightnav.getRunningBadge().should('exist');
-            cy.wait(50000);
+            cy.wait(55000);
+            dialog.getDialogTitle().should('exist').and('contain','Run Complete');
+            dialog.getDialogOKButton().click();
             dfcanvas.getFullGraph().should('be.visible');
             dfcanvas.getDataFlowProgramEditorTopControl().should('not.exist')
             canvas.getPersonalDocTitle().should('contain',dataset2)
@@ -157,7 +159,7 @@ context('Data Canvas tests',()=>{
         rightNav.openCanvasItem('my-work','','Data',dataset2)
         dfcanvas.getFullGraph().should('be.visible');
         dfcanvas.getFullGraph().find('.chartjs-render-monitor').should('be.visible')
-        dfcanvas.getGraphButton('show-original').should('be.visible')
+        dfcanvas.getGraphButton('open-program').should('be.visible')
         dfcanvas.getGraphButton('export').should('be.visible')
         dfcanvas.getGraphButton('data').should('be.visible')
         dfcanvas.getGraphButton('layout').should('be.visible')
