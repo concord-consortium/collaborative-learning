@@ -67,8 +67,8 @@ context('Program Canvas tests',function(){
         })
         it('verify running relay program is not in My Work>Data',()=>{
             rightNav.openSection('my-work','','Data');
-            rightNav.getCanvasItemTitle('my-work','','Data').find(relayTestProgram).should('not.be.visible');
-            rightNav.getCanvasItemTitle('my-work','','Data').find(secondRelayTest).should('not.be.visible');
+            rightNav.getCanvasItemTitle('my-work','','Data').should('not.exist');
+            rightNav.getCanvasItemTitle('my-work','','Data').should('not.exist');
         })
     }) 
 })
