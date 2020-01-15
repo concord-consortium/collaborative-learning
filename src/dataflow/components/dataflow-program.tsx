@@ -857,7 +857,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     .then(ok => {
       if (ok) {
         const { iot } = this.stores;
-        iot.requestAllHubsChannelInfo();
+        iot.refreshAllHubsChannelInfo();
       }
     });
   }
