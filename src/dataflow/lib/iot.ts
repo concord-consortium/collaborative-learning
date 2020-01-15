@@ -33,6 +33,17 @@ export const TopicInfo = {
   [TopicType.hubRelays]: { leafLevel: "actuators" }
 };
 
+export function fixMqttMessage(msg: string) {
+  let match;
+  // Capturing groups: (1) leading comma, (2) bad plug message, (3) trailing comma
+  const strMatch = (str: string) => match = str.match(/(,?)("":{"version":, "plug":\d, "components": \[\]})(,?)/);
+  while (strMatch(msg) && match) {
+    const replaceStr = match[1] && match[3] ? "," : "";
+    msg = msg.replace(match[0], replaceStr);
+  }
+  return msg;
+}
+
 export class IoT {
   public stores: IStores;
   public client: MqttClient;
@@ -70,9 +81,11 @@ export class IoT {
     }
   }
 
-  public requestAllHubsChannelInfo() {
+  public refreshAllHubsChannelInfo() {
     const  { hubStore } = this.stores;
     hubStore.hubs.forEach(hub => {
+      hub.removeAllHubChannels();
+      hub.setHubUpdateTime(Date.now());
       this.requestHubChannelInfo(hub.hubId);
     });
   }
@@ -286,7 +299,7 @@ export class IoT {
   private handleMqttMessage = (topic: string, payload: Buffer) => {
     const { hubId, leafLevel } = this.parseTopic(topic);
     const rawMessage = payload.toString();
-    const fixedMessage = rawMessage.replace(/"":{"version":, "plug":\d, "components": \[\]},?/g, "");
+    const fixedMessage = fixMqttMessage(rawMessage);
     const wasMalformed = fixedMessage !== rawMessage;
     const message = safeJsonParse(fixedMessage);
     if (message) {
