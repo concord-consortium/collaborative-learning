@@ -148,6 +148,9 @@ export class IoT {
               this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo), { qos: 1 });
               this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues), { qos: 1 });
               this.requestHubChannelInfo(hubId);
+              // TODO: this call sometimes causes AWS network errors
+              // remove for now as we do not currently use thing groups
+              // will need to add this back later if we intend to sort hubs based on group
               // this.requestThingGroups(hubId);
             }
           });
