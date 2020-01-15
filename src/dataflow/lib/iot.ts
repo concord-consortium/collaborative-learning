@@ -81,9 +81,11 @@ export class IoT {
     }
   }
 
-  public requestAllHubsChannelInfo() {
+  public refreshAllHubsChannelInfo() {
     const  { hubStore } = this.stores;
     hubStore.hubs.forEach(hub => {
+      hub.removeAllHubChannels();
+      hub.setHubUpdateTime(Date.now());
       this.requestHubChannelInfo(hub.hubId);
     });
   }
