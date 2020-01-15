@@ -1027,7 +1027,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateGraphDataSet = () => {
     if (this.props.programRunId && this.hasDataStorage()) {
-      fetchProgramData(this.props.programRunId).then((result: any) => {
+      fetchProgramData(this.props.programRunId).
+      then((result: any) => {
         // make a new dataset
         const graphDataSet: DataSet = {
           sequences: [],
@@ -1053,6 +1054,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         } else {
           (this.getRunState() === ProgramRunStates.Complete) && this.setState({ graphDataSet });
         }
+      })
+      .catch(error => {
+        console.error("dataflow-program.updateGraphDataSet: error fetching dataset data");
       });
     }
   }

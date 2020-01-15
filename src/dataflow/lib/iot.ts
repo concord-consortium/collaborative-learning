@@ -125,33 +125,37 @@ export class IoT {
     });
 
     const requestParams: AWS.Iot.ListThingsRequest = { maxResults: MAX_HUBS };
-    this.iotCore.listThings(requestParams).promise().then(data => {
-      if (data && data.things) {
-        data.things.forEach(thing => {
-          const { thingName, thingArn, thingTypeName } = thing;
-          // use attribute name when available (some things may not include it)
-          const hubId = thingName || "N/A";
-          const hubName = thing.attributes && thing.attributes.name || hubId;
-          const hubProviderId = thingArn;
-          const hubType = thingTypeName;
-          if (hubId && hubProviderId && !hubStore.getHub(hubProviderId)) {
-            hubStore.addHub({
-              hubId,
-              hubProviderId,
-              hubType: hubType ? hubType : undefined,
-              hubName,
-              hubChannels: [],
-              hubUpdateTime: Date.now()
-            });
-            // subscribe to any necessary topics for the new thing
-            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo), { qos: 1 });
-            this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues), { qos: 1 });
-            this.requestHubChannelInfo(hubId);
-            this.requestThingGroups(hubId);
-          }
-        });
-      }
-    });
+    this.iotCore.listThings(requestParams).promise().
+      then(data => {
+        if (data && data.things) {
+          data.things.forEach(thing => {
+            const { thingName, thingArn, thingTypeName } = thing;
+            // use attribute name when available (some things may not include it)
+            const hubId = thingName || "N/A";
+            const hubName = thing.attributes && thing.attributes.name || hubId;
+            const hubProviderId = thingArn;
+            const hubType = thingTypeName;
+            if (hubId && hubProviderId && !hubStore.getHub(hubProviderId)) {
+              hubStore.addHub({
+                hubId,
+                hubProviderId,
+                hubType: hubType ? hubType : undefined,
+                hubName,
+                hubChannels: [],
+                hubUpdateTime: Date.now()
+              });
+              // subscribe to any necessary topics for the new thing
+              this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubChannelInfo), { qos: 1 });
+              this.client.subscribe(this.createTopic(OWNER_ID, hubId, TopicType.hubSensorValues), { qos: 1 });
+              this.requestHubChannelInfo(hubId);
+              // this.requestThingGroups(hubId);
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error("IoT.updateHubs: error calling listThings");
+      });
   }
 
   private requestThingGroups = (hubId: string) => {
@@ -160,15 +164,19 @@ export class IoT {
     };
     const  { hubStore } = this.stores;
     const hub = hubStore.getHubById(hubId);
-    this.iotCore.listThingGroupsForThing(params).promise().then(data => {
-      if (data && data.thingGroups && hub) {
-        data.thingGroups.forEach(group => {
-          if (group.groupName && !hub.hubGroups.includes(group.groupName)) {
-            hub.addHubGroup(group.groupName);
-          }
-        });
-      }
-    });
+    this.iotCore.listThingGroupsForThing(params).promise()
+      .then(data => {
+        if (data && data.thingGroups && hub) {
+          data.thingGroups.forEach(group => {
+            if (group.groupName && !hub.hubGroups.includes(group.groupName)) {
+              hub.addHubGroup(group.groupName);
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error("IoT.requestThingGroups: error calling listThingGroupsForThing with id =", hubId);
+      });
   }
 
   private createTopic(ownerID: string, hubId: string, topicType: TopicType) {
