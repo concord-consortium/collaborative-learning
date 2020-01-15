@@ -36,32 +36,7 @@ before(()=>{
 
 context('Sensor block tests',()=>{
     describe('Sensor block UI',()=>{
-        it('verify UI',()=>{ //block should have 2 dropdowns, one value field, no input node, one output mode
-            dfblock.getBlockTitle(testBlock).should('contain','Sensor');
-            dfblock.getSensorTypeListDropdown().should('be.visible');
-            dfblock.getHubSensorComboListDropdown().should('be.visible');
-            dfblock.getSensorValueTextField().should('be.visible');
-            dfblock.getOutputNode(testBlock).should('be.visible');
-            dfblock.getInputNodesNum(testBlock).should('not.exist');
-        })
-        it('verify changing sensor type changes the hub list selection',()=>{
-            var sensorTypes=['Humidity','Temperature','Particulates'];
-
-            cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
-                dfblock.selectSensorType(sensor);
-                cy.wait(10000)
-                dfblock.openHubSensorComboListDropdown();
-                dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
-                    if(($optionList.length<2)) {
-                        expect($option).to.contain('None Available');
-                    }
-                    else {
-                        expect($option).to.contain(sensor.toLowerCase());
-                    }
-                })
-            })
-        })
-        it.skip('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
+        it('verify if there are more than one of the same type of sensor on one hub, plug info is shown',()=>{
             var sensorTypes=['Humidity','Temeprature'];
             var hub ='codap-server-hub-sim'; //use cc-west-hub since it has two temp and two humidity
             var plugIndex = 1;
@@ -77,23 +52,7 @@ context('Sensor block tests',()=>{
                 }
             })
         })
-        it('verify sensor type matches units shown in text field',()=>{
-            var sensorTypes=[
-                                {type:'Temperature', unit:'°C'},
-                                {type:'Humidity', unit:'%'},
-                                {type:'CO₂', unit:'PPM'},
-                                {type:'O₂',unit:'%'},
-                                {type:'Light',unit:'lux'},
-                                {type:'Soil Moisture',unit:''},
-                                {type:'Particulates',unit:'PM2.5'}
-                            ];
-
-            cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
-                dfblock.selectSensorType(sensor.type)
-                dfblock.getSensorValueTextField().should('contain',sensor.unit)
-            })
-        })
-        it.skip('verify sensor blocks outputs correctly',()=>{
+        it('verify sensor blocks outputs correctly',()=>{
             var sensor = "Humidity";
             var hubcce = 'cceast-sim-hub:humidity'
             var hubccw = "codap-server-hub-sim:humidity(plug 2)";
