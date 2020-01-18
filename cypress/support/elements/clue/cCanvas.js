@@ -237,15 +237,21 @@ class ClueCanvas {
         return cy.get('.right-workspace [data-test=learning-log-title]')
     }
 
-    getLeftSideWorkspaceTitle() {
-        return cy.get('.left-workspace [data-test=document-title]')
-    }
-    getLeftSidePersonalDocTitle() {
-        return cy.get('.left-workspace [data-test=personal-doc-title]')
-    }
-    getRightSideDocumentContent() {
-        return cy.get('.right-workspace .document-content')
-    }
+     getLeftSideWorkspaceTitle(){
+         return cy.get('.left-workspace [data-test=document-title]')
+     }
+     getLeftSidePersonalDocTitle(){
+         return cy.get('.left-workspace [data-test=personal-doc-title]')
+     }
+     getRightSideDocumentContent(){
+         return cy.get('.right-workspace .document-content')
+     }
+     getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
+        return '.tool-tile-drag-handle';
+     }
+     getLinkIcon(){
+         return cy.get('.link-indicator')
+     }
 }
 
 export default ClueCanvas;

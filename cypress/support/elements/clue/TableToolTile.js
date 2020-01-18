@@ -65,5 +65,9 @@ class TableToolTile{
     getTableIndexColumnCell(){
         return cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-cell')
     }
+    unlinkTable(){
+        this.openTableMenu();
+        cy.get('.bp3-menu-item div').contains('Unlink Geometry').click()
+    }
 }
 export default TableToolTile;

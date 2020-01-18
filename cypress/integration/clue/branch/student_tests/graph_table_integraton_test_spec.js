@@ -1,10 +1,11 @@
-import LeftNav from '../support/elements/clue/LeftNav'
-import Canvas from '../support/elements/common/Canvas'
-import ClueCanvas from '../support/elements/clue/cCanvas'
-import GraphToolTile from '../support/elements/clue/GraphToolTile'
-import RightNav from '../support/elements/common/RightNav'
-import TableToolTile from '../support/elements/clue/TableToolTile'
-import ImageToolTile from '../support/elements/clue/ImageToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
+import RightNav from '../../../../support/elements/common/RightNav'
+import TableToolTile from '../../../../support/elements/clue/TableToolTile'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile'
 
 const leftNav = new LeftNav;
 const canvas = new Canvas;
@@ -13,6 +14,7 @@ const rightNav = new RightNav;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const imageToolTile = new ImageToolTile;
+const textToolTile = new TextToolTile;
 
 function addTableAndGraph(){
     clueCanvas.addTile('table');
@@ -26,24 +28,54 @@ function deleteTableAndGraph(){
 
 function connectTableToGraph(){
     const dataTransfer = new DataTransfer;
+    tableToolTile.getTableTile().click();
+    tableToolTile.getTableTile().parent().parent().should('have.class','selected');
 
     tableToolTile.getTableTile()
-        .trigger('dragstart', {dataTransfer});
+        .trigger('dragstart', {dataTransfer})
     graphToolTile.getGraphTile()
-        .trigger('drop', {dataTransfer});
-    tableToolTile.getTableTile()
-        .trigger('dragend');
+            .trigger('dragover',{dataTransfer})
+            .trigger('drop', {dataTransfer})
+            .trigger('dragend',{dataTransfer});
 }
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
+
+    cy.visit(baseUrl+queryParams);
+    cy.waitForSpinner();
+})
+
 context('Tests for graph and table integration', function(){
-    describe('connect table to graph before adding coordinates', function(){
-        it('setup', function(){
-            addTableAndGraph();
+    before(function(){
+        addTableAndGraph();
+    })
+    describe("connect and disconnect table and graph", function(){
+        it('verify link icon appears when table and graph are connected',function(){
+            clueCanvas.getLinkIcon().should('not.exist');
             connectTableToGraph();
+            tableToolTile.getTableTile().scrollIntoView();
+            graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('be.visible');
+            tableToolTile.getTableTile().parent().should('have.class','is-linked');
+            tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('be.visible');
         })
+        it('verify unlink of graph and table',function(){
+            tableToolTile.unlinkTable();
+            graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('not.exist');
+            tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('not.exist');
+
+        })
+    })
+
+    describe('connect table to graph before adding coordinates', function(){
         describe('Test blank cells',function(){//verify this is still true
           const xCoord = '9';
           const yCoord = '9';
+          before(()=>{
+              connectTableToGraph();
+          })
             it('will add a blank row', function(){ 
                 tableToolTile.getTableTile().should('exist')
                 tableToolTile.addNewRow();
@@ -70,12 +102,12 @@ context('Tests for graph and table integration', function(){
                 tableToolTile.enterData(1,'0')
                 graphToolTile.getGraphPointLabel().contains('p1').should('exist');
                 graphToolTile.getGraphPointCoordinates(0).should('contain', '(0, 0)' );
-                tableToolTile.getTableCell().eq(3).type('0');
-                tableToolTile.getTableCell().eq(6).type(' ');
+                tableToolTile.getTableCell().eq(3).type('0{enter}');
+                // tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p2').should('exist');
                 graphToolTile.getGraphPointCoordinates(1).should('contain', '('+xCoord+', 0)' );
-                tableToolTile.getTableCell().eq(4).type('0');
-                tableToolTile.getTableCell().eq(6).type(' ');
+                tableToolTile.getTableCell().eq(4).type('0{enter}');
+                // tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p3').should('exist');
                 graphToolTile.getGraphPointCoordinates(2).should('contain', '(0, '+yCoord+')');            });
         });
@@ -88,7 +120,7 @@ context('Tests for graph and table integration', function(){
                 graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
             })
             it('will create a polygon', function(){ //first point is created in previous it
-                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+                graphToolTile.getGraphPoint().last().click({force:true}).dblclick({force:true});
                 graphToolTile.getGraphPolygon().should('exist')
             });
             it('will add angle to a table point', function(){
@@ -98,7 +130,7 @@ context('Tests for graph and table integration', function(){
             // TODO: Failing to find 8
             it('will move a point by changing coordinates on the table', function(){
                 let new_x = '8';
-                tableToolTile.getTableCell().eq(6).type(new_x);
+                tableToolTile.getTableCell().eq(6).type(new_x+'{enter}');
                 tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+new_x+', 5)' )
             });
@@ -150,6 +182,7 @@ context('Tests for graph and table integration', function(){
         describe('normal graph interactions', function(){
             it('will add a polygon directly onto the graph', function(){
                 graphToolTile.getGraphTile().click();
+                graphToolTile.addPointToGraph(5,5); //not sure why this isn't appearing
                 graphToolTile.addPointToGraph(10,15);
                 graphToolTile.addPointToGraph(13,10);
                 graphToolTile.addPointToGraph(5,10)
