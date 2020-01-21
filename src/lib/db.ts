@@ -22,7 +22,7 @@ import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
-import { find } from "lodash";
+import { find, findLast } from "lodash";
 
 export enum Monitor {
   None = "None",
@@ -240,9 +240,9 @@ export class DB {
       const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
       const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
                                                                   problemDocumentsSnapshot.val();
-      const firstProblemDocument = find(problemDocuments, () => true);
-      return firstProblemDocument
-              ? this.openProblemDocument(firstProblemDocument.documentKey)
+      const lastProblemDocument = findLast(problemDocuments, () => true);
+      return lastProblemDocument
+              ? this.openProblemDocument(lastProblemDocument.documentKey)
               : this.createProblemDocument(defaultContent);
     }
 
@@ -254,9 +254,9 @@ export class DB {
     const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
     const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
                                                   personalDocumentsSnapshot.val();
-    const firstPersonalDocument = find(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
-    return firstPersonalDocument
-      ? this.openOtherDocument(PersonalDocument, firstPersonalDocument.self.documentKey)
+    const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
+    return lastPersonalDocument
+      ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
       : this.createPersonalDocument({ content: defaultContent });
   }
 
@@ -270,9 +270,9 @@ export class DB {
     const learningLogDocumentsSnapshot = await learningLogDocumentsRef.once("value");
     const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
                                                   learningLogDocumentsSnapshot.val();
-    const firstLearningLogDocument = find(learningLogDocuments, () => true);
-    return firstLearningLogDocument
-      ? this.openOtherDocument(LearningLogDocument, firstLearningLogDocument.self.documentKey)
+    const lastLearningLogDocument = findLast(learningLogDocuments, () => true);
+    return lastLearningLogDocument
+      ? this.openOtherDocument(LearningLogDocument, lastLearningLogDocument.self.documentKey)
       : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
   }
 

@@ -327,8 +327,16 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
+    let {fakeClass, fakeUser} = urlParams;
+
+    // handle preview launch from portal
+    if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
+      appMode = "demo";
+      fakeClass = `preview-${urlParams.domain_uid}`;
+      fakeUser = `student:${urlParams.domain_uid}`;
+    }
+
     if ((appMode === "demo") || (appMode === "qa")) {
-      const {fakeClass, fakeUser} = urlParams;
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }

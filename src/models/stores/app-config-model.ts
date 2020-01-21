@@ -52,6 +52,7 @@ export const AppConfigModel = types
     defaultDocumentType: types.optional(types.enumeration(["problem", "personal"]), "personal"),
     defaultDocumentTitle: "Untitled",
     docTimeStampPropertyName: "",
+    docDisplayIdPropertyName: "",
     // clients should use the defaultDocumentContent() method below
     defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultLearningLogTitle: "UntitledLog",
@@ -65,6 +66,7 @@ export const AppConfigModel = types
     disableTileDrags: false,
     showClassSwitcher: false,
     supportStackedTwoUpView: false,
+    showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel)
