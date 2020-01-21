@@ -126,7 +126,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li>If the relationship is linear, how can you determine if it is a proportional relationship?</li><li>How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?</li><li>If I know the value of one variable, how can I find the value of the other variable? </li></ul>"
+                        "<ul><li><em>How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</em></li><li><em>If the relationship is linear, how can you determine if it is a proportional relationship?</em></li><li><em>How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?</em></li><li><em>If I know the value of one variable, how can I find the value of the other variable? </em></li></ul>"
                       ]
                     }
                   }
@@ -193,7 +193,7 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation B. Liz’s Claim</strong>",
-                        "Liz claimed that walking rates are like ratios and she used proportional reasoning to answer the questions in Situation A. She wrote:\n <em>The walking rate is a multiplicative comparison statement. If I walk 1.5 m per second, then I walk 7.5 m in 5 seconds, 15 m in 10 seconds, … or 500 m in about 333 seconds, etc.</em>\n\nIs she correct? Explain. "
+                        "Liz claimed that walking rates are like ratios and she used proportional reasoning to answer the questions in Situation A. She wrote:\n <blockquote><em>The walking rate is a multiplicative comparison statement. If I walk 1.5 m per second, then I walk 7.5 m in 5 seconds, 15 m in 10 seconds, … or 500 m in about 333 seconds, etc.</em></blockquote>\n\nIs she correct? Explain. "
                       ]
                     }
                   }
@@ -243,14 +243,14 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Expressions</strong>\n1.5<em>t</em> is an expression for the distance walked every second.\n\n<em>d</em> can also be an <strong>expression</strong> for the distance walked."]
+                      "text": ["<strong>Expressions</strong>\n\n1.5<em>t</em> is an <strong>expression</strong> for the distance walked every second.\n\n<em>d</em>\u00a0 can also be an <strong>expression</strong> for the distance walked."]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Equation</strong>\n<em>d = </em>1.5<em>t</em>\u00a0 is an equation for the distance <em>d</em> walked in <em>t</em>\u00a0 seconds.\n\nThe equation has two equivalent expressions that represent the relationship between the two variables, <em>d</em> and <em>t</em>.",
+                      "text": ["<strong>Equation</strong>\n\n<em>d = </em>1.5<em>t</em>\u00a0 is an <strong>equation</strong> for the distance <em>d</em>\u00a0 walked in <em>t</em>\u00a0 seconds.\n\nThe equation has two equivalent expressions that represent the relationship between the two variables, <em>d</em> and <em>t</em>.",
                         "\nThe expressions <em>d</em> and 1.5<em>t</em>\u00a0 are <strong>equivalent expressions</strong>."]
                     }
                   },
@@ -316,7 +316,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Yvonne’s Claims</strong> <ol><li>Yvonne claims she can tell from the table that the relationships between time and distance are proportional. What evidence in the table shows they are proportional? Is this the same thing as saying the relationships are linear?</li><li>Yvonne claims that she can use a table or a graph to answer the question:\n<em>For each student, if time t increases by 1 second, by how much does the distance d change? </em>\nIs she correct? Explain. </li><li>Yvonne also claims that the time and distance data represented in Part 1 is the Constant of Proportionality. What do you think?</li></ol>"]
+                      "text": ["<strong>Situation A. Yvonne’s Claims</strong> <ol><li>Yvonne claims she can tell from the table that the relationships between time and distance are proportional. What evidence in the table shows they are proportional? Is this the same thing as saying the relationships are linear?</li><li>Yvonne claims that she can use a table or a graph to answer the question:\n\u00a0\u00a0\u00a0<em>For each student, if time t increases by 1 second, by how much \n\u00a0\u00a0\u00a0does the distance d change? </em>\nIs she correct? Explain. </li><li>Yvonne also claims that the time and distance data represented in Part 1 is the Constant of Proportionality. What do you think?</li></ol>"]
                     }
                   },
                    {
@@ -329,12 +329,13 @@
                    {
                     "content": {
                       "type": "Text",
-                      "text": "Omar's graph"
+                      "format": "html",
+                      "text": ["<strong>Omar's Walking Rate</strong>"]
                     }
                   },
                   {
                     "layout": {
-                      "height": 250
+                      "height": 300
                     },
                     "content": {
                       "type":"Geometry",
@@ -387,19 +388,20 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Valentina's graph"
+                       "format": "html",
+                      "text": ["<strong>Valentina's Walking Rate</strong>"]
                     }
                   },
                   {
                     "layout": {
-                      "height": 250
+                      "height": 300
                     },
                     "content": {
                       "type":"Geometry",
                       "board": {
                         "properties": {
                           "axisMin": [-1, -1],
-                          "axisRange": [10, 10]
+                          "axisRange": [11, 11]
                         }
                       },
                       "objects": [
@@ -426,7 +428,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ol><li>How are their graphs similar? How are they different?</li><li>Which expression could represent their distance?\n\n 5<em>t</em>  \u00a0\u00a0  2<em>t</em> \u00a0\u00a0 0.5<em>t</em></li></ol>"]
+                      "text": ["<ol><li>How are their graphs similar? How are they different?</li><li>Which expression could represent their distance?\n\n 5<em>t</em>  \u00a0\u00a0\u00a0\u00a0  2<em>t</em> \u00a0\u00a0\u00a0\u00a0 0.5<em>t</em></li></ol>"]
                     }
                   },
                   {
@@ -480,8 +482,8 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["\n<strong>Billie's walkathon</strong>\n<em>D = </em>2.25<em>t</em>, where <em>D</em> represents distance and <em>t</em> represents time.",
-                        "\n<strong>Bob's walkathon</strong>\n<em>t = </em>100/<em>r</em>, where <em>t</em> represents time and <em>r</em> represents walking rate.",
+                      "text": ["\n<strong>Billie's walkathon</strong>\n\n<em>D = </em>2.25<em>t</em>, where <em>D</em> represents distance and <em>t</em> represents time.",
+                        "\n<strong>Bob's walkathon</strong>\n\n<em>t = </em>100/<em>r</em>, where <em>t</em> represents time and <em>r</em> represents walking rate.",
                         "<strong>Evo's Walkathon</strong>"]
                     }
                   },
@@ -522,13 +524,13 @@
           "sections": [{
               "type": "introduction",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon. ",
-                      "The students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions: <ul><li><em> What variables can affect the amount of money that is collected?</em></li><li> How can you use these variables to estimate the amount of money each student will collect? </em></li><li> <em>Will the amount of money collected be the same for each walker? </em></li></ol>\nEach participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as <em>pledge plans</em>."
+                      "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon. \n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions: <ul><li><em> What variables can affect the amount of money that is collected?</em></li><li> How can you use these variables to estimate the amount of money each student will collect? </em></li><li> <em>Will the amount of money collected be the same for each walker? </em></li></ol>\nEach participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as <em>pledge plans</em>."
                     ]
                   }
                 }]
@@ -637,7 +639,7 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["In previous Problems, you noticed that as the independent variable changes by some consistent amount, there is a consistent pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crosses the y-axis at point (0,5). Leanne’s crosses the y-axis at point (0, 10). Gilberto’s pledge plan crosses the y-axis at (0,0). These points are called the <em>y-intercepts</em>. The <strong>y-intercept</strong> is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts. \n<em>What information does the y-intercept represent?\nIn what way does it help you solve the Problem?</em>"]
+                    "text": ["In previous Problems, you noticed that as the independent variable changes by some consistent amount, there is a consistent pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crosses the y-axis at point (0,5). Leanne’s crosses the y-axis at point (0, 10). Gilberto’s pledge plan crosses the y-axis at (0,0). These points are called the <em>y-intercepts</em>. The <strong>y-intercept</strong> is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts. \n\n<em>What information does the y-intercept represent?\nIn what way does it help you solve the Problem?</em>"]
                   }
                 }]
               },
@@ -669,7 +671,7 @@
                       ]
                   },
                   "layout": {
-                    "height": 180
+                    "height": 190
                   }
                 },
                   {
@@ -787,7 +789,7 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n\u00a0\u00a0\u00a0<code>500 - 10t =100\n\u00a0\u00a0\u00a0500 - 10t<100 </code>\nHow do the graphs of the data compare?"]
+                    "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n<code>\u00a0\u00a0\u00a0 500 - 10t = 100 \n\u00a0\u00a0\u00a0 500 - 10t < 100 </code>\nHow do the graphs of the data compare?"]
                   }
 
                 }
@@ -834,13 +836,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["In the last Investigation, you examined linear relationships. For example, the distance, <em>d</em>, a person walks at a rate depends on the amount of time, <em>t</em>, the person walks. Also, the amount of money, <em>A</em>, a person raises from each sponsor depends on the distance, <em>d</em>, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana. "]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_2_In_d=1t_350w.png"
+                      "text": ["In the last Investigation, you examined linear relationships. For example, the distance, <em>d</em>, a person walks at a rate depends on the amount of time, <em>t</em>, the person walks. Also, the amount of money, <em>A</em>, a person raises from each sponsor depends on the distance, <em>d</em>, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana. \n\u00a0\u00a0\u00a0 d = 1<em>t</em> or <em>d = t</em>\n \u00a0\u00a0\u00a0 and \n \u00a0\u00a0\u00a0 A = 5 + 0.5<em>d</em>"]
                     }
                   },
                   {
@@ -908,21 +904,21 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":["<strong>Situation A. Using Tables and Graphs</strong>\nIn Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. <ol><li>How can a table or graph be used to find the length of the race?</li><li>How does the walking rate of each brother show up in the table and graph?</li><li>After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?</li><li>What information does the y-intercept of each graph represent in terms of the race?</li><li>Is the point (26, 70) on the graph or table of one of the brothers? Explain.</li><li>Mary wrote the inequality: 45 + t < 2.5t. What information was she looking for?</li></ol>"]
+                    "text":["<strong>Situation A. Using Tables and Graphs</strong>\nIn Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. <ol><li>How can a table or graph be used to find the length of the race?</li><li>How does the walking rate of each brother show up in the table and graph?</li><li>After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?</li><li>What information does the y-intercept of each graph represent in terms of the race?</li><li>Is the point (26, 70) on the graph or table of one of the brothers? Explain.</li><li>Mary wrote the inequality: 45 + <em>t</em>\u00a0 < 2.5<em>t</em>. What information was she looking for?</li></ol>"]
                     }
                   },
                   {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":["<strong>Situation B. Using Equations</strong>\nAmit wrote equations to represent the relationships between time and distance. He wrote: \n\n<em>d<sub>Emile<M</sub>/em> = 2.5<em>t</em> \u00a0for Emile \n<em>d<sub>Henri</sub> = 45 + 1<em>t</em> \u00a0for Henri \n\nHe makes five claims. Are they correct? Explain."]
+                    "text":["<strong>Situation B. Using Equations</strong>\nAmit wrote equations to represent the relationships between time and distance. He wrote: \n\n<em>d<sub>Emile<M</sub></em> = 2.5<em>t</em> \u00a0 for Emile \n<em>d<sub>Henri</sub> = 45 + 1<em>t</em> \u00a0for Henri \n\nHe makes five claims. Are they correct? Explain."]
                     }
                   },
                   {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":["<strong>Claim #1</strong> You can tell the walking rate and <em>y</em>-intercept from the equation. \n<strong>Claim #2</strong> You can determine which of the two lines will be steeper from the equation. \n<strong>Claim #3</strong> Both equations represent linear relationships. But neither of them is proportional. \n<strong>Claim #4</strong> You can find the time when Emile catches Henri by setting the expressions for distance equal.\n \u00a0\u00a0\u00a0 <em>d<sub>Emile</sub>   =   d<sub>Henri</sub></em> \u00a0\u00a0 or  \u00a0\u00a0 2.5t  = 45 +1t. \nThen find the value for <em>t</em> that makes the equation true.\n<strong>Claim #5</strong> You can use the expression (45 – 1.5<em>t</em>) – 2.5<em>t</em> to find the distance the brothers are apart for any given second <em>t</em>. "]
+                    "text":["<strong>Claim #1</strong> You can tell the walking rate and <em>y</em>-intercept from the equation. \n<strong>Claim #2</strong> You can determine which of the two lines will be steeper from the equation. \n<strong>Claim #3</strong> Both equations represent linear relationships. But neither of them is proportional. \n<strong>Claim #4</strong> You can find the time when Emile catches Henri by setting the expressions for distance equal.\n \u00a0\u00a0\u00a0 <em>d<sub>Emile</sub>   =   d<sub>Henri</sub></em> \u00a0\u00a0 or  \u00a0\u00a0 2.5t  = 45 +1t. \nThen find the value for <em>t</em> that makes the equation true.\n<strong>Claim #5</strong> You can use the expression (45 – 1.5<em>t</em>) – 2.5<em>t</em>\u00a0 to find the distance the brothers are apart for any given second <em>t</em>. "]
                     }
                   }
                 ]
@@ -1012,7 +1008,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>."
+                      "format": "html",
+                      "text": ["The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>."]
                     }
                   },
                   {
@@ -1066,7 +1063,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n <em>C<sub>mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\nThe number of T-shirts is <em>n. C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. <em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n • Which company should they choose? Give evidence for your answer. "]
+                      "text": ["Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n\n <em>C<sub>mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\n\nThe number of T-shirts is <em>n</em>. \n<em>C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. \n<em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n\n • Which company should they choose? Give evidence for your answer. "]
                     }
                   }
                 ]
@@ -1260,7 +1257,7 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation C. Finding Solutions</strong>\nFor Plan 1 <em>y</em> = 5<em>x</em> - 3 <ol><li>Find the value of <em>y</em> when <em>x</em> = 7</li><li>Find the value of <em>x</em> when <em>y</em> = 32.</li></ol> \n\n5. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?\n\n6. Yvonne thinks that all the plans are proportional? Do you agree? Explain why."]
+                    "text": ["<strong>Situation C. Finding Solutions</strong>\nFor Plan 1 <em>y</em> = 5<em>x</em> - 3 <ol><li>Find the value of <em>y</em> when <em>x</em> = 7</li><li>Find the value of <em>x</em> when <em>y</em> = 32.</li></ol>"]
                   }
                 },
                 {
@@ -1699,7 +1696,7 @@
               },
               "supports": [
                 {"text": "Would a diagram help?"},
-                {"text": "What does <em>'x'</em> mean in the equations?"}
+                {"text": "What does 'x' mean in the equations?"}
               ]
             },
             {
@@ -1802,7 +1799,7 @@
                 ]
               },
               "supports": [
-                {"text": "What does <em>'h'</em> mean in the equations?"},
+                {"text": "What does 'h' mean in the equations?"},
                 {"text": "How do you know if a relationship is linear?"},
                 {"text": "Can you explain the meaning of each equation in your own words?"}
               ]
@@ -1923,14 +1920,14 @@
                   },
                   {
                     "layout": {
-                      "height": 60
+                      "height": 80
                     },
                     "content": {
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [160, -1],
-                          "axisRange": [175, 1]
+                          "axisMin": [150, -1],
+                          "axisRange": [180, 1]
                         }
                       },
                       "objects": [
@@ -2027,7 +2024,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Determine the steepness of a set of stairs in your school or home. \n\n  •\u00a0 How can you describe the steepness of the stairs?\n  • Is the steepness the same between any two consecutive steps? \n  •\u00a0 How do the stairs you measured compare to the carpenters’ guidelines on the previous page? "
+                      "text": "Determine the steepness of a set of stairs in your school or home. \n\n  • \u00a0 How can you describe the steepness of the stairs?\n  • \u00a0 Is the steepness the same between any two consecutive steps? \n  • \u00a0 How do the stairs you measured compare to the carpenters’ guidelines on the previous page? "
                     }
                   }
                 ]
@@ -2265,8 +2262,8 @@
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                           "axisMin": [-2, -6],
-                           "axisRange": [2, 6]
+                           "axisMin": [-5, -10],
+                           "axisRange": [5, 10]
                         }
                       },
                       "objects": [
@@ -2300,8 +2297,8 @@
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [-4, -2],
-                          "axisRange": [4, 2]
+                          "axisMin": [-5, -3],
+                          "axisRange": [5, 3]
                         }
                       },
                       "objects": [
@@ -2441,87 +2438,21 @@
           "subtitle": "Revisiting Rates and Proportionality in Linear Situations",
           "sections": [
             {
-              "type": "introduction",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": " Throughout this Unit, you have learned several ways to model linear relationships. You have also learned ways to move back and forth between tables, graphs, and equations to solve problems. This Problem pulls some of these ideas together. "
-                    }
-                  }
-                ]
-              },
-              "supports": []
-            },
-            {
               "type": "initialChallenge",
               "content": {
                 "tiles": [
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Each letter provides criteria for a relationship. For each situation, decide if the relationship could be linear. \nFor those that are linear, is there exactly one or more than one? \nProvide reasons for your decisions. \n\nA: A graph that does not pass through the origin\n\nB: A graph that passes through exactly two quadrants\n\nC: A graph that passes through exactly three quadrants\n\nD: A table"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [-4, -2, -1, 0]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [2, 2, 2, 2]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "E: A graph that contains the points (1, 4) and (-2, -3)\n\nF: A graph that contains the points (0,4), (2,6) and (3,8)\n\nG: A graph that contains the point (-1, 5)\n\nH: A table"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [2, 3, 4, 5, 6]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [-11, -14, -17, -20, -23]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "I: An equation that relates degrees Fahrenheit (F) and degrees Celsius (C). Water freezes at 0\u2103 or 32\u2109. Water boils at 100\u2103 and 212\u2109.\n\nJ: An equation that relates amount of money Chantal will have saved after n years. Chantal’s grandfather puts $1 in her bank account the first year, $2 the second year, $4 the third year, $8 the fourth year, and he continues to double the money added each year."
+                      "format": "html",
+                      "text": ["The students did so well in organizing the walkathon that Ms. Chang organized a special field trip to watch a movie. \n\nSuppose that the ABC Movie Company charges the school $4.50 per student. But the movie company does not want to lose money. The company’s operating expenses include $130 for the staff and a film rental fee of $1.25 per student. \n\n• How many students need to attend the movie so that the theater’s income will equal its operating expenses? "]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "Are any of these situations both linear and non-linear?"},
-                {"text": "What information do you need to know if a situation is linear?"},
-                {"text": "How can you decide if there is only one line for each card?"}
+                {"text": "How much does the operating expense cost if 10 students watch the movie? "},
+                {"text": "How much does the school pay for the movie if 10 students watch the movie?"}
               ]
             },
             {
@@ -2531,14 +2462,89 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Answer the following questions for the situations above that could be linear as if they are linear.\n\n1. Which linear situations could represent a proportional relationship?\n\n2. Which linear situations could have positive rate of change, negative rate of change, zero rate of change, or no rate of change at all?\n\n3. If possible, write an equation for each linear situation. "
+                      "format": "html",
+                      "text": ["<strong>Situation A. Student Strategies</strong> \nThe following students used different strategies to answer the question in the <em>Initial Challenge</em>. Examine each strategy and describe how each could or could not be used to answer the question."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Geraldo’s Strategy: I made the following tables:"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of Students, x",
+                          "type": "number",
+                          "values": [0, 10, 20, 30, 40, 50, 60, 70]
+                        },
+                        {
+                          "name": "Income, I ($)",
+                          "type": "number",
+                          "values": [ ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 180
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of Students, x",
+                          "type": "number",
+                          "values": [0, 10, 20, 30, 40, 50, 60, 70]
+                        },
+                        {
+                          "name": "Expenses, E ($)",
+                          "type": "number",
+                          "values": [ ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 180
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Anna’s Strategy: On the same set of axes, I graphed the theater’s income and operating expenses for any number of students from 0 to 100. "]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Sze’s Strategy: I wrote an expression that represents the theater’s profit. "]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation B. Laneshia Uses Inequalities</strong> \nLaneshia wanted to find the number of students that make each of the following inequality statements true. <ul><li>Expenses < 255 or $1.25n + $130 < $255</li><li>Income  > 675 or $4.50n > $675</li></ul><ol><li>Find the number of students that makes each inequality statement true.</li><li>How might this information be helpful in making decisions about the showing of the film?</li></ol>"]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation C. A Competing Company</strong> \nAt the Studio Theater, they used the equation, P = 3n – 115 to find the profit P for the number of students n that attend the theater. What do the numbers 3 and 115 tell you about <ol><li>the relationship between the number of students and the theater’s profit? </li><li>the pattern of entries that would appear in a table of sample (students, profit) data? </li><li> a graph of the relationship between the number of students and the profit? </li></ol>Write and solve an equation you can use to find the number of students for which the ABC  Movie Company and the Studio Theater make the same profit. Then find the amount of that profit."]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "Can you write a proportion using two points from the situation?"},
-                {"text": "What about the situation tells if the slope slants up, down, or across?"},
+                {"text": "What information do you need to know if a situation is linear?"},
                 {"text": "How do you know your equation represents the linear situation?"}
               ]
             },
@@ -2548,7 +2554,7 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "What information do you need to:\n  • Determine if a relationship is linear? Proportional?\n  • Write an equation for a linear relationship?"
+                    "text": "How do the situations in this Problem compare to other Problems in this Unit? Do any of these represent proportional situations? Why? In what ways are tables, graphs, equations, and inequalities useful for solving Problems?"
                   }
                 }]
               },
