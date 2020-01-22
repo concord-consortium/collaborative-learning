@@ -69,5 +69,19 @@ class RightNav{
         return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
     }
 
+    deleteSupport(index) {
+        if (index == "all") {
+            return cy.get('svg.icon-delete-document').click({multiple:true, force:true})
+        } else {
+            return cy.get('svg.icon-delete-document').eq(index-1).click({force:true})
+        }
+    }
+    confirmDeleteDialog() {
+        return cy.get('.dialog-container').within(() => {
+            cy.get('.dialog-title').contains('Confirm Delete')
+            cy.get('.dialog-text').contains('Do you want to delete this?')
+            cy.get('button#okButton').contains('Yes').click({force:true})
+        })
+    }
 }
 export default RightNav;

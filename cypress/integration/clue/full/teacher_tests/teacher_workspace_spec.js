@@ -218,7 +218,17 @@ context("Teacher Space", () => {
                     clueCanvas.publishSupportDoc();
                     rightNav.openRightNavTab('supports');
                     rightNav.openSection('supports','teacher-supports');
+                    cy.waitForClueRightNavLoading()
                     rightNav.getCanvasItemTitle('supports','teacher-supports').should('contain',title)
+                    rightNav.closeSection('supports','teacher-supports');
+                    rightNav.closeRightNavTab('supports')
+                })
+                it('deletes support and verifies confirmation dialog',function(){
+                    rightNav.openRightNavTab('supports');
+                    rightNav.openSection('supports','teacher-supports');
+                    cy.waitForClueRightNavLoading()
+                    rightNav.deleteSupport(1) // Either give index or 'all'
+                    rightNav.confirmDeleteDialog()
                 })
             })
         })
