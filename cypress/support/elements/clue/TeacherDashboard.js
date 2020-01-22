@@ -76,7 +76,7 @@ class TeacherDashboard {
         return '[data-test=sticky-note-icon]'
     }
     getDashboardSupportButton() {
-        return cy.get('#icon-support')
+        return cy.get('[data-test=publish-support-icon]')
     }
     getExpandGroupViewButton() {
         return cy.get('[data-test=expand-group-view-icon]')
