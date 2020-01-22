@@ -1920,14 +1920,14 @@
                   },
                   {
                     "layout": {
-                      "height": 80
+                      "height": 160
                     },
                     "content": {
                       "type":"Geometry",
                       "board": {
                         "properties": {
-                          "axisMin": [150, -1],
-                          "axisRange": [180, 1]
+                          "axisMin": [-20, -1],
+                          "axisRange": [200, 4]
                         }
                       },
                       "objects": [
@@ -2263,7 +2263,7 @@
                       "board": {
                         "properties": {
                            "axisMin": [-5, -10],
-                           "axisRange": [5, 10]
+                           "axisRange": [10, 32]
                         }
                       },
                       "objects": [
@@ -2298,7 +2298,7 @@
                       "board": {
                         "properties": {
                           "axisMin": [-5, -3],
-                          "axisRange": [5, 3]
+                          "axisRange": [10, 10]
                         }
                       },
                       "objects": [
