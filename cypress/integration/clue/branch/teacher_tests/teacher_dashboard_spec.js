@@ -230,7 +230,7 @@ context("Teacher Space", () => {
             it('verify clicking support button opens two up with group open', function() {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups
-                    dashboard.getDashboardSupportButton().click();
+                    dashboard.getDashboardSupportButton().eq(0).click();
                     clueCanvas.getLeftSideWorkspace().should('be.visible')
                     clueCanvas.getLeftSideWorkspaceTitle().should('contain',this.problemTitle);
                     clueCanvas.getRightSideWorkspace().should('be.visible')
