@@ -21,7 +21,7 @@ class ClueCanvas{
     }
 
     getPublishSupport(){
-        return cy.get('[data-test=support-icon]')
+        return cy.get('[data-test=publish-support-icon]')
     }
     publishSupportDoc(){
         this.getPublishSupport().click();

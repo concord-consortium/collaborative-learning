@@ -214,7 +214,7 @@ context("Teacher Space", () => {
                 })
             })
 
-            describe.only('verify supports functionality', function () {//may need to break down even further between class, group, and student
+            describe('verify supports functionality', function () {//may need to break down even further between class, group, and student
                 before(function () {
                     dashboard.switchView("Workspace")
                     cy.wait(2000)
@@ -280,5 +280,4 @@ context("Teacher Space", () => {
             })
         })
     })
-})
-
+}) 
