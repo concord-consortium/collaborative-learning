@@ -14,9 +14,10 @@ let userCanvas = 'Uploaded Images'
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);
-    cy.wait(4000);
+    cy.waitForSpinner();
 });
 
 context('Test image functionalities', function(){

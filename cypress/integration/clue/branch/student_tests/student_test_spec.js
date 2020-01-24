@@ -15,10 +15,9 @@ let student = '5',
         const baseUrl = `${Cypress.config("baseUrl")}`;
         const queryParams = `${Cypress.config("queryParams")}`;
     
-        // cy.clearQAData('all');
+        cy.clearQAData('all');
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-        // cy.wait(4000);
     });
 describe('Check header area for correctness', function(){
     it('will verify if class name is correct', function(){
