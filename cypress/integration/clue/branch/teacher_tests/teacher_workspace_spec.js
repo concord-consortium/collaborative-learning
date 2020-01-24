@@ -222,7 +222,7 @@ context.skip("Teacher Space", () => {
         })
     })
 
-    context("Teacher Supports in student's view", function() { //going to student page is not working
+    context.skip("Teacher Supports in student's view", function() { //going to student page is not working
         const clueStudent = {
             username: "ctesting1",
             password: "password",
@@ -249,20 +249,20 @@ context.skip("Teacher Space", () => {
                 clueCanvas.getRightSideInvestigationTitle().should('contain',title)
             })
         })
-
-        after(function(){
-            const baseUrl = `${Cypress.config("baseUrl")}`;
-            const queryParams = `${Cypress.config("teacherQueryParams")}`;
-        
-            cy.visit(baseUrl+queryParams);
-            cy.waitForSpinner();
+    })
     
-            dashboard.switchView('Workspace');
-            clueCanvas.deleteTile('table');
-            rightNav.openRightNavTab('supports');
-            rightNav.openSection('supports','teacher-supports');
-            clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
-        })
+    after(function(){
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("teacherQueryParams")}`;
+    
+        cy.visit(baseUrl+queryParams);
+        cy.waitForSpinner();
+
+        dashboard.switchView('Workspace');
+        clueCanvas.deleteTile('table');
+        rightNav.openRightNavTab('supports');
+        rightNav.openSection('supports','teacher-supports');
+        clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
     })
 })
 
