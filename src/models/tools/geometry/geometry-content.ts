@@ -4,9 +4,9 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { registerToolContentInfo } from "../tool-content-info";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
-          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
+          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels, getBaseAxisLabels } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
-          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
+          JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
@@ -27,6 +27,15 @@ export const kGeometryToolID = "Geometry";
 export { kGeometryDefaultHeight };
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
+
+export interface IAxesParams {
+  xName?: string;
+  xMin: number;
+  xMax: number;
+  yName?: string;
+  yMin: number;
+  yMax: number;
+}
 
 function getAxisUnits(protoRange: JXGCoordPair | undefined) {
   const pRange = protoRange && castArray(protoRange);
@@ -52,7 +61,6 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
 }
 
 function defaultGeometryBoardChange(overrides?: JXGProperties) {
-  // TODO: refactor this
   const [xMin, yMax, xMax, yMin] = getBoardBounds();
   const unitX = kGeometryDefaultPixelsPerUnit;
   const unitY = kGeometryDefaultPixelsPerUnit;
@@ -125,17 +133,17 @@ export const GeometryMetadataModel = types
     get linkedTableCount() {
       return self.linkedTables.length;
     },
-    get xAxisLabel() {
+    xAxisLabel(baseName = "x") {
       const links = self.linkedTables
                         .map(entry => entry.x)
                         .filter(name => name && name !== "x");
-      return links.length ? `x (${links.join(", ")})` : "x";
+      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     },
-    get yAxisLabel() {
+    yAxisLabel(baseName = "y") {
       const links = self.linkedTables
                         .map(entry => entry.y)
                         .filter(name => name && name !== "y");
-      return links.length ? `y (${links.join(", ")})` : "y";
+      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     }
   }))
   .actions(self => ({
@@ -382,7 +390,8 @@ export const GeometryContentModel = types
       const { operation } = change;
       const target = change.target.toLowerCase();
       if (board && (target === "tablelink" || (target === "board" && operation === "update"))) {
-        syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
+        const [xName, yName] = getBaseAxisLabels(board);
+        syncAxisLabels(board, self.xAxisLabel(xName), self.yAxisLabel(yName));
       }
     }
 
@@ -450,8 +459,11 @@ export const GeometryContentModel = types
       board.update();
     }
 
-    function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
+    function rescaleBoard(board: JXG.Board, params: IAxesParams) {
       const { canvasWidth, canvasHeight } = board;
+      const { xName, xMin, xMax, yName, yMin, yMax } = params;
+      const xNameObj = xName ? { xName } : undefined;
+      const yNameObj = yName ? { yName } : undefined;
       const width = canvasWidth - kAxisBuffer * 2;
       const height = canvasHeight - kAxisBuffer * 2;
       const unitX = width / (xMax - xMin);
@@ -460,7 +472,10 @@ export const GeometryContentModel = types
         operation: "update",
         target: "board",
         targetID: board.id,
-        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
+        properties: { boardScale: {
+                        xMin, yMin, unitX, unitY, ...xNameObj, ...yNameObj,
+                        canvasWidth: width, canvasHeight: height
+                      } }
       };
       const axes = _applyChange(undefined, change);
       return axes ? axes as any as JXG.Line[] : undefined;
@@ -1081,6 +1096,7 @@ export const GeometryContentModel = types
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
 interface IBoardImportProps {
+  axisNames?: JXGStringPair;
   axisMin?: JXGCoordPair;
   axisRange?: JXGCoordPair;
   [prop: string]: any;
@@ -1130,10 +1146,12 @@ function preprocessImportFormat(snapshot: any) {
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
-    const { axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
+    const { axisNames, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
+    const xName = axisNames?.[0] ? { xName: axisNames[0] } : undefined;
+    const yName = axisNames?.[1] ? { yName: axisNames[1] } : undefined;
     const boundingBox = getBoardBounds(axisMin, axisRange);
     const [unitX, unitY] = getAxisUnits(axisRange);
-    changes.push(defaultGeometryBoardChange({ unitX, unitY, boundingBox, ...others }));
+    changes.push(defaultGeometryBoardChange({ unitX, unitY, ...xName, ...yName, boundingBox, ...others }));
   }
 
   const changes: JXGChange[] = [];

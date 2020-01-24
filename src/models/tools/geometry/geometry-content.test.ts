@@ -49,6 +49,25 @@ describe("GeometryContent", () => {
     destroy(content);
   });
 
+  it("can create with authored properties", () => {
+    const authored = {
+            board: {
+              properties: {
+                axisNames: ["authorX", "authorY"]
+              }
+            },
+            objects: []
+          };
+    const content = GeometryContentModel.create(authored);
+    expect(content.type).toBe(kGeometryToolID);
+    expect(content.changes.length).toEqual(1);
+    const change = JSON.parse(content.changes[0]);
+    expect(change.properties.xName).toBe("authorX");
+    expect(change.properties.yName).toBe("authorY");
+
+    destroy(content);
+  });
+
   it("can create/destroy a JSXGraph board", () => {
     const { content, board } = createContentAndBoard(_content => {
       _content.addChange({ operation: "create", target: "point", parents: [1, 1] });

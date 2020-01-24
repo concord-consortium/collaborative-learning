@@ -6,7 +6,7 @@ import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableContent } from "../../../models/tools/table/table-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
-import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl
+import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl, IAxesParams
         } from "../../../models/tools/geometry/geometry-content";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
@@ -564,11 +564,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
-  private rescaleBoardAndAxes(xMax: number, yMax: number, xMin: number, yMin: number) {
+  private rescaleBoardAndAxes(params: IAxesParams) {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      const axes = content.rescaleBoard(board, xMax, yMax, xMin, yMin);
+      const axes = content.rescaleBoard(board, params);
       if (axes) {
         axes.forEach(this.handleCreateAxis);
       }
@@ -586,13 +586,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const yDataMax = Math.ceil(dataBounds[1].max + 1);
 
         const boundingBox = board.getBoundingBox();
-        let [xBoardMin, yBoardMax, xBoardMax, yBoardMin] = boundingBox;
-        if (xDataMin < xBoardMin) xBoardMin = xDataMin;
-        if (xDataMax > xBoardMax) xBoardMax = xDataMax;
-        if (yDataMin < yBoardMin) yBoardMin = yDataMin;
-        if (yDataMax > yBoardMax) yBoardMax = yDataMax;
+        let [xMin, yMax, xMax, yMin] = boundingBox;
+        if (xDataMin < xMin) xMin = xDataMin;
+        if (xDataMax > xMax) xMax = xDataMax;
+        if (yDataMin < yMin) yMin = yDataMin;
+        if (yDataMax > yMax) yMax = yDataMax;
 
-        this.rescaleBoardAndAxes(xBoardMax, yBoardMax, xBoardMin, yBoardMin);
+        this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
       }
     }
   }
@@ -735,8 +735,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedLine: undefined });
   }
 
-  private handleUpdateSettings = (xMax: number, yMax: number, xMin: number, yMin: number) => {
-    this.rescaleBoardAndAxes(xMax, yMax, xMin, yMin);
+  private handleUpdateSettings = (params: IAxesParams) => {
+    this.rescaleBoardAndAxes(params);
     this.setState({ axisSettingsOpen: false });
   }
 

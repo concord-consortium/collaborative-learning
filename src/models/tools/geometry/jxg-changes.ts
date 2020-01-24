@@ -6,6 +6,7 @@ export type JXGObjectType = "board" |"comment" |  "image" | "linkedPoint" | "mov
 
 export type JXGCoordPair = [number, number];
 export type JXGUnsafeCoordPair = [number?, number?];
+export type JXGStringPair = [string?, string?];
 
 export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
 
