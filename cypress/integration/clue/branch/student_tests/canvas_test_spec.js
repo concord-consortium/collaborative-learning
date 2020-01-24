@@ -399,6 +399,13 @@ context('Test Canvas', function(){
         })
     });
 
+    context('Drag and drop clue canvas tiles', () => {
+        it('Drags and drops a tile', () => {
+            // TO DO
+            //clueCanvas.moveTile(movingTile, targetTile, direction)
+        })
+    })
+
     context.skip('Dragging elements from different locations to canvas', function(){
         describe('Drag element from left nav', function(){
             const dataTransfer = new DataTransfer;
