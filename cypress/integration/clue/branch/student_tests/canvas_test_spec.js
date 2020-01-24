@@ -36,7 +36,6 @@ context('Test Canvas', function(){
             const queryParams = `${Cypress.config("queryParams")}`;
             cy.clearQAData('all');
 
-        
             cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
         clueCanvas.getInvestigationCanvasTitle().text().as('title');

@@ -11,9 +11,10 @@ let leftNav = new LeftNav,
     textToolTile = new TextToolTile;
 
     before(function(){
+        cy.clearQAData('all');
+
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-        // cy.wait(4000);
     });
 context('Test the overall workspace', function(){
     describe('Workspace UI',()=>{
