@@ -12,27 +12,8 @@ let clueCanvas = new ClueCanvas
 let workspace = new TeacherWorkspace
 let dialog = new Dialog
 
-/**
- * Notes:
- * 
- * Teacher dashboard test needs static data from 'clueteachertest's class 'CLUE'
- * Here is the ID for the class in firebase: a1f7b8f8b7b1ad1d2d6240c41bd2354d8575ee09ae8bd641
- * 
- * Currently issues with problem switcher/class switcher. Maybe split these into two tests. Have this test
- * log into portal with data that doesn't need to be static.
- * 
- * -> This may also help with issue when verifying read-only student canvases which is currently looping through
- *    all of the students in the dashboard's current view
- */
-
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
-context("Teacher Space", () => {
-
-    const clueTeacher = {
-        username: "clueteachertest",
-        password: "password"
-    }
 
     before(() => {
         const queryParams = `${Cypress.config("teacherQueryParams")}`;
@@ -352,4 +333,3 @@ context("Teacher Space", () => {
             })
         })
     })
-})

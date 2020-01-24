@@ -18,7 +18,7 @@ class RightNav{
 
     openRightNavTab(tab){   
         this.getRightNavTab(tab).click();
-        cy.wait(2000);
+        cy.wait(1000);
     }
     closeRightNavTab(tab){   
         cy.get('#rightNavTab-'+tab+'.tab').click();
@@ -38,6 +38,7 @@ class RightNav{
             cy.get('[data-test='+tab+'-section]').click();
         } else {   
             cy.get('[data-test='+tab+'-section-'+section+']').click();
+            cy.wait(1000);
         }
     }
 
@@ -46,7 +47,7 @@ class RightNav{
     }
 
     getAllSectionCanvasItems(tab, section){
-        return cy.get('[data-test='+tab+'-section-'+section).siblings('.list').find('[data-test='+tab+'-list-items]');
+        return cy.get('[data-test='+tab+'-section-'+section).siblings('.list-container').find('[data-test='+tab+'-list-items]');
     }
 
     getCanvasItemTitle(tab,section){

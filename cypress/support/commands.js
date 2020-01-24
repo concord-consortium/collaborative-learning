@@ -24,6 +24,9 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import ClueHeader from './elements/clue/cHeader';
+import RightNav from './elements/common/RightNav';
+import Canvas from './elements/common/Canvas';
+import TeacherDashboard from "./elements/clue/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
 
@@ -89,7 +92,27 @@ Cypress.Commands.add("waitForSpinner", () => {
     cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })
-Cypress.Commands.add("waitForClueRightNavLoading", () => {
-    cy.wait(2000);
-    cy.get('.contents .loading', { timeout: 60000 }).should('not.exist')
+Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
+    let rightNav = new RightNav;
+    let canvas = new Canvas;
+    let dashboard = new TeacherDashboard();
+
+    cy.visit(baseUrl+queryParams)
+    cy.waitForSpinner();
+    dashboard.switchView("Workspace")
+    cy.wait(2000)
+    rightNav.openRightNavTab("my-work");
+    rightNav.openSection("my-work","workspaces");
+    cy.wait(2000)
+    rightNav.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
+        let listLength = document_list.length;
+        while(listLength>1){
+            rightNav.getAllSectionCanvasItems("my-work","workspaces").eq(0).click();
+            cy.wait(1111)
+            canvas.deleteDocument();
+            listLength=listLength-1;
+            rightNav.openRightNavTab("my-work")
+        }
+
+    })
 })

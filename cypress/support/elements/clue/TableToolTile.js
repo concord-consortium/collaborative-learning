@@ -2,6 +2,9 @@ class TableToolTile{
     tableToolTile(){
         return '.canvas-area .neo-codap-case-table'
     }
+    tableTool(){//too use when looking for in right side workspace
+        return '.table-tool'
+    }
     getTableTile(){
         return cy.get(this.tableToolTile());
     }
