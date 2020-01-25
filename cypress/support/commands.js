@@ -89,3 +89,7 @@ Cypress.Commands.add("waitForSpinner", () => {
     cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist')
 })
+Cypress.Commands.add("waitForClueRightNavLoading", () => {
+    cy.wait(2000);
+    cy.get('.contents .loading', { timeout: 60000 }).should('not.exist')
+})
