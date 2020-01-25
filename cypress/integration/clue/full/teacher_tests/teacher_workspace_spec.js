@@ -60,11 +60,6 @@ context("Teacher Space", () => {
     })
 
     context('Teacher Workspace', function () {
-        // before(function(){
-        //     dashboard.switchView("Workspace")
-        //     cy.wait(2000)
-        //     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
-        // })
         describe('UI visibility', () => {
             it('verify right nav elements', function () {
                 //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
@@ -79,28 +74,10 @@ context("Teacher Space", () => {
             before(function () {
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('drawing');
-                // textToolTile.addText('this is ' + teacherWorkspace);
                 rightNav.openRightNavTab("my-work");
                 rightNav.openSection('my-work', 'workspaces')
                 rightNav.openCanvasItem('my-work', 'workspaces', teacherDoc)
                 clueCanvas.addTile('table')
-                // textToolTile.addText('this is a my workspace');
-            })
-            it('verify save and restore investigation', function () {
-                rightNav.openRightNavTab("my-work");
-                rightNav.openSection("my-work", "investigations");
-                rightNav.getCanvasItemTitle("my-work", "investigations", this.investigationTitle).should('exist');
-                rightNav.openCanvasItem("my-work", "investigations", this.investigationTitle);
-                cy.wait(2000);
-                tableToolTile.getTableTile().should('exist')
-                drawToolTile.getDrawTile().should('exist')
-            })
-            it('verify save and restore extra workspace', function () {
-                rightNav.openRightNavTab("my-work");
-                rightNav.getCanvasItemTitle("my-work", "workspaces", teacherDoc).should('exist');
-                rightNav.openCanvasItem("my-work", "workspaces", teacherDoc);
-                cy.wait(2000);
-                tableToolTile.getTableTile().should('exist')
             })
             it('verify restore after switching classes', function () {
                 cy.get('@clueData').then((clueData) => {
@@ -175,108 +152,6 @@ context("Teacher Space", () => {
                 rightNav.openCanvasItem("my-work", "investigations", this.investigationTitle);
                 clueCanvas.deleteTile('table');
                 clueCanvas.deleteTile('drawing');
-            })
-        })
-        describe('teacher only functionalities', function () {
-            describe('verify document curation', function () {//adding a star to a student document
-                let studentDoc = "clue testing5: 1.1 Solving a Mystery"
-
-                it('verify starring a student published investigation', function () {
-                    rightNav.openRightNavTab('class-work')
-                    rightNav.openSection('class-work', 'published')
-                    rightNav.starCanvasItem('class-work', 'published', studentDoc)
-                    rightNav.getCanvasStarIcon('class-work', 'published', studentDoc).should('have.class', 'starred')
-                    //make sure only one canvas is starred, 
-                    // but length 2 because there is one in published section and one in Starred section
-                    cy.get('.icon-star.starred').should('have.length', 2)
-
-                })
-                it('verify starred document appears in Starred section in right nav', function () {
-                    rightNav.closeSection('class-work', 'published')
-                    rightNav.openSection('class-work', 'starred')
-                    cy.wait(1000)
-                    rightNav.getCanvasItemTitle('class-work', 'starred', studentDoc)
-                })
-                it('verify starred document has a star in the dashboard', function () {
-                    dashboard.switchView('Dashboard');
-                    dashboard.switchWorkView('Published');
-                    dashboard.getGroup(1).find('.four-up-overlay .icon-star').should('have.class', 'starred')
-                })
-                it('verify unstar in dashboard unstars in workspace', function () {
-                    dashboard.clearAllStarsFromPublishedWork()
-                    cy.wait(1000)
-                    dashboard.switchView('Workspace')
-                    rightNav.openRightNavTab('class-work')
-                    rightNav.openSection('class-work', 'starred')
-                    rightNav.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist')
-                    rightNav.openSection('class-work', 'published')
-                    rightNav.getCanvasStarIcon('class-work', 'published', studentDoc).should('not.have.class', 'starred')
-                })
-            })
-
-            describe('verify supports functionality', function () {//may need to break down even further between class, group, and student
-                before(function () {
-                    dashboard.switchView("Workspace")
-                    cy.wait(2000)
-                })
-                it('will verify publish of support appears in Support>Teacher Workspace', function () {
-                    let title = ((this.investigationTitle).split('1.1')[1]).trim()
-                    clueCanvas.addTile('table');
-                    clueCanvas.publishSupportDoc();
-                    rightNav.openRightNavTab('supports');
-                    rightNav.openSection('supports', 'teacher-supports');
-                    cy.waitForClueRightNavLoading()
-                    rightNav.getCanvasItemTitle('supports', 'teacher-supports').should('contain', title)
-                    rightNav.closeSection('supports', 'teacher-supports');
-                    rightNav.closeRightNavTab('supports')
-                })
-                it('switches to student view and checks for support badge', function () {
-                    cy.login('https://learn.concord.org', clueStudent)
-                    cy.wait(2000)
-                    cy.visit("https://learn.concord.org/users/" + clueStudent.studentUid + "/portal/offerings/" + offeringId + ".run_resource_html")
-                    cy.waitForSpinner();
-                    clueRightNav.getSupportBadge().should('exist').and('be.visible')
-                })
-                it('views published support, causing support badge to disappear', () => {
-                    rightNav.openRightNavTab('supports');
-                    rightNav.openSection('supports', 'teacher-supports');
-                    cy.waitForClueRightNavLoading()
-                    clueRightNav.getSupportBadge().should('not.exist').and('not.be.visible')
-                })
-                it('verify supports open in 2up view righthand workspace', () => {
-                    rightNav.openCanvasItem('supports', 'teacher-supports', title);
-                    clueCanvas.getRightSideInvestigationTitle().should('contain', title)
-                })
-                it('Logs back in as teacher, deletes support, and verifies confirmation dialog', function () {
-                    cy.login("https://learn.concord.org", clueTeacher)
-                    cy.wait(2000)
-                    cy.visit('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25')
-                    cy.waitForSpinner();
-                    dashboard.switchView("Workspace")
-                    cy.wait(2000)
-                    rightNav.openRightNavTab('supports');
-                    rightNav.openSection('supports', 'teacher-supports');
-                    cy.waitForClueRightNavLoading()
-                    rightNav.deleteSupport(1) // Either give index or 'all'
-                    rightNav.confirmDeleteDialog()
-                })
-                it('switches back to student view verifies no supports', function () {
-                    cy.login('https://learn.concord.org', clueStudent)
-                    cy.wait(2000)
-                    cy.visit("https://learn.concord.org/users/" + clueStudent.studentUid + "/portal/offerings/" + offeringId + ".run_resource_html")
-                    cy.waitForSpinner();
-                    clueRightNav.getSupportBadge().should('not.exist')
-                    cy.visit("https://learn.concord.org/")
-                    cy.contains('Log Out').click({force:true})
-                })
-                after(function () {
-                    cy.login("https://learn.concord.org", clueTeacher)
-                    cy.wait(2000)
-                    cy.visit('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25')
-                    cy.waitForSpinner();
-                    dashboard.switchView('Workspace');
-                    clueCanvas.deleteTile('table');
-                })
             })
         })
     })
