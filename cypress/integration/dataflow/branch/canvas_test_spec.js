@@ -70,13 +70,13 @@ context('canvas test',()=>{
             dfcanvas.getRunButton().parent().should('not.have.attr','disabled');
             dfcanvas.getStopButton().parent().should('have.attr','disabled');
         })
-        it.skip('verify Duration is visible when program is running',()=>{
+        it('verify Duration is visible when program is running',()=>{
             dfcanvas.runProgram();
             cy.wait(1500);
             dfcanvas.getDurationContainer().should('be.visible');
             dfcanvas.getProgressTime().should('be.visible');
         })
-        it.skip('verify Run button is not visible',()=>{
+        it('verify Run button is not visible',()=>{
             dfcanvas.getRunButton().should('not.exist');
         })
         it.skip('verify Stop button is enabled when program is running',()=>{
