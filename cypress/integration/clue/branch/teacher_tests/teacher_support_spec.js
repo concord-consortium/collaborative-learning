@@ -18,6 +18,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 
     before(function() {
         const queryParams = `${Cypress.config("teacherQueryParams")}`;
+        cy.clearQAData('all');
     
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
@@ -41,7 +42,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
     describe("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
             it('verify badge on Support Tab',function(){
-                const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=6&problem=2.1&fakeUser=student:3";
+                const queryParams = `${Cypress.config("queryParams")}`;
             
                 cy.visit(baseUrl+queryParams);
                 cy.waitForSpinner();
@@ -52,7 +53,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
                 rightNav.openSection('supports', 'teacher-supports');
                 rightNav.getCanvasItemTitle('supports', 'teacher-supports', title).should('be.visible')
             })
-            it.skip('verify supports open in 2up view righthand workspace', () => {
+            it('verify supports open in 2up view righthand workspace', () => {
                 rightNav.openCanvasItem('supports', 'teacher-supports', title);
                 cy.wait(1000)
                 clueCanvas.getRightSideInvestigationTitle().should('contain',title)
@@ -74,5 +75,8 @@ after(function(){
         rightNav.openRightNavTab('supports');
         rightNav.openSection('supports','teacher-supports');
         clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
+
+        cy.clearQAData('all');
+
 })
    
