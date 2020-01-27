@@ -519,21 +519,43 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "MSA 1.3 Raising Money",
-          "subtitle": "Using Linear Relationships to Solve Equations",
-          "sections": [{
+          "title": "MSA 1.3 Walking Rates and Linear Relationships",
+          "subtitle": "Tables, Graphs, and Equations",
+          "sections": [
+            {
               "type": "introduction",
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon. \n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions: <ul><li><em> What variables can affect the amount of money that is collected?</em></li><li> How can you use these variables to estimate the amount of money each student will collect? </em></li><li> <em>Will the amount of money collected be the same for each walker? </em></li></ol>\nEach participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as <em>pledge plans</em>."
-                    ]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Previously you explored relationships which were linear and proportional. For example, you graphed the relationship between cost and number of bikes rented in <em>Variables and Patterns</em>. You also explored the relationship between time and distance walking backwards in <em>Comparing Quantities</em>. In Comparing and Scaling you learned to recognize the difference between proportional and non-proportional relationships when you investigated pizza prices. In the last Problem Malcolm, a student in Ms. Chang’s class, walked 1.5 meters per second. 1.5 was the <strong>rate of change</strong> in his walking. He used the expression 1.5<em>t</em> to represent the distance <em>d</em> he walks in <em>t</em> seconds. The expressions <em>d</em> and 1.5<em>t</em> are <strong>equivalent expressions</strong>. So he wrote <em>d = </em>1.5<em>t</em>."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Expressions</strong>\n\n1.5<em>t</em> is an <strong>expression</strong> for the distance walked every second.\n\n<em>d</em>\u00a0 can also be an <strong>expression</strong> for the distance walked."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Equation</strong>\n\n<em>d = </em>1.5<em>t</em>\u00a0 is an <strong>equation</strong> for the distance <em>d</em>\u00a0 walked in <em>t</em>\u00a0 seconds.\n\nThe equation has two equivalent expressions that represent the relationship between the two variables, <em>d</em> and <em>t</em>.",
+                        "\nThe expressions <em>d</em> and 1.5<em>t</em>\u00a0 are <strong>equivalent expressions</strong>."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Think about the effect a walking rate has on the relationship between time walked and distance walked. This will provide some important clues about how to identify linear relationships from tables, graphs, expressions, and equations."]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             },
@@ -544,44 +566,39 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Each student found sponsors who will pledge to donate money according to the following descriptions."
+                      "text": "Alana, Gilberto, and Leanne were students in Ms. Chang’s class. They each did the walking experiment to find their walking rates."
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
                       "columns": [
-                        {
-                          "name": "Name",
+                        { "name": "Name",
                           "type": "string",
-                          "values": [" Leanne", "Gilberto ", "Alana"]
+                          "values": ["Alana", "Gilberto", "Leanne"]
                         },
-                         {
-                          "name": "Pledge Plan",
+                        { "name": "Walking Rate",
                           "type": "string",
-                          "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 plus 50¢ per kilometer"]
+                          "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 160
+                      "height": 110
                     }
                   },
-                   {
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>Who will raise the most money? Explain.</li><li>How does the relationship between dollars and kilometers represent a linear relationship? </li><li>How do these relationships compare to those in Problem 1.2? Explain.</li><ul>"]
+                      "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ol><li>Make a table showing the distance walked by each student for the first ten seconds.</li><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person.</li><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ol><ul><li>How are the different walking rates represented in the different equations, tables, and graphs? </li><li>Is one representation more useful than another to solve a problem about walking? Explain.</li></ul>"
                     }
                   }
                 ]
               },
               "supports": [
                 {
-                  "text": "What are the variables for each plan?"
-                },
-                {
-                  "text": "How might a table, graph, or equation help?"
+                  "text": "What is the distance that Alana walks in 1 second? What is it in 2 seconds?"
                 }
               ]
             },
@@ -590,26 +607,190 @@
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":[
-                      "<strong>Situation A. Using the Data</strong><ol><li> In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? How is the rate of change shown in the table, graph, and equation?</li><li>Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer.</li><li>Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain.</li><li>On which graph does the point (12, 11) lie? What information does this point represent?</li><li>Yvonne claims that the relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional. Is she correct?</li></ol>"
-                    ]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation A. Yvonne’s Claims</strong> <ol><li>Yvonne claims she can tell from the table that the relationships between time and distance are proportional. What evidence in the table shows they are proportional? Is this the same thing as saying the relationships are linear?</li><li>Yvonne claims that she can use a table or a graph to answer the question:\n\u00a0\u00a0\u00a0<em>For each student, if time t increases by 1 second, by how much \n\u00a0\u00a0\u00a0does the distance d change? </em>\nIs she correct? Explain. </li><li>Yvonne also claims that the time and distance data represented in Part 1 is the Constant of Proportionality. What do you think?</li></ol>"]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation B. Valentina and Omar have the Same Walking Rate</strong>\nValentina and Omar have the same walking rate. Each made a graph to  represent their data. "]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Omar's Walking Rate</strong>"]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":[
-                      "<strong> Situation B. Gilberto Gives T-shirts</strong>\n\nGilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor. <ol><li> Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts.</li><li>How does this additional cost affect the amount of money he has raised reflected in a table, graph, and equation?</li></ol>"
-                    ]
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -10],
+                          "axisRange": [60, 100]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [5, 10]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [10, 20]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [15, 30]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [20, 40]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [25, 50]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [30, 60]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [35, 70]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [40, 80]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                       "format": "html",
+                      "text": ["<strong>Valentina's Walking Rate</strong>"]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -1],
+                          "axisRange": [11, 11]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [1, 2]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 4]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 6]
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 8]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<ol><li>How are their graphs similar? How are they different?</li><li>Which expression could represent their distance?\n\n 5<em>t</em>  \u00a0\u00a0\u00a0\u00a0  2<em>t</em> \u00a0\u00a0\u00a0\u00a0 0.5<em>t</em></li></ol>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Situation C. Five Friends Walking Rates</strong>\nFive other friends made the following representations of their walkathon data. Could any of these relationships be linear relationships? Explain. For those that are linear, which of these represent proportional relationships?"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Time (seconds)",
+                          "type": "number",
+                          "values": [0, 1, 2, 3, 4, 5]
+                        },
+                         {
+                          "name": "George's Distance (meters)",
+                          "type": "number",
+                          "values": [0, 2, 9, 11, 20, 25]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 180
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Time (seconds)",
+                          "type": "number",
+                          "values": [0, 2, 4, 6, 8, 10]
+                        },
+                         {
+                          "name": "Elizabeth’s Walkathon Distance (meters)",
+                          "type": "number",
+                          "values": [0, 3, 6, 9, 12, 15]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 180
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["\n<strong>Billie's walkathon</strong>\n\n<em>D = </em>2.25<em>t</em>, where <em>D</em> represents distance and <em>t</em> represents time.",
+                        "\n<strong>Bob's walkathon</strong>\n\n<em>t = </em>100/<em>r</em>, where <em>t</em> represents time and <em>r</em> represents walking rate.",
+                        "<strong>Evo's Walkathon</strong>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1_2_evos_walkathon_graph.png"
                     }
                   }
-              ]
+                ],
+                "supports": []
               },
-              "supports": [{"text": "Which variable is the independent variable? Which is the dependent variable? "}]
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -617,12 +798,14 @@
                 "tiles": [{
                   "content": {
                     "type": "Text",
-                    "text": "How can you determine if a relationship is linear from a verbal  context, table, graph, or equation?\n\nIf a relationship is linear, explain how you can tell if it is proportional."
+                    "text": "How do you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation?"
                   }
                 }]
               },
               "supports": [
-              ]
+                {"text": "Can you read a walking rate in the graph?"},
+                {"text": "Can you read a walking rate in the tables?"}
+             ]
             }
           ],
           "supports": []
@@ -1919,32 +2102,9 @@
                     }
                   },
                   {
-                    "layout": {
-                      "height": 160
-                    },
                     "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-20, -1],
-                          "axisRange": [200, 4]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [166.7, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [172, 0]
-                            }
-                          ]
-                        }
-                      ]
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_Fabian_Numberline.png"
                     }
                   }
               ]
