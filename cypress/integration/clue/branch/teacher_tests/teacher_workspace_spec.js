@@ -18,7 +18,8 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
     const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
 before(function() {
-    
+    cy.clearQAData('all');
+
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
     dashboard.switchView("Workspace")
@@ -72,5 +73,6 @@ after(function(){
     clueCanvas.deleteTile('table');
     clueCanvas.deleteTile('draw');
     cy.deleteWorkspaces(baseUrl,queryParams);
+    cy.clearQAData('all');
 })
 

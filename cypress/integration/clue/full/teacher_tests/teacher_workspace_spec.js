@@ -60,16 +60,6 @@ context("Teacher Space", () => {
     })
 
     context('Teacher Workspace', function () {
-        describe('UI visibility', () => {
-            it('verify right nav elements', function () {
-                //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
-                rightNav.getRightNavTab("student-work").should('be.visible')
-                rightNav.getRightNavTab("my-work").should('be.visible')
-                rightNav.getRightNavTab("class-work").should('be.visible')
-                rightNav.getRightNavTab("learning-log").should('be.visible')
-                rightNav.getRightNavTab("supports").should('be.visible')
-            })
-        })
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.addTile('table');
