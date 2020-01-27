@@ -27,7 +27,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         // clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
     })
 
-    describe.skip('verify supports functionality', function() {//may need to break down even further between class, group, and student
+    describe('verify supports functionality', function() {//may need to break down even further between class, group, and student
         it('will verify publish of support appears in Support>Teacher Workspace',function(){
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
 
@@ -39,7 +39,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         })
     }) 
 
-    describe.skip("test visibility of teacher supports in student's workspace", function() {
+    describe("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
             it('verify badge on Support Tab',function(){
                 const queryParams = `${Cypress.config("queryParams")}`;
@@ -61,16 +61,9 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
             })
     })
 
-// after(function(){
-//         const baseUrl = `${Cypress.config("baseUrl")}`;
-//         const queryParams = `${Cypress.config("teacherQueryParams")}`;
-    
-//         cy.visit(baseUrl+queryParams);
-//         cy.waitForSpinner();
-
-//         dashboard.switchView('Workspace');
-//         cy.wait(2000);
-//         clueCanvas.deleteTile('table');
+after(function(){
+        const baseUrl = `${Cypress.config("baseUrl")}`;
+        const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
@@ -84,6 +77,5 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
 
         cy.clearQAData('all');
-
 })
    
