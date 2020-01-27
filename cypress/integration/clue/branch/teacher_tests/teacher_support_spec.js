@@ -26,7 +26,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         // clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
     })
 
-    describe('verify supports functionality', function() {//may need to break down even further between class, group, and student
+    describe.skip('verify supports functionality', function() {//may need to break down even further between class, group, and student
         it('will verify publish of support appears in Support>Teacher Workspace',function(){
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
 
@@ -38,7 +38,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         })
     }) 
 
-    describe("test visibility of teacher supports in student's workspace", function() {
+    describe.skip("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
             it('verify badge on Support Tab',function(){
                 const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=6&problem=2.1&fakeUser=student:3";
@@ -60,19 +60,19 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
             })
     })
 
-after(function(){
-        const baseUrl = `${Cypress.config("baseUrl")}`;
-        const queryParams = `${Cypress.config("teacherQueryParams")}`;
+// after(function(){
+//         const baseUrl = `${Cypress.config("baseUrl")}`;
+//         const queryParams = `${Cypress.config("teacherQueryParams")}`;
     
-        cy.visit(baseUrl+queryParams);
-        cy.waitForSpinner();
+//         cy.visit(baseUrl+queryParams);
+//         cy.waitForSpinner();
 
-        dashboard.switchView('Workspace');
-        cy.wait(2000);
-        clueCanvas.deleteTile('table');
+//         dashboard.switchView('Workspace');
+//         cy.wait(2000);
+//         clueCanvas.deleteTile('table');
 
-        rightNav.openRightNavTab('supports');
-        rightNav.openSection('supports','teacher-supports');
-        clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
-})
+//         rightNav.openRightNavTab('supports');
+//         rightNav.openSection('supports','teacher-supports');
+//         clueRightNav.deleteTeacherSupport('supports','teacher-supports',title)
+// })
    
