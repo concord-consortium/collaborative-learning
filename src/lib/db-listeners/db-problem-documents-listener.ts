@@ -68,8 +68,10 @@ export class DBProblemDocumentsListener extends BaseListener {
   }
 
   private handleOfferingUser = (user: DBOfferingUser) => {
+    if (!user?.self?.uid) return;
     const { documents, user: currentUser, groups } = this.db.stores;
     forEach(user.documents, document => {
+      if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (existingDoc) {
         this.db.updateDocumentFromProblemDocument(existingDoc, document);

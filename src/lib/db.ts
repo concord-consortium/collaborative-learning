@@ -241,7 +241,7 @@ export class DB {
       const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
                                                                   problemDocumentsSnapshot.val();
       const lastProblemDocument = findLast(problemDocuments, () => true);
-      return lastProblemDocument
+      return lastProblemDocument?.documentKey
               ? this.openProblemDocument(lastProblemDocument.documentKey)
               : this.createProblemDocument(defaultContent);
     }
@@ -255,7 +255,7 @@ export class DB {
     const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
                                                   personalDocumentsSnapshot.val();
     const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
-    return lastPersonalDocument
+    return lastPersonalDocument?.self?.documentKey
       ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
       : this.createPersonalDocument({ content: defaultContent });
   }
@@ -271,7 +271,7 @@ export class DB {
     const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
                                                   learningLogDocumentsSnapshot.val();
     const lastLearningLogDocument = findLast(learningLogDocuments, () => true);
-    return lastLearningLogDocument
+    return lastLearningLogDocument?.self?.documentKey
       ? this.openOtherDocument(LearningLogDocument, lastLearningLogDocument.self.documentKey)
       : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
   }
