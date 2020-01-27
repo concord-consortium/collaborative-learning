@@ -35,7 +35,6 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
             //make sure only one canvas is starred, 
             // but length 2 because there is one in published section and one in Starred section
             cy.get('.icon-star.starred').should('have.length',2)
-
         })
         it('verify starred document appears in Starred section in right nav',function(){
             rightNav.closeSection('class-work','published')
