@@ -55,7 +55,8 @@ function getCentroid(anchor: JXG.GeometryElement) {
 
 export const commentChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
-    const changeProps: any = change.properties || {};
+    const { text, ...changeProps } = (change.properties || {}) as any;
+    const commentText = text || "";
     const commentProps = {
       id: uniqueId(),
       ...sharedProps,
@@ -79,7 +80,7 @@ export const commentChangeAgent: JXGChangeAgent = {
       if (!_board.objects[commentProps.anchor]) return;
 
       const id = commentProps.id;
-      const comment = _board.create("text", [0, -1, ""], commentProps);
+      const comment = _board.create("text", [0, -1, commentText], commentProps);
       const commentPoint = _board.create(
         "point",
         [1, 0],
