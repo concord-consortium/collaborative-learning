@@ -8,7 +8,6 @@ before(function(){
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner()
-    // cy.wait(4000);
 });
 
 describe('Test Left tabs',function(){

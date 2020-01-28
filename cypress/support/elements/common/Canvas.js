@@ -49,7 +49,7 @@ class Canvas{
     }
 
     getDeleteIcon(){
-        return cy.get('[data-test=delete-icon]')
+        return cy.get('[data-test=delete-icon] .delete')
     }
 
     createNewExtraDocument(title){

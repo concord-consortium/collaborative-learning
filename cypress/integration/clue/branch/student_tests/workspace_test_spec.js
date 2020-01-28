@@ -11,9 +11,10 @@ let leftNav = new LeftNav,
     textToolTile = new TextToolTile;
 
     before(function(){
+        cy.clearQAData('all');
+
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-        // cy.wait(4000);
     });
 context('Test the overall workspace', function(){
     describe('Workspace UI',()=>{
@@ -46,7 +47,7 @@ context('Test the overall workspace', function(){
             rightNav.getRightNavExpandedSpace().should('be.visible');
         });
         // TODO: Changes in new document add feature.
-        it.skip('will verify canvases do not persist between problems', function(){
+        it('will verify canvases do not persist between problems', function(){
             let problem1='1.1',
                 problem2='2.1';
             let tab1 ='Introduction';

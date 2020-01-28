@@ -14,10 +14,10 @@ describe('Test right nav tabs', function(){
     before(function(){
             const baseUrl = `${Cypress.config("baseUrl")}`;
             const queryParams = `${Cypress.config("queryParams")}`;
-        
+            cy.clearQAData('all');
+
             cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
-            // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('My Work tab tests', function(){

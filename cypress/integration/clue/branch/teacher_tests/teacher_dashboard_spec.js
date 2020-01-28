@@ -12,30 +12,11 @@ let clueCanvas = new ClueCanvas
 let workspace = new TeacherWorkspace
 let dialog = new Dialog
 
-/**
- * Notes:
- * 
- * Teacher dashboard test needs static data from 'clueteachertest's class 'CLUE'
- * Here is the ID for the class in firebase: a1f7b8f8b7b1ad1d2d6240c41bd2354d8575ee09ae8bd641
- * 
- * Currently issues with problem switcher/class switcher. Maybe split these into two tests. Have this test
- * log into portal with data that doesn't need to be static.
- * 
- * -> This may also help with issue when verifying read-only student canvases which is currently looping through
- *    all of the students in the dashboard's current view
- */
-
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
-context("Teacher Space", () => {
-
-    const clueTeacher = {
-        username: "clueteachertest",
-        password: "password"
-    }
 
     before(() => {
-        const queryParams = `${Cypress.config("teacherQueryParams")}`;
+        const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
     
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
@@ -68,15 +49,9 @@ context("Teacher Space", () => {
                     dashboard.getClassList().should('not.have.attr','open')
                     dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className)
                     dashboard.getClassDropdown().should('be.visible').click({ force: true })
-                    dashboard.getClassList().should('exist').and('have.attr', 'open') 
-                    // dashboard.getClassList().find('.Menuitem').should('have.length', clueData.classes.length) // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
-                    dashboard.getClassDropdown().click({ force: true })
-                    dashboard.getClassList().should('not.have.attr','open')
                     // Check Dashboard and Workspace toggle default
                     dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
                     dashboard.getViewToggle('Workspace').should('be.visible').and ('not.have.class', 'selected')
-                    // Check Teacher Username visibility and content
-                    // header.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 })
             })
             it('verifies six pack and group names', () => { //check this test again
@@ -121,31 +96,6 @@ context("Teacher Space", () => {
             })
         })
         describe('Header element functionality', () => {
-            it('verify switching problems changes six pack content and problem title', () => {
-                cy.get('@clueData').then((clueData) => {
-                    let problems = clueData.classes[0].problems
-                    let initProblemIndex = 0
-                    let tempProblemIndex = 1
-
-                    dashboard.getProblemDropdown().text().should('not.contain', problems[tempProblemIndex].problemTitle)
-                    dashboard.getGroups().should('have.length',6)
-                    dashboard.getProblemDropdown().click({ force: true }).then(() => {
-                        dashboard.getProblemList().should('have.attr','open')
-                        dashboard.getProblemList().find('.Menuitem').contains(problems[tempProblemIndex].problemTitle).click({ force: true })
-                        // This differs from production test. Production tests for actual problem switching
-                    dialog.getDialogTitle().should('contain','Problem not currently assigned');
-                    dialog.getDialogOKButton().click();
-                    })
-                    dashboard.getProblemDropdown().should('contain', problems[initProblemIndex].problemTitle)
-                    dashboard.getGroups().should('have.length',6)
-
-                    //Not testing in branch since switch can't be done -- switch back to original problem for later test
-                    // dashboard.getProblemDropdown().click({force:true})
-                    // dashboard.getProblemList().find('.Menuitem').contains(problems[initProblemIndex].problemTitle).click({ force: true })
-                    // // cy.wait(1000)
-                    // cy.waitForSpinner()
-                })
-            })
             it('verify dashboard/workspace switch changes workspace view', () => {
                 dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
                 clueCanvas.getSingleWorkspace().should('not.be.visible')
@@ -155,40 +105,6 @@ context("Teacher Space", () => {
                 clueCanvas.getSingleWorkspace().should('be.visible')
                 dashboard.getViewToggle("Dashboard").click({ force: true })
                 dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected')
-            })
-            it('verify selected class is shown in class dropdown', () => {
-                cy.get('@clueData').then((clueData) => {
-                    let initialClassIndex = 0
-                    let tempClass = clueData.classes[initialClassIndex]
-
-                    dashboard.getClassDropdown().should('contain', tempClass.className).and('be.visible')
-                })
-            })
-            it.skip('verify switching classes changes six pack content', () => {
-                cy.get('@clueData').then((clueData) => {
-                    const initClassIndex = 0
-                    const tempClassIndex = 1
-                    let initClass = clueData.classes[initClassIndex]
-                    let tempClass = clueData.classes[tempClassIndex]
-                    let className = tempClass.className
-                    let initClassName = initClass.className
-
-                    dashboard.getClassDropdown().should('contain', initClassName)
-                    dashboard.getGroups().should('have.length',6)
-                    dashboard.getClassDropdown().click({ force: true }).then(() => {
-                        dashboard.getClassList().contains(className).click({ force: true })
-                        // cy.wait(1000)
-                        cy.waitForSpinner()
-                    })
-                    dashboard.getClassDropdown().should('contain', className)
-                    dashboard.getGroups().should('have.length',0)
-
-                    //switch back to original problem for later test
-                    dashboard.getClassDropdown().click({force:true})
-                    dashboard.getClassList().find('.Menuitem').contains(initClassName).click({ force: true })
-                    // cy.wait(1000)
-                    cy.waitForSpinner()
-                })
             })
         })
 
@@ -334,7 +250,6 @@ context("Teacher Space", () => {
                     dashboard.starPublishedWork(groups)
                 })
             })
-
             it('removes all stars from student published work', () => { 
                 dashboard.getStarPublishIcon().should('have.class', 'starred')
                 dashboard.getStarPublishIcon().click({ force: true, multiple: true })
@@ -352,4 +267,3 @@ context("Teacher Space", () => {
             })
         })
     })
-})

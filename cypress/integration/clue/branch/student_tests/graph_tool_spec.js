@@ -16,9 +16,10 @@ let doc1='2.1 Drawing Wumps', doc2='Points', doc3='Polygon', doc4='Movable Line'
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);
-    // cy.wait(4000);
+    cy.waitForSpinner();
 });
 context('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
