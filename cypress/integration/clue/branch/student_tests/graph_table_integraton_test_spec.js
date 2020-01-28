@@ -1,20 +1,16 @@
-import LeftNav from '../../../../support/elements/clue/LeftNav'
 import Canvas from '../../../../support/elements/common/Canvas'
 import ClueCanvas from '../../../../support/elements/clue/cCanvas'
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
 import RightNav from '../../../../support/elements/common/RightNav'
 import TableToolTile from '../../../../support/elements/clue/TableToolTile'
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
 
-const leftNav = new LeftNav;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const rightNav = new RightNav;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const imageToolTile = new ImageToolTile;
-const textToolTile = new TextToolTile;
 
 function addTableAndGraph(){
     clueCanvas.addTile('table');
@@ -46,6 +42,7 @@ before(function(){
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
 })
 
 context('Tests for graph and table integration', function(){
@@ -78,7 +75,9 @@ context('Tests for graph and table integration', function(){
         it('verify point no longer has p1 in table and graph', function(){
             tableToolTile.getTableIndexColumnCell().first().should('not.contain', 'p1');
             graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
-
+        })
+        it('reconnect table to graph for later test',function(){
+            connectTableToGraph();
         })
     })
 
@@ -311,20 +310,27 @@ context('Tests for graph and table integration', function(){
         });
     });        
 });
-// TODO: Need to write.
-context.skip('Save and restore keeps the connection between table and graph', function(){
-    it('will restore a canvas with connected table and graph', function(){
-    });
-    it('will add a point to the graph from the table', function(){
-        //verify that point is added to the graph
+context('Save and restore keeps the connection between table and graph', function(){
+    before(function(){
+        let title = '2.3 Mouthing Off and Nosing Around';
+        rightNav.openRightNavTab('my-work');
+        rightNav.openSection('my-work','investigations');
+        rightNav.openCanvasItem('my-work','investigations',title)
+    })
+    it('verify connection of table and graph on restored canvas', function(){
+        tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
+        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
     });
 });
-// TODO: Need to write.
-context.skip('Delete connected table', function(){
+context('Delete connected table', function(){
     it('will delete connected table', function(){
-
+        clueCanvas.deleteTile('table');
+        graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
+        graphToolTile.getGraphPoint().should('not.exist');
     });
     it('will verify graph is still functional after connected table is deleted', function(){
-
+        graphToolTile.getGraphTile().click();
+        graphToolTile.addPointToGraph(2,6);
+        graphToolTile.getGraphPoint().should('exist').and ('have.length', 1)
     });
 });
