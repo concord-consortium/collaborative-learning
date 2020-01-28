@@ -1,3 +1,4 @@
+import { getBaseAxisLabels, isBoard } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
@@ -147,10 +148,11 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         name() {
           const disableEquation = context && context.isFeatureDisabled &&
                                     context.isFeatureDisabled("GeometryMovableLineEquation");
-          return !disableEquation && this.getSlope && this.getRise && this.getSlope() !== Infinity
+          const [xName, yName] = isBoard(board) ? getBaseAxisLabels(board as JXG.Board) : ["x", "y"];
+          return !disableEquation && this.getSlope && this.getRise && isFinite(this.getSlope())
             ? this.getRise() >= 0
-              ? `y = ${JXG.toFixed(this.getSlope(), 1)}x + ${JXG.toFixed(this.getRise(), 1)}`
-              : `y = ${JXG.toFixed(this.getSlope(), 1)}x \u2212 ${JXG.toFixed(this.getRise() * -1, 1)}`
+              ? `${yName} = ${JXG.toFixed(this.getSlope(), 1)}${xName} + ${JXG.toFixed(this.getRise(), 1)}`
+              : `${yName} = ${JXG.toFixed(this.getSlope(), 1)}${xName} \u2212 ${JXG.toFixed(this.getRise() * -1, 1)}`
             : "";
         }
       };

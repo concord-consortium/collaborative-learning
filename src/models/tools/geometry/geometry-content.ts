@@ -1108,7 +1108,7 @@ interface IBoardImportSpec {
 interface IPointImportSpec {
   type: "point";
   parents: [number, number];
-  properties?: any;
+  properties?: object;
 }
 
 interface IVertexImportSpec extends IPointImportSpec {
@@ -1118,7 +1118,7 @@ interface IVertexImportSpec extends IPointImportSpec {
 interface IPolygonImportSpec {
   type: "polygon";
   parents: IVertexImportSpec[];
-  properties?: any;
+  properties?: object;
 }
 
 interface IImageImportSpec {
@@ -1128,13 +1128,14 @@ interface IImageImportSpec {
     coords: JXGCoordPair;
     size: JXGCoordPair;
   };
-  properties?: any;
+  properties?: object;
 }
 
 interface IMovableLineImportSpec {
   type: "movableLine";
   parents: [IPointImportSpec, IPointImportSpec];
-  properties?: any;
+  properties?: object;
+  comment?: object;
 }
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
@@ -1156,6 +1157,12 @@ function preprocessImportFormat(snapshot: any) {
 
   const changes: JXGChange[] = [];
   addBoard(boardSpecs);
+
+  function addComment(props: object) {
+    const id = uuid();
+    changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
+    return id;
+  }
 
   function addPoint(pointSpec: IPointImportSpec) {
     const { type, properties: _properties, ...others } = pointSpec;
@@ -1209,6 +1216,9 @@ function preprocessImportFormat(snapshot: any) {
     const parents = _parents.map(ptSpec => ptSpec.parents);
     const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
+    if (movableLineSpec.comment) {
+      addComment({ anchor: id, ...movableLineSpec.comment });
+    }
     return id;
   }
 
