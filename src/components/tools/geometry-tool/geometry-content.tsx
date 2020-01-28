@@ -4,6 +4,7 @@ import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
+import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
 import { getTableContent } from "../../../models/tools/table/table-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl, IAxesParams
@@ -21,7 +22,7 @@ import { isComment } from "../../../models/tools/geometry/jxg-types";
 import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
         } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { isFeatureSupported } from "../../../models/stores/stores";
-import { injectIsValidTableLinkFunction } from "../../../models/tools/geometry/jxg-table-link";
+import { injectGetTableLinkColorsFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
@@ -89,11 +90,7 @@ interface IBoardContentMapEntry {
 }
 const sBoardContentMetadataMap: { [id: string]: IBoardContentMapEntry } = {};
 
-injectIsValidTableLinkFunction((boardDomId: string, tableId?: string) => {
-  const entry = boardDomId && sBoardContentMetadataMap[boardDomId];
-  const metadata = entry && entry.metadata;
-  return metadata && tableId ? metadata.isLinkedToTable(tableId) : false;
-});
+injectGetTableLinkColorsFunction(getTableLinkColors);
 
 function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
                           prevSyncedChanges?: number, readOnly?: boolean) {
@@ -164,7 +161,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           axisSettingsOpen: false,
         };
 
-  private modelId: string;
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
@@ -219,7 +215,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { context, model, onSetActionHandlers } = props;
 
-    this.modelId = model.id;
     this.elementId = `${context}-${model.id}-${nextViewId()}`;
     sBoardContentMetadataMap[this.elementId] = {
       modelId: model.id,
@@ -251,59 +246,70 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.initializeContent();
 
-    if (this.props.toolApiInterface) {
-      this.props.toolApiInterface.register(this.props.model.id, {
-        hasSelection: () => {
-          const geometryContent = this.props.model.content as GeometryContentModelType;
-          // Note: hasSelection() returns true when there is a selection whether or not
-          // the selection is deletable. We could test for hasDeletableSelection() here,
-          // but the effect of that would be that the document toolbar would still enable
-          // the delete button when undeletable content is selected, but now clicking the
-          // delete button would delete the entire tile. For now, we preserve the current
-          // behavior of enabling the toolbar for an undeletable selection.
-          return !!geometryContent && geometryContent.hasSelection();
-        },
-        deleteSelection: () => {
-          const geometryContent = this.props.model.content as GeometryContentModelType;
-          const { board } = this.state;
-          if (geometryContent && board && !this.props.readOnly) {
-            geometryContent.deleteSelection(board);
-          }
-        },
-        getSelectionInfo: () => {
-          const geometryContent = this.props.model.content as GeometryContentModelType;
-          const selectedIds = geometryContent ? geometryContent.selectedIds : [];
-          return JSON.stringify(selectedIds);
-        },
-        setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
-          const { board } = this.state;
-          const content = this.getContent();
-          if (board && content) {
-            const selectedIds: string[] = JSON.parse(selectionInfo);
-            if (isHighlighted) {
-              board.objectsList.forEach(obj => {
-                if (content.isSelected(obj.id)) {
-                  setElementColor(board, obj.id, false);
-                }
-              });
-              selectedIds.forEach(key => {
-                setElementColor(board, key, true);
-              });
-            } else {
-              selectedIds.forEach(key => {
-                setElementColor(board, key, false);
-              });
-              // Return selection state to normal
-              board.objectsList.forEach(obj => {
-                if (content.isSelected(obj.id)) {
-                  setElementColor(board, obj.id, true);
-                }
-              });
-            }
+    const metadata = this.getContent().metadata;
+    this.props.onRegisterToolApi({
+      hasSelection: () => {
+        const geometryContent = this.props.model.content as GeometryContentModelType;
+        // Note: hasSelection() returns true when there is a selection whether or not
+        // the selection is deletable. We could test for hasDeletableSelection() here,
+        // but the effect of that would be that the document toolbar would still enable
+        // the delete button when undeletable content is selected, but now clicking the
+        // delete button would delete the entire tile. For now, we preserve the current
+        // behavior of enabling the toolbar for an undeletable selection.
+        return !!geometryContent && geometryContent.hasSelection();
+      },
+      deleteSelection: () => {
+        const geometryContent = this.props.model.content as GeometryContentModelType;
+        const { board } = this.state;
+        if (geometryContent && board && !this.props.readOnly) {
+          geometryContent.deleteSelection(board);
+        }
+      },
+      getSelectionInfo: () => {
+        const geometryContent = this.props.model.content as GeometryContentModelType;
+        const selectedIds = geometryContent ? geometryContent.selectedIds : [];
+        return JSON.stringify(selectedIds);
+      },
+      setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
+        const { board } = this.state;
+        const content = this.getContent();
+        if (board && content) {
+          const selectedIds: string[] = JSON.parse(selectionInfo);
+          if (isHighlighted) {
+            board.objectsList.forEach(obj => {
+              if (content.isSelected(obj.id)) {
+                setElementColor(board, obj.id, false);
+              }
+            });
+            selectedIds.forEach(key => {
+              setElementColor(board, key, true);
+            });
+          } else {
+            selectedIds.forEach(key => {
+              setElementColor(board, key, false);
+            });
+            // Return selection state to normal
+            board.objectsList.forEach(obj => {
+              if (content.isSelected(obj.id)) {
+                setElementColor(board, obj.id, true);
+              }
+            });
           }
         }
-      });
-    }
+      },
+      isLinked: () => {
+        return metadata.linkedTableCount > 0;
+      },
+      getLinkIndex: (index?: number) => {
+        const tableLink = (index != null) && (index < metadata.linkedTableCount)
+                            ? metadata.linkedTables[index]
+                            : undefined;
+        return tableLink?.id ? getLinkedTableIndex(tableLink?.id) : -1;
+      },
+      getLinkedTables: () => {
+        return metadata.linkedTableIds;
+      }
+    });
 
     this.disposers.push(autorun(() => {
       const { model: { content }, scale, readOnly } = this.props;
@@ -375,16 +381,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
     }
 
-    if (!this.props.readOnly && this.props.toolApiInterface) {
-      this.props.toolApiInterface.unregister(this.modelId);
-    }
+    this.props.onUnregisterToolApi();
 
     this._isMounted = false;
   }
 
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
-    const classes = `geometry-content ${editableClass}`;
+    const metadata = this.getContent().metadata;
+    const isLinkedClass = metadata.linkedTableCount ? "is-linked" : "";
+    const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
     return ([
       this.renderCommentEditor(),
       this.renderLineEditor(),

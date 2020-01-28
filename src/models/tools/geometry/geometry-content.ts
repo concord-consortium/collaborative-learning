@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { SelectionStoreModelType } from "../../stores/selection";
+import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
 import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
@@ -133,6 +134,9 @@ export const GeometryMetadataModel = types
     get linkedTableCount() {
       return self.linkedTables.length;
     },
+    get linkedTableIds() {
+      return self.linkedTables.map(t => t.id);
+    },
     xAxisLabel(baseName = "x") {
       const links = self.linkedTables
                         .map(entry => entry.x)
@@ -172,6 +176,7 @@ export const GeometryMetadataModel = types
         });
         disposer && (self.tableLinkDisposers[tableId] = disposer);
         self.linkedTables.push({ id: tableId, ...axes });
+        addLinkedTable(tableId);
       }
     },
     removeTableLink(tableId: string) {

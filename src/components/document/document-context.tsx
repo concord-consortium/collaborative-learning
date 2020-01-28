@@ -20,8 +20,7 @@ import { DocumentContext } from "../../../components/document/document-context";
 export class GeometryContentComponent extends BaseComponent<{}, {}> {
 
   public static contextType = DocumentContext;
-
-  public context!: React.ContextType<typeof DocumentContext>;
+  public declare context: React.ContextType<typeof DocumentContext>;
 
   public componentDidUpdate() {
     this.context && this.context.setProperties({ foo: "bar", baz: "roo" });

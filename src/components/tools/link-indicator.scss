@@ -1,0 +1,44 @@
+@import "../vars";
+
+$link-indicator-right-offset: 28px;
+$link-indicator-width: 20px;
+
+:export {
+  linkIndicatorRightOffset: $link-indicator-right-offset;
+  linkIndicatorWidth: $link-indicator-width;
+}
+
+.icon-link-indicator {
+  cursor: default;
+  position: absolute;
+  right: $link-indicator-right-offset;
+  box-sizing: content-box;
+  width: 19px;
+  height: 21px;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-bottom: 0px;
+  border-radius: $half-border-radius;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background-color: $color3-4;
+  border: $half-border-width solid transparent;
+  border-right: 0;
+  border-top: 0;
+  z-index: 2;
+  opacity: 1;
+  transition: 0.3s;
+  &:focus {
+    outline: none;
+  }
+}
+
+.link-icon {
+  background-repeat: no-repeat;
+  width: $link-indicator-width;
+  height: 20px;
+  margin-top: 1px;
+  margin-left: -1px;
+  left: 0px;
+  cursor: default;
+}
