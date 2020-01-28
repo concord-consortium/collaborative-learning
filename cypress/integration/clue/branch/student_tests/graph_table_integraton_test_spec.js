@@ -41,7 +41,7 @@ function connectTableToGraph(){
 
 before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
     cy.clearQAData('all');
 
     cy.visit(baseUrl+queryParams);
@@ -53,6 +53,8 @@ context('Tests for graph and table integration', function(){
         addTableAndGraph();
     })
     describe("connect and disconnect table and graph", function(){
+        const xCoord = '7';
+        const yCoord = '5';
         it('verify link icon appears when table and graph are connected',function(){
             clueCanvas.getLinkIcon().should('not.exist');
             connectTableToGraph();
@@ -61,10 +63,21 @@ context('Tests for graph and table integration', function(){
             tableToolTile.getTableTile().parent().should('have.class','is-linked');
             tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('be.visible');
         })
+        it('verify points added has p1 label in table and graph',function(){
+            tableToolTile.addNewRow();
+            tableToolTile.enterData(0,xCoord);
+            tableToolTile.enterData(1,yCoord);
+            tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
+            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+        })
         it('verify unlink of graph and table',function(){
             tableToolTile.unlinkTable();
             graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('not.exist');
             tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('not.exist');
+        })
+        it('verify point no longer has p1 in table and graph', function(){
+            tableToolTile.getTableIndexColumnCell().first().should('not.contain', 'p1');
+            graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
 
         })
     })
@@ -73,8 +86,13 @@ context('Tests for graph and table integration', function(){
         describe('Test blank cells',function(){//verify this is still true
           const xCoord = '9';
           const yCoord = '9';
+          let title = "graph to table"
           before(()=>{
-              connectTableToGraph();
+            canvas.canvas();
+            canvas.createNewExtraDocument(title);
+            canvas.getPersonalDocTitle().should('contain', title)
+            addTableAndGraph();
+            connectTableToGraph();
           })
             it('will add a blank row', function(){ 
                 tableToolTile.getTableTile().should('exist')
@@ -127,14 +145,12 @@ context('Tests for graph and table integration', function(){
                 graphToolTile.showAngle();
                 graphToolTile.getAngleAdornment().should('exist');
             });
-            // TODO: Failing to find 8
             it('will move a point by changing coordinates on the table', function(){
                 let new_x = '8';
                 tableToolTile.getTableCell().eq(6).type(new_x+'{enter}');
                 tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+new_x+', 5)' )
             });
-            // TODO: Found 3 while expecting 4
             it('will delete a point in the table', function(){
                 let  id='';
                 let point=2; //the 3rd point in the graph
