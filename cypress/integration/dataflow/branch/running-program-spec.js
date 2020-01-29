@@ -42,6 +42,35 @@ before(()=>{
 })
 
 context('Program Canvas tests',function(){
+    describe('verify run program toolbar functionality', ()=>{
+        it('verify can select a duration',()=>{
+            var duration = '5 mins';
+            dfcanvas.selectDuration(duration);
+            dfcanvas.getDurationDropdown().should('have.value', '300');
+        })
+        it('verify Stop button is disabled when Run button is enabled',()=>{
+            dfblock.connectBlocks('number',0,'data-storage',0) // ensure we have a valid output
+            dfcanvas.getRunButton().parent().should('not.have.attr','disabled');
+            dfcanvas.getStopButton().parent().should('have.attr','disabled');
+        })
+        it('verify Duration is visible when program is running',()=>{
+            dfcanvas.connectBlocks('number',0,'data-storage',0);
+            dfcanvas.runProgram();
+            cy.wait(1500);
+            dfcanvas.getDurationContainer().should('be.visible');
+            dfcanvas.getProgressTime().should('be.visible');
+        })
+        it('verify Run button is not visible',()=>{
+            dfcanvas.getRunButton().should('not.exist');
+        })
+        it('verify Stop button is enabled when program is running',()=>{
+            dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
+        })
+        it('verify Program toolbar does not exist after running a program',()=>{
+            dfcanvas.stopProgram();
+            dfcanvas.getProgramToolbar().should('not.exist')
+        })
+    })
     describe('Data Storage tests',()=>{
         it('verify data collection stops when Stop button is clicked',()=>{
             dfcanvas.selectDuration('300')
