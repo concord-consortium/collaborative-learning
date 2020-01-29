@@ -15,7 +15,6 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 
     const title = "Drawing Wumps";
 
-
     before(function() {
         const queryParams = `${Cypress.config("teacherQueryParams")}`;
         cy.clearQAData('all');
