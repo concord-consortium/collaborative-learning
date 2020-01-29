@@ -18,16 +18,7 @@ before(()=>{
 
 context('control panel ui',()=>{
     describe('control panel shows registered hubs', ()=>{
-        it('verify Registered Hub List is visible',()=>{
-            controlPanel.getHubListTitle().should('contain', 'Registered IoT Hubs');
-            cy.wait(3000);
-        })
-        it('verify a hub card has status and no channel info when hub is offline',()=>{
-            var hubName='Virtual_Hub_1'
-            controlPanel.getHubStatus(hubName).should('contain','status').and('contain', 'offline');
-            controlPanel.getHubChannelStatus(hubName).should('contain','channels').and('contain','no channels available');
-        })
-        it.skip('verify a hub card has status and channel info when hub is online', ()=>{ 
+        it('verify a hub card has status and channel info when hub is online', ()=>{ 
             //need to make sure cc-west-office-hub is running
             var hubName='cc-west-office-hub'
             controlPanel.getHubStatus(hubName).should('contain','status');

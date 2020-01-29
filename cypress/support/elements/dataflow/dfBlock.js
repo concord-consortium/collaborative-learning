@@ -38,14 +38,14 @@ class dfBlock{
         .invoke('attr','style',"position: absolute; touch-action: none; transform: translate("+x+"px, "+y+"px);")
     }
     connectBlocks(outputBlock, whichBlock=0, inputBlock, whichInput=0){
-        this.getOutputNode(outputBlock, whichBlock).trigger('pointerdown').trigger('pointerup');
-        this.getInputNode(inputBlock,whichInput).trigger('pointerdown').trigger('pointerup',{force:true});
+        this.getOutputNode(outputBlock, whichBlock).trigger('pointerdown',{force:true}).trigger('pointerup',{force:true});
+        this.getInputNode(inputBlock,whichInput).trigger('pointerdown',{force:true}).trigger('pointerup',{force:true});
     }
     connectionLine(){
         return cy.get('.single-workspace .connection .main-path');
     }
     deleteBlock(blockType,whichOne=0){
-        cy.get('.single-workspace .node.'+blockType).eq(whichOne).find('.close-node-button').click();
+        cy.get('.single-workspace .node.'+blockType).eq(whichOne).find('.close-node-button').click({force:true});
     }
     scrollBlockIntoView(block, whichOne=0){
         this.getBlockTitle(block).last().scrollIntoView({top: 50});
