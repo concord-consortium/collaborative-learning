@@ -54,7 +54,7 @@ context('Program Canvas tests',function(){
             dfcanvas.getStopButton().parent().should('have.attr','disabled');
         })
         it('verify Duration is visible when program is running',()=>{
-            dfcanvas.connectBlocks('number',0,'data-storage',0);
+            dfblock.connectBlocks('number',0,'data-storage',0);
             dfcanvas.runProgram();
             cy.wait(1500);
             dfcanvas.getDurationContainer().should('be.visible');
@@ -72,19 +72,6 @@ context('Program Canvas tests',function(){
         })
     })
     describe('Data Storage tests',()=>{
-        it('verify data collection stops when Stop button is clicked',()=>{
-            dfcanvas.selectDuration('300')
-            dfcanvas.runProgram(dataset1);
-            cy.wait(15000); //on first run sometimes it takes 10 seconds for graph to start
-            dfcanvas.getProgramGraph().should('be.visible');
-            dfrightnav.getRunningBadge().should('exist');
-            dfcanvas.stopProgram();
-            dfcanvas.getFullGraph().should('be.visible');
-            dfcanvas.getDataFlowProgramEditorTopControl().should('not.exist')
-            canvas.getPersonalDocTitle().should('contain',dataset1)
-            dfrightnav.getRunningBadge().should('not.exist');
-        })
-
         it('restore program',()=>{
             rightNav.openSection('my-work','','Programs')
             rightNav.openCanvasItem('my-work','','Programs',program1)
