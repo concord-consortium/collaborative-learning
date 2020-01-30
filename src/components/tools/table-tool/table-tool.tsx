@@ -5,12 +5,13 @@ import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
+import { IToolTileProps } from "../tool-tile";
 import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
         } from "ag-grid-community";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { addTable, getLinkedTableIndex } from "../../../models/tools/table-links";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
-          TableContentModelType } from "../../../models/tools/table/table-content";
+        TableContentModelType } from "../../../models/tools/table/table-content";
 import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
 import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
@@ -25,34 +26,22 @@ interface IClipboardCases {
   cases: ICase[];
 }
 
-interface IProps {
-  model: ToolTileModelType;
-  readOnly?: boolean;
-}
-
-// all properties are optional
-interface IPartialState {
-  dataSet?: IDataSet;
-  autoSizeColumns?: boolean;
-}
-​
-// some properties are required
-interface IState extends IPartialState {
+interface IState {
   dataSet: IDataSet;
-  showInvalidPasteAlert: boolean;
+  showInvalidPasteAlert?: boolean;
 }
 
 @inject("stores")
 @observer
-export default class TableToolComponent extends BaseComponent<IProps, IState> {
+export default class TableToolComponent extends BaseComponent<IToolTileProps, IState> {
 
   public static tileHandlesSelection = true;
 
   public state: IState = {
-                  dataSet: DataSet.create(),
-                  showInvalidPasteAlert: false
+                  dataSet: DataSet.create()
                 };
 
+  private modelId: string;
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
   private syncedChanges: number;
@@ -66,9 +55,28 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     this.syncedChanges = 0;
     this.disposers = [];
 
+    this.modelId = this.props.model.id;
+    addTable(this.props.docId, this.modelId);
+
     if (this.domRef.current) {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
+
+    const metadata = this.getContent().metadata;
+    this.props.onRegisterToolApi({
+      hasSelection: () => false,
+      deleteSelection: () => { /* nop */ },
+      getSelectionInfo: () => "",
+      setSelectionHighlight: () => { /* nop */ },
+      isLinked: () => {
+        return metadata.linkCount > 0;
+      },
+      getLinkIndex: (index?: number) => {
+        return metadata.linkCount > 0
+                ? getLinkedTableIndex(this.modelId)
+                : -1;
+      }
+    });
 
     const { selection } = this.stores;
     selection.observe(this.props.model.id, change => {
@@ -100,11 +108,13 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       this.domRef.current.removeEventListener("mousedown", this.handleMouseDown);
     }
 
+    this.props.onUnregisterToolApi();
+
     this.disposers.forEach(disposer => disposer());
   }
 
   public render() {
-    const { readOnly } = this.props;
+    const { model, readOnly } = this.props;
     const content = this.getContent();
     const metadata = content.metadata;
     const itemFlags: IMenuItemFlags = {
@@ -116,8 +126,10 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
             removeCases: true,
             unlinkGeometry: true
           };
+    const linkIndex = getLinkedTableIndex(model.id);
+    const linkClass = linkIndex >= 0 ? `is-linked link-color-${linkIndex}` : "";
     return (
-      <div className={`table-tool ${metadata.isLinked ? "is-linked" : ""}`}
+      <div className={`table-tool ${linkClass}`}
           ref={this.domRef}
           tabIndex={0}
           onKeyDown={this.handleKeyDown} >
@@ -150,10 +162,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderInvalidPasteAlert() {
-    const { showInvalidPasteAlert } = this.state;
-    if (!showInvalidPasteAlert) return;
-
-    return (
+    return this.state.showInvalidPasteAlert && (
       <Alert
           confirmButtonText="OK"
           icon="error"

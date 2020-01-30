@@ -56,9 +56,10 @@ context('Tests for graph and table integration', function(){
             clueCanvas.getLinkIcon().should('not.exist');
             connectTableToGraph();
             tableToolTile.getTableTile().scrollIntoView();
-            graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('be.visible');
+            graphToolTile.getGraphTile().parent().parent().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
             tableToolTile.getTableTile().parent().should('have.class','is-linked');
-            tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('be.visible');
+            graphToolTile.getGraphTile().should('have.class','is-linked');
+            tableToolTile.getTableTile().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
         })
         it('verify points added has p1 label in table and graph',function(){
             tableToolTile.addNewRow();

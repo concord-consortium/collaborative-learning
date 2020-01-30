@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { registerToolContentInfo } from "../tool-content-info";
+import { addLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
@@ -110,6 +111,7 @@ export const TableMetadataModel = types
     addLinkedGeometry(id: string) {
       if (self.linkedGeometries.indexOf(id) < 0) {
         self.linkedGeometries.push(id);
+        addLinkedTable(self.id);
       }
     },
     removeLinkedGeometry(id: string) {
