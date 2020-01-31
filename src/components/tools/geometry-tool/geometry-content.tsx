@@ -1384,11 +1384,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
+      const linkedTableId = point.getAttribute("linkedTableId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
-            const polygon = geometryContent.createPolygonFromFreePoints(board) as JXG.Polygon;
+            const polygon = geometryContent.createPolygonFromFreePoints(board, linkedTableId) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
               this.props.onUpdateToolbar();

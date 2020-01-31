@@ -625,9 +625,11 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
+    function createPolygonFromFreePoints(
+              board: JXG.Board, linkedTableId?: string, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
-                          .filter(elt => isFreePoint(elt))
+                          .filter(elt => isFreePoint(elt) &&
+                                          (linkedTableId === elt?.getAttribute("linkedTableId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
         const change: JXGChange = {
