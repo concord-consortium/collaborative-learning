@@ -25,11 +25,16 @@ export function getAxis(board: JXG.Board, type: "x" | "y") {
   return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
 }
 
-export function getBaseAxisLabels(board: JXG.Board) {
+function getClientAxisLabels(board: JXG.Board) {
   return ["x", "y"].map(xy => {
     const axis = getAxis(board, xy as "x" | "y");
-    return axis?.getAttribute("clientName") as string | undefined || xy;
+    return axis?.getAttribute("clientName") as string | undefined;
   });
+}
+
+export function getBaseAxisLabels(board: JXG.Board) {
+  const [xName, yName] = getClientAxisLabels(board);
+  return [xName || "x", yName || "y"];
 }
 
 export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel: string) {
@@ -216,7 +221,10 @@ export const boardChangeAgent: JXGChangeAgent = {
       const boardScale = props.boardScale;
       if (boardScale) {
         const { canvasWidth, canvasHeight } = boardScale;
-        const [xName, yName] = getAxisLabelsFromProps(change.properties);
+        const [xClientName, yClientName] = getClientAxisLabels(board);
+        const [xPropName, yPropName] = getAxisLabelsFromProps(change.properties);
+        const xName = xPropName || xClientName;
+        const yName = yPropName || yClientName;
         const width = board.canvasWidth;
         const height = board.canvasHeight;
         const widthMultiplier = (width - kAxisBuffer * 2) / canvasWidth;
