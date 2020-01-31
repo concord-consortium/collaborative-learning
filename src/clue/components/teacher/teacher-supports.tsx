@@ -25,9 +25,7 @@ export class TeacherSupports extends BaseComponent<IProps, IState> {
         { this.renderHeader() }
         <TeacherSupport time={new Date().getTime()} audience={audience}/>
           {
-            // Reverse the supports so the newest ones are first + displayed at the top
-            supports.slice()
-              .reverse()
+            supports
               .map((support, i) => {
                 return <TeacherSupport
                   support={support}
