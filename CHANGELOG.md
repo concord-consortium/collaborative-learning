@@ -1,5 +1,25 @@
 # Changelog
 
+## Version 1.1.0-pre.1 - released January 30, 2020
+
+- Moving Straight Ahead content changes
+- Allow author- and user-setting of axis labels
+- Make movable line comment authorable
+- Support sequential link colors for linked tables/geometries
+- Limit polygons to points from a single table (or no table)
+- Order documents from newest to oldest
+- Add confirmation dialog before publishing
+- Put up dialog on authentication error which redirects back to portal
+- Support portal launch via Preview button
+- Dependency updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 500,384 bytes | -0.3% |
+| index.js | 4,398,158 bytes | 0.5% |
+
 ## Version 1.0.3 - released December 12, 2019
 
 - Bug fixes
