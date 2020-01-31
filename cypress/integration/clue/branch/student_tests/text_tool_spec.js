@@ -42,10 +42,13 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
     })
     it('clicks the same text field and allows user to edit text', function(){
-        textToolTile.getTextTile().last().focus().click();
-        textToolTile.enterText('Adding more text to see if it gets added.');
+        textToolTile.getTextTile().last().focus();
+        textToolTile.enterText('Adding more text to see if it gets added. ');
+        textToolTile.getTextEditor().last().should('contain','Adding more text to see if it gets added. ');
         textToolTile.enterText('Adding more text to delete');
+        textToolTile.getTextEditor().last().should('contain','Adding more text to delete');
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
+        textToolTile.getTextTile().last().should('not.contain', 'delete');
     });
     it('delete text tile',()=>{
         clueCanvas.deleteTile('text');
