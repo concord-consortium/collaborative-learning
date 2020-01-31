@@ -74,7 +74,7 @@ context('Test Canvas', function(){
                 clueCanvas.addTile('geometry');
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('text');
-                textToolTile.addText('this is '+ studentWorkspace);
+                textToolTile.enterText('this is '+ studentWorkspace);
             })
             it('verify copy of personal workspace', function(){
                 canvas.copyExtraDocument(copyTitle);
@@ -232,7 +232,7 @@ context('Test Canvas', function(){
             it('adds text tool', function(){
                 clueCanvas.addTile('text');
                 textToolTile.getTextTile().should('exist');
-                textToolTile.addText('This is the Investigation '+this.title)
+                textToolTile.enterText('This is the Investigation '+this.title)
             });
             it('adds a graph tool', function(){
                 clueCanvas.addTile('geometry');

@@ -43,8 +43,8 @@ context('Text tool tile functionalities', function(){
     })
     it('clicks the same text field and allows user to edit text', function(){
         textToolTile.getTextTile().last().focus().click();
-        textToolTile.addText('Adding more text to see if it gets added.');
-        textToolTile.addText('Adding more text to delete');
+        textToolTile.enterText('Adding more text to see if it gets added.');
+        textToolTile.enterText('Adding more text to delete');
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
     });
     it('delete text tile',()=>{

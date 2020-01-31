@@ -249,8 +249,8 @@ class ClueCanvas {
      getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
         return '.tool-tile-drag-handle';
      }
-     getLinkIcon(){
-         return cy.get('.link-indicator')
+     linkIconEl(){
+         return '[data-test="link-indicator-icon"]'
      }
 }
 

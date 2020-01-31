@@ -18,6 +18,9 @@ class GraphToolTile{
         }
     }
     getGraphTile(){
+        return cy.get('.canvas-area .geometry-tool');
+    }
+    getGraph(){
         return cy.get('.canvas-area .geometry-content');
     }
     getGraphAxisLabelId(axis){
@@ -56,20 +59,20 @@ class GraphToolTile{
     getGraphPointAtCoordinate(x,y) {
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
-        this.getGraphTile().last().click(transX,transY);
+        this.getGraph().last().click(transX,transY);
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
         transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last()
+        this.getGraph().last()
             .trigger('mouseover',transX,transY);
     }
     selectGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last().click(transX,transY);
+        this.getGraph().last().click(transX,transY);
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -85,7 +88,7 @@ class GraphToolTile{
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last().click(transX,transY, {force:true});
+        this.getGraph().last().click(transX,transY, {force:true});
     }
     getRotateTool(){
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');

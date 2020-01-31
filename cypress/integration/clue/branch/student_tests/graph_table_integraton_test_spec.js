@@ -56,10 +56,10 @@ context('Tests for graph and table integration', function(){
             clueCanvas.getLinkIcon().should('not.exist');
             connectTableToGraph();
             tableToolTile.getTableTile().scrollIntoView();
-            graphToolTile.getGraphTile().parent().parent().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
-            tableToolTile.getTableTile().parent().should('have.class','is-linked');
+            graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('be.visible');
             graphToolTile.getGraphTile().should('have.class','is-linked');
-            tableToolTile.getTableTile().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
+            tableToolTile.getTableTile().should('have.class','is-linked');
+            tableToolTile.getTableTile().siblings(clueCanvas.linkIconEl()).should('be.visible');
         })
         it('verify points added has p1 label in table and graph',function(){
             tableToolTile.addNewRow();
@@ -70,8 +70,10 @@ context('Tests for graph and table integration', function(){
         })
         it('verify unlink of graph and table',function(){
             tableToolTile.unlinkTable();
-            graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('not.exist');
-            tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('not.exist');
+            graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('not.exist');
+            graphToolTile.getGraphTile().should('not.have.class','is-linked');
+            tableToolTile.getTableTile().siblings(clueCanvas.linkIconEl()).should('not.exist');
+            tableToolTile.getTableTile().should('not.have.class','is-linked');
         })
         it('verify point no longer has p1 in table and graph', function(){
             tableToolTile.getTableIndexColumnCell().first().should('not.contain', 'p1');
