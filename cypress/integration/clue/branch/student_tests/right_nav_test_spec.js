@@ -14,10 +14,10 @@ describe('Test right nav tabs', function(){
     before(function(){
             const baseUrl = `${Cypress.config("baseUrl")}`;
             const queryParams = `${Cypress.config("queryParams")}`;
-        
+            cy.clearQAData('all');
+
             cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
-            // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
     describe('My Work tab tests', function(){
@@ -67,6 +67,19 @@ describe('Test right nav tabs', function(){
                 rightNav.openCanvasItem('my-work','workspaces',copyDocumentTitle);
                 canvas.getPersonalDocTitle().should('contain',copyDocumentTitle);
             });
+        })
+        describe('Starred section', function(){
+            before(()=>{
+                rightNav.openRightNavTab('my-work');
+                rightNav.starCanvasItem('my-work','workspaces',copyDocumentTitle);
+            })
+            it('verify starred document star is highlighted',function(){
+                rightNav.getCanvasStarIcon('my-work','workspaces',copyDocumentTitle).should('have.class','starred')
+            })
+            it('verify starred document appears in the Starred section',function(){
+                rightNav.openSection('my-work','starred');
+                rightNav.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
+            })
         })
         after(function(){
             rightNav.closeRightNavTab('my-work'); // clean up

@@ -1,12 +1,10 @@
-import LeftNav from '../support/elements/clue/LeftNav'
-import Canvas from '../support/elements/common/Canvas'
-import ClueCanvas from '../support/elements/clue/cCanvas'
-import GraphToolTile from '../support/elements/clue/GraphToolTile'
-import RightNav from '../support/elements/common/RightNav'
-import TableToolTile from '../support/elements/clue/TableToolTile'
-import ImageToolTile from '../support/elements/clue/ImageToolTile'
+import Canvas from '../../../../support/elements/common/Canvas'
+import ClueCanvas from '../../../../support/elements/clue/cCanvas'
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
+import RightNav from '../../../../support/elements/common/RightNav'
+import TableToolTile from '../../../../support/elements/clue/TableToolTile'
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
 
-const leftNav = new LeftNav;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const rightNav = new RightNav;
@@ -26,24 +24,76 @@ function deleteTableAndGraph(){
 
 function connectTableToGraph(){
     const dataTransfer = new DataTransfer;
+    tableToolTile.getTableTile().click();
+    tableToolTile.getTableTile().parent().parent().should('have.class','selected');
 
     tableToolTile.getTableTile()
-        .trigger('dragstart', {dataTransfer});
+        .trigger('dragstart', {dataTransfer})
     graphToolTile.getGraphTile()
-        .trigger('drop', {dataTransfer});
-    tableToolTile.getTableTile()
-        .trigger('dragend');
+            .trigger('dragover',{dataTransfer})
+            .trigger('drop', {dataTransfer})
+            .trigger('dragend',{dataTransfer});
 }
 
+before(function(){
+    const baseUrl = `${Cypress.config("baseUrl")}`;
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
+    cy.clearQAData('all');
+
+    cy.visit(baseUrl+queryParams);
+    cy.waitForSpinner();
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
+})
+
 context('Tests for graph and table integration', function(){
-    describe('connect table to graph before adding coordinates', function(){
-        it('setup', function(){
-            addTableAndGraph();
+    before(function(){
+        addTableAndGraph();
+    })
+    describe("connect and disconnect table and graph", function(){
+        const xCoord = '7';
+        const yCoord = '5';
+        it('verify link icon appears when table and graph are connected',function(){
+            clueCanvas.getLinkIcon().should('not.exist');
+            connectTableToGraph();
+            tableToolTile.getTableTile().scrollIntoView();
+            graphToolTile.getGraphTile().parent().parent().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
+            tableToolTile.getTableTile().parent().should('have.class','is-linked');
+            graphToolTile.getGraphTile().should('have.class','is-linked');
+            tableToolTile.getTableTile().parent().siblings('[data-test=link-indicator-icon]').should('be.visible');
+        })
+        it('verify points added has p1 label in table and graph',function(){
+            tableToolTile.addNewRow();
+            tableToolTile.enterData(0,xCoord);
+            tableToolTile.enterData(1,yCoord);
+            tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
+            graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+        })
+        it('verify unlink of graph and table',function(){
+            tableToolTile.unlinkTable();
+            graphToolTile.getGraphTile().parent().parent().parent().siblings('#icon-link-indicator').should('not.exist');
+            tableToolTile.getTableTile().parent().siblings('#icon-link-indicator').should('not.exist');
+        })
+        it('verify point no longer has p1 in table and graph', function(){
+            tableToolTile.getTableIndexColumnCell().first().should('not.contain', 'p1');
+            graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
+        })
+        it('reconnect table to graph for later test',function(){
             connectTableToGraph();
         })
+    })
+
+    describe('connect table to graph before adding coordinates', function(){
         describe('Test blank cells',function(){//verify this is still true
           const xCoord = '9';
           const yCoord = '9';
+          let title = "graph to table"
+          before(()=>{
+            canvas.canvas();
+            canvas.createNewExtraDocument(title);
+            canvas.getPersonalDocTitle().should('contain', title)
+            addTableAndGraph();
+            connectTableToGraph();
+          })
             it('will add a blank row', function(){ 
                 tableToolTile.getTableTile().should('exist')
                 tableToolTile.addNewRow();
@@ -70,12 +120,12 @@ context('Tests for graph and table integration', function(){
                 tableToolTile.enterData(1,'0')
                 graphToolTile.getGraphPointLabel().contains('p1').should('exist');
                 graphToolTile.getGraphPointCoordinates(0).should('contain', '(0, 0)' );
-                tableToolTile.getTableCell().eq(3).type('0');
-                tableToolTile.getTableCell().eq(6).type(' ');
+                tableToolTile.getTableCell().eq(3).type('0{enter}');
+                // tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p2').should('exist');
                 graphToolTile.getGraphPointCoordinates(1).should('contain', '('+xCoord+', 0)' );
-                tableToolTile.getTableCell().eq(4).type('0');
-                tableToolTile.getTableCell().eq(6).type(' ');
+                tableToolTile.getTableCell().eq(4).type('0{enter}');
+                // tableToolTile.getTableCell().eq(6).type(' ');
                 graphToolTile.getGraphPointLabel().contains('p3').should('exist');
                 graphToolTile.getGraphPointCoordinates(2).should('contain', '(0, '+yCoord+')');            });
         });
@@ -88,21 +138,19 @@ context('Tests for graph and table integration', function(){
                 graphToolTile.getGraphPointCoordinates().should('contain', '(5, 5)' );
             })
             it('will create a polygon', function(){ //first point is created in previous it
-                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+                graphToolTile.getGraphPoint().last().click({force:true}).dblclick({force:true});
                 graphToolTile.getGraphPolygon().should('exist')
             });
             it('will add angle to a table point', function(){
                 graphToolTile.showAngle();
                 graphToolTile.getAngleAdornment().should('exist');
             });
-            // TODO: Failing to find 8
             it('will move a point by changing coordinates on the table', function(){
                 let new_x = '8';
-                tableToolTile.getTableCell().eq(6).type(new_x);
+                tableToolTile.getTableCell().eq(6).type(new_x+'{enter}');
                 tableToolTile.getTableCell().eq(8).type(' ');//type in blank again so the coordinate sticks
                 graphToolTile.getGraphPointCoordinates().should('contain', '('+new_x+', 5)' )
             });
-            // TODO: Found 3 while expecting 4
             it('will delete a point in the table', function(){
                 let  id='';
                 let point=2; //the 3rd point in the graph
@@ -150,6 +198,7 @@ context('Tests for graph and table integration', function(){
         describe('normal graph interactions', function(){
             it('will add a polygon directly onto the graph', function(){
                 graphToolTile.getGraphTile().click();
+                graphToolTile.addPointToGraph(5,5); //not sure why this isn't appearing
                 graphToolTile.addPointToGraph(10,15);
                 graphToolTile.addPointToGraph(13,10);
                 graphToolTile.addPointToGraph(5,10)
@@ -262,20 +311,27 @@ context('Tests for graph and table integration', function(){
         });
     });        
 });
-// TODO: Need to write.
-context.skip('Save and restore keeps the connection between table and graph', function(){
-    it('will restore a canvas with connected table and graph', function(){
-    });
-    it('will add a point to the graph from the table', function(){
-        //verify that point is added to the graph
+context('Save and restore keeps the connection between table and graph', function(){
+    before(function(){
+        let title = '2.3 Mouthing Off and Nosing Around';
+        rightNav.openRightNavTab('my-work');
+        rightNav.openSection('my-work','investigations');
+        rightNav.openCanvasItem('my-work','investigations',title)
+    })
+    it('verify connection of table and graph on restored canvas', function(){
+        tableToolTile.getTableIndexColumnCell().first().should('contain', 'p1');
+        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
     });
 });
-// TODO: Need to write.
-context.skip('Delete connected table', function(){
+context('Delete connected table', function(){
     it('will delete connected table', function(){
-
+        clueCanvas.deleteTile('table');
+        graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
+        graphToolTile.getGraphPoint().should('not.exist');
     });
     it('will verify graph is still functional after connected table is deleted', function(){
-
+        graphToolTile.getGraphTile().click();
+        graphToolTile.addPointToGraph(2,6);
+        graphToolTile.getGraphPoint().should('exist').and ('have.length', 1)
     });
 });

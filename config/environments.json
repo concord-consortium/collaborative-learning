@@ -1,21 +1,25 @@
 {
   "production": {
     "baseUrl": "https://collaborative-learning.concord.org",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   },
   "master": {
     "baseUrl": "https://collaborative-learning.concord.org/branch/master/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   },
   "branch": {
     "baseUrl": "https://collaborative-learning.concord.org/branch/problem-documents/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5"
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   },
   "dev": {
     "baseUrl": "dev baseUrl needs to be set in config/user-config.json (see config/user-config.sample.json)"
   },
   "local":{
     "baseUrl": "http://localhost:8080/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5"
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   }
 }

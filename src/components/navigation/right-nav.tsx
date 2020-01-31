@@ -59,8 +59,14 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
+
+    const allowed: Partial< RightNavTabMap<boolean> > = {};
+    props.tabs?.forEach(tab => {
+      allowed[tab.tab] = !this.stores.appConfig.rightNav.lazyLoadTabContents;
+    });
+
     this.state = {
-      tabLoadAllowed: {},
+      tabLoadAllowed: allowed,
       navExpanding: false
     };
   }
@@ -191,7 +197,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
         ui.setActiveRightNavTab(tab);
         ui.toggleRightNav(true);
         logEvent();
-      } else {
+      } else if (!this.stores.appConfig.rightNav.preventExpandCollapse) {
         ui.toggleRightNav();
         ui.rightNavExpanded && logEvent();
       }

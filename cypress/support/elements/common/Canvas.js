@@ -49,7 +49,7 @@ class Canvas{
     }
 
     getDeleteIcon(){
-        return cy.get('[data-test=delete-icon]')
+        return cy.get('[data-test=delete-icon] .delete')
     }
 
     createNewExtraDocument(title){
@@ -62,8 +62,17 @@ class Canvas{
         cy.wait(3000)    
     }
 
-    editTitle(title){
+    editTitlewithPencil(title){
         this.getEditTitleIcon().click()
+            .then(function(){
+                dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
+                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                dialog.getDialogOKButton().click();
+            })
+    }
+
+    editTitle(title){
+        this.getPersonalDocTitle().find('#titlebar-title').click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
@@ -91,7 +100,7 @@ class Canvas{
 
     deleteDocument(){
         this.getDeleteIcon().click().then(()=>{
-            dialog.getDialogTitle().should('exist').contains('Delete Workspace');
+            dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
         })
     cy.wait(3000)    
@@ -100,6 +109,8 @@ class Canvas{
     publishPersonalCanvas(){
         this.getPersonalPublishIcon().click()
             .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Publish ');
+                dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('exist').contains('Published');
                 dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('not.exist');
@@ -109,6 +120,8 @@ class Canvas{
     publishCanvas(){
         this.getPublishIcon().click()
             .then(()=>{
+                dialog.getDialogTitle().should('exist').contains('Publish ');
+                dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('exist').contains('Published');
                 dialog.getDialogOKButton().click();
                 dialog.getDialogTitle().should('not.exist');

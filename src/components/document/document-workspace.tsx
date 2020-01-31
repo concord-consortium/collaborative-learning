@@ -46,12 +46,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   public render() {
-    const { appConfig, user } = this.stores;
-    const { rightNavTabs } = appConfig;
-    const studentTabs = rightNavTabs.filter((t) => !t.teacherOnly);
+    const { appConfig : { rightNav: { tabSpecs } }, user } = this.stores;
+    const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
     const isTeacher = user.isTeacher;
-    const tabsToDisplay = isTeacher ? rightNavTabs : studentTabs;
+    const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -71,7 +70,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
           onDrop={this.handleImageDrop}
         />
         <RightNavComponent
-          tabs={appConfig.rightNavTabs}
+          tabs={tabsToDisplay}
           isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
@@ -189,8 +188,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { appConfig } = this.stores;
-    const hasRightNavTabs = appConfig.rightNavTabs && (appConfig.rightNavTabs.length > 0);
+    const hasRightNavTabs = this.stores.appConfig.rightNav.tabSpecs.length > 0;
     const style = hasRightNavTabs ? undefined : { right: 0 };
     return (
       <div
@@ -206,6 +204,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private renderComparisonPlaceholder() {
+    const { appConfig } = this.stores;
+    const placeholderContent = Array.isArray(appConfig.comparisonPlaceholderContent)
+                                ? appConfig.comparisonPlaceholderContent.map(str => <div key={str}>{str}</div>)
+                                : appConfig.comparisonPlaceholderContent;
     return (
       <div
         className="comparison-placeholder"
@@ -213,7 +215,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
         onDrop={this.handleDropSide("comparison")}
         onClick={this.handleClick}
       >
-        Click or drag an item in the right tabs to show it here
+        {placeholderContent}
       </div>
     );
   }
@@ -284,7 +286,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.contractAll();
+    this.stores.ui.restoreDefaultNavExpansion();
   }
 
   private handleNewDocument = (document: DocumentModelType) => {
@@ -317,8 +319,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { appConfig } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const originTitle = document?.properties?.get("originTitle");
+    const baseTitle = appConfig.copyPreferOriginTitle && originTitle
+                        ? originTitle
+                        : document.title || this.stores.problem.title;
     this.stores.ui.prompt(`Give your ${docTypeStringL} copy a new name:`,
-                          `Copy of ${document.title || this.stores.problem.title}`, `Copy ${docTypeString}`)
+                          `Copy of ${baseTitle}`, `Copy ${docTypeString}`)
       .then((title: string) => {
         this.handleCopyDocumentOpen(document, title)
         .catch(this.stores.ui.setError);
@@ -327,7 +333,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
     const { db, ui: { problemWorkspace } } = this.stores;
-    const copyDocument = await db.copyOtherDocument(document, title);
+    const copyDocument = await db.copyOtherDocument(document, { title, asTemplate: true });
     if (copyDocument) {
       problemWorkspace.setPrimaryDocument(copyDocument);
     }
@@ -387,12 +393,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
     const { appConfig, db, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    // TODO: Disable publish button while publishing
-    const dbPublishDocumentFunc = document.type === ProblemDocument
-                                    ? db.publishProblemDocument
-                                    : db.publishOtherDocument;
-    dbPublishDocumentFunc.call(db, document)
-      .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
+      .then((confirm: boolean) => {
+        if (confirm) {
+          const dbPublishDocumentFunc = document.type === ProblemDocument
+                                          ? db.publishProblemDocument
+                                          : db.publishOtherDocument;
+          dbPublishDocumentFunc.call(db, document)
+            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+        }
+      });
   }
 
   private getPrimaryDocument(documentKey?: string) {

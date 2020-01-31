@@ -478,9 +478,9 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   }
 
   public getRowStyle(params: IRowStyleParams) {
-    if (params.data.id === LOCAL_ROW_ID) {
-      return LOCAL_ROW_STYLE;
-    }
+    // if (params.data.id === LOCAL_ROW_ID) {
+    //   return LOCAL_ROW_STYLE;
+    // }
     return undefined;
   }
 

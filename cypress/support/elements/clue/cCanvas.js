@@ -14,180 +14,226 @@ let graphToolTile = new GraphToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
-class ClueCanvas{
+class ClueCanvas {
     //canvas header
-    getInvestigationCanvasTitle(){
+    getInvestigationCanvasTitle() {
         return cy.get('[data-test=document-title]')
     }
 
-    getPublishSupport(){
+    getPublishSupport() {
         return cy.get('[data-test=publish-support-icon]')
     }
-    publishSupportDoc(){
+    publishSupportDoc() {
         this.getPublishSupport().click();
-        dialog.getDialogTitle().should('be.visible').and('contain','Support Published');
+        dialog.getDialogTitle().should('be.visible').and('contain', 'Support Published');
         dialog.getDialogOKButton().click();
     }
 
     getSingleWorkspace() {
         return cy.get('.single-workspace')
     }
-    
-    getRowSectionHeader(){
+
+    getRowSectionHeader() {
         return cy.get('.row-section-header')
     }
 
-    getSectionHeader(header){
+    getSectionHeader(header) {
         // headers=['IN','IC','WI','NW'];
         // headerTitles=["Introduction", "Initial Challenge", "What If...?","Now What Do You Know?"]
-        return cy.get('#section_'+header);
+        return cy.get('#section_' + header);
     }
 
-    getPlaceHolder(){
+    getPlaceHolder() {
         return cy.get('.placeholder-tool')
     }
 
-    getFourUpViewToggle(){
+    getFourUpViewToggle() {
         return cy.get('[data-test=document-titlebar-actions] .up1');
     }
 
-    openFourUpView(){
+    openFourUpView() {
         this.getFourUpViewToggle().click();
         this.getFourUpView().should('be.visible');
     }
 
-    getFourToOneUpViewToggle(){
+    getFourToOneUpViewToggle() {
         return cy.get('[data-test=document-titlebar-actions] .up4');
     }
 
-    openOneUpViewFromFourUp(){
+    openOneUpViewFromFourUp() {
         this.getFourToOneUpViewToggle().click();
         canvas.getSingleCanvas().should('be.visible');
     }
 
-    getFourUpView(){
+    getFourUpView() {
         return cy.get('.canvas-area .four-up');
     }
 
-    getLeftSideFourUpView(){
+    getLeftSideFourUpView() {
         return cy.get('.left-workspace .canvas-area .four-up')
     }
-    northWestCanvas(){
+    northWestCanvas() {
         return '.canvas-area .four-up .canvas-container.north-west .canvas' //.document-content'
     }
 
-    getNorthEastCanvas(){
+    getNorthEastCanvas() {
         return cy.get('.canvas-area .four-up .canvas-container.north-east');
     }
-    getNorthWestCanvas(){
+    getNorthWestCanvas() {
         return cy.get(this.northWestCanvas()).parent().parent().parent();
     }
-    getSouthEastCanvas(){
+    getSouthEastCanvas() {
         return cy.get('.canvas-area .four-up .canvas-container.south-east');
     }
-    getSouthWestCanvas(){
+    getSouthWestCanvas() {
         return cy.get('.canvas-area .four-up .canvas-container.south-west');
     }
 
-    getCenterSeparator(){
+    getCenterSeparator() {
         return cy.get('.canvas-area .four-up .center');
     }
 
-    getShareButton(){
+    getShareButton() {
         return cy.get('[data-test=share-icon]');
     }
 
-    shareCanvas(){
+    shareCanvas() {
         this.getShareButton().click();
     }
 
-    unshareCanvas(){
+    unshareCanvas() {
         this.getShareButton().click();
     }
 
-    getToolPalette(){
+    getToolPalette() {
         return cy.get('.single-workspace > .toolbar');
     }
 
-    getLeftSideToolPalette(){
+    getLeftSideToolPalette() {
         return cy.get('.left-workspace > .toolbar');
     }
 
-    getRightSideToolPalette(){
+    getRightSideToolPalette() {
         return cy.get('.right-workspace > .toolbar');
     }
-    getSelectTool(){
+    getSelectTool() {
         return cy.get('.single-workspace .tool.select[title=Select]');
     }
 
-    addTile(tile){ //tile=[text,table,geometry,image,drawing,delete]
-        cy.get('.single-workspace .tool.'+tile).click({force:true})
+    addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
+        cy.get('.single-workspace .tool.' + tile).click({ force: true })
     }
 
-    getDeleteTool(){
+    getDeleteTool() {
         return cy.get('.tool.delete');
     }
 
-    deleteTile(tile){
-        switch(tile) {
-            case 'text':
-                textToolTile.getTextTile().last().click({force:true}).invoke('attr', 'class', 'selected');
+    moveTile(movingTile, targetTile, dropZoneDirection) {
+        const dataTransfer = new DataTransfer;
+
+        switch (movingTile) {
+            case ('table'):
+                tableToolTile.getTableTile().eq(0).click()
+                tableToolTile.getTableTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
                 break;
-            case 'graph':
-                graphToolTile.getGraphTile().last().click({force:true});
+            case ('geometry'):
+                graphToolTile.getGraphTile().eq(0).click()
+                graphToolTile.getGraphTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
                 break;
-            case 'image':
-                imageToolTile.getImageTile().last().click({force:true});
+            case ('text'):
+                textToolTile.getTextTile().eq(0).click()
+                textToolTile.getTextTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
                 break;
-            case 'drawing':
-                drawToolTile.getDrawTile().last().click({force:true});
+            case ('image'):
+                imageToolTile.getImageTile().eq(0).click()
+                imageToolTile.getImageTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
                 break;
-            case 'table':
-                tableToolTile.getTableTile().last().click({force:true});
+            case ('draw'):
+                drawToolTile.getDrawTile().eq(0).click()
+                drawToolTile.getDrawTile().eq(0)
+                    .trigger('dragstart', { dataTransfer });
                 break;
+
         }
-        this.getDeleteTool().click({force: true});
+        if (targetTile == "text") {
+            cy.get('.' + targetTile + '-tool').eq(0).parent().parent().parent().within(() => {
+                cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
+                    .trigger('drop', { dataTransfer, force: true })
+                    .trigger('dragend', { dataTransfer, force: true })
+            })
+        } else {
+            cy.get('.' + targetTile + '-tool').eq(0).parent().parent().within(() => {
+                cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
+                    .trigger('drop', { dataTransfer, force: true })
+                    .trigger('dragend', { dataTransfer, force: true })
+            })
+        }
     }
 
-    getSupportList(){
+    deleteTile(tile) {
+        switch (tile) {
+            case 'text':
+                textToolTile.getTextTile().last().click({ force: true }).invoke('attr', 'class', 'selected');
+                break;
+            case 'graph':
+                graphToolTile.getGraphTile().last().click({ force: true });
+                break;
+            case 'image':
+                imageToolTile.getImageTile().last().click({ force: true });
+                break;
+            case 'draw':
+                drawToolTile.getDrawTile().last().click({ force: true });
+                break;
+            case 'table':
+                tableToolTile.getTableTile().last().click({ force: true });
+                break;
+        }
+        this.getDeleteTool().click({ force: true });
+    }
+
+    getSupportList() {
         return cy.get('.statusbar .supports-list');
     }
 
-    getSupportTitle(){
+    getSupportTitle() {
         return cy.get('.visible-supports .supports-list > div')
     }
 
-    getTwoUpViewToggle(){
+    getTwoUpViewToggle() {
         return cy.get('.single-workspace .statusbar .action > .up1');
     }
-    getTwoToOneUpViewToggle(){// from 2up view
+    getTwoToOneUpViewToggle() {// from 2up view
         return cy.get('.left-workspace .statusbar .action > .up2');
     }
 
-    getRightSideWorkspace(){
+    getRightSideWorkspace() {
         return cy.get('.right-workspace')
     }
-    getLeftSideWorkspace(){
+    getLeftSideWorkspace() {
         return cy.get('.left-workspace .canvas-area');
     }
-     openTwoUpView(){
-        this.getTwoUpViewToggle().click({force:true});
+    openTwoUpView() {
+        this.getTwoUpViewToggle().click({ force: true });
         this.getRightSideWorkspace().should('be.visible');
         this.getLeftSideWorkspace().should('be.visible');
-     }
+    }
 
-     openOneUpViewFromTwoUp(){
-        this.getTwoToOneUpViewToggle().click({force:true});
+    openOneUpViewFromTwoUp() {
+        this.getTwoToOneUpViewToggle().click({ force: true });
         canvas.getSingleCanvas().should('be.visible');
-     }
+    }
 
-     getRightSideWorkspaceTitle(){
-         return cy.get('.right-workspace [data-test=personal-doc-title]')
-     }
-     getRightSideInvestigationTitle(){
+    getRightSideWorkspaceTitle() {
+        return cy.get('.right-workspace [data-test=personal-doc-title]')
+    }
+    getRightSideInvestigationTitle() {
         return cy.get('.right-workspace [data-test=document-title]')
     }
-    getRightSideLLTitle(){
+    getRightSideLLTitle() {
         return cy.get('.right-workspace [data-test=learning-log-title]')
     }
 
@@ -199,6 +245,12 @@ class ClueCanvas{
      }
      getRightSideDocumentContent(){
          return cy.get('.right-workspace .document-content')
+     }
+     getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
+        return '.tool-tile-drag-handle';
+     }
+     getLinkIcon(){
+         return cy.get('.link-indicator')
      }
 }
 

@@ -2,6 +2,9 @@ class TableToolTile{
     tableToolTile(){
         return '.canvas-area .neo-codap-case-table'
     }
+    tableTool(){//too use when looking for in right side workspace
+        return '.table-tool'
+    }
     getTableTile(){
         return cy.get(this.tableToolTile());
     }
@@ -61,6 +64,10 @@ class TableToolTile{
     }
     getTableIndexColumnCell(){
         return cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-cell')
+    }
+    unlinkTable(){
+        this.openTableMenu();
+        cy.get('.bp3-menu-item div').contains('Unlink Geometry').click()
     }
 }
 export default TableToolTile;

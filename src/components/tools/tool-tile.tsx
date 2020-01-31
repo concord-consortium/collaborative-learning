@@ -31,6 +31,9 @@ export interface IToolApi {
   deleteSelection: () => void;
   getSelectionInfo: () => string;
   setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => void;
+  isLinked?: () => boolean;
+  getLinkIndex?: (index?: number) => number;
+  getLinkedTables?: () => string[] | undefined;
 }
 
 export interface IToolApiInterface {
@@ -70,7 +73,7 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
   }
 }
 
-interface IProps {
+interface IToolTileBaseProps {
   context: string;
   docId: string;
   scale?: number;
@@ -78,9 +81,17 @@ interface IProps {
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
-  toolApiInterface?: IToolApiInterface;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestRowHeight: (tileId: string, height: number) => void;
+}
+
+export interface IToolTileProps extends IToolTileBaseProps {
+  onRegisterToolApi: (toolApi: IToolApi) => void;
+  onUnregisterToolApi: () => void;
+}
+
+interface IProps extends IToolTileBaseProps {
+  toolApiInterface?: IToolApiInterface;
 }
 
 const kToolComponentMap: any = {
@@ -103,13 +114,17 @@ const DragTileButton = () => {
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
+  private modelId: string;
   private domElement: HTMLDivElement | null;
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
 
-  public componentDidMount() {
-    const { model } = this.props;
+  constructor(props: IProps) {
+    super(props);
+
+    const { model } = props;
     const { content: { type } } = model;
+    this.modelId = model.id;
     model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
 
     const { appMode } = this.stores;
@@ -118,7 +133,9 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
         "cmd-shift-c": this.handleCopyJson
       });
     }
+  }
 
+  public componentDidMount() {
     if (this.domElement) {
       this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
     }
@@ -131,12 +148,12 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   public render() {
     const { model, widthPct } = this.props;
-    const { ui } = this.stores;
+    const { appConfig, ui } = this.stores;
     const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
     const ToolComponent = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const placeholderClass = isPlaceholderTile ? " placeholder" : "";
-    const dragTileButton = !isPlaceholderTile &&
+    const dragTileButton = !isPlaceholderTile && !appConfig.disableTileDrags &&
                             <div ref={elt => this.dragElement = elt}><DragTileButton /></div>;
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -152,7 +169,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
           onDragStart={this.handleToolDragStart}
           draggable={true}
       >
-        <LinkIndicatorComponent type={model.content.type} id={model.id} />
+        {this.renderLinkIndicators()}
         {dragTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
@@ -162,9 +179,27 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private renderTile(ToolComponent: any) {
     const tileId = this.props.model.id;
+    const { toolApiInterface, ...otherProps } = this.props;
     return ToolComponent != null
-            ? <ToolComponent key={tileId} {...this.props} />
+            ? <ToolComponent
+                key={tileId} {...otherProps}
+                onRegisterToolApi={this.handleRegisterToolApi}
+                onUnregisterToolApi={this.handleUnregisterToolApi} />
             : null;
+  }
+
+  private renderLinkIndicators() {
+    const { model, toolApiInterface } = this.props;
+    const toolApi = toolApiInterface?.getToolApi(model.id);
+    const clientTableLinks = toolApi?.getLinkedTables?.();
+    const tableLinkIndex = toolApi?.getLinkIndex?.();
+    return clientTableLinks
+            ? clientTableLinks.map((id, index) => {
+                return <LinkIndicatorComponent key={id} id={id} index={index} />;
+              })
+            : (tableLinkIndex != null) && (tableLinkIndex >= 0)
+                ? <LinkIndicatorComponent id={model.id} />
+                : null;
   }
 
   private renderTileComments() {
@@ -182,6 +217,16 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
                 />;
       }
     }
+  }
+
+  private handleRegisterToolApi = (toolApi: IToolApi) => {
+    this.props.toolApiInterface?.register(this.modelId, toolApi);
+    // trigger initial render of link indicators
+    toolApi.isLinked?.() && this.forceUpdate();
+  }
+
+  private handleUnregisterToolApi = () => {
+    this.props.toolApiInterface?.unregister(this.modelId);
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -209,7 +254,6 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
 
   private handleCopyJson = () => {
     const { content } = this.props.model;
-    const json = JSON.stringify(content);
     const { clipboard } = this.stores;
     clipboard.clear();
     clipboard.addJsonTileContent(this.props.model.id, content, this.stores);
@@ -217,11 +261,20 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
   }
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // tile dragging can be disabled globally via appConfig
+    if (this.stores.appConfig.disableTileDrags) {
+      e.preventDefault();
+      return;
+    }
+
+    // tile dragging can be disabled for individual tiles
     const target: HTMLElement | null = e.target as HTMLElement;
     if (!target || target.querySelector(".disable-tile-drag")) {
       e.preventDefault();
       return;
     }
+    // tile dragging can be disabled for individual tile contents,
+    // which only allows those tiles to be dragged by their drag handle
     if (target && target.querySelector(".disable-tile-content-drag")) {
       const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
       if (!eltTarget || !eltTarget.closest(".tool-tile-drag-handle")) {

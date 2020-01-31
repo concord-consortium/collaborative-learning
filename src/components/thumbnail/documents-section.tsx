@@ -34,13 +34,13 @@ function getSectionTitle(section: NavTabSectionModelType, stores: IStores) {
 }
 
 function getDocumentCaption(section: NavTabSectionModelType, stores: IStores, document: DocumentModelType) {
-  const { problem, class: _class } = stores;
+  const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
   const user = _class && _class.getUserById(uid);
   const userName = user && user.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type) ? problem.title : document.title;
+  const title = isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   return `${namePrefix}${title}`;
 }
 
@@ -78,23 +78,13 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
         sectionDocs.push(...Object.values(publishedDocs));
       }
     });
+
+    // Reverse the order to approximate a most-recently-used ordering.
+    sectionDocs = sectionDocs.reverse();
+
     // filter by additional properties
     if (section.properties && section.properties.length) {
-      sectionDocs = sectionDocs.filter(doc => {
-        return section.properties.every(p => {
-          const match = /(!)?(.*)/.exec(p);
-          const property = match && match[2];
-          const wantsProperty = !(match && match[1]); // not negated => has property
-          if (property === "starred") {
-            return doc.isStarred === wantsProperty;
-          }
-          if (property) {
-            return !!doc.getProperty(property) === wantsProperty;
-          }
-          // ignore empty strings, etc.
-          return true;
-        });
-      });
+      sectionDocs = sectionDocs.filter(doc => doc.matchProperties(section.properties));
     }
 
     function handleSectionHeaderClick() {
@@ -105,60 +95,61 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     return (
-      <div className={`${section.className}`} key={`${tab}-${section.type}`}>
+      <div className={`${section.className} section-tab-container`} key={`${tab}-${section.type}`}>
         <CollapsibleSectionHeader
           sectionTitle={sectionTitle} dataTestName={section.dataTestHeader}
           isExpanded={isExpanded} onClick={handleSectionHeaderClick}/>
+        <div className="list-container">
+          <div className={"list " + (isExpanded ? "shown" : "hidden")}>
+            {sectionDocs.map(document => {
 
-        <div className={"list " + (isExpanded ? "shown" : "hidden")}>
-          {sectionDocs.map(document => {
+              function handleDocumentClick() {
+                onDocumentClick && onDocumentClick(document);
+              }
+              function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
+                onDocumentDragStart && onDocumentDragStart(e, document);
+              }
+              function handleDocumentStarClick() {
+                onDocumentStarClick && onDocumentStarClick(document);
+              }
+              function handleDocumentDeleteClick() {
+                onDocumentDeleteClick && onDocumentDeleteClick(document);
+              }
 
-            function handleDocumentClick() {
-              onDocumentClick && onDocumentClick(document);
-            }
-            function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-              onDocumentDragStart && onDocumentDragStart(e, document);
-            }
-            function handleDocumentStarClick() {
-              onDocumentStarClick && onDocumentStarClick(document);
-            }
-            function handleDocumentDeleteClick() {
-              onDocumentDeleteClick && onDocumentDeleteClick(document);
-            }
-
-            // pass function so logic stays here but access occurs from child
-            // so that mobx-react triggers child render not parent render.
-            const onIsStarred = () => {
-              return section.showStarsForUser(user)
-                      ? user.isTeacher
-                        ? document.isStarredByUser(user.id)
-                        : document.isStarred
-                      : false;
-            };
-            const _handleDocumentStarClick = section.showStarsForUser(user)
-                                              ? handleDocumentStarClick
-                                              : undefined;
-            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                                              ? handleDocumentDeleteClick
-                                              : undefined;
-            return (
-              <ThumbnailDocumentItem
-                key={document.key}
-                dataTestName={`${tab}-list-items`}
-                canvasContext={tab}
-                document={document}
-                scale={scale}
-                captionText={getDocumentCaption(section, stores, document)}
-                onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred}
-                onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
-              />
-            );
-          })}
-          {section.addDocument
-            ? <NewDocumentButtonComponent onClick={handleNewDocumentClick} />
-            : null}
+              // pass function so logic stays here but access occurs from child
+              // so that mobx-react triggers child render not parent render.
+              const onIsStarred = () => {
+                return section.showStarsForUser(user)
+                        ? user.isTeacher
+                          ? document.isStarredByUser(user.id)
+                          : document.isStarred
+                        : false;
+              };
+              const _handleDocumentStarClick = section.showStarsForUser(user)
+                                                ? handleDocumentStarClick
+                                                : undefined;
+              const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+                                                ? handleDocumentDeleteClick
+                                                : undefined;
+              return (
+                <ThumbnailDocumentItem
+                  key={document.key}
+                  dataTestName={`${tab}-list-items`}
+                  canvasContext={tab}
+                  document={document}
+                  scale={scale}
+                  captionText={getDocumentCaption(section, stores, document)}
+                  onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+                  onIsStarred={onIsStarred}
+                  onDocumentStarClick={_handleDocumentStarClick}
+                  onDocumentDeleteClick={_handleDocumentDeleteClick}
+                />
+              );
+            })}
+            {section.addDocument
+              ? <NewDocumentButtonComponent onClick={handleNewDocumentClick} />
+              : null}
+          </div>
         </div>
       </div>
     );

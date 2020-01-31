@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { debounce } from "lodash";
+import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
@@ -25,8 +26,8 @@ export const UIDialogModel = types
 
 export const UIModel = types
   .model("UI", {
-    rightNavExpanded: false,
     leftNavExpanded: false,
+    rightNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeRightNavTab: ERightNavTab.kMyWork,
@@ -38,19 +39,24 @@ export const UIModel = types
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
   })
+  .volatile(self => ({
+    defaultLeftNavExpanded: false,
+    defaultRightNavExpanded: false
+  }))
   .views((self) => ({
-    get allContracted() {
-      return !self.rightNavExpanded && !self.leftNavExpanded;
+    get allDefaulted() {
+      return (self.leftNavExpanded === self.defaultLeftNavExpanded) &&
+              (self.rightNavExpanded === self.defaultRightNavExpanded);
     },
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
-    const contractAll = () => {
-      self.rightNavExpanded = false;
-      self.leftNavExpanded = false;
-    };
+    function restoreDefaultNavExpansion() {
+      self.leftNavExpanded = self.defaultLeftNavExpanded;
+      self.rightNavExpanded = self.defaultRightNavExpanded;
+    }
 
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
       const expanded = typeof override !== "undefined" ? override : !self[toggle];
@@ -121,12 +127,16 @@ export const UIModel = types
     };
 
     return {
-      contractAll,
+      restoreDefaultNavExpansion,
       alert,
       prompt,
       confirm,
       resolveDialog,
 
+      afterCreate() {
+        self.defaultLeftNavExpanded = self.leftNavExpanded;
+        self.defaultRightNavExpanded = self.rightNavExpanded;
+      },
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },
@@ -153,9 +163,12 @@ export const UIModel = types
       },
       closeDialog,
 
-      rightNavDocumentSelected(document: DocumentModelType) {
-        // class work or log
-        if (document.isPublished) {
+      rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
+        if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
+          self.problemWorkspace.setAvailableDocument(document);
+          restoreDefaultNavExpansion();
+        }
+        else if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {
             self.problemWorkspace.setComparisonDocument(document);
             self.problemWorkspace.toggleComparisonVisible({override: true});
@@ -163,11 +176,7 @@ export const UIModel = types
           else {
             alert("Please select a primary document first.", "Select Primary Document");
           }
-        }
-        // my work
-        else {
-          self.problemWorkspace.setAvailableDocument(document);
-          contractAll();
+          return;
         }
       },
       setTeacherPanelKey(key: string) {
