@@ -75,8 +75,7 @@ context('Test graph tool functionalities', function(){
 
     context('Graph Toolbar', function(){
         describe('interact with points and polygons', function(){
-            // TODO: Currently only empty strings are passing through
-            // Skipping this breaks other tests
+
             it('will select a point', function(){
                 let point=4;
                 rightNav.openRightNavTab('my-work');
@@ -101,7 +100,6 @@ context('Test graph tool functionalities', function(){
             // it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
             //
             // });
-            // TODO: Failed in the overall tests run
             it('will show and hide angles to a polygon', function(){
                 let numAngles=1;
                 rightNav.openRightNavTab('my-work');
@@ -125,7 +123,6 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.hideAngle();
                 graphToolTile.getAngleAdornment().should('not.exist')
 
-
                 //Add the angles angle for the restore test later
                 graphToolTile.selectGraphPoint(13.2,5);
                 graphToolTile.showAngle();
@@ -140,7 +137,6 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.getGraphPolygon().click({force:true});
                 graphToolTile.getRotateTool().should('be.visible');
             });
-            // TODO: trigger() failing due to two elements present
             it('will rotate a polygon', function(){
                 //not sure how to verify the rotation
                 graphToolTile.getRotateTool()
@@ -152,7 +148,6 @@ context('Test graph tool functionalities', function(){
                     .trigger('mouseup');
                 //TODO verify points are in new location
             });
-            // TODO: trigger() failing due to two elements present
             it.skip('will drag a polygon to a new location', function(){ //TODO still not working
                 graphToolTile.getGraphPolygon()
                     .trigger('mousedown', {force:true})

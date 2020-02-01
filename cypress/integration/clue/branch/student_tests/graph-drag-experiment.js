@@ -24,19 +24,45 @@ before(function(){
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
+    clueCanvas.addTileByDrag('geometry','left');
 });
 context('Test graph tool functionalities', function(){
-    it('delete text tool',()=>{
-        clueCanvas.addTile('table');
-        clueCanvas.addTile('geometry');
-        tableToolTile.getTableTile().click();
-        tableToolTile.getTableTile().parent().should('have.class', 'selected')
-        graphToolTile.getGraphTile().click();
-        graphToolTile.getGraphTile().parent().should('have.class', 'selected')  
-        textToolTile.getTextTile()
-            .trigger('mousedown')
-            // .type("I'm in the text tool")
-            // .trigger('mousedown')
-        textToolTile.getTextTile().parent().should('have.class', 'selected')    
+    it('drag a point',()=>{
+        const dataTransfer = new DataTransfer;
+        const graphUnit = 17.8;
+        let x= 15, y=0;
+        let transX=(graphToolTile.transformFromCoordinate('x', x))+(12*graphUnit),
+            transY=(graphToolTile.transformFromCoordinate('y', y))+(8.5*graphUnit);
+
+        graphToolTile.addPointToGraph(0,0)
+        graphToolTile.addPointToGraph(5,5)
+        graphToolTile.addPointToGraph(10,0)
+        graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+        graphToolTile.getGraphPolygon().should('exist')
+        graphToolTile.getGraphPoint().last()
+            .trigger('mousedown',{dataTransfer, force:true})
+            .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
+            .trigger('mouseup',{dataTransfer, force:true});
+        graphToolTile.getGraphPointCoordinates(2).should('contain', '('+x+', '+y+')');    
+    })
+    it('drag a polygon',()=>{
+        const dataTransfer = new DataTransfer;
+        const graphUnit = 17.8;
+        let x= 15, y=10;
+        let transX=(graphToolTile.transformFromCoordinate('x', x))+(12*graphUnit),
+            transY=(graphToolTile.transformFromCoordinate('y', y))+(8.5*graphUnit);
+        // graphToolTile.addPointToGraph(0,0)
+        // graphToolTile.addPointToGraph(5,5)
+        // graphToolTile.addPointToGraph(10,0)
+        // graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+        // graphToolTile.getGraphPolygon().should('exist')
+        graphToolTile.getGraphPolygon().click({force:true})
+        graphToolTile.getGraphPolygon()
+            .trigger('mousedown',{dataTransfer, force:true})
+            .trigger('dragstart',{force:true})
+            .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
+            .trigger('dragend',{force:true})
+            .trigger('drop',{force:true})
+            .trigger('mouseup',{dataTransfer, force:true})
     })
 })
