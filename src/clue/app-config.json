@@ -150,6 +150,7 @@
             "dataTestHeader": "supports-section-jit",
             "dataTestItem": "supports-list-items",
             "documentTypes": ["supportPublication"],
+            "order": "original",
             "properties": ["curricularSupport"]
           },
           {

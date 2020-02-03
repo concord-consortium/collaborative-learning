@@ -5,7 +5,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
-import { NavTabSectionModelType } from "../../models/view/right-nav";
+import { ENavTabOrder, NavTabSectionModelType } from "../../models/view/right-nav";
 import { CanvasComponent } from "../document/canvas";
 import { Icon } from "@blueprintjs/core";
 
@@ -80,7 +80,9 @@ export const DocumentsSection = observer(({ tab, section, stores, scale,
     });
 
     // Reverse the order to approximate a most-recently-used ordering.
-    sectionDocs = sectionDocs.reverse();
+    if (section.order === ENavTabOrder.kReverse) {
+      sectionDocs = sectionDocs.reverse();
+    }
 
     // filter by additional properties
     if (section.properties && section.properties.length) {
