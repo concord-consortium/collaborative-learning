@@ -73,7 +73,7 @@ class TeacherDashboard {
         return cy.get('.group-0-'+groupIndex)
     }
     getStickyNoteIcon(){
-        return '[data-test=sticky-note-icon]'
+        return cy.get('[data-test=sticky-note-icon]')
     }
     getDashboardSupportButton() {
         return cy.get('[data-test=support-icon]')
@@ -85,21 +85,30 @@ class TeacherDashboard {
         return cy.get('.four-up')
     }
     getStudentCanvas(quadrant) {
-        return cy.get(quadrant)
+        return cy.get(quadrant).siblings().last().within(() => {
+            cy.get('.four-up-overlay').eq(0) //this is only getting the first overlay of the group
+        })
     }
-    getStudentID() {
-        return cy.get('.member')
+    getStudentID(index) {
+        return cy.get('.member').eq(index)
+    }
+    getZoomedStudentID() {
+        return cy.get('.member-centered')
     }
     sendGroupNote(group,text){
-        this.getGroup(group).find(this.getStickyNoteIcon()).click();
+        this.getGroup(group).within(() => {
+            this.getStickyNoteIcon().click();
+        })
         dialog.getDialogTitle().should('contain','Message Group');
         dialog.getDialogTextInput().type(text)
         dialog.getDialogOKButton().click();
     }
     sendStudentNote(group, student, quadrant, text){
-        this.getStudentCanvas(quadrant).click();
-        this.getGroup(group).find(this.getStickyNoteIcon()).click();
-        dialog.getDialogTitle().should('contain','Message Student '+ student);
+        this.getGroup(group).within(() => {
+            this.getStudentCanvas(quadrant).click({force:true});
+            this.getStickyNoteIcon().click();
+        })
+        dialog.getDialogTitle().should('contain','Message '+ student);
         dialog.getDialogTextInput().type(text)
         dialog.getDialogOKButton().click();
     }
