@@ -399,7 +399,7 @@ export const GeometryContentModel = types
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
       const { operation } = change;
       const target = change.target.toLowerCase();
-      if (board && (target === "tablelink" || (target === "board" && operation === "update"))) {
+      if (board && (target === "tablelink" || (target === "board" && operation !== "delete"))) {
         const [xName, yName] = getBaseAxisLabels(board);
         const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
         syncAxisLabels(board,
@@ -1112,6 +1112,7 @@ export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
 interface IBoardImportProps {
   axisNames?: JXGStringPair;
+  axisLabels?: JXGStringPair;
   axisMin?: JXGCoordPair;
   axisRange?: JXGCoordPair;
   [prop: string]: any;
@@ -1162,12 +1163,14 @@ function preprocessImportFormat(snapshot: any) {
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
-    const { axisNames, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
-    const xName = axisNames?.[0] ? { xName: axisNames[0] } : undefined;
-    const yName = axisNames?.[1] ? { yName: axisNames[1] } : undefined;
+    const { axisNames, axisLabels, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
     const boundingBox = getBoardBounds(axisMin, axisRange);
     const [unitX, unitY] = getAxisUnits(axisRange);
-    changes.push(defaultGeometryBoardChange({ unitX, unitY, ...xName, ...yName, boundingBox, ...others }));
+    changes.push(defaultGeometryBoardChange({
+                  unitX, unitY,
+                  ...toObj("xName", axisNames?.[0]), ...toObj("yName", axisNames?.[1]),
+                  ...toObj("xAnnotation", axisLabels?.[0]), ...toObj("yAnnotation", axisLabels?.[1]),
+                  boundingBox, ...others }));
   }
 
   const changes: JXGChange[] = [];
