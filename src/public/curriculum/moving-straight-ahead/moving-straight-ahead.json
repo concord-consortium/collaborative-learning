@@ -2194,8 +2194,8 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [
-                        "Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
+                      "text": ["<strong>Slope = (24-12)/(12-6) =  6/12  = ½</strong>",
+                        "\nUnlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
                         "\nRecall that proportional relationships can be represented by a multiplicative comparison statement between two quantities <em>x</em> and <em>y</em>. They can also be represented by the equation y = ax. The graph of this equation is a straight line through the origin. The coefficient a in the equation <em>y = ax</em> is the <em>constant of proportionality</em>."
                       ]
                     }
@@ -2218,12 +2218,6 @@
                     },
                     "layout": {
                       "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Line with Negative Slope"
                     }
                   },
                   {
@@ -2273,12 +2267,6 @@
                     },
                     "layout": {
                       "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Line with Positive Slope"
                     }
                   },
                   {
@@ -2454,26 +2442,6 @@
                   },
                   {
                     "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [-6, -4, -2, 0, 2, 4]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [-10, -7, -4, -1, 2, 5]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 160
-                    }
-                  },
-                  {
-                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": ["1. What is the rate of change and y-intercept associated with each representation?\n2.  Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality? "]
@@ -2518,8 +2486,8 @@
         {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "MSA 4.3 Design Under Constraints",
-          "subtitle": "Revisiting Rates and Proportionality in Linear Situations",
+          "title": "MSA 4.3 Pulling it All Together",
+          "subtitle": "",
           "sections": [
             {
               "type": "initialChallenge",
@@ -2652,7 +2620,7 @@
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "MR1 - MR4",
+      "title": "MSA MR1 - MR4",
       "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
@@ -2668,7 +2636,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2685,7 +2653,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2702,7 +2670,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2719,7 +2687,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
