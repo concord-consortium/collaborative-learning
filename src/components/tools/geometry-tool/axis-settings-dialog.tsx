@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Dialog } from "@blueprintjs/core";
 import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
-import { getBaseAxisLabels, guessUserDesiredBoundingBox } from "../../../models/tools/geometry/jxg-board";
+import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox } from "../../../models/tools/geometry/jxg-board";
 import "./axis-settings-dialog.sass";
 
 interface IProps {
@@ -13,6 +13,8 @@ interface IProps {
 interface IState {
   xName: string;
   yName: string;
+  xAnnotation: string;
+  yAnnotation: string;
   xMin: string;
   yMin: string;
   xMax: string;
@@ -22,10 +24,13 @@ interface IState {
 export default class AxisSettingsDialog extends React.Component<IProps, IState> {
   public state = ((board: JXG.Board) => {
                     const [xName, yName] = getBaseAxisLabels(board);
+                    const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
                     const bBox = guessUserDesiredBoundingBox(board);
                     return {
                       xName,
                       yName,
+                      xAnnotation,
+                      yAnnotation,
                       xMin: JXG.toFixed(Math.min(0, bBox[0]), 1),
                       yMax: JXG.toFixed(Math.max(0, bBox[1]), 1),
                       xMax: JXG.toFixed(Math.max(0, bBox[2]), 1),
@@ -55,6 +60,13 @@ export default class AxisSettingsDialog extends React.Component<IProps, IState> 
             <span className="name-prompt">Name:</span>
             { this.renderOption(this.state.xName, this.handleXNameChange) }
             { this.renderOption(this.state.yName, this.handleYNameChange) }
+          </div>
+        </div>
+        <div className="nc-dialog-row">
+          <div className="nc-attribute-name-prompt">
+            <span className="annotation-prompt">Label:</span>
+            { this.renderOption(this.state.xAnnotation, this.handleXAnnotationChange) }
+            { this.renderOption(this.state.yAnnotation, this.handleYAnnotationChange) }
           </div>
         </div>
         <div className="nc-dialog-row">
@@ -128,6 +140,14 @@ export default class AxisSettingsDialog extends React.Component<IProps, IState> 
     this.setState({yName: (evt.target as HTMLInputElement).value });
   }
 
+  private handleXAnnotationChange = (evt: React.FormEvent<HTMLInputElement>) => {
+    this.setState({xAnnotation: (evt.target as HTMLInputElement).value });
+  }
+
+  private handleYAnnotationChange = (evt: React.FormEvent<HTMLInputElement>) => {
+    this.setState({yAnnotation: (evt.target as HTMLInputElement).value });
+  }
+
   private handleXMinChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({xMin: (evt.target as HTMLInputElement).value });
   }
@@ -146,13 +166,13 @@ export default class AxisSettingsDialog extends React.Component<IProps, IState> 
 
   private handleAccept = () => {
     const { onAccept } = this.props;
-    const { xName, yName } = this.state;
+    const { xName, yName, xAnnotation, yAnnotation } = this.state;
     const xMax = parseFloat(this.state.xMax);
     const yMax = parseFloat(this.state.yMax);
     const xMin = parseFloat(this.state.xMin);
     const yMin = parseFloat(this.state.yMin);
     if (isFinite(xMax) && isFinite(yMax) && isFinite(xMin) && isFinite(yMin)) {
-      onAccept({ xName, yName, xMax, yMax, xMin, yMin });
+      onAccept({ xName, yName, xAnnotation, yAnnotation, xMax, yMax, xMin, yMin });
     } else {
       this.handleCancel();
     }
