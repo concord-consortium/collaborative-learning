@@ -4,8 +4,9 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
-          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels, getBaseAxisLabels } from "./jxg-board";
+import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox, isBoard,
+          kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
+          kGeometryDefaultPixelsPerUnit, syncAxisLabels, toObj } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
           JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
@@ -31,9 +32,11 @@ export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
 export interface IAxesParams {
   xName?: string;
+  xAnnotation?: string;
   xMin: number;
   xMax: number;
   yName?: string;
+  yAnnotation?: string;
   yMin: number;
   yMax: number;
 }
@@ -137,16 +140,18 @@ export const GeometryMetadataModel = types
     get linkedTableIds() {
       return self.linkedTables.map(t => t.id);
     },
-    xAxisLabel(baseName = "x") {
+    xAxisLabel(baseName = "x", annotation = "") {
       const links = self.linkedTables
                         .map(entry => entry.x)
-                        .filter(name => name && name !== "x");
+                        .filter(name => name && (name !== "x") && (name !== baseName));
+      annotation && links.unshift(annotation);
       return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     },
-    yAxisLabel(baseName = "y") {
+    yAxisLabel(baseName = "y", annotation = "") {
       const links = self.linkedTables
                         .map(entry => entry.y)
-                        .filter(name => name && name !== "y");
+                        .filter(name => name && (name !== "y") && (name !== baseName));
+      annotation && links.unshift(annotation);
       return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     }
   }))
@@ -396,7 +401,10 @@ export const GeometryContentModel = types
       const target = change.target.toLowerCase();
       if (board && (target === "tablelink" || (target === "board" && operation === "update"))) {
         const [xName, yName] = getBaseAxisLabels(board);
-        syncAxisLabels(board, self.xAxisLabel(xName), self.yAxisLabel(yName));
+        const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
+        syncAxisLabels(board,
+                        self.xAxisLabel(xName, xAnnotation),
+                        self.yAxisLabel(yName, yAnnotation));
       }
     }
 
@@ -466,9 +474,7 @@ export const GeometryContentModel = types
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
       const { canvasWidth, canvasHeight } = board;
-      const { xName, xMin, xMax, yName, yMin, yMax } = params;
-      const xNameObj = xName ? { xName } : undefined;
-      const yNameObj = yName ? { yName } : undefined;
+      const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
       const width = canvasWidth - kAxisBuffer * 2;
       const height = canvasHeight - kAxisBuffer * 2;
       const unitX = width / (xMax - xMin);
@@ -478,7 +484,9 @@ export const GeometryContentModel = types
         target: "board",
         targetID: board.id,
         properties: { boardScale: {
-                        xMin, yMin, unitX, unitY, ...xNameObj, ...yNameObj,
+                        xMin, yMin, unitX, unitY,
+                        ...toObj("xName", xName), ...toObj("yName", yName),
+                        ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation),
                         canvasWidth: width, canvasHeight: height
                       } }
       };
