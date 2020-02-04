@@ -21,6 +21,10 @@ interface IState {
   yMax: string;
 }
 
+const kBoundsMaxChars = 6;
+const kNameMaxChars = 20;
+const kLabelMaxChars = 40;
+
 export default class AxisSettingsDialog extends React.Component<IProps, IState> {
   public state = ((board: JXG.Board) => {
                     const [xName, yName] = getBaseAxisLabels(board);
@@ -58,29 +62,29 @@ export default class AxisSettingsDialog extends React.Component<IProps, IState> 
         <div className="nc-dialog-row">
           <div className="nc-attribute-name-prompt">
             <span className="name-prompt">Name:</span>
-            { this.renderOption(this.state.xName, this.handleXNameChange) }
-            { this.renderOption(this.state.yName, this.handleYNameChange) }
+            { this.renderOption(this.state.xName, kNameMaxChars, this.handleXNameChange) }
+            { this.renderOption(this.state.yName, kNameMaxChars, this.handleYNameChange) }
           </div>
         </div>
         <div className="nc-dialog-row">
           <div className="nc-attribute-name-prompt">
             <span className="annotation-prompt">Label:</span>
-            { this.renderOption(this.state.xAnnotation, this.handleXAnnotationChange) }
-            { this.renderOption(this.state.yAnnotation, this.handleYAnnotationChange) }
+            { this.renderOption(this.state.xAnnotation, kLabelMaxChars, this.handleXAnnotationChange) }
+            { this.renderOption(this.state.yAnnotation, kLabelMaxChars, this.handleYAnnotationChange) }
           </div>
         </div>
         <div className="nc-dialog-row">
           <div className="nc-attribute-name-prompt">
             <span className="min-prompt">Min:</span>
-            { this.renderOption(this.state.xMin, this.handleXMinChange) }
-            { this.renderOption(this.state.yMin, this.handleYMinChange) }
+            { this.renderOption(this.state.xMin, kBoundsMaxChars, this.handleXMinChange) }
+            { this.renderOption(this.state.yMin, kBoundsMaxChars, this.handleYMinChange) }
           </div>
         </div>
         <div className="nc-dialog-row">
           <div className="nc-attribute-name-prompt">
             <span className="max-prompt">Max:</span>
-            { this.renderOption(this.state.xMax, this.handleXMaxChange) }
-            { this.renderOption(this.state.yMax, this.handleYMaxChange) }
+            { this.renderOption(this.state.xMax, kBoundsMaxChars, this.handleXMaxChange) }
+            { this.renderOption(this.state.yMax, kBoundsMaxChars, this.handleYMaxChange) }
           </div>
         </div>
         <div className="nc-dialog-error">
@@ -118,12 +122,13 @@ export default class AxisSettingsDialog extends React.Component<IProps, IState> 
     }
   }
 
-  private renderOption = (value: string, onChange: (evt: React.FormEvent<HTMLInputElement>) => void) => {
+  private renderOption = (value: string, maxLength: number,
+                          onChange: (evt: React.FormEvent<HTMLInputElement>) => void) => {
     return (
       <input
         className="nc-attribute-name-input pt-input"
         type="text"
-        maxLength={5}
+        maxLength={maxLength}
         value={value}
         onChange={onChange}
         onKeyDown={this.handleKeyDown}
