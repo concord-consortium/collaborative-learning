@@ -84,10 +84,16 @@ class TeacherDashboard {
     getFourUpViews() {
         return cy.get('.four-up')
     }
-    getStudentCanvas(quadrant) {
+    getStudentOverlay(quadrant) {
         return cy.get(quadrant).siblings().last().within(() => {
             cy.get('.four-up-overlay').eq(0) //this is only getting the first overlay of the group
         })
+    }
+    getStudentCanvas(quadrant) {
+        return cy.get(quadrant)
+    }
+    closeStudentCanvas(quadrant){
+        return cy.get('.four-up-overlay').click({force:true})
     }
     getStudentID(index) {
         return cy.get('.member').eq(index)
@@ -105,7 +111,7 @@ class TeacherDashboard {
     }
     sendStudentNote(group, student, quadrant, text){
         this.getGroup(group).within(() => {
-            this.getStudentCanvas(quadrant).click({force:true});
+            this.getStudentOverlay(quadrant).click({force:true});
             this.getStickyNoteIcon().click();
         })
         dialog.getDialogTitle().should('contain','Message '+ student);
@@ -117,11 +123,6 @@ class TeacherDashboard {
             if (group.students[i].tools.textTool > 0) {
                 this.getGroups().eq(group.groupIndex).within(() => {
                     this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.tableTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.table-tool')
                 })
             }
             if (group.students[i].tools.geometryTool > 0) {
@@ -176,8 +177,6 @@ class TeacherDashboard {
             cy.get('svg.starred').click({ multiple: true })
         })
     }
-
-
     // Teacher Workspace Right Nav
     getRightNavTabListHidden() {
         return cy.get('.class-work').find('.list').should('have.class', 'hidden')
@@ -185,32 +184,6 @@ class TeacherDashboard {
     getRightNavTabListShown() {
         return cy.get('.class-work').find('.shown').should('have.class', 'list')
     }
-
-    verifyWorkForGroupReadOnly(group) { //table-tool does not get the .read-only class
-        for (let i = 0; i < group.students.length; i++) {
-            if (group.students[i].tools.textTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.text-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.geometryTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.geometry-wrapper').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.drawingTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.drawing-tool').should('have.class', 'read-only')
-                })
-            }
-            if (group.students[i].tools.imageTool > 0) {
-                this.getGroups().eq(group.groupIndex).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('.image-tool').should('have.class', 'read-only')
-                })
-            }
-        }
-    }
-
     verifyPublishStatus(group){
         console.log("students: "+group.students)
         for(let i = 0; i < group.students.length; i++) {
