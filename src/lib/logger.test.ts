@@ -170,7 +170,7 @@ describe("logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      destinationDocument.content.userCopyTiles([copyTileInfo], 0);
+      destinationDocument.content.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
   });
