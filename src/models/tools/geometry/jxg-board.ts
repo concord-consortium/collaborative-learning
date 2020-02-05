@@ -149,7 +149,7 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
   const defaults = {
           keepaspectratio: true,
           showCopyright: false,
-          showNavigation: false,
+          // showNavigation: false,
           minimizeReflow: "none"
         };
   const changeProps = properties && properties as JXGProperties;
