@@ -83,7 +83,7 @@ context('single student functional test',()=>{
         it('adds text tool', function(){
             clueCanvas.addTile('text');
             textToolTile.getTextTile().should('exist');
-            textToolTile.addText('This is a smoke test')
+            textToolTile.enterText('This is a smoke test')
         });
         it('adds a graph tool', function(){
             clueCanvas.addTile('geometry');

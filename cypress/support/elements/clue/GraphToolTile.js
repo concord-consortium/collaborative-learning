@@ -3,10 +3,11 @@ const graphUnit=18.33;
 class GraphToolTile{
     transformFromCoordinate(axis, num){
         if (axis=='x'){
-            return (num+1)*graphUnit;
+            return (num+1.05)*graphUnit;
         }
         if (axis=='y'){
-            return 320-((num+1.2)*graphUnit);
+            // return 320-((num+1.2)*graphUnit);
+            return 316-((num+1.1)*graphUnit);
         }
     }
     transformToCoordinate(axis, num){
@@ -18,6 +19,9 @@ class GraphToolTile{
         }
     }
     getGraphTile(){
+        return cy.get('.canvas-area .geometry-tool');
+    }
+    getGraph(){
         return cy.get('.canvas-area .geometry-content');
     }
     getGraphAxisLabelId(axis){
@@ -53,23 +57,18 @@ class GraphToolTile{
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
-    getGraphPointAtCoordinate(x,y) {
-        let transX=this.transformFromCoordinate('x', x),
-            transY=this.transformFromCoordinate('y', y);
-        this.getGraphTile().last().click(transX,transY);
-    }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
         transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last()
+        this.getGraph().last()
             .trigger('mouseover',transX,transY);
     }
     selectGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last().click(transX,transY);
+        this.getGraph().last().click(transX,transY), {force:true};
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -85,7 +84,7 @@ class GraphToolTile{
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraphTile().last().click(transX,transY, {force:true});
+        this.getGraph().last().click(transX,transY, {force:true});
     }
     getRotateTool(){
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');
