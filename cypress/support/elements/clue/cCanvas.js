@@ -189,6 +189,7 @@ class ClueCanvas {
         switch (tile) {
             case 'text':
                 textToolTile.getTextTile().last().focus();
+                cy.get('.text-tool-wrapper').parent().should('have.class','selected')
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({ force: true });
