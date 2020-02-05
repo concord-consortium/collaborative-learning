@@ -258,12 +258,6 @@ export const GeometryContentModel = types
     },
     isLinkedToTable(tableId: string) {
       return self.metadata.isLinkedToTable(tableId);
-    },
-    get xAxisLabel() {
-      return self.metadata.xAxisLabel;
-    },
-    get yAxisLabel() {
-      return self.metadata.yAxisLabel;
     }
   }))
   .views(self => ({
@@ -403,8 +397,8 @@ export const GeometryContentModel = types
         const [xName, yName] = getBaseAxisLabels(board);
         const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
         syncAxisLabels(board,
-                        self.xAxisLabel(xName, xAnnotation),
-                        self.yAxisLabel(yName, yAnnotation));
+                        self.metadata.xAxisLabel(xName, xAnnotation),
+                        self.metadata.yAxisLabel(yName, yAnnotation));
       }
     }
 
