@@ -131,7 +131,9 @@ export class ToolbarComponent extends BaseComponent<IProps, {}> {
     });
   }
 
-  private handleDragNewToolTile(tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) {
+  private handleDragNewToolTile = (tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) => {
+    // remove hover-insert highlight when we start a tile drag
+    this.removeDropRowHighlight();
     e.dataTransfer.setData(kDragTileCreate, tool);
   }
 }
