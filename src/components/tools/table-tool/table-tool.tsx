@@ -127,7 +127,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
             unlinkGeometry: true
           };
     const linkIndex = getLinkedTableIndex(model.id);
-    const linkClass = linkIndex >= 0 ? `is-linked link-color-${linkIndex}` : "";
+    const linkClass = metadata.isLinked ? `is-linked link-color-${linkIndex}` : "";
     return (
       <div className={`table-tool ${linkClass}`}
           ref={this.domRef}
