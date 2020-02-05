@@ -2,6 +2,7 @@
 
 .left-nav
   position: fixed
+  z-index: 3
   top: $header-height + $nav-expanded-peek
   left: -($left-nav-expanded-width - $left-nav-contracted-width - $nav-expanded-peek)
   width: $left-nav-expanded-width
@@ -33,12 +34,12 @@
       &.active
         background: $color4-selected
         border-left: $border-width solid $color4-selected
-        z-index: 1
+        z-index: 4
 
       &:hover
         background: $color4-hover
         border-left: $border-width solid $color4-hover
-        z-index: 2
+        z-index: 5
 
   .expanded-area
     position: relative
