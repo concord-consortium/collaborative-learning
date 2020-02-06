@@ -2,7 +2,7 @@ import * as React from "react";
 import NewColumnDialog from "./new-column-dialog";
 import RenameColumnDialog from "./rename-column-dialog";
 import { IDataSet } from "../../../models/data/data-set";
-import { GridApi } from "ag-grid-community";
+import { GridApi } from "@ag-grid-community/core";
 import { Icon, Menu, Popover, Position, MenuDivider, MenuItem, Alert, Intent } from "@blueprintjs/core";
 import { listenForTableEvents } from "../../../models/tools/table/table-events";
 import UpdateExpressionDialog from "./update-expression-dialog";

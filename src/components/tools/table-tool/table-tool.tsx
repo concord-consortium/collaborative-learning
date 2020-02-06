@@ -7,7 +7,7 @@ import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
 import { IToolTileProps } from "../tool-tile";
 import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
-        } from "ag-grid-community";
+        } from "@ag-grid-community/core";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { addTable, getLinkedTableIndex } from "../../../models/tools/table-links";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,

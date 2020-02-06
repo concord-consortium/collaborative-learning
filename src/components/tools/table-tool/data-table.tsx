@@ -8,16 +8,17 @@ import {
 } from "../../../models/data/data-set";
 import { IAttribute } from "../../../models/data/attribute";
 import { emitTableEvent } from "../../../models/tools/table/table-events";
-import { AgGridReact } from "ag-grid-react";
+import { AgGridReact } from "@ag-grid-community/react";
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import {
   CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column, ColumnApi,
   GridApi, GridReadyEvent, ICellEditorComp, SelectionChangedEvent, RowNode, SortChangedEvent,
-  TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams, CellComp
-} from "ag-grid-community";
-import { RowDataTransaction } from "ag-grid-community/dist/lib/rowModels/clientSide/clientSideRowModel";
+  TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams
+} from "@ag-grid-community/core";
+import { RowDataTransaction } from "@ag-grid-community/core/dist/es6/interfaces/rowDataTransaction";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
-import "ag-grid-community/dist/styles/ag-grid.css";
-import "ag-grid-community/dist/styles/ag-theme-fresh.css";
+import "@ag-grid-community/core/dist/styles/ag-grid.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 
 import "./data-table.css";
 
@@ -857,6 +858,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         onDragStart={this.handleDragStart}
         onKeyUp={this.handleKeyUp}>
         <AgGridReact
+          modules={[ClientSideRowModelModule]}
           columnDefs={this.gridColumnDefs}
           getRowNodeId={this.getRowNodeId}
           debug={false}
