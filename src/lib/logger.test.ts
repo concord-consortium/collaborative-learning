@@ -68,10 +68,10 @@ describe("logger", () => {
         expect(request.event).toBe("CREATE_TILE");
         expect(request.parameters.objectId).toBe(tile.id);
         expect(request.parameters.objectType).toBe("Text");
-        expect(request.parameters.serializedObject).toEqual({
+        expect(request.parameters.serializedObject).toEqual(JSON.stringify({
           type: "Text",
           text: ""
-        });
+        }));
         expect(request.parameters.documentKey).toBe(undefined);
 
         done();
@@ -98,10 +98,10 @@ describe("logger", () => {
         expect(request.event).toBe("CREATE_TILE");
         // expect(request.parameters.objectId).toBe(tile.id);
         expect(request.parameters.objectType).toBe("Text");
-        expect(request.parameters.serializedObject).toEqual({
+        expect(request.parameters.serializedObject).toEqual(JSON.stringify({
           type: "Text",
           text: ""
-        });
+        }));
         expect(request.parameters.documentKey).toBe("source-document");
         expect(request.parameters.documentType).toBe("problem");
 
@@ -144,10 +144,10 @@ describe("logger", () => {
         expect(request.event).toBe("COPY_TILE");
         // expect(request.parameters.objectId).toBe(tile.id);
         expect(request.parameters.objectType).toBe("Text");
-        expect(request.parameters.serializedObject).toEqual({
+        expect(request.parameters.serializedObject).toEqual(JSON.stringify({
           type: "Text",
           text: "test"
-        });
+        }));
         expect(request.parameters.documentKey).toBe("destination-document");
         expect(request.parameters.documentType).toBe("problem");
         expect(request.parameters.objectId).not.toBe(tileToCopy.id);

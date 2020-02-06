@@ -133,7 +133,7 @@ export class Logger {
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
-        serializedObject: getSnapshot(tile).content,
+        serializedObject: JSON.stringify(getSnapshot(tile).content),
         documentKey: document.key,
         documentType: document.type
       };
@@ -147,7 +147,7 @@ export class Logger {
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {}
+          sourceDocumentProperties: JSON.stringify(sourceDocument.properties || {})
         };
       }
     }
@@ -161,7 +161,7 @@ export class Logger {
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
-      documentProperties: document.properties && document.properties.toJSON() || {},
+      documentProperties: JSON.stringify(document.properties?.toJSON() || {}),
       documentVisibility: document.visibility
     };
     Logger.log(event, parameters);
