@@ -1,6 +1,9 @@
 #!/bin/bash
 
 declare -a BRANCH_ARRAY=("master" "production" "dataflow" "dataflow_production")
+group=$1
+
+echo "group is $group"
 
 npm run start &
 wait-on http://localhost:8080
@@ -10,7 +13,7 @@ if [[ "$TRAVIS_COMMIT_MESSAGE" == *"[dev-build]"* ]]; then
     npm run test:cypress:smoke
 elif !(echo $BRANCH_ARRAY | grep -q $TRAVIS_BRANCH); then
     echo "elif TRAVIS_BRANCH=$TRAVIS_BRANCH"
-    npm run test:cypress:branch
+    npm run test:cypress:branch -- $group
 else 
     echo "else TRAVIS_BRANCH=$TRAVIS_BRANCH"
     npm run test:cypress:ci
