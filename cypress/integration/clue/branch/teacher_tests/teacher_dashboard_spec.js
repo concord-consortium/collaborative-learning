@@ -124,7 +124,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     dashboard.getGroupName().eq(groupIndex).should('contain', 'Group ' + groupName)
                     dashboard.getGroups().eq(groupIndex).within(() => {
                         //for (let i = 0; i < groups[tempGroupIndex].students.length; i++) {
-                        dashboard.getStudentID().eq(studentIndex).should('contain', studentID)
+                        dashboard.getStudentID(studentIndex).should('contain', studentID)
                         //}
                     })
                 })
@@ -180,9 +180,21 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     let student = group.students[studentIndex]
 
                     dashboard.getGroups().eq(group.groupIndex).within(() => {
-                        dashboard.getStudentCanvas(student.quadrant).click({ force: true })
+                        dashboard.getStudentOverlay(student.quadrant).click({ force: true })
+                        dashboard.getZoomedStudentID(student.index).should('contain', 'Student 1')
+                        dashboard.closeStudentCanvas(student.quadrant) //return to original state
                     })
 
+                })
+            })
+            it('verify message button opens message dialog to student',function(){
+                let group = 1,
+                studentName = "Student 1",
+                quadrant = ".north-west",
+                textToStudent = "This is a note to clue testing1"
+
+                cy.get('@clueData').then((clueData) => {
+                    dashboard.sendStudentNote(group-1,studentName,quadrant,textToStudent);
                 })
             })
             it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
