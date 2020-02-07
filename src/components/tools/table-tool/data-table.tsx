@@ -265,8 +265,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       width: kRowIndexColumnWidth,
       // Note that pinned columns can't be grouped with unpinned columns.
       // Given that we're using grouped columns to present the table title, we can
-      // either pin the index column and have the title cover the remaining rows,
-      // or not pin the index column and have the title cover all the rows.
+      // either pin the index column and have the title cover the remaining columns,
+      // or not pin the index column and have the title cover all the columns.
       // Since we currently only support two columns and horizontal scrolling is
       // rare, we don't pin the column for now, but this can be revisited.
       // pinned: "left",

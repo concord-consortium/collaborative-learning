@@ -542,9 +542,9 @@ export function convertImportToChanges(snapshot: any) {
   // create columns
   const changes: ITableChange[] = [];
   const tableName = snapshot?.name != null ? { name: snapshot.name } : undefined;
-  const columnProps = columns.map((col: any) => ({ id: uniqueId(), name: col.name, ...tableName }));
+  const columnProps = columns.map((col: any) => ({ id: uniqueId(), name: col.name }));
   if (columnProps.length) {
-    changes.push({ action: "create", target: "columns", props: { columns: columnProps } });
+    changes.push({ action: "create", target: "table", props: { columns: columnProps, ...tableName } });
   }
 
   // create rows
