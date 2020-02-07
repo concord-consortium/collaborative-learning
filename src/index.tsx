@@ -1,6 +1,6 @@
 import { Provider } from "mobx-react";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React from "react";
+import ReactDOM from "react-dom";
 import { appConfigSpec, createStores } from "./app-config";
 import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -11,7 +11,7 @@ import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
-import * as PackageJson from "../package.json";
+import PackageJson from "../package.json";
 import { setLivelynessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;

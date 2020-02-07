@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
 import { LogEventName, LogEventMethod, Logger } from "../lib/logger";

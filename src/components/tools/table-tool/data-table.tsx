@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
 import { IMenuItemFlags, IProps as ITableHeaderMenuProps, TableHeaderMenu } from "./table-header-menu";

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { inject, observer } from "mobx-react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
@@ -33,7 +33,7 @@ import { assign, castArray, debounce, each, filter, find, keys as _keys, throttl
         size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
         handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import { CollapsibleSectionHeader } from "./collapsible-section-header";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";

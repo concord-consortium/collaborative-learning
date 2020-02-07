@@ -4,7 +4,7 @@ import { isPoint } from "./jxg-point";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 import { assign, each, filter, find, values } from "lodash";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 
 export const isPolygon = (v: any) => v instanceof JXG.Polygon;
 

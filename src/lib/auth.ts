@@ -1,5 +1,5 @@
-import * as jwt from "jsonwebtoken";
-import * as superagent from "superagent";
+import jwt from "jsonwebtoken";
+import superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";

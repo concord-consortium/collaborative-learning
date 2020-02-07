@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Button, Dialog, RadioGroup, Radio } from "@blueprintjs/core";
 import { ESegmentLabelOption } from "../../../models/tools/geometry/jxg-changes";
 import { getPolygonEdge } from "../../../models/tools/geometry/jxg-polygon";

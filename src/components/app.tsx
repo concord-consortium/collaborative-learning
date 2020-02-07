@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { Alert } from "@blueprintjs/core";
 import { authenticate } from "../lib/auth";
 import { AppContentContainerComponent } from "./app-content";

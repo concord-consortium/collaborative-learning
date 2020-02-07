@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import NewColumnDialog from "./new-column-dialog";
 import RenameColumnDialog from "./rename-column-dialog";
 import { SetTableNameDialog } from "./set-table-name-dialog";

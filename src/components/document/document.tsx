@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
-import * as FileSaver from "file-saver";
+import React from "react";
+import FileSaver from "file-saver";
 
 import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
