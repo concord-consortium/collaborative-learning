@@ -7,7 +7,7 @@ import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
 import { IToolTileProps } from "../tool-tile";
 import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
-        } from "ag-grid-community";
+        } from "@ag-grid-community/core";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
 import { addTable, getLinkedTableIndex } from "../../../models/tools/table-links";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
@@ -69,10 +69,10 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
       getSelectionInfo: () => "",
       setSelectionHighlight: () => { /* nop */ },
       isLinked: () => {
-        return metadata.linkCount > 0;
+        return metadata.isLinked;
       },
       getLinkIndex: (index?: number) => {
-        return metadata.linkCount > 0
+        return metadata.isLinked
                 ? getLinkedTableIndex(this.modelId)
                 : -1;
       }
@@ -214,11 +214,11 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     }
 
     // table tile should have keyboard focus -- requires tabIndex
-    this.domRef.current && this.domRef.current.focus();
+    this.domRef.current?.focus();
 
     // clicking on table background clears selection
-    this.gridApi && this.gridApi.deselectAll();
-    this.gridApi && this.gridApi.refreshCells();
+    this.gridApi?.deselectAll();
+    this.gridApi?.refreshCells();
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
