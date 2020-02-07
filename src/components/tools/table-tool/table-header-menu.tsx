@@ -1,6 +1,7 @@
 import * as React from "react";
 import NewColumnDialog from "./new-column-dialog";
 import RenameColumnDialog from "./rename-column-dialog";
+import { SetTableNameDialog } from "./set-table-name-dialog";
 import { IDataSet } from "../../../models/data/data-set";
 import { GridApi } from "@ag-grid-community/core";
 import { Icon, Menu, Popover, Position, MenuDivider, MenuItem, Alert, Intent } from "@blueprintjs/core";
@@ -11,19 +12,21 @@ export interface IMenuItemFlags {
   addAttribute?: boolean;
   addCase?: boolean;
   addRemoveDivider?: boolean;
+  setTableName?: boolean;
   renameAttribute?: boolean;
   removeAttribute?: boolean;
   removeCases?: boolean;
   unlinkGeometry?: boolean;
 }
 
-interface IProps {
+export interface IProps {
   api: GridApi;
   expressions?: Map<string, string>;
   rawExpressions?: Map<string, string>;
   dataSet?: IDataSet;
   readOnly?: boolean;
   itemFlags?: IMenuItemFlags;
+  onSetTableName: (name: string) => void;
   onNewAttribute: (name: string) => void;
   onRenameAttribute: (id: string, name: string) => void;
   onUpdateExpression: (id: string, expression: string, rawExpression: string) => void;
@@ -36,31 +39,24 @@ interface IProps {
 }
 
 interface IState {
-  isNewAttributeDialogOpen: boolean;
-  isRenameAttributeDialogOpen: boolean;
-  renameAttributeId: string;
-  renameAttributeName: string;
+  isNewAttributeDialogOpen?: boolean;
+  isTableNameDialogOpen?: boolean;
+  tableName?: string;
+  isRenameAttributeDialogOpen?: boolean;
+  renameAttributeId?: string;
+  renameAttributeName?: string;
 
-  isUpdateExpressionDialogOpen: boolean;
-  updateExpressionAttributeId: string;
-  showInvalidVariableAlert: boolean;
+  isUpdateExpressionDialogOpen?: boolean;
+  updateExpressionAttributeId?: string;
+  showInvalidVariableAlert?: boolean;
 }
 
 export class TableHeaderMenu extends React.Component<IProps, IState> {
 
+  public state: IState = {};
+
   constructor(props: IProps) {
     super(props);
-
-    this.state = {
-      isNewAttributeDialogOpen: false,
-      isRenameAttributeDialogOpen: false,
-      renameAttributeId: "",
-      renameAttributeName: "",
-
-      isUpdateExpressionDialogOpen: false,
-      updateExpressionAttributeId: "",
-      showInvalidVariableAlert: false
-    };
 
     listenForTableEvents((event) => {
       switch (event.type) {
@@ -106,8 +102,13 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         >
           <Icon icon="menu" />
         </Popover>
+        <SetTableNameDialog
+          isOpen={!!this.state.isTableNameDialogOpen}
+          tableName={this.props.dataSet?.name}
+          onSetTableName={this.props.onSetTableName}
+          onClose={this.handleCloseTableNameDialog} />
         <NewColumnDialog
-          isOpen={this.state.isNewAttributeDialogOpen}
+          isOpen={!!this.state.isNewAttributeDialogOpen}
           onNewAttribute={this.props.onNewAttribute}
           onClose={this.closeNewAttributeDialog}
         />
@@ -121,13 +122,13 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
   private renderRenameColumnDialog() {
     const { expressions } = this.props;
     const nonNullExpression = !!expressions && Array.from(expressions.values()).some(expr => !!expr);
-    return this.state.isRenameAttributeDialogOpen
+    return this.state.isRenameAttributeDialogOpen && this.state.renameAttributeId
             ? <RenameColumnDialog
                 id={this.state.renameAttributeId}
-                isOpen={this.state.isRenameAttributeDialogOpen}
+                isOpen={!!this.state.isRenameAttributeDialogOpen}
                 onRenameAttribute={this.handleRenameAttributeCallback}
                 onClose={this.closeRenameAttributeDialog}
-                name={this.state.renameAttributeName}
+                name={this.state.renameAttributeName || ""}
                 columnNameValidator={this.buildColumnNameValidator(nonNullExpression)}
               />
             : null;
@@ -174,6 +175,14 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
       renameAttributeId: attrID,
       renameAttributeName: name
     });
+  }
+
+  private handleSetTableName = () => {
+    this.setState({ isTableNameDialogOpen: true });
+  }
+
+  private handleCloseTableNameDialog = () => {
+    this.setState({ isTableNameDialogOpen: false });
   }
 
   private closeUpdateExpressionDialog = () => {
@@ -295,9 +304,14 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
                           onClick={this.handleNewCase}
                         />
                       : null;
-    const addRemoveDivider = itemFlags.addRemoveDivider !== false
-                              ? <MenuDivider />
-                              : null;
+    const addRemoveDivider = itemFlags.addRemoveDivider && <MenuDivider />;
+    const setTableName = itemFlags.setTableName &&
+                          <MenuItem
+                            icon="label"
+                            text={`Set Title...`}
+                            data-test={`set-title-menu-item`}
+                            disabled={!this.props.dataSet}
+                            onClick={this.handleSetTableName} />;
     const renameColumn = itemFlags.renameAttribute !== false
                           ? <MenuItem
                               icon="text-highlight"
@@ -353,6 +367,7 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
         {addColumn}
         {addRow}
         {addRemoveDivider}
+        {setTableName}
         {renameColumn}
         {removeColumn}
         {removeRows}

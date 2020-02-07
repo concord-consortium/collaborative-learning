@@ -82,7 +82,7 @@ interface IToolTileBaseProps {
   model: ToolTileModelType;
   readOnly?: boolean;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  onRequestRowHeight: (tileId: string, height: number) => void;
+  onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
 export interface IToolTileProps extends IToolTileBaseProps {
