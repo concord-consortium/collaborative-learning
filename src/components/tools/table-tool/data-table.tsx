@@ -115,7 +115,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private gridColumnApi?: ColumnApi | null;
 
   private gridColumnDefs: ColDefArray = [];
-  private gridRowData: Array<IGridRow | undefined> = [];
+  private gridRowData: IGridRow[] = [];
   private components = this.props.cellEditorComponent
     ? { clientCellEditor: this.props.cellEditorComponent }
     : undefined;

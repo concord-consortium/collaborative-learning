@@ -191,9 +191,10 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
 }
 
 export const polygonChangeAgent: JXGChangeAgent = {
-  create: (board: JXG.Board, change: JXGChange) => {
+  create: (board, change) => {
+    const _board = board as JXG.Board;
     const parents = (change.parents || [])
-                      .map(id => board.objects[id as string])
+                      .map(id => _board.objects[id as string])
                       .filter(pt => pt != null);
     const props = assign({
       id: uuid(),
@@ -201,7 +202,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
       clientFillColor: "#00FF00",
       clientSelectedFillColor: "#00FF00"
     }, change.properties);
-    const poly = parents.length ? board.create("polygon", parents, props) : undefined;
+    const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
     if (poly) {
       const segments = getPolygonEdges(poly);
       segments.forEach(seg => {
@@ -213,7 +214,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
     return poly;
   },
 
-  update: (board: JXG.Board, change: JXGChange) => {
+  update: (board, change) => {
     if ((change.target === "polygon") && change.parents &&
         !Array.isArray(change.properties) && change.properties?.labelOption) {
       updateSegmentLabelOption(board, change);

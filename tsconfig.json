@@ -2,15 +2,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "sourceMap": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
     "target": "es6",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "allowJs": true,
     "resolveJsonModule": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
     "skipLibCheck": true,
     "jsx": "react"
   },

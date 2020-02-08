@@ -69,21 +69,22 @@ export function updateVertexAnglesFromObjects(objects: JXG.GeometryElement[]) {
 }
 
 export const vertexAngleChangeAgent: JXGChangeAgent = {
-  create: (board: JXG.Board, change: JXGChange) => {
+  create: (board, change) => {
+    const _board = board as JXG.Board;
     const parents = (change.parents || [])
-                      .map(id => board.objects[id as string])
+                      .map(id => _board.objects[id as string])
                       .filter(pt => pt != null);
     // cf. http://jsxgraph.uni-bayreuth.de/wiki/index.php/Positioning_of_labels
     const overrides: any = { name() { return `${this.Value ? JXG.toFixed(this.Value() * 180 / Math.PI, 0) : ""}°`; },
                               clientType: "vertexAngle" };
     const props = assign({ id: uuid(), radius: 1 }, change.properties, overrides);
-    return parents.length === 3 ? board.create("angle", parents, props) : undefined;
+    return parents.length === 3 ? _board.create("angle", parents, props) : undefined;
   },
 
   // update can be handled generically
   update: objectChangeAgent.update,
 
-  delete: (board: JXG.Board, change: JXGChange) => {
+  delete: (board, change) => {
     const ids = castArray(change.targetID);
 
     // Identify dots used to define the angle, which would otherwise

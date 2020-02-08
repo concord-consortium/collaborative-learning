@@ -15,7 +15,7 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
   panels: IPanelGroupSpec;
   current: string;
-  onPanelChange: (panel: string) => void;
+  onPanelChange: (panelId: EPanelId) => void;
   showGroup: boolean;
 }
 

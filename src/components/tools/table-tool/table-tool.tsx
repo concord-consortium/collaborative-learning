@@ -206,7 +206,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     selection.setSelected(this.props.model.id, nodes.map(n => n.id));
   }
 
-  private handleMouseDown: EventListener = (e: MouseEvent) => {
+  private handleMouseDown = (e: MouseEvent) => {
     const target: HTMLElement = e.target as HTMLElement;
     const targetClasses = target && target.className;
     // don't mess with focus if this looks like something ag-grid has handled
@@ -368,9 +368,9 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     });
   }
 
-  private handleAddCanonicalCases = (newCases: ICase[]) => {
-    const validateCase = (aCase: ICase) => {
-      const newCase: ICase = { __id__: uniqueId() };
+  private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
+    const validateCase = (aCase: ICaseCreation) => {
+      const newCase: ICaseCreation = { __id__: uniqueId() };
       if (this.getContent().isLinked) {
         // validate linkable values
         this.state.dataSet.attributes.forEach(attr => {
@@ -385,8 +385,8 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
     const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
     const tableActionLinks = this.getTableActionLinks();
-    this.getContent().addCanonicalCases(cases as ICaseCreation[], firstSelectedRowId, tableActionLinks);
-    const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
+    this.getContent().addCanonicalCases(cases, firstSelectedRowId, tableActionLinks);
+    const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__ as string));
     const props = cases.map(aCase => ({ id: aCase.__id__ }));
     const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
     this.getContent().metadata.linkedGeometries.forEach(id => {

@@ -7,7 +7,8 @@ import uuid from "uuid/v4";
 export const isImage = (v: any) => v instanceof JXG.Image;
 
 export const imageChangeAgent: JXGChangeAgent = {
-  create: (board: JXG.Board, change: JXGChange) => {
+  create: (board, change) => {
+    const _board = board as JXG.Board;
     const parents = (change.parents || []).slice();
     const url = parents && parents[0] as string || "";
     const imageEntry = url && gImageMap.getCachedImage(url);
@@ -15,7 +16,7 @@ export const imageChangeAgent: JXGChangeAgent = {
     parents[0] = displayUrl;
     const props = assign({ id: uuid(), fixed: true }, change.properties);
     return parents && parents.length >= 3
-            ? board.create("image", parents, props)
+            ? _board.create("image", parents, props)
             : undefined;
   },
 

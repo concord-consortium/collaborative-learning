@@ -723,11 +723,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ axisSettingsOpen: true });
   }
 
-  private handleUpdateComment = (text: string, commentId: string) => {
+  private handleUpdateComment = (text: string, commentId?: string) => {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateObjects(board, [commentId], { text });
+      content.updateObjects(board, [commentId || ""], { text });
     }
     this.setState({ selectedComment: undefined });
   }
@@ -1345,7 +1345,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // synchronize initial selection
     const content = this.getContent();
     content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
-      .forEach((pt: JXG.Point) => {
+      .forEach(pt => {
         if (content.isSelected(pt.id)) {
           setElementColor(board, pt.id, true);
         }

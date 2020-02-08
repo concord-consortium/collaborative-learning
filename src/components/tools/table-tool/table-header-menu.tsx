@@ -169,11 +169,11 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     this.closeRenameAttributeDialog();
   }
 
-  private handleRenameAttribute = (evt: React.MouseEvent<HTMLElement>, attrID: string, name: string) => {
+  private handleRenameAttribute = (evt: React.MouseEvent<HTMLElement>, attrID: string, name?: string) => {
     this.setState({
       isRenameAttributeDialogOpen: true,
       renameAttributeId: attrID,
-      renameAttributeName: name
+      renameAttributeName: name || ""
     });
   }
 

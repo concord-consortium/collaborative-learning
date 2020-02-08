@@ -18,8 +18,8 @@ interface IProps extends IBaseProps {
 
 interface IButtonProps {
   config: ToolButtonConfig;
-  onClick: (e: React.MouseEvent<HTMLDivElement>, name: string) => void;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, name: string) => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>, name: DocumentTool) => void;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, name: DocumentTool) => void;
   onShowDropHighlight: () => void;
   onHideDropHighlight: () => void;
 }
@@ -27,11 +27,11 @@ interface IButtonProps {
 const ToolButtonComponent = (props: IButtonProps) => {
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    return props.onClick && props.onClick(e, props.config.name);
+    return props.onClick && props.onClick(e, props.config.name as DocumentTool);
   };
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    return props.onDragStart && props.onDragStart(e, props.config.name);
+    return props.onDragStart && props.onDragStart(e, props.config.name as DocumentTool);
   };
 
   return (
