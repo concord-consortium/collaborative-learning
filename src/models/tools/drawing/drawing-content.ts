@@ -81,11 +81,22 @@ interface DrawingToolChangeLoggedEvent extends DrawingToolChange {
   properties?: string[];
 }
 
-export const StampModel = types.model("Stamp", {
-  url: types.string,
-  width: types.number,
-  height: types.number
-});
+export const StampModel = types
+  .model("Stamp", {
+    url: types.string,
+    width: types.number,
+    height: types.number
+  })
+  .preProcessSnapshot(snapshot => {
+    // The set of available stamps is saved with each drawing tool instance (why?).
+    // Thus, we have to convert from pre-webpack/assets reform paths to curriculum
+    // paths on loading documents.
+    const newUrl = snapshot?.url?.replace("assets/tools/drawing-tool/stamps",
+                                          "curriculum/moving-straight-ahead/stamps");
+    return newUrl && (newUrl !== snapshot?.url)
+            ? { ...snapshot, ...{ url: newUrl } }
+            : snapshot;
+  });
 export type StampModelType = Instance<typeof StampModel>;
 
 // track selection in metadata object so it is not saved to firebase but
