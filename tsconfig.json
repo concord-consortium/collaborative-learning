@@ -4,11 +4,13 @@
     "sourceMap": true,
     "target": "es6",
     "esModuleInterop": true,
+    "importHelpers": true,
     "moduleResolution": "node",
     "allowJs": true,
     "resolveJsonModule": true,
     "strict": true,
     "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "jsx": "react"
