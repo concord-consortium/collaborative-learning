@@ -235,8 +235,11 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   store(url: string) {
-    // convert from prior path to new path
-    const _url = url.replace("assets/curriculum", "curriculum");
+                    // convert original curriculum image paths
+    const _url = url.replace("assets/curriculum", "curriculum")
+                    // convert original drawing tool stamp paths
+                    .replace("assets/tools/drawing-tool/stamps",
+                             "curriculum/moving-straight-ahead/stamps");
     return Promise.resolve({ contentUrl: _url, displayUrl: _url });
   }
 };

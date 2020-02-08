@@ -53,32 +53,32 @@
   },
   "defaultStamps": [
     {
-      "url": "assets/tools/drawing-tool/stamps/coin.png",
+      "url": "curriculum/moving-straight-ahead/stamps/coin.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/pouch.png",
+      "url": "curriculum/moving-straight-ahead/stamps/pouch.png",
       "width": 30,
       "height": 37
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/plus.png",
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/equals.png",
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/lparen.png",
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/rparen.png",
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
       "width": 25,
       "height": 25
     }
