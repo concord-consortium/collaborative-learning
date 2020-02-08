@@ -1,7 +1,7 @@
 import * as React from "react";
 import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
-import { IMenuItemFlags, TableHeaderMenu } from "./table-header-menu";
+import { IMenuItemFlags, IProps as ITableHeaderMenuProps, TableHeaderMenu } from "./table-header-menu";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet,
   ICase, ICaseCreation, IDataSet
@@ -11,9 +11,9 @@ import { emitTableEvent } from "../../../models/tools/table/table-events";
 import { AgGridReact } from "@ag-grid-community/react";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import {
-  CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, Column, ColumnApi,
-  GridApi, GridReadyEvent, ICellEditorComp, SelectionChangedEvent, RowNode, SortChangedEvent,
-  TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams
+  CellEditingStartedEvent, CellEditingStoppedEvent, CellPosition, ColDef, ColGroupDef,
+  Column, ColumnApi, GridApi, GridReadyEvent, ICellEditorComp, SelectionChangedEvent, RowNode,
+  SortChangedEvent, TabToNextCellParams, ValueGetterParams, ValueFormatterParams, ValueSetterParams
 } from "@ag-grid-community/core";
 import { RowDataTransaction } from "@ag-grid-community/core/dist/es6/interfaces/rowDataTransaction";
 import { assign, cloneDeep, findIndex, isEqual, sortedIndexBy } from "lodash";
@@ -21,6 +21,8 @@ import "@ag-grid-community/core/dist/styles/ag-grid.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 
 import "./data-table.css";
+
+type ColDefArray = Array<ColDef | ColGroupDef>;
 
 export const TableComponentSortModelData = types.model("TableComponentSortModelData", {
   colId: types.string,
@@ -60,6 +62,7 @@ interface IProps {
   tableComponentData?: ITableComponentData | null;
   onGridReady?: (gridReadyParams: GridReadyEvent) => void;
   onRowSelectionChange?: (e: SelectionChangedEvent) => void;
+  onSetTableName?: (name: string) => void;
   onSetAttributeName?: (colId: string, name: string) => void;
   onSetExpression?: (colId: string, expression: string, rawExpression: string) => void;
   onAddCanonicalCases?: (cases: ICaseCreation[], beforeID?: string | string[]) => void;
@@ -101,14 +104,17 @@ interface ICellIDs {
 }
 
 // default widths for sample data sets
-const defaultWidth = 80;
+const kRowIndexColumnWidth = 50;
+const kDefaultColumnMinWidth = 65;
+const kDefaultColumnWidth = 80;
+const kTableNameMargins = 30;
 
 export default class DataTableComponent extends React.Component<IProps, IState> {
 
   private gridApi?: GridApi | null;
   private gridColumnApi?: ColumnApi | null;
 
-  private gridColumnDefs: ColDef[] = [];
+  private gridColumnDefs: ColDefArray = [];
   private gridRowData: Array<IGridRow | undefined> = [];
   private components = this.props.cellEditorComponent
     ? { clientCellEditor: this.props.cellEditorComponent }
@@ -126,6 +132,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   private gridElement: HTMLDivElement | null;
   private headerElement: HTMLDivElement | null;
+  private headerRulerElement: HTMLDivElement | null;
 
   private sortedRowNodes: RowNode[];
 
@@ -155,12 +162,8 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     this.gridApi = gridReadyParams.api;
     this.gridColumnApi = gridReadyParams.columnApi;
 
-    if (this.gridColumnApi && this.props.autoSizeColumns) {
-      const allColumnIds: string[] = [];
-      this.gridColumnApi.getAllColumns().forEach(column => {
-        allColumnIds.push((column as any).colId);
-      });
-      this.gridColumnApi.autoSizeColumns(allColumnIds);
+    if (this.props.autoSizeColumns) {
+      this.gridColumnApi?.autoSizeAllColumns();
     }
 
     const { tableComponentData: caseTableComponentData } = this.props;
@@ -199,6 +202,14 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         dataSet: this.props.dataSet,
         readOnly,
         itemFlags,
+        onSetTableName: (name: string) => {
+          if (this.props.onSetTableName) {
+            this.props.onSetTableName(name);
+          }
+          else {
+            this.props.dataSet?.setName(name);
+          }
+        },
         onNewAttribute: (name: string) => {
           const { dataSet } = this.props;
           dataSet && addAttributeToDataSet(dataSet, { name });
@@ -211,7 +222,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
             const { dataSet } = this.props;
             dataSet && dataSet.setAttributeName(id, name);
           }
-          setTimeout(() => this.gridColumnApi && this.gridColumnApi.autoSizeColumns([id]), 10);
+          setTimeout(() => this.gridColumnApi?.autoSizeAllColumns(), 10);
         },
         onUpdateExpression: (id: string, expression: string, rawExpression: string) => {
           if (this.props.onSetExpression) {
@@ -247,12 +258,18 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         onUnlinkGeometry: () => {
           this.props.onUnlinkGeometry && this.props.onUnlinkGeometry();
         }
-      },
+      } as ITableHeaderMenuProps,
       headerClass: "cdp-column-header cdp-case-index-header",
       cellClass: "cdp-case-index-cell",
       colId: "__CASE_INDEX__",
-      width: 50,
-      pinned: "left",
+      width: kRowIndexColumnWidth,
+      // Note that pinned columns can't be grouped with unpinned columns.
+      // Given that we're using grouped columns to present the table title, we can
+      // either pin the index column and have the title cover the remaining columns,
+      // or not pin the index column and have the title cover all the columns.
+      // Since we currently only support two columns and horizontal scrolling is
+      // rare, we don't pin the column for now, but this can be revisited.
+      // pinned: "left",
       lockPosition: true,
       valueGetter: this.props.indexValueGetter || defaultIndexValueGetter,
       suppressMovable: true,
@@ -307,7 +324,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
       tooltipField: attribute.name,
       colId: attribute.id,
       editable,
-      width: defaultWidth,
+      width: kDefaultColumnWidth,
       resizable: true,
       lockPosition: true,
       valueGetter: (params: ValueGetterParams) => {
@@ -380,13 +397,30 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
     });
   }
 
-  public getColumnDefs(dataSet: IDataSet) {
-    let cols: ColDef[];
-    cols = dataSet.attributes.map((attr) =>
-      this.getAttributeColumnDef(attr)
-    );
+  public getColumnDefs(dataSet: IDataSet): ColDefArray {
+
+    let minColumnWidth = 0;
+    if (dataSet.name) {
+      // adjust the minimum column width to accommodate the table header
+      const tableNameWidth = this.measureHeaderLabelWidth(dataSet.name);
+      if (tableNameWidth) {
+        const tableHeaderWidth = tableNameWidth + kTableNameMargins;
+        minColumnWidth = Math.max(kDefaultColumnMinWidth,
+                                  Math.ceil((tableHeaderWidth - kRowIndexColumnWidth) / 2));
+      }
+    }
+
+    const cols = dataSet.attributes.map(attr => {
+      const colDef = this.getAttributeColumnDef(attr);
+      minColumnWidth && (colDef.minWidth = minColumnWidth);
+      return colDef;
+    });
     cols.unshift(this.getRowIndexColumnDef());
-    return cols;
+
+    // if the table has a name/title, group the columns under it
+    return dataSet.name
+            ? [{ headerName: dataSet.name, children: cols }]
+            : cols;
   }
 
   public getRowData(dataSet?: IDataSet): IGridRow[] {
@@ -410,27 +444,12 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
 
   public updateGridColState(dataSet?: IDataSet) {
     this.gridColumnDefs = dataSet ? this.getColumnDefs(dataSet) : [];
-    const columnApi = this.gridColumnApi;
-    if (!columnApi) return;
-
-    // recent versions of ag-grid require manual column header synchronization
-    // cf. https://github.com/ag-grid/ag-grid/issues/2771#issuecomment-441576761
-
-    this.gridColumnDefs.forEach(newColDef => {
-      const colDef = columnApi.getColumn(newColDef.colId).getColDef();
-      if (colDef.headerName !== newColDef.headerName) {
-        colDef.headerName = newColDef.headerName;
-      }
-      if (colDef.editable !== newColDef.editable) {
-        colDef.editable = newColDef.editable;
-      }
-      if (colDef.cellClass !== newColDef.cellClass) {
-        colDef.cellClass = newColDef.cellClass;
-      }
-    });
     if (this.gridApi) {
+      // recent versions of ag-grid require manual column header synchronization
+      // cf. https://github.com/ag-grid/ag-grid/issues/2771#issuecomment-441576761
+      // cf. https://github.com/ag-grid/ag-grid/issues/2771#issuecomment-509981799
+      this.gridApi.setColumnDefs([]);
       this.gridApi.setColumnDefs(this.gridColumnDefs);
-      this.gridApi.refreshHeader();
     }
   }
 
@@ -880,13 +899,28 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
           onSortChanged={this.handleSortChanged}
           onViewportChanged={this.handleSetAddAttributePos}
         />
+        {/* hidden ruler div for measuring header text width */}
+        <div
+          id="header-group-cell-ruler"
+          className="ag-header-group-cell-label"
+          ref={el => this.headerRulerElement = el}
+          style={{ display: "inline", visibility: "hidden" }} />
       </div>
     );
   }
 
+  private measureHeaderLabelWidth(label: string) {
+    if (this.headerRulerElement) {
+      this.headerRulerElement.innerText = label;
+      const width = Math.ceil(this.headerRulerElement.offsetWidth);
+      this.headerRulerElement.innerText = "";
+      return width;
+    }
+  }
+
   private handleDragStart = (evt: React.DragEvent<HTMLDivElement>) => {
     // ag-grid adds "ag-column-resizing" class to columns being actively resized
-    if (this.gridElement && this.gridElement.getElementsByClassName("ag-column-resizing").length) {
+    if (this.gridElement?.getElementsByClassName("ag-column-resizing").length) {
       // if we're column resizing, prevent other drags above (e.g. tile drags)
       evt.preventDefault();
       evt.stopPropagation();

@@ -121,6 +121,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
             addAttribute: false,
             addCase: true,
             addRemoveDivider: false,
+            setTableName: true,
             renameAttribute: true,
             removeAttribute: false,
             removeCases: true,
@@ -148,6 +149,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
           onRowSelectionChange={this.handleRowSelectionChange}
+          onSetTableName={this.handleSetTableName}
           onSetAttributeName={this.handleSetAttributeName}
           onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
@@ -324,6 +326,13 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
 
   private getGeometryActionLinksWithLabels(links?: ILinkProperties) {
     return this.getGeometryActionLinks(links, true);
+  }
+
+  private handleSetTableName = (name: string) => {
+    const shouldExpandTable = name && !this.state.dataSet?.name;
+    this.getContent().setTableName(name);
+    const kTableNameHeight = 25;
+    this.props.onRequestRowHeight(this.props.model.id, undefined, kTableNameHeight);
   }
 
   private handleSetAttributeName = (attributeId: string, name: string) => {
