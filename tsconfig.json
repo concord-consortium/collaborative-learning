@@ -2,7 +2,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "sourceMap": true,
-    "target": "es6",
+    "target": "ES2015",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "esModuleInterop": true,
     "importHelpers": true,
     "moduleResolution": "node",

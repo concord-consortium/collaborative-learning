@@ -97,7 +97,6 @@
     "@types/superagent": "^4.1.5",
     "@types/uuid": "^3.4.7",
     "autoprefixer": "^9.7.4",
-    "babel-core": "^6.26.3",
     "babel-jest": "^25.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^7.0.0",
@@ -168,6 +167,7 @@
     "slate-plain-serializer": "^0.7.11",
     "slate-react": "^0.22.10",
     "superagent": "^5.2.1",
+    "ts-polyfill": "^3.7.5",
     "tslib": "^1.10.0",
     "uuid": "^3.4.0",
     "whatwg-fetch": "^3.0.0"
