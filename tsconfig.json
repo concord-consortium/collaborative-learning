@@ -4,6 +4,7 @@
     "sourceMap": true,
     "target": "ES2015",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
     "esModuleInterop": true,
     "importHelpers": true,
     "moduleResolution": "node",
