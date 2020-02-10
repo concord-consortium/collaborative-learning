@@ -5,14 +5,12 @@ import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
-import { GroupVirtualDocument } from "../models/document/group-virtual-document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 import { ITableChange } from "../models/tools/table/table-content";
 import { DEBUG_LOGGER } from "../lib/debug";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
-const applicationName = "CLUE";
 
 interface LogMessage {
   application: string;
@@ -162,7 +160,7 @@ export class Logger {
       documentKey: document.key,
       documentType: document.type,
       documentTitle: document.title || "",
-      documentProperties: document.properties && document.properties.toJSON() || {},
+      documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility
     };
     Logger.log(event, parameters);
@@ -210,10 +208,10 @@ export class Logger {
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
-    const {user} = this.stores;
+    const {appConfig, user} = this.stores;
 
     const logMessage: LogMessage = {
-      application: applicationName,
+      application: appConfig.appName,
       username:  `${user.id}@${user.portal}`,
       role: user.type || "unknown",
       classHash: user.classHash,
