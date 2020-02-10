@@ -77,6 +77,10 @@ export function createStores(params?: ICreateStores): IStores {
   };
 }
 
+export function setAppMode(stores: IStores, appMode: AppMode) {
+  stores.appMode = appMode;
+}
+
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;
   const section = sectionId && problem.getSectionById(sectionId);
