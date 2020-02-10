@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.1.0 - released February 10, 2020
+
+- User-editable table title row
+- User axis annotations
+- Fix tile drags from curriculum
+- Fix drawing tool stamps
+- Fix preview button launch from portal
+- Update dependencies
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 518,038 bytes | 3.5% |
+| index.js | 4,114,798 bytes | -6.4% |
+
 ## Version 1.1.0-pre.1 - released January 30, 2020
 
 - Moving Straight Ahead content changes
