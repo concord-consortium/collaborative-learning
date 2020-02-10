@@ -5,7 +5,7 @@ import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribu
 // see https://medium.com/@martin_hotell/tree-shake-lodash-with-webpack-jest-and-typescript-2734fa13b5cd
 // for more efficient ways of importing lodash functions
 import { cloneDeep, findIndex, padStart } from "lodash";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 
 // tslint:disable:one-variable-per-declaration
 

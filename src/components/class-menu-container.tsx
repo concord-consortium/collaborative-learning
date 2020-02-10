@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";

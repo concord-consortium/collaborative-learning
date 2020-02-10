@@ -24,7 +24,7 @@ export const SetTableNameDialog: React.FC<IProps> = ({ isOpen, tableName, maxLen
     (e.keyCode === 13) && onSetTableName(name);
   };
 
-  const handleOkClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOkClick = () => {
     onSetTableName(name);
   };
 

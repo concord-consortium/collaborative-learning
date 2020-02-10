@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
 import { ISerializedActionCall } from "mobx-state-tree/dist/middlewares/on-action";
 import { IMenuItemFlags, IProps as ITableHeaderMenuProps, TableHeaderMenu } from "./table-header-menu";
@@ -115,7 +115,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   private gridColumnApi?: ColumnApi | null;
 
   private gridColumnDefs: ColDefArray = [];
-  private gridRowData: Array<IGridRow | undefined> = [];
+  private gridRowData: IGridRow[] = [];
   private components = this.props.cellEditorComponent
     ? { clientCellEditor: this.props.cellEditorComponent }
     : undefined;

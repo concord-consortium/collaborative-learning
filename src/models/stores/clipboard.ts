@@ -1,7 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { IStores } from "./stores";
 import { ToolContentUnionType } from "../tools/tool-types";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 
 export const kTypeText = "text";
 export const kJsonTileContent = "org.concord.clue.clipboard.tileJson";

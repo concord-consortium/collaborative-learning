@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";

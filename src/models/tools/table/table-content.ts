@@ -27,7 +27,7 @@ export function defaultTableContent() {
                           } as any);
 }
 
-export function isLinkableValue(value: number | string | undefined) {
+export function isLinkableValue(value: number | string | null | undefined) {
   return value == null || Number.isNaN(value as any) || isFinite(Number(value));
 }
 

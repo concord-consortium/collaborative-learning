@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import NewColumnDialog from "./new-column-dialog";
 import RenameColumnDialog from "./rename-column-dialog";
 import { SetTableNameDialog } from "./set-table-name-dialog";
@@ -169,11 +169,11 @@ export class TableHeaderMenu extends React.Component<IProps, IState> {
     this.closeRenameAttributeDialog();
   }
 
-  private handleRenameAttribute = (evt: React.MouseEvent<HTMLElement>, attrID: string, name: string) => {
+  private handleRenameAttribute = (evt: React.MouseEvent<HTMLElement>, attrID: string, name?: string) => {
     this.setState({
       isRenameAttributeDialogOpen: true,
       renameAttributeId: attrID,
-      renameAttributeName: name
+      renameAttributeName: name || ""
     });
   }
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { BaseComponent } from "../../base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ToolbarView } from "./drawing-toolbar";

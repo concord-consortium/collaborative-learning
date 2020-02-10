@@ -1,5 +1,5 @@
 import { inject } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { BaseComponent } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
 import { ToggleGroup, IToggleChoice, Themes } from "@concord-consortium/react-components";

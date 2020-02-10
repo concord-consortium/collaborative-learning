@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { ClueAppHeaderComponent } from "./clue-app-header";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";

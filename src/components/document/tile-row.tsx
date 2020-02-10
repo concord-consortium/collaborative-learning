@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";

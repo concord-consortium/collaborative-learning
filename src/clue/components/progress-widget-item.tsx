@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { IProgressItem } from "./progress-widget";
 import "./progress-widget-item.sass";
 

@@ -1,4 +1,4 @@
-import * as ReactDOMServer from "react-dom/server";
+import ReactDOMServer from "react-dom/server";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { each, isObject, isUndefined, unset } from "lodash";
 

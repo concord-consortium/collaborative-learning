@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { ISetProperties } from "../../models/document/document";
 
 export interface IDocumentContext {

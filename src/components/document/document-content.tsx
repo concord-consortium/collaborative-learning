@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
