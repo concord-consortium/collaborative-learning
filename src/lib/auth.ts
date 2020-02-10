@@ -313,6 +313,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
 
 export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
   interface IAuthenticateResponse {
+    appMode?: AppMode;
     authenticatedUser: AuthenticatedUser;
     classInfo?: ClassInfo;
     problemId?: string;
@@ -344,13 +345,16 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
-      return resolve(createFakeAuthentication({
-        appMode,
-        classId: fakeClass,
-        userType, userId,
-        unitCode,
-        problemOrdinal
-      }));
+      return resolve({
+              appMode,
+              ...createFakeAuthentication({
+                  appMode,
+                  classId: fakeClass,
+                  userType, userId,
+                  unitCode,
+                  problemOrdinal
+                })
+            });
     }
 
     if (appMode !== "authed") {

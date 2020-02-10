@@ -8,7 +8,7 @@ import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
-import { IStores } from "../models/stores/stores";
+import { IStores, setAppMode } from "../models/stores/stores";
 import { isDifferentUnitAndProblem, setUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import "./app.sass";
@@ -80,7 +80,11 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   const {appConfig, appMode, user, ui} = stores;
 
   authenticate(appMode, appConfig, urlParams)
-    .then(({authenticatedUser, classInfo, problemId, unitCode}) => {
+    .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
+      // authentication can trigger appMode change (e.g. preview => demo)
+      if (newAppMode && (newAppMode !== appMode)) {
+        setAppMode(stores, newAppMode);
+      }
       user.setAuthenticatedUser(authenticatedUser);
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
