@@ -482,6 +482,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "George's Walkathon",
                       "columns": [
                         {
                           "name": "Time (seconds)",
@@ -489,19 +490,20 @@
                           "values": [0, 1, 2, 3, 4, 5]
                         },
                          {
-                          "name": "George's Distance (meters)",
+                          "name": "distance (meters)",
                           "type": "number",
                           "values": [0, 2, 9, 11, 20, 25]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 210
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Elizabeth's Walkathon",
                       "columns": [
                         {
                           "name": "Time (seconds)",
@@ -509,14 +511,14 @@
                           "values": [0, 2, 4, 6, 8, 10]
                         },
                          {
-                          "name": "Elizabeth’s Walkathon Distance (meters)",
+                          "name": "distance (meters)",
                           "type": "number",
                           "values": [0, 3, 6, 9, 12, 15]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 210
                     }
                   },
                   {
@@ -1075,6 +1077,7 @@
                       "board": {
                         "properties": {
                           "axisNames": ["t", "dEmile"],
+                          "axisLabels": ["time", "distance"],
                           "axisMin": [-20, -40],
                           "axisRange": [56, 130]
                         }
@@ -1115,6 +1118,7 @@
                       "board": {
                         "properties": {
                           "axisNames": ["t", "dHenri"],
+                          "axisLabels": ["time", "distance"],
                           "axisMin": [-20, -40],
                           "axisRange": [56, 130]
                         }
@@ -1197,14 +1201,15 @@
                   {
                     "content": {
                       "type": "Table",
-                       "columns": [
+                      "name": "T-Shirt Costs",
+                      "columns": [
                           {
                             "name": "n",
                             "type": "number",
                             "values": [0, 3, 5, 8, 10]
                           },
                           {
-                            "name": "C (T-Shirt Costs)",
+                            "name": "C",
                             "type": "number",
                             "values": [34, 41.5, 46.5, 54, 59]
                           }
@@ -2392,13 +2397,8 @@
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "text": "Representation 3"
-                    }
-                  },
-                  {
-                    "content": {
                       "type": "Table",
+                      "name": "Representation 3",
                       "columns": [
                         {
                           "name": "x",
@@ -2528,6 +2528,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Theater Income",
                       "columns": [
                         {
                           "name": "Number of Students, x",
@@ -2542,12 +2543,13 @@
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 220
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Theater Expenses",
                       "columns": [
                         {
                           "name": "Number of Students, x",
