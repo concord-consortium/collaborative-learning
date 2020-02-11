@@ -18,6 +18,7 @@ interface LogMessage {
   application: string;
   run_remote_endpoint?: string;
   username: string;
+  role: string;
   classHash: string;
   session: string;
   appMode: string;
@@ -209,11 +210,12 @@ export class Logger {
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
-    const {user, ui, documents} = this.stores;
+    const {user} = this.stores;
 
     const logMessage: LogMessage = {
       application: applicationName,
       username:  `${user.id}@${user.portal}`,
+      role: user.type || "unknown",
       classHash: user.classHash,
       session: this.session,
       appMode: this.stores.appMode,
