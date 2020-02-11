@@ -167,7 +167,6 @@
     "slate-react": "^0.22.10",
     "superagent": "^5.2.1",
     "ts-polyfill": "^3.7.5",
-    "tslib": "^1.10.0",
     "uuid": "^3.4.0",
     "whatwg-fetch": "^3.0.0"
   }
