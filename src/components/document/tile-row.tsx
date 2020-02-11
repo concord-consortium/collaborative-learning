@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
@@ -133,8 +133,12 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     this.setState({ tileAcceptDrop: tileId });
   }
 
-  private handleRequestRowHeight = (tileId: string, height: number) => {
-    this.props.model.setRowHeight(height);
+  private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
+    const rowHeight = this.props.model.height;
+    const newHeight = rowHeight != null && deltaHeight != null
+                        ? rowHeight + deltaHeight
+                        : height;
+    (newHeight != null) && this.props.model.setRowHeight(newHeight);
   }
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
@@ -82,7 +82,7 @@ interface IToolTileBaseProps {
   model: ToolTileModelType;
   readOnly?: boolean;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  onRequestRowHeight: (tileId: string, height: number) => void;
+  onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
 export interface IToolTileProps extends IToolTileBaseProps {

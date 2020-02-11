@@ -10,7 +10,7 @@ import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
@@ -407,6 +407,26 @@ export const DocumentContentModel = types
                     drawingContentInfo?.defaultContent({stamps: defaultStamps}),
                     { rowHeight: drawingContentInfo.defaultHeight, ...options });
     },
+    copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      const results: NewRowTileArray = [];
+      if (tiles.length > 0) {
+        tiles.forEach(tile => {
+          let result: INewRowTile | undefined;
+          const content = safeJsonParse(tile.tileContent).content;
+          if (content) {
+            const rowOptions: INewTileOptions = {
+              rowIndex: rowInfo.rowDropIndex
+            };
+            if (tile.rowHeight) {
+              rowOptions.rowHeight = tile.rowHeight;
+            }
+            result = self.addTileInExistingRow(content, rowOptions);
+          }
+          results.push(result);
+        });
+      }
+      return results;
+    },
     copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -716,8 +736,11 @@ export const DocumentContentModel = types
       tiles.forEach(tile => Logger.logTileEvent(LogEventName.MOVE_TILE, self.getTile(tile.tileId)));
       self.moveTiles(tiles, rowInfo);
     },
-    userCopyTiles(tiles: IDragTileItem[], rowIndex: number) {
-      const results = self.copyTilesIntoNewRows(tiles, rowIndex);
+    userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      const { } = rowInfo;
+      const results = rowInfo.rowDropIndex != null
+                        ? self.copyTilesIntoExistingRow(tiles, rowInfo)
+                        : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
       results.forEach((result, i) => {
         const newTile = result?.tileId && self.getTile(result.tileId);
         if (result && newTile) {

@@ -27,7 +27,7 @@ export function defaultTableContent() {
                           } as any);
 }
 
-export function isLinkableValue(value: number | string | undefined) {
+export function isLinkableValue(value: number | string | null | undefined) {
   return value == null || Number.isNaN(value as any) || isFinite(Number(value));
 }
 
@@ -86,7 +86,7 @@ export interface ITableProperties {
 
 export interface ITableChange {
   action: "create" | "update" | "delete";
-  target: "rows" | "columns" | "geometryLink";
+  target: "table" | "rows" | "columns" | "geometryLink";
   ids?: string | string[];
   props?: ITableProperties;
   links?: ILinkProperties;
@@ -255,6 +255,13 @@ export const TableContentModel = types
     }
   }))
   .actions(self => ({
+    setTableName(name: string) {
+      self.appendChange({
+              action: "update",
+              target: "table",
+              props: { name }
+            });
+    },
     setAttributeName(id: string, name: string) {
       self.appendChange({
               action: "update",
@@ -368,7 +375,9 @@ export const TableContentModel = types
     applyCreate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
+        case "table":
         case "columns":
+          (tableProps?.name != null) && dataSet.setName(tableProps.name);
           const columns = tableProps && tableProps.columns;
           columns && columns.forEach((col: any, index: number) => {
             const id = change.ids && change.ids[index] || uniqueId();
@@ -399,6 +408,9 @@ export const TableContentModel = types
     applyUpdate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const ids = castArray(change.ids);
       switch (change.target) {
+        case "table":
+          (change.props?.name != null) && dataSet.setName(change.props.name);
+          break;
         case "columns":
           const colProps = change && change.props && castArray(change.props);
           colProps && colProps.forEach((col: any, colIndex) => {
@@ -524,14 +536,15 @@ export const TableContentModel = types
 export type TableContentModelType = Instance<typeof TableContentModel>;
 
 export function convertImportToChanges(snapshot: any) {
-  const columns = snapshot && snapshot.columns as any[];
+  const columns = snapshot?.columns as any[];
   if (!columns) return [] as string[];
 
   // create columns
   const changes: ITableChange[] = [];
+  const tableName = snapshot?.name != null ? { name: snapshot.name } : undefined;
   const columnProps = columns.map((col: any) => ({ id: uniqueId(), name: col.name }));
   if (columnProps.length) {
-    changes.push({ action: "create", target: "columns", props: { columns: columnProps } });
+    changes.push({ action: "create", target: "table", props: { columns: columnProps, ...tableName } });
   }
 
   // create rows

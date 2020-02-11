@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { AppContentComponent, IBaseProps } from "../app-config";
 
 import "./app-content.sass";

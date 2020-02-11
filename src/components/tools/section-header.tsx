@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { SectionType, getSectionInitials, getSectionTitle } from "../../models/curriculum/section";

@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
@@ -15,7 +15,7 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
   panels: IPanelGroupSpec;
   current: string;
-  onPanelChange: (panel: string) => void;
+  onPanelChange: (panelId: EPanelId) => void;
   showGroup: boolean;
 }
 

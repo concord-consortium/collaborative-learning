@@ -123,6 +123,17 @@ class ClueCanvas {
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.single-workspace .tool.' + tile).click({ force: true })
     }
+    addTileByDrag(tile, dropzone){//tile=[text,table,geometry,image,drawing,delete]
+        const dropzoneArray = ['top', 'left', 'right', 'bottom']
+        const dataTransfer = new DataTransfer;
+        let nthType = dropzoneArray.indexOf(dropzone)+2
+        cy.log(nthType)
+        cy.get('.single-workspace .tool.' + tile)
+            .trigger('dragstart', { dataTransfer })
+        cy.get('.drop-feedback:nth-of-type('+nthType+')').eq(1).invoke('attr','class','drop-feedback show '+dropzone)
+            .trigger('drop', { dataTransfer, force: true })
+            .trigger('dragend', { dataTransfer, force: true })
+    }
 
     getDeleteTool() {
         return cy.get('.tool.delete');
@@ -177,7 +188,8 @@ class ClueCanvas {
     deleteTile(tile) {
         switch (tile) {
             case 'text':
-                textToolTile.getTextTile().last().click({ force: true }).invoke('attr', 'class', 'selected');
+                textToolTile.getTextTile().last().focus();
+                cy.get('.text-tool-wrapper').parent().should('have.class','selected')
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({ force: true });
@@ -249,8 +261,8 @@ class ClueCanvas {
      getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
         return '.tool-tile-drag-handle';
      }
-     getLinkIcon(){
-         return cy.get('.link-indicator')
+     linkIconEl(){
+         return '[data-test="link-indicator-icon"]'
      }
 }
 

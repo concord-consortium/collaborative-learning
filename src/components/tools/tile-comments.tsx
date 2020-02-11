@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileCommentsModelType, TileCommentModelType } from "../../models/tools/tile-comments";

@@ -1,10 +1,10 @@
-import * as React from "react";
+import React from "react";
 import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
+import { IToolTileProps } from "./tool-tile";
 import { debouncedSelectTile } from "../../models/stores/ui";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
@@ -13,12 +13,7 @@ const placeholderImage = require("../../assets/image_placeholder.png");
 
 import "./image-tool.sass";
 
-interface IProps extends IBaseProps {
-  context: string;
-  model: ToolTileModelType;
-  readOnly?: boolean;
-  onRequestRowHeight: (tileId: string, height: number) => void;
-}
+type IProps = IToolTileProps;
 
 interface IState {
   isEditing?: boolean;

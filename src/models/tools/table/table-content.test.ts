@@ -21,8 +21,10 @@ describe("TableContent", () => {
   });
 
   it("can import authored data", () => {
+    const kTableTitle = "Table Title";
     const importData: any = {
             type: "Table",
+            name: kTableTitle,
             columns: [
               { name: "xCol", values: ["x1", "x2"] },
               { name: "yCol", values: ["y1", "y2", "y3"] }
@@ -36,8 +38,10 @@ describe("TableContent", () => {
     const change1 = safeJsonParse(table.changes[0]);
     expect(change1).toBeDefined();
     expect(change1.action).toBe("create");
-    expect(change1.target).toBe("columns");
+    expect(change1.target).toBe("table");
     expect(change1.props).toBeDefined();
+    expect(change1.props.name).toBeDefined();
+    expect(change1.props.name).toBe(kTableTitle);
     expect(change1.props.columns).toBeDefined();
     expect(change1.props.columns.length).toBe(2);
     expect(change1.props.columns[0].name).toBe("xCol");
@@ -124,12 +128,14 @@ describe("TableContent", () => {
   });
 
   it("can read current change format", () => {
+    const kTitle = "Current Title";
     const changes = [
             {
               action: "create",
-              target: "columns",
+              target: "table",
               ids: ["xCol", "yCol"],
               props: {
+                name: kTitle,
                 columns: [
                   { name: "x" },
                   { name: "y" }
@@ -157,9 +163,11 @@ describe("TableContent", () => {
     const change1 = safeJsonParse(table.changes[0]);
     expect(change1).toBeDefined();
     expect(change1.action).toBe("create");
-    expect(change1.target).toBe("columns");
+    expect(change1.target).toBe("table");
     expect(change1.ids).toEqual(["xCol", "yCol"]);
     expect(change1.props).toBeDefined();
+    expect(change1.props.name).toBeDefined();
+    expect(change1.props.name).toBe(kTitle);
     expect(change1.props.columns).toBeDefined();
     expect(change1.props.columns.length).toBe(2);
     expect(change1.props.columns[0]).toEqual({ name: "x" });

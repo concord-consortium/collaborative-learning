@@ -5,7 +5,7 @@ import { assign, find, values } from "lodash";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
-const toObj = (p: string, v: any) => v ? { [p]: v } : undefined;
+export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
 
 export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
@@ -25,11 +25,16 @@ export function getAxis(board: JXG.Board, type: "x" | "y") {
   return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
 }
 
-export function getBaseAxisLabels(board: JXG.Board) {
+function getClientAxisLabels(board: JXG.Board) {
   return ["x", "y"].map(xy => {
     const axis = getAxis(board, xy as "x" | "y");
-    return axis?.getAttribute("clientName") as string | undefined || xy;
+    return axis?.getAttribute("clientName") as string | undefined;
   });
+}
+
+export function getBaseAxisLabels(board: JXG.Board) {
+  const [xName, yName] = getClientAxisLabels(board);
+  return [xName || "x", yName || "y"];
 }
 
 export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel: string) {
@@ -38,6 +43,18 @@ export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel:
   if (xAxis) xAxis.name = xAxisLabel;
   if (yAxis) yAxis.name = yAxisLabel;
   if (xAxis || yAxis) board.update();
+}
+
+function getClientAxisAnnotations(board: JXG.Board) {
+  return ["x", "y"].map(xy => {
+    const axis = getAxis(board, xy as "x" | "y");
+    return axis?.getAttribute("clientAnnotation") as string | undefined;
+  });
+}
+
+export function getAxisAnnotations(board: JXG.Board) {
+  const [xAnnotation, yAnnotation] = getClientAxisAnnotations(board);
+  return [xAnnotation || "", yAnnotation || ""];
 }
 
 export function getTickValues(pixPerUnit: number) {
@@ -111,9 +128,15 @@ export function guessUserDesiredBoundingBox(board: JXG.Board) {
 }
 
 function getAxisLabelsFromProps(props: JXGProperties) {
-  const xName = props?.xName || props?.boardScale?.xName;
-  const yName = props?.yName || props?.boardScale?.yName;
+  const xName = props?.xName ?? props?.boardScale?.xName;
+  const yName = props?.yName ?? props?.boardScale?.yName;
   return [xName, yName];
+}
+
+function getAxisAnnotationsFromProps(props: JXGProperties) {
+  const xAnnotation = props?.xAnnotation ?? props?.boardScale?.xAnnotation;
+  const yAnnotation = props?.yAnnotation ?? props?.boardScale?.yAnnotation;
+  return [xAnnotation, yAnnotation];
 }
 
 function getAxisUnitsFromProps(changeProps?: JXGProperties, scale = 1) {
@@ -141,13 +164,15 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
 interface IAddAxesParams {
   xName?: string;
   yName?: string;
+  xAnnotation?: string;
+  yAnnotation?: string;
   unitX: number;
   unitY: number;
   boundingBox?: JXG.BoundingBox;
 }
 
 function addAxes(board: JXG.Board, params: IAddAxesParams) {
-  const { xName, yName, unitX, unitY, boundingBox } = params;
+  const { xName, yName, xAnnotation, yAnnotation, unitX, unitY, boundingBox } = params;
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
   board.removeGrids();
@@ -160,7 +185,8 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: xName || "x",
     withLabel: true,
     label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
-    ...toObj("clientName", xName)
+    ...toObj("clientName", xName),
+    ...toObj("clientAnnotation", xAnnotation)
   });
   xAxis.removeAllTicks();
   board.create("ticks", [xAxis, xMajorTickDistance], {
@@ -175,7 +201,8 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: yName || "y",
     withLabel: true,
     label: {fontSize: 13, position: "rt", offset: [15, 0]},
-    ...toObj("clientName", yName)
+    ...toObj("clientName", yName),
+    ...toObj("clientAnnotation", yAnnotation)
   });
   yAxis.removeAllTicks();
   board.create("ticks", [yAxis, yMajorTickDistance], {
@@ -201,10 +228,12 @@ export const boardChangeAgent: JXGChangeAgent = {
     const boundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
     const scale = getCanvasScale(board ? board.container : boardDomId as string);
     const [xName, yName] = getAxisLabelsFromProps(props as JXGProperties);
+    const [xAnnotation, yAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
     const [unitX, unitY] = getAxisUnitsFromProps(props, scale);
     const axes = addAxes(board, {
                           unitX, unitY, boundingBox,
-                          ...toObj("xName", xName), ...toObj("yName", yName)
+                          ...toObj("xName", xName), ...toObj("yName", yName),
+                          ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
                         });
     return [board, ...axes];
 },
@@ -216,7 +245,14 @@ export const boardChangeAgent: JXGChangeAgent = {
       const boardScale = props.boardScale;
       if (boardScale) {
         const { canvasWidth, canvasHeight } = boardScale;
-        const [xName, yName] = getAxisLabelsFromProps(change.properties);
+        const [xClientName, yClientName] = getClientAxisLabels(board);
+        const [xPropName, yPropName] = getAxisLabelsFromProps(change.properties);
+        const xName = xPropName ?? xClientName;
+        const yName = yPropName ?? yClientName;
+        const [xClientAnnotation, yClientAnnotation] = getClientAxisAnnotations(board);
+        const [xPropAnnotation, yPropAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
+        const xAnnotation = xPropAnnotation ?? xClientAnnotation;
+        const yAnnotation = yPropAnnotation ?? yClientAnnotation;
         const width = board.canvasWidth;
         const height = board.canvasHeight;
         const widthMultiplier = (width - kAxisBuffer * 2) / canvasWidth;
@@ -239,7 +275,11 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          const axes = addAxes(board, { unitX, unitY, ...toObj("xName", xName), ...toObj("yName", yName) });
+          const axes = addAxes(board, {
+                                unitX, unitY,
+                                ...toObj("xName", xName), ...toObj("yName", yName),
+                                ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
+                              });
           board.update();
           return axes;
         }

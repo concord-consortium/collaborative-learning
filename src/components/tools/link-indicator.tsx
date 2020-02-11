@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import SvgLinkedTileIcon from "../../assets/icons/linked-tile-icon";
 import { getTableLinkColors } from "../../models/tools/table-links";
 import { IconButtonSvg } from "../utilities/icon-button-svg";

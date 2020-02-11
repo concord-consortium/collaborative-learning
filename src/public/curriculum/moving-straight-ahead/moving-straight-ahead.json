@@ -53,32 +53,32 @@
   },
   "defaultStamps": [
     {
-      "url": "assets/tools/drawing-tool/stamps/coin.png",
+      "url": "curriculum/moving-straight-ahead/stamps/coin.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/pouch.png",
+      "url": "curriculum/moving-straight-ahead/stamps/pouch.png",
       "width": 30,
       "height": 37
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/plus.png",
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/equals.png",
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/lparen.png",
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
       "width": 25,
       "height": 25
     },
     {
-      "url": "assets/tools/drawing-tool/stamps/rparen.png",
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
       "width": 25,
       "height": 25
     }
@@ -482,6 +482,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "George's Walkathon",
                       "columns": [
                         {
                           "name": "Time (seconds)",
@@ -489,19 +490,20 @@
                           "values": [0, 1, 2, 3, 4, 5]
                         },
                          {
-                          "name": "George's Distance (meters)",
+                          "name": "distance (meters)",
                           "type": "number",
                           "values": [0, 2, 9, 11, 20, 25]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 210
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Elizabeth's Walkathon",
                       "columns": [
                         {
                           "name": "Time (seconds)",
@@ -509,14 +511,14 @@
                           "values": [0, 2, 4, 6, 8, 10]
                         },
                          {
-                          "name": "Elizabeth’s Walkathon Distance (meters)",
+                          "name": "distance (meters)",
                           "type": "number",
                           "values": [0, 3, 6, 9, 12, 15]
                         }
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 210
                     }
                   },
                   {
@@ -1075,6 +1077,7 @@
                       "board": {
                         "properties": {
                           "axisNames": ["t", "dEmile"],
+                          "axisLabels": ["time", "distance"],
                           "axisMin": [-20, -40],
                           "axisRange": [56, 130]
                         }
@@ -1115,6 +1118,7 @@
                       "board": {
                         "properties": {
                           "axisNames": ["t", "dHenri"],
+                          "axisLabels": ["time", "distance"],
                           "axisMin": [-20, -40],
                           "axisRange": [56, 130]
                         }
@@ -1197,14 +1201,15 @@
                   {
                     "content": {
                       "type": "Table",
-                       "columns": [
+                      "name": "T-Shirt Costs",
+                      "columns": [
                           {
                             "name": "n",
                             "type": "number",
                             "values": [0, 3, 5, 8, 10]
                           },
                           {
-                            "name": "C (T-Shirt Costs)",
+                            "name": "C",
                             "type": "number",
                             "values": [34, 41.5, 46.5, 54, 59]
                           }
@@ -2194,8 +2199,8 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [
-                        "Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
+                      "text": ["<strong>Slope = (24-12)/(12-6) =  6/12  = ½</strong>",
+                        "\nUnlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
                         "\nRecall that proportional relationships can be represented by a multiplicative comparison statement between two quantities <em>x</em> and <em>y</em>. They can also be represented by the equation y = ax. The graph of this equation is a straight line through the origin. The coefficient a in the equation <em>y = ax</em> is the <em>constant of proportionality</em>."
                       ]
                     }
@@ -2218,12 +2223,6 @@
                     },
                     "layout": {
                       "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Line with Negative Slope"
                     }
                   },
                   {
@@ -2273,12 +2272,6 @@
                     },
                     "layout": {
                       "height": 160
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Line with Positive Slope"
                     }
                   },
                   {
@@ -2404,13 +2397,8 @@
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "text": "Representation 3"
-                    }
-                  },
-                  {
-                    "content": {
                       "type": "Table",
+                      "name": "Representation 3",
                       "columns": [
                         {
                           "name": "x",
@@ -2450,26 +2438,6 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_2_WI_graphs_and_tables_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [-6, -4, -2, 0, 2, 4]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [-10, -7, -4, -1, 2, 5]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 160
                     }
                   },
                   {
@@ -2518,8 +2486,8 @@
         {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "MSA 4.3 Design Under Constraints",
-          "subtitle": "Revisiting Rates and Proportionality in Linear Situations",
+          "title": "MSA 4.3 Pulling it All Together",
+          "subtitle": "",
           "sections": [
             {
               "type": "initialChallenge",
@@ -2560,6 +2528,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Theater Income",
                       "columns": [
                         {
                           "name": "Number of Students, x",
@@ -2574,12 +2543,13 @@
                       ]
                     },
                     "layout": {
-                      "height": 180
+                      "height": 220
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Theater Expenses",
                       "columns": [
                         {
                           "name": "Number of Students, x",
@@ -2652,7 +2622,7 @@
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "MR1 - MR4",
+      "title": "MSA MR1 - MR4",
       "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
@@ -2668,7 +2638,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2685,7 +2655,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2702,7 +2672,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
@@ -2719,7 +2689,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
                   } 
