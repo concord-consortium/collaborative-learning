@@ -98,6 +98,12 @@ export const TileRowModel = types
       if (!self.isUserResizable) {
         self.height = undefined;
       }
+    },
+    removeTilesFromRow(removeFn: (tileId: string) => boolean) {
+      self.tiles.replace(self.tiles.filter(tile => !removeFn(tile.tileId)));
+      if (!self.isUserResizable) {
+        self.height = undefined;
+      }
     }
   }));
 
