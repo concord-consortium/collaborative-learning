@@ -14,7 +14,7 @@
 | File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 518,038 bytes | 3.5% |
-| index.js | 4,114,798 bytes | -6.4% |
+| index.js | 4,136,179 bytes | -6.0% |
 
 ## Version 1.1.0-pre.1 - released January 30, 2020
 
