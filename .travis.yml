@@ -12,7 +12,7 @@ cache:
              
 jobs:
   include:
-  - stage: 
+  - stage: "Tests"
     name: "unit test"
     env:
       - STAGE_NAME="1x-electron"
@@ -41,13 +41,18 @@ jobs:
     env:
       - STAGE_NAME="4x-electron"
     script:
-      - ./cypress/run_cypress_test.sh $STAGE_NAME       
+      - ./cypress/run_cypress_test.sh $STAGE_NAME
+  - stage: "Deploy"
+    name: "deploy"
+    script:
+      - ./s3_deploy.sh
+      - ./rollbar_deploy.sh         
 install:
 - travis_retry gem install s3_website -v 3.4.0
 - travis_retry pip install awscli --upgrade --user
 - travis_retry npm ci
 script:
 - npm run build
-after_success:
-- ./s3_deploy.sh
-- ./rollbar_deploy.sh
+# after_success:
+# - ./s3_deploy.sh
+# - ./rollbar_deploy.sh
