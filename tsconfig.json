@@ -6,7 +6,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "esModuleInterop": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "moduleResolution": "node",
     "allowJs": true,
     "resolveJsonModule": true,
