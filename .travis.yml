@@ -19,41 +19,29 @@ jobs:
     script:
       - npm run test:coverage -- --runInBand --forceExit
   - stage: 
-    name: "integration test"
+    name: "integration test 1"
     env:
-      - STAGE_NAME="5x-electron"
+      - STAGE_NAME="4x-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
   - stage:
     name: "integration test 2" 
     env:
-      - STAGE_NAME="5x-electron"
+      - STAGE_NAME="4x-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
   - stage:
     name: "integration test 3" 
     env:
-      - STAGE_NAME="5x-electron"
+      - STAGE_NAME="4x-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
   - stage:
     name: "integration test 4" 
     env:
-      - STAGE_NAME="5x-electron"
+      - STAGE_NAME="4x-electron"
     script:
-      - ./cypress/run_cypress_test.sh $STAGE_NAME  
-  - stage:
-    name: "integration test 5" 
-    env:
-      - STAGE_NAME="5x-electron"
-    script:
-      - ./cypress/run_cypress_test.sh $STAGE_NAME      
-  - stage:
-    name: "integration test 6" 
-    env:
-      - STAGE_NAME="5x-electron"
-    script:
-      - ./cypress/run_cypress_test.sh $STAGE_NAME      
+      - ./cypress/run_cypress_test.sh $STAGE_NAME       
 install:
 - travis_retry gem install s3_website -v 3.4.0
 - travis_retry pip install awscli --upgrade --user
