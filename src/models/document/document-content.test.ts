@@ -241,7 +241,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
-});
+  });
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
     // [Header:A, Placeholder, Header:B, Text]
@@ -804,6 +804,29 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
         whatIfRowHeader: [],
         whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+
+    it("can copy a tile to an existing row, removing placeholder tiles", () => {
+      // copy drawingTool1 to whatIfRow1
+      const dragTiles = getDragTiles(["drawingTool1"]);
+      const whatIfRowIndex = documentContent.getRowIndex("whatIfRow1");
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: whatIfRowIndex,
+        rowDropIndex: whatIfRowIndex
+      };
+      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        introductionRow1: [ "textTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "NEW_DRAWING_TILE_1" ],
         nowWhatDoYouKnowRowHeader: [],
         nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
       });

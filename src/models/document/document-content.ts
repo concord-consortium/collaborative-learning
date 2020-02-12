@@ -305,6 +305,14 @@ export const DocumentContentModel = types
         const tile = ToolTileModel.create({ content: placeholderContentInfo?.defaultContent(beforeSectionId) });
         self.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
+    },
+    removePlaceholderTilesFromRow(rowIndex: number) {
+      const isPlaceholderTile = (tileId: string) => {
+        const tile = self.tileMap.get(tileId);
+        return tile?.content.type === "Placeholder";
+      };
+      const row = self.getRowByIndex(rowIndex);
+      row?.removeTilesFromRow(isPlaceholderTile);
     }
   }))
   .actions(self => ({
@@ -341,6 +349,7 @@ export const DocumentContentModel = types
       const row = self.getRowByIndex(o.rowIndex);
       if (row) {
         self.insertNewTileInRow(tile, row);
+        self.removePlaceholderTilesFromRow(o.rowIndex);
         self.removeNeighboringPlaceholderRows(o.rowIndex);
         if (o.rowHeight) {
           row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
@@ -737,7 +746,6 @@ export const DocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      const { } = rowInfo;
       const results = rowInfo.rowDropIndex != null
                         ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                         : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
