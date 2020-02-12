@@ -24,7 +24,7 @@ context('Test the overall workspace', function(){
     describe('Desktop functionalities', function(){
         it('will verify that clicking on tab closes the nav area', function(){
             leftNav.openLeftNavTab('Introduction'); //left nav expand area should be visible
-            leftNav.getLeftNavExpandedSpace().should('not.be.visible');
+            leftNav.getLeftNavExpandedSpace().should('be.visible');
             leftNav.closeLeftNavTab('Introduction'); //left nav expand area should not be visible
             leftNav.getLeftNavExpandedSpace().should('not.be.visible');
 
