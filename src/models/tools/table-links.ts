@@ -1,9 +1,7 @@
 import { IObservableArray, observable } from "mobx";
 
-// It should be possible to use a standard import and get TypeScript types
-// (cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript).
-// See comment in `typings.d.ts` for details.
-const styles = require("./table-links.scss");
+// cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
+import styles from "./table-links.scss";
 
 const sTableDocumentMap: Map<string, string> = new Map();
 type LinkedTableIds = IObservableArray<string>;
