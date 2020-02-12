@@ -45,14 +45,10 @@ jobs:
   - stage: "Deploy"
     name: "deploy"
     script:
+      - npm run build
       - ./s3_deploy.sh
       - ./rollbar_deploy.sh         
 install:
 - travis_retry gem install s3_website -v 3.4.0
 - travis_retry pip install awscli --upgrade --user
 - travis_retry npm ci
-script:
-- npm run build
-# after_success:
-# - ./s3_deploy.sh
-# - ./rollbar_deploy.sh
