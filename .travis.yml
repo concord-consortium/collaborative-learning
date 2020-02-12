@@ -9,37 +9,37 @@ cache:
     - "$HOME/.npm"
     - "$HOME/.cache"
 # cf. https://stackoverflow.com/a/52387639
-             
+install:
+- travis_retry gem install s3_website -v 3.4.0
+- travis_retry pip install awscli --upgrade --user
+- travis_retry npm ci
 jobs:
   include:
   - stage: "Tests"
     name: "unit test"
     env:
-      - STAGE_NAME="1x-electron"
+      - STAGE_NAME="unit tests"
     script:
       - npm run test:coverage -- --runInBand --forceExit
-  - stage: 
+  - stage: "Integration Tests"
     name: "integration test 1"
     env:
-      - STAGE_NAME="4x-electron"
+      - STAGE_NAME="integration-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
-  - stage:
-    name: "integration test 2" 
+  - name: "integration test 2" 
     env:
-      - STAGE_NAME="4x-electron"
+      - STAGE_NAME="integration-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
-  - stage:
-    name: "integration test 3" 
+  - name: "integration test 3" 
     env:
-      - STAGE_NAME="4x-electron"
+      - STAGE_NAME="integration-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
-  - stage:
-    name: "integration test 4" 
+  - name: "integration test 4" 
     env:
-      - STAGE_NAME="4x-electron"
+      - STAGE_NAME="integration-electron"
     script:
       - ./cypress/run_cypress_test.sh $STAGE_NAME
   - stage: "Deploy"
@@ -47,8 +47,4 @@ jobs:
     script:
       - npm run build
       - ./s3_deploy.sh
-      - ./rollbar_deploy.sh         
-install:
-- travis_retry gem install s3_website -v 3.4.0
-- travis_retry pip install awscli --upgrade --user
-- travis_retry npm ci
+      - ./rollbar_deploy.sh 
