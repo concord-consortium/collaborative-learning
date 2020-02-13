@@ -9,63 +9,62 @@ import { ToolTileModelType } from "../models/tools/tool-tile";
 
 describe("db", () => {
   let stores: IStores;
+  let db: DB;
 
   beforeEach(() => {
     stores = createStores({
       user: UserModel.create({id: "1", portal: "example.com"}),
       appMode: "test",
     });
+    db = new DB();
   });
 
-  it("connects", () => {
-    const db = new DB();
-    return db.connect({appMode: "test", stores})
-      .then(() => {
-        expect(db.firebase.isConnected).toBe(true);
-      })
-      .then(() => db.disconnect());
+  afterEach(() => {
+    // delete all test data (for this unique anonymous test user)
+    db.firebase.ref().remove();
+    db.disconnect();
+  });
+
+  it("connects/disconnects", async () => {
+    expect.assertions(5);
+    // const db = new DB();
+    expect(db.firebase.isConnected).toBe(false);
+    expect(db.isAuthStateSubscribed()).toBe(false);
+    await db.connect({appMode: "test", stores});
+    expect(db.firebase.isConnected).toBe(true);
+    expect(db.isAuthStateSubscribed()).toBe(true);
+    db.disconnect();
+    expect(db.isAuthStateSubscribed()).toBe(false);
   }, 10000);
 
-  it("resolves paths in test mode", () => {
-    const db = new DB();
-    return db.connect({appMode: "test", stores})
-      .then(() => {
-        expect(db.firebase.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
-        expect(db.firebase.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
-      })
-      .then(() => db.disconnect());
+  it("resolves paths in test mode", async () => {
+    expect.assertions(2);
+    await db.connect({appMode: "test", stores});
+    expect(db.firebase.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
+    expect(db.firebase.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
   });
 
-  it("resolves paths in dev mode", () => {
-    const db = new DB();
+  it("resolves paths in dev mode", async () => {
+    expect.assertions(2);
     stores.appMode = "dev";
-    return db.connect({appMode: "dev", stores})
-      .then(() => {
-        expect(db.firebase.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
-        expect(db.firebase.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
-      })
-      .then(() => db.disconnect());
+    await db.connect({appMode: "dev", stores});
+    expect(db.firebase.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
+    expect(db.firebase.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
   });
 
-  it("can get a reference to the database", () => {
-    const db = new DB();
-    return db.connect({appMode: "test", stores})
-      .then(() => {
-        const testString = "this is a test!";
-        const ref = db.firebase.ref("write-test");
-        return ref.set(testString)
-          .then(() => {
-            return ref.once("value", (snapshot) => {
-              expect(snapshot.val()).toBe(testString);
-            });
-          });
-        })
-      .then(() => db.disconnect());
+  it("can get a reference to the database", async () => {
+    expect.assertions(1);
+    await db.connect({appMode: "test", stores});
+    const testString = "this is a test";
+    const ref = db.firebase.ref("write-test");
+    ref.set(testString);
+    const snapshot = await ref.once("value");
+    expect(snapshot.val()).toBe(testString);
   });
 
-  it("can parse document text content", () => {
-    const db = new DB();
-    // tslint:disable-next-line:max-line-length
+  it("can parse document text content", async () => {
+    expect.assertions(4);
+    await db.connect({appMode: "test", stores});
     const storedJsonString = JSON.stringify(createSingleTileContent({ type: "Text", text: "Testing" }));
     const docContentSnapshot = db.parseDocumentContent({content: storedJsonString} as DBDocument);
     const docContent = DocumentContentModel.create(docContentSnapshot);

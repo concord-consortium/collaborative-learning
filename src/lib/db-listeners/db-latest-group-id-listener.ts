@@ -10,21 +10,14 @@ export class DBLatestGroupIdListener extends BaseListener {
     this.db = db;
   }
 
-  public start() {
-    return new Promise<void>((resolve, reject) => {
-      const latestGroupIdRef = this.latestGroupIdRef = this.db.firebase.getLatestGroupIdRef();
-      // use once() so we are ensured that latestGroupId is set before we resolve
-      this.debugLogHandler("#start", "adding", "once", latestGroupIdRef);
-      latestGroupIdRef.once("value", (snapshot) => {
-        this.handleLatestGroupIdRef(snapshot);
-        this.debugLogHandler("#start", "adding", "on value", latestGroupIdRef);
-        latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
-      })
-      .then(snapshot => {
-        resolve();
-      })
-      .catch(reject);
-    });
+  public async start() {
+    const latestGroupIdRef = this.latestGroupIdRef = this.db.firebase.getLatestGroupIdRef();
+    // use once() so we are ensured that latestGroupId is set before we resolve
+    this.debugLogHandler("#start", "adding", "once", latestGroupIdRef);
+    const snapshot = await latestGroupIdRef.once("value");
+    this.handleLatestGroupIdRef(snapshot);
+    this.debugLogHandler("#start", "adding", "on value", latestGroupIdRef);
+    latestGroupIdRef.on("value", this.handleLatestGroupIdRef);
   }
 
   public stop() {

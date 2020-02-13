@@ -85,66 +85,58 @@ export class DB {
   public creatingDocuments: string[] = [];
 
   private appMode: AppMode;
+  private authStateUnsubscribe?: firebase.Unsubscribe;
 
   constructor() {
     this.firebase = new Firebase(this);
     this.listeners = new DBListeners(this);
   }
 
-  public connect(options: IDBConnectOptions) {
-    return new Promise<void>((resolve, reject) => {
-      if (this.firebase.isConnected) {
-        reject("Already connected to database!");
-      }
+  public isAuthStateSubscribed() {
+    return !!this.authStateUnsubscribe;
+  }
 
-      // check for already being initialized for tests
-      if (firebase.apps.length === 0) {
-        firebase.initializeApp({
-          apiKey: "AIzaSyBKwTfDSxKRSTnOaAzI-mUBN78LiI2gM78",
-          authDomain: "collaborative-learning-ec215.firebaseapp.com",
-          databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-          projectId: "collaborative-learning-ec215",
-          storageBucket: "collaborative-learning-ec215.appspot.com",
-          messagingSenderId: "112537088884"
-        });
-      }
+  public async connect(options: IDBConnectOptions) {
+    if (this.firebase.isConnected) {
+      throw new Error("Already connected to database!");
+    }
 
-      this.stores = options.stores;
-
-      firebase.auth().onAuthStateChanged((firebaseUser) => {
-        if (firebaseUser) {
-          this.appMode = options.appMode;
-          this.firebase.user = firebaseUser;
-          this.listeners.stop();
-          this.listeners.start().then(resolve).catch(reject);
-        }
+    // check for already being initialized for tests
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyBKwTfDSxKRSTnOaAzI-mUBN78LiI2gM78",
+        authDomain: "collaborative-learning-ec215.firebaseapp.com",
+        databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
+        projectId: "collaborative-learning-ec215",
+        storageBucket: "collaborative-learning-ec215.appspot.com",
+        messagingSenderId: "112537088884"
       });
+    }
 
-      if (options.appMode === "authed") {
-        return firebase.auth()
-          .signOut()
-          .then(() => {
-            return firebase.auth()
-              .signInWithCustomToken(options.rawFirebaseJWT)
-              .catch(reject);
-          })
-          .catch(reject);
-      }
-      else {
-        return firebase.auth()
-          .signInAnonymously()
-          .catch(reject);
+    this.stores = options.stores;
+
+    this.authStateUnsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
+      if (firebaseUser) {
+        this.appMode = options.appMode;
+        this.firebase.user = firebaseUser;
+        this.listeners.stop();
+        this.listeners.start();
       }
     });
+
+    if (options.appMode === "authed") {
+      await firebase.auth().signOut();
+      return firebase.auth().signInWithCustomToken(options.rawFirebaseJWT);
+    }
+    else {
+      return firebase.auth().signInAnonymously();
+    }
   }
 
   public disconnect() {
     this.listeners.stop();
-
-    if (this.appMode === "test") {
-      // delete all test data (for this unique anonymous test user)
-      return this.firebase.ref().set(null);
-    }
+    this.authStateUnsubscribe?.();
+    this.authStateUnsubscribe = undefined;
   }
 
   public joinGroup(groupId: string) {

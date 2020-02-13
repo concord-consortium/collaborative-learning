@@ -8,10 +8,10 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument,
         } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { DBDocument, DBDocumentMetadata, DBOfferingUserProblemDocument } from "../db-types";
+import { DBDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
@@ -68,40 +68,21 @@ export class DBListeners extends BaseListener {
     this.starsListener = new DBStarsListener(db);
   }
 
-  public start() {
-    return new Promise<void>((resolve, reject) => {
-      // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
-      this.latestGroupIdListener.start()
-        .then(() => {
-          return this.groupsListener.start();
-        })
-        .then(() => {
-          return this.problemDocumentsListener.start();
-        })
-        .then(() => {
-          return this.personalDocumentsListener.start();
-        })
-        .then(() => {
-          return this.learningLogsListener.start();
-        })
-        .then(() => {
-          return this.publicationListener.start();
-        })
-        .then(() => {
-          return this.supportsListener.start();
-        })
-        .then(() => {
-          return this.commentsListener.start();
-        })
-        .then(() => {
-          return this.starsListener.start();
-        })
-        .then(() => {
-          this.isListening = true;
-        })
-        .then(resolve)
-        .catch(reject);
-    });
+  public async start() {
+    // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
+    await this.latestGroupIdListener.start();
+    await Promise.all([
+      this.groupsListener.start(),
+      this.problemDocumentsListener.start(),
+      this.personalDocumentsListener.start(),
+      this.learningLogsListener.start(),
+      this.publicationListener.start(),
+      this.supportsListener.start(),
+      this.commentsListener.start(),
+      this.starsListener.start()
+    ]);
+
+    this.isListening = true;
   }
 
   public stop() {
@@ -110,6 +91,9 @@ export class DBListeners extends BaseListener {
     this.stopModelListeners();
     this.callDocumentModelDisposers();
 
+    this.starsListener.stop();
+    this.commentsListener.stop();
+    this.supportsListener.stop();
     this.publicationListener.stop();
     this.learningLogsListener.stop();
     this.personalDocumentsListener.stop();
