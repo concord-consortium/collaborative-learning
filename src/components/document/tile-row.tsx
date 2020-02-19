@@ -73,7 +73,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { model } = this.props;
     const { isSectionHeader, sectionId } = model;
-    const height = this.props.height || model.height;
+    // ignore height setting for section header rows
+    const height = !isSectionHeader
+                      ? this.props.height || model.height
+                      : undefined;
     const style = height ? { height } : undefined;
     return (
       <div className={`tile-row`} data-row-id={model.id}
