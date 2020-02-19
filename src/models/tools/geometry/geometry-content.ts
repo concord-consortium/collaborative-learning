@@ -1,12 +1,14 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { SelectionStoreModelType } from "../../stores/selection";
+import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { guessUserDesiredBoundingBox, isBoard, kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight,
-          kGeometryDefaultWidth, kGeometryDefaultPixelsPerUnit, syncAxisLabels } from "./jxg-board";
+import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox, isBoard,
+          kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
+          kGeometryDefaultPixelsPerUnit, syncAxisLabels, toObj } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
-          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
+          JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { isMovableLine } from "./jxg-movable-line";
 import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
@@ -16,7 +18,7 @@ import { isComment } from "./jxg-types";
 import { isVertexAngle } from "./jxg-vertex-angle";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -27,6 +29,17 @@ export const kGeometryToolID = "Geometry";
 export { kGeometryDefaultHeight };
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
+
+export interface IAxesParams {
+  xName?: string;
+  xAnnotation?: string;
+  xMin: number;
+  xMax: number;
+  yName?: string;
+  yAnnotation?: string;
+  yMin: number;
+  yMax: number;
+}
 
 function getAxisUnits(protoRange: JXGCoordPair | undefined) {
   const pRange = protoRange && castArray(protoRange);
@@ -52,7 +65,6 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
 }
 
 function defaultGeometryBoardChange(overrides?: JXGProperties) {
-  // TODO: refactor this
   const [xMin, yMax, xMax, yMin] = getBoardBounds();
   const unitX = kGeometryDefaultPixelsPerUnit;
   const unitY = kGeometryDefaultPixelsPerUnit;
@@ -125,17 +137,22 @@ export const GeometryMetadataModel = types
     get linkedTableCount() {
       return self.linkedTables.length;
     },
-    get xAxisLabel() {
+    get linkedTableIds() {
+      return self.linkedTables.map(t => t.id);
+    },
+    xAxisLabel(baseName = "x", annotation = "") {
       const links = self.linkedTables
                         .map(entry => entry.x)
-                        .filter(name => name && name !== "x");
-      return links.length ? `x (${links.join(", ")})` : "x";
+                        .filter(name => name && (name !== "x") && (name !== baseName));
+      annotation && links.unshift(annotation);
+      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     },
-    get yAxisLabel() {
+    yAxisLabel(baseName = "y", annotation = "") {
       const links = self.linkedTables
                         .map(entry => entry.y)
-                        .filter(name => name && name !== "y");
-      return links.length ? `y (${links.join(", ")})` : "y";
+                        .filter(name => name && (name !== "y") && (name !== baseName));
+      annotation && links.unshift(annotation);
+      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     }
   }))
   .actions(self => ({
@@ -165,6 +182,7 @@ export const GeometryMetadataModel = types
         disposer && (self.tableLinkDisposers[tableId] = disposer);
         self.linkedTables.push({ id: tableId, ...axes });
       }
+      addLinkedTable(tableId);
     },
     removeTableLink(tableId: string) {
       const index = self.linkedTables.findIndex(entry => entry.id === tableId);
@@ -240,12 +258,6 @@ export const GeometryContentModel = types
     },
     isLinkedToTable(tableId: string) {
       return self.metadata.isLinkedToTable(tableId);
-    },
-    get xAxisLabel() {
-      return self.metadata.xAxisLabel;
-    },
-    get yAxisLabel() {
-      return self.metadata.yAxisLabel;
     }
   }))
   .views(self => ({
@@ -381,8 +393,12 @@ export const GeometryContentModel = types
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
       const { operation } = change;
       const target = change.target.toLowerCase();
-      if (board && (target === "tablelink" || (target === "board" && operation === "update"))) {
-        syncAxisLabels(board, self.xAxisLabel, self.yAxisLabel);
+      if (board && (target === "tablelink" || (target === "board" && operation !== "delete"))) {
+        const [xName, yName] = getBaseAxisLabels(board);
+        const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
+        syncAxisLabels(board,
+                        self.metadata.xAxisLabel(xName, xAnnotation),
+                        self.metadata.yAxisLabel(yName, yAnnotation));
       }
     }
 
@@ -450,8 +466,9 @@ export const GeometryContentModel = types
       board.update();
     }
 
-    function rescaleBoard(board: JXG.Board, xMax: number, yMax: number, xMin: number, yMin: number) {
+    function rescaleBoard(board: JXG.Board, params: IAxesParams) {
       const { canvasWidth, canvasHeight } = board;
+      const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
       const width = canvasWidth - kAxisBuffer * 2;
       const height = canvasHeight - kAxisBuffer * 2;
       const unitX = width / (xMax - xMin);
@@ -460,7 +477,12 @@ export const GeometryContentModel = types
         operation: "update",
         target: "board",
         targetID: board.id,
-        properties: { boardScale: {xMin, yMin, unitX, unitY, canvasWidth: width, canvasHeight: height} }
+        properties: { boardScale: {
+                        xMin, yMin, unitX, unitY,
+                        ...toObj("xName", xName), ...toObj("yName", yName),
+                        ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation),
+                        canvasWidth: width, canvasHeight: height
+                      } }
       };
       const axes = _applyChange(undefined, change);
       return axes ? axes as any as JXG.Line[] : undefined;
@@ -605,9 +627,11 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function createPolygonFromFreePoints(board: JXG.Board, properties?: JXGProperties): JXG.Polygon | undefined {
+    function createPolygonFromFreePoints(
+              board: JXG.Board, linkedTableId?: string, properties?: JXGProperties): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
-                          .filter(elt => isFreePoint(elt))
+                          .filter(elt => isFreePoint(elt) &&
+                                          (linkedTableId === elt?.getAttribute("linkedTableId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
         const change: JXGChange = {
@@ -1081,6 +1105,8 @@ export const GeometryContentModel = types
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
 interface IBoardImportProps {
+  axisNames?: JXGStringPair;
+  axisLabels?: JXGStringPair;
   axisMin?: JXGCoordPair;
   axisRange?: JXGCoordPair;
   [prop: string]: any;
@@ -1092,7 +1118,7 @@ interface IBoardImportSpec {
 interface IPointImportSpec {
   type: "point";
   parents: [number, number];
-  properties?: any;
+  properties?: object;
 }
 
 interface IVertexImportSpec extends IPointImportSpec {
@@ -1102,7 +1128,7 @@ interface IVertexImportSpec extends IPointImportSpec {
 interface IPolygonImportSpec {
   type: "polygon";
   parents: IVertexImportSpec[];
-  properties?: any;
+  properties?: object;
 }
 
 interface IImageImportSpec {
@@ -1112,13 +1138,14 @@ interface IImageImportSpec {
     coords: JXGCoordPair;
     size: JXGCoordPair;
   };
-  properties?: any;
+  properties?: object;
 }
 
 interface IMovableLineImportSpec {
   type: "movableLine";
   parents: [IPointImportSpec, IPointImportSpec];
-  properties?: any;
+  properties?: object;
+  comment?: object;
 }
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
@@ -1130,14 +1157,24 @@ function preprocessImportFormat(snapshot: any) {
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
-    const { axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
+    const { axisNames, axisLabels, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
     const boundingBox = getBoardBounds(axisMin, axisRange);
     const [unitX, unitY] = getAxisUnits(axisRange);
-    changes.push(defaultGeometryBoardChange({ unitX, unitY, boundingBox, ...others }));
+    changes.push(defaultGeometryBoardChange({
+                  unitX, unitY,
+                  ...toObj("xName", axisNames?.[0]), ...toObj("yName", axisNames?.[1]),
+                  ...toObj("xAnnotation", axisLabels?.[0]), ...toObj("yAnnotation", axisLabels?.[1]),
+                  boundingBox, ...others }));
   }
 
   const changes: JXGChange[] = [];
   addBoard(boardSpecs);
+
+  function addComment(props: object) {
+    const id = uuid();
+    changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
+    return id;
+  }
 
   function addPoint(pointSpec: IPointImportSpec) {
     const { type, properties: _properties, ...others } = pointSpec;
@@ -1191,6 +1228,9 @@ function preprocessImportFormat(snapshot: any) {
     const parents = _parents.map(ptSpec => ptSpec.parents);
     const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
+    if (movableLineSpec.comment) {
+      addComment({ anchor: id, ...movableLineSpec.comment });
+    }
     return id;
   }
 

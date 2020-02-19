@@ -1,5 +1,58 @@
 # Changelog
 
+## Version 1.1.1 - released February 19, 2020
+
+- Log user role
+- Fix tile drags to existing row
+- Fix table selection bug
+- Fix geometry drag bug
+- Fix representation of linked points in group view
+- Prevent tile drop on section headers
+- Limit tile drags to a single source
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 518,038 bytes | 0.0% |
+| index.js | 4,137,028 bytes | 0.0% |
+
+## Version 1.1.0 - released February 10, 2020
+
+- User-editable table title row
+- User axis annotations
+- Fix tile drags from curriculum
+- Fix drawing tool stamps
+- Fix preview button launch from portal
+- Update dependencies
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 518,038 bytes | 3.5% |
+| index.js | 4,136,179 bytes | -6.0% |
+
+## Version 1.1.0-pre.1 - released January 30, 2020
+
+- Moving Straight Ahead content changes
+- Allow author- and user-setting of axis labels
+- Make movable line comment authorable
+- Support sequential link colors for linked tables/geometries
+- Limit polygons to points from a single table (or no table)
+- Order documents from newest to oldest
+- Add confirmation dialog before publishing
+- Put up dialog on authentication error which redirects back to portal
+- Support portal launch via Preview button
+- Dependency updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 500,384 bytes | -0.3% |
+| index.js | 4,398,158 bytes | 0.5% |
+
 ## Version 1.0.3 - released December 12, 2019
 
 - Bug fixes

@@ -1,0 +1,29 @@
+@import "../../components/vars";
+
+$link-color-0-light: #d8bed8;
+$link-color-0-dark: #7d287e;
+$link-color-1-light: $sage-light-1;
+$link-color-1-dark: $sage-dark-5;
+$link-color-2-light: $sky-light-1;
+$link-color-2-dark: $sky-dark-5;
+$link-color-3-light: $peacock-light-1;
+$link-color-3-dark: $peacock-dark-5;
+$link-color-4-light: $terra-light-1;
+$link-color-4-dark: $terra-dark-5;
+$link-color-5-light: $rust-light-1;
+$link-color-5-dark: $rust-dark-5;
+
+:export {
+  linkColor0Light: $link-color-0-light;
+  linkColor0Dark: $link-color-0-dark;
+  linkColor1Light: $link-color-1-light;
+  linkColor1Dark: $link-color-1-dark;
+  linkColor2Light: $link-color-2-light;
+  linkColor2Dark: $link-color-2-dark;
+  linkColor3Light: $link-color-3-light;
+  linkColor3Dark: $link-color-3-dark;
+  linkColor4Light: $link-color-4-light;
+  linkColor4Dark: $link-color-4-dark;
+  linkColor5Light: $link-color-5-light;
+  linkColor5Dark: $link-color-5-dark;
+}

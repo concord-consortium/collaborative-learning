@@ -31,6 +31,8 @@ describe("GeometryContent", () => {
               configContent?: (content: GeometryContentModelType) => void):
               { content: GeometryContentModelType, board: JXG.Board } {
     const content = defaultGeometryContent();
+    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
+    content.doPostCreate(metadata);
     if (configContent) configContent(content);
     const board = createDefaultBoard(content);
     return { content, board };
@@ -49,12 +51,29 @@ describe("GeometryContent", () => {
     destroy(content);
   });
 
+  it("can create with authored properties", () => {
+    const authored = {
+            board: {
+              properties: {
+                axisNames: ["authorX", "authorY"]
+              }
+            },
+            objects: []
+          };
+    const content = GeometryContentModel.create(authored);
+    expect(content.type).toBe(kGeometryToolID);
+    expect(content.changes.length).toEqual(1);
+    const change = JSON.parse(content.changes[0]);
+    expect(change.properties.xName).toBe("authorX");
+    expect(change.properties.yName).toBe("authorY");
+
+    destroy(content);
+  });
+
   it("can create/destroy a JSXGraph board", () => {
     const { content, board } = createContentAndBoard(_content => {
       _content.addChange({ operation: "create", target: "point", parents: [1, 1] });
     });
-    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
-    content.doPostCreate(metadata);
     expect(isBoard(board)).toBe(true);
 
     content.resizeBoard(board, 200, 200);
@@ -180,10 +199,7 @@ describe("GeometryContent", () => {
   });
 
   it("can select points, etc.", () => {
-    const content = defaultGeometryContent();
-    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
-    content.doPostCreate(metadata);
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     const p1 = content.addPoint(board, [0, 0]);
     const p2 = content.addPoint(board, [1, 1]);
     const p3 = content.addPoint(board, [1, 0]);
@@ -214,10 +230,7 @@ describe("GeometryContent", () => {
   });
 
   it("can add a vertex angle to a polygon", () => {
-    const content = defaultGeometryContent();
-    const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
-    content.doPostCreate(metadata);
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     const p0: JXG.Point = content.addPoint(board, [0, 0])!;
     const px: JXG.Point = content.addPoint(board, [1, 0])!;
     const py: JXG.Point = content.addPoint(board, [0, 1])!;
@@ -244,8 +257,7 @@ describe("GeometryContent", () => {
   });
 
   it("can suspend/resume syncChanges", () => {
-    const content = defaultGeometryContent();
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     expect(content.isSyncSuspended).toBe(false);
     content.suspendSync();
     expect(content.isSyncSuspended).toBe(true);
@@ -264,8 +276,7 @@ describe("GeometryContent", () => {
     const change1 = { operation: "create", target: "foo" } as any as JXGChange;
     const change2 = { operation: "create", target: "bar" } as any as JXGChange;
 
-    const content = defaultGeometryContent();
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     content.applyChange(board, change1);
     content.applyChange(board, change2);
     expect(content.changes.length).toBe(3);
@@ -281,8 +292,7 @@ describe("GeometryContent", () => {
     const change3 = { operation: "create", target: "baz" } as any as JXGChange;
     const change4 = { operation: "create", target: "qux", endBatch: true } as any as JXGChange;
 
-    const content = defaultGeometryContent();
-    const board = createDefaultBoard(content);
+    const { content, board } = createContentAndBoard();
     content.applyChange(board, change1);
     content.applyChange(board, change2);
     content.applyChange(board, change3);

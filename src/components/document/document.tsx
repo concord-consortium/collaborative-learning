@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
-import * as FileSaver from "file-saver";
+import React from "react";
+import FileSaver from "file-saver";
 
 import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
@@ -521,9 +521,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleSaveComment = (comment: string, tileId: string) => {
+  private handleSaveComment = (comment: string, tileId?: string) => {
     const { documents, user } = this.stores;
-    const document = documents.findDocumentOfTile(tileId);
+    const document = tileId && documents.findDocumentOfTile(tileId);
+    if (!tileId || !document) return;
     const toolApi = this.toolApiMap[tileId];
     const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
     if (document) {

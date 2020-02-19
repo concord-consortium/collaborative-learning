@@ -5,6 +5,8 @@ import { assign, find, values } from "lodash";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
+export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
+
 export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
@@ -23,12 +25,36 @@ export function getAxis(board: JXG.Board, type: "x" | "y") {
   return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
 }
 
+function getClientAxisLabels(board: JXG.Board) {
+  return ["x", "y"].map(xy => {
+    const axis = getAxis(board, xy as "x" | "y");
+    return axis?.getAttribute("clientName") as string | undefined;
+  });
+}
+
+export function getBaseAxisLabels(board: JXG.Board) {
+  const [xName, yName] = getClientAxisLabels(board);
+  return [xName || "x", yName || "y"];
+}
+
 export function syncAxisLabels(board: JXG.Board, xAxisLabel: string, yAxisLabel: string) {
   const xAxis = getAxis(board, "x");
   const yAxis = getAxis(board, "y");
   if (xAxis) xAxis.name = xAxisLabel;
   if (yAxis) yAxis.name = yAxisLabel;
   if (xAxis || yAxis) board.update();
+}
+
+function getClientAxisAnnotations(board: JXG.Board) {
+  return ["x", "y"].map(xy => {
+    const axis = getAxis(board, xy as "x" | "y");
+    return axis?.getAttribute("clientAnnotation") as string | undefined;
+  });
+}
+
+export function getAxisAnnotations(board: JXG.Board) {
+  const [xAnnotation, yAnnotation] = getClientAxisAnnotations(board);
+  return [xAnnotation || "", yAnnotation || ""];
 }
 
 export function getTickValues(pixPerUnit: number) {
@@ -101,9 +127,21 @@ export function guessUserDesiredBoundingBox(board: JXG.Board) {
   return [xMin + xBufferRange, yMax - yBufferRange, xMax - xBufferRange, yMin + yBufferRange];
 }
 
+function getAxisLabelsFromProps(props: JXGProperties) {
+  const xName = props?.xName ?? props?.boardScale?.xName;
+  const yName = props?.yName ?? props?.boardScale?.yName;
+  return [xName, yName];
+}
+
+function getAxisAnnotationsFromProps(props: JXGProperties) {
+  const xAnnotation = props?.xAnnotation ?? props?.boardScale?.xAnnotation;
+  const yAnnotation = props?.yAnnotation ?? props?.boardScale?.yAnnotation;
+  return [xAnnotation, yAnnotation];
+}
+
 function getAxisUnitsFromProps(changeProps?: JXGProperties, scale = 1) {
-  const unitX = changeProps && changeProps.unitX || kGeometryDefaultPixelsPerUnit;
-  const unitY = changeProps && changeProps.unitY || kGeometryDefaultPixelsPerUnit;
+  const unitX = changeProps?.unitX || changeProps?.boardScale?.unitX || kGeometryDefaultPixelsPerUnit;
+  const unitY = changeProps?.unitY || changeProps?.boardScale?.unitY || kGeometryDefaultPixelsPerUnit;
   return [unitX * scale, unitY * scale];
 }
 
@@ -123,7 +161,18 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
   return board;
 }
 
-function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: JXG.BoundingBox) {
+interface IAddAxesParams {
+  xName?: string;
+  yName?: string;
+  xAnnotation?: string;
+  yAnnotation?: string;
+  unitX: number;
+  unitY: number;
+  boundingBox?: JXG.BoundingBox;
+}
+
+function addAxes(board: JXG.Board, params: IAddAxesParams) {
+  const { xName, yName, xAnnotation, yAnnotation, unitX, unitY, boundingBox } = params;
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
   board.removeGrids();
@@ -133,9 +182,11 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: J
     board.setBoundingBox(boundingBox);
   }
   const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
-    name: "x",
+    name: xName || "x",
     withLabel: true,
-    label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]}
+    label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
+    ...toObj("clientName", xName),
+    ...toObj("clientAnnotation", xAnnotation)
   });
   xAxis.removeAllTicks();
   board.create("ticks", [xAxis, xMajorTickDistance], {
@@ -147,9 +198,11 @@ function addAxes(board: JXG.Board, unitX: number, unitY: number, boundingBox?: J
     drawZero: true
   });
   const yAxis = board.create("axis", [ [0, 0], [0, 1] ], {
-    name: "y",
+    name: yName || "y",
     withLabel: true,
-    label: {fontSize: 13, position: "rt", offset: [15, 0]}
+    label: {fontSize: 13, position: "rt", offset: [15, 0]},
+    ...toObj("clientName", yName),
+    ...toObj("clientAnnotation", yAnnotation)
   });
   yAxis.removeAllTicks();
   board.create("ticks", [yAxis, yMajorTickDistance], {
@@ -172,10 +225,16 @@ export const boardChangeAgent: JXGChangeAgent = {
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
-    const updatedBoundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
+    const boundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
     const scale = getCanvasScale(board ? board.container : boardDomId as string);
+    const [xName, yName] = getAxisLabelsFromProps(props as JXGProperties);
+    const [xAnnotation, yAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
     const [unitX, unitY] = getAxisUnitsFromProps(props, scale);
-    const axes = addAxes(board, unitX, unitY, updatedBoundingBox);
+    const axes = addAxes(board, {
+                          unitX, unitY, boundingBox,
+                          ...toObj("xName", xName), ...toObj("yName", yName),
+                          ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
+                        });
     return [board, ...axes];
 },
 
@@ -186,6 +245,14 @@ export const boardChangeAgent: JXGChangeAgent = {
       const boardScale = props.boardScale;
       if (boardScale) {
         const { canvasWidth, canvasHeight } = boardScale;
+        const [xClientName, yClientName] = getClientAxisLabels(board);
+        const [xPropName, yPropName] = getAxisLabelsFromProps(change.properties);
+        const xName = xPropName ?? xClientName;
+        const yName = yPropName ?? yClientName;
+        const [xClientAnnotation, yClientAnnotation] = getClientAxisAnnotations(board);
+        const [xPropAnnotation, yPropAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
+        const xAnnotation = xPropAnnotation ?? xClientAnnotation;
+        const yAnnotation = yPropAnnotation ?? yClientAnnotation;
         const width = board.canvasWidth;
         const height = board.canvasHeight;
         const widthMultiplier = (width - kAxisBuffer * 2) / canvasWidth;
@@ -208,7 +275,11 @@ export const boardChangeAgent: JXGChangeAgent = {
               board.removeObject(el);
             }
           });
-          const axes = addAxes(board, unitX, unitY);
+          const axes = addAxes(board, {
+                                unitX, unitY,
+                                ...toObj("xName", xName), ...toObj("yName", yName),
+                                ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
+                              });
           board.update();
           return axes;
         }

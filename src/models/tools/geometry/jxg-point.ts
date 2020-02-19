@@ -3,7 +3,7 @@ import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { isCommentType } from "./jxg-types";
 import { castArray, values } from "lodash";
-import * as uuid from "uuid/v4";
+import uuid from "uuid/v4";
 
 export const isPoint = (v: any) => v instanceof JXG.Point;
 

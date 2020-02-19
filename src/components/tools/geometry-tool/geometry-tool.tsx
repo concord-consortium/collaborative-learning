@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
@@ -9,7 +9,7 @@ import { GeometryContentModelType } from "../../../models/tools/geometry/geometr
 import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { HotKeys } from "../../../utilities/hot-keys";
-import * as classNames from "classnames";
+import classNames from "classnames";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 import "./geometry-tool.sass";

@@ -28,6 +28,13 @@ export enum ENavTabSectionType {
   kTeacherSupports = "teacher-supports"
 }
 
+export enum ENavTabOrder {
+  kOriginal = "original",
+  kReverse = "reverse"
+}
+const ENavTabOrderMSTType =
+        types.enumeration<ENavTabOrder>("ENavTabOrder", Object.values(ENavTabOrder));
+
 export const NavTabSectionModel =
   types.model("NavTabSectionModel", {
     className: "",
@@ -36,6 +43,7 @@ export const NavTabSectionModel =
     dataTestHeader: "section-header",
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
+    order: types.optional(ENavTabOrderMSTType, ENavTabOrder.kReverse),
     properties: types.array(types.string),
     showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,

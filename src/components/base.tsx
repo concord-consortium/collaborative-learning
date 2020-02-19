@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { IStores } from "../models/stores/stores";
 
 export interface IBaseProps {

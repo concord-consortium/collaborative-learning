@@ -1,6 +1,7 @@
 import mock from "xhr-mock";
 import { Logger, LogEventName } from "./logger";
 import { ProblemDocument, DocumentModel, DocumentModelType } from "../models/document/document";
+import { AppConfigModel } from "../models/stores/app-config-model";
 import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
@@ -24,6 +25,7 @@ describe("logger", () => {
     mock.setup();
     stores = createStores({
       appMode: "test",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
       user: UserModel.create({id: "0", portal: "test"})
     });
 
@@ -42,7 +44,7 @@ describe("logger", () => {
 
         const request = JSON.parse(req.body());
 
-        expect(request.application).toBe("CLUE");
+        expect(request.application).toBe("TestLogger");
         expect(request.username).toBe("0@test");
         expect(request.investigation).toBe("Investigation 1");
         expect(request.problem).toBe("Problem 1.1");
@@ -170,7 +172,7 @@ describe("logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      destinationDocument.content.userCopyTiles([copyTileInfo], 0);
+      destinationDocument.content.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
   });
