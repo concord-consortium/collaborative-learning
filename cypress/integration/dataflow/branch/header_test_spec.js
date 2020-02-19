@@ -20,7 +20,7 @@ context('Workspace view',()=>{
     describe('workspace ui',()=>{
         it('verify Dataflow workspace switch',()=>{
             dfheader.getDataflowWorkspaceSwitch().each(($switch,index,$switchList)=>{
-                var switches=['Control Panels','Workspace']
+                var switches=['Control Panels','Stats','Workspace']
                 expect($switch.text()).to.contain(switches[index]);
             })
         })

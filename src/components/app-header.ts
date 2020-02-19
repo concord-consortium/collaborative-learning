@@ -1,7 +1,8 @@
 export enum EPanelId {
   controlPanel = "control-panels",
   dashboard = "dashboard",
-  workspace = "workspace"
+  workspace = "workspace",
+  stats = "stats"
 }
 
 export interface IPanelSpec {
