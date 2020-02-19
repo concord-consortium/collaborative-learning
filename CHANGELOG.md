@@ -1,18 +1,19 @@
 # Changelog
 
-## Version 1.1.1 - released February 18, 2020
+## Version 1.1.1 - released February 19, 2020
 
 - Log user role
 - Fix tile drags to existing row
 - Fix table selection bug
 - Fix geometry drag bug
+- Fix representation of linked points in group view
 
 ### Asset Sizes
 
 | File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 518,038 bytes | 0.0% |
-| index.js | 4,136,755 bytes | 0.0% |
+| index.js | 4,136,752 bytes | 0.0% |
 
 ## Version 1.1.0 - released February 10, 2020
 
