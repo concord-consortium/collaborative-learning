@@ -21,6 +21,7 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { getContentIdFromNode } from "../../utilities/mst-utils";
 import { IconButton } from "../utilities/icon-button";
 import "../../utilities/dom-utils";
 
@@ -305,6 +306,8 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
       const content = documents.findDocumentOfTile(tileId)?.content;
       const tile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
       if (tile) {
+        const tileContentId = getContentIdFromNode(tile);
+        if (!tileContentId || (tileContentId !== dragSrcContentId)) return;
         const rowId = content?.findRowContainingTile(tile.id);
         const rowIndex = rowId && content?.getRowIndex(rowId);
         const row = rowId && content?.getRow(rowId);
@@ -323,6 +326,7 @@ export class ToolTileComponent extends BaseComponent<IProps, {}> {
     };
 
     // support dragging a tile without selecting it first
+    const dragSrcContentId = getContentIdFromNode(model);
     const dragTileIds = selectedTileIds.slice();
     if (dragTileIds.indexOf(model.id) < 0) {
       dragTileIds.push(model.id);
