@@ -1,4 +1,4 @@
-import * as superagent from "superagent";
+import superagent from "superagent";
 export const getErrorMessage = (err: any, res: superagent.Response) => {
   // The response should always be non-null, per the typedef and documentation:
   // cf. https://visionmedia.github.io/superagent/#error-handling

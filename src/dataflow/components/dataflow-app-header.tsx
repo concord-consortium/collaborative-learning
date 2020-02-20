@@ -1,7 +1,7 @@
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
-import * as React from "react";
-import { IPanelGroupSpec } from "../../components/app-header";
+import React from "react";
+import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
@@ -14,7 +14,7 @@ interface IProps extends IBaseProps {
   isGhostUser: boolean;
   panels: IPanelGroupSpec;
   current: string;
-  onPanelChange: (panel: string) => void;
+  onPanelChange: (panelId: EPanelId) => void;
   showGroup: boolean;
 }
 
@@ -87,10 +87,10 @@ export class DataflowAppHeaderComponent extends BaseComponent<IProps, {}> {
     if (!this.stores.user.isTeacher) return;
 
     interface IPanelButtonProps {
-      panelId: string;
+      panelId: EPanelId;
       label: string;
       current: string;
-      onPanelChange: (panel: string) => void;
+      onPanelChange: (panelId: EPanelId) => void;
     }
 
     const PanelButton: React.FC<IPanelButtonProps> = (props) => {

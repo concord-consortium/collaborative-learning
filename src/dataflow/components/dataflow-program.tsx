@@ -1,7 +1,6 @@
-import "@babel/polyfill"; // errors about missing `regeneratorRuntime` without this
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "./dataflow-base";
-import * as React from "react";
+import React from "react";
 import Rete, { NodeEditor, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";

@@ -79,6 +79,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   // give clients a chance to intercede after the change has been applied
   if (context && context.onDidApplyChange) {
     if (isBoard(result)) _board = result as JXG.Board;
+    else if (Array.isArray(result) && isBoard(result?.[0])) _board = result[0] as JXG.Board;
     context.onDidApplyChange(_board, change);
   }
 

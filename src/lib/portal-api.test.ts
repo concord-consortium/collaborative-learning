@@ -1,5 +1,5 @@
 import { getPortalOfferings, PortalOfferingParser } from "./portal-api";
-import * as nock from "nock";
+import nock from "nock";
 import { TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
 
 const userType = "teacher";

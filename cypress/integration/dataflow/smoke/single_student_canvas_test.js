@@ -83,13 +83,13 @@ context('single student functional test',()=>{
         describe('Program save and restore', function(){
             it.skip('verify program is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work', '','Programs')
-                rightNav.openCanvasItem('my-work', '', programTitle );
+                rightNav.openSection('my-work','programs')
+                rightNav.openCanvasItem('my-work', 'programs', programTitle );
             });
             it.skip('verify data collected is saved and restored', function() {
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work', '','Data')
-                rightNav.openCanvasItem('my-work', '', dataTitle );
+                rightNav.openSection('my-work','data')
+                rightNav.openCanvasItem('my-work', 'data', dataTitle );
             });
         });
         // TODO: Class Work changed with new feature changes.

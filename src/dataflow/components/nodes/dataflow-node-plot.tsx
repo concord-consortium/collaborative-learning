@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../dataflow-program";
@@ -66,7 +66,7 @@ function lineData(node: any) {
   }
 
   const chartData: ChartData = {
-    labels: Array.apply(null, {length: MAX_NODE_VALUES}).map(Number.call, Number),
+    labels: Array.apply(null, {length: MAX_NODE_VALUES} as any).map(Number.call, Number) as string[],
     datasets: chartDataSets
   };
 

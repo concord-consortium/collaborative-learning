@@ -33,7 +33,7 @@ context('canvas test',()=>{
 
     describe('canvas ui',()=>{
         it('verifies delete button is disabled',()=>{
-            canvas.getDeleteIcon().should('have.class', 'delete-disabled');
+            canvas.getDeleteIcon().should('have.class', 'delete disabled');
         })
         it('verify Dataflow tile opens with program toolbar',()=>{
             buttons.push('Clear','Reset')
@@ -127,8 +127,8 @@ context('canvas test',()=>{
             cy.wait(5000)
 
             // rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','','Programs');
-            rightNav.openCanvasItem('my-work','','Programs',title)
+            rightNav.openSection('my-work','programs');
+            rightNav.openCanvasItem('my-work','programs','Programs',title)
             cy.wait(5000)
             //compare before and after values
             dfblock.getNumberInput(0).invoke('attr','value').then((value)=>{

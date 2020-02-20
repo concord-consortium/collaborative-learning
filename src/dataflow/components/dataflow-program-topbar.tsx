@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { ProgramRunTime } from "../utilities/node";
 import { HTMLSelect } from "@blueprintjs/core";
 import { IconButton } from "../../components/utilities/icon-button";

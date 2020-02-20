@@ -77,12 +77,16 @@ export function createStores(params?: ICreateStores): IStores {
   };
 }
 
+export function setAppMode(stores: IStores, appMode: AppMode) {
+  stores.appMode = appMode;
+}
+
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;
   const section = sectionId && problem.getSectionById(sectionId);
   return [unit, investigation, problem, section].reduce((prev, level) => {
     const featureIndex = level ? level.disabled.findIndex(f => f === feature || f === `!${feature}`) : -1;
-    const isEnabledAtLevel = featureIndex >= 0 && level && level.disabled[featureIndex][0] === "!";
+    const isEnabledAtLevel = featureIndex >= 0 && level ? level.disabled[featureIndex][0] === "!" : true;
     return featureIndex >= 0 ? isEnabledAtLevel : prev;
   }, true);
 }

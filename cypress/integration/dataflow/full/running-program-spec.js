@@ -61,16 +61,16 @@ context('Program Canvas tests',function(){
             dfcanvas.runProgram();
             dialog.getDialogTitle().should('contain','Relay In Use');
             dialog.getDialogOKButton().click();
-            rightNav.openSection('my-work','','Programs')
-            rightNav.openCanvasItem('my-work','','Programs',relayTestProgram);
+            rightNav.openSection('my-work','programs')
+            rightNav.openCanvasItem('my-work','programs','Programs',relayTestProgram);
             dfcanvas.stopProgram();
         })
         it('verify running relay program is not in My Work>Data',()=>{
-            rightNav.openSection('my-work','','Data');
-            rightNav.getCanvasItemTitle('my-work','','Data').should('not.exist');
-            rightNav.getCanvasItemTitle('my-work','','Data').should('not.exist');
+            rightNav.openSection('my-work','data');
+            rightNav.getCanvasItemTitle('my-work','data','Data').should('not.exist');
+            rightNav.getCanvasItemTitle('my-work','data','Data').should('not.exist');
         })
-    }) 
+    })
 })
 after(function(){
     cy.clearQAData('all');

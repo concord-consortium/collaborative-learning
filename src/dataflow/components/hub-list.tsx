@@ -1,7 +1,7 @@
 
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
-import * as React from "react";
+import React from "react";
 import "./hub-list.sass";
 import { HubModelType, HubChannelType } from "../models/stores/hub-store";
 

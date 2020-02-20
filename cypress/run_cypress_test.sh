@@ -11,7 +11,7 @@ if [[ "$TRAVIS_COMMIT_MESSAGE" == *"[dev-build]"* ]]; then
     npm run test:cypress:smoke
 elif !(echo $BRANCH_ARRAY | grep -q $TRAVIS_BRANCH); then
     echo "elif TRAVIS_BRANCH=$TRAVIS_BRANCH"
-    npm run test:cypress:branch       
+    npm run test:cypress:branch
 else
     echo "else TRAVIS_BRANCH=$TRAVIS_BRANCH"
     npm run test:cypress

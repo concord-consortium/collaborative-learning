@@ -149,7 +149,7 @@ function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number, cors
         reject(new Error(`Error converting image: ${imageUrl}`));
       }
     };
-    image.onerror = (e: ErrorEvent) => {
+    image.onerror = (e) => {
       reject(new Error(`Error loading image: ${imageUrl}`));
     };
     image.src = imageUrl;

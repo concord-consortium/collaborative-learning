@@ -1,5 +1,5 @@
 // tslint:disable:jsx-no-lambda
-import * as React from "react";
+import React from "react";
 import { DrawingContentModelType, Color, ToolbarModalButton, TOOLBAR_WIDTH,
   colors, computeStrokeDashArray, StampModelType } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";

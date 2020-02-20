@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
@@ -275,9 +275,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    if (this.state.dropRowInfo) {
-      this.setState({ dropRowInfo: undefined });
-    }
+    this.clearDropRowInfo();
   }
 
   private isPointInRect(x: number, y: number, rect: ClientRect | DOMRect) {
@@ -340,6 +338,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return dropInfo;
   }
 
+  private clearDropRowInfo() {
+    if (this.state.dropRowInfo) {
+      this.setState({ dropRowInfo: undefined });
+    }
+  }
+
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
     const dragResizeRow = this.getDragResizeRowInfo(e);
@@ -351,17 +355,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
-    const { content } = this.props;
-    if (!content) return;
-    const dropRowInfo  = this.getDropRowInfo(e);
-    content.userMoveTiles(dragTiles.items, dropRowInfo);
+    this.props.content?.userMoveTiles(dragTiles.items, this.getDropRowInfo(e));
   }
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
-    const { content } = this.props;
-    if (!content) return;
-    const { rowInsertIndex } = this.getDropRowInfo(e);
-    content.userCopyTiles(dragTiles.items, rowInsertIndex);
+    this.props.content?.userCopyTiles(dragTiles.items, this.getDropRowInfo(e));
   }
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -385,6 +383,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
+    content?.showPendingInsertHighlight(false);
 
     if (!e.dataTransfer || !content || readOnly) return;
 
@@ -405,12 +404,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         else {
           this.handleCopyTilesDrop(e, dragTiles);
         }
-        return;
       } catch (ex) {
-        // tslint:disable-next-line:no-console
         console.error(ex);
-        return;
       }
+
+      this.clearDropRowInfo();
+      return;
     }
 
     const dragCreateTileType = e.dataTransfer.getData(kDragTileCreate);
@@ -420,9 +419,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.handleInsertNewTile(e);
     }
 
-    if (this.state.dropRowInfo) {
-      this.setState({ dropRowInfo: undefined });
-    }
+    this.clearDropRowInfo();
   }
 
   private scrollToSection(sectionId: string | null | undefined ) {
