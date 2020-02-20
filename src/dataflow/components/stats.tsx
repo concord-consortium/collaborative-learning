@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import * as React from "react";
+import { exportCSV } from "../utilities/export";
 import "./stats.sass";
 
 export interface StatsGroup {
@@ -269,17 +270,7 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
       row.push(statGroup.publishedProgramDocuments.toString());
       csv.push(row.join(","));
     });
-    this.exportCSV(csv.join("\n"), "classroom-stats.csv");
-  }
-
-  private exportCSV(csv: string, filename: string) {
-    const csvFile = new Blob([csv], {type: "text/csv"});
-    const downloadLink = document.createElement("a");
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
+    exportCSV(csv.join("\n"), "classroom-stats.csv");
   }
 
 }
