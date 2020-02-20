@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import "./plot-button-control.sass";
 

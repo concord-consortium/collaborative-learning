@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { DataflowAppHeaderComponent } from "./dataflow-app-header";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";

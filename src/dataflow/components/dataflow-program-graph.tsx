@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets, Chart } from "chart.js";
 import { DataflowOpenProgramButton } from "./dataflow-open-program-button";

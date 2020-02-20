@@ -11,6 +11,9 @@
     "rollbarAccessToken": "e9d3071af1a44af0b8be3ba6f9a6e455"
   },
   "jest": {
+    "setupFiles": [
+      "<rootDir>/setupTests.ts"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
