@@ -21,7 +21,7 @@ context('Workspace view',()=>{
         it('verify Dataflow workspace switch',()=>{
             dfheader.getDataflowWorkspaceSwitch().each(($switch,index,$switchList)=>{
                 var switches=['Control Panels','Workspace']
-                expect($switch.text()).to.contain(switches[index]);        
+                expect($switch.text()).to.contain(switches[index]);
             })
         })
         it('verify Problem name is Dataflow',function(){

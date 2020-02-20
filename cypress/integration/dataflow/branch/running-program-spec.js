@@ -73,8 +73,8 @@ context('Program Canvas tests',function(){
     })
     describe('Data Storage tests',()=>{
         it('restore program',()=>{
-            rightNav.openSection('my-work','','Programs')
-            rightNav.openCanvasItem('my-work','','Programs',program1)
+            rightNav.openSection('my-work','programs')
+            rightNav.openCanvasItem('my-work','programs','Programs',program1)
             dfcanvas.getDurationDropdown().should('contain', '5 mins')
         })
         it('verify data collection runs to the end of the duration',()=>{
@@ -88,7 +88,7 @@ context('Program Canvas tests',function(){
             dfcanvas.runProgram(dataset2);
             dfcanvas.getDurationContainer().find('.total').should('contain', '1 min')
             cy.wait(10000);
-            rightNav.openSection('my-work','','Data')
+            rightNav.openSection('my-work','data')
             dfrightnav.getRunningBadge().should('exist');
             cy.wait(55000);
             dialog.getDialogTitle().should('exist').and('contain','Run Complete');
@@ -99,11 +99,11 @@ context('Program Canvas tests',function(){
             dfrightnav.getRunningBadge().should('not.exist');
         })
         it('verify data collected from a run program appears in My Work>Data section',()=>{
-            rightNav.getCanvasItemTitle('my-work','','Data').contains(program1).should('not.be.visible')
+            rightNav.getCanvasItemTitle('my-work','data','Data').contains(program1).should('not.be.visible')
         })
         it('verify data collected from a run program does not appear in My Work>Programs section',()=>{
-            rightNav.openSection('my-work','','Programs')
-            rightNav.getCanvasItemTitle('my-work','','Programs').contains(dataset1).should('not.be.visible')
+            rightNav.openSection('my-work','programs')
+            rightNav.getCanvasItemTitle('my-work','programs','Programs').contains(dataset1).should('not.be.visible')
         })
         it('verify re-running a previously ran program creates a new dataset',()=>{
 
@@ -138,12 +138,12 @@ context('Program Canvas tests',function(){
             cy.wait(1500);
             dfcanvas.stopProgram();
         })
-    }) 
+    })
 })
-context('Data Canvas tests',()=>{   
+context('Data Canvas tests',()=>{
     it('verify restore of data canvas',()=>{
         // rightNav.openSection('my-work','','Data' -- section already open)
-        rightNav.openCanvasItem('my-work','','Data',dataset2)
+        rightNav.openCanvasItem('my-work','data','Data',dataset2)
         dfcanvas.getFullGraph().should('be.visible');
         dfcanvas.getFullGraph().find('.chartjs-render-monitor').should('be.visible')
         dfcanvas.getGraphButton('open-program').should('be.visible')
@@ -162,7 +162,7 @@ context('Data Canvas tests',()=>{
         dfblock.getBlock('data-storage').should('be.visible');
     })
     it('verify new program can be created from a dataset',()=>{
-        rightNav.openCanvasItem('my-work','','Data',dataset2)
+        rightNav.openCanvasItem('my-work','data','Data',dataset2)
         dfcanvas.createNewProgram();
         dfblock.getBlock('number').should('not.be.visible');
         dfblock.getBlock('data-storage').should('not.be.visible');

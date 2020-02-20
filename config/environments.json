@@ -19,7 +19,7 @@
   },
   "local":{
     "baseUrl": "http://localhost:8080/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5",
-    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5"
   }
 }

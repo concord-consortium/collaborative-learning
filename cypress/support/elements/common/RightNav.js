@@ -16,11 +16,11 @@ class RightNav{
         return cy.get('#rightNavTab-'+tab+'.tab');
     }
 
-    openRightNavTab(tab){   
+    openRightNavTab(tab){
         this.getRightNavTab(tab).click();
         cy.wait(1000);
     }
-    closeRightNavTab(tab){   
+    closeRightNavTab(tab){
         cy.get('#rightNavTab-'+tab+'.tab').click();
         cy.wait(2000);
     }
@@ -36,7 +36,7 @@ class RightNav{
     openSection(tab,section){
         if (tab=='learning-log'){
             cy.get('[data-test='+tab+'-section]').click();
-        } else {   
+        } else {
             cy.get('[data-test='+tab+'-section-'+section+']').click();
             cy.wait(1000);
         }

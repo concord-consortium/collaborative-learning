@@ -59,7 +59,7 @@ class Canvas{
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
-        cy.wait(3000)    
+        cy.wait(3000)
     }
     createNewExtraDocument(title){
         this.getNewDocumentIcon().click()
@@ -68,7 +68,7 @@ class Canvas{
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
-        cy.wait(3000)    
+        cy.wait(3000)
     }
 
     editTitlewithPencil(title){
@@ -83,7 +83,7 @@ class Canvas{
     editTitle(title){
         this.getPersonalDocTitle().find('#titlebar-title').click()
             .then(function(){
-                dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
+                dialog.getDialogTitle().should('exist').contains('Rename Program');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             })
@@ -94,7 +94,7 @@ class Canvas{
             .then(function(){
                 dialog.getDialogTitle().should('exist').and('contain','Copy');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
+                dialog.getDialogOKButton().click();
             })
     }
 
@@ -103,7 +103,7 @@ class Canvas{
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Copy Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
+                dialog.getDialogOKButton().click();
             })
     }
 
@@ -112,7 +112,7 @@ class Canvas{
             dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
         })
-    cy.wait(3000)    
+    cy.wait(3000)
     }
 
     publishPersonalCanvas(){
