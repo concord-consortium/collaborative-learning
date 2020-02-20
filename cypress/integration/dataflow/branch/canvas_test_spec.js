@@ -128,7 +128,7 @@ context('canvas test',()=>{
 
             // rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','programs');
-            rightNav.openCanvasItem('my-work','','Programs',title)
+            rightNav.openCanvasItem('my-work','programs','Programs',title)
             cy.wait(5000)
             //compare before and after values
             dfblock.getNumberInput(0).invoke('attr','value').then((value)=>{
