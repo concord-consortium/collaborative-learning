@@ -38,6 +38,9 @@ export const TileRowModel = types
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
+    get acceptsTileDrops() {
+      return !self.isSectionHeader;
+    },
     get tileIds() {
       return self.tiles.map(tile => tile.tileId).join(", ");
     },
@@ -95,6 +98,12 @@ export const TileRowModel = types
     },
     removeTileFromRow(tileId: string) {
       self.tiles.replace(self.tiles.filter(tile => tile.tileId !== tileId));
+      if (!self.isUserResizable) {
+        self.height = undefined;
+      }
+    },
+    removeTilesFromRow(removeFn: (tileId: string) => boolean) {
+      self.tiles.replace(self.tiles.filter(tile => !removeFn(tile.tileId)));
       if (!self.isUserResizable) {
         self.height = undefined;
       }

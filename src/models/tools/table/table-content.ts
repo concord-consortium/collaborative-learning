@@ -111,8 +111,8 @@ export const TableMetadataModel = types
     addLinkedGeometry(id: string) {
       if (self.linkedGeometries.indexOf(id) < 0) {
         self.linkedGeometries.push(id);
-        addLinkedTable(self.id);
       }
+      addLinkedTable(self.id);
     },
     removeLinkedGeometry(id: string) {
       const index = self.linkedGeometries.indexOf(id);

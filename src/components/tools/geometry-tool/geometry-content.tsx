@@ -1224,7 +1224,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
 
     this.dragSelectedPoints(evt, dragTarget, usrDiff);
-    this.dragPts = {};
 
     // only create a change object if there's actually a change
     if (usrDiff[1] || usrDiff[2]) {
@@ -1245,6 +1244,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       this.applyChange(() => content.updateObjects(board, ids, props));
     }
+    this.dragPts = {};
 
     return didDragPoints;
   }

@@ -181,8 +181,8 @@ export const GeometryMetadataModel = types
         });
         disposer && (self.tableLinkDisposers[tableId] = disposer);
         self.linkedTables.push({ id: tableId, ...axes });
-        addLinkedTable(tableId);
       }
+      addLinkedTable(tableId);
     },
     removeTableLink(tableId: string) {
       const index = self.linkedTables.findIndex(entry => entry.id === tableId);

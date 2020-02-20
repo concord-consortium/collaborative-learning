@@ -3,10 +3,8 @@ import SvgLinkedTileIcon from "../../assets/icons/linked-tile-icon";
 import { getTableLinkColors } from "../../models/tools/table-links";
 import { IconButtonSvg } from "../utilities/icon-button-svg";
 
-// It should be possible to use a standard import and get TypeScript types
-// (cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript).
-// See comment in `typings.d.ts` for details.
-const styles = require("./link-indicator.scss");
+// cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
+import styles from "./link-indicator.scss";
 
 interface IProps {
   id: string;

@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 1.1.1 - released February 19, 2020
+
+- Log user role
+- Fix tile drags to existing row
+- Fix table selection bug
+- Fix geometry drag bug
+- Fix representation of linked points in group view
+- Prevent tile drop on section headers
+- Limit tile drags to a single source
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 518,038 bytes | 0.0% |
+| index.js | 4,137,028 bytes | 0.0% |
+
 ## Version 1.1.0 - released February 10, 2020
 
 - User-editable table title row

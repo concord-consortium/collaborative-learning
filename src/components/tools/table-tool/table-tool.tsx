@@ -17,7 +17,8 @@ import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, Lambda } from "mobx";
+type MobXDisposer = IReactionDisposer | Lambda;
 
 import "./table-tool.sass";
 
@@ -45,10 +46,9 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
   private syncedChanges: number;
-  private disposers: IReactionDisposer[];
+  private disposers: MobXDisposer[];
 
   private gridApi?: GridApi;
-  private gridColumnApi?: ColumnApi;
 
   public componentDidMount() {
     this.initializeHotKeys();
@@ -79,7 +79,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     });
 
     const { selection } = this.stores;
-    selection.observe(this.props.model.id, change => {
+    this.disposers.push(selection.observe(this.props.model.id, change => {
       const rowId = change.name;
       const isSharedRowSelected = change.type === "delete"
               ? false
@@ -89,7 +89,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
       if (rowNode && (isSharedRowSelected !== isRowNodeSelected)) {
         rowNode.setSelected(isSharedRowSelected, false);
       }
-    });
+    }));
 
     this.disposers.push(autorun(() => {
       const { model: { content } } = this.props;
@@ -111,6 +111,8 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
     this.props.onUnregisterToolApi();
 
     this.disposers.forEach(disposer => disposer());
+
+    this.gridApi = undefined;
   }
 
   public render() {
@@ -197,7 +199,6 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
 
   private handleGridReady = (gridReadyParams: GridReadyEvent) => {
     this.gridApi = gridReadyParams.api || undefined;
-    this.gridColumnApi = gridReadyParams.columnApi || undefined;
   }
 
   private handleRowSelectionChange = (e: SelectionChangedEvent) => {
