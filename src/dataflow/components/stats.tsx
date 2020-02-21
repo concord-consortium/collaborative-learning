@@ -1,15 +1,18 @@
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
-import * as React from "react";
+import React from "react";
 import { exportCSV } from "../utilities/export";
+import { each } from "lodash";
 import "./stats.sass";
 
 export interface StatsGroup {
-  studentName: string;
+  userId: string;
+  userName: string;
   documents: number;
   programDocuments: number;
   runProgramDocuments: number;
   runProgramDataDocuments: number;
+  runProgramRelayDocuments: number;
   runProgramRelayOnlyDocuments: number;
   publishedProgramDocuments: number;
 }
@@ -21,8 +24,8 @@ interface IState {
   userStats: StatsGroup[];
 }
 
-const kHeaderNames = ["Documents", "Editable Programs", "Run Programs",
-                      "Run Programs w/ Data", "Run Programs Relay-Only", "Published Programs"];
+const kHeaderNames = ["Documents", "Editable Programs", "Run Programs", "Run Programs with Data",
+                      "Run Programs with Relay", "Run Programs Relay-Only", "Published Data Programs"];
 
 @inject("stores")
 @observer
@@ -42,14 +45,11 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
     const publicationsPath = db.firebase.getClassPersonalPublicationsPath(db.stores.user);
     const publicationsRef = db.firebase.ref(publicationsPath);
     const publicationsSnapshot = await publicationsRef.once("value");
-    const publishedDocOriginIds: string[] = [];
+    const publishedDocOriginIds: Set<string> = new Set();
     if (publicationsSnapshot) {
-      const pulishedDocs = publicationsSnapshot.val();
-      Object.keys(pulishedDocs).forEach((pulishedDoc) => {
-        const pulishedDocEntry = pulishedDocs[pulishedDoc];
-        if (!publishedDocOriginIds.find(originDoc => originDoc === pulishedDocEntry.originDoc)) {
-          publishedDocOriginIds.push(pulishedDocEntry.originDoc);
-        }
+      const publishedDocs = publicationsSnapshot.val();
+      each(publishedDocs, publishedDoc => {
+        publishedDocOriginIds.add(publishedDoc.originDoc);
       });
     }
 
@@ -60,35 +60,37 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
     if (usersSnapshot) {
       const users = usersSnapshot.val();
       const userStats: StatsGroup[] = [];
-
-      Object.keys(users).forEach((userId) => {
+      each(users, (userEntry, userId) => {
         const user = this.stores.class.getUserById(userId);
-        if (user && user.type === "student") {
+        if (user?.type === "student") {
           const statsGroup: StatsGroup = {
-            studentName: user.fullName,
+            userId,
+            userName: user.fullName,
             documents: 0,
             programDocuments: 0,
             runProgramDocuments: 0,
             runProgramDataDocuments: 0,
+            runProgramRelayDocuments: 0,
             runProgramRelayOnlyDocuments: 0,
             publishedProgramDocuments: 0
           };
-
-          const userEntry = users[userId];
-          Object.keys(userEntry.personalDocs).forEach((pDoc) => {
-            const document = userEntry.personalDocs[pDoc];
-
+          each(userEntry.personalDocs, document => {
             // determine if this document is a published document
-            if (publishedDocOriginIds.find(originDoc => originDoc === document.self.documentKey)) {
+            if (publishedDocOriginIds.has(document.self.documentKey)) {
               statsGroup.publishedProgramDocuments++;
             }
-
             // determine if this is a run program
-            if (document.properties && document.properties.dfRunId) {
+            if (document.properties?.dfRunId) {
               statsGroup.runProgramDocuments++;
-              document.properties.dfHasData
-                ? statsGroup.runProgramDataDocuments++
-                : statsGroup.runProgramRelayOnlyDocuments++;
+              if (document.properties?.dfHasData) {
+                statsGroup.runProgramDataDocuments++;
+              }
+              if (document.properties?.dfHasRelay) {
+                statsGroup.runProgramRelayDocuments++;
+              }
+              if (document.properties?.dfHasRelay && !document.properties?.dfHasData) {
+                statsGroup.runProgramRelayOnlyDocuments++;
+              }
             } else {
               statsGroup.programDocuments++;
             }
@@ -128,31 +130,24 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
 
   private getStatTotals() {
     const totals: StatsGroup = {
-      studentName: "",
+      userId: "",
+      userName: String(this.state.userStats.length),
       documents: 0,
       programDocuments: 0,
       runProgramDocuments: 0,
       runProgramDataDocuments: 0,
+      runProgramRelayDocuments: 0,
       runProgramRelayOnlyDocuments: 0,
       publishedProgramDocuments: 0
     };
     this.state.userStats.forEach(stats => {
-      totals.documents = totals.documents ? totals.documents + stats.documents : stats.documents;
-      totals.programDocuments = totals.programDocuments
-        ? totals.programDocuments + stats.programDocuments
-        : stats.programDocuments;
-      totals.runProgramDocuments = totals.runProgramDocuments
-        ? totals.runProgramDocuments + stats.runProgramDocuments
-        : stats.runProgramDocuments;
-      totals.runProgramDataDocuments = totals.runProgramDataDocuments
-        ? totals.runProgramDataDocuments + stats.runProgramDataDocuments
-        : stats.runProgramDataDocuments;
-      totals.runProgramRelayOnlyDocuments = totals.runProgramRelayOnlyDocuments
-        ? totals.runProgramRelayOnlyDocuments + stats.runProgramRelayOnlyDocuments
-        : stats.runProgramRelayOnlyDocuments;
-      totals.publishedProgramDocuments = totals.publishedProgramDocuments
-        ? totals.publishedProgramDocuments + stats.publishedProgramDocuments
-        : stats.publishedProgramDocuments;
+      totals.documents = totals.documents + stats.documents;
+      totals.programDocuments = totals.programDocuments + stats.programDocuments;
+      totals.runProgramDocuments = totals.runProgramDocuments + stats.runProgramDocuments;
+      totals.runProgramDataDocuments = totals.runProgramDataDocuments + stats.runProgramDataDocuments;
+      totals.runProgramRelayDocuments = totals.runProgramRelayDocuments + stats.runProgramRelayDocuments;
+      totals.runProgramRelayOnlyDocuments = totals.runProgramRelayOnlyDocuments + stats.runProgramRelayOnlyDocuments;
+      totals.publishedProgramDocuments = totals.publishedProgramDocuments + stats.publishedProgramDocuments;
     });
     return totals;
   }
@@ -175,6 +170,7 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
               <td className="stat-cell">{totals.programDocuments}</td>
               <td className="stat-cell">{totals.runProgramDocuments}</td>
               <td className="stat-cell">{totals.runProgramDataDocuments}</td>
+              <td className="stat-cell">{totals.runProgramRelayDocuments}</td>
               <td className="stat-cell">{totals.runProgramRelayOnlyDocuments}</td>
               <td className="stat-cell">{totals.publishedProgramDocuments}</td>
             </tr>
@@ -200,6 +196,7 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
               <td className="stat-cell">{(totals.programDocuments / numUsers).toFixed(2)}</td>
               <td className="stat-cell">{(totals.runProgramDocuments / numUsers).toFixed(2)}</td>
               <td className="stat-cell">{(totals.runProgramDataDocuments / numUsers).toFixed(2)}</td>
+              <td className="stat-cell">{(totals.runProgramRelayDocuments / numUsers).toFixed(2)}</td>
               <td className="stat-cell">{(totals.runProgramRelayOnlyDocuments / numUsers).toFixed(2)}</td>
               <td className="stat-cell">{(totals.publishedProgramDocuments / numUsers).toFixed(2)}</td>
             </tr>
@@ -238,12 +235,13 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
     return (
       this.state.userStats.map((statGroup, i) => {
         return (
-          <tr className="stat-row" key={i}>
-            <td className="stat-cell">{statGroup.studentName}</td>
+          <tr className="stat-row" key={statGroup.userId}>
+            <td className="stat-cell">{statGroup.userName}</td>
             <td className="stat-cell">{statGroup.documents}</td>
             <td className="stat-cell">{statGroup.programDocuments}</td>
             <td className="stat-cell">{statGroup.runProgramDocuments}</td>
             <td className="stat-cell">{statGroup.runProgramDataDocuments}</td>
+            <td className="stat-cell">{statGroup.runProgramRelayDocuments}</td>
             <td className="stat-cell">{statGroup.runProgramRelayOnlyDocuments}</td>
             <td className="stat-cell">{statGroup.publishedProgramDocuments}</td>
           </tr>
@@ -261,11 +259,12 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
 
     this.state.userStats.forEach(statGroup => {
       const row: string[] = [];
-      row.push(statGroup.studentName);
+      row.push(statGroup.userName);
       row.push(statGroup.documents.toString());
       row.push(statGroup.programDocuments.toString());
       row.push(statGroup.runProgramDocuments.toString());
       row.push(statGroup.runProgramDataDocuments.toString());
+      row.push(statGroup.runProgramRelayDocuments.toString());
       row.push(statGroup.runProgramRelayOnlyDocuments.toString());
       row.push(statGroup.publishedProgramDocuments.toString());
       csv.push(row.join(","));
