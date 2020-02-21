@@ -9,35 +9,13 @@
 module.exports = function patchRete(retePath) {
   const fs = require('fs');
   const retePre = fs.readFileSync(retePath, { encoding: 'utf8' });
-
-  /*
-   * The Zoom patch limits scroll-wheel zooming to when the mouse is over the
-   * white space of the Rete editor, i.e. not when over a node or other content
-   * that might want to handle the wheel event themselves. When the Zoom code
-   * swallows the wheel event, it prevents node menus from scrolling, etc.
-   */
-  const preZoomPatchSrc = [
-    `  _createClass(Zoom, [{`,
-    `    key: "wheel",`,
-    `    value: function wheel(e) {`,
-    `      e.preventDefault();`
-  ];
-  const preZoomPatchStr = preZoomPatchSrc.join("\n");
-
-  const postZoomPatchSrc = [
-    `  _createClass(Zoom, [{`,
-    `    key: "wheel",`,
-    `    value: function wheel(e) {`,
-    `      if (e.currentTarget !== e.target) return;`,
-    `      e.preventDefault();`
-  ];
-  const postZoomPatchStr = postZoomPatchSrc.join("\n");
-  let retePost = retePre.replace(preZoomPatchStr, postZoomPatchStr);
-  const hasZoomPatch = retePost.indexOf(postZoomPatchStr) >= 0;
+  let retePost = retePre;
 
   /*
    * The Drag patch limits dragging to the primary mouse button, to prevent
    * nodes from getting stuck to the mouse after right-button clicks.
+   * Proposed fix to Rete: https://github.com/retejs/rete/pull/404.
+   * Merged on 2020-01-11; published in 1.43-rc.1.
    */
   const preDragPatchSrc = [
     `  _createClass(Drag, [{`,
@@ -58,7 +36,7 @@ module.exports = function patchRete(retePath) {
   retePost = retePost.replace(preDragPatchStr, postDragPatchStr);
   const hasDragPatch = retePost.indexOf(postDragPatchStr) >= 0;
 
-  if (hasZoomPatch && hasDragPatch) {
+  if (hasDragPatch) {
     console.log("Patch succeeded!");
     if (retePost !== retePre) {
       fs.writeFileSync(retePath, retePost, { encoding: 'utf8' });

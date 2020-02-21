@@ -10,10 +10,10 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
-const patchRete = require('./scripts/patch-rete');
-const reteRelPath = 'node_modules/rete/build/rete.esm.js';
-const retePath = path.join(__dirname, reteRelPath);
-patchRete(retePath);
+// const patchRete = require('./scripts/patch-rete');
+// const reteRelPath = 'node_modules/rete/build/rete.esm.js';
+// const retePath = path.join(__dirname, reteRelPath);
+// patchRete(retePath);
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
