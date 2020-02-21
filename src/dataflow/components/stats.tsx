@@ -30,6 +30,7 @@ const kHeaderNames = ["Documents", "Editable Programs", "Run Programs", "Run Pro
 @inject("stores")
 @observer
 export class StatsComponent extends BaseComponent<IProps, IState> {
+  private _isMounted: boolean;
 
   constructor(props: IProps) {
     super(props);
@@ -40,6 +41,7 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
   }
 
   public async componentDidMount() {
+    this._isMounted = true;
     const {db} = this.stores;
     // request the published documents
     const publicationsPath = db.firebase.getClassPersonalPublicationsPath(db.stores.user);
@@ -99,8 +101,12 @@ export class StatsComponent extends BaseComponent<IProps, IState> {
           userStats.push(statsGroup);
         }
       });
-      this.setState({ loading: false, userStats });
+      this._isMounted && this.setState({ loading: false, userStats });
     }
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
   }
 
   public render() {
