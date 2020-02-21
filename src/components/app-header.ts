@@ -1,6 +1,7 @@
 export enum EPanelId {
   controlPanel = "control-panels",
   dashboard = "dashboard",
+  stats = "stats",
   workspace = "workspace"
 }
 
