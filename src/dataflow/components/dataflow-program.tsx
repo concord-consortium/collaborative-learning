@@ -125,6 +125,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEditor: NodeEditor;
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
+  private _isMounted: boolean;
 
   constructor(props: IProps) {
     super(props);
@@ -203,6 +204,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
+    this._isMounted = true;
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
     }
@@ -213,6 +215,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
+    this._isMounted = false;
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -1048,9 +1051,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               graphDataSet.sequences[i].data.push(pt);
             });
           });
-          this.setState({ graphDataSet });
+          this._isMounted && this.setState({ graphDataSet });
         } else {
-          (this.getRunState() === ProgramRunStates.Complete) && this.setState({ graphDataSet });
+          (this.getRunState() === ProgramRunStates.Complete && this._isMounted) && this.setState({ graphDataSet });
         }
       });
     }
