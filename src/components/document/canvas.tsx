@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { IBaseProps } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";

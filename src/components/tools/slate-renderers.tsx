@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 // These renderers are used by the Slate editor to translate a mark or block
 // into its HTML representation.

@@ -1,22 +1,24 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { Alert, Intent } from "@blueprintjs/core";
 import { BaseComponent } from "../../base";
 import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
+import { IToolTileProps } from "../tool-tile";
 import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
-        } from "ag-grid-community";
+        } from "@ag-grid-community/core";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { addTable, getLinkedTableIndex } from "../../../models/tools/table-links";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
-          TableContentModelType } from "../../../models/tools/table/table-content";
+        TableContentModelType } from "../../../models/tools/table/table-content";
 import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
 import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
 import { each, sortedIndexOf } from "lodash";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, Lambda } from "mobx";
+type MobXDisposer = IReactionDisposer | Lambda;
 
 import "./table-tool.sass";
 
@@ -25,53 +27,59 @@ interface IClipboardCases {
   cases: ICase[];
 }
 
-interface IProps {
-  model: ToolTileModelType;
-  readOnly?: boolean;
-}
-
-// all properties are optional
-interface IPartialState {
-  dataSet?: IDataSet;
-  autoSizeColumns?: boolean;
-}
-​
-// some properties are required
-interface IState extends IPartialState {
+interface IState {
   dataSet: IDataSet;
-  showInvalidPasteAlert: boolean;
+  showInvalidPasteAlert?: boolean;
 }
 
 @inject("stores")
 @observer
-export default class TableToolComponent extends BaseComponent<IProps, IState> {
+export default class TableToolComponent extends BaseComponent<IToolTileProps, IState> {
 
   public static tileHandlesSelection = true;
 
   public state: IState = {
-                  dataSet: DataSet.create(),
-                  showInvalidPasteAlert: false
+                  dataSet: DataSet.create()
                 };
 
+  private modelId: string;
   private domRef: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
   private syncedChanges: number;
-  private disposers: IReactionDisposer[];
+  private disposers: MobXDisposer[];
 
   private gridApi?: GridApi;
-  private gridColumnApi?: ColumnApi;
 
   public componentDidMount() {
     this.initializeHotKeys();
     this.syncedChanges = 0;
     this.disposers = [];
 
+    this.modelId = this.props.model.id;
+    addTable(this.props.docId, this.modelId);
+
     if (this.domRef.current) {
       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
     }
 
+    const metadata = this.getContent().metadata;
+    this.props.onRegisterToolApi({
+      hasSelection: () => false,
+      deleteSelection: () => { /* nop */ },
+      getSelectionInfo: () => "",
+      setSelectionHighlight: () => { /* nop */ },
+      isLinked: () => {
+        return metadata.isLinked;
+      },
+      getLinkIndex: (index?: number) => {
+        return metadata.isLinked
+                ? getLinkedTableIndex(this.modelId)
+                : -1;
+      }
+    });
+
     const { selection } = this.stores;
-    selection.observe(this.props.model.id, change => {
+    this.disposers.push(selection.observe(this.props.model.id, change => {
       const rowId = change.name;
       const isSharedRowSelected = change.type === "delete"
               ? false
@@ -81,7 +89,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       if (rowNode && (isSharedRowSelected !== isRowNodeSelected)) {
         rowNode.setSelected(isSharedRowSelected, false);
       }
-    });
+    }));
 
     this.disposers.push(autorun(() => {
       const { model: { content } } = this.props;
@@ -100,24 +108,31 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
       this.domRef.current.removeEventListener("mousedown", this.handleMouseDown);
     }
 
+    this.props.onUnregisterToolApi();
+
     this.disposers.forEach(disposer => disposer());
+
+    this.gridApi = undefined;
   }
 
   public render() {
-    const { readOnly } = this.props;
+    const { model, readOnly } = this.props;
     const content = this.getContent();
     const metadata = content.metadata;
     const itemFlags: IMenuItemFlags = {
             addAttribute: false,
             addCase: true,
             addRemoveDivider: false,
+            setTableName: true,
             renameAttribute: true,
             removeAttribute: false,
             removeCases: true,
             unlinkGeometry: true
           };
+    const linkIndex = getLinkedTableIndex(model.id);
+    const linkClass = metadata.isLinked ? `is-linked link-color-${linkIndex}` : "";
     return (
-      <div className={`table-tool ${metadata.isLinked ? "is-linked" : ""}`}
+      <div className={`table-tool ${linkClass}`}
           ref={this.domRef}
           tabIndex={0}
           onKeyDown={this.handleKeyDown} >
@@ -136,6 +151,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
           readOnly={readOnly}
           onGridReady={this.handleGridReady}
           onRowSelectionChange={this.handleRowSelectionChange}
+          onSetTableName={this.handleSetTableName}
           onSetAttributeName={this.handleSetAttributeName}
           onSetExpression={this.handleSetExpression}
           onAddCanonicalCases={this.handleAddCanonicalCases}
@@ -150,10 +166,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderInvalidPasteAlert() {
-    const { showInvalidPasteAlert } = this.state;
-    if (!showInvalidPasteAlert) return;
-
-    return (
+    return this.state.showInvalidPasteAlert && (
       <Alert
           confirmButtonText="OK"
           icon="error"
@@ -186,7 +199,6 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
 
   private handleGridReady = (gridReadyParams: GridReadyEvent) => {
     this.gridApi = gridReadyParams.api || undefined;
-    this.gridColumnApi = gridReadyParams.columnApi || undefined;
   }
 
   private handleRowSelectionChange = (e: SelectionChangedEvent) => {
@@ -195,7 +207,7 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     selection.setSelected(this.props.model.id, nodes.map(n => n.id));
   }
 
-  private handleMouseDown: EventListener = (e: MouseEvent) => {
+  private handleMouseDown = (e: MouseEvent) => {
     const target: HTMLElement = e.target as HTMLElement;
     const targetClasses = target && target.className;
     // don't mess with focus if this looks like something ag-grid has handled
@@ -205,11 +217,11 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     }
 
     // table tile should have keyboard focus -- requires tabIndex
-    this.domRef.current && this.domRef.current.focus();
+    this.domRef.current?.focus();
 
     // clicking on table background clears selection
-    this.gridApi && this.gridApi.deselectAll();
-    this.gridApi && this.gridApi.refreshCells();
+    this.gridApi?.deselectAll();
+    this.gridApi?.refreshCells();
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -317,6 +329,13 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     return this.getGeometryActionLinks(links, true);
   }
 
+  private handleSetTableName = (name: string) => {
+    const shouldExpandTable = name && !this.state.dataSet?.name;
+    this.getContent().setTableName(name);
+    const kTableNameHeight = 25;
+    this.props.onRequestRowHeight(this.props.model.id, undefined, kTableNameHeight);
+  }
+
   private handleSetAttributeName = (attributeId: string, name: string) => {
     const tableActionLinks = this.getTableActionLinks();
     this.getContent().setAttributeName(attributeId, name);
@@ -350,9 +369,9 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private handleAddCanonicalCases = (newCases: ICase[]) => {
-    const validateCase = (aCase: ICase) => {
-      const newCase: ICase = { __id__: uniqueId() };
+  private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
+    const validateCase = (aCase: ICaseCreation) => {
+      const newCase: ICaseCreation = { __id__: uniqueId() };
       if (this.getContent().isLinked) {
         // validate linkable values
         this.state.dataSet.attributes.forEach(attr => {
@@ -367,8 +386,8 @@ export default class TableToolComponent extends BaseComponent<IProps, IState> {
     const selectedRowIds = this.gridApi && this.gridApi.getSelectedNodes().map(row => row.id);
     const firstSelectedRowId = selectedRowIds && selectedRowIds.length && selectedRowIds[0] || undefined;
     const tableActionLinks = this.getTableActionLinks();
-    this.getContent().addCanonicalCases(cases as ICaseCreation[], firstSelectedRowId, tableActionLinks);
-    const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__));
+    this.getContent().addCanonicalCases(cases, firstSelectedRowId, tableActionLinks);
+    const parents = cases.map(aCase => this.getPositionOfPoint(aCase.__id__ as string));
     const props = cases.map(aCase => ({ id: aCase.__id__ }));
     const geomActionLinks = this.getGeometryActionLinksWithLabels(tableActionLinks);
     this.getContent().metadata.linkedGeometries.forEach(id => {

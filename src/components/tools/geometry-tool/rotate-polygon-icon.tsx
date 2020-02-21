@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { copyCoords, getEventCoords, rotateCoords } from "../../../models/tools/geometry/geometry-utils";
 
 interface IProps {

@@ -12,7 +12,7 @@ import { authenticate,
         createFakeUser,
         getFirebaseJWTParams} from "./auth";
 import { AppConfigModel } from "../models/stores/app-config-model";
-import * as nock from "nock";
+import nock from "nock";
 import { NUM_FAKE_STUDENTS } from "../components/demo/demo-creator";
 import { QueryParams } from "../utilities/url-params";
 

@@ -1,5 +1,5 @@
 import { MqttClient, connect } from "mqtt";
-import * as AWS from "aws-sdk";
+import AWS from "aws-sdk";
 import { IStores } from "../models/stores/dataflow-stores";
 import { getSignedUrl } from "../utilities/aws";
 import { HubChannelModel } from "../models/stores/hub-store";

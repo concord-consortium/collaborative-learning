@@ -11,7 +11,7 @@ before(function(){
     cy.visit(baseUrl+queryParams);
 });
 
-context.skip('test canvas tools', function(){
+context.skip('test canvas tools', function(){ //need to find new home for this test bec only data docs can be published
     describe('Test header elements UI', function(){
         it('verify publish button', function(){
                 //should have create new document

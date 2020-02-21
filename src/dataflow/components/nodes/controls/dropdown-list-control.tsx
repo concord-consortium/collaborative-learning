@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
@@ -66,6 +66,7 @@ export class DropdownListControl extends Rete.Control {
                                 isDisabled?: DisabledChecker) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      useStopEventPropagation(divRef, "wheel");
       const listRef = useRef<HTMLDivElement>(null);
       useCloseDropdownOnOutsideEvent(listRef, () => this.props.showList, () => {
                                       this.props.showList = false;

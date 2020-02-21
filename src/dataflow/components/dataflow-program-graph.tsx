@@ -1,10 +1,10 @@
-import * as React from "react";
+import React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets, Chart } from "chart.js";
 import { DataflowOpenProgramButton } from "./dataflow-open-program-button";
 import { SplitViewButtons } from "./split-view-buttons";
 import { ChartPlotColors } from "./../utilities/node";
-import { exportCSV } from "../utilities/export";
+import { exportDataCSV } from "../utilities/export";
 import { isEqual } from "lodash";
 import "./dataflow-program-graph.sass";
 
@@ -69,7 +69,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   }
   public handleExport = () => {
     const {dataSet} = this.props;
-    exportCSV(dataSet.sequences);
+    exportDataCSV(dataSet.sequences);
   }
 
   public handleExportImage = () => {

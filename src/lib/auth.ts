@@ -1,5 +1,5 @@
-import * as jwt from "jsonwebtoken";
-import * as superagent from "superagent";
+import jwt from "jsonwebtoken";
+import superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -313,6 +313,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
 
 export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
   interface IAuthenticateResponse {
+    appMode?: AppMode;
     authenticatedUser: AuthenticatedUser;
     classInfo?: ClassInfo;
     problemId?: string;
@@ -344,13 +345,16 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
-      return resolve(createFakeAuthentication({
-        appMode,
-        classId: fakeClass,
-        userType, userId,
-        unitCode,
-        problemOrdinal
-      }));
+      return resolve({
+              appMode,
+              ...createFakeAuthentication({
+                  appMode,
+                  classId: fakeClass,
+                  userType, userId,
+                  unitCode,
+                  problemOrdinal
+                })
+            });
     }
 
     if (appMode !== "authed") {

@@ -1,0 +1,63 @@
+@import ../../components/vars
+@import ../vars
+
+.stats
+  position: absolute
+  top: $header-height + $half-nav-expanded-peek
+  bottom: 0
+  left: 0
+  right: 0
+  margin: 10px auto
+  width: 980px
+  border: 2px solid #ffffff
+  background-color: $gray-light
+
+  .loading
+    margin: 10px
+
+  .stats-title
+    padding: $padding
+    font-size: 18px
+    font-weight: bold
+    height: 50px
+
+  .stats-container
+    background-color: $gray-light
+    display: flex
+    flex-direction: column
+    overflow: auto
+    height: calc(100% - 50px)
+    .stats-button
+      margin: 5px 10px
+      font-family: 'Ubuntu', sans-serif
+      width: 200px
+      border: 2px solid $gray-mid
+      border-radius: 3px
+      color: $gray-text
+      background-color: #ffffff
+      font-size: 12px
+      font-style: normal
+      min-height: 32px
+      outline: 0
+      pointer: cursor
+      &:hover
+        background-color: $gray-light-hover
+    .stats-table
+      margin: 10px
+    table
+      border: 1px solid #bcbcbc
+      box-shadow: 1px 1px
+      user-select: text
+      border-collapse: collapse
+      th, td
+        border: 1px solid #bbbbbb
+        text-align: left
+        padding: 8px
+        width: 120px
+      tr:nth-child(even)
+        background-color: #E5E5E5
+      tr:nth-child(odd)
+        background-color: #ffffff
+
+
+

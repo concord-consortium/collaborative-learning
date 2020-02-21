@@ -1,6 +1,6 @@
 import { DataSequence } from "../components/dataflow-program-graph";
 
-export const exportCSV = (dataSequences: DataSequence[]) => {
+export const exportDataCSV = (dataSequences: DataSequence[]) => {
   if (!dataSequences) {
     return;
   }
@@ -21,20 +21,23 @@ export const exportCSV = (dataSequences: DataSequence[]) => {
 
     const allRows = headers + "\n" + rows.join("\n");
     const csvFilename = "dataflow-export-" + Date.now() + ".csv";
+    exportCSV(allRows, csvFilename);
+  }
+};
 
-    // Using similar technique for export as Dataflow 2.0 to ensure consistent functionality
-    const csvBlob = new Blob([allRows], {type: "text/csv;charset=utf-8;"});
-    if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(csvBlob, csvFilename);
-    }
-    else {
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(csvBlob);
-      link.setAttribute("download", csvFilename);
-      document.body.appendChild(link);
-      // link created by us in code, so calling click on the link should not trigger blockers
-      link.click();
-      document.body.removeChild(link);
-    }
+export const exportCSV = (csv: string, fileName: string) => {
+  // Using similar technique for export as Dataflow 2.0 to ensure consistent functionality
+  const csvBlob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+  if (navigator.msSaveBlob) {
+    navigator.msSaveBlob(csvBlob, fileName);
+  }
+  else {
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(csvBlob);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    // link created by us in code, so calling click on the link should not trigger blockers
+    link.click();
+    document.body.removeChild(link);
   }
 };

@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
-import * as React from "react";
+import React from "react";
 import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";

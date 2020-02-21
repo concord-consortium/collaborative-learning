@@ -67,7 +67,7 @@
           {
             "title": "Programs",
             "type": "personal-documents",
-            "dataTestHeader": "my-work-section",
+            "dataTestHeader": "my-work-section-programs",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["!dfHasData", "!dfHasRelay", "!isDeleted"]
@@ -75,7 +75,7 @@
           {
             "title": "Data",
             "type": "personal-documents",
-            "dataTestHeader": "my-work-section",
+            "dataTestHeader": "my-work-section-data",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["dfHasData", "!isDeleted"]
@@ -83,7 +83,7 @@
           {
             "title": "Relay Programs",
             "type": "personal-documents",
-            "dataTestHeader": "my-work-section",
+            "dataTestHeader": "my-work-section-relays",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["dfHasRelay", "!dfHasData", "!isDeleted"]

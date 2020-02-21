@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../../utilities/node";

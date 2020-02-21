@@ -1,11 +1,12 @@
 import { inject, observer } from "mobx-react";
-import * as React from "react";
+import React from "react";
 import { DataflowAppHeaderComponent } from "./dataflow-app-header";
 import { BaseComponent, IBaseProps } from "./dataflow-base";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { HubListComponent } from "./hub-list";
+import { StatsComponent } from "./stats";
 
 import "./dataflow-app-content.sass";
 import { DataflowContentModelType } from "../models/tools/dataflow/dataflow-content";
@@ -38,6 +39,10 @@ export class DataflowAppContentComponent extends BaseComponent<IProps, IState> {
       panelId: EPanelId.controlPanel,
       label: "Control Panels",
       content: <HubListComponent />
+    }, {
+      panelId: EPanelId.stats,
+      label: "Stats",
+      content: <StatsComponent />
     }, {
       panelId: EPanelId.workspace,
       label: "Workspace",

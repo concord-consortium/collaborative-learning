@@ -33,7 +33,7 @@ context('canvas test',()=>{
 
     describe('canvas ui',()=>{
         it('verifies delete button is disabled',()=>{
-            canvas.getDeleteIcon().should('have.class', 'delete-disabled');
+            canvas.getDeleteIcon().should('have.class', 'delete disabled');
         })
         it('verify Dataflow tile opens with program toolbar',()=>{
             buttons.push('Clear','Reset')
@@ -57,34 +57,6 @@ context('canvas test',()=>{
                 dfcanvas.openBlock(buttons[i]);
                 dfblock.getBlock(buttons[i].toLowerCase().replace(' ','-')).should('exist');
             }
-        })
-    })
-    describe('verify run program toolbar functionality', ()=>{
-        it('verify can select a duration',()=>{
-            var duration = '5 mins';
-            dfcanvas.selectDuration(duration);
-            dfcanvas.getDurationDropdown().should('have.value', '300');
-        })
-        it('verify Stop button is disabled when Run button is enabled',()=>{
-            dfblock.connectBlocks('number',0,'data-storage',0) // ensure we have a valid output
-            dfcanvas.getRunButton().parent().should('not.have.attr','disabled');
-            dfcanvas.getStopButton().parent().should('have.attr','disabled');
-        })
-        it.skip('verify Duration is visible when program is running',()=>{
-            dfcanvas.runProgram();
-            cy.wait(1500);
-            dfcanvas.getDurationContainer().should('be.visible');
-            dfcanvas.getProgressTime().should('be.visible');
-        })
-        it.skip('verify Run button is not visible',()=>{
-            dfcanvas.getRunButton().should('not.exist');
-        })
-        it.skip('verify Stop button is enabled when program is running',()=>{
-            dfcanvas.getStopButton().parent().should('not.have.attr','disabled');
-        })
-        it.skip('verify Program toolbar does not exist after running a program',()=>{
-            dfcanvas.stopProgram();
-            dfcanvas.getProgramToolbar().should('not.exist')
         })
     })
     describe('deletion',()=>{
@@ -155,8 +127,8 @@ context('canvas test',()=>{
             cy.wait(5000)
 
             // rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','','Programs');
-            rightNav.openCanvasItem('my-work','','Programs',title)
+            rightNav.openSection('my-work','programs');
+            rightNav.openCanvasItem('my-work','programs','Programs',title)
             cy.wait(5000)
             //compare before and after values
             dfblock.getNumberInput(0).invoke('attr','value').then((value)=>{

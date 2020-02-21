@@ -1,4 +1,4 @@
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import { OtherDocumentType, PersonalDocument } from "../models/document/document";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
@@ -87,6 +87,10 @@ export class Firebase {
 
   public getClassPath(user: UserModelType) {
     return `classes/${user.classHash}`;
+  }
+
+  public getUsersPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/users`;
   }
 
   public getUserPath(user: UserModelType, userId?: string) {

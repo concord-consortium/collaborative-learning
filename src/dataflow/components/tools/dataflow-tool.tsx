@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import { BaseComponent } from "../../../components/base";

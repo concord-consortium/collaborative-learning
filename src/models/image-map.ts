@@ -196,29 +196,35 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  store(url: string, db: DB, userId: string) {
+  store(url: string, db?: DB, userId?: string) {
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
     return new Promise((resolve, reject) => {
-      storeImage(db, userId, url)
-        .then(simpleImage => {
-          if (simpleImage.imageUrl === placeholderImage) {
-            // conversion errors are resolved to placeholder image
-            // this generally occurs due to a CORS error, in which
-            // case we just use the original url.
-            resolve({ contentUrl: url, displayUrl: url });
-          }
-          else {
-            const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-            resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-          }
-        })
-        .catch(() => {
-          // If the silent upload has failed, do we retain the full url or
-          // encourage the user to download a copy and re-upload?
-          // For now, return the original image url.
-          resolve({});
-        });
+      if (db && userId) {
+        storeImage(db, userId, url)
+          .then(simpleImage => {
+            if (simpleImage.imageUrl === placeholderImage) {
+              // conversion errors are resolved to placeholder image
+              // this generally occurs due to a CORS error, in which
+              // case we just use the original url.
+              resolve({ contentUrl: url, displayUrl: url });
+            }
+            else {
+              const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+              resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
+            }
+          })
+          .catch(() => {
+            // If the silent upload has failed, do we retain the full url or
+            // encourage the user to download a copy and re-upload?
+            // For now, return the original image url.
+            resolve({});
+          });
+      }
+      else {
+        // For now, return the original image url.
+        resolve({});
+      }
     });
   }
 };
@@ -235,8 +241,11 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   store(url: string) {
-    // convert from prior path to new path
-    const _url = url.replace("assets/curriculum", "curriculum");
+                    // convert original curriculum image paths
+    const _url = url.replace("assets/curriculum", "curriculum")
+                    // convert original drawing tool stamp paths
+                    .replace("assets/tools/drawing-tool/stamps",
+                             "curriculum/moving-straight-ahead/stamps");
     return Promise.resolve({ contentUrl: _url, displayUrl: _url });
   }
 };
@@ -256,7 +265,7 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                           /^\/.+\/portals\/.+$/.test(url);
   },
 
-  store(url: string, db: DB, userId: string) {
+  store(url: string, db?: DB, userId?: string) {
     return new Promise((resolve, reject) => {
       // All images from firebase storage must be migrated to realtime database
       const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
@@ -265,24 +274,29 @@ export const firebaseStorageImagesHandler: IImageHandler = {
       // Pass in the imagePath as the second argument to get the ref to firebase storage by url
       // This is needed if an image of the same name has been uploaded in two different components,
       // since each public URL becomes invalid and a new url generated on upload
-      db.firebase.getPublicUrlFromStore(storagePath, storageUrl)
-        .then(newUrl => {
-          if (newUrl) {
-            storeCorsImage(db, userId, newUrl)
-              .then(simpleImage => {
-                // Image has been retrieved from Storage, now we can safely remove the old image
-                // TODO: remove old images
-                const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-                resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-              });
-          }
-          else {
+      if (db && userId) {
+        db.firebase.getPublicUrlFromStore(storagePath, storageUrl)
+          .then(newUrl => {
+            if (newUrl) {
+              storeCorsImage(db, userId, newUrl)
+                .then(simpleImage => {
+                  // Image has been retrieved from Storage, now we can safely remove the old image
+                  // TODO: remove old images
+                  const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+                  resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
+                });
+            }
+            else {
+              resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
+            }
+          })
+          .catch(() => {
             resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-          }
-        })
-        .catch(() => {
-          resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-        });
+          });
+      }
+      else {
+        resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
+      }
     });
   }
 };
@@ -318,11 +332,11 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  store(url: string, db: DB) {
+  store(url: string, db?: DB) {
     return new Promise((resolve, reject) => {
       const { path, normalized } = parseFauxFirebaseRTDBUrl(url);
 
-      if (path && normalized) {
+      if (db && path && normalized) {
         db.getImageBlob(path)
           .then(blobUrl => {
             resolve({ contentUrl: normalized, displayUrl: blobUrl });

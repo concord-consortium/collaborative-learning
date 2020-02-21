@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
@@ -59,6 +59,7 @@ export class SensorSelectControl extends Rete.Control {
     const renderSensorTypeList = (type: string, showList: boolean, onDropdownClick: any, onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      useStopEventPropagation(divRef, "wheel");
       const listRef = useRef<HTMLDivElement>(null);
       useCloseDropdownOnOutsideEvent(listRef, () => this.props.showTypeList, () => {
                                       this.props.showTypeList = false;
@@ -121,6 +122,7 @@ export class SensorSelectControl extends Rete.Control {
         onListOptionClick: any) => {
       const divRef = useRef<HTMLDivElement>(null);
       useStopEventPropagation(divRef, "pointerdown");
+      useStopEventPropagation(divRef, "wheel");
       const listRef = useRef<HTMLDivElement>(null);
       useCloseDropdownOnOutsideEvent(listRef, () => this.props.showSensorList, () => {
                                       this.props.showSensorList = false;

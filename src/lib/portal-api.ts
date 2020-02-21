@@ -1,5 +1,5 @@
 import { getErrorMessage } from "../utilities/super-agent-helpers";
-import * as superagent from "superagent";
+import superagent from "superagent";
 import { QueryParams } from "../utilities/url-params";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";

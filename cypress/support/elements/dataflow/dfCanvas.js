@@ -35,7 +35,7 @@ class dfCanvas{
         return cy.get('.single-workspace .program-editor-topbar select')
     }
     getRunButton(){
-        return cy.get('.single-workspace .program-editor-topbar button').contains('Run')
+        return cy.get('.single-workspace .program-editor-topbar button[title="Run Program"]')
     }
     getStopButton(){
         return cy.get('.single-workspace .program-editor-topbar button').contains('Stop')
@@ -50,7 +50,7 @@ class dfCanvas{
         this.getDurationDropdown().select(duration)
     }
     runProgram(title=''){
-        this.getRunButton().click()
+        this.getRunButton().click({force:true})
             .then(() => {
                 dialog.getDialogTitle().text().then((dialogTitle)=>{
                     if (dialogTitle.includes('Run')) {  

@@ -9,14 +9,13 @@
   min-width: 45px;
 }
 
-/* cf. https://github.com/ag-grid/ag-grid/issues/1864#issuecomment-410199641 */
-.ag-theme-fresh .ag-header-cell-label {
-  display: inline !important;
-  /* required to center column labels properly */
-  min-width: 100% !important;
+.ag-theme-fresh .ag-header-group-cell-label {
+  justify-content: center;
+  font-weight: bold;
 }
-.ag-theme-fresh .ag-header-cell-label > span {
-  float: none !important;
+.ag-theme-fresh .ag-header-cell-label {
+  justify-content: center;
+  font-weight: bold;
 }
 .ag-theme-fresh .cdp-attr-column-header {
   text-align: center;
@@ -29,10 +28,6 @@
 
 .ag-theme-fresh .ag-cell-no-focus {
   border-bottom: 1px dotted silver;
-}
-
-.is-linked > .ag-theme-fresh .ag-row-selected {
-  background-color: rgba(125, 40, 126, 0.3);
 }
 
 .ag-cell-edit-input {

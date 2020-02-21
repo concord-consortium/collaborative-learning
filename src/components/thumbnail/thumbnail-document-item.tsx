@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
 import { observer } from "mobx-react";
