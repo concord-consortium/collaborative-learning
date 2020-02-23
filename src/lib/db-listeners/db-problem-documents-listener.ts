@@ -26,18 +26,19 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.db.firebase.getOfferingUsersPath(user));
       // use once() so we are ensured that documents are set before we resolve
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
-      offeringUsersRef.once("value", (snapshot) => {
-        this.handleLoadOfferingUsersProblemDocuments(snapshot);
-        // We have to listen to both events because of a race condition of the documents
-        // not being set when the child is added
-        this.debugLogHandlers("#start", "adding", ["child_added", "child_changed"], offeringUsersRef);
-        offeringUsersRef.on("child_added",
-          this.onLoadOfferingUserChildAdded = this.handleLoadOfferingUserAddedOrChanged("child_added"));
-        offeringUsersRef.on("child_changed",
-          this.onLoadOfferingUserChildChanged = this.handleLoadOfferingUserAddedOrChanged("child_changed"));
-      })
-      .then(() => resolve())
-      .catch(reject);
+      offeringUsersRef.once("value")
+        .then((snapshot) => {
+          this.handleLoadOfferingUsersProblemDocuments(snapshot);
+          // We have to listen to both events because of a race condition of the documents
+          // not being set when the child is added
+          this.debugLogHandlers("#start", "adding", ["child_added", "child_changed"], offeringUsersRef);
+          offeringUsersRef.on("child_added",
+            this.onLoadOfferingUserChildAdded = this.handleLoadOfferingUserAddedOrChanged("child_added"));
+          offeringUsersRef.on("child_changed",
+            this.onLoadOfferingUserChildChanged = this.handleLoadOfferingUserAddedOrChanged("child_changed"));
+          resolve();
+        })
+        .catch(reject);
     });
   }
 
