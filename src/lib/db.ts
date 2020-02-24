@@ -31,14 +31,16 @@ export enum Monitor {
 }
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
-export interface IDBAuthConnectOptions {
+export interface IDBBaseConnectOptions {
+  stores: IStores;
+  dontStartListeners?: boolean; // for unit tests
+}
+export interface IDBAuthConnectOptions extends IDBBaseConnectOptions {
   appMode: "authed";
   rawFirebaseJWT: string;
-  stores: IStores;
 }
-export interface IDBNonAuthConnectOptions {
+export interface IDBNonAuthConnectOptions extends IDBBaseConnectOptions {
   appMode: "dev" | "test" | "demo" | "qa";
-  stores: IStores;
 }
 export interface UserGroupMap {
   [key: string]: {
@@ -85,10 +87,15 @@ export class DB {
   public creatingDocuments: string[] = [];
 
   private appMode: AppMode;
+  private authStateUnsubscribe?: firebase.Unsubscribe;
 
   constructor() {
     this.firebase = new Firebase(this);
     this.listeners = new DBListeners(this);
+  }
+
+  public isAuthStateSubscribed() {
+    return !!this.authStateUnsubscribe;
   }
 
   public connect(options: IDBConnectOptions) {
@@ -111,28 +118,32 @@ export class DB {
 
       this.stores = options.stores;
 
-      firebase.auth().onAuthStateChanged((firebaseUser) => {
+      this.authStateUnsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
+        // always stop existing listeners when firebase user changes
+        this.listeners.stop();
         if (firebaseUser) {
           this.appMode = options.appMode;
           this.firebase.user = firebaseUser;
-          this.listeners.stop();
-          this.listeners.start().then(resolve).catch(reject);
+          if (!options.dontStartListeners) {
+            // resolve after listeners have started
+            this.listeners.start().then(resolve).catch(reject);
+          }
         }
       });
 
       if (options.appMode === "authed") {
-        return firebase.auth()
+        firebase.auth()
           .signOut()
-          .then(() => {
-            return firebase.auth()
-              .signInWithCustomToken(options.rawFirebaseJWT)
-              .catch(reject);
-          })
+          .then(() => firebase.auth().signInWithCustomToken(options.rawFirebaseJWT))
+          // resolve once we're authenticated if we're not supposed to start listeners
+          .then(() => options.dontStartListeners && resolve())
           .catch(reject);
       }
       else {
-        return firebase.auth()
+        firebase.auth()
           .signInAnonymously()
+          // resolve once we're authenticated if we're not supposed to start listeners
+          .then(() => options.dontStartListeners && resolve())
           .catch(reject);
       }
     });
@@ -140,11 +151,8 @@ export class DB {
 
   public disconnect() {
     this.listeners.stop();
-
-    if (this.appMode === "test") {
-      // delete all test data (for this unique anonymous test user)
-      return this.firebase.ref().set(null);
-    }
+    this.authStateUnsubscribe?.();
+    this.authStateUnsubscribe = undefined;
   }
 
   public joinGroup(groupId: string) {
