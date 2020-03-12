@@ -13,6 +13,7 @@ import { DocumentsModelType, DocumentsModel } from "./documents";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
+import { getSetting } from "./settings";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
@@ -109,4 +110,11 @@ export function getDisabledFeaturesOfTile(stores: IStores, tile: string, section
     disabledMap[feature] && prev.push(feature);
     return prev;
   }, []);
+}
+
+export function getSettingFromStores(stores: IStores, key: string, group?: string) {
+  for (const level of [stores.problem, stores.investigation, stores.unit, stores.appConfig]) {
+    const value = level.settings && getSetting(level.settings, key, group);
+    if (value != null) return value;
+  }
 }
