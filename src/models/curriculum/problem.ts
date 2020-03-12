@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
 import { SectionModel, SectionModelType } from "./section";
+import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
 
 export const ProblemModel = types
@@ -10,6 +11,7 @@ export const ProblemModel = types
     disabled: types.array(types.string),
     sections: types.array(SectionModel),
     supports: types.array(SupportModel),
+    settings: types.maybe(SettingsMstType)
   })
   .views((self) => {
     return {
