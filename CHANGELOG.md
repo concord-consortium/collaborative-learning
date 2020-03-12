@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.1.2 - released March 12, 2020
+
+- MSA tables format numbers to two decimal places
+- Add infrastructure for authorable settings
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 518,038 bytes | 0.0% |
+| index.js | 4,142,635 bytes | 0.1% |
+
 ## Version 1.1.1 - released February 19, 2020
 
 - Log user role
