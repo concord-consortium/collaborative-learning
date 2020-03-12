@@ -6,9 +6,10 @@ import DataTableComponent, { LOCAL_ROW_ID } from "./data-table";
 import { LinkedTableCellEditor } from "./linked-table-cell-editor";
 import { IMenuItemFlags } from "./table-header-menu";
 import { IToolTileProps } from "../tool-tile";
-import { ColumnApi, GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
+import { GridApi, GridReadyEvent, SelectionChangedEvent, ValueGetterParams, ValueFormatterParams
         } from "@ag-grid-community/core";
 import { DataSet, IDataSet, ICase, ICaseCreation } from "../../../models/data/data-set";
+import { getSettingFromStores } from "../../../models/stores/stores";
 import { addTable, getLinkedTableIndex } from "../../../models/tools/table-links";
 import { canonicalizeValue, getRowLabel, isLinkableValue, ILinkProperties, ITableLinkProperties,
         TableContentModelType } from "../../../models/tools/table/table-content";
@@ -16,11 +17,14 @@ import { getGeometryContent } from "../../../models/tools/geometry/geometry-cont
 import { JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { uniqueId } from "../../../utilities/js-utils";
-import { each, sortedIndexOf } from "lodash";
+import { format } from "d3-format";
+import { each, memoize, sortedIndexOf } from "lodash";
 import { autorun, IReactionDisposer, Lambda } from "mobx";
 type MobXDisposer = IReactionDisposer | Lambda;
 
 import "./table-tool.sass";
+
+const memoizedFormat = memoize(format);
 
 interface IClipboardCases {
   attrs: Array<{ id: string, name: string }>;
@@ -293,9 +297,11 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
   private attrValueFormatter = (params: ValueFormatterParams) => {
     if ((params.value == null) || (params.value === "")) return params.value;
     const num = Number(params.value);
-    return isFinite(num)
-            ? num.toFixed(1).replace(".0", "")
-            : params.value;
+    if (!isFinite(num)) return params.value;
+    const kDefaultFormatStr = ".1~f"; // one decimal place, remove trailing zero
+    const formatStr = getSettingFromStores(this.stores, "numFormat", "table") as string | undefined ||
+                        kDefaultFormatStr;
+    return memoizedFormat(formatStr)(num);
   }
 
   private getGeometryContent(geometryId: string) {

@@ -3,6 +3,7 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
+import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types
   .model("DocumentSpec", {
@@ -69,7 +70,8 @@ export const AppConfigModel = types
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
-    toolbar: types.array(ToolButtonModel)
+    toolbar: types.array(ToolButtonModel),
+    settings: types.maybe(SettingsMstType)
   })
   .views(self => ({
     get defaultDocumentContent(): DocumentContentModelType | undefined {

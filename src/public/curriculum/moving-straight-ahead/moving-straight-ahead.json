@@ -4,6 +4,11 @@
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
   "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2f"
+    }
+  },
   "sections": {
     "introduction": {
       "initials": "IN",

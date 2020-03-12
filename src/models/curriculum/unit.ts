@@ -4,8 +4,9 @@ import { InvestigationModel } from "./investigation";
 import { ISectionInfoMap, setSectionInfoMap } from "./section";
 import { SupportModel } from "./support";
 import { StampModel } from "../tools/drawing/drawing-content";
-import { IStores } from "../stores/stores";
 import { AppConfigModelType } from "../stores/app-config-model";
+import { SettingsMstType } from "../stores/settings";
+import { IStores } from "../stores/stores";
 
 export const UnitModel = types
   .model("Unit", {
@@ -20,6 +21,7 @@ export const UnitModel = types
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
+    settings: types.maybe(SettingsMstType)
   })
   .actions(self => ({
     afterCreate() {
