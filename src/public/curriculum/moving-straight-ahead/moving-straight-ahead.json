@@ -6,7 +6,7 @@
   "placeholderText": "Enter notes here",
   "settings": {
     "table": {
-      "numFormat": ".2f"
+      "numFormat": ".2~f"
     }
   },
   "sections": {
