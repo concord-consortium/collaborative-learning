@@ -94,6 +94,10 @@ export class Firebase {
     return this.getFullPath(this.getClassPath(user));
   }
 
+  public getUsersPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/users`;
+  }
+
   public getUserPath(user: UserModelType, userId?: string) {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
