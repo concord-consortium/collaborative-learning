@@ -102,7 +102,7 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
         });
       }
 
-      this.exportCSV(csv.join("\n"), `TeacherID-${user.id}-ClassID-${user.classHash}-student-groups.csv`);
+      this.exportCSV(csv.join("\n"), `TeacherID-${user.id}-ClassHash-${user.classHash}-student-groups.csv`);
     }
   }
 
