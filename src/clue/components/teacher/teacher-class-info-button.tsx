@@ -81,9 +81,9 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
 
             csv.push([]);
             csv.push([`OFFERING: ${offeringId}`]);
-            const header: string[] = [];
-            header.push("OFFERING GROUP");
-            header.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
+            const offHeader: string[] = [];
+            offHeader.push("OFFERING GROUP");
+            offHeader.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
             csv.push(header.join(","));
 
             each(offering.groups, (group, groupId) => {
