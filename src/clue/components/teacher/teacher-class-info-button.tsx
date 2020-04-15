@@ -19,12 +19,32 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
 
   private handleExportClick = async () => {
     const {db, user} = this.stores; // access the database
-    const groupsArray: string[] = []; // store the group ids
+    const latestGroupsArray: string[] = []; // store the group ids
+
+    const offeringsPath = db.firebase.getOfferingsPath(db.stores.user);
+    const offeringsRef = db.firebase.ref(offeringsPath);
+    // get a snapshot of the offerings in this class
+    const offeringsSnapshot = await offeringsRef.once("value");
+
     const usersPath = db.firebase.getUsersPath(db.stores.user);
     const usersRef = db.firebase.ref(usersPath);
     // get a snapshot of the users in this class
     const usersSnapshot = await usersRef.once("value");
-    if (usersSnapshot) {
+
+    if (usersSnapshot && offeringsSnapshot) {
+      const csv: any[] = [];
+      csv.push([`CLASS NAME: ${user.className}`]);
+      csv.push(`CLASS HASH: ${user.classHash}`);
+      csv.push(`TEACHER ID: ${user.id}`);
+
+      csv.push([]);
+      csv.push(["CURRENT GROUPS"]);
+      const header: string[] = [];
+      header.push("CURRENT GROUP");
+      header.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
+      csv.push(header.join(","));
+
+      // get the current set of groups
       const users = usersSnapshot.val();
       each(users, (portalUser, userId) => {
         // a user is a DBPortalUser in db-types.ts, can be undefined, each has the latestGroupId
@@ -32,29 +52,56 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
           // classUser contains the user name information
           const classUser = this.stores.class.getUserById(userId);
           if (classUser?.type === "student") {
-            if (groupsArray.indexOf(portalUser.latestGroupId) === -1) groupsArray.push(portalUser.latestGroupId);
+            if (latestGroupsArray.indexOf(portalUser.latestGroupId) === -1) {
+              latestGroupsArray.push(portalUser.latestGroupId);
+            }
           }
         }
       });
-
-      const csv: any[] = [];
-      const header: string[] = [];
-      header.push("GROUP");
-      header.push("STUDENT", "STUDENT", "STUDENT", "STUDENT");
-      csv.push(header.join(","));
-      each(groupsArray, (group) => {
+      // now add the current groups to the CSV
+      each(latestGroupsArray, (group) => {
         const row: string[] = [];
         row.push(group);
         each(users, (portalUser, userId) => {
           if (portalUser) {
             const classUser = this.stores.class.getUserById(userId);
             if (classUser?.type === "student" && portalUser.latestGroupId === group) {
-              row.push(classUser.fullName);
+              row.push(classUser.id);
             }
           }
         });
         csv.push(row.join(","));
       });
+
+      // now get the groups for each offering
+      if (offeringsSnapshot) {
+        const offerings = offeringsSnapshot.val();
+        each(offerings, (offering, offeringId) => {
+          if (offering) {
+
+            csv.push([]);
+            csv.push([`OFFERING: ${offeringId}`]);
+            const header: string[] = [];
+            header.push("OFFERING GROUP");
+            header.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
+            csv.push(header.join(","));
+
+            each(offering.groups, (group, groupId) => {
+              if (group) {
+                const row: string[] = [];
+                row.push(groupId);
+                each(group.users, (gUser, uId) => {
+                  if (gUser) {
+                    row.push(uId);
+                  }
+                });
+                csv.push(row.join(","));
+              }
+            });
+          }
+        });
+      }
+
       this.exportCSV(csv.join("\n"), `${user.className}-student-groups.csv`);
     }
   }
