@@ -33,20 +33,38 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
 
     if (usersSnapshot && offeringsSnapshot) {
       const csv: any[] = [];
-      const classHeader: string[] = [];
-      classHeader.push("className", "classHash", "teacherId");
-      csv.push(classHeader.join(","));
-
-      const classInfo: string[] = [];
-      classInfo.push(user.className, user.classHash, user.id);
-      csv.push(classInfo.join(","));
-
-      csv.push([]);
-      csv.push(["currentGroups"]);
       const header: string[] = [];
-      header.push("groupId");
-      header.push("studentId", "studentId", "studentId", "studentId", "studentId", "studentId");
+      header.push("CLASS NAME");
+      header.push("CLASS HASH");
+      header.push("TEACHER ID");
+      header.push("OFFERING");
+      header.push("CURRENT GROUP");
+      header.push("STUDENT ID 1", "STUDENT ID 2", "STUDENT ID 3", "STUDENT ID 4", "STUDENT ID 5", "STUDENT ID 6");
       csv.push(header.join(","));
+
+      let first = true;
+
+      // get the groups for each offering
+      const offerings = offeringsSnapshot.val();
+      each(offerings, (offering, offeringId) => {
+        if (offering) {
+          each(offering.groups, (group, groupId) => {
+            if (group) {
+              const row: string[] = [];
+              first ? row.push(user.className, user.classHash, user.id) : row.push("", "", "");
+              first = false;
+              row.push(offeringId);
+              row.push(groupId);
+              each(group.users, (gUser, uId) => {
+                if (gUser) {
+                  row.push(uId);
+                }
+              });
+              csv.push(row.join(","));
+            }
+          });
+        }
+      });
 
       // get the current set of groups
       const users = usersSnapshot.val();
@@ -62,9 +80,11 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
           }
         }
       });
-      // now add the current groups to the CSV
+      // add the current groups to the CSV
       each(latestGroupsArray, (group) => {
         const row: string[] = [];
+        row.push("", "", "");
+        row.push("CURRENT GROUPS");
         row.push(group);
         each(users, (portalUser, userId) => {
           if (portalUser) {
@@ -76,36 +96,6 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
         });
         csv.push(row.join(","));
       });
-
-      // now get the groups for each offering
-      if (offeringsSnapshot) {
-        const offerings = offeringsSnapshot.val();
-        each(offerings, (offering, offeringId) => {
-          if (offering) {
-
-            csv.push([]);
-            csv.push(["offeringId"]);
-            csv.push([offeringId]);
-            const offHeader: string[] = [];
-            offHeader.push("groupId");
-            offHeader.push("studentId", "studentId", "studentId", "studentId", "studentId", "studentId");
-            csv.push(header.join(","));
-
-            each(offering.groups, (group, groupId) => {
-              if (group) {
-                const row: string[] = [];
-                row.push(groupId);
-                each(group.users, (gUser, uId) => {
-                  if (gUser) {
-                    row.push(uId);
-                  }
-                });
-                csv.push(row.join(","));
-              }
-            });
-          }
-        });
-      }
 
       this.exportCSV(csv.join("\n"), `teacherId-${user.id}-classHash-${user.classHash}-studentGroups.csv`);
     }
