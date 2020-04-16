@@ -33,15 +33,19 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
 
     if (usersSnapshot && offeringsSnapshot) {
       const csv: any[] = [];
-      csv.push([`CLASS NAME: ${user.className}`]);
-      csv.push(`CLASS HASH: ${user.classHash}`);
-      csv.push(`TEACHER ID: ${user.id}`);
+      const classHeader: string[] = [];
+      classHeader.push("className", "classHash", "teacherId");
+      csv.push(classHeader.join(","));
+
+      const classInfo: string[] = [];
+      classInfo.push(user.className, user.classHash, user.id);
+      csv.push(classInfo.join(","));
 
       csv.push([]);
-      csv.push(["CURRENT GROUPS"]);
+      csv.push(["currentGroups"]);
       const header: string[] = [];
-      header.push("CURRENT GROUP");
-      header.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
+      header.push("groupId");
+      header.push("studentId", "studentId", "studentId", "studentId", "studentId", "studentId");
       csv.push(header.join(","));
 
       // get the current set of groups
@@ -80,10 +84,11 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
           if (offering) {
 
             csv.push([]);
-            csv.push([`OFFERING: ${offeringId}`]);
+            csv.push(["offeringId"]);
+            csv.push([offeringId]);
             const offHeader: string[] = [];
-            offHeader.push("OFFERING GROUP");
-            offHeader.push("STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID", "STUDENT ID");
+            offHeader.push("groupId");
+            offHeader.push("studentId", "studentId", "studentId", "studentId", "studentId", "studentId");
             csv.push(header.join(","));
 
             each(offering.groups, (group, groupId) => {
@@ -102,7 +107,7 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
         });
       }
 
-      this.exportCSV(csv.join("\n"), `TeacherID-${user.id}-ClassHash-${user.classHash}-student-groups.csv`);
+      this.exportCSV(csv.join("\n"), `teacherId-${user.id}-classHash-${user.classHash}-studentGroups.csv`);
     }
   }
 
