@@ -39,7 +39,9 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
       header.push("TEACHER ID");
       header.push("OFFERING");
       header.push("CURRENT GROUP");
-      header.push("STUDENT ID 1", "STUDENT ID 2", "STUDENT ID 3", "STUDENT ID 4", "STUDENT ID 5", "STUDENT ID 6");
+      header.push("STUDENT 1 ID", "STUDENT 1 INITIALS", "STUDENT 2 ID", "STUDENT 2 INITIALS",
+                  "STUDENT 3 ID", "STUDENT 3 INITIALS", "STUDENT 4 ID", "STUDENT 4 INITIALS",
+                  "STUDENT 5 ID", "STUDENT 5 INITIALS", "STUDENT 6 ID", "STUDENT 6 INITIALS");
       csv.push(header.join(","));
 
       let first = true;
@@ -57,7 +59,9 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
               row.push(groupId);
               each(group.users, (gUser, uId) => {
                 if (gUser) {
+                  const classUser = this.stores.class.getUserById(uId);
                   row.push(uId);
+                  classUser ? row.push(classUser.initials) : row.push("");
                 }
               });
               csv.push(row.join(","));
@@ -91,6 +95,7 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
             const classUser = this.stores.class.getUserById(userId);
             if (classUser?.type === "student" && portalUser.latestGroupId === group) {
               row.push(classUser.id);
+              row.push(classUser.initials);
             }
           }
         });
