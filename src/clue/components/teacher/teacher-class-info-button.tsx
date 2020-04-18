@@ -38,13 +38,9 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
       header.push("CLASS HASH");
       header.push("TEACHER ID");
       header.push("OFFERING");
-      header.push("CURRENT GROUP");
-      header.push("STUDENT 1 ID", "STUDENT 1 INITIALS", "STUDENT 2 ID", "STUDENT 2 INITIALS",
-                  "STUDENT 3 ID", "STUDENT 3 INITIALS", "STUDENT 4 ID", "STUDENT 4 INITIALS",
-                  "STUDENT 5 ID", "STUDENT 5 INITIALS", "STUDENT 6 ID", "STUDENT 6 INITIALS");
+      header.push("GROUP ID");
+      header.push("STUDENT ID", "STUDENT INITIALS");
       csv.push(header.join(","));
-
-      let first = true;
 
       // get the groups for each offering
       const offerings = offeringsSnapshot.val();
@@ -52,19 +48,18 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
         if (offering) {
           each(offering.groups, (group, groupId) => {
             if (group) {
-              const row: string[] = [];
-              first ? row.push(user.className, user.classHash, user.id) : row.push("", "", "");
-              first = false;
-              row.push(offeringId);
-              row.push(groupId);
               each(group.users, (gUser, uId) => {
                 if (gUser) {
+                  const row: string[] = [];
+                  row.push(user.className, user.classHash, user.id);
+                  row.push(offeringId);
+                  row.push(groupId);
                   const classUser = this.stores.class.getUserById(uId);
                   row.push(uId);
                   classUser ? row.push(classUser.initials) : row.push("");
+                  csv.push(row.join(","));
                 }
               });
-              csv.push(row.join(","));
             }
           });
         }
@@ -86,20 +81,20 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
       });
       // add the current groups to the CSV
       each(latestGroupsArray, (group) => {
-        const row: string[] = [];
-        row.push("", "", "");
-        row.push("CURRENT GROUPS");
-        row.push(group);
         each(users, (portalUser, userId) => {
           if (portalUser) {
             const classUser = this.stores.class.getUserById(userId);
             if (classUser?.type === "student" && portalUser.latestGroupId === group) {
+              const row: string[] = [];
+              row.push(user.className, user.classHash, user.id);
+              row.push("CURRENT GROUP");
+              row.push(group);
               row.push(classUser.id);
               row.push(classUser.initials);
+              csv.push(row.join(","));
             }
           }
         });
-        csv.push(row.join(","));
       });
 
       this.exportCSV(csv.join("\n"), `teacherId-${user.id}-classHash-${user.classHash}-studentGroups.csv`);
