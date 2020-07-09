@@ -1,0 +1,294 @@
+{
+  "code": "faw",
+  "abbrevTitle": "FAW",
+  "title": "Filling and Wrapping",
+  "subtitle": "Three-Dimensional Measurement",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "FAW Investigation 1. Building Smart Boxes: Rectangular Prisms",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "FAW 1.1 How Big Are Those Boxes?",
+          "subtitle": "Finding Volume",
+          "disabled": [],
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "FAW 1.2 Optimal Containers",
+          "subtitle": "Finding the Least Surface Area",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "FAW 1.3 Compost Containers",
+          "subtitle": "Scaling Up Using Proportional Reasoning",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "FAW Investigation 2. Connecting Rectangular Prisms to Polygonal Prisms",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "FAW 2.1 Folding Paper",
+          "subtitle": "Surface Area and Volume of Right Prisms",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "FAW 2.2 Packing a Prism",
+          "subtitle": "Volume of Right Prism",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "FAW 2.3 Slicing Prisms and Pyramids",
+          "subtitle":"",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "FAW Investigation 3 Area and Circumference of Circles",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "FAW 3.1 Going Around in Circles",
+          "subtitle": "Circumference",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "FAW 3.2 Testing Absorbency of Paper Towels",
+          "subtitle": "Area of a Circle",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "FAW 3.3 Connecting Circumference and Area",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.4",
+          "ordinal": 4,
+          "title": "FAW 3.4 Nate’s Conjecture",
+          "subtitle": "Connecting Circles to Cylinders",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "FAW Investigation 4 Designing Packages: More Three-Dimensional Shapes",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "FAW 4.1 Comparing Juice Containers Using Surface Area",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "FAW 4.2 Connecting Circles to Cones and Spheres",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "FAW 4.3 Creating Ice Cream Containers",
+          "subtitle": "Prism, Cylinder or Cone?",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "FAW MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Filling and Wrapping Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": []
+}

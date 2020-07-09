@@ -1,0 +1,243 @@
+{
+  "code": "sap",
+  "abbrevTitle": "SAP",
+  "title": "Samples and Populations: Making Comparisons and Predictions",
+  "subtitle": "Generalizing and Using Properties of Geometric Shapes",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "SAP Investigation 1 Making Sense of Samples",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "SAP 1.1 Creating and Using a Survey to Collect Data ",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "SAP 1.2 Candy-Sampling Task: Making Predictions about Samples from a Known Population",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "SAP 1.3 Pick Your Preference: Distinguishing Categorical and Numerical Data",
+          "subtitle": "T",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "SAP Investigation 2 Choosing a Sample from a Population",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "SAP 2.1 Selecting Samples",
+          "subtitle": "Distinguishing Kinds of Samples",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "SAP 2.2 Choosing Random Samples",
+          "subtitle": "Comparing Using Center and Spread",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "SAP 2.3 Growing Samples: Does Sample Size Matter",
+          "subtitle":"",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "SAP Investigation 3 Using Samples to Draw Conclusions",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "SAP 3.1 Solving an Archeological Mystery",
+          "subtitle": "Comparing Samples using Median, IQR, and Box Plots",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "SAP 3.2 Comparing Heights of Basketball Players",
+          "subtitle": "Using Means and MADS",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "SAP 3.3 Five Chocolate Chips in Every Cookie",
+          "subtitle": "Using Samples in a Simulation",
+          "sections": [
+          ],
+          "supports": []
+        },
+         {
+          "description": "Problem 3.4",
+          "ordinal": 4,
+          "title": "SAP 3.4 Estimating a Deer Population",
+          "subtitle": "Using Samples to Estimate the Size of a Population",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "SAP Mathematical Reflections",
+      "ordinal": 4,
+      "title": "SAP MR1-3",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Samples and Populations Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are investigating statistical properties of Populations. At the end of this Investigation, <em>What do you know about populations?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                            "In this unit we are investigating statistical properties of Populations. At the end of this Investigation, <em>What do you know about populations?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                            "In this unit we are investigating statistical properties of Populations. At the end of this Investigation, <em>What do you know about populations?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": []
+}
