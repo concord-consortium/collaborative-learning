@@ -13,7 +13,7 @@
     "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
   "defaultProblemOrdinal": "1.1",
-  "defaultUnit": "s+s",
+  "defaultUnit": "sas",
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",
   "defaultLearningLogTitle": "UntitledLog",
