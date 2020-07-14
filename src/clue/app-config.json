@@ -4,12 +4,12 @@
   "units": {
     "cr": "curriculum/completely-rational/completely-rational.json",
     "cas": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
-    "cr": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
+    "faw": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
     "hlit": "curriculum/how-likely-is-it/how-likely-is-it.json",
     "msa": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
     "sad": "curriculum/shapes-and-designs/shapes-and-designs.json",
     "sap": "curriculum/samples-and-populations/samples-and-populations.json",
-    "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
   "defaultProblemOrdinal": "1.1",
