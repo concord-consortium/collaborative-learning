@@ -141,7 +141,7 @@ context("Teacher Space", () => {
                 rightNav.openSection('my-work', 'investigations')
                 rightNav.openCanvasItem("my-work", "investigations", this.investigationTitle);
                 clueCanvas.deleteTile('table');
-                clueCanvas.deleteTile('drawing');
+                clueCanvas.deleteTile('draw');
             })
         })
     })

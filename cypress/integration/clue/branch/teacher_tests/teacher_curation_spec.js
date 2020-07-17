@@ -15,7 +15,7 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
     const baseUrl = `${Cypress.config("baseUrl")}`;
 
     before(function() {
-        const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6&unit=sas"
+        const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
     
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
@@ -25,7 +25,7 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
     })
     
     describe('verify document curation', function() {//adding a star to a student document
-        let studentDoc = "Student 5: 2.1 Drawing Wumps"
+        let studentDoc = "Student 5: SAS 2.1 Drawing Wumps"
 
         it('verify starring a student published investigation',function(){
             rightNav.openRightNavTab('class-work')
