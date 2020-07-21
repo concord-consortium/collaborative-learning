@@ -10,6 +10,7 @@
     "sad": "curriculum/shapes-and-designs/shapes-and-designs.json",
     "sap": "curriculum/samples-and-populations/samples-and-populations.json",
     "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
   },
   "defaultProblemOrdinal": "1.1",
