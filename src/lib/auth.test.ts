@@ -58,12 +58,19 @@ const BAD_TEACHER_TOKEN = "badTeacherToken";
 
 const CLASS_HASH = "testHash";
 
-const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
+// follow nock conventions: host with no trailing slash, path with leading slash
+const BASE_PORTAL_HOST = "https://learn.staging.concord.org";
+const BASE_PORTAL_URL = `${BASE_PORTAL_HOST}/`;
 
-const OFFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
-const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/66";
-const CLASSES_MINE_PATH = "api/v1/classes/mine";
-const OFFERINGS_PATH = "api/v1/offerings/";
+const PORTAL_JWT_PATH = `/${PORTAL_JWT_URL_SUFFIX}`;
+const FIREBASE_JWT_PATH = `/${FIREBASE_JWT_URL_SUFFIX}`;
+const OFFERING_INFO_PATH = "/api/v1/offerings/1033";
+const CLASS_INFO_PATH = "/api/v1/classes/66";
+const CLASSES_MINE_PATH = "/api/v1/classes/mine";
+// const OFFERINGS_PATH = "/api/v1/offerings";
+
+const CLASS_INFO_URL = BASE_PORTAL_HOST + CLASS_INFO_PATH;
+const OFFERING_INFO_URL = BASE_PORTAL_HOST + OFFERING_INFO_PATH;
 
 const RAW_CORRECT_STUDENT: RawUser = {
   id: STUDENT_PORTAL_JWT.user_id,
@@ -188,12 +195,12 @@ describe("student authentication", () => {
   const appConfig = AppConfigModel.create();
 
   beforeEach(() => {
-    nock(CLASS_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer/JWT ${RAW_STUDENT_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(CLASS_INFO_PATH)
     .reply(200, RAW_CLASS_INFO);
   });
 
@@ -209,22 +216,22 @@ describe("student authentication", () => {
   });
 
   it("works in authed mode", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(200, {
       token: RAW_STUDENT_PORTAL_JWT,
     });
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
       }
     })
-    .get(getFirebaseJWTParams(CLASS_HASH))
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
@@ -286,20 +293,20 @@ describe("student authentication", () => {
   });
 
   it("fails with a bad token", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${BAD_STUDENT_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(400);
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${BAD_STUDENT_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
     .reply(400);
 
     authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
@@ -364,20 +371,20 @@ describe("teacher authentication", () => {
   beforeEach(() => {
     urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
 
-    nock(CLASS_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(CLASS_INFO_PATH)
     .reply(200, RAW_CLASS_INFO);
 
-    nock(OFFERING_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(OFFERING_INFO_PATH)
     .reply(200, PARTIAL_RAW_OFFERING_INFO);
 
     nock("https://learn.staging.concord.org/")
@@ -391,32 +398,32 @@ describe("teacher authentication", () => {
   });
 
   it("works in authed mode", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(200, {
       token: RAW_TEACHER_PORTAL_JWT,
     });
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get(getFirebaseJWTParams(CLASS_HASH))
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_TEACHER_FIREBASE_JWT,
     });
 
-    nock((BASE_PORTAL_URL + CLASSES_MINE_PATH), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(CLASSES_MINE_PATH)
     .reply(200, {classes: []});
 
     authenticate("authed", appConfig, urlParams).then(({authenticatedUser, problemId}) => {
@@ -468,20 +475,20 @@ describe("teacher authentication", () => {
   });
 
   it("fails with a bad token", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(400);
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
     .reply(400);
 
     urlParams.token = BAD_TEACHER_TOKEN;
