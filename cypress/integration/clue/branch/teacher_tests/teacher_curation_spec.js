@@ -25,7 +25,7 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
     })
     
     describe('verify document curation', function() {//adding a star to a student document
-        let studentDoc = "Student 5: 2.1 Drawing Wumps"
+        let studentDoc = "Student 5: SAS 2.1 Drawing Wumps"
 
         it('verify starring a student published investigation',function(){
             rightNav.openRightNavTab('class-work')

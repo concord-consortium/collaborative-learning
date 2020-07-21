@@ -5,7 +5,7 @@ import { DBClearLevel } from "../lib/db";
 export interface QueryParams {
   // appMode is "authed", "test" or "dev" with the default of dev
   appMode?: AppMode;
-  // string, e.g. "s+s" for Stretching and Shrinking or "msa" for Moving Straight Ahead
+  // string, e.g. "sas" for Stretching and Shrinking or "msa" for Moving Straight Ahead
   unit?: string;
   // ordinal string, e.g. "2.1", "3.2", etc.
   problem?: string;

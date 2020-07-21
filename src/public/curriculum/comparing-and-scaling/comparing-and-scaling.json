@@ -1,0 +1,243 @@
+{
+  "code": "cas",
+  "abbrevTitle": "CAS",
+  "title": "Comparing and Scaling",
+  "subtitle": "Developing Proportional Reasoning in the Context of Number (quantities)",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "CAS Investigation 1 Proportional Reasoning Using Ratio Comparisons",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "CAS 1.1 Surveying Opinions",
+          "subtitle": "Analyzing Comparison Statements",
+          "disabled": [],
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "CAS 1.2 Mixing Juice",
+          "subtitle": "Choosing a Comparing Strategy",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "CAS 1.3 Time to Concentrate",
+          "subtitle": "Scaling Ratios",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.4",
+          "ordinal": 4,
+          "title": "CAS 1.4 Keeping Things in Proportion",
+          "subtitle": "Using Proportions",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "CAS Investigation 2 Proportional Reasoning: Using Rate Comparisons",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "CAS 2.1 Sharing Pizzas",
+          "subtitle": "Comparing Rate Strategies",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "CAS 2.2 Comparing Pizza Prices",
+          "subtitle": "Scaling Rates",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "CAS 2.3 Finding Costs",
+          "subtitle":"Unit rate and Constant of Proportionality",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "CAS Investigation 3 Pulling it all Together: Ratios, Rates, and Percent",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "CAS 3.1 Using Percents",
+          "subtitle": "What is the Tax?",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "CAS 3.2 Using Percents",
+          "subtitle": "What is the Tip?",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "CAS 3.3 Free Throws and Feeding Chimps",
+          "subtitle": "The Percent Connection",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 4,
+      "title": "CAS MR1 - MR3",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Comparing and Scaling Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                         "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                         "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": []
+}
