@@ -152,7 +152,7 @@
     "immutable": "^3.8.2",
     "initials": "^3.0.1",
     "jsonwebtoken": "^8.5.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "mobx": "^5.15.4",
     "mobx-react": "^6.1.7",
     "mobx-state-tree": "^3.15.0",
