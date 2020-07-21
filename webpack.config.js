@@ -99,9 +99,11 @@ module.exports = (env, argv) => {
           ...packageJson.config
         }
       }),
-      new CopyWebpackPlugin([
-        {from: 'src/public'}
-      ])
+      new CopyWebpackPlugin({
+        patterns: [
+          {from: 'src/public'}
+        ]
+      })
     ]
   };
 };

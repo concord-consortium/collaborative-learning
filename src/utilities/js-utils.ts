@@ -1,5 +1,4 @@
-// import nanoid from "nanoid";
-const nanoid = require("nanoid");
+import { nanoid } from "nanoid";
 
 /*
  * castArrayCopy()
@@ -33,8 +32,7 @@ export function safeJsonParse(json?: string) {
  *
  * returns a unique id string
  */
-export function uniqueId(): string {
+export function uniqueId(idLength = 16): string {
   // cf. https://zelark.github.io/nano-id-cc/
-  const idLength = 16;
   return nanoid(idLength);
 }

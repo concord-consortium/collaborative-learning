@@ -10,7 +10,7 @@ import { ToolContentUnionType } from "../tools/tool-types";
 import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";

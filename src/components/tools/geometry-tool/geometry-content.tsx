@@ -33,7 +33,7 @@ import { assign, castArray, debounce, each, filter, find, keys as _keys, throttl
         size as _size, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
         handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
@@ -45,7 +45,7 @@ import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
-export interface IProps extends IGeometryProps {
+export interface IProps extends IGeometryProps, SizeMeProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onUpdateToolbar: () => void;
