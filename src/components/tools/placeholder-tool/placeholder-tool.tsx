@@ -10,7 +10,7 @@ interface IProps {
   model: ToolTileModelType;
 }
 
-export default class PlaceholderToolComponent extends BaseComponent<IProps, {}> {
+export default class PlaceholderToolComponent extends BaseComponent<IProps> {
   public render() {
     return (
       <div className="placeholder-tool" onMouseDown={this.handleMouseDown} >

@@ -41,7 +41,6 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   public render() {
     const {dialog} = this.stores.ui;
     if (dialog) {
-      const {type} = dialog;
       let title = dialog.title;
       let contents: JSX.Element;
       switch (dialog.type) {

@@ -14,7 +14,7 @@ interface IProps {
 
 @inject("stores")
 @observer
-export class TileCommentsComponent extends BaseComponent<IProps, {}> {
+export class TileCommentsComponent extends BaseComponent<IProps> {
 
   public render() {
     const { user } = this.stores;

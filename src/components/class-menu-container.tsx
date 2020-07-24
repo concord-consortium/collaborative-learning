@@ -9,7 +9,7 @@ interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
-export class ClassMenuContainer extends BaseComponent <IProps, {}> {
+export class ClassMenuContainer extends BaseComponent <IProps> {
   public render() {
     const links = this.getPortalClasses();
     const { user } = this.stores;
@@ -32,8 +32,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
         return currentOffering.problemOrdinal;
       }
     }
-    // tslint:disable-next-line:no-console
-    console.log(`Warning -- current offering not found. (Maybe in demo mode?)`);
+    console.warn(`Warning -- current offering not found. (Maybe in demo mode?)`);
     return appConfig.defaultProblemOrdinal;
   }
 
@@ -79,8 +78,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
           link: classLinks[0].location
         });
       } else {
-        // tslint:disable-next-line:no-console
-        console.log(`Warning -- no problems assigned in this class ${className}`);
+        console.warn(`Warning -- no problems assigned in this class ${className}`);
       }
     });
 

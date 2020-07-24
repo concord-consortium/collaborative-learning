@@ -124,6 +124,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const visibleRowIds: string[] = [];
     this.rowRefs.forEach((ref) => {
       if (ref) {
+        // eslint-disable-next-line react/no-find-dom-node
         const rowNode = findDOMNode(ref);
         if (isElementInViewport(rowNode as Element)) {
           visibleRowIds.push(ref.props.model.id);
@@ -435,7 +436,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return false;
   }
 
-  private findSectionElementTop(parent: HTMLElement, sectionId: string, top: number = 0): number | undefined {
+  private findSectionElementTop(parent: HTMLElement, sectionId: string, top = 0): number | undefined {
     for (let i = 0; i < parent.childNodes.length; i++) {
       const child = parent.childNodes.item(i) as HTMLElement;
       if (child.nodeType === 1) { // 1 is element

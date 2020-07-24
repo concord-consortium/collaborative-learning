@@ -1,4 +1,3 @@
-/* tslint:disable max-line-length */
 export const TeacherOfferings = [
   {
     id: 1190,

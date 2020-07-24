@@ -7,7 +7,8 @@ import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType } from "../tools/tool-tile";
+import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType
+        } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
 import { v4 as uuid } from "uuid";
@@ -562,7 +563,7 @@ export const DocumentContentModel = types
         // delete tile
         self.tileMap.delete(tileId);
       },
-      moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex: number = 0) {
+      moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex = 0) {
         const srcRowId = self.findRowContainingTile(tileId);
         if (!srcRowId) return;
         const srcRowIndex = self.getRowIndex(srcRowId);

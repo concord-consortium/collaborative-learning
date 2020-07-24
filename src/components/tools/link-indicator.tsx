@@ -29,8 +29,9 @@ export const LinkIndicatorComponent: React.FC<IProps> = ({ id, index }: IProps) 
       ? <IconButtonSvg
           className="icon-link-indicator"
           style={style}
-          icon="link-indicator"
-          children={svgLinkIcon} />
+          icon="link-indicator">
+          svgLinkIcon
+        </IconButtonSvg>
       : null
   );
 };

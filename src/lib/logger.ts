@@ -102,7 +102,7 @@ interface IDocumentInfo {
 export class Logger {
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
     if (DEBUG_LOGGER) {
-      // tslint:disable-next-line:no-console
+      // eslint-disable-next-line no-console
       console.log("Logger#initializeLogger called.");
     }
     this._instance = new Logger(stores, investigation, problem);
@@ -113,7 +113,7 @@ export class Logger {
     this._instance.investigationTitle = investigation.title;
   }
 
-  public static log(event: LogEventName, parameters?: object, method?: LogEventMethod) {
+  public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
@@ -251,7 +251,7 @@ export class Logger {
 
 function sendToLoggingService(data: LogMessage) {
   if (DEBUG_LOGGER) {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
   }
   const request = new XMLHttpRequest();

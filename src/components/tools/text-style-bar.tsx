@@ -35,7 +35,7 @@ interface IProps {
 
 @inject("stores")
 @observer
-export class TextStyleBarComponent extends BaseComponent<IProps, {}> {
+export class TextStyleBarComponent extends BaseComponent<IProps> {
 
   private prefix = isMac() ? "Cmd-" : "Ctrl-";
 

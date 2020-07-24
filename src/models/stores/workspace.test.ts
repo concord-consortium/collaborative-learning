@@ -4,7 +4,7 @@ import { DocumentModel, DocumentModelType, ProblemDocument } from "../document/d
 describe("workspaces model", () => {
   let workspace: WorkspaceModelType;
   let goodDoc: DocumentModelType;
-  let badDoc: DocumentModelType;
+  // let badDoc: DocumentModelType;
 
   beforeEach(() => {
     workspace = WorkspaceModel.create({
@@ -20,13 +20,13 @@ describe("workspaces model", () => {
       content: {}
     });
 
-    badDoc = DocumentModel.create({
-      uid: "3",
-      type: ProblemDocument,
-      key: "test3",
-      createdAt: 1,
-      content: {}
-    });
+    // badDoc = DocumentModel.create({
+    //   uid: "3",
+    //   type: ProblemDocument,
+    //   key: "test3",
+    //   createdAt: 1,
+    //   content: {}
+    // });
   });
 
   it("has default values", () => {

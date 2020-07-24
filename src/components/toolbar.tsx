@@ -51,7 +51,7 @@ const ToolButtonComponent = (props: IButtonProps) => {
 
 @inject("stores")
 @observer
-export class ToolbarComponent extends BaseComponent<IProps, {}> {
+export class ToolbarComponent extends BaseComponent<IProps> {
   public render() {
     const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: DocumentTool) => {
       switch (tool) {

@@ -929,7 +929,7 @@ export const GeometryContentModel = types
                 });
               }
               break;
-            case "point":
+            case "point": {
               // don't copy movable line points independently
               if (obj.getAttribute("clientType") === "movableLine") return;
               const [ , x, y] = (obj as JXG.Point).coords.usrCoords;
@@ -938,6 +938,7 @@ export const GeometryContentModel = types
                 parents: [x, y]
               });
               break;
+            }
             case "polygon":
               assign(change, {
                 target: "polygon",
@@ -1062,7 +1063,7 @@ export const GeometryContentModel = types
         },
         resumeSync() {
           if (--suspendCount <= 0) {
-            self.changes.push.apply(self.changes, batchChanges);
+            self.changes.push(...batchChanges);
             batchChanges = [];
           }
         },
@@ -1082,7 +1083,7 @@ export const GeometryContentModel = types
                   }
                 }
                 break;
-              case "update":
+              case "update": {
                 const updateUrl = change.properties &&
                                     !Array.isArray(change.properties) &&
                                     change.properties.url;
@@ -1091,6 +1092,7 @@ export const GeometryContentModel = types
                   updates.push({ index, change: JSON.stringify(change) });
                 }
                 break;
+              }
             }
           });
           // make the corresponding changes
@@ -1118,7 +1120,7 @@ interface IBoardImportSpec {
 interface IPointImportSpec {
   type: "point";
   parents: [number, number];
-  properties?: object;
+  properties?: Record<string, unknown>;
 }
 
 interface IVertexImportSpec extends IPointImportSpec {
@@ -1128,7 +1130,7 @@ interface IVertexImportSpec extends IPointImportSpec {
 interface IPolygonImportSpec {
   type: "polygon";
   parents: IVertexImportSpec[];
-  properties?: object;
+  properties?: Record<string, unknown>;
 }
 
 interface IImageImportSpec {
@@ -1138,14 +1140,14 @@ interface IImageImportSpec {
     coords: JXGCoordPair;
     size: JXGCoordPair;
   };
-  properties?: object;
+  properties?: Record<string, unknown>;
 }
 
 interface IMovableLineImportSpec {
   type: "movableLine";
   parents: [IPointImportSpec, IPointImportSpec];
-  properties?: object;
-  comment?: object;
+  properties?: Record<string, unknown>;
+  comment?: Record<string, unknown>;
 }
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
@@ -1170,7 +1172,7 @@ function preprocessImportFormat(snapshot: any) {
   const changes: JXGChange[] = [];
   addBoard(boardSpecs);
 
-  function addComment(props: object) {
+  function addComment(props: Record<string, unknown>) {
     const id = uuid();
     changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
     return id;

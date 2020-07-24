@@ -3,7 +3,7 @@ import { registerToolContentInfo } from "../tool-content-info";
 
 export const kPlaceholderToolID = "Placeholder";
 
-export function defaultPlaceholderContent(sectionId: string = "") {
+export function defaultPlaceholderContent(sectionId = "") {
   return PlaceholderContentModel.create({
     type: kPlaceholderToolID,
     sectionId
@@ -16,7 +16,7 @@ export const PlaceholderContentModel = types
     sectionId: ""
   })
   .actions(self => ({
-    setSectionId(sectionId: string = "") {
+    setSectionId(sectionId = "") {
       self.sectionId = sectionId;
     }
   }));

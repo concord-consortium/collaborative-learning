@@ -16,7 +16,7 @@ interface IProps {
 }
 
 @inject("stores")
-export class SixPackRightControls extends BaseComponent<IProps, {}> {
+export class SixPackRightControls extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
   }

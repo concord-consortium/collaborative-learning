@@ -20,7 +20,7 @@ interface IState {
 }
 
 function initRollbar(stores: IStores, problemId: string) {
-  const {user, problem, unit, appVersion} = stores;
+  const {user, unit, appVersion} = stores;
   if (typeof (window as any).Rollbar !== "undefined") {
     const _Rollbar = (window as any).Rollbar;
     if (_Rollbar.configure) {

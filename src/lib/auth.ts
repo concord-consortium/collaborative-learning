@@ -319,7 +319,6 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     problemId?: string;
     unitCode?: string;
   }
-  // tslint:disable-next-line:max-line-length
   return new Promise<IAuthenticateResponse>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
@@ -341,7 +340,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
-      const [userType, userId, ...rest] = fakeUser.split(":");
+      const [userType, userId] = fakeUser.split(":");
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
@@ -473,7 +472,7 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
 
 const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
-  const [major, minor, ...rest] = problemOrdinal.split(".");
+  const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
   return `${unitCode}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };

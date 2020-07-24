@@ -1,4 +1,5 @@
-import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext
+        } from "./jxg-changes";
 import { boardChangeAgent, isBoard, kReverse, sortByCreation } from "./jxg-board";
 import { commentChangeAgent } from "./jxg-comment";
 import { imageChangeAgent } from "./jxg-image";

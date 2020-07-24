@@ -46,9 +46,8 @@ export function cn_PnPoly( P: Point, V: Point[] )
             }
         }
     }
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     return (cn & 1);    // 0 if even (out), and 1 if  odd (in)
-
 }
 // ===================================================================
 

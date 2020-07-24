@@ -7,8 +7,6 @@ import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribu
 import { cloneDeep, findIndex, padStart } from "lodash";
 import { v4 as uuid } from "uuid";
 
-// tslint:disable:one-variable-per-declaration
-
 let localIDCounter = 0;
 
 // TODO: handle case ordering without requiring sortable IDs.
@@ -239,7 +237,7 @@ export const DataSet = types.model("DataSet", {
       getCaseAtIndex(index: number) {
         return getCaseAtIndex(index);
       },
-      getCasesAtIndices(start: number = 0, count?: number) {
+      getCasesAtIndices(start = 0, count?: number) {
         const endIndex = count != null
                           ? Math.min(start + count, self.cases.length)
                           : self.cases.length,
@@ -265,7 +263,7 @@ export const DataSet = types.model("DataSet", {
       getCanonicalCaseAtIndex(index: number) {
         return getCanonicalCaseAtIndex(index);
       },
-      getCanonicalCasesAtIndices(start: number = 0, count?: number) {
+      getCanonicalCasesAtIndices(start = 0, count?: number) {
         const endIndex = count != null
                           ? Math.min(start + count, self.cases.length)
                           : self.cases.length,
@@ -420,7 +418,7 @@ export const DataSet = types.model("DataSet", {
               delayApplyActions(actions);
             }
           // attachAfter: if true, listener is called after action has been applied
-          }, true); // tslint:disable-line
+          }, true);
         }
       },
       beforeDestroy() {
@@ -544,8 +542,7 @@ export const DataSet = types.model("DataSet", {
           disposers[key] = onAction(self, (action) => listener(action), true);
         }
         else {
-          // tslint:disable-next-line no-console
-          console.log(`DataSet.addActionListener called for '${key}' with non-function argument!`);
+          console.warn(`DataSet.addActionListener called for '${key}' with non-function argument!`);
         }
       },
 

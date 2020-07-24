@@ -14,7 +14,7 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class LeftNavPanelComponent extends BaseComponent<IProps, {}> {
+export class LeftNavPanelComponent extends BaseComponent<IProps> {
 
   public render() {
     const { section } = this.props;
