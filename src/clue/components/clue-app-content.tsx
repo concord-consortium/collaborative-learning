@@ -11,13 +11,9 @@ import "./clue-app-content.sass";
 
 interface IProps extends IBaseProps {}
 
-interface IState {}
-
 @inject("stores")
 @observer
-export class ClueAppContentComponent extends BaseComponent<IProps, {}> {
-
-  public state: IState;
+export class ClueAppContentComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);

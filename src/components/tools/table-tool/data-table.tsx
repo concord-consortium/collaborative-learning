@@ -79,7 +79,7 @@ interface IState {
 }
 
 export const LOCAL_ROW_ID = "__local__";
-const LOCAL_ROW_STYLE = { backgroundColor: "#cfc" };
+// const LOCAL_ROW_STYLE = { backgroundColor: "#cfc" };
 
 interface IRowStyleParams {
   data: {
@@ -381,7 +381,6 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
         }
         return true;
       },
-      // tslint:disable-next-line:no-any
       comparator(valueA: any, valueB: any, nodeA: RowNode, nodeB: RowNode, descending: boolean) {
         const floatA = parseFloat(valueA);
         const floatB = parseFloat(valueB);
@@ -705,7 +704,7 @@ export default class DataTableComponent extends React.Component<IProps, IState> 
   public hasCellEditValueChanged(startEvent: CellEditingStartedEvent | undefined, stopEvent: CellEditingStoppedEvent) {
     const orgValue = startEvent && startEvent.value || "";
     const newValue = stopEvent && stopEvent.value || "";
-    // tslint:disable-next-line: triple-equals
+    // eslint-disable-next-line eqeqeq
     return newValue != orgValue;
   }
 

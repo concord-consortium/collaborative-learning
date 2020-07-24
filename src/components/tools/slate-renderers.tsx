@@ -74,9 +74,10 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
 
     case "image":  // TODO: This is broken.
       // return (<img src={src} title={title} />);
+      // fall through
     case "link":   // TODO: This is broken.
       // return (<a href={href} {...attributes}>{children}</a>);
-
+      // fall through
     default:
       return null;
   }

@@ -6,7 +6,7 @@ import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { kAllSectionType, getSectionPlaceholder } from "../../models/curriculum/section";
+import { kAllSectionType } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
@@ -30,7 +30,7 @@ const ghostProblemDocuments: GhostDocumentMap = {};
 
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {

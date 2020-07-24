@@ -7,6 +7,7 @@ if (!Element.prototype.matches) {
 // cf. https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill
 if (!Element.prototype.closest) {
   Element.prototype.closest = function(selector: string) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let el: any = this;
     do {
       if (el.matches(selector)) return el;

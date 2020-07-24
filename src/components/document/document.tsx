@@ -16,7 +16,6 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
-import { getLocalTimeStamp } from "../../utilities/time";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -66,12 +65,12 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
   );
 };
 
-const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
-  return (
-    <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
-                onClickButton={onClick} title="Published Workspace" />
-  );
-};
+// const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
+//   return (
+//     <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
+//                 onClickButton={onClick} title="Published Workspace" />
+//   );
+// };
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (

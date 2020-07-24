@@ -74,7 +74,7 @@ export interface OpenDocumentOptions {
   visibility?: "public" | "private";
   title?: string;
   properties?: IDocumentProperties;
-  groupUserConnections?: {};
+  groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
 }
 
@@ -782,7 +782,7 @@ export class DB {
 
   public createTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {
     const { user } = this.stores;
-    const { key: docKey, uid: docUserId } = document;
+    const { key: docKey } = document;
     const commentsRef = this.firebase.ref(
       this.firebase.getUserDocumentCommentsPath(user, docKey, tileId)
     );

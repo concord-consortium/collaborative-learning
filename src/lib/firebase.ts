@@ -30,7 +30,7 @@ export class Firebase {
     return this.user !== null;
   }
 
-  public ref(path: string = "") {
+  public ref(path = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
     }
@@ -41,14 +41,14 @@ export class Firebase {
     return firebase.storage();
   }
 
-  public storeRef(path: string = "") {
+  public storeRef(path = "") {
     if (!this.isConnected) {
       throw new Error("storeRef() requested before firestore connected!");
     }
     return firebase.storage().ref(this.getFullPath(path));
   }
 
-  public getFullPath(path: string = "") {
+  public getFullPath(path = "") {
     return `${this.getRootFolder()}${path}`;
   }
 
@@ -78,7 +78,7 @@ export class Firebase {
   }
 
   public escapeKey(s: string): string {
-    return s.replace(/[.$[\]#\/]/g, "_");
+    return s.replace(/[.$[\]#/]/g, "_");
   }
 
   //

@@ -129,6 +129,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTabContents() {
+    /* eslint-disable react/display-name */
     const {activeRightNavTab} = this.stores.ui;
     const tabContents: RightNavTabMap<() => JSX.Element> = {
             [ERightNavTab.kStudentWork]: () => <StudentWorkComponent />,
@@ -138,6 +139,7 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
             [ERightNavTab.kSupports]: () => <SupportsComponent
                                               onToggleExpansion={this.handleToggleSupportsExpansion} />,
           };
+    /* eslint-enable react/display-name */
     const tabContainers = map(ERightNavTab, (tab: ERightNavTab) => {
             const enabledDisabledClass = activeRightNavTab === tab ? "enabled" : "disabled";
             return (

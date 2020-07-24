@@ -8,7 +8,8 @@ import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
-import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent } from "../document/document-content";
+import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent
+        } from "../document/document-content";
 import { DocumentModel, SupportPublication, DocumentModelType } from "../document/document";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -378,15 +379,12 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
 }
 
 export async function getSupportDocumentProperties(support: TeacherSupportModelType, db: DB) {
-  let properties: IDocumentProperties;
-
   const {audience, sectionTarget, key} = support;
   const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;
   const ref = db.firebase.ref(path);
   const snapshot = await ref.once("value");
-  properties = snapshot && snapshot.val();
 
-  return properties;
+  return snapshot && snapshot.val() as IDocumentProperties;
 }
 
 export async function getDocumentContentForSupport(support: SupportModelType, db?: DB) {

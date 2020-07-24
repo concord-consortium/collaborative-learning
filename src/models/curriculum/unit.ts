@@ -58,7 +58,6 @@ export type UnitModelType = typeof UnitModel.Type;
 function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
   const unitUrlParam = unitId && appConfig.units.get(unitId);
   if (!unitUrlParam){
-    // tslint:disable-next-line
     console.warn(`unitId "${unitId}" not found in appConfig.units`);
   }
   const urlParam = unitUrlParam || appConfig.defaultUnit && appConfig.units.get(appConfig.defaultUnit);

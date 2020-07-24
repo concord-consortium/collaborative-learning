@@ -1,6 +1,6 @@
 const debug = (window.localStorage ? window.localStorage.getItem("debug") : undefined) || "";
 if (debug.length > 0) {
-  // tslint:disable-next-line:no-console
+  // eslint-disable-next-line no-console
   console.info("DEBUG:", debug);
 }
 

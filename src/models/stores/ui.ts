@@ -86,7 +86,7 @@ export const UIModel = types
       });
     };
 
-    const prompt = (text: string, defaultValue: string = "", title?: string, rows?: number) => {
+    const prompt = (text: string, defaultValue = "", title?: string, rows?: number) => {
       self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title, rows});
       return new Promise<string>((resolve, reject) => {
         dialogResolver = resolve;

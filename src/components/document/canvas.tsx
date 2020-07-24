@@ -25,7 +25,7 @@ interface IProps extends IBaseProps {
 }
 
 @observer
-export class CanvasComponent extends React.Component<IProps, {}> {
+export class CanvasComponent extends React.Component<IProps> {
 
   public render() {
     return (

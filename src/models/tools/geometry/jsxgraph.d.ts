@@ -1,7 +1,3 @@
-// tslint:disable:max-classes-per-file
-// tslint:disable:member-access
-// tslint:disable:member-ordering
-// tslint:disable:no-namespace
 declare namespace JXG {
 
   const COORDS_BY_SCREEN: number;
@@ -139,6 +135,7 @@ declare namespace JXG {
     freeBoard: (board: JXG.Board | string) => void;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class Image extends CoordsElement {
     size: [number, number];
     url: string;

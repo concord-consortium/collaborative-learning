@@ -7,7 +7,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/stores/workspace";
 import { defaultTextContent } from "../models/tools/text/text-content";
-import { createToolTileModelFromContent, IDragTileItem, ToolTileModelType } from "../models/tools/tool-tile";
+import { createToolTileModelFromContent, IDragTileItem } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { UserModel } from "../models/stores/user";
 
@@ -138,8 +138,6 @@ describe("logger", () => {
       stores.documents.add(sourceDocument);
       stores.documents.add(destinationDocument);
 
-      let tileToCopy: ToolTileModelType;
-
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
@@ -162,7 +160,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      tileToCopy = sourceDocument.content.firstTile!;
+      const tileToCopy = sourceDocument.content.firstTile!;
 
       const copyTileInfo: IDragTileItem = {
         rowIndex: 0,

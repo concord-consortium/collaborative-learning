@@ -21,7 +21,7 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class ClueAppHeaderComponent extends BaseComponent<IProps, {}> {
+export class ClueAppHeaderComponent extends BaseComponent<IProps> {
 
   public render() {
     const { showGroup } = this.props;

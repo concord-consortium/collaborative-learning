@@ -14,10 +14,7 @@ interface IProps {
   onSetCanAcceptDrop: (tileId?: string) => void;
 }
 
-interface IState {
-}
-​
-export default class DrawingToolComponent extends BaseComponent<IProps, IState> {
+export default class DrawingToolComponent extends BaseComponent<IProps> {
 
   public static tileHandlesSelection = true;
 
@@ -28,7 +25,7 @@ export default class DrawingToolComponent extends BaseComponent<IProps, IState> 
   }
 
   public render() {
-    const { model, readOnly, scale } = this.props;
+    const { model, readOnly } = this.props;
     const editableClass = readOnly ? " read-only" : "";
     const className = `drawing-tool${editableClass}`;
     return (

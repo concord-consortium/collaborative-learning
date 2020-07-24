@@ -395,7 +395,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const ed = this.resolveEditorRef(editor);
     switch (slateType) {
       case "superscript":
-      case "subscript":
+      case "subscript": {
         // Special case handling: Prevent the nesting of superscripts and subscripts.
         const hasType = ed.value.marks.some((m: any) => {
           return (m.type === "subscript" || m.type === "superscript");
@@ -406,6 +406,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           ed.toggleMark(slateType);
         }
         break;
+      }
       default:
         // Everything else (e.g. bold, underline, italic, ...)
         ed.toggleMark(slateType);
@@ -449,7 +450,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       case "heading4":
       case "heading5":
       case "heading6":
-      default:
+      default: {
         const isAlreadySet = blocks.some((block: any) => block.type === slateType);
         ed.setBlocks(isAlreadySet ? DEFAULT_BLOCK_TYPE : slateType);
         if (containsListItems) {
@@ -462,6 +463,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
             .unwrapBlock("ordered-list");
         }
         break;
+      }
     }
   }
 

@@ -16,15 +16,13 @@ import nock from "nock";
 import { NUM_FAKE_STUDENTS } from "../components/demo/demo-creator";
 import { QueryParams } from "../utilities/url-params";
 
-// tslint:disable-next-line:max-line-length
+/* eslint-disable max-len */
 const RAW_STUDENT_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTg5MCwiZXhwIjoxNTM4MDU5NDkwLCJ1aWQiOjQ1NDMsImRvbWFpbiI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy8iLCJ1c2VyX3R5cGUiOiJsZWFybmVyIiwidXNlcl9pZCI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy91c2Vycy80NTQzIiwibGVhcm5lcl9pZCI6MTIzMiwiY2xhc3NfaW5mb191cmwiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvYXBpL3YxL2NsYXNzZXMvNjYiLCJvZmZlcmluZ19pZCI6MTAzM30.WxfzUkv7mWBv3fN_I3eYKp7VxBNADLLhIurxXjewoK4";
-// tslint:disable-next-line:max-line-length
 const RAW_STUDENT_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWF4a2JsQGNvbGxhYm9yYXRpdmUtbGVhcm5pbmctZWMyMTUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1heGtibEBjb2xsYWJvcmF0aXZlLWxlYXJuaW5nLWVjMjE1LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE1MzgwNTU4OTAsImV4cCI6MTUzODA1OTQ5MCwidWlkIjoiYTU2ZjBlMmUxNzZhYTQ4ZWFhMzRmMTllMDkyMmViZTgiLCJkb21haW4iOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvIiwiZXh0ZXJuYWxJZCI6MTIzMiwicmV0dXJuVXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2RhdGFzZXJ2aWNlL2V4dGVybmFsX2FjdGl2aXR5X2RhdGEvYTNmN2Y4ZDQtMjY4ZS00ODQzLThmMzEtZmM0YWRlN2Q3ODAxIiwibG9nZ2luZyI6ZmFsc2UsImRvbWFpbl91aWQiOjQ1NDMsImNsYXNzX2luZm9fdXJsIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL2FwaS92MS9jbGFzc2VzLzY2IiwiY2xhaW1zIjp7InVzZXJfdHlwZSI6ImxlYXJuZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzQ1NDMiLCJjbGFzc19oYXNoIjoiODRkZGIxOTcxZTE2Yjc1NmQ1ZmRlOTdhNzk3OTU4Y2FlYWU4ZjcxMzM4ZDMyZmRjIiwib2ZmZXJpbmdfaWQiOjEwMzN9fQ.lvjuLdrAfbQizwilvv9zCi4cwAmmcrLfKZcnX5-R3O6n_-hSfuAVZ_ScK_95mkFkZdx9Mdpx1j4bDAYEc9gpwP7mIjFqlDJFuwG6m1gicj-D-DrIvecf5nJhCVJgzcEYyuCwLdDhk8iPEFeaJZRqaCg7m8l2B6qWO2nWWFdUTYCyWcmab-VF8z-A43fD76PBNeOdiz90iNBLK_VIMoRNWsk1BVRW4IPUJYsTh1SDWpUP2ocFzuk7x59XiQszlA1CII4pl5O_thtyK79Spt10MbhGbXFZWa1j60TYH3Pi-mXF-JDjD8UUVKUR24PAr8CMCuFstgdnMwphhiGALRtI2g";
 
-// tslint:disable-next-line:max-line-length
 const RAW_TEACHER_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTY2OSwiZXhwIjoxNTM4MDU5MjY5LCJ1aWQiOjIxNywiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6InRlYWNoZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzIxNyIsInRlYWNoZXJfaWQiOjg4fQ.lwFtD-UUXQOcOono0Q9fjBQFbOdP14rhZbJw9PN51vk";
-// tslint:disable-next-line:max-line-length
 const RAW_TEACHER_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWF4a2JsQGNvbGxhYm9yYXRpdmUtbGVhcm5pbmctZWMyMTUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1heGtibEBjb2xsYWJvcmF0aXZlLWxlYXJuaW5nLWVjMjE1LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE1MzgwNTU2NzAsImV4cCI6MTUzODA1OTI3MCwidWlkIjoiMzU4MTYwYzk3M2Y0MmE0MzYxZjA5YzdlMjA2YjVmNGQiLCJkb21haW4iOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvIiwiZG9tYWluX3VpZCI6MjE3LCJjbGFpbXMiOnsidXNlcl90eXBlIjoidGVhY2hlciIsInVzZXJfaWQiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvdXNlcnMvMjE3IiwiY2xhc3NfaGFzaCI6bnVsbH19.XQ_-MmbZUegnod789tKZgWt4r3QpecEoSASb572jDfQGEKupiWGcXn2MGeESuRsOFwD3eWbiQoC6B7F8cy6h0EiaXhIVFR_xrviqoXgayQsDQalrCVGjllLGak4vY7p-ZnLvSie6F9-KubPIfsF_0NdRSDTFOHbN3LGhpxGUYxc4GKandDgGTJwy5rgXLebU7ezzKyzE2YAYEGuVPge5Yf9PgXI__OsbiUD4tOK2dxSTytcL30maeYQ4x0CBWY96w8oOlusOHIsf96OkqKe272SXz2BgkhF6e1IHby_CIhl51FFxAqKr6P1sPlt8WnVpK7qwTDY8VSNCYNxNQMiaXw";
+/* eslint-enable max-len */
 
 const STUDENT_PORTAL_JWT: PortalStudentJWT = {
   alg: "HS256",
@@ -58,12 +56,19 @@ const BAD_TEACHER_TOKEN = "badTeacherToken";
 
 const CLASS_HASH = "testHash";
 
-const BASE_PORTAL_URL = "https://learn.staging.concord.org/";
+// follow nock conventions: host with no trailing slash, path with leading slash
+const BASE_PORTAL_HOST = "https://learn.staging.concord.org";
+const BASE_PORTAL_URL = `${BASE_PORTAL_HOST}/`;
 
-const OFFERING_INFO_URL = "https://learn.staging.concord.org/api/v1/offerings/1033";
-const CLASS_INFO_URL = "https://learn.staging.concord.org/api/v1/classes/66";
-const CLASSES_MINE_PATH = "api/v1/classes/mine";
-const OFFERINGS_PATH = "api/v1/offerings/";
+const PORTAL_JWT_PATH = `/${PORTAL_JWT_URL_SUFFIX}`;
+const FIREBASE_JWT_PATH = `/${FIREBASE_JWT_URL_SUFFIX}`;
+const OFFERING_INFO_PATH = "/api/v1/offerings/1033";
+const CLASS_INFO_PATH = "/api/v1/classes/66";
+const CLASSES_MINE_PATH = "/api/v1/classes/mine";
+// const OFFERINGS_PATH = "/api/v1/offerings";
+
+const CLASS_INFO_URL = BASE_PORTAL_HOST + CLASS_INFO_PATH;
+const OFFERING_INFO_URL = BASE_PORTAL_HOST + OFFERING_INFO_PATH;
 
 const RAW_CORRECT_STUDENT: RawUser = {
   id: STUDENT_PORTAL_JWT.user_id,
@@ -188,12 +193,12 @@ describe("student authentication", () => {
   const appConfig = AppConfigModel.create();
 
   beforeEach(() => {
-    nock(CLASS_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer/JWT ${RAW_STUDENT_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(CLASS_INFO_PATH)
     .reply(200, RAW_CLASS_INFO);
   });
 
@@ -209,22 +214,22 @@ describe("student authentication", () => {
   });
 
   it("works in authed mode", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(200, {
       token: RAW_STUDENT_PORTAL_JWT,
     });
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${GOOD_STUDENT_TOKEN}`
       }
     })
-    .get(getFirebaseJWTParams(CLASS_HASH))
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
@@ -264,7 +269,6 @@ describe("student authentication", () => {
           uid: "a56f0e2e176aa48eaa34f19e0922ebe8",
           domain: "https://learn.staging.concord.org/",
           externalId: 1232,
-          // tslint:disable-next-line:max-line-length
           returnUrl: "https://learn.staging.concord.org/dataservice/external_activity_data/a3f7f8d4-268e-4843-8f31-fc4ade7d7801",
           logging: false,
           domain_uid: 4543,
@@ -286,20 +290,20 @@ describe("student authentication", () => {
   });
 
   it("fails with a bad token", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${BAD_STUDENT_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(400);
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         authorization: `Bearer ${BAD_STUDENT_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
     .reply(400);
 
     authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
@@ -364,20 +368,20 @@ describe("teacher authentication", () => {
   beforeEach(() => {
     urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
 
-    nock(CLASS_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(CLASS_INFO_PATH)
     .reply(200, RAW_CLASS_INFO);
 
-    nock(OFFERING_INFO_URL, {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer/JWT ${RAW_TEACHER_PORTAL_JWT}`
       }
     })
-    .get("")
+    .get(OFFERING_INFO_PATH)
     .reply(200, PARTIAL_RAW_OFFERING_INFO);
 
     nock("https://learn.staging.concord.org/")
@@ -391,32 +395,32 @@ describe("teacher authentication", () => {
   });
 
   it("works in authed mode", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(200, {
       token: RAW_TEACHER_PORTAL_JWT,
     });
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get(getFirebaseJWTParams(CLASS_HASH))
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams(CLASS_HASH))
     .reply(200, {
       token: RAW_TEACHER_FIREBASE_JWT,
     });
 
-    nock((BASE_PORTAL_URL + CLASSES_MINE_PATH), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${GOOD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(CLASSES_MINE_PATH)
     .reply(200, {classes: []});
 
     authenticate("authed", appConfig, urlParams).then(({authenticatedUser, problemId}) => {
@@ -468,20 +472,20 @@ describe("teacher authentication", () => {
   });
 
   it("fails with a bad token", (done) => {
-    nock((BASE_PORTAL_URL + PORTAL_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
       }
     })
-    .get("")
+    .get(PORTAL_JWT_PATH)
     .reply(400);
 
-    nock((BASE_PORTAL_URL + FIREBASE_JWT_URL_SUFFIX), {
+    nock(BASE_PORTAL_HOST, {
       reqheaders: {
         Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
     .reply(400);
 
     urlParams.token = BAD_TEACHER_TOKEN;

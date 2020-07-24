@@ -1,5 +1,5 @@
 import { DB } from "../db";
-import { TileCommentModel, TileCommentsModelType, TileCommentsModel } from "../../models/tools/tile-comments";
+import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { forEach } from "lodash";
 import { BaseListener } from "./base-listener";
 

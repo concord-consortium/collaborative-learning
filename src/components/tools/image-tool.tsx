@@ -2,7 +2,7 @@ import React from "react";
 import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
-import { BaseComponent, IBaseProps } from "../base";
+import { BaseComponent } from "../base";
 import { IToolTileProps } from "./tool-tile";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";

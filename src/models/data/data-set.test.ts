@@ -2,9 +2,7 @@
 import { applyAction, clone, destroy, getSnapshot, onAction } from "mobx-state-tree";
 import { addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet,
           CaseID, ICaseID, ICase, DataSet, IDataSet } from "./data-set";
-import uuid from "uuid/v4";
-
-// tslint:disable:one-variable-per-declaration
+import { v4 as uuid } from "uuid";
 
 test("CaseID functionality", () => {
   const caseID = CaseID.create({ __id__: "0" });
@@ -402,12 +400,11 @@ test("Derived DataSet synchronization (subset attributes)", () => {
         cCaseID = source.cases[2].__id__,
         dCaseID = source.cases[3].__id__,
         eCaseID = source.cases[4].__id__;
-  let fooAttrID: string,
-      abCaseID: string,
+  let abCaseID: string,
       cdCaseID: string,
       gCaseID: string;
   addAttributeToDataSet(source, { name: "foo" });
-  fooAttrID = source.attributes[2].id;
+  const fooAttrID = source.attributes[2].id;
 
   return odds.onSynchronized()
     .then(() => {
@@ -475,9 +472,9 @@ test("Derived DataSet synchronization (all attributes)", () => {
 
   expect(evens.attributes.length).toBe(2);
 
-  let fooAttrID: string, a1CaseID: string, a2CaseID;
+  let a1CaseID: string, a2CaseID;
   addAttributeToDataSet(source, { name: "foo" });
-  fooAttrID = source.attributes[2].id;
+  const fooAttrID = source.attributes[2].id;
 
   return evens.onSynchronized()
     .then(() => {

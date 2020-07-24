@@ -29,7 +29,7 @@ export class BaseListener {
 
   protected debugLog(methodName: string, ...args: any[]) {
     if (DEBUG_LISTENERS) {
-      // tslint:disable-next-line:no-console
+      // eslint-disable-next-line no-console
       console.log(`${this.listener}${methodName}`, ...args);
     }
   }

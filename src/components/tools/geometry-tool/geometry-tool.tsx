@@ -35,7 +35,7 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
 
   private domElement: React.RefObject<HTMLDivElement> = React.createRef();
   private hotKeys: HotKeys = new HotKeys();
-  private didLastMouseDownSelectTile: boolean = false;
+  private didLastMouseDownSelectTile = false;
 
   public render() {
     // We must listen for pointer events because we want to get the events before

@@ -65,16 +65,16 @@ export function getTickValues(pixPerUnit: number) {
   return [majorTickDistance, minorTicks, minorTickDistance];
 }
 
-function findNearestMinorTicks(board: JXG.Board, x: number, y: number) {
-  const [ , , xMinorTickDistance] = getTickValues(board.unitX);
-  const [ , , yMinorTickDistance] = getTickValues(board.unitY);
-  const xOut = xMinorTickDistance * Math.round(x / xMinorTickDistance);
-  const yOut = yMinorTickDistance * Math.round(y / yMinorTickDistance);
-  return [xOut, yOut];
-}
+// function findNearestMinorTicks(board: JXG.Board, x: number, y: number) {
+//   const [ , , xMinorTickDistance] = getTickValues(board.unitX);
+//   const [ , , yMinorTickDistance] = getTickValues(board.unitY);
+//   const xOut = xMinorTickDistance * Math.round(x / xMinorTickDistance);
+//   const yOut = yMinorTickDistance * Math.round(y / yMinorTickDistance);
+//   return [xOut, yOut];
+// }
 
 export const kReverse = true;
-export function sortByCreation(board: JXG.Board, ids: string[], reverse: boolean = false) {
+export function sortByCreation(board: JXG.Board, ids: string[], reverse = false) {
   const indices: { [id: string]: number } = {};
   board.objectsList.forEach((obj, index) => {
     indices[obj.id] = index;
@@ -111,6 +111,7 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
   const { boundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
+  // eslint-disable-next-line no-sparse-arrays
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
   const xMax = xMin + eltWidth / unitX;
   const yMax = yMin + eltHeight / unitY;

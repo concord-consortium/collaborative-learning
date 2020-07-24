@@ -5,9 +5,7 @@ import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribu
 // see https://medium.com/@martin_hotell/tree-shake-lodash-with-webpack-jest-and-typescript-2734fa13b5cd
 // for more efficient ways of importing lodash functions
 import { cloneDeep, findIndex, padStart } from "lodash";
-import uuid from "uuid/v4";
-
-// tslint:disable:one-variable-per-declaration
+import { v4 as uuid } from "uuid";
 
 let localIDCounter = 0;
 
@@ -239,7 +237,7 @@ export const DataSet = types.model("DataSet", {
       getCaseAtIndex(index: number) {
         return getCaseAtIndex(index);
       },
-      getCasesAtIndices(start: number = 0, count?: number) {
+      getCasesAtIndices(start = 0, count?: number) {
         const endIndex = count != null
                           ? Math.min(start + count, self.cases.length)
                           : self.cases.length,
@@ -265,7 +263,7 @@ export const DataSet = types.model("DataSet", {
       getCanonicalCaseAtIndex(index: number) {
         return getCanonicalCaseAtIndex(index);
       },
-      getCanonicalCasesAtIndices(start: number = 0, count?: number) {
+      getCanonicalCasesAtIndices(start = 0, count?: number) {
         const endIndex = count != null
                           ? Math.min(start + count, self.cases.length)
                           : self.cases.length,
@@ -420,7 +418,7 @@ export const DataSet = types.model("DataSet", {
               delayApplyActions(actions);
             }
           // attachAfter: if true, listener is called after action has been applied
-          }, true); // tslint:disable-line
+          }, true);
         }
       },
       beforeDestroy() {
@@ -544,8 +542,7 @@ export const DataSet = types.model("DataSet", {
           disposers[key] = onAction(self, (action) => listener(action), true);
         }
         else {
-          // tslint:disable-next-line no-console
-          console.log(`DataSet.addActionListener called for '${key}' with non-function argument!`);
+          console.warn(`DataSet.addActionListener called for '${key}' with non-function argument!`);
         }
       },
 

@@ -1,4 +1,3 @@
-// tslint:disable:jsx-no-lambda
 import React from "react";
 import { v4 as uuid } from "uuid";
 import { extractDragTileType, kDragTileContent } from "../tool-tile";
@@ -633,7 +632,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public objects: ObjectMap;
   public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
-  private svgRef: React.RefObject<{}>|null;
+  private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
   private disposers: IReactionDisposer[];
@@ -1123,7 +1122,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       case "ellipse":
         drawingObject = new EllipseObject(data);
         break;
-      case "image":
+      case "image": {
         const imageEntry = gImageMap.getCachedImage(data.url);
         const displayUrl = imageEntry && imageEntry.displayUrl || "";
         drawingObject = new ImageObject(assign({}, data, { url: displayUrl }));
@@ -1132,10 +1131,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           this.updateImageUrl(data.url);
         }
         break;
+      }
     }
     if (drawingObject && drawingObject.model.id) {
-      this.state.objects[drawingObject.model.id] = drawingObject;
-      this.setState({objects: this.state.objects});
+      this.setState({objects: { ...this.state.objects, ...{ [drawingObject.model.id]: drawingObject } }});
     }
   }
 
@@ -1160,7 +1159,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {ids, update: {prop, newValue}} = update;
     for (const id of ids) {
       const drawingObject = this.state.objects[id];
-      if (drawingObject && drawingObject.model.hasOwnProperty(prop)) {
+      if (drawingObject && Object.prototype.hasOwnProperty.call(drawingObject.model, prop)) {
         if ((drawingObject instanceof ImageObject) && (prop === "url")) {
           const url = newValue as string;
           this.updateImageUrl(url);

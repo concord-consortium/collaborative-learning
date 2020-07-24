@@ -1,7 +1,6 @@
-// tslint:disable:jsx-no-lambda
 import React from "react";
 import { DrawingContentModelType, Color, ToolbarModalButton, TOOLBAR_WIDTH,
-  colors, computeStrokeDashArray, StampModelType } from "../../../models/tools/drawing/drawing-content";
+  colors, computeStrokeDashArray } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { observer } from "mobx-react";
 

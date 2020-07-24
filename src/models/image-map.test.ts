@@ -36,8 +36,7 @@ describe("ImageMap", () => {
       const didMatch = handler.match(input);
       const shouldMatch = matches.indexOf(input) >= 0;
       if (didMatch !== shouldMatch) {
-        // tslint:disable-next-line:no-console
-        console.log(`handler: ${handler.name}, input: ${input}, match: ${didMatch}, should: ${shouldMatch}`);
+        console.warn(`handler: ${handler.name}, input: ${input}, match: ${didMatch}, should: ${shouldMatch}`);
       }
       expect(didMatch).toBe(shouldMatch);
       return didMatch === shouldMatch;
@@ -125,8 +124,8 @@ describe("ImageMap", () => {
             firebase: { getPublicUrlFromStore: (path?: string, url?: string) => Promise.resolve(undefined) },
             getImageBlob: jest.fn(() => Promise.resolve(kBlobUrl))
           };
-    const storeSpy = jest.spyOn(ImageUtils, "storeImage")
-                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
+    // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
+    //                       .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
     return firebaseStorageImagesHandler.store(kCCImgFBRTDB, mockDB, "user")
       .then(imageResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
@@ -141,8 +140,8 @@ describe("ImageMap", () => {
                                                   Promise.reject(new Error("Conversion error")) },
             getImageBlob: jest.fn(() => Promise.resolve(kBlobUrl))
           };
-    const storeSpy = jest.spyOn(ImageUtils, "storeImage")
-                          .mockImplementation(() => Promise.reject(new Error("Conversion error")));
+    // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
+    //                       .mockImplementation(() => Promise.reject(new Error("Conversion error")));
     return firebaseStorageImagesHandler.store(kCCImgFBRTDB, mockDB, "user")
       .then(imageResult => {
         // expect(storeSpy).not.toHaveBeenCalled();

@@ -8,7 +8,7 @@ interface IProps {
 }
 
 @observer
-export class TabSetComponent extends React.Component<IProps, {}> {
+export class TabSetComponent extends React.Component<IProps> {
 
   public render() {
     const className = `tabs${this.props.className ? ` ${this.props.className}` : ""}`;

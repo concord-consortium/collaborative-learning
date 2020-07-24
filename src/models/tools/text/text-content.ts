@@ -29,19 +29,6 @@ export const emptyJson: ValueJSON = {
               }
             };
 
-const errorJson: ValueJSON = {
-        document: {
-          nodes: [{
-            object: "block",
-            type: "paragraph",
-            nodes: [{
-              object: "text",
-              text: "A slate error occurred"
-            }]
-          }]
-        }
-      };
-
 export const TextContentModel = types
   .model("TextTool", {
     type: types.optional(types.literal(kTextToolID), kTextToolID),

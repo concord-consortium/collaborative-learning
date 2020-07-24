@@ -10,7 +10,7 @@ interface IProps {
 }
 
 @inject("stores")
-export class SectionHeader extends BaseComponent<IProps, {}> {
+export class SectionHeader extends BaseComponent<IProps> {
 
   public render() {
     const initials = getSectionInitials(this.props.type);
