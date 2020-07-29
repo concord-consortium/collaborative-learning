@@ -30,7 +30,7 @@ export const LinkIndicatorComponent: React.FC<IProps> = ({ id, index }: IProps) 
           className="icon-link-indicator"
           style={style}
           icon="link-indicator">
-          svgLinkIcon
+          {svgLinkIcon}
         </IconButtonSvg>
       : null
   );
