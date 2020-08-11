@@ -165,7 +165,7 @@ export const DocumentModel = types
       if (value == null) {
         self.properties.delete(key);
       }
-      else {
+      else if (self.getProperty(key) !== value) {
         self.properties.set(key, value);
       }
     },

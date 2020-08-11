@@ -1,23 +1,24 @@
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
+import "firebase/firestore";
 import "firebase/storage";
-import { AppMode, IStores } from "../models/stores/stores";
+import { getProblemPath, IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBPublicationDocumentMetadata,
-  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
-  DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
-  DBOtherDocument, DBOtherDocumentMap, IDocumentProperties, DBOtherPublication,
-  DBPublishedSupport, DBSupportPublicationMetadata, DBSupport } from "./db-types";
+        DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
+        DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
+        DBOtherDocument, DBOtherDocumentMap, IDocumentProperties, DBOtherPublication, DBSupport
+        } from "./db-types";
 import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
         PersonalPublication, ProblemPublication, LearningLogPublication, OtherPublicationType, OtherDocumentType,
         SupportPublication } from "../models/document/document";
-import { SupportModelType, ESupportType } from "../models/curriculum/support";
+import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
        } from "../models/document/document-content";
 import { Firebase } from "./firebase";
+import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -81,16 +82,17 @@ export interface OpenDocumentOptions {
 export class DB {
   @observable public groups: GroupUsersMap = {};
   public firebase: Firebase;
+  public firestore: Firestore;
   public listeners: DBListeners;
   public stores: IStores;
 
   public creatingDocuments: string[] = [];
 
-  private appMode: AppMode;
   private authStateUnsubscribe?: firebase.Unsubscribe;
 
   constructor() {
     this.firebase = new Firebase(this);
+    this.firestore = new Firestore(this);
     this.listeners = new DBListeners(this);
   }
 
@@ -124,8 +126,8 @@ export class DB {
         // always stop existing listeners when firebase user changes
         this.listeners.stop();
         if (firebaseUser) {
-          this.appMode = options.appMode;
-          this.firebase.user = firebaseUser;
+          this.firebase.setFirebaseUser(firebaseUser);
+          this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
             // resolve after listeners have started
             this.listeners.start().then(resolve).catch(reject);
@@ -470,44 +472,24 @@ export class DB {
     });
   }
 
-  public publishDocumentAsSupport(documentModel: DocumentModelType,
-                                  audience: AudienceModelType,
-                                  sectionTarget: SectionTarget,
-                                  caption: string) {
+  public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
     const {user} = this.stores;
     const content = documentModel.content.publish();
-    return new Promise<{document: DBDocument, metadata: DBSupportPublicationMetadata}>((resolve, reject) => {
-      this.createDocument({ type: SupportPublication, content })
-        .then(({document, metadata}) => {
-          const supportPath = this.firebase.getSupportsPath(user, audience, sectionTarget);
-          const supportRef = this.firebase.ref(supportPath).push();
-          const fbSupportDocPath = this.firebase.getUserDocumentPath(user, document.self.documentKey);
-          const support: DBPublishedSupport = {
-            version: "1.0",
-            self: {
-              classHash: user.classHash,
-              offeringId: user.offeringId,
-              audienceType: audience.type,
-              audienceId: audience.identifier || "",
-              sectionTarget,
-              key: supportRef.key!
-            },
-            uid: user.id,
-            properties: { caption, ...documentModel.copyProperties() },
-            originDoc: documentModel.key,
-            timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-            type: ESupportType.publication,
-            content: fbSupportDocPath,
-            deleted: false
-          };
-
-          supportRef.set(support)
-            .then(() => {
-              Logger.logDocumentEvent(LogEventName.PUBLISH_SUPPORT, documentModel);
-              resolve({document, metadata: metadata as DBSupportPublicationMetadata});
-            })
-            .catch(reject);
-        });
+    const fs = this.firestore;
+    return fs.batch(batch => {
+      const rootRef = fs.documentRef(fs.getRootFolder());
+      batch.set(rootRef, { updatedAt: fs.timestamp() });
+      const docRef = fs.newDocumentRef(fs.getMulticlassSupportsPath());
+      batch.set(docRef, {
+        uid: user.id,
+        type: "supportPublication",
+        createdAt: fs.timestamp(),
+        properties: { teacherSupport: true, caption, ...documentModel.copyProperties() },
+        problem: getProblemPath(this.stores),
+        classes: [user.classHash],
+        originDoc: documentModel.key,
+        content
+      });
     });
   }
 

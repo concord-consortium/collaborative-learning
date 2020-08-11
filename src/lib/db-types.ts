@@ -1,6 +1,8 @@
 import { ESupportMode, ESupportType } from "../models/curriculum/support";
 import { AudienceEnum, SectionTarget } from "../models/stores/supports";
 
+export type DatabaseType = "firebase" | "firestore";
+
 // NOTE: see docs/firebase-schema.md to see a visual hierarchy of these interfaces
 
 export interface DBPortalUser {
@@ -286,12 +288,17 @@ export interface DBDocumentSupport extends DBBaseSupport {
   type: ESupportType.document;
 }
 
+export interface DBMulticlassSupport extends DBBaseSupport {
+  type: ESupportType.multiclass;
+  originDoc: string;
+}
+
 export interface DBPublishedSupport extends DBBaseSupport {
   type: ESupportType.publication;
   originDoc: string;
 }
 
-export type DBSupport = DBTextSupport | DBDocumentSupport | DBPublishedSupport;
+export type DBSupport = DBTextSupport | DBDocumentSupport | DBMulticlassSupport | DBPublishedSupport;
 
 export interface DBTileComment {
   content: string;

@@ -6,11 +6,9 @@ import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { kAllSectionType } from "../../models/curriculum/section";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { AudienceModelType, ClassAudienceModel, SectionTarget } from "../../models/stores/supports";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
@@ -373,7 +371,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return match && match[1] ? match[1] : title;
   }
 
-  private getSupportDocumentBaseCaption(document: DocumentModelType, sectionTarget: SectionTarget) {
+  private getSupportDocumentBaseCaption(document: DocumentModelType) {
     return document.type === ProblemDocument
             ? this.getProblemBaseTitle(this.stores.problem.title)
             : document.title;
@@ -381,12 +379,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handlePublishSupport = async (document: DocumentModelType) => {
     const { db, ui } = this.stores;
-    const audience: AudienceModelType = ClassAudienceModel.create();
-    const sectionTarget: SectionTarget = kAllSectionType;
-    const caption = this.getSupportDocumentBaseCaption(document, sectionTarget) || "Untitled";
+    const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
     // TODO: Disable publish button while publishing
-    db.publishDocumentAsSupport(document, audience, sectionTarget, caption)
-      .then(() => ui.alert("Your support was published.", "Support Published"));
+    db.publishDocumentAsSupport(document, caption)
+      .then(() => ui.alert("Your support was published.", "Support Published"))
+      .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
   }
 
   private handlePublishDocument = (document: DocumentModelType) => {

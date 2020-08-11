@@ -82,6 +82,11 @@ export function setAppMode(stores: IStores, appMode: AppMode) {
   stores.appMode = appMode;
 }
 
+export function getProblemPath(stores: IStores) {
+  const { unit, investigation, problem } = stores;
+  return `${unit.code}/${investigation.ordinal}/${problem.ordinal}`;
+}
+
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;
   const section = sectionId && problem.getSectionById(sectionId);

@@ -11,7 +11,7 @@ import { IDisposer } from "mobx-state-tree/dist/utils";
 import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument,
         } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { DBDocument } from "../db-types";
+import { DBDocument, DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
@@ -165,17 +165,25 @@ export class DBListeners extends BaseListener {
     this.unmonitorDocumentModel(document);
   }
 
-  public syncDocumentProperties = (document: DocumentModelType, path: string) => {
+  public syncDocumentProperties = (document: DocumentModelType, dbType: DatabaseType, path?: string) => {
     const { user } = this.db.stores;
     const { key, properties } = document;
 
-    const updatePath = path || this.db.firebase.getUserDocumentPath(user, key, document.uid);
-    const updateRef = this.db.firebase.ref(updatePath);
-    onSnapshot(properties, (newProperties) => {
-      updateRef.update({
-        properties: newProperties
+    if (dbType === "firebase") {
+      const updatePath = path || this.db.firebase.getUserDocumentPath(user, key, document.uid);
+      const updateRef = this.db.firebase.ref(updatePath);
+      // synchronize document property changes to firebase
+      onSnapshot(properties, newProperties => {
+        updateRef.update({ properties: newProperties });
       });
-    });
+    }
+    else if (dbType === "firestore") {
+      const docRef = this.db.firestore.getMulticlassSupportDocumentRef(key);
+      // synchronize document property changes to firestore
+      onSnapshot(properties, newProperties => {
+        docRef.update({ properties: newProperties });
+      });
+    }
   }
 
   private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {

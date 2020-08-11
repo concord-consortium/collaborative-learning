@@ -7,7 +7,9 @@ export enum ESupportType {
   // supports with embedded document content (e.g. curricular supports with document content)
   // content is stringified document content
   document = "document",
-  // published teacher supports: content is path to published support document
+  // published teacher supports: content is stringified document content
+  multiclass = "multiclass",
+  // legacy published teacher supports: content is path to published support document in firebase
   publication = "publication"
 }
 
