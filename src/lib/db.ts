@@ -473,7 +473,7 @@ export class DB {
   }
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const content = documentModel.content.publish();
     const fs = this.firestore;
     return fs.batch(batch => {
@@ -486,7 +486,7 @@ export class DB {
         createdAt: fs.timestamp(),
         properties: { teacherSupport: true, caption, ...documentModel.copyProperties() },
         problem: getProblemPath(this.stores),
-        classes: [user.classHash],
+        classes: user.classHashesForProblemPath(getProblemPath(this.stores)),
         originDoc: documentModel.key,
         content
       });

@@ -2,7 +2,7 @@ import { getErrorMessage } from "../utilities/super-agent-helpers";
 import superagent from "superagent";
 import { QueryParams } from "../utilities/url-params";
 import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IPortalClassOffering } from "../models/stores/user";
+import { IPortalClassOffering, PortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
 import { parseUrl } from "query-string";
 
@@ -47,7 +47,41 @@ export const getPortalOfferings = (
         } else {
           const thisUsersOfferings = res.body as IPortalOffering[];
           const clueOfferings = thisUsersOfferings.filter(isClueAssignment);
-          resolve(clueOfferings);
+          // clazz_hash is a recent addition to the offerings API -- if it's
+          // not present then we have to map from class ID to class hash ourselves
+          const hasMissingClassHashes = clueOfferings.some(o => !o.clazz_hash);
+          if (hasMissingClassHashes) {
+            superagent
+            .get(`${domain}api/v1/classes/mine`)
+            .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+            .end((err2, res2) => {
+              if (err2) {
+                reject(getErrorMessage(err2, res2));
+              } else {
+                const mineClasses = res2.body as IMineClasses;
+                // create map from class ID to class hash
+                const classHashMap: Record<string, string> = {};
+                mineClasses.classes.forEach(c => {
+                  const match = /\/([^/]+)$/.exec(c.uri);
+                  const classId = match && match[1];
+                  if (classId) {
+                    classHashMap[classId] = c.class_hash;
+                  }
+                });
+                // fill in missing class hashes from map
+                clueOfferings.forEach(o => {
+                  if (!o.clazz_hash && classHashMap[o.clazz_id]) {
+                    o.clazz_hash = classHashMap[o.clazz_id];
+                  }
+                });
+                resolve(clueOfferings);
+              }
+            });
+          }
+          else {
+            // class hashes are already present so no further work required
+            resolve(clueOfferings);
+          }
         }
       });
     }
@@ -90,14 +124,26 @@ export const getProblemIdForAuthenticatedUser =
 };
 
 // The portals native format of API returns
-interface IPortalOffering {
+export interface IPortalOffering {
   id: number;
   clazz: string;
   clazz_id: number;
+  clazz_hash?: string;  // added in recent portal versions
   activity: string;
   activity_url: string;
   external_report?: IPortalReport | null;
   external_reports?: IPortalReport[];
+}
+
+// portal API return from /api/v1/classes/mine
+interface IMineClass {
+  uri: string;
+  name: string;
+  class_hash: string;
+}
+
+interface IMineClasses {
+  classes: IMineClass[];
 }
 
 // Extracts the problem ordinal from the activity_url. An activity_url is part
@@ -124,7 +170,7 @@ function getUnitCode(url: string) {
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
                                         appConfig: AppConfigModelType,
                                         urlParams?: QueryParams) {
-  const result = [] as IPortalClassOffering[];
+  const result: IPortalClassOffering[] = [];
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering) && urlParams) {
       let newLocationUrl = "";
@@ -135,13 +181,14 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
           `&reportType=${urlParams.reportType}` +
           `&token=${urlParams.token}`;
       }
-      result.push({
+      result.push(PortalClassOffering.create({
+        classHash: offering.clazz_hash || "",
         className: offering.clazz,
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
         unitCode: getUnitCode(offering.activity_url) || appConfig.defaultUnit,
         offeringId: `${offering.id}`,
         location: newLocationUrl
-      });
+      }));
     }
   };
   portalOfferings.forEach(addOffering);

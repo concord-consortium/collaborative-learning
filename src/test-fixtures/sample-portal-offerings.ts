@@ -1,3 +1,23 @@
+export const TeacherMineClasses = {
+  classes: [
+    {
+      uri: "https://learn.staging.concord.org/api/v1/classes/242",
+      name: "ClueClass1",
+      class_hash: "ClueClass1Hash"
+    },
+    {
+      uri: "https://learn.staging.concord.org/api/v1/classes/243",
+      name: "ClueClass2",
+      class_hash: "ClueClass2Hash"
+    },
+    {
+      uri: "https://learn.staging.concord.org/api/v1/classes/246",
+      name: "DavesTETester",
+      class_hash: "DavesTETesterHash"
+    }
+  ]
+};
+
 export const TeacherOfferings = [
   {
     id: 1190,

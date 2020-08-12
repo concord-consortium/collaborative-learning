@@ -5,13 +5,20 @@ const initials = require("initials");
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
-export const PortalClassOffering = types.model("PortalClassOffering", {
-  className: "",
-  problemOrdinal: "",
-  unitCode: "",
-  offeringId: "",
-  location: ""
-});
+export const PortalClassOffering = types
+  .model("PortalClassOffering", {
+    classHash: "",
+    className: "",
+    problemOrdinal: "",
+    unitCode: "",
+    offeringId: "",
+    location: ""
+  })
+  .views(self => ({
+    get problemPath() {
+      return `${self.unitCode}/${self.problemOrdinal.replace(".", "/")}`;
+    }
+  }));
 
 export type IPortalClassOffering = typeof PortalClassOffering.Type;
 
@@ -80,6 +87,19 @@ export const UserModel = types
     },
     get initials() {
       return initials(self.name);
+    }
+  }))
+  .views((self) => ({
+    classHashesForProblemPath(problemPath: string) {
+      const classSet = new Set<string>([self.classHash]);
+      if (self.isTeacher && self.portalClassOfferings) {
+        self.portalClassOfferings.forEach(o => {
+          if (o.classHash && (o.problemPath === problemPath)) {
+            classSet.add(o.classHash);
+          }
+        });
+      }
+      return [...classSet];
     }
   }));
 
