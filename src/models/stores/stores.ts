@@ -82,6 +82,11 @@ export function setAppMode(stores: IStores, appMode: AppMode) {
   stores.appMode = appMode;
 }
 
+export function getProblemOrdinal(stores: IStores) {
+  const { investigation, problem } = stores;
+  return `${investigation.ordinal}.${problem.ordinal}`;
+}
+
 export function getProblemPath(stores: IStores) {
   const { unit, investigation, problem } = stores;
   return `${unit.code}/${investigation.ordinal}/${problem.ordinal}`;

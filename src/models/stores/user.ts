@@ -35,6 +35,7 @@ export const UserModel = types
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
+    demoClassHashes: types.array(types.string),
     lastSupportViewTimestamp: types.maybe(types.number),
     lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
@@ -70,6 +71,9 @@ export const UserModel = types
       if (user.portalClassOfferings) {
         self.portalClassOfferings.replace(user.portalClassOfferings);
       }
+      if (user.demoClassHashes?.length) {
+        self.demoClassHashes.replace(user.demoClassHashes);
+      }
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;
@@ -92,12 +96,19 @@ export const UserModel = types
   .views((self) => ({
     classHashesForProblemPath(problemPath: string) {
       const classSet = new Set<string>([self.classHash]);
-      if (self.isTeacher && self.portalClassOfferings) {
-        self.portalClassOfferings.forEach(o => {
-          if (o.classHash && (o.problemPath === problemPath)) {
-            classSet.add(o.classHash);
-          }
-        });
+      if (self.isTeacher) {
+        // authenticated teachers pull class hashes from portalClassOfferings
+        if (self.portalClassOfferings.length) {
+          self.portalClassOfferings.forEach(o => {
+            if (o.classHash && (o.problemPath === problemPath)) {
+              classSet.add(o.classHash);
+            }
+          });
+        }
+        // non-authenticated teachers (e.g. demo/qa) pull from demoClassHashes
+        else if (self.demoClassHashes.length) {
+          self.demoClassHashes.forEach(hash => classSet.add(hash));
+        }
       }
       return [...classSet];
     }
