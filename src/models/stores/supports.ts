@@ -261,7 +261,7 @@ export const SupportsModel = types
         }
         const supportMap: Record<string, ISupportWithIndex> = {};
         currSupports.forEach((s, i) => {
-          supportMap[s.key] = { support: s, index: i};
+          supportMap[s.key] = { support: s, index: i };
         });
         supports
           .sort((supportA, supportB) => supportA.authoredTime - supportB.authoredTime)
@@ -310,7 +310,7 @@ function getTeacherSupportCaption(support: TeacherSupportModelType,
   const sectionPart = sectionId ? " " + getSectionInitials(sectionId) : "";
   const prefix = `${investigationPart}.${problemPart}${sectionPart}`;
   const caption = support.caption || "Untitled";
-  return caption.startsWith(prefix)
+  return caption.includes(prefix)
           ? caption
           : `${prefix} ${caption}`;
 }

@@ -1,6 +1,7 @@
 import "ts-polyfill";
 
 import { Provider } from "mobx-react";
+// https://github.com/mobxjs/mobx-react#observer-batching
 import "mobx-react/batchingForReactDom";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -15,7 +16,7 @@ import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "../package.json";
-import { setLivelynessChecking } from "mobx-state-tree";
+import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
@@ -45,7 +46,7 @@ const initializeApp = async () => {
   Logger.initializeLogger(stores, stores.investigation, stores.problem);
 
   if (kEnableLivelinessChecking) {
-    setLivelynessChecking("error");
+    setLivelinessChecking("error");
   }
 
   setPageTitle(stores);

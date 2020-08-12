@@ -67,10 +67,6 @@ export class Firestore {
     return this.documentRef(this.getMulticlassSupportDocumentPath(docId));
   }
 
-  public documentsGroup() {
-    return firebase.firestore().collectionGroup("docs");
-  }
-
   public collectionRef(path: string) {
     return firebase.firestore().collection(path);
   }

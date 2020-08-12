@@ -146,6 +146,7 @@ export interface PortalUserJWT extends BasePortalJWT {
   last_name: string;
 }
 
+// firebase JWT claims are available to firestore security rules under request.auth.token
 export interface PortalFirebaseJWTBaseClaims {
   user_id: string;          // e.g. `https://learn.concord.org/users/${platform_user_id}`
   class_hash: string;
@@ -158,7 +159,6 @@ export interface PortalFirebaseJWTStudentClaims extends PortalFirebaseJWTBaseCla
   offering_id: number;
 }
 
-// these properties are available to firestore security rules under request.auth.token
 export interface PortalFirebaseJWTTeacherClaims {
   user_type: "teacher";
 }

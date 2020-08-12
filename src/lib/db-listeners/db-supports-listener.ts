@@ -149,7 +149,7 @@ export class DBSupportsListener extends BaseListener {
     });
     if (teacherSupports.length === 0) return;
 
-    const {supports} = this.db.stores;
+    const { supports } = this.db.stores;
     supports.addAuthoredSupports(teacherSupports, AudienceEnum.class);
 
     const { unit, investigation, problem, documents, user } = this.db.stores;
