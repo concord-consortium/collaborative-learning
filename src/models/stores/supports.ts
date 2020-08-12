@@ -332,7 +332,7 @@ function getSupportCaption(support: UnionSupportModelType, index: number,
 }
 
 export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
-  const { db, documents, investigation, problem, supports, onDocumentCreated } = params;
+  const { db, fromDB, documents, investigation, problem, supports, onDocumentCreated } = params;
   if (!documents) {
     return;
   }
@@ -365,10 +365,20 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
     }
     // else it is a teacher support
     else {
-      properties = { teacherSupport: "true", caption: supportCaption };
+      const isDeleted = support.deleted ? { isDeleted: "true" } : undefined;
+      properties = {
+        teacherSupport: "true",
+        caption: supportCaption,
+        ...isDeleted
+      };
       // if we have a db add the properties from support document which can be
       // updated by the teacher to soft delete the document
-      if (db && !params.fromDB) {
+      if (db && !fromDB) {
+        // Note that this read fails for firestore supports immediately after they
+        // have been created, perhaps before the update has been completed. Therefore,
+        // we skip it for firestore supports (using the fromDB parameter), which means
+        // that we won't include any properties other than the ones configured above.
+        // For now this seems fine since no other properties are relevant to supports.
         properties = {...properties, ...await getSupportDocumentProperties(support, db)};
       }
     }
@@ -405,7 +415,7 @@ export async function getSupportDocumentProperties(support: TeacherSupportModelT
 
   if (type === ESupportType.multiclass) {
     const snapshot = await db.firestore.getDocument(db.firestore.getMulticlassSupportDocumentPath(key));
-    return snapshot.exists && (snapshot as any).properties;
+    return snapshot.exists && (snapshot.data() as any).properties;
   }
   else {
     const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;

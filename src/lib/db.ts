@@ -484,7 +484,7 @@ export class DB {
         uid: user.id,
         type: "supportPublication",
         createdAt: fs.timestamp(),
-        properties: { teacherSupport: true, caption, ...documentModel.copyProperties() },
+        properties: { teacherSupport: "true", caption, ...documentModel.copyProperties() },
         problem: getProblemPath(this.stores),
         classes: user.classHashesForProblemPath(getProblemPath(this.stores)),
         originDoc: documentModel.key,
