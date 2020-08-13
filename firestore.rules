@@ -37,6 +37,11 @@ service cloud.firestore {
       return hasUserId() && hasRole("teacher");
     }
 
+    function requestMatchUserId() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) == request.resource.data.uid;
+    }
+
     function docMatchUserId() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == resource.data.uid;
@@ -54,9 +59,9 @@ service cloud.firestore {
 
         match /mcsupports/{docId} {
           // any portal-authenticated teacher can create supports
-          allow create: if isAuthedTeacher();
+          allow create: if isAuthedTeacher() && requestMatchUserId();
           // teachers can only update/delete their own supports
-          allow update, delete: if docMatchUserId();
+          allow update, delete: if requestMatchUserId() && docMatchUserId();
           // teachers and students in appropriate classes can read supports
           allow read: if docMatchUserId() || classInClasses();
         }
