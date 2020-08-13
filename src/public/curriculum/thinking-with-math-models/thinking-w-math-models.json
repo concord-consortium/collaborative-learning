@@ -1,0 +1,2821 @@
+{
+  "code": "twmm",
+  "abbrevTitle": "TWMM",
+  "title": "Thinking with Mathematical Models",
+  "subtitle": "Linear Functions and Bivariate Data",
+  "placeholderText": "Enter notes here",
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+     "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "TWMM Investigation 1 Exploring Data Patterns in Building Bridges",
+      "introduction": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "TWMM 1.1 Bridge Thickness and Strength",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Many bridges are built with frames of steel beams. Steel is very strong, but any beam will bend or break if you put too much weight on it."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_1_arched_bridge_350w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "content": {
+                "type": "Text",
+                "format": "markdown",
+                "text": [
+                  "*What variables determine the strength of a bridge?*"
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- How do you think the strength of a beam is related to its thickness?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "To answer this question, engineers often use scale models to test their designs. We can do an experiment to discover mathematical patterns involved in building bridges."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**A Bridge-Thinkness Experiment**",
+                        "Materhials:",
+                        "- Two books of the same thinkness",
+                        "- A small paper cup",
+                        "- About 50 pennies",
+                        "- Several 11-inch by 4¼-inch strips of paper",
+                        " ",
+                        "Instructions:",
+                        "- Start with one of the paper strips. Make a “bridge” by folding up 1 inch on each long side."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_1_paper_bridge_340w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Suspend the bridge between two books. Place a paper cup in the center of the bridge."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_1_bridges_between_books_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Using guidelines determined by your class, put pennies in the cup, one at a time until the bridge collapse. Record the number of pennies added to the cup. This number is the breaking weight of the bridge.",
+                        "- Repeat the experiment with two, three, four, and five strips of new paper. Record your data."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Conduct the experiment.",
+                        "- Collect the data and represent the data in a table and graph.",
+                        "- What patterns do you observe in the data? Do they support your original conjecture? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Situation A. Modeling the Data**",
+                        "Does the relationship between the number of layers and the breaking weight appear to be linear or nonlinear?",
+                        "How do the graph and the table show this relationship?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Situation B. Making Predictions**",
+                        "1. Suppose you could split layers of paper in half. What breaking weight would you predict for a bridge 2.5 layers thick? Explain.",
+                        "2. Predict the breaking weight for a bridge 6 layers thick. Explain your reasoning.",
+                        "3. Test your prediction of strength for the 6-layer bridge. Explain why results from such a test might not exactly match predictions."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe the relationship between the bridge strength and the bridge thickness revealed by your experiment. What other variables might affect the strength of a bridge?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "TWMM Problem 1.2",
+          "ordinal": 2,
+          "title": "TWMM 1.2 Bridge Length and Strength",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In the last problem you tested the strength of some paper bridges. We found that as the number of layers increased so did the strength. That is, bridges with more layers are stronger than bridges with fewer layers. The data for the pair of variables, layers and strength, is called **bivariate data**. The data gathered in the following experiment is another example of bivariate data. Statisticians gather, analyze, and interpret data to aid in many business, scientific, medical, engineering and other decision-making processes. They call graphs of the data **scatter plots**."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- How do you think the length and strength of a bridge are related?",
+                        "We can do an experiment to find out how the length and strength of a bridge are related."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**A bridge-Length Experiment**",
+                        "Materials:",
+                        "- Two books of the same thinkness",
+                        "- A small paper cup",
+                        "- About 50 pennies",
+                        "- 4¼-inch paper strips with lengths 4, 6, 8, 9, and 11 inches"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_2_five_paper_bridges_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Instructions:",
+                        "- Fold the paper strips to make bridges as shown above.",
+                        "- Start with the 4-inch bridge. Suspend the bridge between the two books as you did before.",
+                        "- Put pennies into the cup, one at a time, until the bridge collapses. Record the number of pennies you added to the cup. As in the first experiment, this number is the breaking weight of the bridge.",
+                        "- Repeat the experiment to find breaking weights for the other bridges."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Conduct the experiment.",
+                        "- Collect the data and represent the data in a table and graph",
+                        "- What patterns do you observe in the data? Do they support your original conjecture? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation A. Modeling the Data###",
+                        "Describe the relationship between bridge length and breaking weight. Is this relationship linear? Explain. How is the relationship shown by patterns in your table and graph?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation B. Making Predictions###",
+                        "Use your data to predict the breaking weights for bridges of lengths 3, 5, 10, and 12 inches. Explain how you made your predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation C. Comparing Data Sets###",
+                        "Compare your data from this experiment to the data from the experiment on bridges with different numbers of layers. How is the relationship between the number of layers in a bridge and its breaking weight similar to the relationship between bridge length and breaking weight? How is it different?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "How does a graph model the relationship between the variables? How does it indicate the type of relationship?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "TWMM 1.3 Custom Construction Parts: More Patterns",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In Problem 1.1, Ms. Gomez’s students noticed that the points do not lie exactly on a line. But they thought they could draw a line which might approximate the data pattern and could be used to make predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Data from Ms. Gomez's Class"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_3_gomez_data_combined_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "- What equation could represent each line?",
+                        "- Would the equations for these lines be different?",
+                        "- Would the equations give the same predictions for the breaking weight for 3.5 layers?",
+                        "Before we can answer these questions, you will explore the skills needed to write equations for lines that represent linear relationships or linear functions. A linear relationship or function is one whose graph is a straight line.   We will return to these questions in Investigation 4."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Suppose a company called Custom Steel Products (CSP for short) supplies materials to builders. One common structure that CSP makes is called a truss. You might see a truss holding up a bridge or the roof of a building. The following is a picture of a truss. It is made by fastening together steel rods 1 foot long."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_3_seven_foot_truss_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "This truss has an overall length of 7 feet. The manager at CSP needs to know the number of rods in any length of truss a customer might order.",
+                        "- Describe a pattern that the manager can use to predict the number of rods for any length of truss. Does the pattern represent a linear relationship? Explain.",
+                        "- How does this pattern compare to the patterns found in Problems 1.1 and 1.2?",
+                        "- Are you equally confident about the predictions you made for Problems 1.1 and 1.2 and this problem?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Situation A. Student Strategies from Ms. Gomez’s Class***",
+                        "- Examine each strategy. Is it correct? Explain why.",
+                        "- Can each strategy be used to make predictions? Which would you choose to make a prediction? Explain.",
+                        "- How are the four strategies the same? Different?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Maria Uses a Table",
+                        "I worked out several cases for truss lengths. I recorded them in a table. I noticed that as the length increased by 1 unit, the number of rods increased by 4. That is the number of rods is increasing at a rate of change of 4 rods per one additional unit."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_3_maria_table.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Sungah Uses a Graph",
+                        "I also worked out several cases for truss lengths. But I made a graph of the data. The data points appear to lie on a straight line. The y-intercept is (0,0) but I was not sure what the rate of change between the two variables is."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_3_sungah_graph_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Walter Uses an Equation",
+                        "I noticed that as the length of the truss increased by 1, the number of rods increased by 4. This means the relationship between the length of the truss L and the number of rods N is linear. So, the rate of change between the two variables is 4. The point (0,0) represents the y-intercept, the equation is",
+                        "**N = 0 + 4L or N = 4L.**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Jenna Uses an Equation",
+                        "I figured out a pattern for the number of rods. For overall length 7, there are 7 triangles and 6 rods connecting these triangles, so I wrote ",
+                        "**3 x 7 + 6 = 27**. The length L = 27.",
+                        "The number of connecting rods 6 is one less than the length 7. I wrote the equation for the number of rods N is",
+                        "**N = 3L + L - 1**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Situation B. Another Structure: Staircase Frames***",
+                        "Custom Steel Products also makes staircase frames like those shown here."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_1_3_stairase_frames_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "1. Describe the pattern of change in the number of rods as the number of steps increases. Explain how you found the pattern.",
+                        "2. How would the pattern you described be shown in the table? Graph? Equation?",
+                        "3. Does this pattern represent a linear relationship? Explain.",
+                        "4. How many steel rods are in a staircase frame with 12 steps? Explain how you could find this number without drawing the staircase frame."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "How can you predict from the patterns in a table of data or on a graph if the relationship between variables is linear or non-linear? How does having an equation for a linear pattern help you make predictions?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "TWMM Investigation 2 Linear Models and Equations",
+      "introduction": {
+      },
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "TWMM 2.1 Tree Top Fun",
+          "subtitle": "Equations for Linear Functions",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": "Tree Top Fun (TTF, for short) runs adventure sites with zip lines, swings, rope ladders, bridges, and trapezes. The company uses mathematical models to relate the number of customers, price of ticket to ride, costs to set up and manage, income from ticket sales, and profit at its many locations. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_1_zipline_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Did You Know?**",
+                        "*A **zip line** is a cable that starts at a higher point than it ends. Using the natural decline of the cable, a person or cargo can travel down the wire on a pulley system that minimizes friction to help the rider accelerate.  For example, for a 200′ **zip line** that is 7′ high in the middle (when loaded with a rider), **should** sag 5% or 10 feet. This means that the end attachments are 17′ high each. At this point, plan that the longer the zip line, the higher in the air you'll need to be to start.*",
+                        "*You can travel internationally on ziplines. The Limited Zero Zipline crosses the Guadiana River from Spain to Portugal.*"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The manager of TTF is considering how much money they should charge each customer. The total money he collects from customers is called his ***income*** or ***revenue***. But he also has ***costs***, which he has to pay out of his revenue. What is left is called his ***profit***. Answer the questions below to help the manager analyze his income and profit and other expenses.",
+                        "For the income, profit, and unpaid balance below, describe how the equation can be used to make predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Daily Income**",
+                        "If the standard charge per customer at TTF is $25, what equation relates the daily income *I* to the number *n* of customers?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Daily Profit**",
+                        "If the operating costs of TTF is $500 per day, what equation relates the daily profit *P* to the number *n* of customers?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Unpaid Balance**",
+                        "If TTF bought a new rope bridge for $4,500 and then makes monthly payments of $350, what equation relates the unpaid balance *B* after *m* monthly payments?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "Markdown",
+                      "text": [
+                        "***Situation A. Group Admission Fees***",
+                        "One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table.",
+                        "1. Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain",
+                        "2. How much money would a group expect to pay if the group size is 0? 21? 30?  ",
+                        "3. What equation relates admission fee A to the number n in the group? Use the equation to check your predictions for Part 2.",
+                        "**Group Admission Fees**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number in Group",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 15, 20 ]
+                        },
+                        {
+                          "name": "Admission (dollars)",
+                          "type": "number",
+                          "values": [ 75, 90, 105, 120, 135, 210, 285, 360 ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 380
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe how you know if the relationship between two variables is a linear function? What strategies did you use to write equations for linear functions? "
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "TWMM 2.2 Boat Rental",
+          "subtitle": "Solving Linear Equations",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": "When we have a relationship between two quantities or variables, we can use numeric reasoning, tables, graphs and equations to find the value of a variable. We have used these strategies in several *Connected Mathematics* units in 6th and 7th grade. We will continue to explore these strategies as we examine the strategies used by students in the following problem."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The owner of Sandy’s Boat House advertises the cost to rent a canoe is $15 per hour for trips on the Red Cedar River. He is also willing to break down the $15 per hour if a customer rents for only a part of an hour.",
+                        "The manager suggests another deal for customers. She uses the equation <em>c<sub>mangager</sub></em> = 0.15<em>t</em> + 2.50 to find the charge c in dollars for renting a canoe for t minutes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_2_canoe_rental_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• Which option would you choose, the manager’s equation or the owner’s cost of $15 per hour? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Serena, Rashida and Omar’ Strategies.</strong>\nSome students in Summit Heights Middle School used different strategies to answer the question “which cost plan is the better deal?” Explain how each strategy would or would not work to decide which cost plan is the best",
+                        "<strong>Serena Uses Tables"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_2_serena_table_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Rashida Uses Graphs</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_2_rashida_graph_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Omar Uses Equations</strong>\nI wrote the equation, C<sub>manager</sub> = 0.15t + 2.50 for the cost that the owner charges. I wrote the equation C<sub>owner</sub> = 0.25t where t is the number of minutes. Then I set the two expressions for cost equal.\n0.25<em>t</em> = 0.15<em>t</em> + 2.50"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
+                        "River Fun Boats (RFB) also rents canoes. The equation <em>c<sub>RFB</sub></em> = 4 + 0.10<em>t</em> gives the charge in dollars <em>c</em> for renting a canoe for <em>t</em> minutes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "1. What is the charge to rent a canoe for 20 minutes?",
+                        "2. A customer at River Fun is charged $9. How long did the customer use a canoe?",
+                        "3. Suppose you want to spend at most $12. How long could you use a canoe?",
+                        "4. How does the cost to rent a boat from River Fun Boat Rides compare to the cost to rent canoes from Sandy’s Boat House?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
+                        "Do any of the three cost plans in this problem represent linear functions? Explain why or why not."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do graphs and tables and equations of functions such as <em>C</em> = 0.25<em>t</em> and <em>C</em> = 0.15<em>t</em> + 2.5 help you solve problems. Explain the advantages and disadvantages of each of each representation when trying to solve problems."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "TWMM 2.3 Up and Down the Staircase Again",
+          "subtitle": "Exploring Slope",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In any problem that calls for a linear mode that is an equation, the goal is to find the values of *m* and *b* for the linear equation y = *m*x + *b* that fits the data pattern well. Recall from **Moving Straight Ahead** unit that for linear relationships as x increases by a fixed increment y changes by a constant amount, *m*, called the rate of change. The y-intercept is (0,*b*) or *b*. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_intro_graph_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The change in x from one point to the another is also called the *horizontal change* or **run** change. The change in y from one point to another is called the *vertical change* or **rise** change.  The ratio of rise to run is called the **slope** of the line which is also the coefficient of *m* in the equation, y = *m*x + *b*."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_slope_formula_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "This ratio, slope, describes the steepness of a line that represents the linear function. The equation y = *m*x + *b* is also called the **slope intercept** form of a linear equation. To measure the steepness of a linear equation graph, it helps to imagine a staircase that lies underneath the line. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_staircase_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>What is the slope of the line that represents the steepness of the staircase?</em></strong>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- For the linear functions described below, find the slope and y-intercept.",
+                        "- Then write the equations for the lines in the form y = *m*x + *b*."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_1_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_3_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_4_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_5_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_linear_function_6_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Linear Function 7**",
+                        "The line that passes through (6, 1) and (2, -1)."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Linear Function 8**",
+                        "The line that passes through (0, 3) and (3, 3)."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Student Claims from Mr. Cai's Class.</h3>Mr. Cai asked his class to look for patterns in the representations in the Initial Challenge. The follow are some claims his student made about linear functions.<p>Study each claim. Are they correct? Explain.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Jackie's Claim**",
+                        "To find the slope of a line it makes a difference which two points you use to find the slope."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Gus's Claim**",
+                        "For each unit change in the independent variable there is a constant change in the dependent variable."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Yvonne's Claim**",
+                        "Both a horizontal line and a vertical line are linear functions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Malcolm's Claim**",
+                        "The slope is the same as the constant rate of change m between the variables x and y."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Kevin's Claim**",
+                        "The line with equation y = 2x passes through the points (0, 0) and (1, 2). The line with equation y = - 3x passes through the points (0, 0) and (1, - 3). In general, lines with equations of the form y = *m*x always pass through the points (0, 0) and (1, *m*). And *m* is the constant of proportionality.  "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Connecting Rates and Slopes</h3>Juan was studying a table of values. He noticed that as x increases by 1, y increases by 2. He says this is a linear function. But he wonders where in the table the ratio of rise/run is indicated. Is it possible to find the slope from the table of values?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/TWMM_2_3_juan_table_401w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What information do you need to write an equation for a linear function? How is the constant rate of change for a linear function the same as the ratio of rise/run between two points of the graph of the function? How does the ability to write an equation for a set of data help you make predictions about a situation like the bridge experiments?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.4",
+          "ordinal": 4,
+          "title": "TWMM 2.4 Exploring Patterns with Lines",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "We have used linear functions to model linear situations and make predictions. Our understanding of linear relationships or functions can be used to explore some ideas about groups of lines."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "For example, suppose the slope of a line is 3.",
+                        "- Sketch a line with this slope.",
+                        "- Can you sketch a different line with this slope? Explain.",
+                        "In this Problem, we will use slope to explore some patterns among linear relationships."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "For each group or pairs of lines answer the following questions.",
+                        "- What features do the equations have in common?",
+                        "- Graph the equations on the same coordinate axes. What do you notice about the graphs? How might you have predicted this from the equations?",
+                        "- Describe another equation that has the same pattern."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Groups of Lines**",
+                        "**Group 1**  y = 3x  y = 5 + 3x  y = 10 + 3x y = 3x - 5",
+                        "**Group 2**  y = -2x y = -2x + 4 y = 8 - 2x  y = -4 - 2x"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Pairs of Lines 1",
+                        "<table>",
+                        "<tr>",
+                        "<th>Pair 1</th>",
+                        "<th>Pair 2</th>",
+                        "<th>Pair 3</th>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2x</td>",
+                        "<td>y = 4x</td>",
+                        "<td>y = -3x + 5</td>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = -0.5x</td>",
+                        "<td>y - -0.25x</td>",
+                        "<td>y = 1/3x - 1</td>",
+                        "</tr>",
+                        "</table>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Pairs of Lines 2",
+                        "<table>",
+                        "<tr>",
+                        "<th>Pair 1</th>",
+                        "<th>Pair 2</th>",
+                        "<th>Pair 3</th>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2x + 1</td>",
+                        "<td>y = 5 - 2x</td>",
+                        "<td>y = 2(x - 1) - 1</td>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2(x + 1) - 1</td>",
+                        "<td>y = 3 - 2(x - 1)</td>",
+                        "<td>y = 4x - 2x -2</td>",
+                        "</tr>",
+                        "</table>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Jose's Example</strong>\nHe claims that the following two lines have the same pattern as one of those in the Initial Challenge. Which Group or Pair of lines does each line belong? Explain why.<ul><li>Line 1 contains the points (1,4) and (3, 12)</li><li>Line 2 contains the points (1, 6) and (3, 14)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Boat Rentals Again</strong>\nSeveral competing canoe rentals use expressions to represent the rental cost <em>C</em>.",
+                        "<ul><li><em>C<sub>1</sub><em> = 2.5 + 0.25<em>t</em></li>",
+                        "<li><em>C<sub>2</sub><em> = 0.25(10 + <em>t</em>)</li>",
+                        "<li><em>C<sub>3</sub><em> = 0.25(10 + 10<em>t</em>)</li>",
+                        "<li><em>C<sub>4</sub><em> = 0.5(10 + 0.5<em>t</em>)</li></ul>",
+                        "1. Which plan(s) is the least expensive per minute?",
+                        "2. Describe the shape of each graph. What information about rental costs does the slope represent?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can you predict if two lines are parallel or perpendicular from their equations?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "SAS Investigation 3 Scaling Perimeter and Area",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "SAS 3.1 Rep-Tile Quadrilaterals",
+          "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
+          "sections": [
+             {
+              "type": "introduction",
+              "content": {
+                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In <em>Shapes and Designs</em>, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_1_In_20_rep_tiles_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_1_In_21_squares_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Quadrilaterals",
+                          "type": "string",
+                          "values": [ "A non-square rectangle", "A non-rectangular parallelogram"]
+                        },
+                         {
+                          "name": "Triangles",
+                          "type": "string",
+                          "values": ["A right triangle", "An isosceles triangle"]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 150
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• Which shapes are rep-tiles? Make a sketch to show how the copies fit together."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• For the shapes that rep-tile, what is the scale factor from the original figure to its image? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• How does the perimeter of the larger figure relate to the perimeter of the original figure?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• How does the area of the larger figure relate to the area of the original figure?"
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 360
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "objects": [
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [19, 14],
+                              "properties": {
+                                "name": "A"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [18, 12],
+                              "properties": {
+                                "name": "B"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [24, 12],
+                              "properties": {
+                                "name": "C"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [23, 14],
+                              "properties": {
+                                "name": "D"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [9, 12],
+                              "properties": {
+                                "name": "E"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [11, 14],
+                              "properties": {
+                                "name": "F"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [16, 14],
+                              "properties": {
+                                "name": "G"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [14, 12],
+                              "properties": {
+                                "name": "H"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [1, 12],
+                              "properties": {
+                                "name": "I"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [1, 14],
+                              "properties": {
+                                "name": "J"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 14],
+                              "properties": {
+                                "name": "K"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 12],
+                              "properties": {
+                                "name": "L"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [1, 10],
+                              "properties": {
+                                "name": "M"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [1, 7],
+                              "properties": {
+                                "name": "N"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [4, 7],
+                              "properties": {
+                                "name": "O"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [10, 10],
+                              "properties": {
+                                "name": "P"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [8, 5],
+                              "properties": {
+                                "name": "Q"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [12, 5],
+                              "properties": {
+                                "name": "R"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [15, 10],
+                              "properties": {
+                                "name": "S"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [17, 6],
+                              "properties": {
+                                "name": "T"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [20, 6],
+                              "properties": {
+                                "name": "U"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "1. Which of these quadrilaterals make a rep-tile? Make a sketch to show how the copies fit together."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. Which of these triangles make a rep-tile? Make a sketch to show how the copies fit together."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "For the shapes that rep-tile,"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "3. What is the scale factor from the original figure to the image? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "4. How does the perimeter of the larger figure relate to the perimeter of the original figure?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "5. How does the area of the larger figure relate to the area of the original figure?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Extending a Rep-tile</h3> What if you extend one of the rep-tile patterns you drew in the Initial Challenge? You can do this by sketching additional copies of the original figure to make even larger figures that are similar to the original. <ol><li>Show how the copies fit together.</li><li>What do the scale factors tell you about the corresponding side lengths, perimeters, angles, and areas?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Making Rep-tiles </h3>Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation C. Scale Factors and Rep-tiles</h3>It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and its image?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation D. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). Explain why the smaller shapes are similar to the original."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation E. Claims About Rep-tiles</h3>Tomoko claims that all triangles are rep-tiles. Is this true? Explain. Kazuko claims that if you want to show that two triangles with the same angle measures are similar, you can use a unit rep-tile. She used an equilateral triangle whose side lengths are one unit. Does her strategy work? Explain. "
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {
+                  "type": "document",
+                  "content": {
+                    "tiles": [
+                      {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "What is the scale factor from the smaller square to the larger square? "
+                            ]
+                        }
+                      },
+                      {
+                        "layout": {
+                          "height": 200
+                        },
+                        "content": {
+                          "type":"Geometry",
+                          "objects": [
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [1, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [2, 2],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [1, 2],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "polygon",
+                              "parents": [
+                                {
+                                  "type": "point",
+                                  "parents": [4, 1],
+                                  "properties": {
+                                    "name": "A"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 1],
+                                  "properties": {
+                                    "name": "B"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [7, 4],
+                                  "properties": {
+                                    "name": "C"
+                                  }
+                                },
+                                {
+                                  "type": "point",
+                                  "parents": [4, 4],
+                                  "properties": {
+                                    "name": "D"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "SAS 3.2 Designing Under Constraints",
+          "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_2_In_23_A_B_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.<ul><li>Rectangle P. The scale factor from Rectangle A to Rectangle P is 2.5.</li></li>Rectangle Q. The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li>Rectangle R. The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 260
+                    },
+                    "content": {	
+                      "type":"Geometry",
+                      "objects": [
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [1, 4],
+                              "properties": {
+                                "name": "A"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [1, 0],
+                              "properties": {
+                                "name": "B"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [9, 0],
+                              "properties": {
+                                "name": "C"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [9, 4],
+                              "properties": {
+                                "name": "D"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [12, 0],
+                              "properties": {
+                                "name": "E"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [19, 0],
+                              "properties": {
+                                "name": "F"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [15, 4],
+                              "properties": {
+                                "name": "G"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li>Triangle X. The area of Triangle X is 16 times the area of Triangle B.</li><li> Triangle Y. The scale factor from Triangle B to Triangle X is 1/2. </li><li> Triangle Z. The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {
+                  "text": "How do you find the scale factor between two similar figures?"
+                },
+                {
+                  "text": "If the scale factor from one shape to the other is 2, how do corresponding sides, perimeters, areas, and angles change from the original figure to its image?"
+                },
+                {
+                  "text": "What is the area of Rectangle A? What is the perimeter of Rectangle A?"
+                }
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Similar Rectangles</h3>These two rectangles are similar. Is it possible to find the length of side AD? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Similar Triangles</h3>These two triangles are similar. Find all the missing side lengths and angles. Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_2_WI_24_Q1_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. Find all the missing side lengths and angles. Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_2_WI_25_Q2_500w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {
+                  "text": "Can using corresponding sides help?"
+                },
+                {
+                  "text": "Can using corresponding angles help?"
+                },
+                {
+                  "text": "What is the scale factor from one shape to the other?"
+                }
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can you use scale factors<ul><li>to draw similar figures?</li><li>to find missing information about angle measures? Areas? Perimeters?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "SAS 3.3 Out of Reach",
+          "subtitle": "Finding Lengths with Similar Triangles",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this problem you will use similar triangles to find the distance across a river."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Durrell, Angie, and Tonya are designing a boardwalk that crosses a river for a class project. They make several measurements and sketch the diagram below. The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, <strong>nested triangles</strong>, which are triangles that share a common angle.\n\nThe angles that look like right angles are right angles. The triangles in the diagram are similar."
+                      ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "•  What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_3_In_26_river_triangle_500w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {
+                  "text": "What shapes do you see in the diagram? Are they similar? Why?"
+                },
+                {
+                  "text": "What measurements in the diagram might be useful?"
+                },
+               {
+                  "text": "How can corresponding sides and angles in two similar triangles help find the missing measurements?"
+                }
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "1. Durrell claims that he can use rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_3_3_WI_27_river_triangle2_500w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {"text": "How is the new diagram in the <em>What If?</em> section different from the diagram in the <em>initialChallenge</em>? How is it the same?"}
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can you use similar triangles to find a distance that is difficult to measure directly?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    }, 
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "SAS Investigation 4 Similarity and Ratios",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "SAS 4.1 Ratios Within Similar Parallelograms",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You can enhance a report or story by adding photographs, drawings, or diagrams. If you place a graphic in an electronic document, you can enlarge, reduce, or move it. When you click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_In_28_fish_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You can change the size and shape of the image by dragging the handles."
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_In_29_fish_resized_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Recall that a ratio is a comparison of two quantities, such as two lengths. The rectangle around the original figure is about 10 centimeters tall and 8 centimeters wide. You can say, “The ratio of height to width is 10 to 8.”\n\nThis table gives the ratios of height to width for the images."
+                      ]
+                    }
+                  }, 
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_In_30_image_table_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. You can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or you could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_In_31_proportion_350w.png"
+                    }
+                  }, 
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<em>What information does each fraction represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal.\n\nYou know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios of adjacent side lengths within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+                      ]
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "For each set of figures, which are similar? Why?\n\nIf two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_IC_32_rectangles_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_IC_33_triangles_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_1_IC_34_parallelograms_350w.png"
+                    }
+                  }
+                ]
+              },
+              "supports" : [
+                {
+                  "text": "Can finding corresponding angles help?"
+                },
+                {
+                  "text": "Can finding corresponding side lengths help?"
+                },
+                {
+                  "text": "How are rectangles different from other parallelograms?"
+                }
+              ]
+            }, 
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Using the Scale Factor</h3><ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Isaiah, Noah, and Anna’s Claims</h3><ol><li>Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why?</li><li>Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain.</li><li>Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal? Is that true? Explain.</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports" : [
+                {
+                  "text": "In the Initial Challenge, can you find a pair of similar figures that satisfies each person’s claims?"
+                }
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What information does the ratio of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports" : []
+            }
+          ]
+        }, {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "SAS 4.2 Finding Missing Parts",
+          "subtitle": "Using Similarity to Find Measurements",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In the last problem you explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_IN_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ratios of corresponding side lengths across figures</strong>\n\nRatio of height to height is 9 cm to 3 cm or 9cm/3cm = 3\nRatio of width to width is 4.5 cm to 1.5 cm or 4.5cm/1.5cm = 3 \n\nNote that the ratio of corresponding side lengths across the two rectangles are also equal. And this ratio is the scale factor between the two figures.\n\nSimilar figures are useful in determining missing measurements. In Problem 3.3, you used similar figures to find the distance across a river without crossing the river. In this problem, you will explore finding missing measures."
+                      ]
+                    }
+                  }
+                ]
+              }
+            }, {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct.</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
+                      ]
+                    }
+                  }, 
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_IC_35_Q2A_350w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_IC_36_Q2B_350w.png"
+                    }
+                  }, 
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_IC_37_Q2C_350w.png"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 400
+                    },
+                    "content": 
+                   {"type":"Geometry","changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}","{\"operation\":\"create\",\"properties\":{\"id\":\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,18],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[13,17.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f2aafbcc-1804-4e0d-9604-ea484480310d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3,19.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"256679af-d72d-4b5c-b7aa-f6c90e3262c4\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"f2aafbcc-1804-4e0d-9604-ea484480310d\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,6.300000000000001]}","{\"operation\":\"create\",\"properties\":{\"id\":\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[1.1,1.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3.7,0.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.7,5.2]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d067f66c-ba4a-4334-a356-ab4430be843c\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a88e59a8-8b96-433e-b7ed-23dbe0d93852\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[5.817308417645462,0.6483504047306452]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9456f6f0-c71f-4091-a730-db092f41350d\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.669500594976327,0.6624620872369071]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18.193215922236906,6.8494638029196295]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[8.333707570993896,6.769491261270044]}","{\"operation\":\"create\",\"properties\":{\"id\":\"e80894ff-e77e-4cee-952e-718e09ad24c6\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c34e47b3-8769-465d-9caf-5c09194511e3\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"9456f6f0-c71f-4091-a730-db092f41350d\",\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[3.5,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c134b506-a474-477e-badd-6f3284e5f710\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[5.1000000000000005,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"738bc31d-087d-4249-bbf9-b1584656471b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"c134b506-a474-477e-badd-6f3284e5f710\",\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[8,14]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[8,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[18,13.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a72286d7-fac7-40a4-8e43-996de471d3d2\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"758ead0e-0d33-4daf-a707-622da638e34b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\"],\"endBatch\":true}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[15.06188023264823,20.20345894829196]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2c3e3378-b10b-4c44-9feb-6924de25d960\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"08cf2680-1c94-4f1c-9296-6ec2b779d23b\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"endBatch\":true}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,5.926598035131802,0.9762192571896611]},{\"position\":[1,15.778790212462667,0.990330939695923]},{\"position\":[1,18.302505539723246,7.177332655378645]},{\"position\":[1,8.442997188480236,7.09736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\"],\"properties\":[{\"position\":[1,1,1.8]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"snapToGrid\":false,\"position\":[3.0603141205063,11.865891487995759]},{\"snapToGrid\":false,\"position\":[3.0398895801024057,10.26602185638533]},{\"snapToGrid\":false,\"position\":[5.540962413268945,10.334100363979896]},{\"snapToGrid\":false,\"position\":[5.560110419897596,11.833978143614674]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a68b7cff-812f-41d0-b3fb-429c5547ba51\"],\"properties\":[{\"position\":[1,18.247860730980076,7.013398229149137]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\"],\"properties\":[{\"position\":[1,15.034984210144865,15.004098305593702]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a07874b-eeea-4853-a4df-03a995ad782e\"],\"properties\":[{\"position\":[1,15.00723542390506,20.20345894829196]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.595607222012115,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.76589148799576]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9603141205063004,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"position\":[1,5.490710382513662,11.90928961748634]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.486317604525776,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9510245030199616,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"c134b506-a474-477e-badd-6f3284e5f710\"],\"properties\":[{\"position\":[1,3.0000000000000004,10.3]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[28.087431693989064,8.688524590163937],\"properties\":{\"id\":\"ace52739-3491-4954-a913-ba153d6abc19\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"],\"properties\":[{\"position\":[1,28.1,8.8]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.841734885533623,11.811246679252589]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[1.5300546448087426,9.890710382513664],\"properties\":{\"id\":\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"],\"properties\":[{\"position\":[1,1.6,9.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"738bc31d-087d-4249-bbf9-b1584656471b\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.918032786885245,10.000000000000004],\"properties\":{\"id\":\"761a73cc-640c-4786-a55f-910f1343ef11\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.100000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.000000000000002]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.55191256830601,10.000000000000004],\"properties\":{\"id\":\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.7,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.6,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.5,10]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.4426229508196715,12.568306010928964],\"properties\":{\"id\":\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.972677595628414,12.677595628415304],\"properties\":{\"id\":\"5613b304-98e4-4ce8-8495-2917bc1ffd84\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.1000000000000005,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.55464480874317,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144865,14.949453496850532]},{\"position\":[1,15.00723542390506,20.14881413954879]},{\"position\":[1,15.987508722202124,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,16.073235576265084,14.949453496850532]},{\"position\":[1,16.04548679002528,20.14881413954879]},{\"position\":[1,17.025760088322343,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"],\"properties\":[{\"position\":[1,15.136612021857923,15.081967213114757]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144867,15.004098305593699]},{\"position\":[1,15.007235423905062,20.203458948291956]},{\"position\":[1,15.987508722202126,19.206639973262487]}]}","{\"operation\":\"create\",\"target\":\"polygon\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":{\"id\":\"229fdb45-3397-46be-88a9-6a811cff5c4c\"}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5,12.5]}]}","{\"operation\":\"create\",\"target\":\"vertexAngle\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":{\"id\":\"0c35873c-4134-4536-a3cd-0c93dd9e557f\",\"radius\":1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[26.065573770491802,10.491803278688527],\"properties\":{\"id\":\"a266b80a-c47a-4b0c-8429-31b9d1155e59\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a266b80a-c47a-4b0c-8429-31b9d1155e59\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"],\"properties\":[{\"position\":[1,18,14]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,8.442997188480236,6.99736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.8762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[32.349726775956285,10.819672131147543],\"properties\":{\"id\":\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[56.994535519125684,11.912568306010932],\"properties\":{\"id\":\"82b37f05-3244-4ce3-8750-b393d40ed41d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"],\"properties\":[{\"position\":[1,56.900000000000006,11.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"]}"]}
+                  }  
+                ]
+              },
+              "supports" : [
+                { "text": "What are the corresponding side lengths and corresponding angles?" },
+                { "text": "What are the scale factors or the ratios of adjacent side lengths?" }
+              ]
+            }, {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. New Figures</h3>The two figures are similar. Each side length is in centimeters.<ol><li>Find the value of x. Explain how you found it.</li><li>Find the value of y. Explain how you found it.</li></ol>"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_WI_38_figs_500w.png"
+                    }
+                  }, 
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Predicting Perimeters and Areas</h3><ol><li>If you know the perimeter of one figure, how can you find the perimeter of the other figure? Is there another way? Explain.</li><li>If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain.</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                { "text": "How do you know if these two figures are similar?"}, 
+                { "text": "Would the scale factors or the ratios of adjacent side lengths help you find the missing values?"}
+              ]
+            }, {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "supports": [
+            { "text": "How could you use scale factors?"},
+            { "text": "How could you use ratio of adjacent side lengths?"}
+          ]
+        }, {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "SAS 4.3 Using Shadows to Find Height",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths within each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
+                      ]
+                    }
+                  }
+                ]
+              }
+            }, 
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_IC_39_statue_liberty_500w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Examine the diagram of the shadow method. \nWhy are the measures of the corresponding angles of the large triangle and the small triangle equal? \nHow can you use this method to find the height of the Statue of Liberty? What is the height?"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the stick’s shadow</li><li>The length of the shadow cast by the building, tree, or other object</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports" : [
+                {"text": "Are the two triangles similar? Why?"}
+              ]
+            }, 
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet long. How tall is the tree?"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Using the &quot;Mirror Method&quot;</h3> Another method for finding heights of objects is called the “mirror method.” Ashton’s class experimented with the mirror method to understand how it worked by using it to measure the height of their principal. They knew from science class that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). Therefore, the two triangles are similar."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-w-math-models/images/SS_4_2_WI_40_mirror_method_500w.png"
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li></ol>"
+                      ]
+                    }
+                  }, {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation C. Creating Similar Figures</h3>Mario thought that the mirrors and shadows created similar figures. Is his claim correct? Explain. What other methods have you used in this unit to create similar figures?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ 
+                { "text": "Are the two triangles similar? Why?"},
+                { "text": "What are  the corresponding side lengths and corresponding angles?"}
+              ]
+            }, {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe how similar figures can be used to find missing measurements of objects that cannot be measured directly. Is there another method? Explain."
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "SAS MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Stretching and Shrinking Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": [ ]
+}

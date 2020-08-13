@@ -12,7 +12,8 @@
     "sap": "curriculum/samples-and-populations/samples-and-populations.json",
     "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-    "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+    "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "twmm": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
   },
   "defaultProblemOrdinal": "1.1",
   "defaultUnit": "sas",
