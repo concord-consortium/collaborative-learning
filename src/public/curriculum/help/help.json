@@ -50,7 +50,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "CLUE is an educational environment that allows you to create and share live content with your peers so you can solve problems together. When you launch an activity, you'll see a work area on the right. This is where you can create text, graphs, images, drawings and other STEM content. There are also content tabs on the left that hold curriculum, help and documentation, and reusable content from your own library or your class or your instructor. /br /br There are also subsections in many tabs. For example, in this help section you will see subsections for :<ul><li>Introduction</li><li>Tools</li><li>Sharing</li><li>Instructors</li></ul>"
+                        "CLUE is an educational environment that allows you to create and share live content with your peers so you can solve problems together. When you launch an activity, you'll see a work area on the right. This is where you can create text, graphs, images, drawings and other STEM content. There are also content tabs on the left that hold curriculum, help and documentation, and reusable content from your own library or your class or your instructor. \n\nThere are also subsections in many tabs. For example, in this help section you will see subsections for :<ul><li>Introduction</li><li>Tools</li><li>Sharing</li><li>Instructors</li></ul>"
                       ]
                     }
                   },
@@ -66,7 +66,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/workspaceHelp.png"
+                      "url": "curriculum/help/images/fileAndContent.png"
                     }
                   },
                   {
@@ -93,6 +93,12 @@
                       "text": [
                         "Click on <strong>tool buttons</strong> on the left side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/help/images/Toolset.png"
                     }
                   },
                   {
@@ -125,7 +131,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/graphdoc.png"
+                      "url": "curriculum/help/images/graphdoc.png"
                     }
                   },
                   {
@@ -140,7 +146,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
+                      "url": "curriculum/help/images/SS_LA_04_city_spoon_350w.png"
                     }
                   },
                   {
@@ -148,7 +154,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
+                        "<strong>Dragging</strong>\nDragging is one of the primary actions to get tiles to interact, place tiles, copy from the curriculum or your peers or teachers, and to bring in content from your computer. Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs and draw tiles. Try to <em>drop this image on a graph</em> or in your workspace now. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
                       ]
                     }
                   }
@@ -165,7 +171,22 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you are ready to <strong>share work</strong> with your group, click the Group Share eye icon, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                        "<strong>Sharing</strong>\nWhen you are ready to <strong>share work</strong> with your group, use the share slider, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/help/images/sharingScreen.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be discussed or reused by more classmates than those in your group. You can share content back into your own documents from any tab on the left, including your own files. For example, you might wish to copy content from 'My Work' into a Learning Log so that you can remind yourself how you solved problems as you work through the lessons."
                       ]
                     }
                   },
@@ -174,7 +195,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."
+                        "Your teacher may share content with you too, either in the class work tab or in the Supports tab. If new teacher content is posted, you'll see a small bubble on the Support tab. You might find a graph or some data to help you get started on a problem, or find a more challenging extension to work on."
                       ]
                     }
                   }
@@ -191,8 +212,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Instructors get an extra tab at the top of the CLUE window which allows them to monitor all the work done on a particular problem. This dashboard view shows up to 24 student workspaces at a time in groups of up to 4. Clicking on the groups will show a closeup view of just one group member. Selecting the section labels on the right side of the dashboard will scroll all the document views to that section."
+                        "Instructors get an extra tab labeled Dashboard at the top of the window which shows all the work done on a particular problem by all students. Clicking on the groups will show a closeup view of just one group member. Selecting the section labels on the right side of the dashboard will scroll all the document views to that section."
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/help/images/dashboard.png"
                     }
                   },
                   {
@@ -200,7 +227,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Instructors can send sticky notes from the dashboard to either a group or an individual. These will show as soon as they are sent as yellow stickies next to the workspace header. For more extended communication, the instructor can publish a support in the supports tab, or they can publish to the Class Work tab just like students do. Instructors can make documents with all the same tools available for students, or they can copy content from student documents to further comment on and share. "
+                        "Instructors can send sticky notes from the dashboard to either a group or an individual. These will show as soon as they are sent as yellow stickies next to the workspace header for students. \n\nInstructors can make documents with all the same tools available for students by flipping to the Workspace view. They can copy content from student documents to further comment on and share. Demonstrations, additional problems, or summary posters can be published as a support or Class Work. Supports are published with the green arrow, Class Work with the blue arrow. "
                       ]
                     }
                   }
