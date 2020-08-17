@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser, PortalFirebaseStudentJWT } from "../../lib/auth";
-const initials = require("initials");
+import initials from "initials";
+import { parse } from "query-string";
 
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
@@ -91,6 +92,11 @@ export const UserModel = types
     },
     get initials() {
       return initials(self.name);
+    },
+    get offeringUrl() {
+      const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
+      const parsed = offering?.location ? parse(offering?.location) : undefined;
+      return parsed?.offering || undefined;
     }
   }))
   .views((self) => ({

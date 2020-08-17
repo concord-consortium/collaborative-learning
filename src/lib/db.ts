@@ -488,7 +488,12 @@ export class DB {
         problem: getProblemPath(this.stores),
         classes: user.classHashesForProblemPath(getProblemPath(this.stores)),
         originDoc: documentModel.key,
-        content
+        content,
+        // LTI fields
+        platform_id: user.portal,
+        context_id: user.classHash,
+        resource_link_id: user.offeringId,
+        resource_url: user.offeringUrl || ""
       });
     });
   }
