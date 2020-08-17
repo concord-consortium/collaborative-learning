@@ -1,15 +1,17 @@
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser, PortalFirebaseStudentJWT } from "../../lib/auth";
 import initials from "initials";
-import { parse } from "query-string";
 
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
 export const PortalClassOffering = types
   .model("PortalClassOffering", {
+    classId: "",
     classHash: "",
     className: "",
+    activityTitle: "",
+    activityUrl: "",
     problemOrdinal: "",
     unitCode: "",
     offeringId: "",
@@ -93,10 +95,9 @@ export const UserModel = types
     get initials() {
       return initials(self.name);
     },
-    get offeringUrl() {
+    get activityUrl() {
       const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
-      const parsed = offering?.location ? parse(offering?.location) : undefined;
-      return parsed?.offering || undefined;
+      return offering?.activityUrl || undefined;
     }
   }))
   .views((self) => ({

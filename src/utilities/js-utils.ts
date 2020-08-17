@@ -12,6 +12,22 @@ export function castArrayCopy(itemOrArray: any) {
 }
 
 /*
+ * safeDecodeURI()
+ *
+ * returns the original string on error rather than throwing an exception
+ */
+export function safeDecodeURI(uriOrComponent: string) {
+  let decoded: string | undefined;
+  try {
+    decoded = decodeURIComponent(uriOrComponent);
+  }
+  catch (e) {
+    // swallow errors
+  }
+  return decoded || uriOrComponent;
+}
+
+/*
  * safeJsonParse()
  *
  * returns undefined on error rather than throwing an exception

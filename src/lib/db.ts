@@ -493,7 +493,7 @@ export class DB {
         platform_id: user.portal,
         context_id: user.classHash,
         resource_link_id: user.offeringId,
-        resource_url: user.offeringUrl || ""
+        resource_url: user.activityUrl || ""
       });
     });
   }

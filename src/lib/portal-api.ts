@@ -1,5 +1,6 @@
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import superagent from "superagent";
+import { safeDecodeURI } from "../utilities/js-utils";
 import { QueryParams } from "../utilities/url-params";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering, PortalClassOffering } from "../models/stores/user";
@@ -182,8 +183,11 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
           `&token=${urlParams.token}`;
       }
       result.push(PortalClassOffering.create({
+        classId: `${offering.clazz_id}`,
         classHash: offering.clazz_hash || "",
         className: offering.clazz,
+        activityTitle: offering.activity,
+        activityUrl: safeDecodeURI(offering.activity_url),
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
         unitCode: getUnitCode(offering.activity_url) || appConfig.defaultUnit,
         offeringId: `${offering.id}`,
