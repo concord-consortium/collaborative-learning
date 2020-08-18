@@ -9,7 +9,8 @@ $member-size: 18px
   left: 0
   right: 0
   height: $header-height
-  background-color: $color1
+  background-color: $workspace-teal-light-5
+  color: $charcoal-dark-2
   display: flex
   flex-direction: row
   flex-wrap: nowrap
@@ -18,13 +19,18 @@ $member-size: 18px
 
   .left
     flex: 2
-    padding: 0 $padding
+    padding: 0 9px
     display: flex
     align-items: center
     justify-content: flex-start
-    .problem
+    .unit
       text-align: center
-      color: $sage-dark-5
+      .title
+        font-size: 13px
+        font-weight: bold
+      .investigation-ordinal
+        font-size: 13px
+        font-weight: normal
       .unit
         font-weight: bold
       .investigation
@@ -33,9 +39,13 @@ $member-size: 18px
       border-right: 2px solid $sage-light-1
       height: 40px
       margin: 5px
+    .separator 
+      width: 3px
+      height: 40px
+      background-color: $charcoal-light-1
+      margin: 0 9px 0 5px
     .problem-dropdown
       height: 40px
-
   .middle
     display: flex
     align-items: center
@@ -51,7 +61,7 @@ $member-size: 18px
 
   .right
     flex: 2
-    padding: 0 $padding
+    padding: 0 9px
     text-align: center
     display: flex
     align-items: center
@@ -61,18 +71,28 @@ $member-size: 18px
       font-size: 0.9em
 
     .group
+      height: 40px
       flex-grow: 0
-      padding: 0 $padding
+      padding: 0
+      margin: 0 10px 0 0
       text-align: center
       display: flex
       flex-direction: row
       align-items: center
-
+      border-radius: 5px
+      border: solid 1.5px $charcoal-light-1
+      .group-center
+        position: relative
+        left: 22px
+        width: 8px
+        height: 8px
+        border-radius: 2.5px
+        background-color: white
       .name
-        font-weight: bold
+        font-weight: normal
+        font-size: 13px
         cursor: pointer
-        background-color: $color1-3
-        padding: $half-padding $padding
+        margin: 0 2px 0 10px
 
       .members
         display: flex
@@ -81,37 +101,39 @@ $member-size: 18px
           display: flex
           flex-direction: row
           .member
-            font-size: 10px
+            font-size: 9px
             line-height: $member-size
-            margin: 1px
             padding: 3px
             width: $member-size
             height: $member-size
             background-color: #2da343
-            color: white
             &.nw
-              background-color: blue
+              background-color: $id-blue
+              border-right: 1px solid white
+              border-bottom: 1px solid white
             &.ne
-              background-color: orange
-              border-top-right-radius: $border-radius
+              background-color: $id-orange
+              border-top-right-radius: 4px
+              border-left: 1px solid white
+              border-bottom: 1px solid white
             &.se
-              background-color: green
-              border-bottom-right-radius: $border-radius
+              background-color: $id-green
+              border-bottom-right-radius: 4px
+              border-left: 1px solid white
+              border-top: 1px solid white
             &.sw
-              background-color: purple
-              border-bottom-left-radius: $border-radius
+              background-color: $id-purple
+              border-right: 1px solid white
+              border-top: 1px solid white
             &.disconnected
               background-color: #777
             &.teacher
               background-color: #EA6D2F !important
             &.empty
-              background-color: $color1-4
+              background-color: $workspace-teal-light-2
 
             .initials
               margin-top: -3px
-
-    .class
-      margin-left: 20px
 
     .profile-icon
       background-color: $sage-dark-2
@@ -130,15 +152,38 @@ $member-size: 18px
         background-color: $sage-light-2
 
     .user
+      height: 40px
+      padding: 0 1px 0 0 
       flex-grow: 0
       display: flex
       align-items: center
-      margin-right: $double-margin
+      border-radius: 5px
+      border: solid 1.5px $charcoal-light-1
 
-      .name
-        padding: $half-padding $padding
-        background-color: $color1-3
-        font-weight: bold
+      .user-contents
+        display: flex
+        flex-direction: column
+        align-items: flex-start
+        font-weight: normal
+        font-size: 13px
+        .name
+          padding: 0 10px 0 10px
+        .class
+          padding: 0 10px 0 10px
+      .student-profile-icon
+        background-color: white
+        width: 36px
+        height: 36px
+        border-radius: 0 5px 5px 0
+        display: flex
+        justify-content: center
+        align-items: center
+        text-align: center
+        .student-profile-icon-inner
+          width: 30px
+          height: 30px
+          mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg")
+          background-color: $problem-orange         
 
   .problemMenu
     margin: 10px
