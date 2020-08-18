@@ -39,7 +39,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           <div className="unit"> 
             <div className="title" data-test="unit-title">{unit.title}</div>
             <div className="investigation-ordinal" data-test="investigation-ordinal">
-              Investigation {investigation.ordinal}
+              {investigation.title}
             </div>
           </div>
           <div className="separator"/>
@@ -48,7 +48,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
             isDisabled={true}
           />
         </div>
-        <div className="middle">
+        <div className="middle student">
           {this.renderPanelButtons()}
         </div>
         <div className="right">
