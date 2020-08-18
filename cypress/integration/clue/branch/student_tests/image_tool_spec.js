@@ -70,7 +70,7 @@ context('Test image functionalities', function(){
             cy.wait(2000)
         })
 
-        it('will upload gif file from user computer', function(){
+        it.skip('will upload gif file from user computer', function(){
             const imageFilePath='model_image.gif';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
@@ -99,10 +99,10 @@ context('Test image functionalities', function(){
             cy.wait(5000)
         })
         it('verify restore of all  images that were added by upload', function(){
-            const imageFilePath=['image.png','case_image.jpg','model_image.gif'];
+            const imageFilePath=['image.png','case_image.jpg',/*'model_image.gif'*/];
 
             imageToolTile.getImageToolImage().each(($images, index, $list)=>{
-                expect($list).to.have.length(3);
+                expect($list).to.have.length(imageFilePath.length);
                 expect($images).to.have.css('background-image').and.contains('url("data:image');
             })
         })
