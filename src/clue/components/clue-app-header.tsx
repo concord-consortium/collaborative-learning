@@ -45,7 +45,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           <div className="separator"/>
           <ProblemSelect
             items={[`${problem.title}: ${problem.subtitle}`]}
-            onSelectItem={()=>console.log("hi")}
+            isDisabled={true}
           />
         </div>
         <div className="middle">

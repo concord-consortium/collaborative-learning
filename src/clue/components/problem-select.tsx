@@ -4,7 +4,7 @@ import "./problem-select.sass";
 
 interface IProps {
   items: string[];
-  onSelectItem: (value: string) => void;
+  onSelectItem?: (value: string) => void;
   isDisabled?: boolean;
 }
 
@@ -90,7 +90,8 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
   }
 
   private handleListClick = (current: string) => () => {
-    this.props.onSelectItem(current);
+    const { onSelectItem } = this.props;
+    onSelectItem && onSelectItem(current);
     this.setState({
       current,
       showList: false
