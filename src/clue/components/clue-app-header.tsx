@@ -37,8 +37,10 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
       <div className="app-header">
         <div className="left">
           <div className="unit"> 
-            <div className="title" data-test="unit-title">{unit.title}</div>
-            <div className="investigation-ordinal" data-test="investigation-ordinal">
+            <div className="title" data-test="unit-title">
+              {unit.title}
+            </div>
+            <div className="investigation" data-test="investigation">
               {investigation.title}
             </div>
           </div>
@@ -71,17 +73,17 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   private renderTeacherHeader(userTitle: string | undefined) {
     const { investigation, unit } = this.stores;
     return (
-      <div className="app-header">
+      <div className="app-header teacher">
         <div className="left">
-          <div className="problem" data-test="investigation-title">
-            <div className="unit">
+          <div className="unit" data-test="investigation-title">
+            <div className="title">
               {unit.title}
             </div>
             <div className="investigation">
               {investigation.title}
             </div>
           </div>
-          <div className="spacer" />
+          <div className="separator"/>
           <div className="problem-dropdown" data-test="user-class">
             <ProblemMenuContainer />
           </div>
