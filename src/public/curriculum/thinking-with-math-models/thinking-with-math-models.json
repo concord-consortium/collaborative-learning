@@ -1,0 +1,1649 @@
+{
+  "code": "twmm",
+  "abbrevTitle": "TWMM",
+  "title": "Thinking with Mathematical Models",
+  "subtitle": "Linear Functions and Bivariate Data",
+  "placeholderText": "Enter notes here",
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+     "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you launch a problem, there are up to four standard tabs corresponding to the curriculum:<ul><li>Introduction</li><li>Initial Challenge</li><li>What If ...?</li><li>Now What Do You Know?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You will find text, graphs, images and other kinds of content in the tabs. These can be dragged into your workspace. Try to drag this text into your workspace now. You can drag any kind of content found in tabs on either side of the workspace. This will let you use useful parts from problems, supports from your teacher, and work you share with your fellow students."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/workspaceHelp.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Images are handy for recording work you do on paper. You can make an image either by choosing the image tool and choosing a file from your computer, or you can drag an image from your file list or desktop on to the browser window. Try this now."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Click on <strong>tool buttons</strong> on the side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "To <strong>delete tiles</strong>, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you are ready to <strong>share work</strong> with your group, switch the Share slider, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/graphdoc.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Note: Points are connected in the order they were made, which can lead, for example, to an unexpected hourglass shape as in the example above. If this is not the intended shape, simply drag the points to the desired shape."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/SS_LA_04_city_spoon_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "TWMM Investigation 1 Exploring Data Patterns in Building Bridges",
+      "introduction": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "TWMM 1.1 Bridge Thickness and Strength",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Many bridges are built with frames of steel beams. Steel is very strong, but any beam will bend or break if you put too much weight on it."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_arched_bridge_350w.png"
+                    }
+                  },
+                  {
+              		"content": {
+                		"type": "Text",
+                		"format": "markdown",
+                		"text": [
+                  			"*What variables determine the strength of a bridge?*"
+                		]
+              		}
+            	  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- How do you think the strength of a beam is related to its thickness?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "To answer this question, engineers often use scale models to test their designs. We can do an experiment to discover mathematical patterns involved in building bridges."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**A Bridge-Thinkness Experiment**",
+                        "Materhials:",
+                        "- Two books of the same thinkness",
+                        "- A small paper cup",
+                        "- About 50 pennies",
+                        "- Several 11-inch by 4¼-inch strips of paper",
+                        " ",
+                        "Instructions:",
+                        "- Start with one of the paper strips. Make a “bridge” by folding up 1 inch on each long side."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_paper_bridge_340w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Suspend the bridge between two books. Place a paper cup in the center of the bridge."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_bridges_between_books_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Using guidelines determined by your class, put pennies in the cup, one at a time until the bridge collapse. Record the number of pennies added to the cup. This number is the breaking weight of the bridge.",
+                        "- Repeat the experiment with two, three, four, and five strips of new paper. Record your data."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Conduct the experiment.",
+                        "- Collect the data and represent the data in a table and graph.",
+                        "- What patterns do you observe in the data? Do they support your original conjecture? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Situation A. Modeling the Data**",
+                        "Does the relationship between the number of layers and the breaking weight appear to be linear or nonlinear?",
+                        "How do the graph and the table show this relationship?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Situation B. Making Predictions**",
+                        "1. Suppose you could split layers of paper in half. What breaking weight would you predict for a bridge 2.5 layers thick? Explain.",
+                        "2. Predict the breaking weight for a bridge 6 layers thick. Explain your reasoning.",
+                        "3. Test your prediction of strength for the 6-layer bridge. Explain why results from such a test might not exactly match predictions."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe the relationship between the bridge strength and the bridge thickness revealed by your experiment. What other variables might affect the strength of a bridge?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "TWMM Problem 1.2",
+          "ordinal": 2,
+          "title": "TWMM 1.2 Bridge Length and Strength",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In the last problem you tested the strength of some paper bridges. We found that as the number of layers increased so did the strength. That is, bridges with more layers are stronger than bridges with fewer layers. The data for the pair of variables, layers and strength, is called **bivariate data**. The data gathered in the following experiment is another example of bivariate data. Statisticians gather, analyze, and interpret data to aid in many business, scientific, medical, engineering and other decision-making processes. They call graphs of the data **scatter plots**."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- How do you think the length and strength of a bridge are related?",
+                        "We can do an experiment to find out how the length and strength of a bridge are related."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**A bridge-Length Experiment**",
+                        "Materials:",
+                        "- Two books of the same thinkness",
+                        "- A small paper cup",
+                        "- About 50 pennies",
+                        "- 4¼-inch paper strips with lengths 4, 6, 8, 9, and 11 inches"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_2_five_paper_bridges_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Instructions:",
+                        "- Fold the paper strips to make bridges as shown above.",
+                        "- Start with the 4-inch bridge. Suspend the bridge between the two books as you did before.",
+                        "- Put pennies into the cup, one at a time, until the bridge collapses. Record the number of pennies you added to the cup. As in the first experiment, this number is the breaking weight of the bridge.",
+                        "- Repeat the experiment to find breaking weights for the other bridges."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Conduct the experiment.",
+                        "- Collect the data and represent the data in a table and graph",
+                        "- What patterns do you observe in the data? Do they support your original conjecture? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation A. Modeling the Data###",
+                        "Describe the relationship between bridge length and breaking weight. Is this relationship linear? Explain. How is the relationship shown by patterns in your table and graph?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation B. Making Predictions###",
+                        "Use your data to predict the breaking weights for bridges of lengths 3, 5, 10, and 12 inches. Explain how you made your predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "###Situation C. Comparing Data Sets###",
+                        "Compare your data from this experiment to the data from the experiment on bridges with different numbers of layers. How is the relationship between the number of layers in a bridge and its breaking weight similar to the relationship between bridge length and breaking weight? How is it different?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "How does a graph model the relationship between the variables? How does it indicate the type of relationship?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "TWMM 1.3 Custom Construction Parts: More Patterns",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In Problem 1.1, Ms. Gomez’s students noticed that the points do not lie exactly on a line. But they thought they could draw a line which might approximate the data pattern and could be used to make predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Data from Ms. Gomez's Class"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_gomez_data_combined_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "- What equation could represent each line?",
+                        "- Would the equations for these lines be different?",
+                        "- Would the equations give the same predictions for the breaking weight for 3.5 layers?",
+                        "Before we can answer these questions, you will explore the skills needed to write equations for lines that represent linear relationships or linear functions. A linear relationship or function is one whose graph is a straight line.   We will return to these questions in Investigation 4."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Suppose a company called Custom Steel Products (CSP for short) supplies materials to builders. One common structure that CSP makes is called a truss. You might see a truss holding up a bridge or the roof of a building. The following is a picture of a truss. It is made by fastening together steel rods 1 foot long."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_seven_foot_truss_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "This truss has an overall length of 7 feet. The manager at CSP needs to know the number of rods in any length of truss a customer might order.",
+                        "- Describe a pattern that the manager can use to predict the number of rods for any length of truss. Does the pattern represent a linear relationship? Explain.",
+                        "- How does this pattern compare to the patterns found in Problems 1.1 and 1.2?",
+                        "- Are you equally confident about the predictions you made for Problems 1.1 and 1.2 and this problem?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Situation A. Student Strategies from Ms. Gomez’s Class***",
+                        "- Examine each strategy. Is it correct? Explain why.",
+                        "- Can each strategy be used to make predictions? Which would you choose to make a prediction? Explain.",
+                        "- How are the four strategies the same? Different?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Maria Uses a Table",
+                        "I worked out several cases for truss lengths. I recorded them in a table. I noticed that as the length increased by 1 unit, the number of rods increased by 4. That is the number of rods is increasing at a rate of change of 4 rods per one additional unit."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_maria_table_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Sungah Uses a Graph",
+                        "I also worked out several cases for truss lengths. But I made a graph of the data. The data points appear to lie on a straight line. The y-intercept is (0,0) but I was not sure what the rate of change between the two variables is."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_sungah_graph_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Walter Uses an Equation",
+                        "I noticed that as the length of the truss increased by 1, the number of rods increased by 4. This means the relationship between the length of the truss L and the number of rods N is linear. So, the rate of change between the two variables is 4. The point (0,0) represents the y-intercept, the equation is",
+                        "**N = 0 + 4L or N = 4L.**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Jenna Uses an Equation",
+                        "I figured out a pattern for the number of rods. For overall length 7, there are 7 triangles and 6 rods connecting these triangles, so I wrote ",
+                        "**3 x 7 + 6 = 27**. The length L = 27.",
+                        "The number of connecting rods 6 is one less than the length 7. I wrote the equation for the number of rods N is",
+                        "**N = 3L + L - 1**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "***Situation B. Another Structure: Staircase Frames***",
+                        "Custom Steel Products also makes staircase frames like those shown here."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_stairase_frames_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "1. Describe the pattern of change in the number of rods as the number of steps increases. Explain how you found the pattern.",
+                        "2. How would the pattern you described be shown in the table? Graph? Equation?",
+                        "3. Does this pattern represent a linear relationship? Explain.",
+                        "4. How many steel rods are in a staircase frame with 12 steps? Explain how you could find this number without drawing the staircase frame."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "How can you predict from the patterns in a table of data or on a graph if the relationship between variables is linear or non-linear? How does having an equation for a linear pattern help you make predictions?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "TWMM Investigation 2 Linear Models and Equations",
+      "introduction": {
+      },
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "TWMM 2.1 Tree Top Fun",
+          "subtitle": "Equations for Linear Functions",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": "Tree Top Fun (TTF, for short) runs adventure sites with zip lines, swings, rope ladders, bridges, and trapezes. The company uses mathematical models to relate the number of customers, price of ticket to ride, costs to set up and manage, income from ticket sales, and profit at its many locations. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_zipline_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Did You Know?**",
+                        "*A **zip line** is a cable that starts at a higher point than it ends. Using the natural decline of the cable, a person or cargo can travel down the wire on a pulley system that minimizes friction to help the rider accelerate.  For example, for a 200′ **zip line** that is 7′ high in the middle (when loaded with a rider), **should** sag 5% or 10 feet. This means that the end attachments are 17′ high each. At this point, plan that the longer the zip line, the higher in the air you'll need to be to start.*",
+                        "*You can travel internationally on ziplines. The Limited Zero Zipline crosses the Guadiana River from Spain to Portugal.*"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The manager of TTF is considering how much money they should charge each customer. The total money he collects from customers is called his ***income*** or ***revenue***. But he also has ***costs***, which he has to pay out of his revenue. What is left is called his ***profit***. Answer the questions below to help the manager analyze his income and profit and other expenses.",
+                        "For the income, profit, and unpaid balance below, describe how the equation can be used to make predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Daily Income**",
+                        "If the standard charge per customer at TTF is $25, what equation relates the daily income *I* to the number *n* of customers?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Daily Profit**",
+                        "If the operating costs of TTF is $500 per day, what equation relates the daily profit *P* to the number *n* of customers?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Unpaid Balance**",
+                        "If TTF bought a new rope bridge for $4,500 and then makes monthly payments of $350, what equation relates the unpaid balance *B* after *m* monthly payments?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "Markdown",
+                      "text": [
+                        "***Situation A. Group Admission Fees***",
+                        "One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table.",
+                        "1. Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain",
+                        "2. How much money would a group expect to pay if the group size is 0? 21? 30?  ",
+                        "3. What equation relates admission fee A to the number n in the group? Use the equation to check your predictions for Part 2.",
+                        "**Group Admission Fees**"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number in Group",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 15, 20 ]
+                        },
+                        {
+                          "name": "Admission (dollars)",
+                          "type": "number",
+                          "values": [ 75, 90, 105, 120, 135, 210, 285, 360 ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 380
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe how you know if the relationship between two variables is a linear function? What strategies did you use to write equations for linear functions? "
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "TWMM 2.2 Boat Rental",
+          "subtitle": "Solving Linear Equations",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": "When we have a relationship between two quantities or variables, we can use numeric reasoning, tables, graphs and equations to find the value of a variable. We have used these strategies in several *Connected Mathematics* units in 6th and 7th grade. We will continue to explore these strategies as we examine the strategies used by students in the following problem."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The owner of Sandy’s Boat House advertises the cost to rent a canoe is $15 per hour for trips on the Red Cedar River. He is also willing to break down the $15 per hour if a customer rents for only a part of an hour.",
+                        "The manager suggests another deal for customers. She uses the equation <em>c<sub>mangager</sub></em> = 0.15<em>t</em> + 2.50 to find the charge c in dollars for renting a canoe for t minutes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_canoe_rental_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• Which option would you choose, the manager’s equation or the owner’s cost of $15 per hour? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Serena, Rashida and Omar’ Strategies.</strong>\nSome students in Summit Heights Middle School used different strategies to answer the question “which cost plan is the better deal?” Explain how each strategy would or would not work to decide which cost plan is the best",
+                        "<strong>Serena Uses Tables"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_serena_table_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Rashida Uses Graphs</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_rashida_graph_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Omar Uses Equations</strong>\nI wrote the equation, C<sub>manager</sub> = 0.15t + 2.50 for the cost that the owner charges. I wrote the equation C<sub>owner</sub> = 0.25t where t is the number of minutes. Then I set the two expressions for cost equal.\n0.25<em>t</em> = 0.15<em>t</em> + 2.50"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
+                        "River Fun Boats (RFB) also rents canoes. The equation <em>c<sub>RFB</sub></em> = 4 + 0.10<em>t</em> gives the charge in dollars <em>c</em> for renting a canoe for <em>t</em> minutes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "1. What is the charge to rent a canoe for 20 minutes?",
+                        "2. A customer at River Fun is charged $9. How long did the customer use a canoe?",
+                        "3. Suppose you want to spend at most $12. How long could you use a canoe?",
+                        "4. How does the cost to rent a boat from River Fun Boat Rides compare to the cost to rent canoes from Sandy’s Boat House?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
+                        "Do any of the three cost plans in this problem represent linear functions? Explain why or why not."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do graphs and tables and equations of functions such as <em>C</em> = 0.25<em>t</em> and <em>C</em> = 0.15<em>t</em> + 2.5 help you solve problems. Explain the advantages and disadvantages of each of each representation when trying to solve problems."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "TWMM 2.3 Up and Down the Staircase Again",
+          "subtitle": "Exploring Slope",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "In any problem that calls for a linear mode that is an equation, the goal is to find the values of *m* and *b* for the linear equation y = *m*x + *b* that fits the data pattern well. Recall from **Moving Straight Ahead** unit that for linear relationships as x increases by a fixed increment y changes by a constant amount, *m*, called the rate of change. The y-intercept is (0,*b*) or *b*. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_graph_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The change in x from one point to the another is also called the *horizontal change* or **run** change. The change in y from one point to another is called the *vertical change* or **rise** change.  The ratio of rise to run is called the **slope** of the line which is also the coefficient of *m* in the equation, y = *m*x + *b*."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_slope_formula_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "This ratio, slope, describes the steepness of a line that represents the linear function. The equation y = *m*x + *b* is also called the **slope intercept** form of a linear equation. To measure the steepness of a linear equation graph, it helps to imagine a staircase that lies underneath the line. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_staircase_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong><em>What is the slope of the line that represents the steepness of the staircase?</em></strong>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- For the linear functions described below, find the slope and y-intercept.",
+                        "- Then write the equations for the lines in the form y = *m*x + *b*."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_1_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_3_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_4_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_5_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_6_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Linear Function 7**",
+                        "The line that passes through (6, 1) and (2, -1)."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Linear Function 8**",
+                        "The line that passes through (0, 3) and (3, 3)."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Student Claims from Mr. Cai's Class.</h3>Mr. Cai asked his class to look for patterns in the representations in the Initial Challenge. The follow are some claims his student made about linear functions.<p>Study each claim. Are they correct? Explain.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Jackie's Claim**",
+                        "To find the slope of a line it makes a difference which two points you use to find the slope."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Gus's Claim**",
+                        "For each unit change in the independent variable there is a constant change in the dependent variable."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Yvonne's Claim**",
+                        "Both a horizontal line and a vertical line are linear functions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Malcolm's Claim**",
+                        "The slope is the same as the constant rate of change m between the variables x and y."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Kevin's Claim**",
+                        "The line with equation y = 2x passes through the points (0, 0) and (1, 2). The line with equation y = - 3x passes through the points (0, 0) and (1, - 3). In general, lines with equations of the form y = *m*x always pass through the points (0, 0) and (1, *m*). And *m* is the constant of proportionality.  "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Connecting Rates and Slopes</h3>Juan was studying a table of values. He noticed that as x increases by 1, y increases by 2. He says this is a linear function. But he wonders where in the table the ratio of rise/run is indicated. Is it possible to find the slope from the table of values?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_juan_table_401w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What information do you need to write an equation for a linear function? How is the constant rate of change for a linear function the same as the ratio of rise/run between two points of the graph of the function? How does the ability to write an equation for a set of data help you make predictions about a situation like the bridge experiments?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.4",
+          "ordinal": 4,
+          "title": "TWMM 2.4 Exploring Patterns with Lines",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "We have used linear functions to model linear situations and make predictions. Our understanding of linear relationships or functions can be used to explore some ideas about groups of lines."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "For example, suppose the slope of a line is 3.",
+                        "- Sketch a line with this slope.",
+                        "- Can you sketch a different line with this slope? Explain.",
+                        "In this Problem, we will use slope to explore some patterns among linear relationships."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "For each group or pairs of lines answer the following questions.",
+                        "- What features do the equations have in common?",
+                        "- Graph the equations on the same coordinate axes. What do you notice about the graphs? How might you have predicted this from the equations?",
+                        "- Describe another equation that has the same pattern."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Groups of Lines**",
+                        "**Group 1**  y = 3x  y = 5 + 3x  y = 10 + 3x y = 3x - 5",
+                        "**Group 2**  y = -2x y = -2x + 4 y = 8 - 2x  y = -4 - 2x"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Pairs of Lines 1",
+                        "<table>",
+                        "<tr>",
+                        "<th>Pair 1</th>",
+                        "<th>Pair 2</th>",
+                        "<th>Pair 3</th>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2x</td>",
+                        "<td>y = 4x</td>",
+                        "<td>y = -3x + 5</td>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = -0.5x</td>",
+                        "<td>y - -0.25x</td>",
+                        "<td>y = 1/3x - 1</td>",
+                        "</tr>",
+                        "</table>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Pairs of Lines 2",
+                        "<table>",
+                        "<tr>",
+                        "<th>Pair 1</th>",
+                        "<th>Pair 2</th>",
+                        "<th>Pair 3</th>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2x + 1</td>",
+                        "<td>y = 5 - 2x</td>",
+                        "<td>y = 2(x - 1) - 1</td>",
+                        "</tr>",
+                        "<tr>",
+                        "<td>y = 2(x + 1) - 1</td>",
+                        "<td>y = 3 - 2(x - 1)</td>",
+                        "<td>y = 4x - 2x -2</td>",
+                        "</tr>",
+                        "</table>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Jose's Example</strong>\nHe claims that the following two lines have the same pattern as one of those in the Initial Challenge. Which Group or Pair of lines does each line belong? Explain why.<ul><li>Line 1 contains the points (1,4) and (3, 12)</li><li>Line 2 contains the points (1, 6) and (3, 14)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Boat Rentals Again</strong>\nSeveral competing canoe rentals use expressions to represent the rental cost <em>C</em>.",
+                        "<ul><li><em>C<sub>1</sub><em> = 2.5 + 0.25<em>t</em></li>",
+                        "<li><em>C<sub>2</sub><em> = 0.25(10 + <em>t</em>)</li>",
+                        "<li><em>C<sub>3</sub><em> = 0.25(10 + 10<em>t</em>)</li>",
+                        "<li><em>C<sub>4</sub><em> = 0.5(10 + 0.5<em>t</em>)</li></ul>",
+                        "1. Which plan(s) is the least expensive per minute?",
+                        "2. Describe the shape of each graph. What information about rental costs does the slope represent?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can you predict if two lines are parallel or perpendicular from their equations?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "TWMM MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Thinking with Math Models Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": [ ]
+}

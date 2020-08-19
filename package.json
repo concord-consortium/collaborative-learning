@@ -167,6 +167,7 @@
     "react-dom": "^16.13.1",
     "react-dom-factories": "^1.0.2",
     "react-sizeme": "^2.6.12",
+    "resize-observer-polyfill": "^1.5.1",
     "rollbar": "^2.18.0",
     "slate": "^0.47.9",
     "slate-html-serializer": "^0.8.13",
