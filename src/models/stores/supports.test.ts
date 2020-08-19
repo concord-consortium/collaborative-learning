@@ -276,7 +276,7 @@ describe("supports model", () => {
       groupSupports: [],
       userSupports: []
     });
-    supports.setAuthoredSupports([lateSupport, earlySupport], AudienceEnum.class);
+    supports.addAuthoredSupports([lateSupport, earlySupport], AudienceEnum.class);
     expect(getSnapshot(supports)).toEqual({
       curricularSupports: [],
       classSupports: [earlySupport, lateSupport],

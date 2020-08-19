@@ -42,6 +42,8 @@
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
     "clean": "rimraf dist",
+    "deploy:database:rules": "firebase deploy --only database",
+    "deploy:firestore:rules": "firebase deploy --only firestore:rules",
     "lint": "eslint \"./src/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:build": "eslint -c \".eslintrc.build.js\" \"./src/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{js,json,jsx,ts,tsx}\"",

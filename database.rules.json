@@ -1,0 +1,76 @@
+{
+  "rules": {
+    "test": {
+      ".read": "auth !== null",
+      ".write": "auth !== null"
+    },
+    "dev": {
+      ".read": "auth !== null",
+      ".write": "auth !== null"
+    },
+    "demo": {
+      ".read": "auth !== null",
+      ".write": "auth !== null"
+    },
+    "qa": {
+      ".read": "auth !== null",
+      ".write": "auth !== null"
+    },
+    "authed": {
+      "portals": {
+        "learn_concord_org": {
+          "classes": {
+            "$class_hash": {
+              ".read": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash",
+              "users": {
+                "$user_id": {
+                  "latestGroupId": {
+                    ".read": "auth !== null",
+                    ".write": "auth !== null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "learn_staging_concord_org": {
+          "classes": {
+            "$class_hash": {
+              ".read": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash",
+              "users": {
+                "$user_id": {
+                  "latestGroupId": {
+                    ".read": "auth !== null",
+                    ".write": "auth !== null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "authed-copy": {
+      "portals": {
+        "learn_concord_org": {
+          "classes": {
+            "$class_hash": {
+              ".read": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash"
+            }
+          }
+        },
+        "learn_staging_concord_org": {
+          "classes": {
+            "$class_hash": {
+              ".read": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash"
+            }
+          }
+        }
+      }
+    }
+  }
+}

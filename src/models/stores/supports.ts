@@ -125,6 +125,7 @@ export interface ICreateFromUnitParams {
   documents?: DocumentsModelType;
   db?: DB;
   supports?: CurricularSupportModelType[] | TeacherSupportModelType[];
+  fromDB?: boolean;
   onDocumentCreated?: (support: UnionSupportModelType, document: DocumentModelType) => void;
 }
 
@@ -248,16 +249,33 @@ export const SupportsModel = types
         }
       },
 
-      setAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
+      addAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
         const currSupports = audienceType === AudienceEnum.class
           ? self.classSupports
           : audienceType === AudienceEnum.group
             ? self.groupSupports
             : self.userSupports;
-        currSupports.clear();
+        interface ISupportWithIndex {
+          support: TeacherSupportModelType;
+          index: number;
+        }
+        const supportMap: Record<string, ISupportWithIndex> = {};
+        currSupports.forEach((s, i) => {
+          supportMap[s.key] = { support: s, index: i };
+        });
         supports
           .sort((supportA, supportB) => supportA.authoredTime - supportB.authoredTime)
-          .forEach(support => currSupports.push(support));
+          .forEach(inSupport => {
+            const found = supportMap[inSupport.key];
+            if (found) {
+              // replace updated supports
+              currSupports[found.index] = inSupport;
+            }
+            else {
+              // add new supports
+              currSupports.push(inSupport);
+            }
+          });
       },
 
       hideSupports() {
@@ -290,7 +308,11 @@ function getTeacherSupportCaption(support: TeacherSupportModelType,
   const problemPart = problem ? `${problem.ordinal}` : "*";
   const { sectionId } = support;
   const sectionPart = sectionId ? " " + getSectionInitials(sectionId) : "";
-  return `${investigationPart}.${problemPart}${sectionPart} ${support.caption || "Untitled"}`;
+  const prefix = `${investigationPart}.${problemPart}${sectionPart}`;
+  const caption = support.caption || "Untitled";
+  return caption.includes(prefix)
+          ? caption
+          : `${prefix} ${caption}`;
 }
 
 function getCurricularSupportCaption(support: CurricularSupportModelType, index: number,
@@ -310,7 +332,7 @@ function getSupportCaption(support: UnionSupportModelType, index: number,
 }
 
 export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
-  const { db, documents, investigation, problem, supports, onDocumentCreated } = params;
+  const { db, fromDB, documents, investigation, problem, supports, onDocumentCreated } = params;
   if (!documents) {
     return;
   }
@@ -343,10 +365,20 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
     }
     // else it is a teacher support
     else {
-      properties = { teacherSupport: "true", caption: supportCaption };
+      const isDeleted = support.deleted ? { isDeleted: "true" } : undefined;
+      properties = {
+        teacherSupport: "true",
+        caption: supportCaption,
+        ...isDeleted
+      };
       // if we have a db add the properties from support document which can be
       // updated by the teacher to soft delete the document
-      if (db) {
+      if (db && !fromDB) {
+        // Note that this read fails for firestore supports immediately after they
+        // have been created, perhaps before the update has been completed. Therefore,
+        // we skip it for firestore supports (using the fromDB parameter), which means
+        // that we won't include any properties other than the ones configured above.
+        // For now this seems fine since no other properties are relevant to supports.
         properties = {...properties, ...await getSupportDocumentProperties(support, db)};
       }
     }
@@ -379,18 +411,26 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
 }
 
 export async function getSupportDocumentProperties(support: TeacherSupportModelType, db: DB) {
-  const {audience, sectionTarget, key} = support;
-  const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;
-  const ref = db.firebase.ref(path);
-  const snapshot = await ref.once("value");
+  const {audience, sectionTarget, key, support: { type }} = support;
 
-  return snapshot && snapshot.val() as IDocumentProperties;
+  if (type === ESupportType.multiclass) {
+    const snapshot = await db.firestore.getDocument(db.firestore.getMulticlassSupportDocumentPath(key));
+    return snapshot.exists && (snapshot.data() as any).properties;
+  }
+  else {
+    const path = `${db.firebase.getSupportsPath(db.stores.user, audience, sectionTarget, key)}/properties`;
+    const ref = db.firebase.ref(path);
+    const snapshot = await ref.once("value");
+
+    return snapshot?.val() as IDocumentProperties;
+  }
 }
 
 export async function getDocumentContentForSupport(support: SupportModelType, db?: DB) {
   let content: DocumentContentSnapshotType | IAuthoredDocumentContent | undefined;
   switch (support.type) {
     case ESupportType.document:
+    case ESupportType.multiclass:
       content = safeJsonParse(support.content);
       break;
     case ESupportType.publication:

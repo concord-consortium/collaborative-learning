@@ -1,6 +1,6 @@
-import { getPortalOfferings, PortalOfferingParser } from "./portal-api";
+import { getPortalOfferings, IPortalOffering, PortalOfferingParser } from "./portal-api";
 import nock from "nock";
-import { TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
+import { TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
 
 const userType = "teacher";
 const userID = 22;
@@ -12,12 +12,15 @@ describe("Portal Offerings", () => {
     nock(/superfake/)
       .get(/\/api\/v1\/offerings\/\?user_id=22/)
       .reply(200, TeacherOfferings);
+    nock(/superfake/)
+      .get(/\/api\/v1\/classes\/mine/)
+      .reply(200, TeacherMineClasses);
   });
 
   afterEach(() => nock.cleanAll());
 
   describe("getPortalOfferings", () => {
-    let fetchedOfferings;
+    let fetchedOfferings: IPortalOffering[];
 
     beforeEach(async () => {
       fetchedOfferings = await getPortalOfferings(userType, userID, domain, fakeJWT);
@@ -25,6 +28,10 @@ describe("Portal Offerings", () => {
 
     it("Result should have 3 Offerings", () => {
       expect(fetchedOfferings.length).toEqual(3);
+    });
+
+    it("offerings should have class hashes", () => {
+      expect(fetchedOfferings.every(o => o.clazz_hash));
     });
   });
 

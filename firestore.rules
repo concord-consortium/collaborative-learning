@@ -1,0 +1,96 @@
+// NOTE: to deploy only these rules run
+// `npm run deploy:firestore:rules`
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    // function hasClass() {
+    //   return isAuthed() && request.auth.token.class_hash != null;
+    // }
+
+    // function hasClassHash(classHash) {
+    //   return request.auth.token.class_hash == classHash;
+    // }
+
+    function hasRole(role) {
+      return isAuthed() && request.auth.token.user_type == role;
+    }
+
+    function hasUserId() {
+      return isAuthed() && request.auth.token.platform_user_id != null;
+    }
+
+    // function matchUserId(userId) {
+    //   return hasUserId() && string(request.auth.token.platform_user_id) == userId;
+    // }
+
+    function matchFirebaseUserId(userId) {
+      return isAuthed() && request.auth.uid == userId;
+    }
+
+    function isAuthedTeacher() {
+      return hasUserId() && hasRole("teacher");
+    }
+
+    function requestMatchUserId() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) == request.resource.data.uid;
+    }
+
+    function docMatchUserId() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) == resource.data.uid;
+    }
+
+    function classInClasses() {
+      return isAuthed() && request.auth.token.class_hash in resource.data.classes;
+    }
+
+    //
+    // portal-authenticated secure access rules
+    //
+    match /authed/{portal} {
+      allow read, write: if isAuthedTeacher();
+
+        match /mcsupports/{docId} {
+          // any portal-authenticated teacher can create supports
+          allow create: if isAuthedTeacher() && requestMatchUserId();
+          // teachers can only update/delete their own supports
+          allow update, delete: if requestMatchUserId() && docMatchUserId();
+          // teachers and students in appropriate classes can read supports
+          allow read: if docMatchUserId() || classInClasses();
+        }
+    }
+
+    //
+    // non-portal-authenticated/dev/demo/qa/test rules
+    //
+    match /demo/{demoName}/{restOfPath=**} {
+      allow read, write: if isAuthed();
+    }
+
+    match /dev/{userId}/{restOfPath=**} {
+      allow read: if isAuthed();
+      // users can only write to their own folders
+      allow write: if matchFirebaseUserId(userId);
+    }
+
+    match /qa/{userId}/{restOfPath=**} {
+      allow read: if isAuthed();
+      // users can only write to their own folders
+      allow write: if matchFirebaseUserId(userId);
+    }
+
+    match /test/{userId}/{restOfPath=**} {
+      allow read: if isAuthed();
+      // users can only write to their own folders
+      allow write: if matchFirebaseUserId(userId);
+    }
+
+  }
+}

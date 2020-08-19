@@ -5,6 +5,7 @@ import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudie
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
+import { getProblemPath } from "../../models/stores/stores";
 import { BaseListener } from "./base-listener";
 import { isAlive } from "mobx-state-tree";
 
@@ -23,12 +24,18 @@ export class DBSupportsListener extends BaseListener {
 
   // TODO: Create different listeners for support audiences
   public start() {
+    const { user } = this.db.stores;
     this.supportsRef = this.db.firebase.ref(
-      this.db.firebase.getSupportsPath(this.db.stores.user)
+      this.db.firebase.getSupportsPath(user)
     );
     this.debugLogHandlers("#start", "adding", ["child_changed", "child_added"], this.supportsRef);
     this.supportsRef.on("child_changed", this.onChildChanged = this.handleSupportsUpdate("child_changed"));
     this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
+
+    this.db.firestore.getMulticlassSupportsRef()
+        .where("problem", "==", getProblemPath(this.db.stores))
+        .where("classes", "array-contains", user.classHash)
+        .onSnapshot(snapshot => this.handleMulticlassSupports(snapshot));
 
     this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
     this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
@@ -90,7 +97,7 @@ export class DBSupportsListener extends BaseListener {
         });
       }
 
-      supports.setAuthoredSupports(teacherSupports, audienceType);
+      supports.addAuthoredSupports(teacherSupports, audienceType);
 
       const { unit, investigation, problem, documents, user } = this.db.stores;
       addSupportDocumentsToStore({
@@ -103,7 +110,7 @@ export class DBSupportsListener extends BaseListener {
               // teachers sync their support document properties to Firebase to track isDeleted
               const {audience, sectionTarget, key} = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
-              this.db.listeners.syncDocumentProperties(document, path);
+              this.db.listeners.syncDocumentProperties(document, "firebase", path);
             }
           }
         }
@@ -131,6 +138,54 @@ export class DBSupportsListener extends BaseListener {
       originDoc: dbSupport.type === ESupportType.publication ? dbSupport.originDoc : undefined,
       caption: dbSupport.properties && dbSupport.properties.caption,
       deleted: dbSupport.deleted || !!(dbSupport.properties && dbSupport.properties.isDeleted)
+    });
+  }
+
+  private handleMulticlassSupports(querySnapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) {
+    const teacherSupports: TeacherSupportModelType[] = [];
+    querySnapshot.forEach(doc => {
+      const supportModel = this.createMulticlassSupport(doc.data().uid, doc.id, doc.data());
+      supportModel && teacherSupports.push(supportModel);
+    });
+    if (teacherSupports.length === 0) return;
+
+    const { supports } = this.db.stores;
+    supports.addAuthoredSupports(teacherSupports, AudienceEnum.class);
+
+    const { unit, investigation, problem, documents, user } = this.db.stores;
+    addSupportDocumentsToStore({
+      unit, investigation, problem, documents, supports: teacherSupports, db: this.db, fromDB: true,
+      onDocumentCreated: (support, document) => {
+        // since there are multiple async calls before we get here check if the support is still in the tree
+        if (isAlive(support)) {
+          const teacherSupport = support as TeacherSupportModelType;
+          if (teacherSupport.uid === user.id) {
+            // teachers sync their support document properties to Firebase to track isDeleted
+            this.db.listeners.syncDocumentProperties(document, "firestore");
+          }
+        }
+      }
+    });
+  }
+
+  private createMulticlassSupport(uid: string, docId: string, dbSupport: any) {
+    if (!uid || !docId || !dbSupport) return;
+    const content = dbSupport.content;
+    const supportModel = SupportModel.create({ type: ESupportType.multiclass, content });
+    if (!supportModel) return;
+    // a just-created support will sometimes return undefined for createdAt,
+    // in which case we'll use the current date as a substitute
+    const authoredDate = dbSupport.createdAt?.toDate() || new Date();
+    return TeacherSupportModel.create({
+      uid,
+      key: docId,
+      support: supportModel,
+      type: SupportTarget.problem,
+      audience: ClassAudienceModel.create(),
+      authoredTime: authoredDate.getTime(),
+      originDoc: dbSupport.originDoc,
+      caption: dbSupport.properties?.caption,
+      deleted: dbSupport.deleted || !!dbSupport.properties?.isDeleted
     });
   }
 

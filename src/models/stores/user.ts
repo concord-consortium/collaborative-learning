@@ -1,17 +1,27 @@
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser, PortalFirebaseStudentJWT } from "../../lib/auth";
-const initials = require("initials");
+import initials from "initials";
 
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);
 export type UserType = typeof UserTypeEnum.Type;
 
-export const PortalClassOffering = types.model("PortalClassOffering", {
-  className: "",
-  problemOrdinal: "",
-  unitCode: "",
-  offeringId: "",
-  location: ""
-});
+export const PortalClassOffering = types
+  .model("PortalClassOffering", {
+    classId: "",
+    classHash: "",
+    className: "",
+    activityTitle: "",
+    activityUrl: "",
+    problemOrdinal: "",
+    unitCode: "",
+    offeringId: "",
+    location: ""
+  })
+  .views(self => ({
+    get problemPath() {
+      return `${self.unitCode}/${self.problemOrdinal.replace(".", "/")}`;
+    }
+  }));
 
 export type IPortalClassOffering = typeof PortalClassOffering.Type;
 
@@ -28,6 +38,7 @@ export const UserModel = types
     portal: "",
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
+    demoClassHashes: types.array(types.string),
     lastSupportViewTimestamp: types.maybe(types.number),
     lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
@@ -63,6 +74,9 @@ export const UserModel = types
       if (user.portalClassOfferings) {
         self.portalClassOfferings.replace(user.portalClassOfferings);
       }
+      if (user.demoClassHashes?.length) {
+        self.demoClassHashes.replace(user.demoClassHashes);
+      }
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;
@@ -80,6 +94,30 @@ export const UserModel = types
     },
     get initials() {
       return initials(self.name);
+    },
+    get activityUrl() {
+      const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
+      return offering?.activityUrl || undefined;
+    }
+  }))
+  .views((self) => ({
+    classHashesForProblemPath(problemPath: string) {
+      const classSet = new Set<string>([self.classHash]);
+      if (self.isTeacher) {
+        // authenticated teachers pull class hashes from portalClassOfferings
+        if (self.portalClassOfferings.length) {
+          self.portalClassOfferings.forEach(o => {
+            if (o.classHash && (o.problemPath === problemPath)) {
+              classSet.add(o.classHash);
+            }
+          });
+        }
+        // non-authenticated teachers (e.g. demo/qa) pull from demoClassHashes
+        else if (self.demoClassHashes.length) {
+          self.demoClassHashes.forEach(hash => classSet.add(hash));
+        }
+      }
+      return [...classSet];
     }
   }));
 
