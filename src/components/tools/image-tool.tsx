@@ -94,8 +94,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
-        const {width, height} = entry.contentRect;
-        this.setState({ imageEltWidth: width, imageEltHeight: height });
+        if (entry.target === this.imageElt) {
+          // https://stackoverflow.com/a/58701523
+          window.requestAnimationFrame(() => {
+            const {width, height} = entry.contentRect;
+            this.setState({ imageEltWidth: width, imageEltHeight: height });
+          });
+        }
       }
     });
     this.imageElt && this.resizeObserver.observe(this.imageElt);
