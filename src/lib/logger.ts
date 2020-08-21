@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
+import { Optional } from "utility-types";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
@@ -89,7 +90,9 @@ export enum LogEventName {
   DASHBOARD_TOGGLE_TO_DASHBOARD
 }
 
-type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
+type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
+                                Partial<DrawingToolChange> |
+                                Optional<ITableChange, "action">;
 
 interface IDocumentInfo {
   type: string;
@@ -169,7 +172,7 @@ export class Logger {
   public static logToolChange(
     eventName: LogEventName,
     operation: string,
-    change: ToolChangeEventType,
+    change: LoggableToolChangeEvent,
     toolId: string,
     method?: LogEventMethod)
   {

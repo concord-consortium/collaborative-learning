@@ -1,7 +1,9 @@
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotOut } from "mobx-state-tree";
 import { kPlaceholderToolID } from "./placeholder/placeholder-content";
 import { findMetadata, ToolContentUnion, ToolContentUnionType } from "./tool-types";
 import { v4 as uuid } from "uuid";
+import { cloneDeep } from "lodash";
+import { Optional } from "utility-types";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -22,6 +24,12 @@ export interface IDragTiles {
 
 export function createToolTileModelFromContent(content: ToolContentUnionType) {
   return ToolTileModel.create({ content });
+}
+
+export function cloneTileSnapshotWithoutId(tile: ToolTileModelType) {
+  const copy: Optional<ToolTileSnapshotOutType, "id"> = cloneDeep(getSnapshot(tile));
+  delete copy.id;
+  return copy;
 }
 
 export const ToolTileModel = types

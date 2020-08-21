@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
+import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
@@ -978,7 +979,7 @@ export const GeometryContentModel = types
         batchChanges.push(jsonChange);
       }
 
-      let loggedChangeProps = {...change};
+      let loggedChangeProps: Optional<JXGChange, "operation"> = {...change};
       if (!Array.isArray(change.properties)) {
         // flatten change.properties
         delete loggedChangeProps.properties;
