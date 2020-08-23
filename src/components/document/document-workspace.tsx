@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { LeftNavComponent } from "../../components/navigation/left-nav";
 import { RightNavComponent } from "../../components/navigation/right-nav";
 import { DocumentComponent } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
@@ -11,6 +10,8 @@ import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument,
 import { DocumentContentModel } from "../../models/document/document-content";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { LeftTabPanel } from "../../components/navigation/left-tab-panel";
+import { LeftTabButtons } from "../../components/navigation/left-tab-buttons";
 
 import "./document-workspace.sass";
 
@@ -45,10 +46,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   public render() {
     const { appConfig : { rightNav: { tabSpecs } }, user } = this.stores;
+    const leftTabSpecs = this.stores.appConfig.leftTabs.tabSpecs;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
+    const studentLeftTabs = leftTabSpecs.filter((t) => !t.teacherOnly);
     const isGhostUser = this.props.isGhostUser;
     const isTeacher = user.isTeacher;
     const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
+    const leftTabsToDisplay = isTeacher ? leftTabSpecs : studentLeftTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -62,13 +66,22 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDrop={this.handleImageDrop}
         />
         {this.renderDocuments(isGhostUser)}
-        <LeftNavComponent
+        <RightNavComponent
+          tabs={tabsToDisplay}
           isGhostUser={isGhostUser}
+          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        <RightNavComponent
-          tabs={tabsToDisplay}
+        <LeftTabPanel
+          tabs={leftTabsToDisplay}
+          isGhostUser={isGhostUser}
+          isTeacher={isTeacher}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+        />
+        <LeftTabButtons
+          tabs={leftTabsToDisplay}
           isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
@@ -186,11 +199,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
+    const { ui } = this.stores;
     const hasRightNavTabs = this.stores.appConfig.rightNav.tabSpecs.length > 0;
     const style = hasRightNavTabs ? undefined : { right: 0 };
+    const positionedClassName = !ui.leftTabButtonsShown ? className + " half" : className;
     return (
       <div
-        className={className}
+        className={positionedClassName}
         style={style}
         onDragOver={this.handleDragOverSide}
         onDrop={this.handleDropSide(side)}

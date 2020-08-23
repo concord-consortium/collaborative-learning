@@ -3,12 +3,21 @@ import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueI
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
 import { RightNavTabModel } from "../view/right-nav";
+import { LeftTabModel } from "../view/left-tabs";
 import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types
   .model("DocumentSpec", {
     documentType: types.string,
     properties: types.array(types.string)
+  });
+
+const LeftTabsAppConfigModel = types
+  .model("LeftTabsAppConfig", {
+    defaultExpanded: false,
+    preventExpandCollapse: false,
+    lazyLoadTabContents: false,
+    tabSpecs: types.array(LeftTabModel)
   });
 
 const RightNavAppConfigModel = types
@@ -69,6 +78,7 @@ export const AppConfigModel = types
     supportStackedTwoUpView: false,
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
+    leftTabs: types.optional(LeftTabsAppConfigModel, () => LeftTabsAppConfigModel.create()),
     rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel),
     settings: types.maybe(SettingsMstType)
