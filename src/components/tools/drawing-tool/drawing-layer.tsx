@@ -225,6 +225,9 @@ class ImageObject extends DrawingObject {
   }
 }
 
+type DrawableObject = LineObject | VectorObject | RectangleObject | EllipseObject;
+type DrawingObjectUnion = DrawableObject | ImageObject;
+
 /**  ======= Drawing Tools ======= */
 
 interface IDrawingTool {
@@ -617,7 +620,7 @@ interface DrawingLayerViewProps {
 
 interface DrawingLayerViewState {
   toolbarSettings?: ToolbarSettings;
-  currentDrawingObject: LineObject|RectangleObject|EllipseObject|VectorObject|null;
+  currentDrawingObject: DrawableObject|null;
   objects: ObjectMap;
   selectedObjects: DrawingObject[];
   selectionBox: SelectionBox|null;
@@ -1108,7 +1111,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private createDrawingObject(data: DrawingObjectDataType) {
-    let drawingObject;
+    let drawingObject: DrawingObjectUnion;
     switch (data.type) {
       case "line":
         drawingObject = new LineObject(data);
@@ -1133,8 +1136,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       }
     }
-    if (drawingObject && drawingObject.model.id) {
-      this.setState({objects: { ...this.state.objects, ...{ [drawingObject.model.id]: drawingObject } }});
+    if (drawingObject?.model.id) {
+      const objectId = drawingObject.model.id;
+      this.setState(state => ({objects: { ...state.objects, ...{ [objectId]: drawingObject } }}));
     }
   }
 
