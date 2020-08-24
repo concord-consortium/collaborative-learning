@@ -58,7 +58,7 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
 
     return cy.get(selector).then(subject => {
         return cy.fixture(filename,'base64')
-            .then(Cypress.Blob.base64StringToBlob)
+            .then(str => Promise.resolve(Cypress.Blob.base64StringToBlob))
         // From Cypress document: https://docs.cypress.io/api/utilities/blob.html#Examples
         // return Cypress.Blob.base64StringToBlob(cy.fixture(filename), "image/png")
             .then((blob) => {

@@ -1,9 +1,7 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
-import { getSnapshot } from "mobx-state-tree";
-import { cloneDeep } from "lodash";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
-import { ToolTileModelType, IDragTiles } from "../../models/tools/tool-tile";
+import { cloneTileSnapshotWithoutId, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
@@ -313,8 +311,7 @@ export class ToolTileComponent extends BaseComponent<IProps> {
         const row = rowId && content?.getRow(rowId);
         const rowHeight = row ? row.height : height;
         const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
-        const tileContent = cloneDeep(getSnapshot(tile));
-        delete tileContent.id;
+        const tileContent = cloneTileSnapshotWithoutId(tile);
         return {
           tile,
           tileContent: JSON.stringify(tileContent),
@@ -337,8 +334,6 @@ export class ToolTileComponent extends BaseComponent<IProps> {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
         const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
-        const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
-        delete tileSnapshotWithoutId.id;
         dragTiles.items.push({
           rowIndex: rowIndex || 0,
           rowHeight,

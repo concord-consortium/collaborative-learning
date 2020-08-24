@@ -77,7 +77,7 @@ export interface DrawingToolChange {
   action: DrawingToolChangeAction;
   data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
 }
-interface DrawingToolChangeLoggedEvent extends DrawingToolChange {
+interface DrawingToolChangeLoggedEvent extends Partial<DrawingToolChange> {
   properties?: string[];
 }
 
