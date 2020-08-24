@@ -1,9 +1,9 @@
 @import ../../components/vars
 
-.problem-select 
+.problem-select
   user-select: none
 
-  .header 
+  .header
     display: flex
     flex-direction: row
     align-items: center
@@ -17,21 +17,21 @@
     color: $charcoal-dark-2
     cursor: pointer
 
-    &:hover 
+    &:hover
       background-color: $workspace-teal-light-4
-    
-    &.disabled 
+
+    &.disabled
       pointer-events: none
-    
-    &.show-list, &:active 
+
+    &.show-list, &:active
       background-color: $workspace-teal
       color: white
       border-color: white
-    
-    &:active .arrow 
+
+    &:active .arrow
       background-image: url("../../assets/icons/arrow/arrow-open.svg")
-      
-    .current 
+
+    .item
       display: flex
       flex-direction: column
       justify-content: center
@@ -41,7 +41,7 @@
       height: 40px
       margin: 0 10px 0 10px
 
-    .arrow 
+    .arrow
       height: 24px
       width: 24px
       margin: 0 5px 0 5px
@@ -49,14 +49,14 @@
       transition-duration: .25s
       background-image: url("../../assets/icons/arrow/arrow.svg")
 
-      &.show-list 
+      &.show-list
         background-image: url("../../assets/icons/arrow/arrow-open.svg")
         transform: rotate(180deg)
-      
-      &.disabled 
+
+      &.disabled
         display: none
-      
-  .list 
+
+  .list
     position: absolute
     margin-top: 1px
     width: 300px
@@ -68,12 +68,12 @@
     transition-duration: .25s
     pointer-events: none
 
-    &.show 
+    &.show
       opacity: 1
       pointer-events: auto
       cursor: pointer
-    
-    .list-item 
+
+    .list-item
       display: flex
       flex-direction: row
       align-items: center
@@ -83,26 +83,25 @@
       background-color: white
       font-size: 13px
 
-      .item 
+      .item
         width: 260px
-      
-      &:hover 
+
+      &:hover
         background-color: $workspace-teal-light-6
-      
-      &:active 
+
+      &:active
         background-color: $workspace-teal-light-4
-      
-      &:active .check 
+
+      &:active .check
         background-image: url("../../assets/icons/check/check-selected.svg")
-      
-      .check 
+
+      .check
         height: 24px
         width: 24px
         margin: 0 2px 0 2px
         background-image: url("../../assets/icons/check/check.svg")
-        &.selected 
+        &.selected
           background-image: url("../../assets/icons/check/check-selected.svg")
-        
-    .list-item:last-child 
+
+    .list-item:last-child
       border-radius: 0 0 5px 5px
-    

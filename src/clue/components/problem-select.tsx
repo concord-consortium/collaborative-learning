@@ -9,7 +9,7 @@ interface IProps {
 }
 
 interface IState {
-  current: string;
+  selected: string;
   showList: boolean;
 }
 
@@ -18,17 +18,19 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      current: props.items[0],
+      selected: props.items[0],
       showList: false
     };
   }
 
   public componentDidMount() {
-    document.addEventListener("mousedown", this.handleClick, false);
+    document.addEventListener("mousedown", this.handleDown, true);
+    document.addEventListener("touchstart", this.handleDown, true);
   }
 
   public componentWillUnmount() {
-    document.removeEventListener("mousedown", this.handleClick, false);
+    document.removeEventListener("mousedown", this.handleDown, true);
+    document.removeEventListener("touchstart", this.handleDown, true);
   }
 
   public render() {
@@ -42,12 +44,12 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
 
   private renderHeader = () => {
     const { items, isDisabled } = this.props;
-    const currentItem = items.find(i => i === this.state.current);
+    const selectedItem = items.find(i => i === this.state.selected);
     const showListClass = this.state.showList ? "show-list" : "";
     const disabled = isDisabled ? "disabled" : "";
     return (
       <div className={`header ${showListClass} ${disabled}`} onClick={this.handleHeaderClick}>
-        <div className="current">{currentItem && currentItem}</div>
+        <div className="item">{selectedItem && selectedItem}</div>
         <div className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );
@@ -57,16 +59,16 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
     const { items } = this.props;
     return (
       <div className={`list ${(this.state.showList ?"show" : "")}`}>
-        { items && items.map((item: string, i: number) => {
-          const currentClass = this.state.current === item ? "selected" : "";
+        { items?.map((item: string, i: number) => {
+          const selectedClass = this.state.selected === item ? "selected" : "";
           return (
             <div
               key={`item ${i}`}
-              className={`list-item ${currentClass}`}
+              className={`list-item ${selectedClass}`}
               onClick={this.handleListClick(item)}
-              data-cy={`list-item-${item.toLowerCase().replace(" ", "-")}`}
+              data-test={`list-item-${item.toLowerCase().replace(" ", "-")}`}
             >
-              <div className={`check ${currentClass}`} />
+              <div className={`check ${selectedClass}`} />
               <div className="item">{item}</div>
             </div>
           );
@@ -75,7 +77,7 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
     );
   }
 
-  private handleClick = (e: MouseEvent) => {
+  private handleDown = (e: MouseEvent | TouchEvent) => {
     if (this.divRef.current && e.target && !this.divRef.current.contains(e.target as Node)) {
       this.setState({
         showList: false
@@ -84,16 +86,14 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
   }
 
   private handleHeaderClick = () => {
-    this.setState({
-      showList: !this.state.showList
-    });
+    this.setState(state => ({ showList: !state.showList }));
   }
 
-  private handleListClick = (current: string) => () => {
+  private handleListClick = (selected: string) => () => {
     const { onSelectItem } = this.props;
-    onSelectItem && onSelectItem(current);
+    onSelectItem && onSelectItem(selected);
     this.setState({
-      current,
+      selected,
       showList: false
     });
   }
