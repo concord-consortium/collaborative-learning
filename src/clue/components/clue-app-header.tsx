@@ -6,6 +6,7 @@ import { ClassMenuContainer } from "../../components/class-menu-container";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup, Themes } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { ProblemSelect } from "./problem-select";
 
 import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
@@ -25,30 +26,44 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
 
   public render() {
     const { showGroup } = this.props;
-    const {appConfig, appMode, appVersion, db, user, problem, groups} = this.stores;
+    const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, unit } = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
     if (user.isTeacher && appConfig.showClassSwitcher) {
       return this.renderTeacherHeader(userTitle);
     }
-
     return (
       <div className="app-header">
         <div className="left">
-          <div>
-            <div className="problem" data-test="problem-title">{problem.fullTitle}</div>
-            <div className="class" data-test="user-class">{user.className}</div>
+          <div className="unit"> 
+            <div className="title" data-test="unit-title">
+              {unit.title}
+            </div>
+            <div className="investigation" data-test="investigation">
+              {investigation.title}
+            </div>
           </div>
+          <div className="separator"/>
+          <ProblemSelect
+            items={[`${problem.title}: ${problem.subtitle}`]}
+            isDisabled={true}
+          />
         </div>
-        <div className="middle">
+        <div className="middle student">
           {this.renderPanelButtons()}
         </div>
         <div className="right">
           <div className="version">Version {appVersion}</div>
           {myGroup ? this.renderGroup(myGroup) : null}
           <div className="user">
-            <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
+            <div className="user-contents">
+              <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
+              <div className="class" data-test="user-class">{user.className}</div>
+            </div>
+            <div className="student-profile-icon">
+              <div className="student-profile-icon-inner"/>
+            </div>
           </div>
         </div>
       </div>
@@ -58,17 +73,17 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   private renderTeacherHeader(userTitle: string | undefined) {
     const { investigation, unit } = this.stores;
     return (
-      <div className="app-header">
+      <div className="app-header teacher">
         <div className="left">
-          <div className="problem" data-test="investigation-title">
-            <div className="unit">
+          <div className="unit" data-test="investigation-title">
+            <div className="title">
               {unit.title}
             </div>
             <div className="investigation">
               {investigation.title}
             </div>
           </div>
-          <div className="spacer" />
+          <div className="separator"/>
           <div className="problem-dropdown" data-test="user-class">
             <ProblemMenuContainer />
           </div>
@@ -131,6 +146,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
     return (
       <div className="group">
         <div onClick={this.handleResetGroup} className="name" data-test="group-name">{`Group ${group.id}`}</div>
+        <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
             {this.renderGroupUser(groupUsers, 0, "nw")}

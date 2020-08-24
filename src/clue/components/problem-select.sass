@@ -1,0 +1,107 @@
+@import ../../components/vars
+
+.problem-select
+  user-select: none
+
+  .header
+    display: flex
+    flex-direction: row
+    align-items: center
+    width: 300px
+    height: 40px
+    box-sizing: border-box
+    border-radius: 5px
+    border: solid 1.5px $charcoal-light-1
+    background-color: $workspace-teal-light-5
+    font-size: 13px
+    color: $charcoal-dark-2
+    cursor: pointer
+
+    &:hover
+      background-color: $workspace-teal-light-4
+
+    &.disabled
+      pointer-events: none
+
+    &.show-list, &:active
+      background-color: $workspace-teal
+      color: white
+      border-color: white
+
+    &:active .arrow
+      background-image: url("../../assets/icons/arrow/arrow-open.svg")
+
+    .item
+      display: flex
+      flex-direction: column
+      justify-content: center
+      flex-grow: 1
+      max-width: 245px
+      white-space: pre-wrap
+      height: 40px
+      margin: 0 10px 0 10px
+
+    .arrow
+      height: 24px
+      width: 24px
+      margin: 0 5px 0 5px
+      transition-property: transform
+      transition-duration: .25s
+      background-image: url("../../assets/icons/arrow/arrow.svg")
+
+      &.show-list
+        background-image: url("../../assets/icons/arrow/arrow-open.svg")
+        transform: rotate(180deg)
+
+      &.disabled
+        display: none
+
+  .list
+    position: absolute
+    margin-top: 1px
+    width: 300px
+    border-radius: 0 0 5px 5px
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5)
+    opacity: 0
+    z-index: 1
+    transition-property: opacity
+    transition-duration: .25s
+    pointer-events: none
+
+    &.show
+      opacity: 1
+      pointer-events: auto
+      cursor: pointer
+
+    .list-item
+      display: flex
+      flex-direction: row
+      align-items: center
+      box-sizing: border-box
+      height: 40px
+      margin: 0 2px 0 2px
+      background-color: white
+      font-size: 13px
+
+      .item
+        width: 260px
+
+      &:hover
+        background-color: $workspace-teal-light-6
+
+      &:active
+        background-color: $workspace-teal-light-4
+
+      &:active .check
+        background-image: url("../../assets/icons/check/check-selected.svg")
+
+      .check
+        height: 24px
+        width: 24px
+        margin: 0 2px 0 2px
+        background-image: url("../../assets/icons/check/check.svg")
+        &.selected
+          background-image: url("../../assets/icons/check/check-selected.svg")
+
+    .list-item:last-child
+      border-radius: 0 0 5px 5px
