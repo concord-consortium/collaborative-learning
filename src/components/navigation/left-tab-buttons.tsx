@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { ELeftTab, LeftTabSpec } from "../../models/view/left-tabs";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./left-tab-buttons.sass";
 
@@ -49,8 +50,13 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
 
   private handleTabButtonClick = (tab: ELeftTab) => () => {
     const { ui } = this.stores;
+    const logParameters = {
+      tab_name: tab.toString()
+    };
+    const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
     if (ui.activeLeftNavTab !== tab) {
       ui.setActiveLeftNavTab(tab);
+      logEvent();
     }
     ui.toggleLeftTabButtons(false);
   }

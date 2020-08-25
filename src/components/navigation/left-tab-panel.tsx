@@ -3,6 +3,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { LeftTabSpec } from "../../models/view/left-tabs";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "react-tabs/style/react-tabs.css";
 import "./left-tab-panel.sass";
@@ -80,6 +81,11 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
       const tabWrapper = tabs[tabIndex];
       if (ui.activeLeftNavTab !== tabWrapper.tab) {
         ui.setActiveLeftNavTab(tabWrapper.tab);
+        const logParameters = {
+          tab_name: tabWrapper.tab.toString()
+        };
+        const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
+        logEvent();
       }
     }
   }
