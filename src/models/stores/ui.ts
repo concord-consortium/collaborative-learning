@@ -5,6 +5,7 @@ import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ERightNavTab } from "../view/right-nav";
+import { ELeftTab } from "../view/left-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
@@ -28,9 +29,11 @@ export const UIDialogModel = types
 export const UIModel = types
   .model("UI", {
     leftNavExpanded: false,
+    leftTabContentShown: false,
     rightNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
+    activeLeftNavTab: ELeftTab.kMyWork,
     activeRightNavTab: ERightNavTab.kMyWork,
     selectedTileIds: types.array(types.string),
     showDemo: false,
@@ -144,11 +147,17 @@ export const UIModel = types
       toggleRightNav(override?: boolean) {
         toggleWithOverride("rightNavExpanded", override);
       },
+      toggleLeftTabContent(show: boolean) {
+        self.leftTabContentShown = show;
+      },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
       },
       setActiveSectionIndex(activeSectionIndex: number) {
         self.activeSectionIndex = activeSectionIndex;
+      },
+      setActiveLeftNavTab(tab: string) {
+        self.activeLeftNavTab = tab;
       },
       setActiveRightNavTab(tab: string) {
         self.activeRightNavTab = tab;

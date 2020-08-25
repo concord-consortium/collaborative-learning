@@ -28,7 +28,7 @@ let renameTitlePencil = "Renamed Title pencil";
 
 context('Test Canvas', function(){
     //TODO: Tests to add to canvas:
-    // 1. reorder 
+    // 1. reorder
     // 3. drag image from leftNav to canvas
     // 5. drag a tool from tool bar to canvas
     before(function(){
@@ -116,8 +116,8 @@ context('Test Canvas', function(){
                 rightNav.closeRightNavTab('my-work');
             })
         })
-        
-        describe('Test section heaaders',function(){    
+
+        describe('Test section heaaders',function(){
             let headers=['IN','IC','WI','NW'];
             let headerTitles=["Introduction", "Initial Challenge", "What If...?","Now What Do You Know?"]
             before(function(){
@@ -157,7 +157,7 @@ context('Test Canvas', function(){
                     clueCanvas.getPlaceHolder().first().click({force:true});
                     clueCanvas.getDeleteTool().click();
                     clueCanvas.getPlaceHolder().should('have.length',numHolders);
-                })        
+                })
             })
             it.skip('verifies work area placeholder is not draggable', function(){
                 //TODO: not sure how to test this yet
@@ -277,7 +277,7 @@ context('Test Canvas', function(){
                     tableToolTile.getTableTile().should('be.visible');
                     textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace)
                 })
-                it('will restore from My Work/Investigation tab', function() {    
+                it('will restore from My Work/Investigation tab', function() {
                     //Open Investigation
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','investigations',this.title);
@@ -318,7 +318,7 @@ context('Test Canvas', function(){
         });
 
         context('test footer elements', function(){
-            describe('Test the 2-up view', function(){
+            describe.skip('Test the 2-up view', function(){
                 it('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.openTwoUpView();
@@ -359,7 +359,7 @@ context('Test Canvas', function(){
                     clueCanvas.getRightSideWorkspaceTitle().should('contain',studentWorkspace)
                     //verify tool palette is not present in the rightside workspace
                     clueCanvas.getRightSideToolPalette().should('not.exist');
-                    //Verify header elements do not appear in right side canvas 
+                    //Verify header elements do not appear in right side canvas
                     //by checking how many of the icons exist in the DOM
                     canvas.getNewDocumentIcon().should('have.length',1);
                     canvas.getCopyIcon().should('have.length', 1);
@@ -393,9 +393,10 @@ context('Test Canvas', function(){
                 //from https://www.pivotaltracker.com/story/show/160826065
             });
         });
-        after(()=>{
-            clueCanvas.openOneUpViewFromTwoUp();
-        })
+        //TODO: removed to accomodate new UI design
+        // after(()=>{
+        //     clueCanvas.openOneUpViewFromTwoUp();
+        // })
     });
 
     context('Drag and drop clue canvas tiles', () => {
@@ -429,9 +430,9 @@ context('Test Canvas', function(){
     });
 
     // TODO: Unable to get and return the delete methods in Canvas
-    context('delete elements from canvas', function(){
+    context.skip('delete elements from canvas', function(){
         before(()=>{
-            //star a document to verify delete 
+            //star a document to verify delete
             rightNav.openCanvasItem('my-work','workspaces','copy of 1.2');
         })
         it('will delete elements from canvas', function(){
@@ -450,7 +451,7 @@ context('Test Canvas', function(){
         });
     });
 
-    context('delete workspaces',function(){
+    context.skip('delete workspaces',function(){
         before(()=>{
             rightNav.openRightNavTab('my-work');
             rightNav.starCanvasItem('my-work','workspaces',studentWorkspace);
@@ -459,7 +460,7 @@ context('Test Canvas', function(){
             rightNav.openCanvasItem('my-work','workspaces','Investigation Copy');
             canvas.deleteDocument();
             rightNav.openRightNavTab('my-work');
-            rightNav.getCanvasItemTitle('my-work','workspaces').contains('Investigation Copy').should('not.exist') 
+            rightNav.getCanvasItemTitle('my-work','workspaces').contains('Investigation Copy').should('not.exist')
         })
         it('verify original investigation canvas still exist after copy delete',function(){
             rightNav.openSection('my-work','investigations');

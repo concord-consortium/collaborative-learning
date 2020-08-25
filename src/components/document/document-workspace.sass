@@ -14,6 +14,9 @@
     left: $left-nav-contracted-width + $nav-expanded-peek + $workspace-toolbar-width
     right: $right-nav-contracted-width + $nav-expanded-peek
     bottom: $bottom-nav-contracted-height
+    transition: left 1s
+    &.half
+      left: 50%
 
   .left-workspace
     position: absolute

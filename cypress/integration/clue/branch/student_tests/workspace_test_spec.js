@@ -18,10 +18,10 @@ let leftNav = new LeftNav,
     });
 context('Test the overall workspace', function(){
     describe('Workspace UI',()=>{
-        
+
     })
 
-    describe('Desktop functionalities', function(){
+    describe.skip('Desktop functionalities', function(){
         it('will verify that clicking on tab closes the nav area', function(){
             leftNav.openLeftNavTab('Introduction'); //left nav expand area should be visible
             leftNav.getLeftNavExpandedSpace().should('be.visible');
@@ -55,7 +55,7 @@ context('Test the overall workspace', function(){
             cy.visit(baseUrl+'?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem='+problem1);
             cy.waitForSpinner();
             // cy.wait(3000);
-            
+
             clueCanvas.addTile('text');
             textToolTile.enterText('This is the '+tab1+ ' in Problem '+problem1);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);

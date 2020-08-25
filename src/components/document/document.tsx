@@ -492,8 +492,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderStatusBar(type: string) {
-    const { appConfig: { supportStackedTwoUpView }} = this.stores;
-    const isPrimary = this.isPrimary();
     // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
     // const showComment = !isPrimary && (document.type === ProblemPublication);
     const showComment = false;
@@ -503,7 +501,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {null}
         </div>
         <div className="actions">
-          {!supportStackedTwoUpView && isPrimary && this.renderTwoUpButton()}
           {showComment ? this.renderCommentButton() : null}
         </div>
         {this.renderCommentDialog()}
