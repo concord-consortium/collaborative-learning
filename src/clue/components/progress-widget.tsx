@@ -1,5 +1,4 @@
 import { inject, observer } from "mobx-react";
-import { toJS } from "mobx";
 import React from "react";
 import "./progress-widget.sass";
 

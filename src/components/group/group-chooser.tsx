@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { GroupUsersMap } from "../../lib/db";
 
 import "./group-chooser.sass";
 import { GroupModelType } from "../../models/stores/groups";
@@ -30,7 +29,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {db, user, groups} = this.stores;
+    const {user, groups} = this.stores;
     return (
       <div className="join">
         <div className="join-title">Join Group</div>

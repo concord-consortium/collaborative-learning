@@ -5,7 +5,9 @@ export interface IBaseProps {
   stores?: IStores;
 }
 
-export class BaseComponent<P, S> extends React.Component<P, S> {
+interface INullState {}
+
+export class BaseComponent<P, S = INullState> extends React.Component<P, S> {
 
   // this assumes that stores are injected by the classes that extend BaseComponent
   get stores() {

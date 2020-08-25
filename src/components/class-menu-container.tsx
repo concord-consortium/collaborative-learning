@@ -4,12 +4,13 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
 import { DropDown, IDropdownItem } from "@concord-consortium/react-components";
+import { getProblemOrdinal } from "../models/stores/stores";
 
 interface IProps extends IBaseProps {}
 
 @inject("stores")
 @observer
-export class ClassMenuContainer extends BaseComponent <IProps, {}> {
+export class ClassMenuContainer extends BaseComponent <IProps> {
   public render() {
     const links = this.getPortalClasses();
     const { user } = this.stores;
@@ -23,7 +24,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
   }
 
   private getCurrentProblemOrdinal() {
-    const { appConfig, user: { offeringId, portalClassOfferings } } = this.stores;
+    const { appConfig, appMode, user: { offeringId, portalClassOfferings } } = this.stores;
     if (offeringId) {
       const currentOffering = portalClassOfferings.find( offering => {
         return (offering.offeringId === offeringId);
@@ -32,9 +33,10 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
         return currentOffering.problemOrdinal;
       }
     }
-    // tslint:disable-next-line:no-console
-    console.log(`Warning -- current offering not found. (Maybe in demo mode?)`);
-    return appConfig.defaultProblemOrdinal;
+    if (appMode === "authed") {
+      console.warn(`Warning -- current offering not found. (Maybe in demo mode?)`);
+    }
+    return getProblemOrdinal(this.stores) || appConfig.defaultProblemOrdinal;
   }
 
   private getPortalClasses() {
@@ -79,8 +81,7 @@ export class ClassMenuContainer extends BaseComponent <IProps, {}> {
           link: classLinks[0].location
         });
       } else {
-        // tslint:disable-next-line:no-console
-        console.log(`Warning -- no problems assigned in this class ${className}`);
+        console.warn(`Warning -- no problems assigned in this class ${className}`);
       }
     });
 

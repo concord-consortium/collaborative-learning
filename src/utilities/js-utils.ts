@@ -1,5 +1,4 @@
-// import nanoid from "nanoid";
-const nanoid = require("nanoid");
+import { nanoid } from "nanoid";
 
 /*
  * castArrayCopy()
@@ -10,6 +9,22 @@ export function castArrayCopy(itemOrArray: any) {
   return Array.isArray(itemOrArray)
           ? itemOrArray.slice()
           : [itemOrArray];
+}
+
+/*
+ * safeDecodeURI()
+ *
+ * returns the original string on error rather than throwing an exception
+ */
+export function safeDecodeURI(uriOrComponent: string) {
+  let decoded: string | undefined;
+  try {
+    decoded = decodeURIComponent(uriOrComponent);
+  }
+  catch (e) {
+    // swallow errors
+  }
+  return decoded || uriOrComponent;
 }
 
 /*
@@ -33,8 +48,7 @@ export function safeJsonParse(json?: string) {
  *
  * returns a unique id string
  */
-export function uniqueId(): string {
+export function uniqueId(idLength = 16): string {
   // cf. https://zelark.github.io/nano-id-cc/
-  const idLength = 16;
   return nanoid(idLength);
 }

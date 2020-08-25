@@ -16,7 +16,7 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class FourUpOverlayComponent extends BaseComponent<IProps, {}> {
+export class FourUpOverlayComponent extends BaseComponent<IProps> {
   public render() {
     return (
       <div

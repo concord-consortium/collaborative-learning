@@ -37,7 +37,7 @@ export function canonicalizeValue(value: number | string | undefined) {
   return isFinite(num) ? num : undefined;
 }
 
-export function getRowLabel(index: number, prefix: string = "p") {
+export function getRowLabel(index: number, prefix = "p") {
   return `${prefix}${index + 1}`;
 }
 
@@ -376,7 +376,7 @@ export const TableContentModel = types
       const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
         case "table":
-        case "columns":
+        case "columns": {
           (tableProps?.name != null) && dataSet.setName(tableProps.name);
           const columns = tableProps && tableProps.columns;
           columns && columns.forEach((col: any, index: number) => {
@@ -384,7 +384,8 @@ export const TableContentModel = types
             dataSet.addAttributeWithID({ id, ...col });
           });
           break;
-        case "rows":
+        }
+        case "rows": {
           const rows = tableProps && tableProps.rows &&
                         tableProps.rows.map((row: any, index: number) => {
                           const id = change.ids && change.ids[index] || uniqueId();
@@ -396,6 +397,7 @@ export const TableContentModel = types
             self.updateDatasetByExpressions(dataSet);
           }
           break;
+        }
         case "geometryLink":
           if (!dataSetOnly) {
             const geometryId = change.ids && change.ids as string;
@@ -411,18 +413,19 @@ export const TableContentModel = types
         case "table":
           (change.props?.name != null) && dataSet.setName(change.props.name);
           break;
-        case "columns":
+        case "columns": {
           const colProps = change && change.props && castArray(change.props);
           colProps && colProps.forEach((col: any, colIndex) => {
             each(col, (value, prop) => {
               switch (prop) {
-                case "name":
+                case "name": {
                   const colId = ids[colIndex];
                   dataSet.setAttributeName(colId, value);
                   if (colIndex === 0) {
                     self.metadata.clearRawExpressions(kSerializedXKey);
                   }
                   break;
+                }
                 case "expression":
                   self.metadata.setExpression(ids[colIndex], value);
                   self.updateDatasetByExpressions(dataSet);
@@ -434,7 +437,8 @@ export const TableContentModel = types
             });
           });
           break;
-        case "rows":
+        }
+        case "rows": {
           const rowProps = change && change.props && castArray(change.props);
           if (rowProps) {
             rowProps.forEach((row: any, rowIndex) => {
@@ -443,6 +447,7 @@ export const TableContentModel = types
             self.updateDatasetByExpressions(dataSet);
           }
           break;
+        }
       }
     },
     applyDelete(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
@@ -480,7 +485,7 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
-    applyChanges(dataSet: IDataSet, start: number = 0) {
+    applyChanges(dataSet: IDataSet, start = 0) {
       for (let i = start; i < self.changes.length; ++i) {
         const change = safeJsonParse(self.changes[i]);
         if (change) {
@@ -498,7 +503,7 @@ export const TableContentModel = types
     }
   }))
   .views(self => ({
-    getSharedData(canonicalize: boolean = true) {
+    getSharedData(canonicalize = true) {
       const dataSet = DataSet.create();
       self.applyChangesToDataSet(dataSet);
 

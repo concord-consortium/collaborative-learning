@@ -336,7 +336,7 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
   }
 
   private handleSetTableName = (name: string) => {
-    const shouldExpandTable = name && !this.state.dataSet?.name;
+    // const shouldExpandTable = name && !this.state.dataSet?.name;
     this.getContent().setTableName(name);
     const kTableNameHeight = 25;
     this.props.onRequestRowHeight(this.props.model.id, undefined, kTableNameHeight);

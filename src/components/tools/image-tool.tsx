@@ -1,8 +1,9 @@
 import React from "react";
+import ResizeObserver from "resize-observer-polyfill";
 import { autorun, IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
-import { BaseComponent, IBaseProps } from "../base";
+import { BaseComponent } from "../base";
 import { IToolTileProps } from "./tool-tile";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
@@ -20,6 +21,9 @@ interface IState {
   isLoading?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
+  imageEltWidth?: number;
+  imageEltHeight?: number;
+  requestedHeight?: number;
 }
 
 const defaultImagePlaceholderSize = { width: 128, height: 128 };
@@ -32,6 +36,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private syncedChanges: number;
   private _isMounted = false;
+  private resizeObserver: ResizeObserver;
+  private imageElt: HTMLDivElement | null;
   private inputElt: HTMLInputElement | null;
   private disposers: IReactionDisposer[];
   private debouncedUpdateImage = debounce((url: string) => {
@@ -85,11 +91,25 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.syncedChanges = content.changeCount;
       }
     }));
+
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === this.imageElt) {
+          // https://stackoverflow.com/a/58701523
+          window.requestAnimationFrame(() => {
+            const {width, height} = entry.contentRect;
+            this.setState({ imageEltWidth: width, imageEltHeight: height });
+          });
+        }
+      }
+    });
+    this.imageElt && this.resizeObserver.observe(this.imageElt);
   }
 
   public componentWillUnmount() {
     this._isMounted = false;
     this.disposers.forEach(disposer => disposer());
+    this.resizeObserver.disconnect();
   }
 
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -97,9 +117,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       this.updateImageUrl(this.state.imageContentUrl);
     }
     // if we have a new image, or the image height has changed, reqest an explicit height
-    if (this.state.imageEntry && this.state.imageEntry.height
-        && (!prevState.imageEntry || prevState.imageEntry.height !== this.state.imageEntry.height)) {
-      this.props.onRequestRowHeight(this.props.model.id, this.state.imageEntry.height);
+    const desiredHeight = this.getDesiredHeight();
+    if (desiredHeight && (desiredHeight !== this.state.requestedHeight)) {
+      this.props.onRequestRowHeight(this.props.model.id, desiredHeight);
+      this.setState({ requestedHeight: desiredHeight });
     }
   }
 
@@ -136,7 +157,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop} >
         {isLoading && <div className="loading-spinner" />}
-        <div className="image-tool-image" style={imageDisplayStyle} onMouseDown={this.handleMouseDown} />
+        <div
+          className="image-tool-image"
+          ref={elt => this.imageElt = elt}
+          style={imageDisplayStyle}
+          onMouseDown={this.handleMouseDown}
+        />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
             className={inputClasses}
@@ -154,6 +180,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         </div>
       </div>
     );
+  }
+
+  private getDesiredHeight() {
+    const { imageEntry, imageEltWidth, imageEltHeight } = this.state;
+    const aspectRatio = imageEntry?.width && imageEntry?.height
+                          ? imageEntry.width / imageEntry.height
+                          : undefined;
+    return aspectRatio && imageEltWidth && imageEltHeight
+            ? Math.ceil(imageEltWidth / aspectRatio)
+            : imageEntry?.height;
   }
 
   private getContent() {

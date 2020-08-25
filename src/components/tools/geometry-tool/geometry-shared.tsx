@@ -1,4 +1,3 @@
-import { SizeMeProps } from "react-sizeme";
 import { IToolTileProps } from "../tool-tile";
 import { HotKeyHandler } from "../../../utilities/hot-keys";
 
@@ -16,4 +15,4 @@ export interface IActionHandlers {
   handleCreateComment: () => void;
 }
 
-export type IGeometryProps = IToolTileProps & SizeMeProps;
+export type IGeometryProps = IToolTileProps;

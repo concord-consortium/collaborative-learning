@@ -1,7 +1,8 @@
 import React from "react";
 import { Button, Dialog } from "@blueprintjs/core";
 import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
-import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox } from "../../../models/tools/geometry/jxg-board";
+import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox
+        } from "../../../models/tools/geometry/jxg-board";
 import "./axis-settings-dialog.sass";
 
 interface IProps {

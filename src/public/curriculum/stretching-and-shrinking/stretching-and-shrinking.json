@@ -1,6 +1,6 @@
 {
-  "code": "s+s",
-  "abbrevTitle": "S & S",
+  "code": "sas",
+  "abbrevTitle": "SAS",
   "title": "Stretching and Shrinking",
   "subtitle": "Understanding Similarity",
   "placeholderText": "Enter notes here",
@@ -318,7 +318,7 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Enlarging and Reducing Shapes",
+      "title": "SAS Investigation 1 Enlarging and Reducing Shapes",
       "introduction": {
         "tiles": [ ]
       },
@@ -326,7 +326,7 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "1.1 Solving a Mystery",
+          "title": "SAS 1.1 Solving a Mystery",
           "subtitle": "An Introduction to Similarity",
           "sections": [
             {
@@ -482,9 +482,9 @@
           "supports": []
         },
         {
-          "description": "Problem 1.2",
+          "description": "SAS Problem 1.2",
           "ordinal": 2,
-          "title": "1.2 Stretching a Figure",
+          "title": "SAS 1.2 Stretching a Figure",
           "subtitle": "Comparing Similar Figures",
           "sections": [
             {
@@ -662,7 +662,7 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "1.3 Scaling Up and Down",
+          "title": "SAS 1.3 Scaling Up and Down",
           "subtitle": "Corresponding Sides and Angles",
           "sections": [
             {
@@ -901,14 +901,14 @@
     {
       "description": "Investigation 2",
       "ordinal": 2,
-      "title": "Similar Figures",
+      "title": "SAS Investigation 2 Similar Figures",
       "introduction": {
       },
       "problems": [
         {
           "description": "Problem 2.1",
           "ordinal": 1,
-          "title": "2.1 Drawing Wumps",
+          "title": "SAS 2.1 Drawing Wumps",
           "subtitle": "Making Similar Figures",
           "disabled": ["GeometryLinkedTables"],
           "sections": [
@@ -1136,7 +1136,7 @@
         {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "2.2 Hats Off to the Wumps",
+          "title": "SAS 2.2 Hats Off to the Wumps",
           "subtitle": "Changing a Figure's Size and Location",
           "sections": [
             {
@@ -1315,7 +1315,7 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "2.3 Mouthing Off and Nosing Around",
+          "title": "SAS 2.3 Mouthing Off and Nosing Around",
           "subtitle": "Scale Factors",
           "sections": [
             {
@@ -1846,12 +1846,12 @@
     {
       "description": "Investigation 3",
       "ordinal": 3,
-      "title": "Scaling Perimeter and Area",
+      "title": "SAS Investigation 3 Scaling Perimeter and Area",
       "problems": [
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "3.1 Rep-Tile Quadrilaterals",
+          "title": "SAS 3.1 Rep-Tile Quadrilaterals",
           "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
           "sections": [
              {
@@ -2393,7 +2393,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "3.2 Designing Under Constraints",
+          "title": "SAS 3.2 Designing Under Constraints",
           "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
           "sections": [
             {
@@ -2604,7 +2604,7 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "3.3 Out of Reach",
+          "title": "SAS 3.3 Out of Reach",
           "subtitle": "Finding Lengths with Similar Triangles",
           "sections": [
             {
@@ -2725,12 +2725,12 @@
     {
       "description": "Investigation 4",
       "ordinal": 4,
-      "title": "Similarity and Ratios",
+      "title": "SAS Investigation 4 Similarity and Ratios",
       "problems": [
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "4.1 Ratios Within Similar Parallelograms",
+          "title": "SAS 4.1 Ratios Within Similar Parallelograms",
           "subtitle": "",
           "sections": [
             {
@@ -2903,7 +2903,7 @@
         }, {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "4.2 Finding Missing Parts",
+          "title": "SAS 4.2 Finding Missing Parts",
           "subtitle": "Using Similarity to Find Measurements",
           "sections": [
             {
@@ -3036,7 +3036,7 @@
         }, {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "4.3 Using Shadows to Find Height",
+          "title": "SAS 4.3 Using Shadows to Find Height",
           "subtitle": "",
           "sections": [
             {
@@ -3169,11 +3169,11 @@
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "MR1 - MR4",
+      "title": "SAS MR1 - MR4",
       "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
-          "title": "Mathematical Reflections",
+          "title": "Stretching and Shrinking Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {

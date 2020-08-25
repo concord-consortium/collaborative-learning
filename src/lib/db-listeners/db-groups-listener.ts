@@ -116,13 +116,12 @@ export class DBGroupsListener extends BaseListener {
       documents.byType(ProblemDocument).forEach((document) => {
         document.setGroupId(userGroupIds[document.uid]);
 
-        // students only monitor documents in their group to save bandwidth
-        if (user.isStudent) {
+        // enable/disable monitoring of other students' documents when groups change
+        if (user.isStudent && (document.uid !== user.id)) {
+          // students only monitor documents in their group to save bandwidth
           if (document.groupId === user.latestGroupId) {
-            if (document.uid !== user.id) {
-              // ensure the group document is monitored
-              this.db.listeners.monitorDocument(document, Monitor.Remote);
-            }
+            // ensure the group document is monitored
+            this.db.listeners.monitorDocument(document, Monitor.Remote);
           }
           else {
             // ensure we don't monitor documents outside the group

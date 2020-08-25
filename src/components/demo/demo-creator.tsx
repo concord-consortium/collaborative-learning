@@ -23,7 +23,7 @@ interface IProblemOption {
 /* istanbul ignore next */
 @inject("stores")
 @observer
-export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
+export class DemoCreatorComponment extends BaseComponent<IProps> {
   private problemOptions: IProblemOption[] = [];
 
   constructor(props: IProps) {
@@ -99,11 +99,11 @@ export class DemoCreatorComponment extends BaseComponent<IProps, {}> {
     const demoNameParam = demo.name ? `&demoName=${demo.name}` : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
-    // tslint:disable-next-line:max-line-length
+    // eslint-disable-next-line max-len
     const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
     return (
       <li key={userIndex}>
-        <a href={href} target="_blank">{userType} {userIndex}</a>
+        <a href={href} target="_blank" rel="noreferrer">{userType} {userIndex}</a>
       </li>
     );
   }

@@ -1,9 +1,9 @@
-import { JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isPoint } from "./jxg-point";
 import { getPointsForVertexAngle } from "./jxg-polygon";
 import { assign, castArray, each, values } from "lodash";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 export const isVertexAngle = (v: any) =>
                 (v instanceof JXG.Curve) && (v.elType === "angle") &&

@@ -92,7 +92,7 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Walking Rates",
+      "title": "MSA Investigation 1 Walking Rates",
       "problems": [
         {
           "description": "Problem 1.1",
@@ -920,7 +920,7 @@
     {
       "description": "Investigation 2",
       "ordinal": 2,
-      "title": "Using Tables, Graphs, and Equations to Explore Linear Relationships",
+      "title": "MSA Investigation 2 Using Tables, Graphs, and Equations to Explore Linear Relationships",
       "problems": [
         {
           "description": "Problem 2.1",
@@ -1398,7 +1398,7 @@
     {
       "description": "Investigation 3",
       "ordinal": 3,
-      "title": "Solving Equations Symbolically",
+      "title": "MSA Investigation 3 Solving Equations Symbolically",
       "problems": [
         {
           "description": "Problem 3.1",
@@ -2063,7 +2063,7 @@
     {
       "description": "Investigation 4",
       "ordinal": 4,
-      "title": "Connecting Rates and Ratios",
+      "title": "MSA Investigation 4 Connecting Rates and Ratios",
       "problems": [
         {
           "description": "Problem 4.1",
@@ -2631,7 +2631,7 @@
       "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
-          "title": "Mathematical Reflections",
+          "title": "Moving Straight Ahead Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {

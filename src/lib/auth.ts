@@ -71,6 +71,7 @@ interface User {
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
   portalClassOfferings?: IPortalClassOffering[];
+  demoClassHashes?: string[];
 }
 
 export interface StudentUser extends User {
@@ -146,16 +147,21 @@ export interface PortalUserJWT extends BasePortalJWT {
   last_name: string;
 }
 
-export interface PortalFirebaseJWTStudentClaims {
-  user_type: "learner";
-  user_id: string;
+// firebase JWT claims are available to firestore security rules under request.auth.token
+export interface PortalFirebaseJWTBaseClaims {
+  user_id: string;          // e.g. `https://learn.concord.org/users/${platform_user_id}`
   class_hash: string;
+  platform_id: string;      // e.g. "https://learn.concord.org"
+  platform_user_id: number;
+}
+
+export interface PortalFirebaseJWTStudentClaims extends PortalFirebaseJWTBaseClaims {
+  user_type: "learner";
   offering_id: number;
 }
+
 export interface PortalFirebaseJWTTeacherClaims {
   user_type: "teacher";
-  user_id: string;
-  class_hash: string;
 }
 
 export type PortalFirebaseJWTClaims = PortalFirebaseJWTStudentClaims | PortalFirebaseJWTTeacherClaims;
@@ -319,7 +325,6 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     problemId?: string;
     unitCode?: string;
   }
-  // tslint:disable-next-line:max-line-length
   return new Promise<IAuthenticateResponse>((resolve, reject) => {
     urlParams = urlParams || DefaultUrlParams;
     const unitCode = urlParams.unit || "";
@@ -341,7 +346,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
-      const [userType, userId, ...rest] = fakeUser.split(":");
+      const [userType, userId] = fakeUser.split(":");
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
@@ -473,7 +478,7 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
 
 const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
-  const [major, minor, ...rest] = problemOrdinal.split(".");
+  const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
   return `${unitCode}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
@@ -492,6 +497,25 @@ export interface CreateFakeUserOptions {
   offeringId: string;
 }
 
+const getFakeClassHash = (appMode: AppMode, classId: string) => {
+  return `${appMode}class${classId}`;
+};
+
+// for testing purposes, demo teachers each have access to three classes
+const getFakeTeacherClassHashes = (appMode: AppMode, classId: string) => {
+
+  // if class id is non-numeric, just return the teacher's own class hash
+  const idNum = parseInt(classId, 10);
+  if (isNaN(idNum)) return [getFakeClassHash(appMode, classId)];
+
+  // each block of three classes is considered part of the same group,
+  // e.g. [class1, class2, class3], [class4, class5, class6], etc.
+  const mod3 = (idNum - 1) % 3;
+  const idNumBase = idNum - mod3;
+  return [idNumBase, idNumBase + 1, idNumBase + 2]
+          .map(id => getFakeClassHash(appMode, `${id}`));
+};
+
 export const createFakeUser = (options: CreateFakeUserOptions) => {
   const {appMode, classId, userType, userId, offeringId} = options;
   const className = `${appMode === "demo" ? "Demo" : "QA"} Class ${classId}`;
@@ -505,7 +529,7 @@ export const createFakeUser = (options: CreateFakeUserOptions) => {
       fullName: `Student ${userId}`,
       initials: `S${userId}`,
       className,
-      classHash: `${appMode}class${classId}`,
+      classHash: getFakeClassHash(appMode, classId),
       offeringId,
     };
     return student;
@@ -520,7 +544,8 @@ export const createFakeUser = (options: CreateFakeUserOptions) => {
       fullName: `Teacher ${userId}`,
       initials: `T${userId}`,
       className,
-      classHash: `${appMode}class${classId}`,
+      classHash: getFakeClassHash(appMode, classId),
+      demoClassHashes: getFakeTeacherClassHashes(appMode, classId),
       offeringId,
     };
     return teacher;

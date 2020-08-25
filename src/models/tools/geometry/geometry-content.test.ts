@@ -207,6 +207,7 @@ describe("GeometryContent", () => {
     content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
+    expect(content.isSelected(p3!.id)).toBe(false);
     content.selectObjects(board, poly!.id);
     expect(content.isSelected(poly!.id)).toBe(true);
     expect(content.hasSelection()).toBe(true);

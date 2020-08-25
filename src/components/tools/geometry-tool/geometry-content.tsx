@@ -29,11 +29,10 @@ import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle,
-        size as _size, values } from "lodash";
+import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
         handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
@@ -45,7 +44,7 @@ import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
-export interface IProps extends IGeometryProps {
+export interface IProps extends IGeometryProps, SizeMeProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onUpdateToolbar: () => void;
@@ -126,7 +125,7 @@ let sViewCount = 0;
 function nextViewId() {
   return ++sViewCount;
 }
-​
+
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
@@ -312,7 +311,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
 
     this.disposers.push(autorun(() => {
-      const { model: { content }, scale, readOnly } = this.props;
+      const { model: { content }, readOnly } = this.props;
       const { board } = this.state;
       const geometryContent = content as GeometryContentModelType;
       if (geometryContent.changes.length !== this.syncedChanges && board) {

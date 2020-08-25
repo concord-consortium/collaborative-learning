@@ -1,8 +1,8 @@
-import { JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { gImageMap } from "../../image-map";
 import { assign } from "lodash";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 export const isImage = (v: any) => v instanceof JXG.Image;
 

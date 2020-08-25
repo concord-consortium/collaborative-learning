@@ -1,7 +1,6 @@
 'use strict';
 
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJson = require('./package.json');
@@ -30,21 +29,15 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
+          test: /\.(js|json|jsx|ts|tsx)$/,
+          exclude: /node_modules/,
           enforce: 'pre',
-          use: [
-            {
-              loader: 'tslint-loader',
-              options: {}
-            }
-          ]
+          loader: 'eslint-loader',
         },
         {
-          test: /\.tsx?$/,
+          test: /\.(t|j)sx?$/,
           loader: 'ts-loader',
-          options: {
-            transpileOnly: true // IMPORTANT! use transpileOnly mode to speed-up compilation
-          }
+          exclude: /node_modules/
         },
         {
           test: /\.(sa|sc|c)ss$/i,
@@ -76,20 +69,15 @@ module.exports = (env, argv) => {
       ]
     },
     resolve: {
-      extensions: [ '.ts', '.tsx', '.js' ]
+      extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
     stats: {
       // suppress "export not found" warnings about re-exported types
       warningsFilter: /export .* was not found in/
     },
     plugins: [
-      new ForkTsCheckerWebpackPlugin({
-        measureCompilationTime: true,
-        useTypescriptIncrementalApi: false,
-        workers: ForkTsCheckerWebpackPlugin.TWO_CPUS_FREE
-      }),
       new MiniCssExtractPlugin({
-        filename: devMode ? "index.css" : "index.[hash].css"
+        filename: devMode ? 'index.css' : 'index.[hash].css'
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
@@ -99,9 +87,11 @@ module.exports = (env, argv) => {
           ...packageJson.config
         }
       }),
-      new CopyWebpackPlugin([
-        {from: 'src/public'}
-      ])
+      new CopyWebpackPlugin({
+        patterns: [
+          {from: 'src/public'}
+        ]
+      })
     ]
   };
 };

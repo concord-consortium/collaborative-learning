@@ -11,7 +11,7 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class ClassLogsComponent extends BaseComponent<IProps, {}> {
+export class ClassLogsComponent extends BaseComponent<IProps> {
 
   public render() {
     const { documents } = this.stores;

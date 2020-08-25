@@ -2,12 +2,21 @@
   "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
+    "cr": "curriculum/completely-rational/completely-rational.json",
+    "cas": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
+    "faw": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
+    "hlit": "curriculum/how-likely-is-it/how-likely-is-it.json",
+    "help": "curriculum/help/help.json",
     "msa": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
+    "sad": "curriculum/shapes-and-designs/shapes-and-designs.json",
+    "sap": "curriculum/samples-and-populations/samples-and-populations.json",
+    "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-    "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+    "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "twmm": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
   },
   "defaultProblemOrdinal": "1.1",
-  "defaultUnit": "s+s",
+  "defaultUnit": "sas",
   "defaultDocumentType": "problem",
   "defaultDocumentTitle": "Untitled",
   "defaultLearningLogTitle": "UntitledLog",

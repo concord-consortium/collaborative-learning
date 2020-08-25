@@ -1,4 +1,5 @@
 import { inject, observer } from "mobx-react";
+import { autorun, IReactionDisposer } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 
@@ -16,7 +17,6 @@ import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-com
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import SingleStringDialog from "../utilities/single-string-dialog";
-import { getLocalTimeStamp } from "../../utilities/time";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -66,12 +66,12 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
   );
 };
 
-const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
-  return (
-    <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
-                onClickButton={onClick} title="Published Workspace" />
-  );
-};
+// const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
+//   return (
+//     <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
+//                 onClickButton={onClick} title="Published Workspace" />
+//   );
+// };
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
@@ -181,6 +181,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private toolApiInterface: IToolApiInterface;
   private stickyNoteIcon: HTMLDivElement | null;
   private documentContainer: HTMLDivElement | null;
+  private deleteHandler: { documentKey?: string, disposer?: IReactionDisposer } = {};
 
   constructor(props: IProps) {
     super(props);
@@ -204,6 +205,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     };
   }
 
+  public componentDidMount() {
+    this.configureDeleteHandler();
+  }
+
+  public componentDidUpdate() {
+    this.configureDeleteHandler();
+  }
+
+  public componentWillUnmount() {
+    this.deleteHandler.disposer?.();
+  }
+
   public render() {
     const { document: { type } } = this.props;
     return (
@@ -217,6 +230,23 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         </div>
       </DocumentContext.Provider>
     );
+  }
+
+  private configureDeleteHandler() {
+    const { deleteHandler, props: { document, side }, stores } = this;
+    if (document.key !== deleteHandler.documentKey) {
+      // dispose any previous delete handler
+      deleteHandler.disposer?.();
+      // install delete handler for current document
+      deleteHandler.disposer = autorun(reaction => {
+        const isDeleted = document.getProperty("isDeleted");
+        // close comparison when comparison document is deleted
+        if (isDeleted && (side === "comparison")) {
+          const { ui: { problemWorkspace } } = stores;
+          problemWorkspace.toggleComparisonVisible({ override: false, muteLog: true });
+        }
+      });
+    }
   }
 
   private renderTitleBar(type: string) {

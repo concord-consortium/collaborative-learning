@@ -3,6 +3,7 @@ import { OtherDocumentType, PersonalDocument } from "../models/document/document
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
+import { escapeKey } from "./fire-utils";
 import { urlParams } from "../utilities/url-params";
 import { Logger, LogEventName } from "../lib/logger";
 
@@ -13,13 +14,17 @@ import { Logger, LogEventName } from "../lib/logger";
 const FIREBASE_ROOT_OVERRIDE = undefined;
 
 export class Firebase {
-  public user: firebase.User | null = null;
+  private user: firebase.User | null = null;
   private db: DB;
   private groupOnDisconnect: firebase.database.OnDisconnect | null = null;
   private connectedRef: firebase.database.Reference | null = null;
 
   constructor(db: DB) {
     this.db = db;
+  }
+
+  public setFirebaseUser(user: firebase.User) {
+    this.user = user;
   }
 
   public get userId() {
@@ -30,7 +35,7 @@ export class Firebase {
     return this.user !== null;
   }
 
-  public ref(path: string = "") {
+  public ref(path = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
     }
@@ -41,14 +46,14 @@ export class Firebase {
     return firebase.storage();
   }
 
-  public storeRef(path: string = "") {
+  public storeRef(path = "") {
     if (!this.isConnected) {
       throw new Error("storeRef() requested before firestore connected!");
     }
     return firebase.storage().ref(this.getFullPath(path));
   }
 
-  public getFullPath(path: string = "") {
+  public getFullPath(path = "") {
     return `${this.getRootFolder()}${path}`;
   }
 
@@ -65,20 +70,16 @@ export class Firebase {
         parts.push(this.userId);
       }
       else if (appMode === "demo") {
-        const slug = demoName && demoName.length > 0 ? this.escapeKey(demoName) : "";
+        const slug = demoName && demoName.length > 0 ? escapeKey(demoName) : "";
         if (slug.length > 0) {
           parts.push(slug);
         }
       }
     }
     parts.push("portals");
-    parts.push(this.escapeKey(user.portal));
+    parts.push(escapeKey(user.portal));
 
     return `/${parts.join("/")}/`;
-  }
-
-  public escapeKey(s: string): string {
-    return s.replace(/[.$[\]#\/]/g, "_");
   }
 
   //

@@ -64,20 +64,20 @@ describe("DemoCreator Component", () => {
 
     // test changing classes
     expect(wrapper.find("ul.student-links").first().contains(
-      // tslint:disable-next-line:max-line-length
-      <a href="?appMode=demo&amp;fakeClass=1&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank">student 1</a>
+      // eslint-disable-next-line max-len
+      <a href="?appMode=demo&amp;fakeClass=1&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank" rel="noreferrer">student 1</a>
     )).toBe(true);
     wrapper.find("select.classes").simulate("change", {target: {value: 2}});
     expect(wrapper.find("ul.student-links").first().contains(
-      // tslint:disable-next-line:max-line-length
-      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank">student 1</a>
+      // eslint-disable-next-line max-len
+      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank" rel="noreferrer">student 1</a>
     )).toBe(true);
 
     // test changing classes
     wrapper.find("select.problems").simulate("change", {target: {value: "1.2"}});
     expect(wrapper.find("ul.student-links").first().contains(
-      // tslint:disable-next-line:max-line-length
-      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.2" target="_blank">student 1</a>
+      // eslint-disable-next-line max-len
+      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.2" target="_blank" rel="noreferrer">student 1</a>
     )).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
@@ -52,7 +52,7 @@ export const Attribute = types.model("Attribute", {
       self.values.splice.apply(self.values, [beforeIndex, 0, ...values]);
     }
     else {
-      self.values.push.apply(self.values, values);
+      self.values.push(...values);
     }
   },
   setValue(index: number, value: IValueType) {
@@ -69,7 +69,7 @@ export const Attribute = types.model("Attribute", {
       }
     }
   },
-  removeValues(index: number, count: number = 1) {
+  removeValues(index: number, count = 1) {
     if ((index != null) && (index < self.values.length) && (count > 0)) {
       self.values.splice(index, count);
     }

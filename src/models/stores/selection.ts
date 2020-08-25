@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { IMapDidChange, ObservableMap } from "mobx";
+import { IMapDidChange } from "mobx";
 
 export const DataSetSelectionModel = types
   .model("DataSetSelection", {

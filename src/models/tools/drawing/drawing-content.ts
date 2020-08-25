@@ -256,20 +256,22 @@ export const DrawingContentModel = types
           self.changes.forEach((changeJson, index) => {
             const change: DrawingToolChange = safeJsonParse(changeJson);
             switch (change && change.action) {
-              case "create":
+              case "create": {
                 const createData = change.data as DrawingObjectDataType;
                 if ((createData.type === "image") && (createData.url === oldUrl)) {
                   createData.url = newUrl;
                   updates.push({ index, change: JSON.stringify(change) });
                 }
                 break;
-              case "update":
+              }
+              case "update": {
                 const updateData = change.data as DrawingToolUpdate;
                 if ((updateData.update.prop === "url") && (updateData.update.newValue === oldUrl)) {
                   updateData.update.newValue = newUrl;
                   updates.push({ index, change: JSON.stringify(change) });
                 }
                 break;
+              }
             }
           });
           // make the corresponding changes

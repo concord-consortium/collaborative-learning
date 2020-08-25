@@ -308,7 +308,7 @@ const kCCImageScheme = "ccimg";
 const kFirebaseRTDBFauxHost = "fbrtdb.concord.org";
 const kFirebaseRTDBEscFauxHost = kFirebaseRTDBFauxHost.replace(/\./g, "\\.");
 const kFirebaseRTDBFauxUrlPrefix = `${kCCImageScheme}://${kFirebaseRTDBFauxHost}`;
-const kFirebaseRTDBFauxUrlRegex = new RegExp(`^${kCCImageScheme}:\/\/(${kFirebaseRTDBEscFauxHost}\/)?(.*)`);
+const kFirebaseRTDBFauxUrlRegex = new RegExp(`^${kCCImageScheme}://(${kFirebaseRTDBEscFauxHost}/)?(.*)`);
 
 function createFirebaseRTDBFauxUrl(path: string) {
   return `${kFirebaseRTDBFauxUrlPrefix}/${path}`;

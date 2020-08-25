@@ -58,8 +58,7 @@ const rules = [
       // There is no need for a serializer (that is, conversion from Slate's
       // document model -> html), so we will just announce that our code-path
       // accidentally reached this point.
-      // tslint:disable-next-line
-      console.log(`Warning! Slate editor serialize() was called. Not yet implemented`);
+      console.warn(`Warning! Slate editor serialize() was called. Not yet implemented`);
       return [];
     }
   }

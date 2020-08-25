@@ -150,7 +150,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
   }
 
   private handleDocumentDeleteClick = (document: DocumentModelType) => {
-    const {ui, supports} = this.stores;
+    const {ui} = this.stores;
     ui.confirm("Do you want to delete this?", "Confirm Delete")
       .then(ok => {
         if (ok) {

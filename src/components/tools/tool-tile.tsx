@@ -113,7 +113,7 @@ const DragTileButton = () => {
 
 @inject("stores")
 @observer
-export class ToolTileComponent extends BaseComponent<IProps, {}> {
+export class ToolTileComponent extends BaseComponent<IProps> {
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
