@@ -8,13 +8,13 @@ import ClueRightNav from "../../../../support/elements/clue/cRightNav";
 
 /**
  * Notes:
- * 
+ *
  * Teacher dashboard test needs static data from 'clueteachertest's class 'CLUE'
  * Here is the ID for the class in firebase: a1f7b8f8b7b1ad1d2d6240c41bd2354d8575ee09ae8bd641
- * 
+ *
  * Currently issues with problem switcher/class switcher. Maybe split these into two tests. Have this test
  * log into portal with data that doesn't need to be static.
- * 
+ *
  * -> This may also help with issue when verifying read-only student canvases which is currently looping through
  *    all of the students in the dashboard's current view
  */
@@ -59,7 +59,7 @@ context("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData")
     })
 
-    context('Teacher Workspace', function () {
+    context.skip('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.addTile('table');
@@ -69,7 +69,7 @@ context("Teacher Space", () => {
                 rightNav.openCanvasItem('my-work', 'workspaces', teacherDoc)
                 clueCanvas.addTile('table')
             })
-            it('verify restore after switching classes', function () {
+            it.skip('verify restore after switching classes', function () {
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0
                     const tempClassIndex = 1
@@ -102,7 +102,7 @@ context("Teacher Space", () => {
                 })
 
             })
-            it('verify restore after switching investigation', function () {
+            it.skip('verify restore after switching investigation', function () {
                 cy.get('@clueData').then((clueData) => {
                     let problems = clueData.classes[0].problems
                     let initProblemIndex = 0
@@ -145,4 +145,4 @@ context("Teacher Space", () => {
             })
         })
     })
-}) 
+})
