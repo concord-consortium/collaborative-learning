@@ -15,7 +15,7 @@ let canvas = new Canvas,
 
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-    });    
+    });
 
 context('Table Tool Tile',function(){
     describe('test menu functions of table', function(){
@@ -65,7 +65,7 @@ context('Table Tool Tile',function(){
             tableToolTile.getTableRow().should('have.length',1);
         });
     });
-    describe('table in different views', function(){
+    describe.skip('table in different views', function(){
         //4-up view is tested in group_test_spec
         it('will open in 2-up view', function(){
             clueCanvas.openTwoUpView();

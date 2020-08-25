@@ -10,7 +10,7 @@ before(function(){
     cy.waitForSpinner()
 });
 
-describe('Test Left tabs',function(){
+describe.skip('Test Left tabs',function(){
 
     let titles=['Introduction', 'Initial Challenge', 'What If...?', 'Now What Do You Know', 'Extra Workspace']
 
@@ -20,7 +20,7 @@ describe('Test Left tabs',function(){
         leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
             expect($tab.text()).to.contain(titles[index])
         })
-    })    
+    })
     it('verify content when switching tabs', function(){
         let titleArr = [], i=0;
 
