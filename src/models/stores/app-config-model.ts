@@ -47,6 +47,7 @@ export const AppConfigModel = types
     pageTitle: "",
     demoProblemTitle: "",
     units: types.map(types.string),
+    unitCodeMap: types.map(types.string),
     defaultProblemOrdinal: "",
     defaultUnit: "",
     autoAssignStudentsToIndividualGroups: false,

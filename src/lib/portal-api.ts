@@ -109,7 +109,7 @@ export const getProblemIdForAuthenticatedUser =
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
           resolve({
-            unitCode: getUnitCode(activityUrl) || appConfig.defaultUnit,
+            unitCode: getUnitCode(activityUrl, appConfig) || appConfig.defaultUnit,
             problemOrdinal: getProblemOrdinal(activityUrl) || appConfig.defaultProblemOrdinal
           });
         }
@@ -161,11 +161,15 @@ function getProblemOrdinal(url: string) {
 
 // For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
 // for the "Stretching and Shrinking" unit.
-function getUnitCode(url: string) {
+function getUnitCode(url: string, appConfig: AppConfigModelType) {
   const queryParams = parseUrl(url);
-  return queryParams.query.unit
-          ? queryParams.query.unit as string
-          : undefined;
+  const unitCode = queryParams.query.unit
+                    ? queryParams.query.unit as string
+                    : undefined;
+  const mappedUnitCode = unitCode
+                          ? appConfig.unitCodeMap.get(unitCode)
+                          : undefined;
+  return mappedUnitCode || unitCode;
 }
 
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
@@ -189,7 +193,7 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
         activityTitle: offering.activity,
         activityUrl: safeDecodeURI(offering.activity_url),
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
-        unitCode: getUnitCode(offering.activity_url) || appConfig.defaultUnit,
+        unitCode: getUnitCode(offering.activity_url, appConfig) || appConfig.defaultUnit,
         offeringId: `${offering.id}`,
         location: newLocationUrl
       }));
