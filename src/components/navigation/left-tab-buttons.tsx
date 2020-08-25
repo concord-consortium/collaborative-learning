@@ -35,11 +35,11 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
     return (
       <div className={`left-tab-buttons ${ui.leftTabContentShown ? "hidden" : ""}`}>
         { tabs &&
-          tabs.map((tabWrapper, i) => {
-            const tabClass = `left-tab tab-${tabWrapper.tab}`;
+          tabs.map((tabSpec, i) => {
+            const tabClass = `left-tab tab-${tabSpec.tab}`;
             return (
-              <div key={`index-${i}`} className={tabClass} onClick={this.handleTabButtonClick(tabWrapper.tab)}>
-                {tabWrapper.label}
+              <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
+                {tabSpec.label}
               </div>
             );
           })

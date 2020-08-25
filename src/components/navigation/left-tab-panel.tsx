@@ -41,9 +41,9 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
           <div className="top-row">
             <TabList className="top-tab-list">
               { tabs &&
-                tabs.map((tabWrapper, i) => {
-                  const tabClass = `top-tab tab-${tabWrapper.tab} ${selectedTabIndex === i ? "selected" : ""}`;
-                  return <Tab key={`index-${i}`} className={tabClass}>{tabWrapper.label}</Tab>;
+                tabs.map((tabSpec, i) => {
+                  const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === i ? "selected" : ""}`;
+                  return <Tab key={tabSpec.tab} className={tabClass}>{tabSpec.label}</Tab>;
                 })
               }
             </TabList>
@@ -55,10 +55,10 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderTabContent = (tab: any, i: number)  => {
+  private renderTabContent = (tabSpec: LeftTabSpec, i: number)  => {
     return (
-      <TabPanel key={`index-${i}`}>
-        {tab.label} content
+      <TabPanel key={tabSpec.tab}>
+        {tabSpec.label} content
       </TabPanel>
     );
   }
@@ -67,11 +67,11 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui } = this.stores;
     if (tabs) {
-      const tabWrapper = tabs[tabIndex];
-      if (ui.activeLeftNavTab !== tabWrapper.tab) {
-        ui.setActiveLeftNavTab(tabWrapper.tab);
+      const tabSpec = tabs[tabIndex];
+      if (ui.activeLeftNavTab !== tabSpec.tab) {
+        ui.setActiveLeftNavTab(tabSpec.tab);
         const logParameters = {
-          tab_name: tabWrapper.tab.toString()
+          tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
         logEvent();
