@@ -33,7 +33,7 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui } = this.stores;
     return (
-      <div className={`left-tab-buttons ${!ui.leftTabButtonsShown ? "hidden" : ""}`}>
+      <div className={`left-tab-buttons ${ui.leftTabContentShown ? "hidden" : ""}`}>
         { tabs &&
           tabs.map((tabWrapper, i) => {
             const tabClass = `left-tab tab-${tabWrapper.tab}`;
@@ -58,7 +58,7 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
       ui.setActiveLeftNavTab(tab);
       logEvent();
     }
-    ui.toggleLeftTabButtons(false);
+    ui.toggleLeftTabContent(true);
   }
 
 }

@@ -29,7 +29,7 @@ export const UIDialogModel = types
 export const UIModel = types
   .model("UI", {
     leftNavExpanded: false,
-    leftTabButtonsShown: true,
+    leftTabContentShown: false,
     rightNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
@@ -147,8 +147,8 @@ export const UIModel = types
       toggleRightNav(override?: boolean) {
         toggleWithOverride("rightNavExpanded", override);
       },
-      toggleLeftTabButtons(show: boolean) {
-        self.leftTabButtonsShown = show;
+      toggleLeftTabContent(show: boolean) {
+        self.leftTabContentShown = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;

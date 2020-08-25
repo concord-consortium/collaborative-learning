@@ -36,29 +36,20 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeLeftNavTab);
     return (
-      <div className={`left-tab-panel ${!ui.leftTabButtonsShown ? "shown" : ""}`}>
+      <div className={`left-tab-panel ${ui.leftTabContentShown ? "shown" : ""}`}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect}>
           <div className="top-row">
             <TabList className="top-tab-list">
               { tabs &&
                 tabs.map((tabWrapper, i) => {
                   const tabClass = `top-tab tab-${tabWrapper.tab} ${selectedTabIndex === i ? "selected" : ""}`;
-                  return (
-                    <Tab
-                      key={`index-${i}`}
-                      className={tabClass}
-                    >
-                      {tabWrapper.label}
-                    </Tab>
-                  );
+                  return <Tab key={`index-${i}`} className={tabClass}>{tabWrapper.label}</Tab>;
                 })
               }
             </TabList>
             <button className="close-button" onClick={this.handleClose}/>
           </div>
-            { tabs &&
-              tabs.map((tab, i) => this.renderTabContent(tab, i))
-            }
+          { tabs && tabs.map((tab, i) => this.renderTabContent(tab, i)) }
         </Tabs>
       </div>
     );
@@ -67,9 +58,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
   private renderTabContent = (tab: any, i: number)  => {
     return (
       <TabPanel key={`index-${i}`}>
-        <div>
-          {tab.label} content
-        </div>
+        {tab.label} content
       </TabPanel>
     );
   }
@@ -92,7 +81,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
 
   private handleClose = () => {
     const { ui } = this.stores;
-    ui.toggleLeftTabButtons(true);
+    ui.toggleLeftTabContent(false);
   }
 
 }
