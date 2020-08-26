@@ -21,7 +21,7 @@ $member-size: 18px
 
   .left
     flex: 2
-    padding: 0 $header-padding
+    padding: 0 $padding
     display: flex
     align-items: center
     justify-content: flex-start
@@ -36,7 +36,7 @@ $member-size: 18px
       width: 1.5px
       height: 40px
       background-color: $charcoal-light-1
-      margin: 0 $header-margin 0 5px
+      margin: 0 $margin 0 $margin
     .problem-dropdown
       height: 40px
   .middle
@@ -56,20 +56,19 @@ $member-size: 18px
 
   .right
     flex: 2
-    padding: 0 $header-padding
+    padding: 0 $padding
     text-align: center
     display: flex
     align-items: center
     justify-content: flex-end
     .version
-      padding-right: $padding
       font-size: 0.9em
 
     .group
       height: 40px
       flex-grow: 0
       padding: 0
-      margin: 0 10px 0 0
+      margin: 0 $margin 0 $margin
       text-align: center
       display: flex
       flex-direction: row
@@ -175,8 +174,8 @@ $member-size: 18px
         align-items: center
         text-align: center
         .student-profile-icon-inner
-          width: 30px
-          height: 30px
+          width: 24px
+          height: 24px
           mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg")
           background-color: $problem-orange
 
