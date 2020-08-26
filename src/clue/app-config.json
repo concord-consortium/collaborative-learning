@@ -15,6 +15,10 @@
     "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "twmm": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
   },
+  "unitCodeMap": {
+    "s s": "sas",
+    "s+s": "sas"
+  },
   "defaultProblemOrdinal": "1.1",
   "defaultUnit": "sas",
   "defaultDocumentType": "problem",
