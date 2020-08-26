@@ -1,6 +1,6 @@
 @import ../../components/vars
 
-.problem-select
+.custom-select
   user-select: none
 
   .header
@@ -31,6 +31,13 @@
 
     &:active .arrow
       background-image: url("../../assets/icons/arrow/arrow-open.svg")
+
+    .title-container
+      display: flex
+      flex-direction: column
+      align-items: flex-start
+      margin: 0 10px 0 10px
+      flex-grow: 1
 
     .item
       flex-grow: 1

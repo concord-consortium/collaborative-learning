@@ -1,11 +1,13 @@
 import React from "react";
+import { IDropdownItem } from "@concord-consortium/react-components";
 
-import "./problem-select.sass";
+import "./custom-select.sass";
 
 interface IProps {
-  items: string[];
-  onSelectItem?: (value: string) => void;
+  items: IDropdownItem[];
   isDisabled?: boolean;
+  title?: string;
+  titlePrefix?: string;
 }
 
 interface IState {
@@ -13,12 +15,12 @@ interface IState {
   showList: boolean;
 }
 
-export class ProblemSelect extends React.PureComponent<IProps, IState> {
+export class CustomSelect extends React.PureComponent<IProps, IState> {
   private divRef = React.createRef<HTMLDivElement>();
   constructor(props: IProps) {
     super(props);
     this.state = {
-      selected: props.items[0],
+      selected: props.items.length > 0 ? props.items[0].text : "",
       showList: false
     };
   }
@@ -35,21 +37,27 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
 
   public render() {
     return (
-      <div className="problem-select" ref={this.divRef}>
+      <div className="custom-select" ref={this.divRef}>
         { this.renderHeader() }
-        { this.renderList() }
+        { (!this.props.isDisabled && this.props.items.length > 0) && this.renderList() }
       </div>
     );
   }
 
   private renderHeader = () => {
-    const { items, isDisabled } = this.props;
-    const selectedItem = items.find(i => i === this.state.selected);
+    const { items, isDisabled, title, titlePrefix } = this.props;
+    const selectedItem = items.find(i => i.text === this.state.selected);
     const showListClass = this.state.showList ? "show-list" : "";
-    const disabled = isDisabled ? "disabled" : "";
+    const disabled = isDisabled || items.length === 0 ? "disabled" : "";
     return (
       <div className={`header ${showListClass} ${disabled}`} onClick={this.handleHeaderClick}>
-        <div className="item line-clamp">{selectedItem && selectedItem}</div>
+        { title
+          ? <div className="title-container">
+              { titlePrefix && <div className="title-prefix">{titlePrefix}</div> }
+              <div className="title">{title}</div>
+            </div>
+          : <div className="item line-clamp">{selectedItem && selectedItem.text}</div>
+        }
         <div className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );
@@ -59,17 +67,17 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
     const { items } = this.props;
     return (
       <div className={`list ${(this.state.showList ?"show" : "")}`}>
-        { items?.map((item: string, i: number) => {
-          const selectedClass = this.state.selected === item ? "selected" : "";
+        { items?.map((item: IDropdownItem, i: number) => {
+          const selectedClass = this.state.selected === item.text ? "selected" : "";
           return (
             <div
               key={`item ${i}`}
               className={`list-item ${selectedClass}`}
               onClick={this.handleListClick(item)}
-              data-test={`list-item-${item.toLowerCase().replace(" ", "-")}`}
+              data-test={`list-item-${item.text.toLowerCase().replace(" ", "-")}`}
             >
               <div className={`check ${selectedClass}`} />
-              <div className="item">{item}</div>
+              <div className="item">{item.text}</div>
             </div>
           );
         }) }
@@ -89,11 +97,11 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
     this.setState(state => ({ showList: !state.showList }));
   }
 
-  private handleListClick = (selected: string) => () => {
-    const { onSelectItem } = this.props;
-    onSelectItem && onSelectItem(selected);
+  private handleListClick = (item: IDropdownItem) => () => {
+    const { onClick } = item;
+    onClick && onClick(item);
     this.setState({
-      selected,
+      selected: item.text,
       showList: false
     });
   }

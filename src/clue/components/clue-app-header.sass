@@ -16,8 +16,6 @@ $member-size: 18px
   flex-wrap: nowrap
   justify-content: space-between
   font-size: 14px
-  &.teacher
-    background-color: $sage
 
   .left
     flex: 2
@@ -153,20 +151,23 @@ $member-size: 18px
               margin-top: -3px
 
     .profile-icon
-      background-color: $sage-dark-2
-      width: 40px
-      height: 40px
+      background-color: white
+      width: 36px
+      height: 36px
+      border-radius: 0 5px 5px 0
       display: flex
       justify-content: center
       align-items: center
       text-align: center
-      &:hover
-        background-color: $sage-dark-3
+      &.teacher
+        border: solid 1.5px $charcoal-light-1
+        height: 40px
+        width: 40px
       .profile-icon-inner
-        width: 30px
-        height: 30px
+        width: 24px
+        height: 24px
         mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg")
-        background-color: $sage-light-2
+        background-color: $problem-orange
 
     .user
       height: 40px
@@ -179,6 +180,10 @@ $member-size: 18px
       min-width: 144px
       max-width: 191px
       box-sizing: border-box
+      &.teacher
+        border-width: 0
+      .class > .custom-select > .header
+        min-width: 150px
 
       .user-contents
         display: flex
@@ -202,6 +207,7 @@ $member-size: 18px
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis
+
       .student-profile-icon
         background-color: white
         width: 36px
@@ -228,3 +234,14 @@ $member-size: 18px
     .bp3-button
       background-color: $color1-4
       border-radius: 5px
+
+  .toggle-button
+    border-style: solid
+    border-color: $charcoal-light-1
+    border-width: 1.5px 0 1.5px 1.5px
+    height: 40px
+    padding: .75em
+    color: $charcoal-dark-2
+    cursor: pointer
+  .toggle-button:last-child
+    border-width: 1.5px
