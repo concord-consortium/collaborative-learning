@@ -1,34 +1,30 @@
 @import ../vars
 
 .left-nav-panel
-  position: absolute
-  top: 0
-  right: 0
-  bottom: 0
-  left: 0
-
+  height: 100%
   .section
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$left-tab-height} * 2))
     .section-header
+      height: $problem-header-height
       display: flex
-      flex-direction: row
+      flex-direction: column
       flex-wrap: nowrap
-      justify-content: flex-start
-
-      h1
-        flex-grow: 1
-        font-size: 18px
-        margin: $double-margin
+      color: $charcoal-dark-2
+      background-color: white
+      padding: 0 20px
+      .title
+        height: 37px
+        line-height: 37px
+        font-size: 14px
         text-align: center
+      .separator
+        height: 1px
+        width: 100%
+        background-color: $problem-orange-light-3
 
     .canvas
-      position: absolute
-      top: 62px
-      right: $double-margin
-      bottom: $double-margin
-      left: $double-margin
-      width: initial
-      height: initial
       overflow: auto
+      height: calc(100% - #{$problem-header-height})
 
       .document-content
         background-color: #fff

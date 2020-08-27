@@ -31,7 +31,8 @@ export class LeftNavPanelComponent extends BaseComponent<IProps> {
     return (
       <div className="section">
         <div className="section-header">
-          <h1>{section.title}</h1>
+          <div className="title">{section.title}</div>
+          <div className="separator"/>
         </div>
         {content ? this.renderContent(content) : null}
       </div>

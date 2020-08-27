@@ -2,13 +2,15 @@
 
 .left-tab-panel
   width: 50%
-  height: 100%
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
   position: fixed
   left: calc(0px - 100vw * .5)
-  top: 55px
+  top: $header-height
   transition-duration: 1s
   transition-property: left
   margin-top: 4px
+  background-color: white
+  border-radius: 0 6px 0 0
   &.shown
     left: 0px
 
@@ -20,7 +22,7 @@
   .close-button
     flex-shrink: 0
     width: 36px
-    height: 34px
+    height: $left-tab-height
     background-color: $charcoal-light-6
     border-radius: 0 6px 0 0
     border-style: solid
@@ -44,7 +46,7 @@
     margin: 0
     .top-tab
       flex-grow: 1
-      height: 34px
+      height: $left-tab-height
       font-size: 13px
       color: $charcoal-dark-2
       border-style: solid
