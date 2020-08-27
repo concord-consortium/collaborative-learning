@@ -372,8 +372,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private handleOverlayClicked = (context: string) => {
     const { groupId, setFocusedGroupUser } = this.props;
     const groupUser = this.userByContext[context];
-    const toggledContext = context === this.state.toggledContext ? null : context;
-    this.setState({toggledContext});
+    const toggleContext = (state: IState) => context === state.toggledContext ? null : context;
+    const toggledContext = toggleContext(this.state);
+    this.setState(state => ({ toggledContext: toggleContext(state) }));
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});

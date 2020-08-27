@@ -157,10 +157,7 @@ export class GeometryToolbarView extends BaseComponent<IProps, IState> {
   }
 
   private handleSettingsButton = () => {
-    const showSettings = !this.state.showSettings;
-    this.setState({
-      showSettings
-    });
+    this.setState(state => ({ showSettings: !state.showSettings }));
   }
 
 }

@@ -16,7 +16,7 @@ before(function(){
     cy.visit(baseUrl+queryParams);
 });
 context('Test header elements',()=>{
-    describe('Test header UI',()=>{
+    describe.skip('Test header UI',()=>{
         it('verify header ui existence',()=>{
             header.getClassName().should('exist');
             header.getProblemTitle().should('exist'); //may have to move this when dropdown exists

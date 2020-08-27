@@ -44,6 +44,7 @@ module.exports = {
       "no-debugger": "off", // enabled in .eslintrc.build.js
       "no-shadow": ["error", { "builtinGlobals": false, "hoist": "all", "allow": [] }],
       "no-unused-vars": "off",  // superceded by @typescript-eslint/no-unused-vars
+      "react/no-access-state-in-setstate": "error",
       "react/prop-types": "off",
       semi: ["error", "always"]
     }

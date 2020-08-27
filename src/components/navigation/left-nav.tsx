@@ -97,9 +97,10 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private updateTabLoadAllowedState = (sectionIndex: number) => {
-    const tabLoadAllowed = this.state.tabLoadAllowed;
-    tabLoadAllowed[sectionIndex] = true;
-    this.setState({ tabLoadAllowed });
+    this.setState(state => {
+      state.tabLoadAllowed[sectionIndex] = true;
+      return { tabLoadAllowed: state.tabLoadAllowed };
+    });
   }
 
   private getTabId(sectionIndex: number) {

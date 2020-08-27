@@ -43,7 +43,12 @@ module.exports = (env, argv) => {
           test: /\.(sa|sc|c)ss$/i,
           use: [
             devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                esModule: false
+              }
+            },
             'postcss-loader',
             'sass-loader'
           ]

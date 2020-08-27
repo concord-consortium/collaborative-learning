@@ -28,7 +28,7 @@ context('single student functional test',()=>{
             // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     })
-    describe('Left nav tabs open and close',()=>{
+    describe.skip('Left nav tabs open and close',()=>{
         it('verify left nav tabs open and switch contents', ()=>{
             leftNav.getLeftNavTabs().each(($tab, index, $tabList)=>{
                 cy.get('#leftNavTab' + index).click({force:true});
@@ -151,5 +151,5 @@ context('single student functional test',()=>{
                 clueCanvas.getRightSideDocumentContent().find('.neo-codap-case-table').should('exist');
             })
         })
-    });    
+    });
 })
