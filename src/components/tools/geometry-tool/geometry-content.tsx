@@ -795,9 +795,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const changeset = content.popChangeset();
       if (changeset) {
         board.showInfobox(false);
-        this.setState({
-          redoStack: this.state.redoStack.concat([changeset])
-        });
+        this.setState(state => ({ redoStack: state.redoStack.concat([changeset]) }));
 
         // Reverse the changes so they're logged in the order they're undone
         [...changeset].reverse().forEach(changeString => {

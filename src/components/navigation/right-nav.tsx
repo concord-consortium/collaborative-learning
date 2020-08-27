@@ -226,10 +226,11 @@ export class RightNavComponent extends BaseComponent<IProps, IState> {
   }
 
   private updateComponentLoadAllowedState = () => {
-    const { ui } = this.stores;
-    const tabLoadAllowed = this.state.tabLoadAllowed;
-    tabLoadAllowed[ui.activeRightNavTab as ERightNavTab] = true;
-    this.setState({ tabLoadAllowed });
+    const { ui: { activeRightNavTab } } = this.stores;
+    this.setState(state => {
+      state.tabLoadAllowed[activeRightNavTab as ERightNavTab] = true;
+      return { tabLoadAllowed: state.tabLoadAllowed };
+    });
   }
 
 }

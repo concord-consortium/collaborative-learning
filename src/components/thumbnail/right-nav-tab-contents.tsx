@@ -115,7 +115,7 @@ export class RightNavTabContents extends BaseComponent<IProps, IState> {
       this.state.showSection.set(sectionId, !isExpanded);
     });
     this.props.onToggleExpansion?.(section);
-    this.setState( () => ({ showSection: this.state.showSection }));
+    this.setState( state => ({ showSection: state.showSection }));
     Logger.log(LogEventName.SHOW_FILTER, {
                 filter_state: isCurrentSectionExpanded ? "close" : "open",
                 filter_name: section.title,
