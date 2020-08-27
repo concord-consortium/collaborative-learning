@@ -36,7 +36,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
     return (
       <div className="app-header">
         <div className="left">
-          <div className="unit"> 
+          <div className="unit">
             <div className="title" data-test="unit-title">
               {unit.title}
             </div>
@@ -144,8 +144,8 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
       groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
     }
     return (
-      <div className="group">
-        <div onClick={this.handleResetGroup} className="name" data-test="group-name">{`Group ${group.id}`}</div>
+      <div onClick={this.handleResetGroup} className="group">
+        <div className="name" data-test="group-name">{`Group ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
