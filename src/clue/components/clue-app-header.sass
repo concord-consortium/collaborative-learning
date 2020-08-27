@@ -75,6 +75,13 @@ $member-size: 18px
       align-items: center
       border-radius: 5px
       border: solid 1.5px $charcoal-light-1
+      cursor: pointer
+      &:hover
+        background-color: $workspace-teal-light-3
+      &:active
+        background-color: $workspace-teal-dark-1
+        color: white
+        border-color: white
       .group-center
         position: relative
         left: 22px
@@ -85,12 +92,12 @@ $member-size: 18px
       .name
         font-weight: normal
         font-size: 13px
-        cursor: pointer
         margin: 0 2px 0 10px
 
       .members
         display: flex
         flex-direction: column
+        color: $charcoal-dark-2
         .row
           display: flex
           flex-direction: row
