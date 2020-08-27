@@ -77,8 +77,8 @@
         {
           "description": "Problem 1.2",
           "ordinal": 2,
-          "title": "SAP 1.2 Candy-Sampling Task: Making Predictions about Samples from a Known Population",
-          "subtitle": "",
+          "title": "SAP 1.2 Candy-Sampling Task",
+          "subtitle": "Making Predictions about Samples from a Known Population",
           "sections": [
           ],
           "supports": []
@@ -86,8 +86,8 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "SAP 1.3 Pick Your Preference: Distinguishing Categorical and Numerical Data",
-          "subtitle": "T",
+          "title": "SAP 1.3 Pick Your Preference",
+          "subtitle": "Distinguishing Categorical and Numerical Data",
           "sections": [
           ],
           "supports": []
