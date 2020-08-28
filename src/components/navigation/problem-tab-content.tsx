@@ -1,8 +1,7 @@
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { getSectionInitials } from "../../models/curriculum/section";
+import { getSectionInitials, SectionModelType } from "../../models/curriculum/section";
 import { LeftNavPanelComponent } from "./left-nav-panel";
-import { SectionModelType } from "../../models/curriculum/section";
 
 import "./problem-tab-content.sass";
 

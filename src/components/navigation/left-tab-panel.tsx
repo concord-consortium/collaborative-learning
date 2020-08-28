@@ -41,8 +41,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect}>
           <div className="top-row">
             <TabList className="top-tab-list">
-              { tabs &&
-                tabs.map((tabSpec, index) => {
+              { tabs?.map((tabSpec, index) => {
                   const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
                   return <Tab key={tabSpec.tab} className={tabClass}>{tabSpec.label}</Tab>;
                 })
@@ -50,8 +49,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
             </TabList>
             <button className="close-button" onClick={this.handleClose}/>
           </div>
-          { tabs &&
-            tabs.map((tabSpec) => {
+          { tabs?.map((tabSpec) => {
               return (
                 <TabPanel key={tabSpec.tab}>
                   {this.renderTabContent(tabSpec)}
