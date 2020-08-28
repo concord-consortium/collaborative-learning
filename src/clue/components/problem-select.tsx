@@ -49,7 +49,7 @@ export class ProblemSelect extends React.PureComponent<IProps, IState> {
     const disabled = isDisabled ? "disabled" : "";
     return (
       <div className={`header ${showListClass} ${disabled}`} onClick={this.handleHeaderClick}>
-        <div className="item">{selectedItem && selectedItem}</div>
+        <div className="item line-clamp">{selectedItem && selectedItem}</div>
         <div className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );
