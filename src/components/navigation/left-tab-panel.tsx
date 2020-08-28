@@ -2,8 +2,9 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { LeftTabSpec } from "../../models/view/left-tabs";
+import { LeftTabSpec, ELeftTab } from "../../models/view/left-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
+import { ProblemTabContent } from "./problem-tab-content";
 
 import "react-tabs/style/react-tabs.css";
 import "./left-tab-panel.sass";
@@ -40,26 +41,45 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect}>
           <div className="top-row">
             <TabList className="top-tab-list">
-              { tabs &&
-                tabs.map((tabSpec, i) => {
-                  const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === i ? "selected" : ""}`;
+              { tabs?.map((tabSpec, index) => {
+                  const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
                   return <Tab key={tabSpec.tab} className={tabClass}>{tabSpec.label}</Tab>;
                 })
               }
             </TabList>
             <button className="close-button" onClick={this.handleClose}/>
           </div>
-          { tabs && tabs.map((tab, i) => this.renderTabContent(tab, i)) }
+          { tabs?.map((tabSpec) => {
+              return (
+                <TabPanel key={tabSpec.tab}>
+                  {this.renderTabContent(tabSpec)}
+                </TabPanel>
+              );
+            })
+          }
         </Tabs>
       </div>
     );
   }
 
-  private renderTabContent = (tabSpec: LeftTabSpec, i: number)  => {
+  private renderTabContent = (tabSpec: LeftTabSpec) => {
+    // TODO: handle additional content types
+    switch (tabSpec.tab) {
+      case ELeftTab.kProblems:
+        return this.renderProblems();
+      default:
+        return null;
+    }
+  }
+
+  private renderProblems = () => {
+    const { problem } = this.stores;
+    const { sections } = problem;
     return (
-      <TabPanel key={tabSpec.tab}>
-        {tabSpec.label} content
-      </TabPanel>
+      <ProblemTabContent
+        isGhostUser={this.props.isGhostUser}
+        sections={sections}
+      />
     );
   }
 
