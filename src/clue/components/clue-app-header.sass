@@ -26,17 +26,26 @@ $member-size: 18px
     align-items: center
     justify-content: flex-start
     .unit
+      max-width: 286px
+      flex-shrink: 0
       .title
         font-size: 13px
         font-weight: bold
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
       .investigation
         font-size: 13px
         font-weight: normal
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
     .separator
       width: 1.5px
       height: 40px
       background-color: $charcoal-light-1
       margin: 0 $margin
+      flex-shrink: 0
     .problem-dropdown
       height: 40px
   .middle
@@ -66,12 +75,16 @@ $member-size: 18px
 
     .group
       height: 40px
+      min-width: 109px
+      max-width: 124px
+      box-sizing: border-box
       flex-grow: 0
       padding: 0
       margin: 0 $margin
       text-align: center
       display: flex
       flex-direction: row
+      justify-content: flex-end
       align-items: center
       border-radius: 5px
       border: solid 1.5px $charcoal-light-1
@@ -93,6 +106,9 @@ $member-size: 18px
         font-weight: normal
         font-size: 13px
         margin: 0 2px 0 10px
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
 
       .members
         display: flex
@@ -160,6 +176,9 @@ $member-size: 18px
       align-items: center
       border-radius: 5px
       border: solid 1.5px $charcoal-light-1
+      min-width: 144px
+      max-width: 191px
+      box-sizing: border-box
 
       .user-contents
         display: flex
@@ -167,10 +186,22 @@ $member-size: 18px
         align-items: flex-start
         font-weight: normal
         font-size: 13px
+        min-width: 108px
+        max-width: 155px
         .name
+          width: 100%
           padding: 0 10px 0 10px
+          text-align: left
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
         .class
+          width: 100%
           padding: 0 10px 0 10px
+          text-align: left
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
       .student-profile-icon
         background-color: white
         width: 36px
