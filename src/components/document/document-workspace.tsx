@@ -9,6 +9,7 @@ import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
+import { getProblemPath } from "../../models/stores/stores";
 import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
@@ -378,11 +379,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handlePublishSupport = async (document: DocumentModelType) => {
-    const { db, ui } = this.stores;
+    const { db, ui, user } = this.stores;
     const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, caption)
-      .then(() => ui.alert("Your support was published.", "Support Published"))
+      .then(() => {
+        const classes = user.classHashesForProblemPath(getProblemPath(this.stores));
+        const classWord = classes.length === 1 ? "class" : "classes";
+        ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
+      })
       .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
   }
 
