@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.2.2 - released August 28, 2020
+
+- More informative message upon publishing a teacher support
+- Improved image tile auto-sizing
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,710 bytes | 0.0% |
+| index.js | 4,921,173 bytes | 0.0% |
+
 ## Version 1.2.1 - released August 25, 2020
 
 - Fix bug which affected class visibility of some teacher supports
