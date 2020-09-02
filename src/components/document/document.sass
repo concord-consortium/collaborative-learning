@@ -132,6 +132,12 @@
           background-color: $color1-5
 
       .icon-button
+        background-color: $color1-3
+        position: relative
+        width: 34px
+        height: 28px
+        margin: 0 4px
+        cursor: pointer
         border: 0
 
         &:hover
@@ -144,25 +150,16 @@
           outline: none
           outline-offset: 0
 
-      .icon-button
-        background-color: $color1-3
-        position: relative
-        width: 32px
-        height: 28px
-        margin: 0 4px
-        cursor: pointer
-
         .button-icon
           background-repeat: no-repeat
           position: absolute
           top: 0
-          left: 0
+          left: 1px
           width: 30px
           height: 28px
           cursor: pointer
 
         &.icon-publish, &.icon-up1, &.icon-up4
-          width: 32px
           height: 32px
           border-radius: 0
 
@@ -186,6 +183,9 @@
 
           &:active
             background-image: url("../../assets/icons/new/new-active.svg")
+
+      .icon-copy
+        margin-right: 1px
 
       .icon-support
         border-top-left-radius: $border-radius
