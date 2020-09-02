@@ -3,16 +3,16 @@ class ImageToolTile{
         return cy.get('.canvas-area .image-tool');
     }
     getImageToolControl(){
-        return cy.get('.image-tool.editable > .image-tool-controls')
+        return cy.get('.image-tool.editable > .image-tool-controls');
     }
     getImageURLTextField(){
-        return cy.get('.image-url.editing')
+        return cy.get('.image-url.editing');
     }
     imageChooseFileButton(){
-        return ('.image-file.editing:first')
+        return ('.image-file.editing:first');
     }
     getImageToolImage(){
-        return cy.get('.image-tool.editable > .image-tool-image')
+        return cy.get('.image-tool.editable > .image-tool-image');
     }
 }
 

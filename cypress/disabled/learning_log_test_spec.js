@@ -1,19 +1,13 @@
 import LearningLog from '../support/xelements/LearningLog';
-import BottomNav from '../support/xelements/BottomNav';
 import RightNav from '../support/xelements/RightNav';
-import LeftNav from '../support/xelements/LeftNav';
 import Canvas from '../support/xelements/Canvas';
 import GraphToolTile from '../support/xelements/GraphToolTile';
-import TextToolTile from '../support/xelements/TextToolTile'
 
 context('Test bottom tabs', function(){
     let learningLog = new LearningLog,
-        bottomNav = new BottomNav,
         rightNav = new RightNav,
-        leftNav = new LeftNav,
         canvas = new Canvas,
-        graphToolTile = new GraphToolTile,
-        textToolTile = new TextToolTile;
+        graphToolTile = new GraphToolTile;
     // TODO: Learning logs has changed with new feature changes.
     describe.skip('Test learning log interaction with main canvas', function(){
         it('will verify restore of already open canvas in main workspace after opening learning log', function(){
@@ -27,7 +21,7 @@ context('Test bottom tabs', function(){
                 //Open learning log
                 learningLog.openLearningLogTab();
                 learningLog.closeLearningLogTab();
-        })
+        });
     });
     // TODO: Learning logs has changed with new feature changes.
     describe.skip('Test create, save and restore a learning log canvas',function(){
@@ -69,7 +63,7 @@ context('Test bottom tabs', function(){
             learningLog.createLearningLog(log3);
             learningLog.getLLCanvasTitle().should('contain', log3);
             //verify thumbnails
-            learningLog.getAllLearningLogCanvasItems().should(($itemList)=>{expect($itemList).to.have.length(4)});
+            learningLog.getAllLearningLogCanvasItems().should(($itemList)=>{expect($itemList).to.have.length(4);});
             learningLog.getLearningLogCanvasItemTitle().each(($log, index, $loglist)=>{
                 let title = $log.text();
                 cy.wrap($log).parent().parent().click();
@@ -81,7 +75,6 @@ context('Test bottom tabs', function(){
     // TODO: This should likely be rewritten
     describe.skip('Test learning log canvases with other canvases', function(){
         let title = 'LL_Intro',
-            myWorkTitle = 'Introduction',
             classWorkTitle = 'What if';
         it('create a canvas and switch to 2up view', function(){
             // click on create button

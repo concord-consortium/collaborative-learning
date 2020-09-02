@@ -1,8 +1,4 @@
-import Header from '../../support/elements/Header';
-import RightNav from '../../support/elements/RightNav';
 import LeftNav from '../../support/elements/LeftNav';
-import Canvas from '../../support/elements/Canvas';
-import Workspace from '../../support/elements/Workspace';
 import TeacherDashboard from '../../support/elements/TeacherDashboard';
 
 let qaClass = 10,
@@ -14,21 +10,17 @@ let qaClass = 10,
 
 let teacher = 10;
 
-let header = new Header,
-    rightNav = new RightNav,
-    leftNav = new LeftNav,
-    canvas = new Canvas,
-    workspace = new Workspace,
+let leftNav = new LeftNav,
     teacherDashboard = new TeacherDashboard;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-   
+
 describe('setup', function(){
     it("will set up groups", function(){ //need to setup two groups to verify teacher can switch groups
         cy.setupGroup(studentArr10, qaGroup10); //This publishes canvases to Class Work
         cy.setupGroup(studentArr20, qaGroup20); //This publishes canvases to Class Work
     });
-});    
+});
 
 describe('Teacher can add support messages to all sections', function(){
 
@@ -47,7 +39,7 @@ describe('Teacher can add support messages to all sections', function(){
         teacherDashboard.selectStudent(studentArr10[0]);
         teacherDashboard.sendSupportMessage('user', 'This message is for S' + studentArr10[0] + ' in all sections');
         cy.wait(1000);
-        teacherDashboard.getStudentSupportsMessage().should('be.visible').and('contain', 'S'+studentArr10[0] +' in all sections'); 
+        teacherDashboard.getStudentSupportsMessage().should('be.visible').and('contain', 'S'+studentArr10[0] +' in all sections');
     });
 
     it('verify message appears in all sections for whole class', function(){
@@ -87,10 +79,10 @@ describe('Teacher can add support messages to all sections', function(){
             leftNav.openToWorkspace('What if...?');
             cy.wait(3000);
             cy.get('[data-test="support-icon group"]').last().click();
-            cy.get('[data-test="supports-list"]').contains('group 10 in all sections')
+            cy.get('[data-test="supports-list"]').contains('group 10 in all sections');
             leftNav.openToWorkspace('Introduction');
             // cy.wait(1000);
-            cy.get('[data-test="supports-list"]').contains('group 10 in all sections')
+            cy.get('[data-test="supports-list"]').contains('group 10 in all sections');
         }
 
         // verify message is not in the other group
@@ -107,10 +99,10 @@ describe('Teacher can add support messages to all sections', function(){
         leftNav.openToWorkspace('What if...?');
         cy.wait(3000);
         cy.get('[data-test="support-icon user"]').last().click();
-        cy.get('[data-test="supports-list"]').contains('S'+studentArr10[0]+' in all sections')
+        cy.get('[data-test="supports-list"]').contains('S'+studentArr10[0]+' in all sections');
         leftNav.openToWorkspace('Now What');
         cy.wait(1000);
-        cy.get('[data-test="supports-list"]').contains('S'+studentArr10[0]+' in all sections')
+        cy.get('[data-test="supports-list"]').contains('S'+studentArr10[0]+' in all sections');
 
         // verify that message does not appear  for another student in all sections
         cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[1]+'&problem='+problem);
@@ -126,7 +118,7 @@ describe('it will delete messages', function(){
         cy.visit(baseUrl + '?appMode=qa&fakeClass=' + qaClass + '&fakeUser=teacher:' + teacher + '&problem=' + problem);
         cy.wait(1000);
         teacherDashboard.deleteClassSupportMessage();
-        teacherDashboard.getClassSupportsMessage().should('not.exist')
+        teacherDashboard.getClassSupportsMessage().should('not.exist');
 
         teacherDashboard.selectGroup(qaGroup10);
         teacherDashboard.deleteGroupSupportMessage();

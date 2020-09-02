@@ -14,7 +14,7 @@ describe("documents model", () => {
       key: "test",
       createdAt: 1,
       content: {}
-    }),
+    });
     documents = DocumentsModel.create({});
   });
 

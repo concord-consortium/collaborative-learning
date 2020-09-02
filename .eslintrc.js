@@ -1,3 +1,4 @@
+/* eslint-env node */
 // default configuration tuned for development
 module.exports = {
     parser: "@typescript-eslint/parser",
@@ -37,12 +38,15 @@ module.exports = {
       "@typescript-eslint/no-unused-vars": ["error", { "args": "none", "ignoreRestSiblings": true }],
       "@typescript-eslint/no-var-requires": "off",  // 12 uses as of 2020-07-23
       curly: ["error", "multi-line", "consistent"],
+      "eol-last": "warn",
       eqeqeq: ["error", "smart"],
       "eslint-comments/no-unused-disable": "off",   // enabled in .eslintrc.build.js
       "max-len": ["warn", { code: 120, ignoreUrls: true }],
       "no-bitwise": "error",
       "no-debugger": "off", // enabled in .eslintrc.build.js
+      "no-sequences": "error",
       "no-shadow": ["error", { "builtinGlobals": false, "hoist": "all", "allow": [] }],
+      "no-unused-expressions": ["error", { allowShortCircuit: true }],
       "no-unused-vars": "off",  // superceded by @typescript-eslint/no-unused-vars
       "react/no-access-state-in-setstate": "error",
       "react/prop-types": "off",

@@ -1,12 +1,12 @@
-import LeftNav from '../../../../support/elements/clue/LeftNav'
-import Canvas from '../../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../../support/elements/clue/cCanvas'
-import RightNav from '../../../../support/elements/common/RightNav'
-import GraphToolTile from '../../../../support/elements/clue/GraphToolTile'
-import ImageToolTile from '../../../../support/elements/clue/ImageToolTile'
-import DrawToolTile from '../../../../support/elements/clue/DrawToolTile'
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
-import TableToolTile from '../../../../support/elements/clue/TableToolTile'
+import LeftNav from '../../../../support/elements/clue/LeftNav';
+import Canvas from '../../../../support/elements/common/Canvas';
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import RightNav from '../../../../support/elements/common/RightNav';
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
+import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
+import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 
 let leftNav = new LeftNav;
 let canvas = new Canvas;
@@ -39,7 +39,7 @@ context('Test Canvas', function(){
             cy.visit(baseUrl+queryParams);
             cy.waitForSpinner();
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
-    })
+    });
 
     context('test canvas tools', function(){
         describe('test header elements', function(){
@@ -52,9 +52,9 @@ context('Test Canvas', function(){
                 clueCanvas.getShareButton().should('be.visible');
                 clueCanvas.getFourUpViewToggle().should('be.visible');
                 clueCanvas.openFourUpView();
-                clueCanvas.getShareButton().should('be.visible')//should have share in 4 up
+                clueCanvas.getShareButton().should('be.visible');//should have share in 4 up
                 clueCanvas.openOneUpViewFromFourUp();
-            })
+            });
             it('verify personal workspace header UI',()=>{ //other header elements are tested in common
                canvas.createNewExtraDocument(studentWorkspace);
                canvas.getNewDocumentIcon().should('be.visible');
@@ -64,92 +64,90 @@ context('Test Canvas', function(){
                canvas.getPersonalPublishIcon().should('be.visible');
                clueCanvas.getShareButton().should('not.exist');
                clueCanvas.getFourUpViewToggle().should('not.exist');
-            })
-        })
+            });
+        });
         describe('Test personal workspace canvas',function(){
             it('verify personal workspace does not have section headers', function(){
                 clueCanvas.getRowSectionHeader().should('not.exist');
-            })
+            });
             it('verify tool tiles',function(){ //to be used for save and restore test
                 clueCanvas.addTile('geometry');
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('text');
                 textToolTile.enterText('this is '+ studentWorkspace);
-            })
+            });
             it('verify copy of personal workspace', function(){
                 canvas.copyExtraDocument(copyTitle);
                 canvas.getPersonalDocTitle().should('contain',copyTitle);
                 graphToolTile.getGraphTile().should('be.visible');
                 tableToolTile.getTableTile().should('be.visible');
                 textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace);
-            })
+            });
             it('verify rename of workspace title with edit icon', function(){
                 canvas.editTitlewithPencil(renameTitlePencil);
                 canvas.getPersonalDocTitle().should("contain",renameTitlePencil);
-                rightNav.openRightNavTab('my-work')
+                rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work','workspaces');
                 rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',renameTitlePencil);
-            })
+            });
             it('verify create new document', function(){
-                let newDocTitle = 'New User Doc To Publish';
                 canvas.createNewExtraDocument(newDocTitleToPublish);
                 canvas.getPersonalDocTitle().should('contain',newDocTitleToPublish);
                 graphToolTile.getGraphTile().should('not.exist');
                 tableToolTile.getTableTile().should('not.exist');
-                textToolTile.getTextTile().should('not.exist')
-            })
+                textToolTile.getTextTile().should('not.exist');
+            });
             it('verify publish document', function(){
                 canvas.publishPersonalCanvas();
-                rightNav.openRightNavTab('class-work')
+                rightNav.openRightNavTab('class-work');
                 rightNav.openSection('class-work','personal');
-                rightNav.getCanvasItemTitle('class-work','personal').should('contain',newDocTitleToPublish)
-            })
+                rightNav.getCanvasItemTitle('class-work','personal').should('contain',newDocTitleToPublish);
+            });
             it('verify rename of workspace title with edit icon', function(){
-                let renameTitle = "Renamed Title title";
-                canvas.editTitle(renameTitle)
+                canvas.editTitle(renameTitle);
                 canvas.getPersonalDocTitle().should("contain",renameTitle);
-                rightNav.openRightNavTab('my-work')
+                rightNav.openRightNavTab('my-work');
                 // rightNav.openSection('my-work','workspaces');
                 rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',renameTitle);
-            })
+            });
             after(()=>{
                 rightNav.closeRightNavTab('my-work');
-            })
-        })
+            });
+        });
 
         describe('Test section heaaders',function(){
             let headers=['IN','IC','WI','NW'];
-            let headerTitles=["Introduction", "Initial Challenge", "What If...?","Now What Do You Know?"]
+            let headerTitles=["Introduction", "Initial Challenge", "What If...?","Now What Do You Know?"];
             before(function(){
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work','investigations')
-                rightNav.openCanvasItem('my-work','investigations',this.title)
-            })
+                rightNav.openSection('my-work','investigations');
+                rightNav.openCanvasItem('my-work','investigations',this.title);
+            });
             it('verified initial canvas load has sections',function(){
                 headers.forEach(function(header){
                     clueCanvas.getSectionHeader(header).should('exist');
-                })
-            })
+                });
+            });
             it('verifies section header has initials and titles',function(){
-                let i=0
+                let i=0;
                 for (i=0;i<headers.length;i++){
-                    clueCanvas.getSectionHeader(headers[i]).find('.initials').should('contain', headers[i])
-                    clueCanvas.getSectionHeader(headers[i]).find('.title').should('contain', headerTitles[i])
+                    clueCanvas.getSectionHeader(headers[i]).find('.initials').should('contain', headers[i]);
+                    clueCanvas.getSectionHeader(headers[i]).find('.title').should('contain', headerTitles[i]);
                 }
-            })
+            });
             it('verifies section headers are not deletable',function(){
                 clueCanvas.getRowSectionHeader().each(function($header, index, $header_list){
                     cy.wrap($header).click({force:true});
                     clueCanvas.getDeleteTool().click();
                     expect($header).to.exist;
-                })
-            })
+                });
+            });
             it('verifies a placeholder tile for every section header', function(){
                 clueCanvas.getRowSectionHeader().each(function($header, index, $header_list){
                     let numHeaders=$header_list.length;
-                    clueCanvas.getPlaceHolder().should('have.length',numHeaders)
-                })
-            })
+                    clueCanvas.getPlaceHolder().should('have.length',numHeaders);
+                });
+            });
             it('verifies work area placeholder is not deletable',function(){
                 clueCanvas.getPlaceHolder().each(function($holder, index, $holder_list){
                     let numHolders = $holder_list.length;
@@ -157,30 +155,30 @@ context('Test Canvas', function(){
                     clueCanvas.getPlaceHolder().first().click({force:true});
                     clueCanvas.getDeleteTool().click();
                     clueCanvas.getPlaceHolder().should('have.length',numHolders);
-                })
-            })
+                });
+            });
             it.skip('verifies work area placeholder is not draggable', function(){
                 //TODO: not sure how to test this yet
-            })
+            });
             it('verifies publish of investigation',function(){
-                canvas.publishCanvas()
+                canvas.publishCanvas();
                 rightNav.openRightNavTab('class-work');
                 rightNav.openSection('class-work','published');
-                rightNav.getCanvasItemTitle('class-work','published').should('contain',this.title)
-            })
+                rightNav.getCanvasItemTitle('class-work','published').should('contain',this.title);
+            });
             it('verifies copy of investigation',function(){
-                let copyTitle = 'Investigation Copy'
-                canvas.copyDocument(copyTitle);
-                canvas.getPersonalDocTitle().should('contain', copyTitle);
+                let investigationTitle = 'Investigation Copy';
+                canvas.copyDocument(investigationTitle);
+                canvas.getPersonalDocTitle().should('contain', investigationTitle);
                 rightNav.openRightNavTab('my-work');
                 rightNav.openSection('my-work','workspaces');
-                rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',copyTitle)
-            })
-        })
+                rightNav.getCanvasItemTitle('my-work','workspaces').should('contain',investigationTitle);
+            });
+        });
         describe('Test 4up view',function(){
             before(function(){
                 rightNav.openCanvasItem('my-work','investigations',this.title);
-            })
+            });
             it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
                 //1-up view has 4-up button visible and 1-up canvas
                 clueCanvas.getFourUpViewToggle().should('be.visible');
@@ -232,7 +230,7 @@ context('Test Canvas', function(){
             it('adds text tool', function(){
                 clueCanvas.addTile('text');
                 textToolTile.getTextTile().should('exist');
-                textToolTile.enterText('This is the Investigation '+this.title)
+                textToolTile.enterText('This is the Investigation '+this.title);
             });
             it('adds a graph tool', function(){
                 clueCanvas.addTile('geometry');
@@ -271,17 +269,17 @@ context('Test Canvas', function(){
                 it('will restore from My Work/Extra Workspaces tab', function() {
                     //Open personal workspace
                     rightNav.openRightNavTab('my-work');
-                    rightNav.openCanvasItem('my-work','workspaces',studentWorkspace)
-                    canvas.getPersonalDocTitle().should('contain',studentWorkspace)
+                    rightNav.openCanvasItem('my-work','workspaces',studentWorkspace);
+                    canvas.getPersonalDocTitle().should('contain',studentWorkspace);
                     graphToolTile.getGraphTile().should('be.visible');
                     tableToolTile.getTableTile().should('be.visible');
-                    textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace)
-                })
+                    textToolTile.getTextTile().should('be.visible').and('contain',studentWorkspace);
+                });
                 it('will restore from My Work/Investigation tab', function() {
                     //Open Investigation
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','investigations',this.title);
-                    clueCanvas.getInvestigationCanvasTitle().should('contain', this.title)
+                    clueCanvas.getInvestigationCanvasTitle().should('contain', this.title);
                     textToolTile.getTextTile().should('be.visible').and('contain', this.title);
                     graphToolTile.getGraphTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
@@ -292,28 +290,28 @@ context('Test Canvas', function(){
 
             describe('verify that if user leaves a canvas in four-up view, restore is also in four up view', function(){
                 before(()=>{
-                    clueCanvas.openFourUpView()//for later test on restore of 4up view
-                    clueCanvas.getNorthWestCanvas().should('be.visible')
-                })
+                    clueCanvas.openFourUpView();//for later test on restore of 4up view
+                    clueCanvas.getNorthWestCanvas().should('be.visible');
+                });
                 it('verify restore in 4 up view from Extra Workspace',function(){
                     //Open Personal Workspace
                     rightNav.openRightNavTab('my-work');
-                    rightNav.openCanvasItem('my-work','workspaces',studentWorkspace)
-                    rightNav.closeRightNavTab('my-work')
-                    canvas.getPersonalDocTitle().should('contain',studentWorkspace)
-                })
+                    rightNav.openCanvasItem('my-work','workspaces',studentWorkspace);
+                    rightNav.closeRightNavTab('my-work');
+                    canvas.getPersonalDocTitle().should('contain',studentWorkspace);
+                });
                 it('verify restore in 4 up view from Investigation',function(){
                     //Open Investigation should be in 4up view
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work','investigations',this.title);
                     rightNav.closeRightNavTab('my-work');
-                    clueCanvas.getInvestigationCanvasTitle().should('contain',this.title)
-                    clueCanvas.getNorthWestCanvas().should('be.visible')
-                })
+                    clueCanvas.getInvestigationCanvasTitle().should('contain',this.title);
+                    clueCanvas.getNorthWestCanvas().should('be.visible');
+                });
                 after(()=>{ //restore to 1up view
-                    rightNav.closeRightNavTab('my-work')
+                    rightNav.closeRightNavTab('my-work');
                     clueCanvas.openOneUpViewFromFourUp();
-                })
+                });
             });
         });
 
@@ -330,7 +328,7 @@ context('Test Canvas', function(){
 
                 it('verify 2-up view is visible when canvas is in 4-up view', function(){
                     //single canvas 4up button and 2up button is visible
-                    clueCanvas.openFourUpView()
+                    clueCanvas.openFourUpView();
                     clueCanvas.getNorthEastCanvas().should('be.visible');
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
 
@@ -356,7 +354,7 @@ context('Test Canvas', function(){
                     //add a canvas to the rightside workspace from My Work
                     rightNav.openRightNavTab('my-work');
                     rightNav.openCanvasItem('my-work', 'workspaces', studentWorkspace);
-                    clueCanvas.getRightSideWorkspaceTitle().should('contain',studentWorkspace)
+                    clueCanvas.getRightSideWorkspaceTitle().should('contain',studentWorkspace);
                     //verify tool palette is not present in the rightside workspace
                     clueCanvas.getRightSideToolPalette().should('not.exist');
                     //Verify header elements do not appear in right side canvas
@@ -364,22 +362,22 @@ context('Test Canvas', function(){
                     canvas.getNewDocumentIcon().should('have.length',1);
                     canvas.getCopyIcon().should('have.length', 1);
                     canvas.getPublishIcon().should('have.length',1);
-                    clueCanvas.getShareButton().should('have.length',1)
+                    clueCanvas.getShareButton().should('have.length',1);
                 });
                 describe('header actions in 2up view',function(){
                     it('verify copy of workspace',function(){
-                        let title = 'copy of 1.2'
+                        let title = 'copy of 1.2';
                         canvas.copyDocument(title);
-                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title);
                     });
                     it('verify new workspace', function(){
-                        let title = 'New in 2up'
+                        let title = 'New in 2up';
                         canvas.createNewExtraDocument(title);
-                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',title);
                     });
                     it('verify publishing', function(){//{https://www.pivotaltracker.com/story/show/169159799}
                         canvas.createNewExtraDocument(publishTitle);
-                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',publishTitle)
+                        clueCanvas.getLeftSidePersonalDocTitle().should('contain',publishTitle);
                         canvas.publishPersonalCanvas();
                         rightNav.openRightNavTab('class-work');
                         rightNav.openSection('class-work','personal');
@@ -388,7 +386,7 @@ context('Test Canvas', function(){
                     it('verify share',function(){
                         //TODO
                     });
-                })
+                });
                 //TODO: add a test for when both views are the same section (Open an intro, put it into workspace, change to 2 up view, drag intro to 2nd space, open intro again, switching back to 1 up view disappears
                 //from https://www.pivotaltracker.com/story/show/160826065
             });
@@ -403,8 +401,8 @@ context('Test Canvas', function(){
         it('Drags and drops a tile', () => {
             // TO DO
             //clueCanvas.moveTile(movingTile, targetTile, direction)
-        })
-    })
+        });
+    });
 
     context.skip('Dragging elements from different locations to canvas', function(){
         describe('Drag element from left nav', function(){
@@ -423,7 +421,7 @@ context('Test Canvas', function(){
                     .trigger('dragend');
                 leftNav.closeLeftNavTab('Introduction');
                 imageToolTile.getImageTile().first().should('exist');
-            })
+            });
        });
        //TODO add a test for dragging rightside canvas to the left side workspace
 
@@ -434,7 +432,7 @@ context('Test Canvas', function(){
         before(()=>{
             //star a document to verify delete
             rightNav.openCanvasItem('my-work','workspaces','copy of 1.2');
-        })
+        });
         it('will delete elements from canvas', function(){
             // //Delete elements in the canvas
             clueCanvas.deleteTile('graph');
@@ -455,53 +453,53 @@ context('Test Canvas', function(){
         before(()=>{
             rightNav.openRightNavTab('my-work');
             rightNav.starCanvasItem('my-work','workspaces',studentWorkspace);
-        })
+        });
         it('verify delete of copy of investigation', function(){
             rightNav.openCanvasItem('my-work','workspaces','Investigation Copy');
             canvas.deleteDocument();
             rightNav.openRightNavTab('my-work');
-            rightNav.getCanvasItemTitle('my-work','workspaces').contains('Investigation Copy').should('not.exist')
-        })
+            rightNav.getCanvasItemTitle('my-work','workspaces').contains('Investigation Copy').should('not.exist');
+        });
         it('verify original investigation canvas still exist after copy delete',function(){
             rightNav.openSection('my-work','investigations');
             rightNav.getCanvasItemTitle('my-work','investigations').contains('Drawing Wumps').should('exist');
-        })
+        });
         it('verify that original personal workspace is not deleted when copy is deleted', function(){
-            rightNav.openSection('my-work', 'workspaces')
+            rightNav.openSection('my-work', 'workspaces');
             rightNav.openCanvasItem('my-work','workspaces',renameTitle);
             canvas.deleteDocument();
             rightNav.openRightNavTab('my-work');
             rightNav.getCanvasItemTitle('my-work','workspaces').contains(renameTitle).should('not.exist');
             rightNav.getCanvasItemTitle('my-work','workspaces').contains(studentWorkspace).should('exist');
-        })
+        });
         it('verify delete of personal workspace', function(){
             rightNav.openCanvasItem('my-work','workspaces',studentWorkspace);
             canvas.deleteDocument();
             rightNav.openRightNavTab('my-work');
-            rightNav.getCanvasItemTitle('my-work','workspaces').contains(studentWorkspace).should('not.exist')
-        })
+            rightNav.getCanvasItemTitle('my-work','workspaces').contains(studentWorkspace).should('not.exist');
+        });
         it('verify starred document is no longer in the Starred section after delete',function(){
             rightNav.openSection('my-work','starred');
             rightNav.getCanvasItemTitle('my-work','starred').should('not.exist');
-        })
+        });
         it('verify that published personal workspace', function(){
             rightNav.openCanvasItem('my-work','workspaces',publishTitle);
             canvas.deleteDocument();
             rightNav.openRightNavTab('class-work');
-            rightNav.getCanvasItemTitle('class-work','personal').contains(publishTitle).should('exist')
-        })
+            rightNav.getCanvasItemTitle('class-work','personal').contains(publishTitle).should('exist');
+        });
         it('verify delete of starred personal workspace', function(){
             //TODO: should also delete document from Starred section
-        })
+        });
         it('verify delete last document thumbnail',function(){
-            rightNav.openRightNavTab('my-work')
+            rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','workspaces');
             rightNav.openCanvasItem('my-work','workspaces',renameTitlePencil);
             canvas.deleteDocument();
             rightNav.openRightNavTab('my-work');
             rightNav.getCanvasItemTitle('my-work','workspaces').contains(renameTitlePencil).should('not.exist');
-        })
-    })
+        });
+    });
 });
 
 after(function(){

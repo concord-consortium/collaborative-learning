@@ -2,20 +2,20 @@ const graphUnit=18.33;
 
 class GraphToolTile{
     transformFromCoordinate(axis, num){
-        if (axis=='x'){
+        if (axis==='x'){
             return (num+1.05)*graphUnit;
         }
-        if (axis=='y'){
+        if (axis==='y'){
             // return 320-((num+1.2)*graphUnit);
             return 316-((num+1.1)*graphUnit);
         }
     }
     transformToCoordinate(axis, num){
-        if (axis=='x'){
-            return Math.round(((num-graphUnit)/graphUnit))
+        if (axis==='x'){
+            return Math.round(((num-graphUnit)/graphUnit));
         }
-        if (axis=='y'){
-            return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))))
+        if (axis==='y'){
+            return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))));
         }
     }
     getGraphTile(){
@@ -29,14 +29,14 @@ class GraphToolTile{
             .then(($label)=>{
                 let id= $label.attr('id');
                 return id;
-        })
+        });
     }
     getGraphAxisLabel(axis){
-        if (axis=='x') {
-            return cy.get('.canvas-area .geometry-content .JXGtext').contains('x')
+        if (axis==='x') {
+            return cy.get('.canvas-area .geometry-content .JXGtext').contains('x');
         }
-        if(axis=='y') {
-            return cy.get('.canvas-area .geometry-content .JXGtext').contains('y')
+        if(axis==='y') {
+            return cy.get('.canvas-area .geometry-content .JXGtext').contains('y');
         }
     }
     getGraphPointCoordinates(index){ //This is the point coordinate text
@@ -48,7 +48,7 @@ class GraphToolTile{
                 x = $point.attr('cx');
                 y = $point.attr('cy');
                 var coords = ('"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"');
-                return coords
+                return coords;
             });
     }
     getGraphPointLabel(){ //This is the letter label for a point
@@ -68,7 +68,7 @@ class GraphToolTile{
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX,transY), {force:true};
+        this.getGraph().last().click(transX, transY, {force:true});
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -90,7 +90,7 @@ class GraphToolTile{
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');
     }
     getGraphToolMenuIcon(){
-        return cy.get('.geometry-menu-button')
+        return cy.get('.geometry-menu-button');
     }
     showAngle(){
         cy.get('.geometry-tool .button.angle-label.enabled').click();
