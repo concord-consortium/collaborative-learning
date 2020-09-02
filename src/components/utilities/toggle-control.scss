@@ -1,6 +1,7 @@
 @import "../vars";
 
 .toggle-control {
+  box-sizing: content-box;
   width: 34px;
   height: 14px;
   cursor: pointer;
@@ -18,7 +19,7 @@
 
   .ball {
     position: relative;
-    top: -15.5px;
+    top: -17px;
     width: 17px;
     height: 17px;
     border-radius: 50%;
@@ -36,7 +37,7 @@
     }
 
     &.toggle-on {
-      transform: translate(17.5px, 0);
+      transform: translate(17px, 0);
       background-color: $workspace-teal;
       border-color: white;
     }
