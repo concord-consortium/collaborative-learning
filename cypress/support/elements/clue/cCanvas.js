@@ -94,7 +94,7 @@ class ClueCanvas {
     }
 
     getShareButton() {
-        return cy.get('[data-test=share-icon]');
+        return cy.get('[data-test=share-button]');
     }
 
     shareCanvas() {

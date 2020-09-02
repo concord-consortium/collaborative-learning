@@ -95,7 +95,7 @@ context('Test graph tool functionalities', function(){
                 // graphToolTile.getGraphPointCoordinates().should('contain', '(13.20, 5)');
                 graphToolTile.getGraphPointCoordinates().should('contain', '(10, 10)');
             });
-            it('will drag a point to a new location', function(){
+            it.skip('will drag a point to a new location', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 15, y=2;
@@ -106,7 +106,7 @@ context('Test graph tool functionalities', function(){
                     .trigger('mousedown',{dataTransfer, force:true})
                     .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
                     .trigger('mouseup',{dataTransfer, force:true});
-                graphToolTile.getGraphPointCoordinates().should('contain', '('+x+', '+y+')'); 
+                graphToolTile.getGraphPointCoordinates().should('contain', '('+x+', '+y+')');
             });
             // it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
             //
@@ -144,7 +144,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.selectGraphPoint(4.2,2);
 
             });
-            it('will drag a polygon to a new location', function(){ 
+            it.skip('will drag a polygon to a new location', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 18, y=5;
@@ -156,13 +156,13 @@ context('Test graph tool functionalities', function(){
                     transY=(graphToolTile.transformFromCoordinate('y', y))+(6.5*graphUnit);
                 graphToolTile.getGraphPolygon().click({force:true})
                 graphToolTile.getGraphPoint().last()
-                    .trigger('mousedown',{dataTransfer, force:true}) 
+                    .trigger('mousedown',{dataTransfer, force:true})
                     .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
                     .trigger('mouseup',{dataTransfer, force:true})
-                //TODO: verify move    
-                graphToolTile.getGraphPointCoordinates(0).should('contain', '('+newX1+', '+newY1+')'); 
-                graphToolTile.getGraphPointCoordinates(1).should('contain', '('+newX2+', '+newY2+')'); 
-                graphToolTile.getGraphPointCoordinates(2).should('contain', '('+newX3+', '+newY3+')'); 
+                //TODO: verify move
+                graphToolTile.getGraphPointCoordinates(0).should('contain', '('+newX1+', '+newY1+')');
+                graphToolTile.getGraphPointCoordinates(1).should('contain', '('+newX2+', '+newY2+')');
+                graphToolTile.getGraphPointCoordinates(2).should('contain', '('+newX3+', '+newY3+')');
             });
             it('verify rotate tool is visible when polygon is selected', function(){
                 rightNav.openRightNavTab('my-work');
@@ -214,14 +214,14 @@ context('Test graph tool functionalities', function(){
             it('verify delete polygon',()=>{
                 rightNav.openRightNavTab('my-work');
                 rightNav.openCanvasItem('my-work','workspaces', doc3)
-                
+
                 graphToolTile.getGraphPolygon().last().click({force:true});
                 graphToolTile.deleteGraphElement();
                 graphToolTile.getGraphPolygon().should('have.length',1)
             })
-            it('verify delete points alters polygon',()=>{
+            it.skip('verify delete points alters polygon',()=>{
                 let basePointCount = 3, baseAngleCount=3; // number of points already in doc
-                
+
                 graphToolTile.getGraphPoint().should('have.length', basePointCount)
                 graphToolTile.selectGraphPoint(18.5,5.1);
                 graphToolTile.getAngleAdornment().should('have.length',baseAngleCount);
@@ -237,7 +237,7 @@ context('Test graph tool functionalities', function(){
             })
         })
 
-        describe('movable line tests',()=>{    
+        describe('movable line tests',()=>{
             it('verify add a movable line', function(){
                 canvas.createNewExtraDocument(doc4)
                 clueCanvas.addTile('geometry');

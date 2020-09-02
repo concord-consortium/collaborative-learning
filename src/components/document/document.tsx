@@ -13,10 +13,9 @@ import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPubl
          ProblemDocument } from "../../models/document/document";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
-import SingleStringDialog from "../utilities/single-string-dialog";
+import ToggleControl from "../utilities/toggle-control";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -53,7 +52,7 @@ type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
 
 const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   return (
-    <svg key="download" className={`action icon icon-download`} onClick={onClick}>
+    <svg className={`action icon icon-download`} onClick={onClick}>
       <use xlinkHref={`#icon-publish`} />
     </svg>
   );
@@ -131,9 +130,13 @@ const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: bool
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
   return (
-    <IconButton icon="share" key={`share-${visibility}`} className={`action icon-share`}
-                innerClassName={`visibility ${visibility}`} onClickButton={onClick}
-                title={`${isShared ? "Unshare from" : "Share to"} Group`} />
+    <>
+      {<div className="share-separator" />}
+      <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
+                      initialValue={isShared} onChange={onClick}
+                      title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
+      <div className="share-label">Share</div>
+    </>
   );
 };
 
@@ -225,7 +228,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div key="document" className="document" ref={(el) => this.documentContainer = el}>
           {this.renderTitleBar(type)}
           {this.renderCanvas()}
-          {this.renderStatusBar(type)}
           {this.renderStickyNotesPopup()}
         </div>
       </DocumentContext.Provider>
@@ -275,26 +277,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
-          <div className="actions">
+          <div className="actions left">
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
+            {this.showPublishButton(document) &&
+              <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
         }
         <div className="title" data-test="document-title">
           {problemTitle} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
-          <div className="actions" data-test="document-titlebar-actions">
-            {[
-              downloadButton,
-              isTeacher &&
-                <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
-              this.showPublishButton(document) &&
-                <PublishButton key="publish" onClick={this.handlePublishDocument} />,
-              !isTeacher &&
-                <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
-            ]}
+          <div className="actions right" data-test="document-titlebar-actions">
+            {downloadButton}
+            {isTeacher &&
+              <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
+            {!isTeacher &&
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
@@ -410,6 +410,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <NewButton onClick={this.handleNewDocumentClick} />
             <CopyButton onClick={this.handleCopyDocumentClick} />
             <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
+            {!hideButtons && this.showPublishButton(document) &&
+              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -429,8 +431,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
-              {!hideButtons && this.showPublishButton(document) &&
-                <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
@@ -488,98 +488,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
                         toolApiInterface={this.toolApiInterface} />
-    );
-  }
-
-  private renderStatusBar(type: string) {
-    // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === ProblemPublication);
-    const showComment = false;
-    return (
-      <div className={`statusbar ${type}`}>
-        <div className="supports">
-          {null}
-        </div>
-        <div className="actions">
-          {showComment ? this.renderCommentButton() : null}
-        </div>
-        {this.renderCommentDialog()}
-      </div>
-    );
-  }
-
-  private renderCommentDialog = () => {
-    const { isCommentDialogOpen, commentTileId } = this.state;
-    if (isCommentDialogOpen) {
-      return (
-        <SingleStringDialog
-          parentId={commentTileId}
-          onAccept={this.handleSaveComment}
-          onClose={this.handleCloseCommentDialog}
-          title="Add Comment"
-          prompt="Enter a comment"
-          placeholder="Comment..."
-          maxLength={100}
-        />
-      );
-    }
-  }
-
-  private renderCommentButton() {
-    return (
-      <div className="tool comment" title="Comment"
-          onClick={this.handleComment}>
-        <svg className={`icon icon-geometry-comment`}>
-          <use xlinkHref={`#icon-geometry-comment`} />
-        </svg>
-      </div>
-    );
-  }
-
-  private handleComment = () => {
-    // TODO: how to handle comments when multiple tiles are selected?
-    //       currently it will select the first tile for commenting
-    const { ui: { selectedTileIds } } = this.stores;
-    if (selectedTileIds.length > 0) {
-      this.setState({
-        isCommentDialogOpen: true,
-        commentTileId: selectedTileIds[0]
-      });
-    }
-  }
-
-  private handleSaveComment = (comment: string, tileId?: string) => {
-    const { documents, user } = this.stores;
-    const document = tileId && documents.findDocumentOfTile(tileId);
-    if (!tileId || !document) return;
-    const toolApi = this.toolApiMap[tileId];
-    const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
-    if (document) {
-      const newComment = TileCommentModel.create({
-        uid: user.id,
-        text: comment,
-        selectionInfo
-      });
-      let tileComments = document.comments.get(tileId);
-      if (!tileComments) {
-        tileComments = TileCommentsModel.create({ tileId });
-        document.setTileComments(tileId, tileComments);
-      }
-      tileComments.addComment(newComment);
-    }
-    this.handleCloseCommentDialog();
-  }
-
-  private handleCloseCommentDialog = () => {
-    this.setState({ isCommentDialogOpen: false });
-  }
-
-  private renderTwoUpButton() {
-    const {workspace} = this.props;
-    const mode = workspace.comparisonVisible ? "up2" : "up1";
-    const modeTitle = workspace.comparisonVisible ? "Return to Student View" : "Open Workspace Compare View";
-    return (
-      <ViewModeButton onClick={this.handleToggleTwoUp} icon={mode} title={modeTitle} />
     );
   }
 
