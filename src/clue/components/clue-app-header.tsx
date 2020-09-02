@@ -4,13 +4,15 @@ import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
-import { ToggleGroup, Themes } from "@concord-consortium/react-components";
+import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
-import { ProblemSelect } from "./problem-select";
+import { CustomSelect } from "./custom-select";
+
+// cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
+import styles from "./toggle-buttons.scss";
 
 import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
-const Colors = Themes.Default;
 
 interface IProps extends IBaseProps {
   isGhostUser: boolean;
@@ -45,8 +47,8 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
             </div>
           </div>
           <div className="separator"/>
-          <ProblemSelect
-            items={[`${problem.title}: ${problem.subtitle}`]}
+          <CustomSelect
+            items={[{text: `${problem.title}: ${problem.subtitle}`}]}
             isDisabled={true}
           />
         </div>
@@ -61,8 +63,8 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
               <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
               <div className="class" data-test="user-class">{user.className}</div>
             </div>
-            <div className="student-profile-icon">
-              <div className="student-profile-icon-inner"/>
+            <div className="profile-icon">
+              <div className="profile-icon-inner"/>
             </div>
           </div>
         </div>
@@ -73,7 +75,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   private renderTeacherHeader(userTitle: string | undefined) {
     const { investigation, unit } = this.stores;
     return (
-      <div className="app-header teacher">
+      <div className="app-header">
         <div className="left">
           <div className="unit" data-test="investigation-title">
             <div className="title">
@@ -92,11 +94,13 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           {this.renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="class" data-test="user-class">
-            <ClassMenuContainer />
-          </div>
-          <div className="profile-icon">
-            <div className="profile-icon-inner"/>
+          <div className="user teacher">
+            <div className="class" data-test="user-class">
+              <ClassMenuContainer />
+            </div>
+            <div className="profile-icon teacher">
+              <div className="profile-icon-inner"/>
+            </div>
           </div>
         </div>
       </div>
@@ -114,19 +118,31 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
         const onClick = () => { onPanelChange?.(panelId); };
         const key = panelId;
         const selected = key === current;
-        const colors = panelId === EPanelId.workspace
+        const colors = panelId === EPanelId.workspace || panelId === EPanelId.dashboard
           ? {
             unselectedColor: {
-              color: Colors.Sky["sky-dark-5"],
-              background: Colors.Sky["sky-light-1"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceBackgroundColor
+                          : styles.toggleButtonDashboardBackgroundColor
             },
             hoverColor: {
-              color: Colors.Sky["sky-dark-5"],
-              background: Colors.Sky["sky-dark-1"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceHoverBackgroundColor
+                          : styles.toggleButtonDashboardHoverBackgroundColor
             },
             selectedColor: {
-              color: Colors.Sky["sky-light-2"],
-              background: Colors.Sky["sky-dark-5"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceSelectedBackgroundColor
+                          : styles.toggleButtonDashboardSelectedBackgroundColor,
             }
           }
           : undefined;

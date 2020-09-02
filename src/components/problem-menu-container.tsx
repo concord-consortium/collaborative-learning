@@ -2,7 +2,8 @@ import React from "react";
 import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
 import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
-import { DropDown, IDropdownItem } from "@concord-consortium/react-components";
+import { IDropdownItem } from "@concord-consortium/react-components";
+import { CustomSelect } from "../clue/components/custom-select";
 
 interface IProps extends IBaseProps {}
 
@@ -12,7 +13,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
 
   public render() {
     const problemMenuItems = this.getProblemMenuItems();
-    return <DropDown title="Problems" items={problemMenuItems} />;
+    return <CustomSelect items={problemMenuItems} />;
   }
 
   private handleMenuItemClick = (item: IDropdownItem, problemName: string) => {

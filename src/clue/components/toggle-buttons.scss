@@ -1,0 +1,21 @@
+@import "../../components/vars";
+
+$toggle-button-dashboard-color: $charcoal-dark-2;
+$toggle-button-dashboard-background-color: $learninglog-green-light-7;
+$toggle-button-dashboard-hover-background-color: $learninglog-green-light-5;
+$toggle-button-dashboard-selected-background-color: $learninglog-green-light-3;
+$toggle-button-workspace-color: $charcoal-dark-2;
+$toggle-button-workspace-background-color: $workspace-teal-light-6;
+$toggle-button-workspace-hover-background-color: $workspace-teal-light-4;
+$toggle-button-workspace-selected-background-color: $workspace-teal-light-3;
+
+:export {
+  toggleButtonDashboardColor: $toggle-button-dashboard-color;
+  toggleButtonDashboardBackgroundColor: $toggle-button-dashboard-background-color;
+  toggleButtonDashboardHoverBackgroundColor: $toggle-button-dashboard-hover-background-color;
+  toggleButtonDashboardSelectedBackgroundColor: $toggle-button-dashboard-selected-background-color;
+  toggleButtonWorkspaceColor: $toggle-button-workspace-color;
+  toggleButtonWorkspaceBackgroundColor: $toggle-button-workspace-background-color;
+  toggleButtonWorkspaceHoverBackgroundColor: $toggle-button-workspace-hover-background-color;
+  toggleButtonWorkspaceSelectedBackgroundColor: $toggle-button-workspace-selected-background-color;
+}
