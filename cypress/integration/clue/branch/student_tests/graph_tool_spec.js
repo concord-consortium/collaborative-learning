@@ -73,7 +73,7 @@ context('Test graph tool functionalities', function(){
     });
 
     context('Graph Toolbar', function(){
-        describe('interact with points and polygons', function(){
+        describe.skip('interact with points and polygons', function(){
             it('will select a point', function(){
                 let point=4;
                 rightNav.openRightNavTab('my-work');
@@ -92,7 +92,7 @@ context('Test graph tool functionalities', function(){
                 // graphToolTile.getGraphPointCoordinates().should('contain', '(13.20, 5)');
                 graphToolTile.getGraphPointCoordinates().should('contain', '(10, 10)');
             });
-            it.skip('will drag a point to a new location', function(){
+            it('will drag a point to a new location', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 15, y=2;
@@ -141,7 +141,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.selectGraphPoint(4.2,2);
 
             });
-            it.skip('will drag a polygon to a new location', function(){
+            it('will drag a polygon to a new location', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 18, y=5;
@@ -192,7 +192,7 @@ context('Test graph tool functionalities', function(){
             });
         });
 
-        describe('delete points and polygons', function(){
+        describe.skip('delete points and polygons', function(){
             it('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
                 let basePointCount = 3; // number of points already in doc2
 
@@ -216,7 +216,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.deleteGraphElement();
                 graphToolTile.getGraphPolygon().should('have.length',1);
             });
-            it.skip('verify delete points alters polygon',()=>{
+            it('verify delete points alters polygon',()=>{
                 let basePointCount = 3, baseAngleCount=3; // number of points already in doc
 
                 graphToolTile.getGraphPoint().should('have.length', basePointCount);
