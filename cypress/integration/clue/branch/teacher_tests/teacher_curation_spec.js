@@ -16,15 +16,15 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
 
     before(function() {
         const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
-    
+
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
         dashboard.switchView("Workspace")
         cy.wait(2000)
-        clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
+        clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')
     })
-    
-    describe('verify document curation', function() {//adding a star to a student document
+
+    describe.skip('verify document curation', function() {//adding a star to a student document
         let studentDoc = "Student 5: SAS 2.1 Drawing Wumps"
 
         it('verify starring a student published investigation',function(){
@@ -32,7 +32,7 @@ import TextToolTile from "../../../../support/elements/clue/TextToolTile";
             rightNav.openSection('class-work','published')
             rightNav.starCanvasItem('class-work','published',studentDoc)
             rightNav.getCanvasStarIcon('class-work','published',studentDoc).should('have.class','starred')
-            //make sure only one canvas is starred, 
+            //make sure only one canvas is starred,
             // but length 2 because there is one in published section and one in Starred section
             cy.get('.icon-star.starred').should('have.length',2)
         })
