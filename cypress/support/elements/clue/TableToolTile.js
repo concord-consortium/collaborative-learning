@@ -1,9 +1,9 @@
 class TableToolTile{
     tableToolTile(){
-        return '.canvas-area .neo-codap-case-table'
+        return '.canvas-area .neo-codap-case-table';
     }
     tableTool(){//to use when looking for in right side workspace
-        return '.table-tool'
+        return '.table-tool';
     }
     getTableTile(){
         return cy.get('.canvas-area .table-tool');
@@ -13,7 +13,7 @@ class TableToolTile{
     }
 
     getRemoveRowMenuItem(){
-        return cy.get('[data-test=remove-row-menu-item]')
+        return cy.get('[data-test=remove-row-menu-item]');
     }
 
     openTableMenu(){
@@ -21,7 +21,7 @@ class TableToolTile{
     }
     addNewRow(){
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('New Row').click()
+        cy.get('.bp3-menu-item div').contains('New Row').click();
         // cy.get('[data-test=new-row-menu-item]').click();
     }
     renameColumn(column, title){
@@ -33,7 +33,7 @@ class TableToolTile{
     removeRows(i){
         cy.get('[row-index='+i+']').first().click({force:true});
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Remove Rows').click()
+        cy.get('.bp3-menu-item div').contains('Remove Rows').click();
         // cy.get('[data-test=remove-row-menu-item]').click()
     }
     getTableRow(){
@@ -48,7 +48,7 @@ class TableToolTile{
     openRenameColumnDialog(column){ //used for testing cancel of dialog
         this.openTableMenu();
         cy.get('.bp3-menu-item div').contains('Rename Column').click().click();//.siblings('span.bp3-icon-caret-right').click().click()
-        cy.wait(500)
+        cy.wait(500);
         cy.get('.bp3-menu-item div').contains(column).click();
         // cy.get('[data-test=rename-column-menu-item]').click().click();
         // cy.get('[data-test=attr-menu-item]').contains(column).click();
@@ -66,11 +66,11 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-cell')
+        return cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-cell');
     }
     unlinkTable(){
         this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Unlink Geometry').click()
+        cy.get('.bp3-menu-item div').contains('Unlink Geometry').click();
     }
 }
 export default TableToolTile;

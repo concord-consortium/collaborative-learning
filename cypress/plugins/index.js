@@ -7,6 +7,7 @@
 // You can read more here:
 // https://on.cypress.io/plugins-guide
 // ***********************************************************
+/* eslint-env node */
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
@@ -19,18 +20,18 @@ function getConfigFile (name) {
     const pathToConfigFile = path.resolve('config', name);
     return fs.readJson(pathToConfigFile)
     // Don't throw an error if config file does not exist. Just return an empty config.
-        .catch(_ => {})
+        .catch(_ => { /* ignore */ });
 }
 
 function getEnvVariablesStartingWith (prefix) {
     const result = {};
     Object.keys(process.env).forEach(key => {
         if (key.startsWith(prefix)) {
-            const [_, configKey] = key.split(prefix);
-            result[configKey] = process.env[key]
+            const [ , configKey] = key.split(prefix);
+            result[configKey] = process.env[key];
         }
     });
-    return result
+    return result;
 }
 
 // This function reads content of config/environments.json and config/user-config.json files.
@@ -51,7 +52,7 @@ module.exports = (on, config) => {
         .then(content => {
             // Pick correct set of values for given environment.
             const envSpecificConfig = content[environment] || {};
-            return Object.assign(envSpecificConfig, unifiedCypressEnvVariables)
+            return Object.assign(envSpecificConfig, unifiedCypressEnvVariables);
 
-        })
+        });
 };

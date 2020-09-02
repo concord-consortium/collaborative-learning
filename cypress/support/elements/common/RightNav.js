@@ -9,18 +9,18 @@ class RightNav{
     }
 
     closeRightNavTabs(){
-        cy.get('.right-nav .tabs').click()
+        cy.get('.right-nav .tabs').click();
     }
 
     getRightNavTab(tab){
         return cy.get('#rightNavTab-'+tab+'.tab');
     }
 
-    openRightNavTab(tab){   
+    openRightNavTab(tab){
         this.getRightNavTab(tab).click();
         cy.wait(1000);
     }
-    closeRightNavTab(tab){   
+    closeRightNavTab(tab){
         cy.get('#rightNavTab-'+tab+'.tab').click();
         cy.wait(2000);
     }
@@ -30,20 +30,20 @@ class RightNav{
     }
 
     getSectionTitle(tab, section){
-        return cy.get('[data-test='+tab+'-section-'+section+'] .title')
+        return cy.get('[data-test='+tab+'-section-'+section+'] .title');
     }
 
     openSection(tab,section){
-        if (tab=='learning-log'){
+        if (tab==='learning-log'){
             cy.get('[data-test='+tab+'-section]').click();
-        } else {   
+        } else {
             cy.get('[data-test='+tab+'-section-'+section+']').click();
             cy.wait(1000);
         }
     }
 
     closeSection(tab,section){
-        cy.get('[data-test='+tab+'-section-'+section+']').click()
+        cy.get('[data-test='+tab+'-section-'+section+']').click();
     }
 
     getAllSectionCanvasItems(tab, section){
@@ -51,10 +51,10 @@ class RightNav{
     }
 
     getCanvasItemTitle(tab,section){
-        if ((tab=='learning-log')||(section==='')){
-            return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div')
+        if ((tab==='learning-log')||(section==='')){
+            return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div');
         } else {
-            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div')
+            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div');
 
         }
     }
@@ -64,25 +64,25 @@ class RightNav{
     }
 
     starCanvasItem(tab,section,title){
-        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click()
+        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click();
     }
     getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star')    
+        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star');
     }
 
     deleteSupport(index) {
-        if (index == "all") {
-            return cy.get('svg.icon-delete-document').click({multiple:true, force:true})
+        if (index === "all") {
+            return cy.get('svg.icon-delete-document').click({multiple:true, force:true});
         } else {
-            return cy.get('svg.icon-delete-document').eq(index-1).click({force:true})
+            return cy.get('svg.icon-delete-document').eq(index-1).click({force:true});
         }
     }
     confirmDeleteDialog() {
         return cy.get('.dialog-container').within(() => {
-            cy.get('.dialog-title').contains('Confirm Delete')
-            cy.get('.dialog-text').contains('Do you want to delete this?')
-            cy.get('button#okButton').contains('Yes').click({force:true})
-        })
+            cy.get('.dialog-title').contains('Confirm Delete');
+            cy.get('.dialog-text').contains('Do you want to delete this?');
+            cy.get('button#okButton').contains('Yes').click({force:true});
+        });
     }
 }
 export default RightNav;

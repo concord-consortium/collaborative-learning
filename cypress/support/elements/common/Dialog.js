@@ -16,4 +16,4 @@ class Dialog{// popup dialog box
     }
 
 }
-export default Dialog
+export default Dialog;

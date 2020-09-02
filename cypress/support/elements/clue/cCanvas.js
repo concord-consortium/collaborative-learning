@@ -1,10 +1,10 @@
-import GraphToolTile from './GraphToolTile'
-import ImageToolTile from './ImageToolTile'
-import DrawToolTile from './DrawToolTile'
-import TextToolTile from './TextToolTile'
-import TableToolTile from './TableToolTile'
-import Canvas from '../common/Canvas'
-import Dialog from '../common/Dialog'
+import GraphToolTile from './GraphToolTile';
+import ImageToolTile from './ImageToolTile';
+import DrawToolTile from './DrawToolTile';
+import TextToolTile from './TextToolTile';
+import TableToolTile from './TableToolTile';
+import Canvas from '../common/Canvas';
+import Dialog from '../common/Dialog';
 
 let graphToolTile = new GraphToolTile,
     imageToolTile = new ImageToolTile,
@@ -17,11 +17,11 @@ let graphToolTile = new GraphToolTile,
 class ClueCanvas {
     //canvas header
     getInvestigationCanvasTitle() {
-        return cy.get('[data-test=document-title]')
+        return cy.get('[data-test=document-title]');
     }
 
     getPublishSupport() {
-        return cy.get('[data-test=publish-support-icon]')
+        return cy.get('[data-test=publish-support-icon]');
     }
     publishSupportDoc() {
         this.getPublishSupport().click();
@@ -30,11 +30,11 @@ class ClueCanvas {
     }
 
     getSingleWorkspace() {
-        return cy.get('.single-workspace')
+        return cy.get('.single-workspace');
     }
 
     getRowSectionHeader() {
-        return cy.get('.row-section-header')
+        return cy.get('.row-section-header');
     }
 
     getSectionHeader(header) {
@@ -44,7 +44,7 @@ class ClueCanvas {
     }
 
     getPlaceHolder() {
-        return cy.get('.placeholder-tool')
+        return cy.get('.placeholder-tool');
     }
 
     getFourUpViewToggle() {
@@ -70,10 +70,10 @@ class ClueCanvas {
     }
 
     getLeftSideFourUpView() {
-        return cy.get('.left-workspace .canvas-area .four-up')
+        return cy.get('.left-workspace .canvas-area .four-up');
     }
     northWestCanvas() {
-        return '.canvas-area .four-up .canvas-container.north-west .canvas' //.document-content'
+        return '.canvas-area .four-up .canvas-container.north-west .canvas'; //.document-content'
     }
 
     getNorthEastCanvas() {
@@ -121,18 +121,18 @@ class ClueCanvas {
     }
 
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
-        cy.get('.single-workspace .tool.' + tile).click({ force: true })
+        cy.get('.single-workspace .tool.' + tile).click({ force: true });
     }
     addTileByDrag(tile, dropzone){//tile=[text,table,geometry,image,drawing,delete]
-        const dropzoneArray = ['top', 'left', 'right', 'bottom']
+        const dropzoneArray = ['top', 'left', 'right', 'bottom'];
         const dataTransfer = new DataTransfer;
-        let nthType = dropzoneArray.indexOf(dropzone)+2
-        cy.log(nthType)
+        let nthType = dropzoneArray.indexOf(dropzone)+2;
+        cy.log(nthType);
         cy.get('.single-workspace .tool.' + tile)
-            .trigger('dragstart', { dataTransfer })
+            .trigger('dragstart', { dataTransfer });
         cy.get('.drop-feedback:nth-of-type('+nthType+')').eq(1).invoke('attr','class','drop-feedback show '+dropzone)
             .trigger('drop', { dataTransfer, force: true })
-            .trigger('dragend', { dataTransfer, force: true })
+            .trigger('dragend', { dataTransfer, force: true });
     }
 
     getDeleteTool() {
@@ -144,44 +144,44 @@ class ClueCanvas {
 
         switch (movingTile) {
             case ('table'):
-                tableToolTile.getTableTile().eq(0).click()
+                tableToolTile.getTableTile().eq(0).click();
                 tableToolTile.getTableTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('geometry'):
-                graphToolTile.getGraphTile().eq(0).click()
+                graphToolTile.getGraphTile().eq(0).click();
                 graphToolTile.getGraphTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('text'):
-                textToolTile.getTextTile().eq(0).click()
+                textToolTile.getTextTile().eq(0).click();
                 textToolTile.getTextTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('image'):
-                imageToolTile.getImageTile().eq(0).click()
+                imageToolTile.getImageTile().eq(0).click();
                 imageToolTile.getImageTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('draw'):
-                drawToolTile.getDrawTile().eq(0).click()
+                drawToolTile.getDrawTile().eq(0).click();
                 drawToolTile.getDrawTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
 
         }
-        if (targetTile == "text") {
+        if (targetTile === "text") {
             cy.get('.' + targetTile + '-tool').eq(0).parent().parent().parent().within(() => {
                 cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
                     .trigger('drop', { dataTransfer, force: true })
-                    .trigger('dragend', { dataTransfer, force: true })
-            })
+                    .trigger('dragend', { dataTransfer, force: true });
+            });
         } else {
             cy.get('.' + targetTile + '-tool').eq(0).parent().parent().within(() => {
                 cy.get('.drop-feedback').eq(0).invoke('attr', 'class', 'drop-feedback show ' + dropZoneDirection)
                     .trigger('drop', { dataTransfer, force: true })
-                    .trigger('dragend', { dataTransfer, force: true })
-            })
+                    .trigger('dragend', { dataTransfer, force: true });
+            });
         }
     }
 
@@ -189,7 +189,7 @@ class ClueCanvas {
         switch (tile) {
             case 'text':
                 textToolTile.getTextTile().last().focus();
-                cy.get('.text-tool-wrapper').parent().should('have.class','selected')
+                cy.get('.text-tool-wrapper').parent().should('have.class','selected');
                 break;
             case 'graph':
                 graphToolTile.getGraphTile().last().click({ force: true });
@@ -212,7 +212,7 @@ class ClueCanvas {
     }
 
     getSupportTitle() {
-        return cy.get('.visible-supports .supports-list > div')
+        return cy.get('.visible-supports .supports-list > div');
     }
 
     getTwoUpViewToggle() {
@@ -223,7 +223,7 @@ class ClueCanvas {
     }
 
     getRightSideWorkspace() {
-        return cy.get('.right-workspace')
+        return cy.get('.right-workspace');
     }
     getLeftSideWorkspace() {
         return cy.get('.left-workspace .canvas-area');
@@ -240,29 +240,29 @@ class ClueCanvas {
     }
 
     getRightSideWorkspaceTitle() {
-        return cy.get('.right-workspace [data-test=personal-doc-title]')
+        return cy.get('.right-workspace [data-test=personal-doc-title]');
     }
     getRightSideInvestigationTitle() {
-        return cy.get('.right-workspace [data-test=document-title]')
+        return cy.get('.right-workspace [data-test=document-title]');
     }
     getRightSideLLTitle() {
-        return cy.get('.right-workspace [data-test=learning-log-title]')
+        return cy.get('.right-workspace [data-test=learning-log-title]');
     }
 
      getLeftSideWorkspaceTitle(){
-         return cy.get('.left-workspace [data-test=document-title]')
+         return cy.get('.left-workspace [data-test=document-title]');
      }
      getLeftSidePersonalDocTitle(){
-         return cy.get('.left-workspace [data-test=personal-doc-title]')
+         return cy.get('.left-workspace [data-test=personal-doc-title]');
      }
      getRightSideDocumentContent(){
-         return cy.get('.right-workspace .document-content')
+         return cy.get('.right-workspace .document-content');
      }
      getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
         return '.tool-tile-drag-handle';
      }
      linkIconEl(){
-         return '[data-test="link-indicator-icon"]'
+         return '[data-test="link-indicator-icon"]';
      }
 }
 

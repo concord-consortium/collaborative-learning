@@ -1,10 +1,10 @@
 import LeftNav from '../../../../support/elements/clue/LeftNav';
 import RightNav from '../../../../support/elements/common/RightNav';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-const queryParams = `${Cypress.config("queryParams")}`
+const queryParams = `${Cypress.config("queryParams")}`;
 let leftNav = new LeftNav,
     rightNav = new RightNav,
     clueCanvas = new ClueCanvas,
@@ -17,9 +17,9 @@ let leftNav = new LeftNav,
         cy.waitForSpinner();
     });
 context('Test the overall workspace', function(){
-    describe('Workspace UI',()=>{
+    // describe('Workspace UI',()=>{
 
-    })
+    // })
 
     describe.skip('Desktop functionalities', function(){
         it('will verify that clicking on tab closes the nav area', function(){
@@ -70,8 +70,8 @@ context('Test the overall workspace', function(){
             cy.waitForSpinner();
             // cy.wait(2000);
             textToolTile.getTextTile().last().should('contain', 'Problem '+problem1);
-            clueCanvas.deleteTile('text')//clean up
-        })
+            clueCanvas.deleteTile('text');//clean up
+        });
 
     });
 });

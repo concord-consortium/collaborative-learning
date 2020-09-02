@@ -1,6 +1,6 @@
 import Dialog from "./Dialog";
 
-const dialog = new Dialog
+const dialog = new Dialog;
 
 class Canvas{
     canvas(){
@@ -8,7 +8,7 @@ class Canvas{
     }
 
     singleCanvas(){
-        return '[data-test=canvas]'
+        return '[data-test=canvas]';
     }
 
     getSingleCanvas(){
@@ -16,20 +16,20 @@ class Canvas{
     }
 
     getSingleCanvasDocumentContent(){
-        return cy.get('[data-test=canvas]:first .document-content')
+        return cy.get('[data-test=canvas]:first .document-content');
     }
 
     //Header elements
     personalDocTitleEl(){
-        return '[data-test=personal-doc-title]'
+        return '[data-test=personal-doc-title]';
     }
 
     getPersonalDocTitle(){
-        return cy.get(this.personalDocTitleEl())
+        return cy.get(this.personalDocTitleEl());
     }
 
     getNewDocumentIcon(){
-        return cy.get('[data-test=new-icon]')
+        return cy.get('[data-test=new-icon]');
     }
 
     getPublishIcon(){
@@ -41,15 +41,15 @@ class Canvas{
     }
 
     getEditTitleIcon(){
-        return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]')
+        return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
     }
 
     getCopyIcon(){
-        return cy.get('[data-test=copy-icon]')
+        return cy.get('[data-test=copy-icon]');
     }
 
     getDeleteIcon(){
-        return cy.get('[data-test=delete-icon] .delete')
+        return cy.get('[data-test=delete-icon] .delete');
     }
 
     createNewExtraDocument(title){
@@ -58,8 +58,8 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
-            })
-        cy.wait(3000)    
+            });
+        cy.wait(3000);    
     }
 
     editTitlewithPencil(title){
@@ -68,7 +68,7 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
-            })
+            });
     }
 
     editTitle(title){
@@ -77,7 +77,7 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
-            })
+            });
     }
 
     copyDocument(title){
@@ -86,7 +86,7 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Copy Problem Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click(); 
-            })
+            });
     }
 
     copyExtraDocument(title){
@@ -95,15 +95,15 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Copy Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click(); 
-            })
+            });
     }
 
     deleteDocument(){
         this.getDeleteIcon().click().then(()=>{
             dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
-        })
-    cy.wait(3000)    
+        });
+    cy.wait(3000);    
     }
 
     publishPersonalCanvas(){
