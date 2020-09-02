@@ -17,7 +17,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
 
     before(() => {
         const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
-    
+
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
 
@@ -39,14 +39,14 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     // Check Investigation Name visibility
                     dashboard.getInvestigationTitle().should('be.visible').and('contain', clueData.investigationTitle)
                     // Check problem list  UI and visibility
-                    dashboard.getProblemList().should('not.have.attr','open')
+                    dashboard.getProblemList().should('not.have.class','show')
                     dashboard.getProblemDropdown().should('be.visible').click({ force: true })
-                    dashboard.getProblemList().should('exist').and('have.attr','open')
-                    dashboard.getProblemList().find('.Menuitem').should('have.length', tempClass.problemTotal)
+                    dashboard.getProblemList().should('exist').and('have.class','show')
+                    dashboard.getProblemList().find('.list-item').should('have.length', tempClass.problemTotal)
                     dashboard.getProblemDropdown().click({ force: true })
-                    dashboard.getProblemList().should('not.have.attr','open')
+                    dashboard.getProblemList().should('not.have.class','show')
                     // Check class list UI and visibility
-                    dashboard.getClassList().should('not.have.attr','open')
+                    dashboard.getClassList().should('not.have.class','show')
                     dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className)
                     dashboard.getClassDropdown().should('be.visible').click({ force: true })
                     // Check Dashboard and Workspace toggle default
@@ -171,7 +171,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
 
                 dashboard.switchView('Dashboard') //switch back to continue tests
             })
-            it('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => { 
+            it('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => {
                 cy.get('@clueData').then((clueData) => {
                     let groupIndex = 0
                     let studentIndex = 0
@@ -204,7 +204,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                                  "IC":"9",
                                  "WI":"10",
                                  "NW":"7"
-                                }; 
+                                };
                 dashboard.getTotalProgressNumber("IN").should('contain',progress["total"])
                 dashboard.getTotalProgressNumber("IC").should('contain',progress["total"])
                 dashboard.getTotalProgressNumber("WI").should('contain',progress["total"])
@@ -262,7 +262,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     dashboard.starPublishedWork(groups)
                 })
             })
-            it('removes all stars from student published work', () => { 
+            it('removes all stars from student published work', () => {
                 dashboard.getStarPublishIcon().should('have.class', 'starred')
                 dashboard.getStarPublishIcon().click({ force: true, multiple: true })
                 dashboard.getStarPublishIcon().should('not.have.class', 'starred')

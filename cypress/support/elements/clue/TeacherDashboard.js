@@ -18,16 +18,16 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.problem-dropdown[data-test="user-class"] .dropdown')
+        return cy.get('.problem-dropdown[data-test="user-class"] .header')
     }
     getClassDropdown() {
-        return cy.get('.class[data-test="user-class"] .dropdown')
+        return cy.get('.class[data-test="user-class"] .header')
     }
     getProblemList() {
-        return cy.get('.problem-dropdown .dropdown')
+        return cy.get('.problem-dropdown .list')
     }
     getClassList() {
-        return cy.get('.class .dropdown')
+        return cy.get('.class .list')
     }
     getViewToggle(view) { //view=["Dashboard", "Workspace"]
         return cy.get('.toggle-button').contains(view)
@@ -193,7 +193,7 @@ class TeacherDashboard {
                 })
             } else {
                 this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain',"Not Published")
-            }  
+            }
         }
     }
     // selectStudent(student) {
