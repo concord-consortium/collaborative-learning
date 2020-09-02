@@ -1,0 +1,54 @@
+@import "../vars";
+
+.toggle-control {
+  width: 34px;
+  height: 14px;
+  cursor: pointer;
+
+  .track {
+    width: 34px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: $charcoal-light-1;
+
+    &.toggle-on {
+      background-color: $workspace-teal;
+    }
+  }
+
+  .ball {
+    position: relative;
+    top: -15.5px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border: 2px solid $charcoal-light-1;
+    background-color: $workspace-teal-light-6;
+    transition-property: transform;
+    transition-duration: .25s;
+
+    &:hover {
+      background-color: $workspace-teal-light-4;
+    }
+    &:active {
+      background-color: $workspace-teal;
+      border-color: white;
+    }
+
+    &.toggle-on {
+      transform: translate(17.5px, 0);
+      background-color: $workspace-teal;
+      border-color: white;
+    }
+
+    &:hover.toggle-on {
+      background-color: $workspace-teal-light-4;
+    }
+    &:active.toggle-on {
+      background-color: $workspace-teal-light-6;
+      border-color: $charcoal-light-1;
+    }
+
+  }
+
+}

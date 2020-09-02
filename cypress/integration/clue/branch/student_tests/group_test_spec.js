@@ -52,7 +52,6 @@ context('Test group functionalities', function(){
                 cy.get('.canvas-area > .four-up > .horizontal.splitter').trigger('mousedown',{which:1}, {force:true}).trigger('mousemove',{pageX:243, pageY: 175}, {force:true}).trigger('mouseup',{force:true});
                 cy.get('.canvas-area > .canvas-container.north-west').should('have.css','height').and('less.than', 243);
                 cy.get('.canvas-area > .canvas-container.south-east').should('have.css','height').and('greater.than', 243);
-            
             });
             // TODO: Write this test
             it.skip('will move vertical splitter horizantally and verify canvas size change', function(){
@@ -99,11 +98,11 @@ context('Test group functionalities', function(){
         // TODO: Need to write tests
         describe('test sharing and unsharing canvases', function(){
             it('verify share icon toggles correctly',()=>{
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
+                clueCanvas.getShareButton().should('have.class', 'public');
                 clueCanvas.shareCanvas();
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'private');
+                clueCanvas.getShareButton().should('have.class', 'private');
                 clueCanvas.unshareCanvas();
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
+                clueCanvas.getShareButton().should('have.class', 'public');
             })
             it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
                 cy.log('need to write this test');

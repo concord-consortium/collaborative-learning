@@ -63,13 +63,13 @@ context('single student functional test',()=>{
 
         it('verify share button', function(){
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().find('.button-icon').should('have.class','private')
+            clueCanvas.getShareButton().should('have.class','private');
             clueCanvas.shareCanvas();
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().find('.button-icon').should('have.class','public')
+            clueCanvas.getShareButton().should('have.class','public');
             clueCanvas.unshareCanvas();
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().find('.button-icon').should('have.class','private')
+            clueCanvas.getShareButton().should('have.class','private');
         });
         it('verify publish button', function(){
             canvas.publishCanvas();

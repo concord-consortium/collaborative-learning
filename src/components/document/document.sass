@@ -6,12 +6,11 @@
   left: 0
   right: 0
   bottom: 0
-  color: #000
-  background-color: #F8FCFE
-  margin: $margin
-  margin-left: $margin - $border-width
-  border: $border-width solid $border-color
-  border-radius: $border-radius
+  color: black
+  background-color: white
+  margin: 0 8px 0 10px
+  border: $document-border-width solid $workspace-teal
+  border-top-left-radius: $border-radius
 
   .titlebar
     position: absolute
@@ -19,13 +18,11 @@
     left: 0
     right: 0
     height: $workspace-titlebar-height
-    background-color: $color1-3
     display: flex
     flex-direction: row
     flex-wrap: nowrap
     justify-content: flex-start
     border-top-left-radius: $border-radius
-    border-top-right-radius: $border-radius
 
     .display-id
       flex-grow: 1
@@ -39,6 +36,7 @@
       flex-grow: 1
       text-align: center
       padding: $margin
+      color: $charcoal-dark-2
       font-weight: bold
       white-space: nowrap
       overflow: hidden
@@ -91,6 +89,8 @@
       flex-grow: 0
       padding: 1px 0
       display: flex
+      align-items: center
+      justify-content: space-between
 
       .action.icon.icon-download
         transform: rotate(180deg)
@@ -99,6 +99,19 @@
 
       .mode
         border-top-right-radius: $border-radius
+
+      .share-separator
+        width: 1px
+        height: 24px
+        margin: 0 3px
+        background-color: $workspace-teal
+        border: 0.5px solid $workspace-teal
+
+      .toggle-control
+        margin: 0 4px
+
+      .share-label
+        margin: 0 7px 0 3px
 
       .icon
         box-sizing: content-box
@@ -120,7 +133,6 @@
 
       .icon-button
         border: 0
-        padding: 0
 
         &:hover
           background-color: $color1
@@ -134,31 +146,37 @@
 
       .icon-button
         background-color: $color1-3
-        padding: $padding
-        padding-top: 2px
         position: relative
-        width: 40px
-        height: 36px
+        width: 32px
+        height: 28px
+        margin: 0 4px
         cursor: pointer
 
         .button-icon
           background-repeat: no-repeat
           position: absolute
-          left: 15%
-          bottom: 10%
+          top: 0
+          left: 0
           width: 30px
-          height: 26px
-          padding: $half-padding
-          padding-top: 2px
+          height: 28px
           cursor: pointer
 
+        &.icon-publish, &.icon-up1, &.icon-up4
+          width: 32px
+          height: 32px
+          border-radius: 0
+
+          .button-icon
+            width: 32px
+            height: 32px
+
+          &:hover
+            background-color: $workspace-teal-light-3
           &:active
-            transform-origin: center
-            transform: scale(.85)
+            background-color: $workspace-teal-light-2
 
       .icon-new
-        border-top-left-radius: $border-radius
-        margin-left: 0
+        margin-left: 8px
 
         .new
           background-image: url("../../assets/icons/new/new.svg")
@@ -185,10 +203,10 @@
   .canvas-area
     position: absolute
     top: $workspace-titlebar-height
-    bottom: $workspace-statusbar-height
+    bottom: 0
     left: 0
     right: 0
-    border-top: $border-width solid $border-color
+    border-top: $document-border-width solid white
 
   .statusbar
     position: absolute
@@ -335,4 +353,3 @@
         .sticky-note-popup-item-content
           font-size: 1.1em
           padding: 3px 0
-
