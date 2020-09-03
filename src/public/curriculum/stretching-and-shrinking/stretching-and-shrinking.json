@@ -2814,7 +2814,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Using the Scale Factor</h3><ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                        "<h3>Situation A. Scale Factors and Ratios</h3>For each set in the Initial Challenge, <ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
                       ]
                     }
                   },
@@ -2823,7 +2823,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Isaiah, Noah, and Anna’s Claims</h3><ol><li>Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why?</li><li>Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain.</li><li>Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal? Is that true? Explain.</li></ol>"
+                        "<h3>Situation B. Isaiah, Noah, and Anna’s Conjectures</h3>Examine each conjecture. Is it true? Explain. \n<strong>Isaiah's Conjectures</strong> Two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. \n<strong>Noah's Conjectures</strong> Isaiah’s conjecture is true for parallelograms. \n<strong>Anna's Conjectures</strong> Isaiah’s conjecture is true for triangles if the corresponding angles are equal. "
                       ]
                     }
                   }
@@ -2844,7 +2844,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What information does the ratio of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                        "What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
                       ]
                     }
                   }
@@ -2868,7 +2868,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
+                        "In the last problem we explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
                       ]
                     }
                   },
@@ -2898,7 +2898,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct.</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
+                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct?</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
                       ]
                     }
                   }, 
@@ -2989,7 +2989,7 @@
         }, {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "SAS 4.3 Using Shadows to Find Height",
+          "title": "SAS 4.3 Using Shadows to Find Heights",
           "subtitle": "",
           "sections": [
             {
@@ -3001,7 +3001,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths within each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths with each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
                       ]
                     }
                   }
@@ -3017,7 +3017,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
+                        "We can find the height of a school building by climbing a ladder and using a long tape measure. We can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
                       ]
                     }
                   }, {
@@ -3030,7 +3030,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Examine the diagram of the shadow method. \nWhy are the measures of the corresponding angles of the large triangle and the small triangle equal? \nHow can you use this method to find the height of the Statue of Liberty? What is the height?"
+                        "Examine the diagram of the shadow method. <ul><li>Why are the measures of the corresponding angles of the large triangle and the small triangle equal? </li><li>How can we use this method to find the height of the Statue of Liberty? What is the height?</li></ol>"
                       ]
                     }
                   }, {
@@ -3038,7 +3038,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the stick’s shadow</li><li>The length of the shadow cast by the building, tree, or other object</li></ul>"
+                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the shadow of the stick</li><li>The length of the shadow of the building’s (tree’s, or other object’s) shadow</li></ul>"
                       ]
                     }
                   }
@@ -3057,7 +3057,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet long. How tall is the tree?"
+                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet in length. How tall is the tree?"
                       ]
                     }
                   }, {
@@ -3087,7 +3087,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Creating Similar Figures</h3>Mario thought that the mirrors and shadows created similar figures. Is his claim correct? Explain. What other methods have you used in this unit to create similar figures?"
+                        "<h3>Situation C. Creating Similar Figures</h3>Mario claims that the mirrors and shadows created similar figures. Is his claim correct? Explain why. What other methods have you used in this unit to create similar figures?"
                       ]
                     }
                   }
@@ -3138,7 +3138,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3155,7 +3155,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3172,7 +3172,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3189,7 +3189,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
