@@ -1,5 +1,8 @@
 @import ../vars
 
+$canvas-separator-offset: 4px
+$canvas-separator-width: 2px
+
 .document
   position: absolute
   top: 0
@@ -8,7 +11,7 @@
   bottom: 0
   color: black
   background-color: white
-  margin: 0 8px 0 10px
+  margin: 0 8px 0 5px
   border: $document-border-width solid $workspace-teal
   border-top-left-radius: $border-radius
 
@@ -200,11 +203,19 @@
           &:active
             background-image: url("../../assets/icons/support/support-active.svg")
 
+  .canvas-separator
+    position: absolute
+    top: 0
+    left: $workspace-toolbar-width + $canvas-separator-offset
+    width: $canvas-separator-width
+    bottom: 0
+    background-color: $workspace-teal-light-4
+
   .canvas-area
     position: absolute
     top: $workspace-titlebar-height
     bottom: 0
-    left: 0
+    left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width
     right: 0
     border-top: $document-border-width solid white
 

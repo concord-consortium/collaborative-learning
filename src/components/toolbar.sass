@@ -2,43 +2,38 @@
 
 .toolbar
   position: absolute
-  top: $margin + $border-width + $workspace-titlebar-height
-  bottom: $workspace-statusbar-height
-  left: $margin - $workspace-toolbar-width - $border-width 
+  top: $workspace-titlebar-height
+  left: 0
   width: $workspace-toolbar-width
 
   display: flex
   flex-direction: column
 
   .tool
-    width: $workspace-toolbar-width
-    height: $workspace-toolbar-width - 2px
-    background-color: $color3
+    width: 36px
+    height: 34px
+    background-color: $charcoal-light-6
     display: flex
     justify-content: center
     align-items: center
     text-align: center
     font-size: 20px
     font-weight: bold
-    margin-bottom: -$border-width
-    border: $border-width solid $border-color
-    border-right-width: 0
+    margin: 2px
+    margin-bottom: 0
+    border: 0
     cursor: pointer
 
-    .icon
-      width: 36px
-      height: 34px
-      color: $color3-1
+    svg path
+      fill: $charcoal-dark-1
       pointer-events: none
 
-    &.select
-      border-top-left-radius: $border-radius
-
-    &.delete
-      border-bottom-left-radius: $border-radius
-
     &:hover
-      background-color: $color3-6
+      background-color: $charcoal-light-4
 
     &:active
-      background-color: $color3-7
+      background-color: $charcoal-light-3
+
+      svg path
+        fill: $charcoal-dark-2
+        pointer-events: none

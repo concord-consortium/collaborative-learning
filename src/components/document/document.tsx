@@ -224,9 +224,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { document: { type } } = this.props;
     return (
       <DocumentContext.Provider value={this.state.documentContext}>
-        {this.renderToolbar()}
         <div key="document" className="document" ref={(el) => this.documentContainer = el}>
           {this.renderTitleBar(type)}
+          {this.renderToolbar()}
+          <div className="canvas-separator"/>
           {this.renderCanvas()}
           {this.renderStickyNotesPopup()}
         </div>

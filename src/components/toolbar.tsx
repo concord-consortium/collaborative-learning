@@ -7,6 +7,7 @@ import { IDocumentContentAddTileOptions } from "../models/document/document-cont
 import { getToolContentInfoByTool } from "../models/tools/tool-content-info";
 import { ToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
+import { gToolIcons } from "../app-config";
 
 import "./toolbar.sass";
 
@@ -24,27 +25,29 @@ interface IButtonProps {
   onHideDropHighlight: () => void;
 }
 
-const ToolButtonComponent = (props: IButtonProps) => {
+const ToolButtonComponent: React.FC<IButtonProps> =
+        ({ config, onClick, onDragStart, onShowDropHighlight, onHideDropHighlight }) => {
+
+  const { name, title, iconId, isTileTool } = config;
+  const ToolIcon = gToolIcons[iconId];
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    return props.onClick && props.onClick(e, props.config.name as DocumentTool);
+    return onClick?.(e, name as DocumentTool);
   };
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    return props.onDragStart && props.onDragStart(e, props.config.name as DocumentTool);
+    return onDragStart?.(e, name as DocumentTool);
   };
 
   return (
-    <div className={`tool ${props.config.name}`} title={props.config.title || ""}
-        key={props.config.name}
+    <div className={`tool ${name}`} title={title || ""}
+        key={name}
         onClick={handleClick}
-        onDragStart={props.config.isTileTool ? handleDrag : undefined}
-        draggable={props.config.isTileTool || false}
-        onMouseEnter={props.config.isTileTool ? props.onShowDropHighlight : undefined}
-        onMouseLeave={props.config.isTileTool ? props.onHideDropHighlight : undefined}>
-      <svg className={`icon ${props.config.iconId}`}>
-        <use xlinkHref={`#${props.config.iconId}`} />
-      </svg>
+        onDragStart={isTileTool ? handleDrag : undefined}
+        draggable={isTileTool || false}
+        onMouseEnter={isTileTool ? onShowDropHighlight : undefined}
+        onMouseLeave={isTileTool ? onHideDropHighlight : undefined}>
+      <ToolIcon />
     </div>
   );
 };
