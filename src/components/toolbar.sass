@@ -28,12 +28,16 @@
       fill: $charcoal-dark-1
       pointer-events: none
 
-    &:hover
-      background-color: $charcoal-light-4
+    &.enabled
+      &:hover
+        background-color: $charcoal-light-4
 
-    &:active
-      background-color: $charcoal-light-3
+      &:active, &.active
+        background-color: $charcoal-light-3
 
-      svg path
-        fill: $charcoal-dark-2
-        pointer-events: none
+        svg path
+          fill: $charcoal-dark-2
+          pointer-events: none
+
+    &.disabled
+      opacity: 35%

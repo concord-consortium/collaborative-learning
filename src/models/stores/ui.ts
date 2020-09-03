@@ -168,6 +168,9 @@ export const UIModel = types
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tileId, options);
       },
+      removeTileIdFromSelection(tileId: string) {
+        self.selectedTileIds.remove(tileId);
+      },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
       },
