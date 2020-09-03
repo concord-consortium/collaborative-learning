@@ -52,7 +52,8 @@ export const ToolButtonModel = types.model("ToolButton", {
   name: types.string,
   title: types.string,
   iconId: types.string,
-  isTileTool: false     // boolean that defaults to false
+  isDefault: false,
+  isTileTool: false
 });
 export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
 export type ToolButtonConfig = SnapshotOut<typeof ToolButtonModel>;

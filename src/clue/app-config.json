@@ -51,7 +51,7 @@
         "tab": "problems",
         "label": "Problems",
         "sections": []
-      },      
+      },
       {
         "tab": "student-work",
         "label": "Student Workspaces",
@@ -313,7 +313,8 @@
     {
       "name": "select",
       "title": "Select",
-      "iconId": "icon-select-tool"
+      "iconId": "icon-select-tool",
+      "isDefault": true
     },
     {
       "name": "text",
