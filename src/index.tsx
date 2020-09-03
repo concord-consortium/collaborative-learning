@@ -5,7 +5,7 @@ import { Provider } from "mobx-react";
 import "mobx-react/batchingForReactDom";
 import React from "react";
 import ReactDOM from "react-dom";
-import { appConfigSpec, createStores, gToolIcons } from "./app-config";
+import { appConfigSpec, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -61,7 +61,7 @@ const initializeApp = async () => {
   });
 
   ReactDOM.render(
-    <AppConfigContext.Provider value={{ toolIcons: gToolIcons }} >
+    <AppConfigContext.Provider value={{ appIcons }} >
       <Provider stores={stores}>
         <AppComponent />
       </Provider>

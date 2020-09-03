@@ -3,17 +3,17 @@ import { autorun, IReactionDisposer } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 
+import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { ToolbarComponent } from "../toolbar";
+import { ToolbarComponent, ToolbarConfig } from "../toolbar";
 import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
          ProblemDocument } from "../../models/document/document";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -455,12 +455,21 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderToolbar() {
-    const {document, isGhostUser, readOnly} = this.props;
+    const {document, isGhostUser, readOnly, toolbar} = this.props;
     const isPublication = document.isPublished;
     const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    if (!showToolbar || !this.props.toolbar) return;
-    return <ToolbarComponent key="toolbar" document={this.props.document}
-                              config={this.props.toolbar} toolApiMap={this.toolApiMap} />;
+    if (!showToolbar || !toolbar) return;
+    return (
+      <AppConfigContext.Consumer>
+        {appConfig => {
+          const toolbarConfig = (toolbar || {}).map(tool => ({ icon: appConfig.appIcons?.[tool.iconId], ...tool }));
+          return (
+            <ToolbarComponent key="toolbar" document={this.props.document}
+                              config={toolbarConfig} toolApiMap={this.toolApiMap} />
+          );
+        }}
+      </AppConfigContext.Consumer>
+    );
   }
 
   private renderCanvas() {
