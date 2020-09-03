@@ -37,7 +37,7 @@ class RightNav{
         if (tab==='learning-log'){
             cy.get('[data-test='+tab+'-section]').click();
         } else {
-            cy.get('[data-test='+tab+'-section-'+section+']').click();
+            cy.get('[data-test='+tab+'-section-'+section+']').click({ force: true });
             cy.wait(1000);
         }
     }

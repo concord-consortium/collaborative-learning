@@ -14,12 +14,13 @@ interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
+  showStarInThumbnail?: boolean;
 }
 
 export const ThumbnailDocumentItem = observer((props: IProps) => {
   const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
-        onDocumentDeleteClick } = props;
+          onDocumentDeleteClick, showStarInThumbnail } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick && onDocumentClick(document);
   };
@@ -37,23 +38,27 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
       className="list-item"
       data-test={dataTestName}
       key={document.key} >
-
       <div
         className="scaled-list-item-container"
         onClick={handleDocumentClick}
         onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart} >
-
         <div className="scaled-list-item">
-          <CanvasComponent context={canvasContext} document={document}
-                            readOnly={true} scale={scale} />
+          <CanvasComponent
+            context={canvasContext}
+            document={document}
+            readOnly={true}
+            scale={scale}
+          />
         </div>
       </div>
-
+      { (onDocumentStarClick && showStarInThumbnail) &&
+          <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
+      }
       <DocumentCaption
         captionText={captionText}
         isStarred={onIsStarred()}
-        onStarClick={onDocumentStarClick ? handleDocumentStarClick : undefined}
+        onStarClick={(onDocumentStarClick && !showStarInThumbnail) ? handleDocumentStarClick : undefined}
         onDeleteClick={onDocumentDeleteClick ? handleDocumentDeleteClick : undefined}
       />
     </div>
@@ -77,12 +82,8 @@ const DocumentCaption = (props: IDocumentCaptionProps) => {
       <div className="info">
         <div>{captionText}</div>
       </div>
-      {onStarClick
-        ? <DocumentStar isStarred={!!isStarred} onStarClick={onStarClick} />
-        : null}
-      {onDeleteClick
-        ? <DocumentDelete onDeleteClick={onDeleteClick} />
-        : null}
+      { onStarClick && <DocumentStar isStarred={!!isStarred} onStarClick={onStarClick} /> }
+      { onDeleteClick && <DocumentDelete onDeleteClick={onDeleteClick} /> }
     </div>
   );
 };

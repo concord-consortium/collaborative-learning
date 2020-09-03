@@ -61,7 +61,7 @@ context('Test Canvas', function(){
             });
         });
         describe('Test personal workspace canvas',function(){
-            it('verify personal workspace does not have section headers', function(){
+            it.skip('verify personal workspace does not have section headers', function(){
                 clueCanvas.getRowSectionHeader().should('not.exist');
             });
             it('verify tool tiles',function(){ //to be used for save and restore test
