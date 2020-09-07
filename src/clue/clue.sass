@@ -106,39 +106,6 @@
     .actions
       .action.icon, .action.icon-button
         background-color: inherit
-        .button-icon.copy
-          background-image: url("../assets/icons/copy/copy.svg")
-          &:hover
-            background-image: url("../assets/icons/copy/copy-hover.svg")
-          &:active
-            background-image: url("../assets/icons/copy/copy-active.svg")
-        .button-icon.delete
-          &.enabled
-            background-image: url("../assets/icons/delete/delete.svg")
-            &:hover
-                background-image: url("../assets/icons/delete/delete-hover.svg")
-            &:active
-                background-image: url("../assets/icons/delete/delete-active.svg")
-          &.disabled
-            background-image: url("../assets/icons/delete/delete-disabled.svg")
-            cursor: default
-            &:active
-              transform-origin: center
-              transform: none
-              cursor: default
-        .button-icon.share
-          &.visibility.public
-            background-image: url("../assets/icons/share/share.svg")
-            &:hover
-              background-image: url("../assets/icons/share/not-share-hover.svg")
-            &:active
-              background-image: url("../assets/icons/share/not-share-active.svg")
-          &.visibility.private
-            background-image: url("../assets/icons/share/not-share.svg")
-            &:hover
-              background-image: url("../assets/icons/share/share-hover.svg")
-            &:active
-              background-image: url("../assets/icons/share/share-active.svg")
         .button-icon.publish
           background-image: url("../assets/icons/publish/publish-icon-default.svg")
           &:hover
@@ -172,43 +139,3 @@
             background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg")
       .icon-button.delete-disabled
         cursor: default
-  .statusbar
-    &.personal, &.personalPublication, &.problem, &.publication
-      background-color: $sage-light-1
-    &.learningLog, &.learningLogPublication
-      background-color: $peacock-light-1
-    &.supportPublication
-      background-color: $sky-light-1
-    .actions
-      .action.icon, .action.icon-button
-        background-color: inherit
-        border: 0
-        padding: 0
-        &:focus
-          outline: none
-          outline-offset: 0
-        .button-icon
-          background-repeat: no-repeat
-          position: absolute
-          right: 10px
-          bottom: 15%
-          width: 30px
-          height: 26px
-          padding: $half-padding
-          padding-top: 2px
-          cursor: pointer
-          &:active
-            transform-origin: center
-            transform: scale(.85)
-        .button-icon.up1
-          background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg")
-          &:hover
-            background-image: url("../assets/icons/up2/up2-hover.svg")
-          &:active
-            background-image: url("../assets/icons/up2/up2-active.svg")
-        .button-icon.up2
-          background-image: url("../assets/icons/up2/up2.svg")
-          &:hover
-            background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg")
-          &:active
-            background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg")
