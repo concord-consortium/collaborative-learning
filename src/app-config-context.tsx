@@ -1,10 +1,10 @@
 import React, { FunctionComponent, SVGProps } from "react";
 
-export type IToolIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
-export type IToolIcons = Record<string, IToolIcon>;
+export type IconComponent = FunctionComponent<SVGProps<SVGSVGElement>>;
+export type IconComponents = Record<string, IconComponent>;
 
 export interface IAppConfigContext {
-  toolIcons?: IToolIcons;
+  appIcons?: IconComponents;
 }
 
 export const AppConfigContext = React.createContext<IAppConfigContext>({});

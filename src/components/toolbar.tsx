@@ -2,15 +2,21 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import classNames from "classnames";
 
-import { AppConfigContext, IToolIcon, IToolIcons } from "../app-config-context";
+import { IconComponent } from "../app-config-context";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions } from "../models/document/document-content";
 import { getToolContentInfoByTool } from "../models/tools/tool-content-info";
-import { ToolButtonConfig, ToolbarConfig } from "../models/tools/tool-types";
+import { ToolButtonSnapshot } from "../models/tools/tool-types";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
+
+export interface IToolButtonConfig extends ToolButtonSnapshot {
+  icon?: IconComponent;
+}
+
+export type ToolbarConfig = IToolButtonConfig[];
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
@@ -24,8 +30,8 @@ interface IState {
 }
 
 interface IButtonProps {
-  config: ToolButtonConfig;
-  ToolIcon?: IToolIcon;
+  config: IToolButtonConfig;
+  ToolIcon?: IconComponent;
   isActive: boolean;
   isDisabled: boolean;
   onSetToolActive: (tool: DocumentTool, isActive: boolean) => void;
@@ -117,12 +123,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: DocumentTool) => {
       this.handleDragNewToolTile(tool, e);
     };
-    const renderToolButtons = (toolbarConfig: ToolbarConfig, toolIcons?: IToolIcons) => {
+    const renderToolButtons = (toolbarConfig: ToolbarConfig) => {
       const { ui: { selectedTileIds } } = this.stores;
       return toolbarConfig.map(config => {
         const buttonProps: IButtonProps = {
           config,
-          ToolIcon: toolIcons?.[config.iconId],
+          ToolIcon: config.icon,
           isActive: config.name === this.state.activeTool,
           isDisabled: config.name === "delete" && !selectedTileIds.length,
           onSetToolActive: handleSetActiveTool,
@@ -135,13 +141,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       });
     };
     return (
-      <AppConfigContext.Consumer>
-        {value => (
-          <div className="toolbar">
-            {renderToolButtons(this.props.config, value.toolIcons)}
-          </div>
-        )}
-      </AppConfigContext.Consumer>
+      <div className="toolbar">
+        {renderToolButtons(this.props.config)}
+      </div>
     );
   }
 

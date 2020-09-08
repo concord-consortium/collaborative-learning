@@ -56,9 +56,7 @@ export const ToolButtonModel = types.model("ToolButton", {
   isTileTool: false
 });
 export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
-export type ToolButtonConfig = SnapshotOut<typeof ToolButtonModel>;
-
-export type ToolbarConfig = ToolButtonConfig[];
+export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
 
 interface IPrivate {
   toolMap: IToolMap;

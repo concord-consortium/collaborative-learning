@@ -6,5 +6,5 @@ export { createStores } from "./models/stores/stores";
 export { BaseComponent, IBaseProps } from "./components/base";
 import { ClueAppContentComponent } from "./clue/components/clue-app-content";
 export const AppContentComponent = ClueAppContentComponent;
-export { gToolIcons } from "./clue/components/tool-icons";
+export { appIcons } from "./clue/app-icons";
 import "./clue/clue.sass";
