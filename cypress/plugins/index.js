@@ -13,8 +13,8 @@
 // the project's config changing)
 
 // promisified fs module
-const fs = require('fs-extra');
-const path = require('path');
+import fs from 'fs-extra';
+import path from 'path';
 
 function getConfigFile (name) {
     const pathToConfigFile = path.resolve('config', name);

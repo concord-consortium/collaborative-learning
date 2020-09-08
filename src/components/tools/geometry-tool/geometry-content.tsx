@@ -38,7 +38,7 @@ import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+import placeholderImage from "../../../assets/image_placeholder.png";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 

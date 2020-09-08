@@ -31,12 +31,12 @@ module.exports = {
     ],
     rules: {
       "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/interface-name-prefix": "off",
+      "@typescript-eslint/no-confusing-non-null-assertion": "error",
       "@typescript-eslint/no-empty-interface": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",  // extensive use before introduction of eslint
+      "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-unused-vars": ["error", { "args": "none", "ignoreRestSiblings": true }],
-      "@typescript-eslint/no-var-requires": "off",  // 12 uses as of 2020-07-23
       curly: ["error", "multi-line", "consistent"],
       "eol-last": "warn",
       eqeqeq: ["error", "smart"],

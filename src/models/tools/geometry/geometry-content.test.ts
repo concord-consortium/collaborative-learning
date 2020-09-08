@@ -9,7 +9,7 @@ import { isUuid } from "../../../utilities/test-utils";
 import { clone } from "lodash";
 import { destroy } from "mobx-state-tree";
 
-const placeholderImage = require("../../../assets/image_placeholder.png");
+import placeholderImage from "../../../assets/image_placeholder.png";
 
 describe("GeometryContent", () => {
 
