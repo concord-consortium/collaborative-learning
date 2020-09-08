@@ -44,9 +44,6 @@ context('Test Canvas', function(){
     context('test canvas tools', function(){
         describe('test header elements', function(){
             it('verify investigation header UI',()=>{ // element functionality are tested in common
-                canvas.getNewDocumentIcon().should('be.visible');
-                canvas.getCopyIcon().should('be.visible');
-                canvas.getDeleteIcon().should('not.exist');
                 canvas.getEditTitleIcon().should('not.exist');
                 canvas.getPublishIcon().should('be.visible');
                 clueCanvas.getShareButton().should('be.visible');
@@ -57,9 +54,6 @@ context('Test Canvas', function(){
             });
             it('verify personal workspace header UI',()=>{ //other header elements are tested in common
                canvas.createNewExtraDocument(studentWorkspace);
-               canvas.getNewDocumentIcon().should('be.visible');
-               canvas.getCopyIcon().should('be.visible');
-               canvas.getDeleteIcon().should('be.visible');
                canvas.getEditTitleIcon().should('be.visible');
                canvas.getPersonalPublishIcon().should('be.visible');
                clueCanvas.getShareButton().should('not.exist');
@@ -315,8 +309,8 @@ context('Test Canvas', function(){
             });
         });
 
-        context('test footer elements', function(){
-            describe.skip('Test the 2-up view', function(){
+        context.skip('test footer elements', function(){
+            describe('Test the 2-up view', function(){
                 it('verify 2 up button, and correct corresponding view comes up', function(){
                     clueCanvas.getTwoUpViewToggle().should('be.visible');
                     clueCanvas.openTwoUpView();
@@ -359,8 +353,6 @@ context('Test Canvas', function(){
                     clueCanvas.getRightSideToolPalette().should('not.exist');
                     //Verify header elements do not appear in right side canvas
                     //by checking how many of the icons exist in the DOM
-                    canvas.getNewDocumentIcon().should('have.length',1);
-                    canvas.getCopyIcon().should('have.length', 1);
                     canvas.getPublishIcon().should('have.length',1);
                     clueCanvas.getShareButton().should('have.length',1);
                 });

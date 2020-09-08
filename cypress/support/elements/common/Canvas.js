@@ -28,8 +28,29 @@ class Canvas{
         return cy.get(this.personalDocTitleEl());
     }
 
-    getNewDocumentIcon(){
-        return cy.get('[data-test=new-icon]');
+    getFileMenu() {
+        return cy.get('[data-test=document-file-menu-header');
+    }
+
+    getNewDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-new-workspace');
+            });
+    }
+
+    getCopyDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-copy-workspace');
+            });
+    }
+
+    getDeleteDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-delete-workspace');
+            });
     }
 
     getPublishIcon(){
@@ -44,22 +65,14 @@ class Canvas{
         return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
     }
 
-    getCopyIcon(){
-        return cy.get('[data-test=copy-icon]');
-    }
-
-    getDeleteIcon(){
-        return cy.get('[data-test=delete-icon] .delete');
-    }
-
     createNewExtraDocument(title){
-        this.getNewDocumentIcon().click()
+        this.getNewDocumentItem().click()
             .then(()=>{
                 dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
             });
-        cy.wait(3000);    
+        cy.wait(3000);
     }
 
     editTitlewithPencil(title){
@@ -81,29 +94,29 @@ class Canvas{
     }
 
     copyDocument(title){
-        this.getCopyIcon().click()
+        this.getCopyDocumentItem().click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Copy Problem Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
+                dialog.getDialogOKButton().click();
             });
     }
 
     copyExtraDocument(title){
-        this.getCopyIcon().click()
+        this.getCopyDocumentItem().click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Copy Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
+                dialog.getDialogOKButton().click();
             });
     }
 
     deleteDocument(){
-        this.getDeleteIcon().click().then(()=>{
+        this.getDeleteDocumentItem().click().then(()=>{
             dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
         });
-    cy.wait(3000);    
+    cy.wait(3000);
     }
 
     publishPersonalCanvas(){

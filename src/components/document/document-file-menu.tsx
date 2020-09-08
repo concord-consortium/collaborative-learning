@@ -53,7 +53,8 @@ export const DocumentFileMenu: React.FC<IProps> =
   ]), [document]);
 
   return (
-    <CustomSelect className="document-file-menu" title="File" titleIcon={titleIcon}
+    <CustomSelect className="document-file-menu" dataTest="document-file-menu"
+                  title="File" titleIcon={titleIcon}
                   items={menuItems} showItemChecks={false} showItemIcons={true}/>
   );
 };
