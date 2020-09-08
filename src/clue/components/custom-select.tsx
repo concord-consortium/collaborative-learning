@@ -93,12 +93,13 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
     return (
       <div className={`list ${(this.state.showList ? "show" : "")}`}>
         { items?.map((item, i) => {
+          const disabledClass = item.disabled ? "disabled" : "enabled";
           const selectedClass = this.state.selected === item.text ? "selected" : "";
           const itemId = getItemId(item);
           return (
             <div
               key={`item-${i}-${itemId}`}
-              className={`list-item ${selectedClass}`}
+              className={`list-item ${disabledClass} ${selectedClass}`}
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
             >

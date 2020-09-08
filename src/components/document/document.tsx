@@ -6,6 +6,7 @@ import FileSaver from "file-saver";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContext, IDocumentContext } from "./document-context";
+import { DocumentFileMenu } from "./document-file-menu";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
@@ -65,13 +66,6 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
   );
 };
 
-// const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
-//   return (
-//     <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
-//                 onClickButton={onClick} title="Published Workspace" />
-//   );
-// };
-
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="publish-support" key="support" className="action icon-support"
@@ -79,24 +73,10 @@ const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const NewButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="new" key="new" className="action icon-new"
-                onClickButton={onClick} title="Create New Workspace" />
-  );
-};
-
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
                 onClickButton={onClick} title="Rename Workspace" />
-  );
-};
-
-const CopyButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="copy" key="copy" className="action icon-copy"
-                onClickButton={onClick} title="Copy Workspace" />
   );
 };
 
@@ -116,15 +96,6 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
                 innerClassName={selectedClass}
                 onClickButton={onClick} title="Two-Up View" />
   );
-};
-
-const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
-    const enabledClass = enabled ? "enabled" : "disabled";
-    return (
-      <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
-                  enabled={enabled} innerClassName={enabledClass}
-                  onClickButton={enabled ? onClick : undefined} title="Delete Workspace" />
-    );
 };
 
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
@@ -279,8 +250,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions left">
-            <NewButton onClick={this.handleNewDocumentClick} />
-            <CopyButton onClick={this.handleCopyDocumentClick} />
+            <DocumentFileMenu document={document}
+              onNewDocument={this.handleNewDocumentClick}
+              onCopyDocument={this.handleCopyDocumentClick}
+              isDeleteDisabled={true} />
             {this.showPublishButton(document) &&
               <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
@@ -408,9 +381,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            <NewButton onClick={this.handleNewDocumentClick} />
-            <CopyButton onClick={this.handleCopyDocumentClick} />
-            <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
+            <DocumentFileMenu document={document}
+              onNewDocument={this.handleNewDocumentClick}
+              onCopyDocument={this.handleCopyDocumentClick}
+              isDeleteDisabled={countNotDeleted < 1}
+              onDeleteDocument={this.handleDeleteDocumentClick}/>
             {!hideButtons && this.showPublishButton(document) &&
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
           </div>
