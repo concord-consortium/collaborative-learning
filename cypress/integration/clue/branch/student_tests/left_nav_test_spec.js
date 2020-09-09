@@ -21,7 +21,7 @@ describe.skip('Test Left tabs',function(){
     });
     it('verify content when switching tabs', function(){
         leftNav.getLeftNavTabs().each(($tab,index, tabList)=>{
-            var title = $tab.text();
+            const title = $tab.text();
             cy.wrap($tab).click({force:true});
             cy.get('#leftNavContainer'+index).find('.left-nav-panel .section-header h1').should("contain",title);
         });

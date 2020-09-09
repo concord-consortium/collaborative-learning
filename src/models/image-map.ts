@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
 import { getImageDimensions, storeCorsImage, storeFileImage, storeImage } from "../utilities/image-utils";
 import { DB } from "../lib/db";
-const placeholderImage = require("../assets/image_placeholder.png");
+import placeholderImage from "../assets/image_placeholder.png";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";

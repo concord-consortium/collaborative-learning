@@ -2,8 +2,8 @@ import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapModel, ImageMapModelType } from "./image-map";
 import * as ImageUtils from "../utilities/image-utils";
-const urlParser = require("url");
-const placeholderImage = require("../assets/image_placeholder.png");
+import urlParser from "url";
+import placeholderImage from "../assets/image_placeholder.png";
 
 let sImageMap: ImageMapModelType;
 
@@ -167,7 +167,7 @@ describe("ImageMap", () => {
 
   it("test firebaseRealTimeDBImagesHandler", () => {
     const parsedPath = urlParser.parse(kCCImgFBRTDB).path;
-    const path = parsedPath.startsWith("/") ? parsedPath.slice(1) : parsedPath;
+    const path = parsedPath?.startsWith("/") ? parsedPath.slice(1) : parsedPath;
     expectToMatch(firebaseRealTimeDBImagesHandler, [kCCImgOriginal, kCCImgFBRTDB]);
     let p1: any;
     let p2: any;

@@ -199,14 +199,14 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                                  "WI":"10",
                                  "NW":"7"
                                 };
-                dashboard.getTotalProgressNumber("IN").should('contain',progress["total"]);
-                dashboard.getTotalProgressNumber("IC").should('contain',progress["total"]);
-                dashboard.getTotalProgressNumber("WI").should('contain',progress["total"]);
-                dashboard.getTotalProgressNumber("NW").should('contain',progress["total"]);
-                dashboard.getCurrentProgressNumber("IN").should('contain',progress["IN"]);
-                dashboard.getCurrentProgressNumber("IC").should('contain',progress["IC"]);
-                dashboard.getCurrentProgressNumber("WI").should('contain',progress["WI"]);
-                dashboard.getCurrentProgressNumber("NW").should('contain',progress["NW"]);
+                dashboard.getTotalProgressNumber("IN").should('contain',progress.total);
+                dashboard.getTotalProgressNumber("IC").should('contain',progress.total);
+                dashboard.getTotalProgressNumber("WI").should('contain',progress.total);
+                dashboard.getTotalProgressNumber("NW").should('contain',progress.total);
+                dashboard.getCurrentProgressNumber("IN").should('contain',progress.IN);
+                dashboard.getCurrentProgressNumber("IC").should('contain',progress.IC);
+                dashboard.getCurrentProgressNumber("WI").should('contain',progress.WI);
+                dashboard.getCurrentProgressNumber("NW").should('contain',progress.NW);
             });
             it('can switch pages', () => {
                 // Use when clue class has LESS than 6 groups

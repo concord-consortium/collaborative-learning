@@ -49,7 +49,7 @@ export const Attribute = types.model("Attribute", {
   },
   addValues(values: IValueType[], beforeIndex?: number) {
     if ((beforeIndex != null) && (beforeIndex < self.values.length)) {
-      self.values.splice.apply(self.values, [beforeIndex, 0, ...values]);
+      self.values.splice(beforeIndex, 0, ...values);
     }
     else {
       self.values.push(...values);

@@ -189,7 +189,6 @@ export const UIModel = types
           else {
             alert("Please select a primary document first.", "Select Primary Document");
           }
-          return;
         }
       },
       setTeacherPanelKey(key: string) {

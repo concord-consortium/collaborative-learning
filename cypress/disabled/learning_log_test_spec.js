@@ -45,9 +45,9 @@ context('Test bottom tabs', function(){
             learningLog.closeLearningLogTab();
         });
         it('will create multiple learning logs, verify thumbnails, and restore them', function(){
-            var log1='deck',
-                log2='slide',
-                log3='lane';
+            const log1='deck',
+                  log2='slide',
+                  log3='lane';
             //create learning log canvases
             // deck should have graph tile
             learningLog.createLearningLog(log1);
@@ -122,7 +122,7 @@ context('Test bottom tabs', function(){
     describe.skip('Test publishing a learning log', function(){
         it('will verify learning log is published', function(){
             //create a learning log document.
-            var title='skip';
+            const title='skip';
             learningLog.createLearningLog(title);
             //Add text, and graph
             learningLog.addLLTextTile('Lucy is bugging me');
