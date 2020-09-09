@@ -50,22 +50,29 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   }
 
   public render() {
+    const { className, isDisabled, items } = this.props;
     return (
-      <div className={`custom-select ${this.props.className}`} ref={this.divRef}>
+      <div className={`custom-select ${className || ""}`}
+          data-test={this.getDataTest()} ref={this.divRef}>
         { this.renderHeader() }
-        { (!this.props.isDisabled && this.props.items.length > 0) && this.renderList() }
+        { (!isDisabled && items.length > 0) && this.renderList() }
       </div>
     );
   }
 
+  private getDataTest(suffix?: string) {
+    const { dataTest } = this.props;
+    return `${dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
+  }
+
   private renderHeader = () => {
-    const { dataTest, items, isDisabled, title, titlePrefix, titleIcon } = this.props;
+    const { items, isDisabled, title, titlePrefix, titleIcon } = this.props;
     const selectedItem = items.find(i => i.text === this.state.selected);
     const showListClass = this.state.showList ? "show-list" : "";
     const disabled = isDisabled || items.length === 0 ? "disabled" : "";
     return (
       <div className={`header ${showListClass} ${disabled}`}
-        data-test={`${dataTest}-header`} onClick={this.handleHeaderClick}>
+        data-test={this.getDataTest("header")} onClick={this.handleHeaderClick}>
         {titleIcon && <div className="title-icon">{titleIcon}</div>}
         { title
           ? <div className="title-container">
@@ -91,9 +98,10 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   };
 
   private renderList = () => {
-    const { dataTest, items, showItemChecks } = this.props;
+    const { items, showItemChecks } = this.props;
     return (
-      <div className={`list ${(this.state.showList ? "show" : "")}`} data-test={`${dataTest}-list`} >
+      <div className={`list ${(this.state.showList ? "show" : "")}`}
+          data-test={this.getDataTest("list")} >
         { items?.map((item, i) => {
           const disabledClass = item.disabled ? "disabled" : "enabled";
           const selectedClass = this.state.selected === item.text ? "selected" : "";
