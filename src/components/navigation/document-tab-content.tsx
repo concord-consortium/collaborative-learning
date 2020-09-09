@@ -28,7 +28,7 @@ export class DocumentTabContent extends BaseComponent<IProps> {
     return (
       <Tabs className={`document-tabs ${leftTabSpec?.tab}`} selectedTabClassName="selected" forceRenderTabPanel={true}>
         <TabList className={`tab-list ${leftTabSpec?.tab}`}>
-          {leftTabSpec && leftTabSpec.sections.map((section) => {
+          {leftTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
             return (
               <Tab
@@ -41,7 +41,7 @@ export class DocumentTabContent extends BaseComponent<IProps> {
             );
           })}
         </TabList>
-        {leftTabSpec && leftTabSpec.sections.map((section) => {
+        {leftTabSpec?.sections.map((section) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
                 ? this.handleDocumentStarClick
                 : undefined;
@@ -102,7 +102,7 @@ export class DocumentTabContent extends BaseComponent<IProps> {
 
   private handleDocumentStarClick = (document: DocumentModelType) => {
     const { user } = this.stores;
-    document && document.toggleUserStar(user.id);
+    document?.toggleUserStar(user.id);
   }
 
   private handleDocumentDeleteClick = (document: DocumentModelType) => {
