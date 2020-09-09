@@ -56,8 +56,6 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
   private handlePanelChange = (panelId: EPanelId) => {
     const { user, ui } = this.stores;
-    ui.toggleLeftNav(false);
-    ui.toggleRightNav(false);
     ui.setTeacherPanelKey(panelId);
 
     // log teacher dashboard panel changes
