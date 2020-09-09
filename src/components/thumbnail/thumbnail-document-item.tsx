@@ -14,13 +14,12 @@ interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
-  showStarInThumbnail?: boolean;
 }
 
 export const ThumbnailDocumentItem = observer((props: IProps) => {
   const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
-          onDocumentDeleteClick, showStarInThumbnail } = props;
+          onDocumentDeleteClick } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick && onDocumentClick(document);
   };
@@ -52,13 +51,11 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
           />
         </div>
       </div>
-      { (onDocumentStarClick && showStarInThumbnail) &&
+      { onDocumentStarClick &&
           <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
       }
       <DocumentCaption
         captionText={captionText}
-        isStarred={onIsStarred()}
-        onStarClick={(onDocumentStarClick && !showStarInThumbnail) ? handleDocumentStarClick : undefined}
         onDeleteClick={onDocumentDeleteClick ? handleDocumentDeleteClick : undefined}
       />
     </div>
@@ -70,19 +67,16 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
  */
 interface IDocumentCaptionProps {
   captionText: string;
-  isStarred?: boolean;
-  onStarClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onDeleteClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const DocumentCaption = (props: IDocumentCaptionProps) => {
-  const { captionText, isStarred, onStarClick, onDeleteClick } = props;
+  const { captionText, onDeleteClick } = props;
   return (
     <div className="footer">
       <div className="info">
         <div>{captionText}</div>
       </div>
-      { onStarClick && <DocumentStar isStarred={!!isStarred} onStarClick={onStarClick} /> }
       { onDeleteClick && <DocumentDelete onDeleteClick={onDeleteClick} /> }
     </div>
   );
