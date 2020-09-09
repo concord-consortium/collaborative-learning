@@ -311,7 +311,7 @@ context('Tests for graph and table integration', function(){
         });
     });
 });
-context('Save and restore keeps the connection between table and graph', function(){
+context.skip('Save and restore keeps the connection between table and graph', function(){
     before(function(){
         let title = '2.3 Mouthing Off and Nosing Around';
         rightNav.openRightNavTab('my-work');

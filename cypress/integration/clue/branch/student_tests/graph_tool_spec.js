@@ -52,7 +52,7 @@ context('Test graph tool functionalities', function(){
         });
     });
 
-    describe('restore points to canvas', function(){
+    describe.skip('restore points to canvas', function(){
         it('will verify restore of point at origin', function(){
             rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','investigations');
