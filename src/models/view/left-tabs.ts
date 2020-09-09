@@ -63,8 +63,8 @@ export type LeftTabSectionSpec = SnapshotIn<typeof LeftTabSectionModel>;
 export type LeftTabSectionModelType = Instance<typeof LeftTabSectionModel>;
 
 export const LeftTabModel =
-  types.model("RightNavTab", {
-    tab: types.enumeration<ELeftTab>("ERightNavTab", Object.values(ELeftTab)),
+  types.model("LeftTab", {
+    tab: types.enumeration<ELeftTab>("ELeftTab", Object.values(ELeftTab)),
     label: types.string,
     hideGhostUser: false,
     teacherOnly: false,

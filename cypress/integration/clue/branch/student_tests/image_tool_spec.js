@@ -78,7 +78,7 @@ context('Test image functionalities', function(){
             cy.wait(2000);
         });
     });
-    describe('restore of images', function(){
+    describe.skip('restore of images', function(){
         before(()=>{ //reopen the first canvas
             rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','investigations');

@@ -5,6 +5,7 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { LeftTabSpec, ELeftTab } from "../../models/view/left-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { ProblemTabContent } from "./problem-tab-content";
+import { DocumentTabContent } from "./document-tab-content";
 
 import "react-tabs/style/react-tabs.css";
 import "./left-tab-panel.sass";
@@ -67,9 +68,23 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     switch (tabSpec.tab) {
       case ELeftTab.kProblems:
         return this.renderProblems();
+      case ELeftTab.kClassWork:
+      case ELeftTab.kLearningLog:
+      case ELeftTab.kMyWork:
+      case ELeftTab.kStudentWork:
+      case ELeftTab.kSupports:
+        return this.renderDocuments(tabSpec);
       default:
         return null;
     }
+  }
+
+  private renderDocuments = (tabSpec: LeftTabSpec) => {
+    return (
+      <DocumentTabContent
+        tabSpec={tabSpec}
+      />
+    );
   }
 
   private renderProblems = () => {

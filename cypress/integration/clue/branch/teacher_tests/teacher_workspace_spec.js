@@ -24,10 +24,10 @@ before(function() {
     cy.waitForSpinner();
     dashboard.switchView("Workspace");
     cy.wait(2000);
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');               
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 });
 
-describe('UI visibility', () => {
+describe.skip('UI visibility', () => {
     it('verify right nav elements', function() {
          //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
         rightNav.getRightNavTab("student-work").should('be.visible');
@@ -35,9 +35,9 @@ describe('UI visibility', () => {
         rightNav.getRightNavTab("class-work").should('be.visible');
         rightNav.getRightNavTab("learning-log").should('be.visible');
         rightNav.getRightNavTab("supports").should('be.visible');
-        });    
+        });
 });
-describe('teacher document functionality',function(){
+describe.skip('teacher document functionality',function(){
      before(function(){
         clueCanvas.addTile('table');
         clueCanvas.addTile('drawing');
@@ -67,12 +67,11 @@ describe('teacher document functionality',function(){
     });
 });
 after(function(){
-    rightNav.openRightNavTab("my-work");
-    rightNav.openSection('my-work','investigations');
-    rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
-    clueCanvas.deleteTile('table');
-    clueCanvas.deleteTile('draw');
-    cy.deleteWorkspaces(baseUrl,queryParams);
+    // rightNav.openRightNavTab("my-work");
+    // rightNav.openSection('my-work','investigations');
+    // rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
+    // clueCanvas.deleteTile('table');
+    // clueCanvas.deleteTile('draw');
+    // cy.deleteWorkspaces(baseUrl,queryParams);
     cy.clearQAData('all');
 });
-

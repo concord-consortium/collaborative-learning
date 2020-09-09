@@ -1,0 +1,121 @@
+@import ../vars
+
+$list-item-height: 660px
+$list-item-width: 880px
+$list-item-scale: 0.11
+
+.tab-panel-documents-section
+  height: 100%
+  .list
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$left-tab-height} * 2))
+    display: flex
+    flex-wrap: wrap
+    align-content: flex-start
+    overflow: auto
+    overflow-x: hidden
+    padding: $padding
+
+    .list-item
+      position: relative
+      min-height: 120px
+      width: 116px
+      border-radius: 5px
+      padding: $padding 0
+      display: flex
+      flex-direction: column
+      align-items: center
+      background-color: white
+      overflow: hidden
+      cursor: pointer
+
+      .scaled-list-item-container
+        border-radius: 5px
+        border: solid 1.5px $charcoal-light-1
+        width: $list-item-width * $list-item-scale
+        height: $list-item-height * $list-item-scale
+        background-color: white
+        padding: 1px
+
+        .scaled-list-item
+          transform: scale(.1)
+          transform-origin: 0 0
+          height: $list-item-height
+          width: $list-item-width
+
+        &.new-document-button
+          position: relative
+
+          .new-document-button-label
+            position: absolute
+            left: 2px
+            top: 18px
+            width: 100%
+            height: 100%
+            display: flex
+            flex-direction: column
+            align-items: center
+            color: #C9DAB7
+
+            label
+              font-size: 12px
+              font-style: italic
+              color: #AAA
+
+        .canvas
+
+      .icon-holder
+        position: absolute
+        top: 12px
+        right: 14px
+        cursor: pointer
+        .icon-star
+          height: 24px
+          width: 24px
+          fill: $charcoal-light-1
+          opacity: .25
+          &.starred
+            opacity: .75
+            fill: $problem-orange
+        &:hover .icon-star
+          opacity: .25
+          fill: $problem-orange
+        &:active .icon-star
+          opacity: .75
+          fill: $problem-orange
+        &:active .icon-star.starred
+          opacity: .25
+          fill: $charcoal-light-1
+
+      .info
+        margin-top: $half-margin
+        text-align: center
+        font-size: 10px
+        width: 90px
+
+      .footer
+        display: flex
+        align-items: center
+        justify-content: center
+
+        .icon-delete-document
+          height: 16px
+          width: 16px
+          fill: #808080
+        .icon-delete-document:hover
+          fill: #f00
+
+  .my-work > .list-item
+    &:hover
+      background-color: $workspace-teal-light-7
+    &:active
+      background-color: $workspace-teal-light-5
+  .class-work > .list-item
+    &:hover
+      background-color: $classwork-purple-light-8
+    &:active
+      background-color: $classwork-purple-light-6
+  .supports > .list-item
+    &:hover
+      background-color: $support-blue-light-8
+    &:active
+      background-color: $support-blue-light-6

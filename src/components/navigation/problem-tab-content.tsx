@@ -1,6 +1,6 @@
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { getSectionInitials, SectionModelType } from "../../models/curriculum/section";
+import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
 import { LeftNavPanelComponent } from "./left-nav-panel";
 
 import "./problem-tab-content.sass";
@@ -18,7 +18,7 @@ export const ProblemTabContent: React.FC<IProps> = (props) => {
         {sections.map((section) => {
           return (
             <Tab className="prob-tab" key={`section-${section.type}`}>
-              {getSectionInitials(section.type)}
+              {getSectionTitle(section.type)}
             </Tab>
           );
         })}

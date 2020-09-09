@@ -137,7 +137,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     dashboard.sendGroupNote(2,"This is a note to Group 2");
                 });
             });
-            it('verify clicking support button opens two up with group open', function() {
+            it.skip('verify clicking support button opens two up with group open', function() {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups;
                     dashboard.getDashboardSupportButton().eq(0).click();

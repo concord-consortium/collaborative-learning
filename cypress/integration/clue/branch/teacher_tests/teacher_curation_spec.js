@@ -19,7 +19,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     });
 
-    describe('verify document curation', function() {//adding a star to a student document
+    describe.skip('verify document curation', function() {//adding a star to a student document
         let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
 
         it('verify starring a student published investigation',function(){
