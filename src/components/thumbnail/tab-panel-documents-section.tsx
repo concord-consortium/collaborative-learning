@@ -81,7 +81,8 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     return (
-      <div className="tab-panel-documents-section" key={`${tab}-${section.type}`} data-test={`${section.dataTestHeader}-documents`}>
+      <div className="tab-panel-documents-section" key={`${tab}-${section.type}`}
+          data-test={`${section.dataTestHeader}-documents`}>
         <div className={`list ${tab}`}>
           {sectionDocs.map(document => {
 
