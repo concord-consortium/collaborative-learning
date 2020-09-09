@@ -191,9 +191,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { ui } = this.stores;
     const style = { right: 0 };
     const positionedClassName = ui.leftTabContentShown ? className + " half" : className;
+    const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div
-        className={positionedClassName}
+        className={`${positionedClassName} ${roleClassName}`}
         style={style}
         onDragOver={this.handleDragOverSide}
         onDrop={this.handleDropSide(side)}

@@ -15,8 +15,9 @@ let dashboard = new TeacherDashboard();
  *    all of the students in the dashboard's current view
  */
 
-
-context("Teacher Space", () => {
+// This test launches from portal and tests the master branch rather than the branch under development.
+// Only tests that test the branch under development should run as part of Travis branch tests.
+context.skip("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",

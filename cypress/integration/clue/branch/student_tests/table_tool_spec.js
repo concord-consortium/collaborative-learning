@@ -21,7 +21,7 @@ context('Table Tool Tile',function(){
             clueCanvas.addTile('table');
             tableToolTile.getTableTile().should('be.visible');
         });
-        it('will verify there are only two columns x & y', function(){
+        it.skip('will verify there are only two columns x & y', function(){
             tableToolTile.getColumnHeaderText().then(($headers)=>{
                     expect(($headers.length)).to.be.eq(2);
             });

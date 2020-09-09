@@ -1,12 +1,12 @@
 class TableToolTile{
-    tableToolTile(){
-        return '.canvas-area .neo-codap-case-table';
+    tableToolTile(workspaceClass){
+        return `${workspaceClass || ".primary-workspace"} .canvas-area .neo-codap-case-table`;
     }
     tableTool(){//to use when looking for in right side workspace
         return '.table-tool';
     }
-    getTableTile(){
-        return cy.get('.canvas-area .table-tool');
+    getTableTile(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .table-tool`);
     }
     getTable(){
         return cy.get(this.tableToolTile());

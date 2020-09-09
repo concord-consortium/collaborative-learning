@@ -18,11 +18,11 @@ class GraphToolTile{
             return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))));
         }
     }
-    getGraphTile(){
-        return cy.get('.canvas-area .geometry-tool');
+    getGraphTile(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool`);
     }
-    getGraph(){
-        return cy.get('.canvas-area .geometry-content');
+    getGraph(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content`);
     }
     getGraphAxisLabelId(axis){
         return this.getGraphAxisLabel(axis)

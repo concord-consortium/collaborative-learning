@@ -6,7 +6,7 @@ const rightNav = new RightNav;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 
-describe('Test right nav tabs', function(){
+describe.skip('Test right nav tabs', function(){
     let copyDocumentTitle = 'copy Investigation';
 
     before(function(){
