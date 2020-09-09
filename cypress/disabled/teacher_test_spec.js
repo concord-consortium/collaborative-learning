@@ -28,7 +28,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             // cy.wait(3000)
         });
         it('will verify if class name is correct', function(){
-            header.getClassName().should('contain',''+'Class '+qaClass);
+            header.getClassName().should('contain','Class '+qaClass);
         });
         it('will verify teacher name is correct', function(){
             header.getUserName().should('contain','Teacher '+teacher);

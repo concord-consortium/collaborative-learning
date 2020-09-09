@@ -47,6 +47,7 @@ export const ToolTileModel = types
     // undefined by default, but can be negotiated with app,
     // e.g. width of all columns for table
     get maxWidth(): number | undefined {
+      // eslint-disable-next-line no-useless-return
       return;
     },
     get isUserResizable() {

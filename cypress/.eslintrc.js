@@ -8,6 +8,7 @@ module.exports = {
     ],
     rules: {
       "cypress/no-unnecessary-waiting": "off",
-      "max-len": "off"
+      "max-len": "off",
+      "prefer-const": "off"
     }
 };

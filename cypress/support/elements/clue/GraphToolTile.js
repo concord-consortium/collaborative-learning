@@ -47,8 +47,7 @@ class GraphToolTile{
             .then(($point)=>{
                 x = $point.attr('cx');
                 y = $point.attr('cy');
-                var coords = ('"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"');
-                return coords;
+                return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
             });
     }
     getGraphPointLabel(){ //This is the letter label for a point

@@ -135,13 +135,13 @@ context('single student functional test',()=>{
             });
             it('verify student name appears under thumbnail',()=>{
                 cy.get('[data-test=user-name]').then(($el)=>{
-                    var user = $el.text();
+                    const user = $el.text();
                     rightNav.getAllSectionCanvasItems('class-work','published').first().find('.info div').should('contain',user);
                 });
             } );
             it('verify restore of published canvas', ()=>{
                 cy.get('[data-test=user-name]').then(($el)=>{
-                    var user = $el.text();
+                    const user = $el.text();
                     rightNav.openCanvasItem('class-work','published', user);
                 });
                 clueCanvas.getRightSideDocumentContent().find('.text-tool').should('exist').and('contain','This is a smoke test');
