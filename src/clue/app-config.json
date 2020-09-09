@@ -62,8 +62,8 @@
           {
             "title": "Group Workspaces",
             "type": "problem-documents",
-            "dataTestHeader": "left-group-workspaces",
-            "dataTestItem": "left-group-list-items",
+            "dataTestHeader": "group-workspaces",
+            "dataTestItem": "group-list-items",
             "showGroupWorkspaces": true
           }
         ]
@@ -76,8 +76,8 @@
           {
             "title": "Extra Workspaces",
             "type": "personal-documents",
-            "dataTestHeader": "left-my-work-section-workspaces",
-            "dataTestItem": "left-my-work-list-items",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["!isDeleted"],
             "showStars": ["student", "teacher"]
@@ -85,15 +85,15 @@
           {
             "title": "Problem Workspaces",
             "type": "problem-documents",
-            "dataTestHeader": "left-my-work-section-investigations",
-            "dataTestItem": "left-my-work-list-items",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
             "documentTypes": ["problem"],
             "showStars": ["student", "teacher"]
           },
           {
             "title": "Starred",
             "type": "starred-problem-documents",
-            "dataTestHeader": "left-my-work-section-starred",
+            "dataTestHeader": "my-work-section-starred",
             "documentTypes": ["personal", "problem"],
             "properties": ["starred", "!isDeleted"],
             "showStars": ["student", "teacher"]
@@ -101,7 +101,7 @@
           {
             "title": "Learning Log",
             "type": "learning-logs",
-            "dataTestHeader": "left-learning-log-section",
+            "dataTestHeader": "learning-log-section",
             "documentTypes": ["learningLog"],
             "properties": ["!isDeleted"]
           }
@@ -115,16 +115,16 @@
             "className": "section personal published",
             "title": "Extra Workspaces",
             "type": "published-personal-documents",
-            "dataTestHeader": "left-class-work-section-personal",
-            "dataTestItem": "left-class-work-list-items",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
             "documentTypes": ["personalPublication"]
           },
           {
             "className": "section problem published",
             "title": "Problem Workspaces",
             "type": "published-problem-documents",
-            "dataTestHeader": "left-class-work-section-published",
-            "dataTestItem": "left-class-work-list-items",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "class-work-list-items",
             "documentTypes": ["publication"],
             "showStars": ["teacher"]
           },
@@ -132,15 +132,15 @@
             "className": "section learning-log published",
             "title": "Learning Logs",
             "type": "published-learning-logs",
-            "dataTestHeader": "left-class-work-section-learning-log",
-            "dataTestItem": "left-class-work-list-items",
+            "dataTestHeader": "class-work-section-learning-log",
+            "dataTestItem": "class-work-list-items",
             "documentTypes": ["learningLogPublication"]
           },
           {
             "className": "section problem starred",
             "title": "Starred",
             "type": "starred-problem-documents",
-            "dataTestHeader": "left-class-work-section-starred",
+            "dataTestHeader": "class-work-section-starred",
             "documentTypes": ["publication"],
             "properties": ["starred"],
             "showStars": ["teacher"]
@@ -154,8 +154,8 @@
           {
             "title": "Problem Supports",
             "type": "curricular-supports",
-            "dataTestHeader": "left-supports-section-jit",
-            "dataTestItem": "left-supports-list-items",
+            "dataTestHeader": "supports-section-jit",
+            "dataTestItem": "supports-list-items",
             "documentTypes": ["supportPublication"],
             "order": "original",
             "properties": ["curricularSupport"]
@@ -163,8 +163,8 @@
           {
             "title": "Teacher Supports",
             "type": "teacher-supports",
-            "dataTestHeader": "left-supports-section-teacher-supports",
-            "dataTestItem": "left-supports-list-items",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
             "documentTypes": ["supportPublication"],
             "properties": ["teacherSupport", "!isDeleted"]
           }
