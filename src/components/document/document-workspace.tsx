@@ -189,8 +189,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { ui } = this.stores;
-    const hasRightNavTabs = this.stores.appConfig.rightNav.tabSpecs.length > 0;
-    const style = hasRightNavTabs ? undefined : { right: 0 };
+    const style = { right: 0 };
     const positionedClassName = ui.leftTabContentShown ? className + " half" : className;
     return (
       <div
