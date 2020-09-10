@@ -55,7 +55,6 @@
       {
         "tab": "student-work",
         "label": "Student Workspaces",
-        "hideGhostUser": true,
         "teacherOnly": true,
         "groupsDisplay": true,
         "sections": [
@@ -71,7 +70,6 @@
       {
         "tab": "my-work",
         "label": "My Work",
-        "hideGhostUser": true,
         "sections": [
           {
             "title": "Extra Workspaces",

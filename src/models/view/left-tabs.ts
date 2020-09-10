@@ -66,7 +66,6 @@ export const LeftTabModel =
   types.model("LeftTab", {
     tab: types.enumeration<ELeftTab>("ELeftTab", Object.values(ELeftTab)),
     label: types.string,
-    hideGhostUser: false,
     teacherOnly: false,
     sections: types.array(LeftTabSectionModel)
   });

@@ -1,6 +1,5 @@
 import { types } from "mobx-state-tree";
 import { DocumentModelType } from "../document/document";
-import { SectionModelType } from "../curriculum/section";
 import { LogEventName, Logger } from "../../lib/logger";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 
@@ -12,13 +11,6 @@ export type WorkspaceType = typeof WorkspaceTypeEnum.Type;
 
 export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
-
-const GhostSectionPrefix = "ghostSection";
-export const createGhostSectionDocumentKey = (sectionId: string) => `${GhostSectionPrefix}:${sectionId}`;
-export const parseGhostSectionDocumentKey = (documentKey: string) => {
-  const [prefix, sectionId] = documentKey.split(":");
-  return prefix === GhostSectionPrefix ? sectionId : null;
-};
 
 export const WorkspaceModel = types
   .model("Workspace", {
@@ -82,11 +74,8 @@ export const WorkspaceModel = types
             : LogEventName.VIEW_HIDE_COMPARISON_PANEL;
           Logger.log(logEvent);
         }
-      },
+      }
 
-      setPrimaryGhostSection(section: SectionModelType) {
-        self.primaryDocumentKey = createGhostSectionDocumentKey(section.type);
-      },
     };
   })
   .actions(self => ({
