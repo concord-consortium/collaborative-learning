@@ -5,7 +5,7 @@ import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
-import "./left-nav-panel.sass";
+import "./problem-panel.sass";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
@@ -13,13 +13,13 @@ interface IProps extends IBaseProps {
 
 @inject("stores")
 @observer
-export class LeftNavPanelComponent extends BaseComponent<IProps> {
+export class ProblemPanelComponent extends BaseComponent<IProps> {
 
   public render() {
     const { section } = this.props;
 
     return (
-      <div className="left-nav-panel">
+      <div className="problem-panel">
         {section ? this.renderSection(section) : null}
       </div>
     );
