@@ -1,10 +1,8 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { DocumentContext, IDocumentContext } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
 import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-virtual-document";
-import { IToolApiInterface  } from "../tools/tool-tile";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 
 import "./group-virtual-document.sass";
@@ -20,7 +18,6 @@ interface IProps extends IBaseProps {
 
 interface IState {
   documentKey: string;
-  documentContext?: IDocumentContext;
   isCommentDialogOpen: boolean;
 }
 
@@ -38,8 +35,6 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   https://www.pivotaltracker.com/story/show/168619033
   https://www.pivotaltracker.com/story/show/168711827
 */
-  private toolApiInterface: IToolApiInterface;
-
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -51,13 +46,11 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   public render() {
     const { document: { type } } = this.props;
     return (
-      <DocumentContext.Provider value={this.state.documentContext}>
-        <div key="document" className="document">
-          {this.renderTitleBar()}
-          <div className="canvas-area">{this.render4UpCanvas()}</div>
-          {this.renderStatusBar(type)}
-        </div>
-      </DocumentContext.Provider>
+      <div key="document" className="document">
+        {this.renderTitleBar()}
+        <div className="canvas-area">{this.render4UpCanvas()}</div>
+        {this.renderStatusBar(type)}
+      </div>
     );
   }
 
@@ -105,8 +98,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
       <FourUpComponent
         userId={ user.id }
         groupId={ groupId }
-        isGhostUser={true}
-        toolApiInterface={this.toolApiInterface} />
+        isGhostUser={true} />
     );
   }
   private isPrimary() {
