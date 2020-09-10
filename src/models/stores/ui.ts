@@ -4,11 +4,10 @@ import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { ERightNavTab } from "../view/right-nav";
 import { ELeftTab } from "../view/left-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
-export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
+export type ToggleElement = "leftNavExpanded";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
@@ -30,11 +29,9 @@ export const UIModel = types
   .model("UI", {
     leftNavExpanded: false,
     leftTabContentShown: false,
-    rightNavExpanded: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeLeftNavTab: ELeftTab.kMyWork,
-    activeRightNavTab: ERightNavTab.kMyWork,
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
@@ -45,12 +42,10 @@ export const UIModel = types
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
-    defaultRightNavExpanded: false
   }))
   .views((self) => ({
     get allDefaulted() {
-      return (self.leftNavExpanded === self.defaultLeftNavExpanded) &&
-              (self.rightNavExpanded === self.defaultRightNavExpanded);
+      return (self.leftNavExpanded === self.defaultLeftNavExpanded);
     },
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
@@ -59,7 +54,6 @@ export const UIModel = types
   .actions((self) => {
     function restoreDefaultNavExpansion() {
       self.leftNavExpanded = self.defaultLeftNavExpanded;
-      self.rightNavExpanded = self.defaultRightNavExpanded;
     }
 
     const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
@@ -68,11 +62,6 @@ export const UIModel = types
       switch (toggle) {
         case "leftNavExpanded":
           self.leftNavExpanded = expanded;
-          self.rightNavExpanded = false;
-          break;
-        case "rightNavExpanded":
-          self.rightNavExpanded = expanded;
-          self.leftNavExpanded = false;
           break;
       }
     };
@@ -139,13 +128,9 @@ export const UIModel = types
 
       afterCreate() {
         self.defaultLeftNavExpanded = self.leftNavExpanded;
-        self.defaultRightNavExpanded = self.rightNavExpanded;
       },
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
-      },
-      toggleRightNav(override?: boolean) {
-        toggleWithOverride("rightNavExpanded", override);
       },
       toggleLeftTabContent(show: boolean) {
         self.leftTabContentShown = show;
@@ -158,9 +143,6 @@ export const UIModel = types
       },
       setActiveLeftNavTab(tab: string) {
         self.activeLeftNavTab = tab;
-      },
-      setActiveRightNavTab(tab: string) {
-        self.activeRightNavTab = tab;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);

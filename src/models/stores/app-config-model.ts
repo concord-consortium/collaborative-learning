@@ -2,7 +2,6 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
-import { RightNavTabModel } from "../view/right-nav";
 import { LeftTabModel } from "../view/left-tabs";
 import { SettingsMstType } from "./settings";
 
@@ -18,14 +17,6 @@ const LeftTabsAppConfigModel = types
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
     tabSpecs: types.array(LeftTabModel)
-  });
-
-const RightNavAppConfigModel = types
-  .model("RightNavAppConfig", {
-    defaultExpanded: false,
-    preventExpandCollapse: false,
-    lazyLoadTabContents: false,
-    tabSpecs: types.array(RightNavTabModel)
   });
 
 const DocumentLabelModel = types
@@ -79,7 +70,6 @@ export const AppConfigModel = types
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     leftTabs: types.optional(LeftTabsAppConfigModel, () => LeftTabsAppConfigModel.create()),
-    rightNav: types.optional(RightNavAppConfigModel, () => RightNavAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel),
     settings: types.maybe(SettingsMstType)
   })
