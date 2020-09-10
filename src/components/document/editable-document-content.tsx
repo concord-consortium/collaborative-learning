@@ -84,9 +84,10 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
 
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
+  const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   return (
     <DocumentContext.Provider value={documentContext}>
-      <div key="editable-document" className="editable-document-content" >
+      <div key="editable-document" className={`editable-document-content ${showToolbarClass}`} >
         {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} toolApiMap={toolApiMap} />}
         {isShowingToolbar && <div className="canvas-separator"/>}
         <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}

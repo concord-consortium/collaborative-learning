@@ -20,9 +20,14 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+    left: 0;
     right: 0;
     border-top: $document-border-width solid white;
   }
 
+  &.show-toolbar {
+    .canvas-area {
+      left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+    }
+  }
 }
