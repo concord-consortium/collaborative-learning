@@ -4,10 +4,9 @@ import React from "react";
 import { DocumentComponent } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
+import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { LeftTabPanel } from "../../components/navigation/left-tab-panel";
 import { LeftTabButtons } from "../../components/navigation/left-tab-buttons";
@@ -18,12 +17,6 @@ type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {
 }
-
-// keep ghost documents out of MST
-interface GhostDocumentMap {
-  [key: string]: DocumentModelType;
-}
-const ghostProblemDocuments: GhostDocumentMap = {};
 
 @inject("stores")
 @observer
@@ -402,20 +395,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
-      const ghostSectionId = parseGhostSectionDocumentKey(documentKey);
-      if (ghostSectionId) {
-        if (!ghostProblemDocuments[ghostSectionId]) {
-          // Ghosts don't store section documents in Firebase, so we create fake ones here for convenience
-          ghostProblemDocuments[ghostSectionId] = DocumentModel.create({
-            uid: "ghost",
-            type: ProblemDocument,
-            key: ghostSectionId,
-            createdAt: 1,
-            content: {},
-          });
-        }
-        return ghostProblemDocuments[ghostSectionId];
-      }
       return this.stores.documents.getDocument(documentKey);
     }
   }
