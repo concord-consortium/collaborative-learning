@@ -37,18 +37,15 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = ({ document, readOnly, toolApiI
   );
 };
 
-interface IFourUpCanvasProps {
+interface IEditableFourUpCanvasProps {
   userId: string;
-  isGhostUser: boolean;
   toolApiInterface: IToolApiInterface;
 }
-const FourUpCanvas: React.FC<IFourUpCanvasProps> = ({ userId, isGhostUser, toolApiInterface}) => {
+const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = ({ userId, toolApiInterface}) => {
   const groups = useGroupsStore();
-  const group = isGhostUser ? undefined : groups.groupForUser(userId);
-  const groupId = isGhostUser ? groups.ghostGroupId : group?.id;
+  const group = groups.groupForUser(userId);
   return (
-    <FourUpComponent userId={userId} groupId={groupId} isGhostUser={isGhostUser}
-                      toolApiInterface={toolApiInterface} />
+    <FourUpComponent userId={userId} groupId={group?.id} toolApiInterface={toolApiInterface} />
   );
 };
 
@@ -57,16 +54,15 @@ interface IDocumentCanvasProps {
   isPrimary: boolean;
   document: DocumentModelType;
   readOnly: boolean;
-  isGhostUser: boolean;
   toolApiInterface: IToolApiInterface;
 }
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
-  const { mode, isPrimary, document, readOnly, isGhostUser, toolApiInterface } = props;
-  const isFourUp = (document.type === ProblemDocument) && (isGhostUser || (isPrimary && (mode === "4-up")));
+  const { mode, isPrimary, document, readOnly, toolApiInterface } = props;
+  const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
   return (
     <div className="canvas-area">
       {isFourUp
-        ? <FourUpCanvas userId={document.uid} isGhostUser={isGhostUser} toolApiInterface={toolApiInterface} />
+        ? <EditableFourUpCanvas userId={document.uid} toolApiInterface={toolApiInterface} />
         : <OneUpCanvas document={document} readOnly={readOnly} toolApiInterface={toolApiInterface} />}
     </div>
   );
@@ -79,15 +75,14 @@ interface IProps {
   document: DocumentModelType;
   toolbar?: ToolbarConfig;
   readOnly?: boolean;
-  isGhostUser?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly, isGhostUser } = props;
+  const { mode, isPrimary, document, toolbar, readOnly } = props;
 
   const documentContext = useDocumentContext(document);
   const [toolApiMap, toolApiInterface] = useToolApiInterface();
 
-  const isReadOnly = !isPrimary || isGhostUser || readOnly || document.isPublished;
+  const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
   return (
     <DocumentContext.Provider value={documentContext}>
@@ -95,7 +90,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
         {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} toolApiMap={toolApiMap} />}
         {isShowingToolbar && <div className="canvas-separator"/>}
         <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}
-                        isGhostUser={!!isGhostUser} toolApiInterface={toolApiInterface} />
+                        toolApiInterface={toolApiInterface} />
       </div>
     </DocumentContext.Provider>
   );

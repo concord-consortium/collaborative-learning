@@ -8,7 +8,6 @@ import "./left-tab-buttons.sass";
 
 interface IProps extends IBaseProps {
   tabs?: LeftTabSpec[];
-  isGhostUser: boolean;
   isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;

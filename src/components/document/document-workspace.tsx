@@ -17,7 +17,6 @@ import "./document-workspace.sass";
 type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {
-  isGhostUser: boolean;
 }
 
 // keep ghost documents out of MST
@@ -46,7 +45,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   public render() {
     const { appConfig : { leftTabs: { tabSpecs } }, user } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
-    const isGhostUser = this.props.isGhostUser;
     const isTeacher = user.isTeacher;
     const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
@@ -61,17 +59,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments(isGhostUser)}
+        {this.renderDocuments()}
         <LeftTabPanel
           tabs={tabsToDisplay}
-          isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
         <LeftTabButtons
           tabs={tabsToDisplay}
-          isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
@@ -111,7 +107,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
   }
 
-  private renderDocuments(isGhostUser: boolean) {
+  private renderDocuments() {
     const {appConfig, documents, ui, groups} = this.stores;
 
     const { problemWorkspace } = ui;
@@ -150,7 +146,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             toolbar={toolbar}
             side="comparison"
             readOnly={true}
-            isGhostUser={isGhostUser}
           />
         : this.renderComparisonPlaceholder();
 
@@ -165,7 +160,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onPublishDocument={this.handlePublishDocument}
         toolbar={toolbar}
         side="primary"
-        isGhostUser={isGhostUser}
       />;
 
     // Show Pimary and comparison docs:
