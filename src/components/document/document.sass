@@ -1,8 +1,5 @@
 @import ../vars
 
-$canvas-separator-offset: 4px
-$canvas-separator-width: 2px
-
 .document
   position: absolute
   top: 0
@@ -203,15 +200,8 @@ $canvas-separator-width: 2px
           &:active
             background-image: url("../../assets/icons/support/support-active.svg")
 
-  .canvas-separator
-    position: absolute
-    top: $workspace-titlebar-height
-    left: $workspace-toolbar-width + $canvas-separator-offset
-    width: $canvas-separator-width
-    bottom: 0
-    background-color: $workspace-teal-light-4
-
-  .canvas-area
+  // teacher dashboard puts .canvas-area directly within .document
+  >.canvas-area
     position: absolute
     top: $workspace-titlebar-height
     bottom: 0

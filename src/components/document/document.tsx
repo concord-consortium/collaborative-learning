@@ -3,16 +3,13 @@ import { autorun, IReactionDisposer } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 
-import { AppConfigContext } from "../../app-config-context";
-import { CanvasComponent } from "./canvas";
-import { DocumentContext, IDocumentContext } from "./document-context";
+import { EditableDocumentContent } from "./editable-document-content";
+import { IDocumentContext } from "./document-context";
 import { DocumentFileMenu } from "./document-file-menu";
-import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { ToolbarComponent, ToolbarConfig } from "../toolbar";
-import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
+import { ToolbarConfig } from "../toolbar";
 import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument } from "../../models/document/document";
+        } from "../../models/document/document";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { IconButton } from "../utilities/icon-button";
@@ -151,26 +148,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return { documentContext };
   }
 
-  private toolApiMap: IToolApiMap = {};
-  private toolApiInterface: IToolApiInterface;
   private stickyNoteIcon: HTMLDivElement | null;
   private documentContainer: HTMLDivElement | null;
   private deleteHandler: { documentKey?: string, disposer?: IReactionDisposer } = {};
 
   constructor(props: IProps) {
     super(props);
-
-    this.toolApiInterface = {
-      register: (id: string, toolApi: IToolApi) => {
-        this.toolApiMap[id] = toolApi;
-      },
-      unregister: (id: string) => {
-        delete this.toolApiMap[id];
-      },
-      getToolApi: (id: string) => {
-        return this.toolApiMap[id];
-      }
-    };
 
     this.state = {
       isCommentDialogOpen: false,
@@ -192,17 +175,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { document: { type } } = this.props;
+    const { workspace, document, toolbar, side, readOnly, isGhostUser } = this.props;
     return (
-      <DocumentContext.Provider value={this.state.documentContext}>
-        <div key="document" className="document" ref={(el) => this.documentContainer = el}>
-          {this.renderTitleBar(type)}
-          {this.renderToolbar()}
-          <div className="canvas-separator"/>
-          {this.renderCanvas()}
-          {this.renderStickyNotesPopup()}
-        </div>
-      </DocumentContext.Provider>
+      <div key="document" className="document" ref={(el) => this.documentContainer = el}>
+        {this.renderTitleBar(document.type)}
+        <EditableDocumentContent
+          mode={workspace.mode}
+          isPrimary={side === "primary"}
+          document={document}
+          toolbar={toolbar}
+          readOnly={readOnly}
+          isGhostUser={isGhostUser} />
+        {this.renderStickyNotesPopup()}
+      </div>
     );
   }
 
@@ -426,53 +411,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {document.getProperty("caption")}
         </div>
       </div>
-    );
-  }
-
-  private renderToolbar() {
-    const {document, isGhostUser, readOnly, toolbar} = this.props;
-    const isPublication = document.isPublished;
-    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    if (!showToolbar || !toolbar) return;
-    return (
-      <AppConfigContext.Consumer>
-        {appConfig => {
-          const toolbarConfig = (toolbar || {}).map(tool => ({ icon: appConfig.appIcons?.[tool.iconId], ...tool }));
-          return (
-            <ToolbarComponent key="toolbar" document={this.props.document}
-                              config={toolbarConfig} toolApiMap={this.toolApiMap} />
-          );
-        }}
-      </AppConfigContext.Consumer>
-    );
-  }
-
-  private renderCanvas() {
-    const { document, workspace, side, isGhostUser } = this.props;
-    const fourUp = (document.type === ProblemDocument) &&
-                    (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
-    const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
-    return (
-      <div className="canvas-area">{canvas}</div>
-    );
-  }
-
-  private render1UpCanvas(forceReadOnly?: boolean) {
-    const readOnly = forceReadOnly || this.props.readOnly;
-    return (
-      <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
-                        toolApiInterface={this.toolApiInterface} />
-    );
-  }
-
-  private render4UpCanvas() {
-    const {isGhostUser, document} = this.props;
-    const { groups } = this.stores;
-    const group = isGhostUser ? undefined : groups.groupForUser(document.uid);
-    const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
-    return (
-      <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
-                        toolApiInterface={this.toolApiInterface} />
     );
   }
 
