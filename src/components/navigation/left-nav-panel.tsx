@@ -9,7 +9,6 @@ import "./left-nav-panel.sass";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
-  isGhostUser: boolean;
 }
 
 @inject("stores")

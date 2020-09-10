@@ -36,7 +36,6 @@ interface IProps extends IBaseProps {
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
-  isGhostUser?: boolean;
 }
 
 interface IState {
@@ -175,7 +174,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { workspace, document, toolbar, side, readOnly, isGhostUser } = this.props;
+    const { workspace, document, toolbar, side, readOnly } = this.props;
     return (
       <div key="document" className="document" ref={(el) => this.documentContainer = el}>
         {this.renderTitleBar(document.type)}
@@ -184,8 +183,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           isPrimary={side === "primary"}
           document={document}
           toolbar={toolbar}
-          readOnly={readOnly}
-          isGhostUser={isGhostUser} />
+          readOnly={readOnly} />
         {this.renderStickyNotesPopup()}
       </div>
     );
@@ -209,8 +207,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTitleBar(type: string) {
-    const { document, side, isGhostUser } = this.props;
-    const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
+    const { document, side } = this.props;
+    const hideButtons = (side === "comparison") || document.isPublished;
     if (document.isProblem) {
       return this.renderProblemTitleBar(type, hideButtons);
     }

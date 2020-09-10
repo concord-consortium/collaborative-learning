@@ -10,7 +10,6 @@ import { Logger, LogEventName } from "../../lib/logger";
 import "./left-nav.sass";
 
 interface IProps extends IBaseProps {
-  isGhostUser: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -65,7 +64,7 @@ export class LeftNavComponent extends BaseComponent<IProps, IState> {
                   id={this.getContainerId(index)}
                   className={"container " + (activeSectionIndex === index ? "enabled" : "disabled")}
                   key={index}>
-                  <LeftNavPanelComponent section={section} isGhostUser={this.props.isGhostUser} key={index} />
+                  <LeftNavPanelComponent section={section} key={index} />
                 </div>
               : null
             );

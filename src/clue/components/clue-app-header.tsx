@@ -15,7 +15,6 @@ import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
 
 interface IProps extends IBaseProps {
-  isGhostUser: boolean;
   panels: IPanelGroupSpec;
   current: string;
   onPanelChange: (panelId: EPanelId) => void;
@@ -199,17 +198,11 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   }
 
   private handleResetGroup = () => {
-    const {isGhostUser} = this.props;
-    const {ui, db, groups} = this.stores;
+    const {ui, db} = this.stores;
     ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
-          if (isGhostUser) {
-            groups.ghostGroup();
-          }
-          else {
-            db.leaveGroup();
-          }
+          db.leaveGroup();
         }
       });
   }
