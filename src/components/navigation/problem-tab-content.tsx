@@ -1,7 +1,7 @@
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
-import { LeftNavPanelComponent } from "./left-nav-panel";
+import { ProblemPanelComponent } from "./problem-panel";
 
 import "./problem-tab-content.sass";
 
@@ -25,7 +25,7 @@ export const ProblemTabContent: React.FC<IProps> = (props) => {
       {sections.map((section) => {
         return (
           <TabPanel key={`section-${section.type}`}>
-            <LeftNavPanelComponent section={section} key={`section-${section.type}`} />
+            <ProblemPanelComponent section={section} key={`section-${section.type}`} />
           </TabPanel>
         );
       })}
