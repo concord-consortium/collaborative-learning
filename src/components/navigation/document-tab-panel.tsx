@@ -7,7 +7,6 @@ import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
 import { LogEventName, Logger } from "../../lib/logger";
-import { EditableDocumentContent } from "../document/editable-document-content";
 
 import "./document-tab-panel.sass";
 
@@ -15,7 +14,7 @@ interface IProps extends IBaseProps {
   tabSpec: LeftTabSpec;
   onDocumentClick?: (document: DocumentModelType) => void;
   onTabClick?: () => void;
-  document?: DocumentModelType;
+  documentView?: React.ReactNode;
 }
 
 interface IState {
@@ -36,7 +35,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { document, tabSpec, onTabClick, onDocumentClick } = this.props;
+    const { documentView, tabSpec, onTabClick, onDocumentClick } = this.props;
     const { tabIndex } = this.state;
     const { user } = this.stores;
     const leftTabSpecs = this.stores.appConfig.leftTabs.tabSpecs;
@@ -72,13 +71,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 : undefined;
           return (
             <TabPanel key={`section-${section.type}`}>
-              { document && (index === tabIndex)
-                ? <EditableDocumentContent
-                    mode={"1-up"}
-                    isPrimary={false}
-                    document={document}
-                    readOnly={true}
-                  />
+              { documentView && (index === tabIndex)
+                ? documentView
                 : <TabPanelDocumentsSection
                     key={section.type}
                     tab={leftTabSpec!.tab}
@@ -111,9 +105,11 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   private handleNewDocumentClick = async (section: LeftTabSectionModelType) => {
     const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
     const { problemWorkspace } = ui;
-    const newDocument = section.type === ELeftTabSectionType.kPersonalDocuments
-                          ? await db.createPersonalDocument({ content: defaultDocumentContent })
-                          : await db.createLearningLogDocument();
+
+    const newDocument = section.type === ELeftTabSectionType.kLearningLogs
+      ? await db.createLearningLogDocument()
+      : await db.createPersonalDocument({ content: defaultDocumentContent });
+
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);
       ui.restoreDefaultNavExpansion();

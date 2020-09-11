@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DocumentModelType } from "../../models/document/document";
 import { LeftTabSpec } from "../../models/view/left-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
+import { EditableDocumentContent } from "../document/editable-document-content";
 
 import "./document-tab-content.sass";
 
@@ -20,13 +21,21 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     setReferenceDocument(document);
   };
 
+  const documentView = referenceDocument &&
+          <EditableDocumentContent
+            mode={"1-up"}
+            isPrimary={false}
+            document={referenceDocument}
+            readOnly={true}
+          />;
+
   return (
     <div className="document-tab-content">
       <DocumentTabPanel
         tabSpec={tabSpec}
         onTabClick={handleTabClick}
         onDocumentClick={handleDocumentClick}
-        document={referenceDocument}
+        documentView={documentView}
       />
     </div>
   );
