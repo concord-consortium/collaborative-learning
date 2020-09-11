@@ -18,19 +18,37 @@ interface IProps extends IBaseProps {
   document?: DocumentModelType;
 }
 
+interface IState {
+  tabIndex: number;
+}
+
 const kNavItemScale = 0.11;
 
 @inject("stores")
 @observer
-export class DocumentTabPanel extends BaseComponent<IProps> {
+export class DocumentTabPanel extends BaseComponent<IProps, IState> {
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      tabIndex: 0
+    };
+  }
 
   public render() {
     const { document, tabSpec, onTabClick, onDocumentClick } = this.props;
+    const { tabIndex } = this.state;
     const { user } = this.stores;
     const leftTabSpecs = this.stores.appConfig.leftTabs.tabSpecs;
     const leftTabSpec = leftTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
-      <Tabs className={`document-tabs ${leftTabSpec?.tab}`} selectedTabClassName="selected" forceRenderTabPanel={true}>
+      <Tabs
+        className={`document-tabs ${leftTabSpec?.tab}`}
+        forceRenderTabPanel={true}
+        onSelect={this.handleTabSelect}
+        selectedIndex={tabIndex}
+        selectedTabClassName="selected"
+      >
         <TabList className={`tab-list ${leftTabSpec?.tab}`} onClick={onTabClick}>
           {leftTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
@@ -45,7 +63,7 @@ export class DocumentTabPanel extends BaseComponent<IProps> {
             );
           })}
         </TabList>
-        {leftTabSpec?.sections.map((section) => {
+        {leftTabSpec?.sections.map((section, index) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
                 ? this.handleDocumentStarClick
                 : undefined;
@@ -54,8 +72,7 @@ export class DocumentTabPanel extends BaseComponent<IProps> {
                 : undefined;
           return (
             <TabPanel key={`section-${section.type}`}>
-              {
-              document
+              { document && (index === tabIndex)
                 ? <EditableDocumentContent
                     mode={"1-up"}
                     isPrimary={false}
@@ -73,8 +90,7 @@ export class DocumentTabPanel extends BaseComponent<IProps> {
                     onDocumentDragStart={this.handleDocumentDragStart}
                     onDocumentStarClick={_handleDocumentStarClick}
                     onDocumentDeleteClick={_handleDocumentDeleteClick}
-                  />
-              }
+                  /> }
             </TabPanel>
           );
         })}
@@ -129,6 +145,10 @@ export class DocumentTabPanel extends BaseComponent<IProps> {
           }
         }
       });
+  }
+
+  private handleTabSelect = (tabIndex: number) => {
+    this.setState({ tabIndex });
   }
 
 }
