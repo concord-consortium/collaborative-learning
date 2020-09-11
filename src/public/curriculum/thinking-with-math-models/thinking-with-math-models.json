@@ -766,7 +766,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Group Admission Fees</h3>One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table. <ol><li>Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain.</li><li>How much money would a group expect to pay if the group size is 0? 21? 30? <li></li>What equation relates admission fee <em>A</em> to the number <em>n</em> in the group? Use the equation to check your predictions for Part 2.</li></ol>"
+                        "<h3>Situation A. Group Admission Fees</h3>One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table. <ol><li>Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain.</li><li>How much money would a group expect to pay if the group size is 0? 21? 30? </li><li>What equation relates admission fee <em>A</em> to the number <em>n</em> in the group? Use the equation to check your predictions for Part 2.</li></ol>"
                       ]
                     }
                   },
@@ -1340,7 +1340,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 145
+                      "height": 160
                     }
                   }
                 ]
@@ -1825,7 +1825,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 380
+                      "height": 160
                     }
                   },
                   {
@@ -1984,7 +1984,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 380
+                      "height": 250
                     }
                   },
                   {
@@ -2115,7 +2115,7 @@
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "TWMM MR1 - MR4",
+      "title": "TWMM MR1 - MR3",
       "problems": [
         {
           "description": "Mathematical Reflections",
