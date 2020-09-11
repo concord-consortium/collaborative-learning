@@ -9,6 +9,8 @@ interface IProps {
   document: DocumentModelType;
   isNewDisabled?: boolean;
   onNewDocument?: (document: DocumentModelType) => void;
+  isOpenDisabled?: boolean;
+  onOpenDocument?: (document: DocumentModelType) => void;
   isCopyDisabled?: boolean;
   onCopyDocument?: (document: DocumentModelType) => void;
   isDeleteDisabled?: boolean;
@@ -18,15 +20,19 @@ interface IProps {
 function idAndIcon(id: string, appIcons?: Record<string, IconComponent>) {
   const ItemIcon = appIcons?.[id];
   // not clear why we need to reset the viewBox
-  const viewBox = id === "icon-new-workspace" ? "0 0 32 32" : "0 0 24 24";
+  const viewBox = (id === "icon-new-workspace") || (id === "icon-open-workspace") ? "0 0 32 32" : "0 0 24 24";
   return { id, itemIcon: ItemIcon && <ItemIcon viewBox={viewBox} /> };
 }
 
-export const DocumentFileMenu: React.FC<IProps> =
-  ({ document, isNewDisabled, onNewDocument, isCopyDisabled, onCopyDocument, isDeleteDisabled, onDeleteDocument }) => {
+export const DocumentFileMenu: React.FC<IProps> = props => {
+  const { document,
+          isNewDisabled, onNewDocument,
+          isOpenDisabled, onOpenDocument,
+          isCopyDisabled, onCopyDocument,
+          isDeleteDisabled, onDeleteDocument } = props;
 
   const { appIcons } = useContext(AppConfigContext);
-  const TitleIcon = appIcons?.["icon-new-workspace"];
+  const TitleIcon = appIcons?.["icon-open-workspace"];
   // not clear why we need to reset the viewBox
   const titleIcon = TitleIcon && <TitleIcon viewBox="0 0 32 32" />;
 
@@ -36,6 +42,12 @@ export const DocumentFileMenu: React.FC<IProps> =
       text: "New",
       disabled: !!isNewDisabled,
       onClick: () => onNewDocument?.(document)
+    },
+    {
+      ...idAndIcon("icon-open-workspace", appIcons),
+      text: "Open...",
+      disabled: !!isOpenDisabled,
+      onClick: () => onOpenDocument?.(document)
     },
     {
       ...idAndIcon("icon-copy-workspace", appIcons),

@@ -69,7 +69,7 @@ const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
 
 };
 
-interface IProps {
+export interface IProps {
   mode: WorkspaceMode;
   isPrimary: boolean;
   document: DocumentModelType;

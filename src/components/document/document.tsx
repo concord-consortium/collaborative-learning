@@ -1,15 +1,13 @@
 import { inject, observer } from "mobx-react";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 
-import { EditableDocumentContent } from "./editable-document-content";
-import { IDocumentContext } from "./document-context";
 import { DocumentFileMenu } from "./document-file-menu";
+import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolbarConfig } from "../toolbar";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-        } from "../../models/document/document";
+import { DocumentModelType, LearningLogDocument, LearningLogPublication } from "../../models/document/document";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { IconButton } from "../utilities/icon-button";
@@ -39,9 +37,7 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
-  documentContext?: IDocumentContext;
-  isCommentDialogOpen: boolean;
-  commentTileId: string;
+  showBrowser: boolean;
   stickyNotesVisible: boolean;
 }
 
@@ -134,31 +130,14 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
 
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { document } = nextProps;
-    const documentContext: IDocumentContext = {
-            type: document.type,
-            key: document.key,
-            title: document.title,
-            originDoc: document.originDoc,
-            getProperty: (key: string) => document.properties.get(key),
-            setProperties: (properties: ISetProperties) => document.setProperties(properties)
-          };
-    return { documentContext };
-  }
-
   private stickyNoteIcon: HTMLDivElement | null;
   private documentContainer: HTMLDivElement | null;
+  private openHandlerDisposer: IReactionDisposer;
   private deleteHandler: { documentKey?: string, disposer?: IReactionDisposer } = {};
 
-  constructor(props: IProps) {
-    super(props);
-
-    this.state = {
-      isCommentDialogOpen: false,
-      commentTileId: "",
-      stickyNotesVisible: false
-    };
+  state = {
+    showBrowser: false,
+    stickyNotesVisible: false
   }
 
   public componentDidMount() {
@@ -166,11 +145,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate() {
+    this.openHandlerDisposer = reaction(
+      // data function: changes to primaryDocumentKey trigger the reaction
+      () => this.stores.ui.problemWorkspace.primaryDocumentKey,
+      // reaction function
+      () => this.setState({ showBrowser: false })
+    );
     this.configureDeleteHandler();
   }
 
   public componentWillUnmount() {
     this.deleteHandler.disposer?.();
+    this.openHandlerDisposer?.();
   }
 
   public render() {
@@ -178,7 +164,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div key="document" className="document" ref={(el) => this.documentContainer = el}>
         {this.renderTitleBar(document.type)}
-        <EditableDocumentContent
+        <MyWorkDocumentOrBrowser
+          showBrowser={this.state.showBrowser}
           mode={workspace.mode}
           isPrimary={side === "primary"}
           document={document}
@@ -195,7 +182,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       // dispose any previous delete handler
       deleteHandler.disposer?.();
       // install delete handler for current document
-      deleteHandler.disposer = autorun(reaction => {
+      deleteHandler.disposer = autorun(() => {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
@@ -235,6 +222,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions left">
             <DocumentFileMenu document={document}
               onNewDocument={this.handleNewDocumentClick}
+              onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
             {this.showPublishButton(document) &&
@@ -366,6 +354,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions">
             <DocumentFileMenu document={document}
               onNewDocument={this.handleNewDocumentClick}
+              onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
               onDeleteDocument={this.handleDeleteDocumentClick}/>
@@ -422,9 +411,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc);
   }
 
-  private handleToggleTwoUp = () => {
-    this.props.workspace.toggleComparisonVisible();
-  }
   private handleShowTwoUp = () => {
     this.props.workspace.toggleComparisonVisible({override: true});
   }
@@ -444,17 +430,21 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleNewDocumentClick = () => {
     const { document, onNewDocument } = this.props;
-    onNewDocument && onNewDocument(document);
+    onNewDocument?.(document);
+  }
+
+  private handleOpenDocumentClick = () => {
+    this.setState({ showBrowser: true });
   }
 
   private handleCopyDocumentClick = () => {
     const { document, onCopyDocument } = this.props;
-    onCopyDocument && onCopyDocument(document);
+    onCopyDocument?.(document);
   }
 
   private handleDeleteDocumentClick = () => {
     const { document, onDeleteDocument } = this.props;
-    onDeleteDocument && onDeleteDocument(document);
+    onDeleteDocument?.(document);
   }
 
   private handleDocumentRename = () => {
