@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
-import { LeftTabModel } from "../view/left-tabs";
+import { ELeftTab, LeftTabModel, LeftTabSpec } from "../view/left-tabs";
 import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types
@@ -80,6 +80,9 @@ export const AppConfigModel = types
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase) || "";
+    },
+    getLeftTabSpec(tabId: ELeftTab): LeftTabSpec | undefined {
+      return self.leftTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;
