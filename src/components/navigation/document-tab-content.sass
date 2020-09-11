@@ -3,4 +3,8 @@
 .document-tab-content
   .editable-document-content
     top: $left-tab-height * 2
-    height: calc(100% - (#{$left-tab-height} * 2))
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$left-tab-height} * 2 + #{$tab-section-border-width} * 2))
+    position: static
+    .canvas-area
+      position: static
+      height: 100%
