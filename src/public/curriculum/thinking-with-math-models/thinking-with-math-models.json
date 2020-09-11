@@ -1050,11 +1050,13 @@
                     }
                   },
                   {
-                    "type": "Text",
-                    "format": "markdown",
-                    "text": [
-                      "---"
-                    ]
+                    "content": {
+                        "type": "Text",
+                        "format": "markdown",
+                        "text": [
+                          "---"
+                        ]
+                    }
                   },
                   {
                     "content": {
@@ -1304,11 +1306,13 @@
                     }
                   },
                   {
-                    "type": "Text",
-                    "format": "markdown",
-                    "text": [
-                      "---"
-                    ]
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
                   },
                   {
                     "content": {
@@ -1586,7 +1590,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "- Create a table and graph for the length and width of rectangles that have an area of 24 square feet.", 
+                        "- Create a table and graph for the length and width of rectangles that have an area of 24 square feet.",
                         "- What patterns appear in tables and graphs of the data? Is it linear? Explain.",
                         "- What equation represents the relationship between the length *l* and width *w* of rectangles with area 24 square feet? Is this a function? Explain."
                       ]
