@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { ENavTab, NavTabSpec } from "../../models/view/left-tabs";
+import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./left-tab-buttons.sass";

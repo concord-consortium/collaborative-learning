@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppConfigStore } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { ENavTab, NavTabSpec } from "../../models/view/left-tabs";
+import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "../navigation/document-tab-panel";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
 

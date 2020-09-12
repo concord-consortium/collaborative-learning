@@ -4,7 +4,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
-import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/left-tabs";
+import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { Icon } from "@blueprintjs/core";
 
