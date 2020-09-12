@@ -8,7 +8,7 @@ import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 
 import "react-tabs/style/react-tabs.css";
-import "./left-tab-panel.sass";
+import "./nav-tab-panel.sass";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];

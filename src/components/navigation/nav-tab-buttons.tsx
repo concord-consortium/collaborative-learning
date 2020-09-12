@@ -4,7 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
-import "./left-tab-buttons.sass";
+import "./nav-tab-buttons.sass";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
