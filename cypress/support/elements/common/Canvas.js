@@ -74,11 +74,14 @@ class Canvas{
 
     createNewExtraDocument(title){
         this.getNewDocumentItem().click()
-            .then(()=>{
+            .then(function() {
                 dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click();
-            });
+                dialog.getDialogOKButton().click()
+                    .then(function() {
+                        this.getPersonalDocTitle().should("contain",title);
+                    }.bind(this));
+            }.bind(this));
     }
 
     openDocumentWithTitle(subTab, title){
