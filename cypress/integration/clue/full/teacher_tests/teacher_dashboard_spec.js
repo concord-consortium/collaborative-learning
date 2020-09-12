@@ -12,19 +12,19 @@ let workspace = new TeacherWorkspace
 
 /**
  * Notes:
- * 
+ *
  * Teacher dashboard test needs static data from 'clueteachertest's class 'CLUE'
  * Here is the ID for the class in firebase: a1f7b8f8b7b1ad1d2d6240c41bd2354d8575ee09ae8bd641
- * 
+ *
  * Currently issues with problem switcher/class switcher. Maybe split these into two tests. Have this test
  * log into portal with data that doesn't need to be static.
- * 
+ *
  * -> This may also help with issue when verifying read-only student canvases which is currently looping through
  *    all of the students in the dashboard's current view
  */
 
 
-context("Teacher Space", () => {
+context.skip("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -65,7 +65,7 @@ context("Teacher Space", () => {
                     dashboard.getClassList().should('not.have.attr','open')
                     dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className)
                     dashboard.getClassDropdown().should('be.visible').click({ force: true })
-                    dashboard.getClassList().should('exist').and('have.attr', 'open') 
+                    dashboard.getClassList().should('exist').and('have.attr', 'open')
                     dashboard.getClassList().find('.Menuitem').should('have.length', clueData.classes.length) // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
                     dashboard.getClassDropdown().click({ force: true })
                     dashboard.getClassList().should('not.have.attr','open')
