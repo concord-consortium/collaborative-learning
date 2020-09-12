@@ -1,5 +1,6 @@
 import React from "react";
 import { useAppConfigStore } from "../../hooks/use-stores";
+import { DocumentModelType } from "../../models/document/document";
 import { ELeftTab, LeftTabSpec } from "../../models/view/left-tabs";
 import { DocumentTabPanel } from "../navigation/document-tab-panel";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
@@ -7,11 +8,12 @@ import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from
 interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   showBrowser: boolean;
   tabSpec: LeftTabSpec;
+  onSelectDocument?: (document: DocumentModelType) => void;
 }
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
-  const { showBrowser, tabSpec, ...others } = props;
+  const { showBrowser, tabSpec, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec
-          ? <DocumentTabPanel tabSpec={tabSpec} />
+          ? <DocumentTabPanel tabSpec={tabSpec} onDocumentClick={onSelectDocument} />
           : <EditableDocumentContent {...others} />;
 };
 

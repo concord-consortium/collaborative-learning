@@ -4,6 +4,38 @@
 //           [''],
 //           ['jit','teacher-supports']]
 class RightNav{
+    testDocumentWithTitle(tab, subTab, title, shouldTest) {
+        const tabName = 'tab-' + tab;
+        const buttonSelector = '.left-tab-buttons .left-tab.' + tabName;
+        const topTabSelector = '.left-tab-panel .top-tab.' + tabName;
+        const subTabSelector = '.left-tab-panel .doc-tab.' + tab + '.' + subTab;
+        const panelSelector = '.left-tab-panel .tab-panel-documents-section.' + subTab;
+        const titlesSelector = panelSelector + ' .list.' + tab + ' .list-item .footer';
+        cy.get(buttonSelector).click()
+            .then(() => {
+                cy.get(topTabSelector).click()
+                    .then(() => {
+                        cy.get(subTabSelector).click()
+                            .then(() => {
+                                cy.get(titlesSelector)
+                                    .should(shouldTest, title)
+                                    .then(() => {
+                                        cy.get('.left-tab-panel .close-button').click();
+                                    });
+                            });
+                    });
+            });
+
+    }
+
+    shouldHaveDocumentWithTitle(tab, subTab, title) {
+        return this.testDocumentWithTitle(tab, subTab, title, 'contain');
+    }
+
+    shouldNotHaveDocumentWithTitle(tab, subTab, title) {
+        return this.testDocumentWithTitle(tab, subTab, title, 'not.contain');
+    }
+
     getRightNavTabs(){
         return cy.get('.right-nav .tabs');
     }

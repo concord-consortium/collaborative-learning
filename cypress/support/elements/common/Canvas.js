@@ -39,6 +39,13 @@ class Canvas{
             });
     }
 
+    getOpenDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-open-workspace');
+            });
+    }
+
     getCopyDocumentItem() {
         return this.getFileMenu().click()
             .then(() => {
@@ -67,12 +74,27 @@ class Canvas{
 
     createNewExtraDocument(title){
         this.getNewDocumentItem().click()
-            .then(()=>{
+            .then(function() {
                 dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click();
+                dialog.getDialogOKButton().click()
+                    .then(function() {
+                        this.getPersonalDocTitle().should("contain",title);
+                    }.bind(this));
+            }.bind(this));
+    }
+
+    openDocumentWithTitle(subTab, title){
+        const subTabSelector = '.primary-workspace .doc-tab.my-work.' + subTab;
+        const panelSelector = '.primary-workspace .tab-panel-documents-section.' + subTab;
+        const titlesSelector = panelSelector + ' .list.my-work .list-item .footer';
+        this.getOpenDocumentItem().click()
+            .then(()=>{
+                cy.get(subTabSelector).click()
+                    .then(() => {
+                        cy.contains(titlesSelector, title).click();
+                    });
             });
-        cy.wait(3000);
     }
 
     editTitlewithPencil(title){
@@ -116,7 +138,6 @@ class Canvas{
             dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
         });
-    cy.wait(3000);
     }
 
     publishPersonalCanvas(){

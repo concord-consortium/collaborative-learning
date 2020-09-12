@@ -166,6 +166,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {this.renderTitleBar(document.type)}
         <MyWorkDocumentOrBrowser
           showBrowser={this.state.showBrowser}
+          onSelectDocument={this.handleSelectDocument}
           mode={workspace.mode}
           isPrimary={side === "primary"}
           document={document}
@@ -445,6 +446,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleDeleteDocumentClick = () => {
     const { document, onDeleteDocument } = this.props;
     onDeleteDocument?.(document);
+  }
+
+  private handleSelectDocument = (document: DocumentModelType) => {
+    const { appConfig, ui } = this.stores;
+    ui.rightNavDocumentSelected(appConfig, document);
+    this.setState({ showBrowser: false });
   }
 
   private handleDocumentRename = () => {
