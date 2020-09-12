@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
-import { ELeftTab, LeftTabModel, LeftTabSpec } from "../view/left-tabs";
+import { EContentTab, ContentTabModel, ContentTabSpec } from "../view/left-tabs";
 import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types
@@ -16,7 +16,7 @@ const LeftTabsAppConfigModel = types
     defaultExpanded: false,
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
-    tabSpecs: types.array(LeftTabModel)
+    tabSpecs: types.array(ContentTabModel)
   });
 
 const DocumentLabelModel = types
@@ -81,7 +81,7 @@ export const AppConfigModel = types
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase) || "";
     },
-    getLeftTabSpec(tabId: ELeftTab): LeftTabSpec | undefined {
+    getLeftTabSpec(tabId: EContentTab): ContentTabSpec | undefined {
       return self.leftTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
   }));

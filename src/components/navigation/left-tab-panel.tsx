@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { LeftTabSpec, ELeftTab } from "../../models/view/left-tabs";
+import { ContentTabSpec, EContentTab } from "../../models/view/left-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
@@ -11,7 +11,7 @@ import "react-tabs/style/react-tabs.css";
 import "./left-tab-panel.sass";
 
 interface IProps extends IBaseProps {
-  tabs?: LeftTabSpec[];
+  tabs?: ContentTabSpec[];
   isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -23,7 +23,7 @@ interface IState {
 
 @inject("stores")
 @observer
-export class LeftTabPanel extends BaseComponent<IProps, IState> {
+export class ContentTabPanel extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
@@ -62,22 +62,22 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderTabContent = (tabSpec: LeftTabSpec) => {
+  private renderTabContent = (tabSpec: ContentTabSpec) => {
     switch (tabSpec.tab) {
-      case ELeftTab.kProblems:
+      case EContentTab.kProblems:
         return this.renderProblems();
-      case ELeftTab.kClassWork:
-      case ELeftTab.kLearningLog:
-      case ELeftTab.kMyWork:
-      case ELeftTab.kStudentWork:
-      case ELeftTab.kSupports:
+      case EContentTab.kClassWork:
+      case EContentTab.kLearningLog:
+      case EContentTab.kMyWork:
+      case EContentTab.kStudentWork:
+      case EContentTab.kSupports:
         return this.renderDocuments(tabSpec);
       default:
         return null;
     }
   }
 
-  private renderDocuments = (tabSpec: LeftTabSpec) => {
+  private renderDocuments = (tabSpec: ContentTabSpec) => {
     return (
       <DocumentTabContent tabSpec={tabSpec}/>
     );

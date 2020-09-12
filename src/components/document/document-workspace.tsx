@@ -8,8 +8,8 @@ import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentT
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { LeftTabPanel } from "../../components/navigation/left-tab-panel";
-import { LeftTabButtons } from "../../components/navigation/left-tab-buttons";
+import { ContentTabPanel } from "../../components/navigation/left-tab-panel";
+import { ContentTabButtons } from "../navigation/left-tab-buttons";
 
 import "./document-workspace.sass";
 
@@ -53,13 +53,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDrop={this.handleImageDrop}
         />
         {this.renderDocuments()}
-        <LeftTabPanel
+        <ContentTabPanel
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        <LeftTabButtons
+        <ContentTabButtons
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}

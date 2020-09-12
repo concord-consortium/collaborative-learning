@@ -4,7 +4,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { ELeftTab } from "../view/left-tabs";
+import { EContentTab } from "../view/left-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "leftNavExpanded";
@@ -31,7 +31,7 @@ export const UIModel = types
     leftTabContentShown: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
-    activeLeftNavTab: ELeftTab.kMyWork,
+    activeLeftNavTab: EContentTab.kMyWork,
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,

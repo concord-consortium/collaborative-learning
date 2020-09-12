@@ -1,7 +1,7 @@
 import { types, SnapshotIn, Instance } from "mobx-state-tree";
 import { UserModelType, UserTypeEnum } from "../stores/user";
 
-export enum ELeftTab {
+export enum EContentTab {
   kProblems = "problems",
   kStudentWork = "student-work",
   kMyWork = "my-work",
@@ -11,11 +11,11 @@ export enum ELeftTab {
 }
 
 // generic type which maps tab id to values of another type
-export type LeftTabMap<T> = {
-  [K in ELeftTab]: T;
+export type ContentTabMap<T> = {
+  [K in EContentTab]: T;
 };
 
-export enum ELeftTabSectionType {
+export enum EContentTabSectionType {
   kPersonalDocuments = "personal-documents",
   kProblemDocuments = "problem-documents",
   kLearningLogs = "learning-logs",
@@ -29,22 +29,22 @@ export enum ELeftTabSectionType {
   kTeacherSupports = "teacher-supports"
 }
 
-export enum ELeftTabOrder {
+export enum EContentTabOrder {
   kOriginal = "original",
   kReverse = "reverse"
 }
 const ENavTabOrderMSTType =
-        types.enumeration<ELeftTabOrder>("ENavTabOrder", Object.values(ELeftTabOrder));
+        types.enumeration<EContentTabOrder>("ENavTabOrder", Object.values(EContentTabOrder));
 
-export const LeftTabSectionModel =
+export const ContentTabSectionModel =
   types.model("NavTabSectionModel", {
     className: "",
     title: types.string,
-    type: types.enumeration<ELeftTabSectionType>("ENavTabSectionType", Object.values(ELeftTabSectionType)),
+    type: types.enumeration<EContentTabSectionType>("ENavTabSectionType", Object.values(EContentTabSectionType)),
     dataTestHeader: "section-header",
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
-    order: types.optional(ENavTabOrderMSTType, ELeftTabOrder.kReverse),
+    order: types.optional(ENavTabOrderMSTType, EContentTabOrder.kReverse),
     properties: types.array(types.string),
     showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,
@@ -56,23 +56,23 @@ export const LeftTabSectionModel =
     },
     showDeleteForUser(user: UserModelType) {
       // allow teachers to delete supports
-      return (user.type === "teacher") && (self.type === ELeftTabSectionType.kTeacherSupports);
+      return (user.type === "teacher") && (self.type === EContentTabSectionType.kTeacherSupports);
     },
   }));
-export type LeftTabSectionSpec = SnapshotIn<typeof LeftTabSectionModel>;
-export type LeftTabSectionModelType = Instance<typeof LeftTabSectionModel>;
+export type ContentTabSectionSpec = SnapshotIn<typeof ContentTabSectionModel>;
+export type ContentTabSectionModelType = Instance<typeof ContentTabSectionModel>;
 
-export const LeftTabModel =
-  types.model("LeftTab", {
-    tab: types.enumeration<ELeftTab>("ELeftTab", Object.values(ELeftTab)),
+export const ContentTabModel =
+  types.model("ContentTab", {
+    tab: types.enumeration<EContentTab>("EContentTab", Object.values(EContentTab)),
     label: types.string,
     teacherOnly: false,
-    sections: types.array(LeftTabSectionModel)
+    sections: types.array(ContentTabSectionModel)
   });
-export type LeftTabSpec = SnapshotIn<typeof LeftTabModel>;
-export type LeftTabModelType = Instance<typeof LeftTabModel>;
+export type ContentTabSpec = SnapshotIn<typeof ContentTabModel>;
+export type ContentTabModelType = Instance<typeof ContentTabModel>;
 
-export function leftTabSectionId(section: LeftTabSectionSpec) {
+export function contentTabSectionId(section: ContentTabSectionSpec) {
   const title = section.title.toLowerCase().replace(" ", "-");
   return `${section.type}-${title}`;
 }

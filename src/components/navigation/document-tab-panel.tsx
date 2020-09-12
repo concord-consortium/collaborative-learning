@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ELeftTabSectionType, LeftTabSpec, LeftTabSectionModelType } from "../../models/view/left-tabs";
+import { EContentTabSectionType, ContentTabSpec, ContentTabSectionModelType } from "../../models/view/left-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
@@ -11,7 +11,7 @@ import { LogEventName, Logger } from "../../lib/logger";
 import "./document-tab-panel.sass";
 
 interface IProps extends IBaseProps {
-  tabSpec: LeftTabSpec;
+  tabSpec: ContentTabSpec;
   onDocumentClick?: (document: DocumentModelType) => void;
   onTabClick?: () => void;
   documentView?: React.ReactNode;
@@ -92,7 +92,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private getSectionTitle = (section: LeftTabSectionModelType, stores: IStores) => {
+  private getSectionTitle = (section: ContentTabSectionModelType, stores: IStores) => {
     if (section.title === "%abbrevInvestigation%") {
       const { unit, investigation } = stores;
       const { abbrevTitle } = unit;
@@ -102,11 +102,11 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     return section.title;
   }
 
-  private handleNewDocumentClick = async (section: LeftTabSectionModelType) => {
+  private handleNewDocumentClick = async (section: ContentTabSectionModelType) => {
     const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
     const { problemWorkspace } = ui;
 
-    const newDocument = section.type === ELeftTabSectionType.kLearningLogs
+    const newDocument = section.type === EContentTabSectionType.kLearningLogs
       ? await db.createLearningLogDocument()
       : await db.createPersonalDocument({ content: defaultDocumentContent });
 
