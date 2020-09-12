@@ -38,7 +38,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeLeftNavTab);
     return (
       <div className={`left-tab-panel ${ui.leftTabContentShown ? "shown" : ""}`}>
-        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect}>
+        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
               { tabs?.map((tabSpec, index) => {
@@ -63,7 +63,6 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
   }
 
   private renderTabContent = (tabSpec: LeftTabSpec) => {
-    // TODO: handle additional content types
     switch (tabSpec.tab) {
       case ELeftTab.kProblems:
         return this.renderProblems();
@@ -80,9 +79,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: LeftTabSpec) => {
     return (
-      <DocumentTabContent
-        tabSpec={tabSpec}
-      />
+      <DocumentTabContent tabSpec={tabSpec}/>
     );
   }
 

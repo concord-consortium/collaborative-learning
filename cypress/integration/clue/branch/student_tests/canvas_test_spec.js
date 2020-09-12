@@ -133,7 +133,7 @@ context('Test Canvas', function(){
                     clueCanvas.getSectionHeader(headers[i]).find('.title').should('contain', headerTitles[i]);
                 }
             });
-            it('verifies section headers are not deletable',function(){
+            it.skip('verifies section headers are not deletable',function(){
                 clueCanvas.getRowSectionHeader().each(function($header, index, $header_list){
                     cy.wrap($header).click({force:true});
                     clueCanvas.getDeleteTool().click();
