@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
-import { ELeftTab, LeftTabModel, LeftTabSpec } from "../view/left-tabs";
+import { ENavTab, NavTabModel, NavTabSpec } from "../view/left-tabs";
 import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types
@@ -11,12 +11,12 @@ const DocumentSpecModel = types
     properties: types.array(types.string)
   });
 
-const LeftTabsAppConfigModel = types
-  .model("LeftTabsAppConfig", {
+const NavTabsAppConfigModel = types
+  .model("NavTabsAppConfig", {
     defaultExpanded: false,
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
-    tabSpecs: types.array(LeftTabModel)
+    tabSpecs: types.array(NavTabModel)
   });
 
 const DocumentLabelModel = types
@@ -69,7 +69,7 @@ export const AppConfigModel = types
     supportStackedTwoUpView: false,
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
-    leftTabs: types.optional(LeftTabsAppConfigModel, () => LeftTabsAppConfigModel.create()),
+    navTabs: types.optional(NavTabsAppConfigModel, () => NavTabsAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel),
     settings: types.maybe(SettingsMstType)
   })
@@ -81,8 +81,8 @@ export const AppConfigModel = types
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase) || "";
     },
-    getLeftTabSpec(tabId: ELeftTab): LeftTabSpec | undefined {
-      return self.leftTabs.tabSpecs.find(tab => tabId === tab.tab);
+    getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
+      return self.navTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;

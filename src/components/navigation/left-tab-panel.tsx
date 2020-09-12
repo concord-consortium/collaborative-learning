@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { LeftTabSpec, ELeftTab } from "../../models/view/left-tabs";
+import { NavTabSpec, ENavTab } from "../../models/view/left-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
@@ -11,7 +11,7 @@ import "react-tabs/style/react-tabs.css";
 import "./left-tab-panel.sass";
 
 interface IProps extends IBaseProps {
-  tabs?: LeftTabSpec[];
+  tabs?: NavTabSpec[];
   isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -23,7 +23,7 @@ interface IState {
 
 @inject("stores")
 @observer
-export class LeftTabPanel extends BaseComponent<IProps, IState> {
+export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
@@ -35,9 +35,9 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
   public render() {
     const { tabs } = this.props;
     const { ui } = this.stores;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeLeftNavTab);
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     return (
-      <div className={`left-tab-panel ${ui.leftTabContentShown ? "shown" : ""}`}>
+      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
@@ -62,22 +62,22 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderTabContent = (tabSpec: LeftTabSpec) => {
+  private renderTabContent = (tabSpec: NavTabSpec) => {
     switch (tabSpec.tab) {
-      case ELeftTab.kProblems:
+      case ENavTab.kProblems:
         return this.renderProblems();
-      case ELeftTab.kClassWork:
-      case ELeftTab.kLearningLog:
-      case ELeftTab.kMyWork:
-      case ELeftTab.kStudentWork:
-      case ELeftTab.kSupports:
+      case ENavTab.kClassWork:
+      case ENavTab.kLearningLog:
+      case ENavTab.kMyWork:
+      case ENavTab.kStudentWork:
+      case ENavTab.kSupports:
         return this.renderDocuments(tabSpec);
       default:
         return null;
     }
   }
 
-  private renderDocuments = (tabSpec: LeftTabSpec) => {
+  private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
       <DocumentTabContent tabSpec={tabSpec}/>
     );
@@ -96,8 +96,8 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      if (ui.activeLeftNavTab !== tabSpec.tab) {
-        ui.setActiveLeftNavTab(tabSpec.tab);
+      if (ui.activeNavTab !== tabSpec.tab) {
+        ui.setActiveNavTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
@@ -109,7 +109,7 @@ export class LeftTabPanel extends BaseComponent<IProps, IState> {
 
   private handleClose = () => {
     const { ui } = this.stores;
-    ui.toggleLeftTabContent(false);
+    ui.toggleNavTabContent(false);
   }
 
 }

@@ -4,7 +4,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
-import { ELeftTabOrder, LeftTabSectionModelType } from "../../models/view/left-tabs";
+import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/left-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { Icon } from "@blueprintjs/core";
 
@@ -12,17 +12,17 @@ import "./tab-panel-documents-section.sass";
 
 interface IProps {
   tab: string;
-  section: LeftTabSectionModelType;
+  section: NavTabSectionModelType ;
   stores: IStores;
   scale: number;
-  onNewDocumentClick?: (section: LeftTabSectionModelType) => void;
+  onNewDocumentClick?: (section: NavTabSectionModelType ) => void;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function getDocumentCaption(section: LeftTabSectionModelType, stores: IStores, document: DocumentModelType) {
+function getDocumentCaption(section: NavTabSectionModelType , stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
@@ -67,7 +67,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     });
 
     // Reverse the order to approximate a most-recently-used ordering.
-    if (section.order === ELeftTabOrder.kReverse) {
+    if (section.order === ENavTabOrder.kReverse) {
       sectionDocs = sectionDocs.reverse();
     }
 

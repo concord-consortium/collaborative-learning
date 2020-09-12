@@ -4,7 +4,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { ELeftTab } from "../view/left-tabs";
+import { ENavTab } from "../view/left-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "leftNavExpanded";
@@ -28,10 +28,10 @@ export const UIDialogModel = types
 export const UIModel = types
   .model("UI", {
     leftNavExpanded: false,
-    leftTabContentShown: false,
+    navTabContentShown: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
-    activeLeftNavTab: ELeftTab.kMyWork,
+    activeNavTab: ENavTab.kMyWork,
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
@@ -132,8 +132,8 @@ export const UIModel = types
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },
-      toggleLeftTabContent(show: boolean) {
-        self.leftTabContentShown = show;
+      toggleNavTabContent(show: boolean) {
+        self.navTabContentShown = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
@@ -141,8 +141,8 @@ export const UIModel = types
       setActiveSectionIndex(activeSectionIndex: number) {
         self.activeSectionIndex = activeSectionIndex;
       },
-      setActiveLeftNavTab(tab: string) {
-        self.activeLeftNavTab = tab;
+      setActiveNavTab(tab: string) {
+        self.activeNavTab = tab;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);

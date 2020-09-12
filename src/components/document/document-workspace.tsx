@@ -8,8 +8,8 @@ import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentT
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { LeftTabPanel } from "../../components/navigation/left-tab-panel";
-import { LeftTabButtons } from "../../components/navigation/left-tab-buttons";
+import { NavTabPanel } from "../../components/navigation/left-tab-panel";
+import { NavTabButtons } from "../../components/navigation/left-tab-buttons";
 
 import "./document-workspace.sass";
 
@@ -36,7 +36,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { leftTabs: { tabSpecs } }, user } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } }, user } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const isTeacher = user.isTeacher;
     const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
@@ -53,13 +53,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDrop={this.handleImageDrop}
         />
         {this.renderDocuments()}
-        <LeftTabPanel
+        <NavTabPanel
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        <LeftTabButtons
+        <NavTabButtons
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
@@ -177,7 +177,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { ui } = this.stores;
     const style = { right: 0 };
-    const positionedClassName = ui.leftTabContentShown ? className + " half" : className;
+    const positionedClassName = ui.navTabContentShown ? className + " half" : className;
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div

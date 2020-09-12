@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ELeftTabSectionType, LeftTabSpec, LeftTabSectionModelType } from "../../models/view/left-tabs";
+import { ENavTabSectionType, NavTabSpec, NavTabSectionModelType  } from "../../models/view/left-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
@@ -11,7 +11,7 @@ import { LogEventName, Logger } from "../../lib/logger";
 import "./document-tab-panel.sass";
 
 interface IProps extends IBaseProps {
-  tabSpec: LeftTabSpec;
+  tabSpec: NavTabSpec;
   onDocumentClick?: (document: DocumentModelType) => void;
   onTabClick?: () => void;
   documentView?: React.ReactNode;
@@ -38,22 +38,22 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { documentView, tabSpec, onTabClick, onDocumentClick } = this.props;
     const { tabIndex } = this.state;
     const { user } = this.stores;
-    const leftTabSpecs = this.stores.appConfig.leftTabs.tabSpecs;
-    const leftTabSpec = leftTabSpecs.find(spec => spec.tab === tabSpec.tab);
+    const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
+    const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
       <Tabs
-        className={`document-tabs ${leftTabSpec?.tab}`}
+        className={`document-tabs ${navTabSpec?.tab}`}
         forceRenderTabPanel={true}
         onSelect={this.handleTabSelect}
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <TabList className={`tab-list ${leftTabSpec?.tab}`} onClick={onTabClick}>
-          {leftTabSpec?.sections.map((section) => {
+        <TabList className={`tab-list ${navTabSpec?.tab}`} onClick={onTabClick}>
+          {navTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
             return (
               <Tab
-                className={`doc-tab ${leftTabSpec?.tab} ${section.type}`}
+                className={`doc-tab ${navTabSpec?.tab} ${section.type}`}
                 key={`section-${section.type}`}
                 data-test={section.dataTestHeader}
               >
@@ -62,7 +62,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })}
         </TabList>
-        {leftTabSpec?.sections.map((section, index) => {
+        {navTabSpec?.sections.map((section, index) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
                 ? this.handleDocumentStarClick
                 : undefined;
@@ -75,7 +75,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 ? documentView
                 : <TabPanelDocumentsSection
                     key={section.type}
-                    tab={leftTabSpec!.tab}
+                    tab={navTabSpec!.tab}
                     section={section}
                     stores={this.stores}
                     scale={kNavItemScale}
@@ -92,7 +92,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private getSectionTitle = (section: LeftTabSectionModelType, stores: IStores) => {
+  private getSectionTitle = (section: NavTabSectionModelType , stores: IStores) => {
     if (section.title === "%abbrevInvestigation%") {
       const { unit, investigation } = stores;
       const { abbrevTitle } = unit;
@@ -102,11 +102,11 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     return section.title;
   }
 
-  private handleNewDocumentClick = async (section: LeftTabSectionModelType) => {
+  private handleNewDocumentClick = async (section: NavTabSectionModelType ) => {
     const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
     const { problemWorkspace } = ui;
 
-    const newDocument = section.type === ELeftTabSectionType.kLearningLogs
+    const newDocument = section.type === ENavTabSectionType.kLearningLogs
       ? await db.createLearningLogDocument()
       : await db.createPersonalDocument({ content: defaultDocumentContent });
 
