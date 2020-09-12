@@ -2,13 +2,13 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ContentTabSpec, EContentTab } from "../../models/view/left-tabs";
+import { ContentTabSpec, EContentTab } from "../../models/view/content-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 
 import "react-tabs/style/react-tabs.css";
-import "./left-tab-panel.sass";
+import "./content-tab-panel.sass";
 
 interface IProps extends IBaseProps {
   tabs?: ContentTabSpec[];

@@ -1,10 +1,10 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { EContentTab, ContentTabSpec } from "../../models/view/left-tabs";
+import { EContentTab, ContentTabSpec } from "../../models/view/content-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
-import "./left-tab-buttons.sass";
+import "./content-tab-buttons.sass";
 
 interface IProps extends IBaseProps {
   tabs?: ContentTabSpec[];

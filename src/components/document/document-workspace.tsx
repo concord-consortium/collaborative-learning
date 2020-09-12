@@ -8,8 +8,8 @@ import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentT
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { ContentTabPanel } from "../../components/navigation/left-tab-panel";
-import { ContentTabButtons } from "../navigation/left-tab-buttons";
+import { ContentTabPanel } from "../navigation/content-tab-panel";
+import { ContentTabButtons } from "../navigation/content-tab-buttons";
 
 import "./document-workspace.sass";
 

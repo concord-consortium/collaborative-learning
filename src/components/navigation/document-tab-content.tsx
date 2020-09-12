@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DocumentModelType } from "../../models/document/document";
-import { ContentTabSpec } from "../../models/view/left-tabs";
+import { ContentTabSpec } from "../../models/view/content-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
 

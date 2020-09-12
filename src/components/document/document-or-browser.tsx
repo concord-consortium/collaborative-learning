@@ -1,6 +1,6 @@
 import React from "react";
 import { useAppConfigStore } from "../../hooks/use-stores";
-import { EContentTab, ContentTabSpec } from "../../models/view/left-tabs";
+import { EContentTab, ContentTabSpec } from "../../models/view/content-tabs";
 import { DocumentTabPanel } from "../navigation/document-tab-panel";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
 

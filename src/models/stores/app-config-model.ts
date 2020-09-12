@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-types";
-import { EContentTab, ContentTabModel, ContentTabSpec } from "../view/left-tabs";
+import { EContentTab, ContentTabModel, ContentTabSpec } from "../view/content-tabs";
 import { SettingsMstType } from "./settings";
 
 const DocumentSpecModel = types

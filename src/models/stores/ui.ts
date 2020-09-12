@@ -4,7 +4,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { EContentTab } from "../view/left-tabs";
+import { EContentTab } from "../view/content-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "leftNavExpanded";

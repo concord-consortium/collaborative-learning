@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { EContentTabSectionType, ContentTabSpec, ContentTabSectionModelType } from "../../models/view/left-tabs";
+import { EContentTabSectionType, ContentTabSpec, ContentTabSectionModelType } from "../../models/view/content-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
