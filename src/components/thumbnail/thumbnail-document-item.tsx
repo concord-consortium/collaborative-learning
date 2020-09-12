@@ -36,10 +36,10 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
     <div
       className="list-item"
       data-test={dataTestName}
-      key={document.key} >
+      key={document.key}
+      onClick={handleDocumentClick} >
       <div
         className="scaled-list-item-container"
-        onClick={handleDocumentClick}
         onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart} >
         <div className="scaled-list-item">
