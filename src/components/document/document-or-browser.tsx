@@ -17,7 +17,7 @@ export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
 
 function useTabSpec(tab: EContentTab) {
   const appConfig = useAppConfigStore();
-  return appConfig.getLeftTabSpec(tab);
+  return appConfig.getContentTabSpec(tab);
 }
 
 type IMyWorkDocumentOrBrowserProps = Omit<IDocumentOrBrowserProps, "tabSpec">;

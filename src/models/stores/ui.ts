@@ -28,10 +28,10 @@ export const UIDialogModel = types
 export const UIModel = types
   .model("UI", {
     leftNavExpanded: false,
-    leftTabContentShown: false,
+    contentTabShown: false,
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
-    activeLeftNavTab: EContentTab.kMyWork,
+    activeContentTab: EContentTab.kMyWork,
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
@@ -132,8 +132,8 @@ export const UIModel = types
       toggleLeftNav(override?: boolean) {
         toggleWithOverride("leftNavExpanded", override);
       },
-      toggleLeftTabContent(show: boolean) {
-        self.leftTabContentShown = show;
+      toggleContentTab(show: boolean) {
+        self.contentTabShown = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
@@ -141,8 +141,8 @@ export const UIModel = types
       setActiveSectionIndex(activeSectionIndex: number) {
         self.activeSectionIndex = activeSectionIndex;
       },
-      setActiveLeftNavTab(tab: string) {
-        self.activeLeftNavTab = tab;
+      setActiveContentTab(tab: string) {
+        self.activeContentTab = tab;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);

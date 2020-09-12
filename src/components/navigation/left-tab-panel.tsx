@@ -35,9 +35,9 @@ export class ContentTabPanel extends BaseComponent<IProps, IState> {
   public render() {
     const { tabs } = this.props;
     const { ui } = this.stores;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeLeftNavTab);
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeContentTab);
     return (
-      <div className={`left-tab-panel ${ui.leftTabContentShown ? "shown" : ""}`}>
+      <div className={`content-tab-panel ${ui.contentTabShown ? "shown" : ""}`}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
@@ -96,8 +96,8 @@ export class ContentTabPanel extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      if (ui.activeLeftNavTab !== tabSpec.tab) {
-        ui.setActiveLeftNavTab(tabSpec.tab);
+      if (ui.activeContentTab !== tabSpec.tab) {
+        ui.setActiveContentTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
@@ -109,7 +109,7 @@ export class ContentTabPanel extends BaseComponent<IProps, IState> {
 
   private handleClose = () => {
     const { ui } = this.stores;
-    ui.toggleLeftTabContent(false);
+    ui.toggleContentTab(false);
   }
 
 }

@@ -32,9 +32,9 @@ export class ContentTabButtons extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui } = this.stores;
     return (
-      <div className={`left-tab-buttons ${ui.leftTabContentShown ? "hidden" : ""}`}>
+      <div className={`content-tab-buttons ${ui.contentTabShown ? "hidden" : ""}`}>
         { tabs?.map((tabSpec, i) => {
-            const tabClass = `left-tab tab-${tabSpec.tab}`;
+            const tabClass = `content-tab tab-${tabSpec.tab}`;
             return (
               <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
                 {tabSpec.label}
@@ -52,11 +52,11 @@ export class ContentTabButtons extends BaseComponent<IProps, IState> {
       tab_name: tab.toString()
     };
     const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
-    if (ui.activeLeftNavTab !== tab) {
-      ui.setActiveLeftNavTab(tab);
+    if (ui.activeContentTab !== tab) {
+      ui.setActiveContentTab(tab);
       logEvent();
     }
-    ui.toggleLeftTabContent(true);
+    ui.toggleContentTab(true);
   }
 
 }

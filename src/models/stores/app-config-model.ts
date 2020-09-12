@@ -11,8 +11,8 @@ const DocumentSpecModel = types
     properties: types.array(types.string)
   });
 
-const LeftTabsAppConfigModel = types
-  .model("LeftTabsAppConfig", {
+const ContentTabsAppConfigModel = types
+  .model("ContentTabsAppConfig", {
     defaultExpanded: false,
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
@@ -69,7 +69,7 @@ export const AppConfigModel = types
     supportStackedTwoUpView: false,
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
-    leftTabs: types.optional(LeftTabsAppConfigModel, () => LeftTabsAppConfigModel.create()),
+    contentTabs: types.optional(ContentTabsAppConfigModel, () => ContentTabsAppConfigModel.create()),
     toolbar: types.array(ToolButtonModel),
     settings: types.maybe(SettingsMstType)
   })
@@ -81,8 +81,8 @@ export const AppConfigModel = types
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase) || "";
     },
-    getLeftTabSpec(tabId: EContentTab): ContentTabSpec | undefined {
-      return self.leftTabs.tabSpecs.find(tab => tabId === tab.tab);
+    getContentTabSpec(tabId: EContentTab): ContentTabSpec | undefined {
+      return self.contentTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;

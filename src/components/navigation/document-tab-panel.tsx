@@ -38,22 +38,22 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { documentView, tabSpec, onTabClick, onDocumentClick } = this.props;
     const { tabIndex } = this.state;
     const { user } = this.stores;
-    const leftTabSpecs = this.stores.appConfig.leftTabs.tabSpecs;
-    const leftTabSpec = leftTabSpecs.find(spec => spec.tab === tabSpec.tab);
+    const contentTabSpecs = this.stores.appConfig.contentTabs.tabSpecs;
+    const contentTabSpec = contentTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
       <Tabs
-        className={`document-tabs ${leftTabSpec?.tab}`}
+        className={`document-tabs ${contentTabSpec?.tab}`}
         forceRenderTabPanel={true}
         onSelect={this.handleTabSelect}
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <TabList className={`tab-list ${leftTabSpec?.tab}`} onClick={onTabClick}>
-          {leftTabSpec?.sections.map((section) => {
+        <TabList className={`tab-list ${contentTabSpec?.tab}`} onClick={onTabClick}>
+          {contentTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
             return (
               <Tab
-                className={`doc-tab ${leftTabSpec?.tab} ${section.type}`}
+                className={`doc-tab ${contentTabSpec?.tab} ${section.type}`}
                 key={`section-${section.type}`}
                 data-test={section.dataTestHeader}
               >
@@ -62,7 +62,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })}
         </TabList>
-        {leftTabSpec?.sections.map((section, index) => {
+        {contentTabSpec?.sections.map((section, index) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
                 ? this.handleDocumentStarClick
                 : undefined;
@@ -75,7 +75,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 ? documentView
                 : <TabPanelDocumentsSection
                     key={section.type}
-                    tab={leftTabSpec!.tab}
+                    tab={contentTabSpec!.tab}
                     section={section}
                     stores={this.stores}
                     scale={kNavItemScale}

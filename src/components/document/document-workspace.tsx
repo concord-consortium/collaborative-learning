@@ -36,7 +36,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { leftTabs: { tabSpecs } }, user } = this.stores;
+    const { appConfig : { contentTabs: { tabSpecs } }, user } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const isTeacher = user.isTeacher;
     const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
@@ -177,7 +177,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { ui } = this.stores;
     const style = { right: 0 };
-    const positionedClassName = ui.leftTabContentShown ? className + " half" : className;
+    const positionedClassName = ui.contentTabShown ? className + " half" : className;
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div
