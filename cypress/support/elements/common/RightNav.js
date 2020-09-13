@@ -6,10 +6,10 @@
 class RightNav{
     testDocumentWithTitle(tab, subTab, title, shouldTest) {
         const tabName = 'tab-' + tab;
-        const buttonSelector = '.left-tab-buttons .left-tab.' + tabName;
-        const topTabSelector = '.left-tab-panel .top-tab.' + tabName;
-        const subTabSelector = '.left-tab-panel .doc-tab.' + tab + '.' + subTab;
-        const panelSelector = '.left-tab-panel .tab-panel-documents-section.' + subTab;
+        const buttonSelector = '.nav-tab-buttons .nav-tab.' + tabName;
+        const topTabSelector = '.nav-tab-panel .top-tab.' + tabName;
+        const subTabSelector = '.nav-tab-panel .doc-tab.' + tab + '.' + subTab;
+        const panelSelector = '.nav-tab-panel .tab-panel-documents-section.' + subTab;
         const titlesSelector = panelSelector + ' .list.' + tab + ' .list-item .footer';
         cy.get(buttonSelector).click()
             .then(() => {
@@ -20,7 +20,7 @@ class RightNav{
                                 cy.get(titlesSelector)
                                     .should(shouldTest, title)
                                     .then(() => {
-                                        cy.get('.left-tab-panel .close-button').click();
+                                        cy.get('.nav-tab-panel .close-button').click();
                                     });
                             });
                     });
