@@ -1,5 +1,6 @@
 import { observer, inject } from "mobx-react";
 import React from "react";
+import ResizeObserver from "resize-observer-polyfill";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
@@ -47,6 +48,8 @@ export const BORDER_SIZE = 4;
 export class FourUpComponent extends BaseComponent<IProps, IState> {
   private grid: FourUpGridModelType;
   private container: HTMLDivElement | null;
+  private resizeObserver: ResizeObserver;
+  private roIsInitialized = false;
   private userByContext: ContextUserMap = {};
 
   constructor(props: IProps) {
@@ -63,18 +66,27 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    if (this.container) {
-      this.grid.update({
-        height: this.container.offsetHeight - BORDER_SIZE,
-        initSplitters: true,
-        width: this.container.offsetWidth,
-      });
-    }
-    window.addEventListener("resize", this.handleResizeWindow);
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === this.container) {
+          const {width, height} = entry.contentRect;
+          if (width > 0 && height > 0) {
+            this.grid.update({
+              height: height - BORDER_SIZE,
+              initSplitters: !this.roIsInitialized,
+              resizeSplitters: this.roIsInitialized,
+              width
+            });
+            this.roIsInitialized = true;
+          }
+        }
+      }
+    });
+    this.container && this.resizeObserver.observe(this.container);
   }
 
   public componentWillUnmount() {
-    window.removeEventListener("resize", this.handleResizeWindow);
+    this.resizeObserver.disconnect();
   }
 
   public render() {

@@ -32,6 +32,7 @@ export const UIModel = types
     error: types.maybeNull(types.string),
     activeSectionIndex: 0,
     activeNavTab: ENavTab.kMyWork,
+    activeGroupId: "",
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
@@ -143,6 +144,10 @@ export const UIModel = types
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
+      },
+      setActiveStudentGroup(groupId: string) {
+        self.activeNavTab = ENavTab.kStudentWork;
+        self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);

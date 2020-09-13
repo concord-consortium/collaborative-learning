@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
+import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 
@@ -38,7 +39,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     return (
       <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
-        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelect} forceRenderTabPanel={true}>
+        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
               { tabs?.map((tabSpec, index) => {
@@ -66,10 +67,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     switch (tabSpec.tab) {
       case ENavTab.kProblems:
         return this.renderProblems();
+      case ENavTab.kStudentWork:
+        return <StudentGroupView groupId={this.stores.ui.activeGroupId} setGroupId={this.handleSelectStudentGroup} />;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
-      case ENavTab.kStudentWork:
       case ENavTab.kSupports:
         return this.renderDocuments(tabSpec);
       default:
@@ -91,7 +93,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleSelect = (tabIndex: number) => {
+  private handleSelectTab = (tabIndex: number) => {
     const { tabs } = this.props;
     const { ui } = this.stores;
     if (tabs) {
@@ -105,6 +107,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         logEvent();
       }
     }
+  }
+
+  private handleSelectStudentGroup = (groupId: string) => {
+    const { ui } = this.stores;
+    ui.setActiveStudentGroup(groupId);
   }
 
   private handleClose = () => {
