@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { DocumentModelType } from "../../models/document/document";
-import { LeftTabSpec } from "../../models/view/left-tabs";
+import { NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
 
 import "./document-tab-content.sass";
 
 interface IProps {
-  tabSpec: LeftTabSpec;
+  tabSpec: NavTabSpec;
 }
 
 export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {

@@ -44,7 +44,7 @@
     }
   },
   "showClassSwitcher": true,
-  "leftTabs": {
+  "navTabs": {
     "lazyLoadTabContents": true,
     "tabSpecs": [
       {

@@ -1,13 +1,13 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { ELeftTab, LeftTabSpec } from "../../models/view/left-tabs";
+import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
-import "./left-tab-buttons.sass";
+import "./nav-tab-buttons.sass";
 
 interface IProps extends IBaseProps {
-  tabs?: LeftTabSpec[];
+  tabs?: NavTabSpec[];
   isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -19,7 +19,7 @@ interface IState {
 
 @inject("stores")
 @observer
-export class LeftTabButtons extends BaseComponent<IProps, IState> {
+export class NavTabButtons extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
@@ -32,9 +32,9 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui } = this.stores;
     return (
-      <div className={`left-tab-buttons ${ui.leftTabContentShown ? "hidden" : ""}`}>
+      <div className={`nav-tab-buttons ${ui.navTabContentShown ? "hidden" : ""}`}>
         { tabs?.map((tabSpec, i) => {
-            const tabClass = `left-tab tab-${tabSpec.tab}`;
+            const tabClass = `nav-tab tab-${tabSpec.tab}`;
             return (
               <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
                 {tabSpec.label}
@@ -46,17 +46,17 @@ export class LeftTabButtons extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleTabButtonClick = (tab: ELeftTab) => () => {
+  private handleTabButtonClick = (tab: ENavTab) => () => {
     const { ui } = this.stores;
     const logParameters = {
       tab_name: tab.toString()
     };
     const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
-    if (ui.activeLeftNavTab !== tab) {
-      ui.setActiveLeftNavTab(tab);
+    if (ui.activeNavTab !== tab) {
+      ui.setActiveNavTab(tab);
       logEvent();
     }
-    ui.toggleLeftTabContent(true);
+    ui.toggleNavTabContent(true);
   }
 
 }

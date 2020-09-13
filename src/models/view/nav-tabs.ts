@@ -1,7 +1,7 @@
 import { types, SnapshotIn, Instance } from "mobx-state-tree";
 import { UserModelType, UserTypeEnum } from "../stores/user";
 
-export enum ELeftTab {
+export enum ENavTab {
   kProblems = "problems",
   kStudentWork = "student-work",
   kMyWork = "my-work",
@@ -11,11 +11,11 @@ export enum ELeftTab {
 }
 
 // generic type which maps tab id to values of another type
-export type LeftTabMap<T> = {
-  [K in ELeftTab]: T;
+export type NavTabMap<T> = {
+  [K in ENavTab]: T;
 };
 
-export enum ELeftTabSectionType {
+export enum ENavTabSectionType {
   kPersonalDocuments = "personal-documents",
   kProblemDocuments = "problem-documents",
   kLearningLogs = "learning-logs",
@@ -29,22 +29,22 @@ export enum ELeftTabSectionType {
   kTeacherSupports = "teacher-supports"
 }
 
-export enum ELeftTabOrder {
+export enum ENavTabOrder {
   kOriginal = "original",
   kReverse = "reverse"
 }
 const ENavTabOrderMSTType =
-        types.enumeration<ELeftTabOrder>("ENavTabOrder", Object.values(ELeftTabOrder));
+        types.enumeration<ENavTabOrder>("ENavTabOrder", Object.values(ENavTabOrder));
 
-export const LeftTabSectionModel =
+export const NavTabSectionModel =
   types.model("NavTabSectionModel", {
     className: "",
     title: types.string,
-    type: types.enumeration<ELeftTabSectionType>("ENavTabSectionType", Object.values(ELeftTabSectionType)),
+    type: types.enumeration<ENavTabSectionType>("ENavTabSectionType", Object.values(ENavTabSectionType)),
     dataTestHeader: "section-header",
     dataTestItem: "section-item",
     documentTypes: types.array(types.string),
-    order: types.optional(ENavTabOrderMSTType, ELeftTabOrder.kReverse),
+    order: types.optional(ENavTabOrderMSTType, ENavTabOrder.kReverse),
     properties: types.array(types.string),
     showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,
@@ -56,23 +56,23 @@ export const LeftTabSectionModel =
     },
     showDeleteForUser(user: UserModelType) {
       // allow teachers to delete supports
-      return (user.type === "teacher") && (self.type === ELeftTabSectionType.kTeacherSupports);
+      return (user.type === "teacher") && (self.type === ENavTabSectionType.kTeacherSupports);
     },
   }));
-export type LeftTabSectionSpec = SnapshotIn<typeof LeftTabSectionModel>;
-export type LeftTabSectionModelType = Instance<typeof LeftTabSectionModel>;
+export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
+export type NavTabSectionModelType  = Instance<typeof NavTabSectionModel>;
 
-export const LeftTabModel =
-  types.model("LeftTab", {
-    tab: types.enumeration<ELeftTab>("ELeftTab", Object.values(ELeftTab)),
+export const NavTabModel =
+  types.model("NavTab", {
+    tab: types.enumeration<ENavTab>("ENavTab", Object.values(ENavTab)),
     label: types.string,
     teacherOnly: false,
-    sections: types.array(LeftTabSectionModel)
+    sections: types.array(NavTabSectionModel)
   });
-export type LeftTabSpec = SnapshotIn<typeof LeftTabModel>;
-export type LeftTabModelType = Instance<typeof LeftTabModel>;
+export type NavTabSpec = SnapshotIn<typeof NavTabModel>;
+export type NavTabModelType = Instance<typeof NavTabModel>;
 
-export function leftTabSectionId(section: LeftTabSectionSpec) {
+export function navTabSectionId(section: NavTabSectionSpec) {
   const title = section.title.toLowerCase().replace(" ", "-");
   return `${section.type}-${title}`;
 }
