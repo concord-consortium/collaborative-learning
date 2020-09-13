@@ -27,10 +27,8 @@ export const UIDialogModel = types
 
 export const UIModel = types
   .model("UI", {
-    leftNavExpanded: false,
     navTabContentShown: false,
     error: types.maybeNull(types.string),
-    activeSectionIndex: 0,
     activeNavTab: ENavTab.kMyWork,
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
@@ -45,28 +43,11 @@ export const UIModel = types
     defaultLeftNavExpanded: false,
   }))
   .views((self) => ({
-    get allDefaulted() {
-      return (self.leftNavExpanded === self.defaultLeftNavExpanded);
-    },
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
-    function restoreDefaultNavExpansion() {
-      self.leftNavExpanded = self.defaultLeftNavExpanded;
-    }
-
-    const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
-      const expanded = typeof override !== "undefined" ? override : !self[toggle];
-
-      switch (toggle) {
-        case "leftNavExpanded":
-          self.leftNavExpanded = expanded;
-          break;
-      }
-    };
-
     const alert = (text: string, title?: string) => {
       self.dialog = UIDialogModel.create({type: "alert", text, title});
       dialogResolver = undefined;
@@ -121,26 +102,16 @@ export const UIModel = types
     };
 
     return {
-      restoreDefaultNavExpansion,
       alert,
       prompt,
       confirm,
       resolveDialog,
 
-      afterCreate() {
-        self.defaultLeftNavExpanded = self.leftNavExpanded;
-      },
-      toggleLeftNav(override?: boolean) {
-        toggleWithOverride("leftNavExpanded", override);
-      },
       toggleNavTabContent(show: boolean) {
         self.navTabContentShown = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
-      },
-      setActiveSectionIndex(activeSectionIndex: number) {
-        self.activeSectionIndex = activeSectionIndex;
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
@@ -166,7 +137,6 @@ export const UIModel = types
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);
-          restoreDefaultNavExpansion();
         }
         else if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {

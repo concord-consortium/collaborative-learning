@@ -271,7 +271,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.restoreDefaultNavExpansion();
+    // placeholder
   }
 
   private handleNewDocument = (document: DocumentModelType) => {
