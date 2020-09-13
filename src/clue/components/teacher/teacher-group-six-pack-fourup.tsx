@@ -120,7 +120,7 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
               documentViewMode={documentViewMode}
               selectedSectionId={selectedSectionId}
               viaTeacherDashboard={true}
-              setFocusedGroupUser={this.handleSetFocusedGroupUser}
+              setFocusedGroupUser={this.setFocusedGroupUser}
             />
           </div>
         </div>
@@ -128,7 +128,7 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleSetFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
+  private setFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
     this.setState({focusedGroupUser});
   }
 }

@@ -82,7 +82,7 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
                   ▶
                 </div>
               }
-          </div>
+            </div>
           }
           <div className={deleteButtonClass} title="Delete" onClick={this.handleDeleteButton}>
             <span className="drawing-tool-icon drawing-tool-icon-bin" />

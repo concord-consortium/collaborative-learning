@@ -41,8 +41,8 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
         />
         <SixPackRightControls
           documentViewMode={documentViewMode}
-          setDocumentViewMode={this.handleSetDocumentViewMode}
-          setSelectedSectionId={this.handleSetSelectedSectionId}
+          setDocumentViewMode={this.setDocumentViewMode}
+          setSelectedSectionId={this.setSelectedSectionId}
           selectedSectionId={selectedSectionId}
         >
           <Pager
@@ -61,11 +61,11 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     return Math.ceil(this.stores.groups.allGroups.length / GROUPS_PER_PAGE);
   }
 
-  private handleSetDocumentViewMode = (documentViewMode: DocumentViewMode) => {
+  private setDocumentViewMode = (documentViewMode: DocumentViewMode) => {
     this.setState({documentViewMode});
   }
 
-  private handleSetSelectedSectionId = (selectedSectionId: string) => {
+  private setSelectedSectionId = (selectedSectionId: string) => {
     this.setState({selectedSectionId});
   }
 }

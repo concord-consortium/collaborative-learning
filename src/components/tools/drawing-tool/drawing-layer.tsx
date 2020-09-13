@@ -13,7 +13,7 @@ import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
-import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
+import { gImageMap } from "../../../models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 const SELECTION_COLOR = "#777";
@@ -626,8 +626,6 @@ interface DrawingLayerViewState {
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObject|null;
   isLoading: boolean;
-  imageContentUrl?: string;
-  imageEntry?: ImageMapEntryType;
 }
 
 @observer
@@ -1001,22 +999,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           (imgObj as ImageObject).model.url = image.displayUrl || placeholderImage);
 
         // update react state
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageEntry: image
-        });
+        this.setState({ isLoading: false });
         // update mst content if conversion occurred
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
       })
       .catch(() => {
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageEntry: undefined
-        });
+        this.setState({ isLoading: false });
       });
   }
 
