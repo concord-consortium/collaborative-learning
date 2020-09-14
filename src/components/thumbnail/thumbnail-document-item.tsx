@@ -21,16 +21,19 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onDocumentClick && onDocumentClick(document);
+    onDocumentClick?.(document);
+    e.stopPropagation();
   };
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    onDocumentDragStart && onDocumentDragStart(e, document);
+    onDocumentDragStart?.(e, document);
   };
   const handleDocumentStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onDocumentStarClick && onDocumentStarClick(document);
+    onDocumentStarClick?.(document);
+    e.stopPropagation();
   };
   const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onDocumentDeleteClick && onDocumentDeleteClick(document);
+    onDocumentDeleteClick?.(document);
+    e.stopPropagation();
   };
   return (
     <div
