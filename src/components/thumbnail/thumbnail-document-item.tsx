@@ -28,6 +28,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
   };
   const handleDocumentStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentStarClick && onDocumentStarClick(document);
+    e.stopPropagation();
   };
   const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentDeleteClick && onDocumentDeleteClick(document);
