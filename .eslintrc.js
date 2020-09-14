@@ -36,7 +36,8 @@ module.exports = {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { "args": "none", "ignoreRestSiblings": true }],
+      "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: [] }],
+      "@typescript-eslint/no-unused-vars": ["error", { args: "none", ignoreRestSiblings: true }],
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
@@ -48,7 +49,7 @@ module.exports = {
       "no-debugger": "off", // enabled in .eslintrc.build.js
       "no-duplicate-imports": "error",
       "no-sequences": "error",
-      "no-shadow": ["error", { "builtinGlobals": false, "hoist": "all", "allow": [] }],
+      "no-shadow": "off", // superceded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
       "no-unused-expressions": ["error", { allowShortCircuit: true }],
@@ -78,9 +79,16 @@ module.exports = {
     },
     overrides: [
       { // some rules can be relaxed in tests
-        "files": ["**/*.test.*"],
+        files: ["**/*.test.*"],
         rules: {
           "@typescript-eslint/no-non-null-assertion": "off",
+        }
+      },
+      {
+        files: ["**/webpack.config.js"],
+        rules: {
+          "@typescript-eslint/no-require-imports": "off",
+          "@typescript-eslint/no-var-requires": "off"
         }
       }
     ]

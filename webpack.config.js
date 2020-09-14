@@ -1,3 +1,4 @@
+/* eslint-env node */
 'use strict';
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
