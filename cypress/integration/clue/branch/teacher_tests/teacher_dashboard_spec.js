@@ -151,7 +151,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                 });
                 dashboard.switchView('Dashboard'); //switch back to continue tests
             });
-            it('clicking expand group button will open that single group in teacher workspace', () => {
+            it.skip('clicking expand group button will open that single group in teacher workspace', () => {
                 cy.get('@clueData').then((clueData) => {
                     let groups = clueData.classes[0].problems[0].groups;
                     dashboard.getExpandGroupViewButton().eq(1).click();//hard coding clicking the first icon

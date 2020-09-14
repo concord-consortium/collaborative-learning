@@ -5,7 +5,6 @@ import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
 import { FourUpComponent } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
-import { GroupVirtualDocument } from "../../../models/document/group-virtual-document";
 import { LogEventName, Logger } from "../../../lib/logger";
 import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
@@ -81,18 +80,11 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
         }
       };
 
-      const showGroupClickHandler = () => {
-        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-standalone-group"});
-        ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
-        ui.problemWorkspace.toggleComparisonVisible({override: true, hidePrimary: true});
-        ui.setTeacherPanelKey(EPanelId.workspace);
-      };
-
       const showGroupSupportClickHandler = () => {
         Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-comparison-group"});
-        ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument(group));
-        ui.problemWorkspace.toggleComparisonVisible({override: true});
         ui.setTeacherPanelKey(EPanelId.workspace);
+        ui.setActiveStudentGroup(group.id);
+        ui.toggleNavTabContent(true);
       };
 
       return(
@@ -111,12 +103,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
               icon="support"
               key="support"
               onClickButton={showGroupSupportClickHandler} />
-            <IconButton
-              title="Expand Group View"
-              className="icon"
-              icon="expand-group-view"
-              key="expand-group-view"
-              onClickButton={showGroupClickHandler} />
           </div>
         </div>
       );

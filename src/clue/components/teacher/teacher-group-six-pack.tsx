@@ -42,13 +42,14 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
   private renderGroups() {
     const { page, documentViewMode, selectedSectionId } = this.props;
     const { groups } = this.stores;
-    const numberOfGroups = groups.allGroups.length;
     const renders = [];
+    const renderGroups = groups.allGroups.filter(group => group.users.length > 0);
+    const numberOfGroups = renderGroups.length;
     for (let row = 0; row < ROWS; row++) {
       for (let column = 0; column < COLUMNS; column++) {
         const groupIndex = (page * GROUPS_PER_PAGE) + (row * COLUMNS) + column;
         if (groupIndex < numberOfGroups) {
-          const group = groups.allGroups[groupIndex];
+          const group = renderGroups[groupIndex];
           const fourUp = <TeacherGroupSixPackFourUp
                             key={group.id}
                             group={group}

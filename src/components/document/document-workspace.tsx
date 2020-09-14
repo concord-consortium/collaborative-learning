@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { DocumentComponent } from "../../components/document/document";
+import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentType,
@@ -12,8 +12,6 @@ import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";
 
 import "./document-workspace.sass";
-
-type WorkspaceSide = "primary" | "comparison";
 
 interface IProps extends IBaseProps {
 }
@@ -123,8 +121,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       ? <GroupVirtualDocumentComponent
           key={comparisonDocumentKey}
           document={groupVirtualDocument}
-          workspace={problemWorkspace}
-          side={hidePrimaryForCompare ? "primary" : "comparison"}
         />
       : comparisonDocument
         ?
