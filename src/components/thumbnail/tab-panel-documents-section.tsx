@@ -34,7 +34,7 @@ function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) 
   return "New " + (documentLabel || "Workspace");
 }
 
-function getDocumentCaption(section: NavTabSectionModelType , stores: IStores, document: DocumentModelType) {
+function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
@@ -136,7 +136,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
                 canvasContext={tab}
                 document={document}
                 scale={scale}
-                captionText={getDocumentCaption(section, stores, document)}
+                captionText={getDocumentCaption(stores, document)}
                 onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
                 onIsStarred={onIsStarred}
                 onDocumentStarClick={_handleDocumentStarClick}

@@ -1,5 +1,6 @@
 import { MobXProviderContext } from "mobx-react";
 import { useContext } from "react";
+import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
 import { IStores } from "../models/stores/stores";
@@ -20,4 +21,8 @@ export function useGroupsStore(): GroupsModelType {
 
 export function useUserStore(): UserModelType {
   return useStores().user;
+}
+
+export function useProblemStore(): ProblemModelType {
+  return useStores().problem;
 }
