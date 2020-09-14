@@ -335,16 +335,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleResizeWindow = (e: UIEvent) => {
-    if (this.container) {
-      this.grid.update({
-        height: this.container.offsetHeight - BORDER_SIZE,
-        resizeSplitters: true,
-        width: this.container.offsetWidth,
-      });
-    }
-  }
-
   private handleHSplitter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, true, false);
   }
