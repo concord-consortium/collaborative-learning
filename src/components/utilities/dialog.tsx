@@ -60,7 +60,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
       }
 
       return (
-        <div className="dialog">
+        <div className={`dialog ${dialog.className}`}>
           <div className="dialog-background" />
           <div className="dialog-container">
             <div className="dialog-title" data-test="dialog-title">{title}</div>
