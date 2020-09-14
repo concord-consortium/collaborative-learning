@@ -103,7 +103,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
-        const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
+        const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       }
     }

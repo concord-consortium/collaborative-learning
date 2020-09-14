@@ -14,7 +14,7 @@ interface IProps extends IBaseProps {
   tabSpec: NavTabSpec;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
-  onTabClick?: () => void;
+  onTabClick?: (title: string, type: string) => void;
   documentView?: React.ReactNode;
 }
 
@@ -49,13 +49,14 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <TabList className={`tab-list ${navTabSpec?.tab}`} onClick={onTabClick}>
+        <TabList className={`tab-list ${navTabSpec?.tab}`}>
           {navTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
             return (
               <Tab
                 className={`doc-tab ${navTabSpec?.tab} ${section.type}`}
                 key={`section-${section.type}`}
+                onClick={() => onTabClick?.(sectionTitle, section.type)}
                 data-test={section.dataTestHeader}
               >
                 {sectionTitle}

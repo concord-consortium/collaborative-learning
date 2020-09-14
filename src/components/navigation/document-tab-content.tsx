@@ -6,6 +6,7 @@ import { NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfigStore, useProblemStore } from "../../hooks/use-stores";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document-tab-content.sass";
 
@@ -18,8 +19,12 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
 
-  const handleTabClick = () => {
+  const handleTabClick = (title: string, type: string) => {
     setReferenceDocument(undefined);
+    Logger.log(LogEventName.SHOW_TAB_SECTION, {
+      tab_section_name: title,
+      tab_section_type: type
+    });
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
