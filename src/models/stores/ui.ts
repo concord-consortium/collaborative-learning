@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
@@ -21,9 +21,12 @@ export const UIDialogModel = types
     type: UIDialogTypeEnum,
     text: types.string,
     title: types.maybe(types.string),
+    className: "",
     defaultValue: types.maybe(types.string),
     rows: types.maybe(types.number)
   });
+type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
+type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
@@ -48,20 +51,27 @@ export const UIModel = types
     }
   }))
   .actions((self) => {
-    const alert = (text: string, title?: string) => {
-      self.dialog = UIDialogModel.create({type: "alert", text, title});
+    const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "alert", text: textOrOpts, title }
+                                          : { type: "alert", ...textOrOpts });
       dialogResolver = undefined;
     };
 
-    const confirm = (text: string, title?: string) => {
-      self.dialog = UIDialogModel.create({type: "confirm", text, title});
+    const confirm = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "confirm", text: textOrOpts, title }
+                                          : { type: "confirm", ...textOrOpts });
       return new Promise<boolean>((resolve, reject) => {
         dialogResolver = resolve;
       });
     };
 
-    const prompt = (text: string, defaultValue = "", title?: string, rows?: number) => {
-      self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title, rows});
+    const prompt = (textOrOpts: string | UIDialogModelSnapshotWithoutType,
+                    defaultValue = "", title?: string, rows?: number) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "prompt", text: textOrOpts, defaultValue, title, rows }
+                                          : { type: "prompt", ...textOrOpts });
       return new Promise<string>((resolve, reject) => {
         dialogResolver = resolve;
       });

@@ -284,7 +284,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const docTypeString = appConfig.getDocumentLabel(docType, 1);
     const docTypeStringL = appConfig.getDocumentLabel(docType, 1, true);
     const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
-    this.stores.ui.prompt(`Name your new ${docTypeStringL}:`, `${nextTitle}`, `Create ${docTypeString}`)
+    this.stores.ui.prompt({
+        className: `create-${type}`,
+        title: `Create ${docTypeString}`,
+        text: `Name your new ${docTypeStringL}:`,
+        defaultValue: `${nextTitle}`,
+      })
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
         .catch(this.stores.ui.setError);
