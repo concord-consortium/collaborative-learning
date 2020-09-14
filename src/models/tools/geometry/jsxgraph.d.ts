@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare namespace JXG {
 
   const COORDS_BY_SCREEN: number;
@@ -135,7 +136,6 @@ declare namespace JXG {
     freeBoard: (board: JXG.Board | string) => void;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class Image extends CoordsElement {
     size: [number, number];
     url: string;
