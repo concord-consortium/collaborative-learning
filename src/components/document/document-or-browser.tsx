@@ -8,12 +8,15 @@ import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from
 interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   showBrowser: boolean;
   tabSpec: NavTabSpec;
+  onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
-  const { showBrowser, tabSpec, onSelectDocument, ...others } = props;
+  const { showBrowser, tabSpec, onSelectNewDocument, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec
-          ? <DocumentTabPanel tabSpec={tabSpec} onDocumentClick={onSelectDocument} />
+          ? <DocumentTabPanel tabSpec={tabSpec}
+              onSelectNewDocument={onSelectNewDocument}
+              onSelectDocument={onSelectDocument} />
           : <EditableDocumentContent {...others} />;
 };
 

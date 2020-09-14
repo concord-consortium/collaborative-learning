@@ -78,7 +78,8 @@
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["!isDeleted"],
-            "showStars": ["student", "teacher"]
+            "showStars": ["student", "teacher"],
+            "addDocument": true
           },
           {
             "title": "Problem Workspaces",
@@ -101,7 +102,8 @@
             "type": "learning-logs",
             "dataTestHeader": "learning-log-section",
             "documentTypes": ["learningLog"],
-            "properties": ["!isDeleted"]
+            "properties": ["!isDeleted"],
+            "addDocument": true
           }
         ]
       },

@@ -32,13 +32,6 @@ class Canvas{
         return cy.get('[data-test=document-file-menu-header');
     }
 
-    getNewDocumentItem() {
-        return this.getFileMenu().click()
-            .then(() => {
-                return cy.get('[data-test=list-item-icon-new-workspace');
-            });
-    }
-
     getOpenDocumentItem() {
         return this.getFileMenu().click()
             .then(() => {
@@ -73,13 +66,16 @@ class Canvas{
     }
 
     createNewExtraDocument(title){
-        this.getNewDocumentItem().click()
+        this.getOpenDocumentItem().click()
             .then(function() {
-                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
-                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click()
+                cy.get('.tab-panel-documents-section.personal-documents .new-document-button').click()
                     .then(function() {
-                        this.getPersonalDocTitle().should("contain",title);
+                        dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+                        dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                        dialog.getDialogOKButton().click()
+                            .then(function() {
+                                this.getPersonalDocTitle().should("contain",title);
+                            }.bind(this));
                     }.bind(this));
             }.bind(this));
     }

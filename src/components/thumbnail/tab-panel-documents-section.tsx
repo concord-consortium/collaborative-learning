@@ -1,12 +1,12 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, SupportPublication
+import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, PersonalDocument, SupportPublication
       } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
-import { Icon } from "@blueprintjs/core";
+import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
 
@@ -15,11 +15,23 @@ interface IProps {
   section: NavTabSectionModelType ;
   stores: IStores;
   scale: number;
-  onNewDocumentClick?: (section: NavTabSectionModelType ) => void;
-  onDocumentClick: (document: DocumentModelType) => void;
+  onSelectNewDocument?: (type: string) => void;
+  onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
+}
+
+function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) {
+  const { appConfig } = stores;
+  let documentLabel = "";
+  section.documentTypes.forEach(type => {
+    const label = type !== PersonalDocument ? appConfig.getDocumentLabel(type, 1) : "";
+    if (!documentLabel && label) {
+      documentLabel = label;
+    }
+  });
+  return "New " + (documentLabel || "Workspace");
 }
 
 function getDocumentCaption(section: NavTabSectionModelType , stores: IStores, document: DocumentModelType) {
@@ -34,10 +46,11 @@ function getDocumentCaption(section: NavTabSectionModelType , stores: IStores, d
 }
 
 export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
-                                  onDocumentClick, onDocumentDragStart,
-                                  onNewDocumentClick, onDocumentStarClick,
-                                  onDocumentDeleteClick }: IProps) => {
+                                  onSelectNewDocument, onSelectDocument, onDocumentDragStart,
+                                  onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
+    const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
+    const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
 
@@ -77,26 +90,28 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     function handleNewDocumentClick() {
-      onNewDocumentClick && onNewDocumentClick(section);
+      onSelectNewDocument?.(section.documentTypes[0]);
     }
 
     return (
       <div className={`tab-panel-documents-section ${section.type}`} key={`${tab}-${section.type}`}
           data-test={`${section.dataTestHeader}-documents`}>
         <div className={`list ${tab}`}>
+          {showNewDocumentThumbnail &&
+            <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
           {sectionDocs.map(document => {
 
             function handleDocumentClick() {
-              onDocumentClick && onDocumentClick(document);
+              onSelectDocument?.(document);
             }
             function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-              onDocumentDragStart && onDocumentDragStart(e, document);
+              onDocumentDragStart?.(e, document);
             }
             function handleDocumentStarClick() {
-              onDocumentStarClick && onDocumentStarClick(document);
+              onDocumentStarClick?.(document);
             }
             function handleDocumentDeleteClick() {
-              onDocumentDeleteClick && onDocumentDeleteClick(document);
+              onDocumentDeleteClick?.(document);
             }
 
             // pass function so logic stays here but access occurs from child
@@ -129,30 +144,25 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
               />
             );
           })}
-          {section.addDocument
-            ? <NewDocumentButtonComponent onClick={handleNewDocumentClick} />
-            : null}
         </div>
       </div>
     );
   });
 
-interface INewDocumentButtonProps {
+interface INewDocumentThumbnailProps {
+  label?: string;
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
-
-const NewDocumentButtonComponent = ({ onClick }: INewDocumentButtonProps) => {
+const NewDocumentThumbnail: React.FC<INewDocumentThumbnailProps> = ({ label, onClick }) => {
   return (
     <div className="list-item" data-test="my-work-new-document" >
-      <div
-        className="scaled-list-item-container new-document-button"
-        onClick={onClick} >
+      <div className="scaled-list-item-container new-document-button" onClick={onClick} >
         <div className="scaled-list-item">
           <CanvasComponent context="my-work" readOnly={true} />
         </div>
         <div className="new-document-button-label">
-          <Icon className="new-document-button-icon" icon="add" iconSize={26} />
-          <label>New</label>
+          <NewDocumentIcon />
+          <label>{label}</label>
         </div>
       </div>
     </div>
