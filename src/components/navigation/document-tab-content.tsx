@@ -26,18 +26,18 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     setReferenceDocument(document);
   };
 
-  const documentDisplayTitle = (document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType) => {
+  const documentTitle = (document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType) => {
     const { type } = document;
     return document.isSupport
-    ? document.getProperty("caption") || "Support"
-    : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
+      ? document.getProperty("caption") || "Support"
+      : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   };
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const documentView = referenceDocument &&
     <div>
       <div className={`document-title ${tabSpec.tab} ${sectionClass}`}>
-        {documentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
+        {documentTitle(referenceDocument, appConfigStore, problemStore)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
