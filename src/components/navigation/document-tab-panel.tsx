@@ -112,7 +112,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
 
     if (newDocument) {
       problemWorkspace.setAvailableDocument(newDocument);
-      ui.restoreDefaultNavExpansion();
     }
   }
 
