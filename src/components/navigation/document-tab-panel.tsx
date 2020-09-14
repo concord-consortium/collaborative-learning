@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ENavTabSectionType, NavTabSpec, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { NavTabSpec, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
@@ -12,7 +12,8 @@ import "./document-tab-panel.sass";
 
 interface IProps extends IBaseProps {
   tabSpec: NavTabSpec;
-  onDocumentClick?: (document: DocumentModelType) => void;
+  onSelectNewDocument?: (type: string) => void;
+  onSelectDocument?: (document: DocumentModelType) => void;
   onTabClick?: () => void;
   documentView?: React.ReactNode;
 }
@@ -35,7 +36,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, onTabClick, onDocumentClick } = this.props;
+    const { documentView, tabSpec, onTabClick, onSelectNewDocument, onSelectDocument } = this.props;
     const { tabIndex } = this.state;
     const { user } = this.stores;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
@@ -79,8 +80,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                     section={section}
                     stores={this.stores}
                     scale={kNavItemScale}
-                    onNewDocumentClick={this.handleNewDocumentClick}
-                    onDocumentClick={onDocumentClick || this.handleDocumentClick}
+                    onSelectNewDocument={onSelectNewDocument}
+                    onSelectDocument={onSelectDocument}
                     onDocumentDragStart={this.handleDocumentDragStart}
                     onDocumentStarClick={_handleDocumentStarClick}
                     onDocumentDeleteClick={_handleDocumentDeleteClick}
@@ -100,24 +101,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
       return `${prefix}Investigation ${investigation.ordinal}`;
     }
     return section.title;
-  }
-
-  private handleNewDocumentClick = async (section: NavTabSectionModelType ) => {
-    const { appConfig: { defaultDocumentContent }, db, ui } = this.stores;
-    const { problemWorkspace } = ui;
-
-    const newDocument = section.type === ENavTabSectionType.kLearningLogs
-      ? await db.createLearningLogDocument()
-      : await db.createPersonalDocument({ content: defaultDocumentContent });
-
-    if (newDocument) {
-      problemWorkspace.setAvailableDocument(newDocument);
-    }
-  }
-
-  private handleDocumentClick = (document: DocumentModelType) => {
-    const { appConfig, ui } = this.stores;
-    ui.rightNavDocumentSelected(appConfig, document);
   }
 
   private handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {

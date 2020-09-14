@@ -7,8 +7,6 @@ import "./document-file-menu.scss";
 
 interface IProps {
   document: DocumentModelType;
-  isNewDisabled?: boolean;
-  onNewDocument?: (document: DocumentModelType) => void;
   isOpenDisabled?: boolean;
   onOpenDocument?: (document: DocumentModelType) => void;
   isCopyDisabled?: boolean;
@@ -26,7 +24,6 @@ function idAndIcon(id: string, appIcons?: Record<string, IconComponent>) {
 
 export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
-          isNewDisabled, onNewDocument,
           isOpenDisabled, onOpenDocument,
           isCopyDisabled, onCopyDocument,
           isDeleteDisabled, onDeleteDocument } = props;
@@ -37,12 +34,6 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
   const titleIcon = TitleIcon && <TitleIcon viewBox="0 0 32 32" />;
 
   const menuItems: ICustomDropdownItem[] = useMemo(() => ([
-    {
-      ...idAndIcon("icon-new-workspace", appIcons),
-      text: "New",
-      disabled: !!isNewDisabled,
-      onClick: () => onNewDocument?.(document)
-    },
     {
       ...idAndIcon("icon-open-workspace", appIcons),
       text: "Open...",

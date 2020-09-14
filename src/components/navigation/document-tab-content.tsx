@@ -17,7 +17,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     setReferenceDocument(undefined);
   };
 
-  const handleDocumentClick = (document: DocumentModelType) => {
+  const handleSelectDocument = (document: DocumentModelType) => {
     setReferenceDocument(document);
   };
 
@@ -34,7 +34,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
       <DocumentTabPanel
         tabSpec={tabSpec}
         onTabClick={handleTabClick}
-        onDocumentClick={handleDocumentClick}
+        onSelectDocument={handleSelectDocument}
         documentView={documentView}
       />
     </div>

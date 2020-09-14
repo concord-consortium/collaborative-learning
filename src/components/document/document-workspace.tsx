@@ -274,10 +274,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     // placeholder
   }
 
-  private handleNewDocument = (document: DocumentModelType) => {
+  private handleNewDocument = (type: string) => {
     const { appConfig, user } = this.stores;
-    const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const defaultDocTitle = document.isLearningLog
+    const isLearningLog = type === LearningLogDocument;
+    const docType = isLearningLog ? LearningLogDocument : PersonalDocument;
+    const defaultDocTitle = isLearningLog
                             ? appConfig.defaultLearningLogTitle
                             : appConfig.defaultDocumentTitle;
     const docTypeString = appConfig.getDocumentLabel(docType, 1);

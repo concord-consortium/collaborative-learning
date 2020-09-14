@@ -26,7 +26,7 @@ export type WorkspaceSide = "primary" | "comparison";
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
-  onNewDocument?: (document: DocumentModelType) => void;
+  onNewDocument?: (type: string) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onPublishSupport?: (document: DocumentModelType) => void;
@@ -166,6 +166,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {this.renderTitleBar(document.type)}
         <MyWorkDocumentOrBrowser
           showBrowser={this.state.showBrowser}
+          onSelectNewDocument={this.handleSelectNewDocument}
           onSelectDocument={this.handleSelectDocument}
           mode={workspace.mode}
           isPrimary={side === "primary"}
@@ -222,7 +223,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions left">
             <DocumentFileMenu document={document}
-              onNewDocument={this.handleNewDocumentClick}
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
@@ -354,7 +354,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions">
             <DocumentFileMenu document={document}
-              onNewDocument={this.handleNewDocumentClick}
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
@@ -429,9 +428,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     clipboard.clear();
   }
 
-  private handleNewDocumentClick = () => {
-    const { document, onNewDocument } = this.props;
-    onNewDocument?.(document);
+  private handleSelectNewDocument = (type: string) => {
+    const { onNewDocument } = this.props;
+    onNewDocument?.(type);
   }
 
   private handleOpenDocumentClick = () => {
