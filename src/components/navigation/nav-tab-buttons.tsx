@@ -51,7 +51,7 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
     const logParameters = {
       tab_name: tab.toString()
     };
-    const logEvent = () => { Logger.log(LogEventName.SHOW_LEFT_TAB, logParameters); };
+    const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
     if (ui.activeNavTab !== tab) {
       ui.setActiveNavTab(tab);
       logEvent();
