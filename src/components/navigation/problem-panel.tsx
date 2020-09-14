@@ -29,10 +29,6 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
     const {content} = section;
     return (
       <div className="section">
-        <div className="section-header">
-          <div className="title">{section.title}</div>
-          <div className="separator"/>
-        </div>
         {content ? this.renderContent(content) : null}
       </div>
     );
