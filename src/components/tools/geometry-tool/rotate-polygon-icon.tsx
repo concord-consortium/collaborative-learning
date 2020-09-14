@@ -10,7 +10,6 @@ interface IProps {
 
 interface IState {
   polygonId?: string;
-  deltaAngle?: number;
   iconAnchor?: JXG.Coords;
 }
 
@@ -134,7 +133,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     const dragAngle = this.computeAngle(this.polygonCenter, e);
     const deltaAngle = dragAngle - this.initialDragAngle;
     const iconAnchor = rotateCoords(this.initialIconAnchor, this.polygonCenter, deltaAngle);
-    this.setState({ deltaAngle, iconAnchor });
+    this.setState({ iconAnchor });
 
     this.rotateVertices(polygon, deltaAngle, false);
   }

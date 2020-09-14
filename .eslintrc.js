@@ -34,9 +34,10 @@ module.exports = {
       "@typescript-eslint/no-confusing-non-null-assertion": "error",
       "@typescript-eslint/no-empty-interface": "off",
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",  // extensive use before introduction of eslint
+      "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-unused-vars": ["error", { "args": "none", "ignoreRestSiblings": true }],
+      "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
       "eol-last": "warn",
@@ -65,8 +66,22 @@ module.exports = {
       "prefer-rest-params": "error",
       "prefer-spread": "error",
       radix: "error",
+      "react/jsx-closing-tag-location": "error",
+      "react/jsx-handler-names": "off", // 13 as of 2020-09-13
+      "react/jsx-no-useless-fragment": "error",
       "react/no-access-state-in-setstate": "error",
+      "react/no-danger": "error",
+      "react/no-unsafe": ["off", { checkAliases: true }], // 1 as of 2020-09-13
+      "react/no-unused-state": "error",
       "react/prop-types": "off",
       semi: ["error", "always"]
-    }
+    },
+    overrides: [
+      { // some rules can be relaxed in tests
+        "files": ["**/*.test.*"],
+        rules: {
+          "@typescript-eslint/no-non-null-assertion": "off",
+        }
+      }
+    ]
 };

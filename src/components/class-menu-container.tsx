@@ -15,13 +15,13 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
   public render() {
     const links = this.getPortalClasses();
     const { user } = this.stores;
-    return(<>
+    return(
       <CustomSelect
         title="Class Menu"
         titlePrefix={user.name}
         items={links}
       />
-    </>);
+    );
   }
 
   private getCurrentProblemOrdinal() {

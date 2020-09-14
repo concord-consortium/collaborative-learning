@@ -38,7 +38,7 @@ const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSe
       </div>
       {<div className="group-title" data-test="document-title">
           {selectedId ? `Group ${selectedId}` : "No groups"}
-      </div>}
+       </div>}
     </div>
   );
 };
