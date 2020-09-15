@@ -1,0 +1,312 @@
+{
+  "code": "ggg",
+  "abbrevTitle": "GGG",
+  "title": "Growing, Growing, Growing",
+  "subtitle": "Exponential Expressions and Exponential Functions, Non-Linear Functions",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "GGG Investigation 1 Investigation 1. Exponential Growth Patterns",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "GGG 1.1 Making Ballots",
+          "subtitle": "Introducing Exponential Functions",
+          "disabled": [],
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "GGG 1.2 The King’s Reward",
+          "subtitle": "Representing Exponential Functions",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "GGG 1.3 Killer Plant Strikes Lake Victoria",
+          "subtitle": "y-intercepts Other than 1",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.4",
+          "ordinal": 4,
+          "title": "GGG 1.4 Growing Mold",
+          "subtitle": "Interpreting Equations for Exponential Functions",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "GGG Investigation 2 Investigation 2. Growth Factors and Growth Rates",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "GGG 2.1 Reproducing Rabbits",
+          "subtitle": "Fractional Growth Factors",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "GGG 2.2 Investing in the Future",
+          "subtitle": "Growth Rates",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "GGG 2.3 Making a Difference",
+          "subtitle":"Connecting Initial Populations to Growth Factors",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "GGG Investigation 3 Exponential Decay",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "GGG 3.1 Making Smaller Ballots: Introducing Exponential Decay",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "GGG 3.2 Fighting Fleas",
+          "subtitle": "Representing Exponential Decay",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "GGG 3.3 Cooling Water",
+          "subtitle": "Modeling Exponential Decay",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.4",
+          "ordinal": 4,
+          "title": "GGG 3.4 Wrapping Up",
+          "subtitle": "Exponential Functions",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "GGG Investigation 4 Patterns with Exponents",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "GGG 4.1 Looking for Patterns among Exponents",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "GGG 4.2 More Patterns",
+          "subtitle": "Properties of Exponents",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "GGG 4.3 Water Usage",
+          "subtitle": "Operations with Scientific Notation",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.4",
+          "ordinal": 4,
+          "title": "GGG 4.4 Growing Amoebas",
+          "subtitle": "Extending the Properties of Exponents",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "GGG MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "How Likely Is It? Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                          "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                         "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": []
+}

@@ -5,6 +5,8 @@
     "cr": "curriculum/completely-rational/completely-rational.json",
     "cas": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
     "faw": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
+    "ffpc": "curriculum/frogs-fleas-and-painted-cubes/frogs-fleas-and-painted-cubes.json",
+    "ggg": "curriculum/growing-growing-growing/growing-growing-growing.json",
     "hlit": "curriculum/how-likely-is-it/how-likely-is-it.json",
     "help": "curriculum/help/help.json",
     "lfp": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json",
@@ -14,6 +16,7 @@
     "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
     "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+    "sws": "curriculum/say-it-with-symbols/say-it-with-symbols.json",
     "twmm": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
   },
   "unitCodeMap": {

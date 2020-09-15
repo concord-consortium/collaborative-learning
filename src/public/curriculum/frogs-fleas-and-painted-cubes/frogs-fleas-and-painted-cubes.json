@@ -1,0 +1,294 @@
+{
+  "code": "ffpc",
+  "abbrevTitle": "FFPC",
+  "title": "Frogs, Fleas, and Painted Cubes",
+  "subtitle": "Quadratic Functions and Expressions",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "FFPC Investigation 1 Introducing Quadratic Functions, a Non-Linear Function",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "FFPC 1.1 Staking a Claim",
+          "subtitle": "Maximizing Area",
+          "disabled": [],
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.2 ",
+          "ordinal": 2,
+          "title": "FFPC 1.2 Using Graphs and Tables to Make Predictions",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "FFPC 1.3 Using Equations to Make Predictions",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "FFPC Investigation 2 Quadratic Functions and Expressions",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "FFPC 2.1 Trading Land",
+          "subtitle": "Representing Areas of Rectangles",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "FFPC 2.2 Changing Dimensions",
+          "subtitle": "The Distributive Property and Expressions",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "FFPC 2.3 Factoring Expressions",
+          "subtitle":"",
+          "sections": [
+          ],
+          "supports": []
+        },
+         {
+          "description": "Problem 2.4",
+          "ordinal": 4,
+          "title": "FFPC 2.4 Quadratic Functions and Their Graphs",
+          "subtitle":"",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "FFPC Investigation 3 Quadratic Patterns of Change ",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "FFPC 3.1 Exploring Triangular Numbers",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "FFPC 3.2 Counting Handshakes",
+          "subtitle": "Another Quadratic Function?",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "FFPC 3.3 Quadratic Functions and Patterns of Change",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "FFPC Investigation 4 Frogs Meet Fleas on a Painted Cube: More Quadratic Functions",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "FFPC 4.1 Tracking a Ball",
+          "subtitle": "Interpreting a Table and Graph",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "FFPC 4.2 Painted Cubes",
+          "subtitle": "Looking at Several Functions",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "FFPC 4.3 Putting It All Together",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "FFPC MR1 - MR4",
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "How Likely Is It? Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are exploring quadratic functions and expressions and how they can be used to solve problems and make predictions. At the end of this Investigation, <em>What do you know about quadratic functions and expressions? </em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are exploring quadratic functions and expressions and how they can be used to solve problems and make predictions. At the end of this Investigation, <em>What do you know about quadratic functions and expressions? </em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "In this unit we are exploring quadratic functions and expressions and how they can be used to solve problems and make predictions. At the end of this Investigation, <em>What do you know about quadratic functions and expressions? </em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                      "In this unit we are exploring quadratic functions and expressions and how they can be used to solve problems and make predictions. At the end of this Investigation, <em>What do you know about quadratic functions and expressions? </em>"
+                      ]
+                    }
+                  } 
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ],
+      "supports": [
+      ]
+    }
+  ],
+  "supports": []
+}
