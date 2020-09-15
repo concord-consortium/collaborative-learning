@@ -66,15 +66,19 @@ class Canvas{
     }
 
     createNewExtraDocument(title){
+        const subTabSelector = '.primary-workspace .doc-tab.my-work.personal-documents';
         this.getOpenDocumentItem().click()
             .then(function() {
-                cy.get('.tab-panel-documents-section.personal-documents .new-document-button').click()
+                cy.get(subTabSelector).click()
                     .then(function() {
-                        dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
-                        dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                        dialog.getDialogOKButton().click()
+                        cy.get('.tab-panel-documents-section.personal-documents .new-document-button').click()
                             .then(function() {
-                                this.getPersonalDocTitle().should("contain",title);
+                                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+                                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                                dialog.getDialogOKButton().click()
+                                    .then(function() {
+                                        this.getPersonalDocTitle().should("contain",title);
+                                    }.bind(this));
                             }.bind(this));
                     }.bind(this));
             }.bind(this));

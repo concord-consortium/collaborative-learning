@@ -77,6 +77,14 @@
         "label": "My Work",
         "sections": [
           {
+            "title": "Problem Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem"],
+            "showStars": ["student", "teacher"]
+          },
+          {
             "title": "Extra Workspaces",
             "type": "personal-documents",
             "dataTestHeader": "my-work-section-workspaces",
@@ -85,14 +93,6 @@
             "properties": ["!isDeleted"],
             "showStars": ["student", "teacher"],
             "addDocument": true
-          },
-          {
-            "title": "Problem Workspaces",
-            "type": "problem-documents",
-            "dataTestHeader": "my-work-section-investigations",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["problem"],
-            "showStars": ["student", "teacher"]
           },
           {
             "title": "Starred",
@@ -117,14 +117,6 @@
         "label": "Class Work",
         "sections": [
           {
-            "className": "section personal published",
-            "title": "Extra Workspaces",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section-personal",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"]
-          },
-          {
             "className": "section problem published",
             "title": "Problem Workspaces",
             "type": "published-problem-documents",
@@ -132,6 +124,14 @@
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["publication"],
             "showStars": ["teacher"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Extra Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"]
           },
           {
             "className": "section learning-log published",

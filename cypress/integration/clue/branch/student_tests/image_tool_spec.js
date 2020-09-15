@@ -30,7 +30,7 @@ context('Test image functionalities', function(){
             cy.get(imageToolTile.imageChooseFileButton()).last().click();
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
-        it('will load an jpg from a URL', function(){
+        it.skip('will load an jpg from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/case_image.jpg';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
@@ -39,7 +39,7 @@ context('Test image functionalities', function(){
             cy.wait(2000);
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
-        it('will load an gif from a URL', function(){
+        it.skip('will load an gif from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/model_image.gif';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
