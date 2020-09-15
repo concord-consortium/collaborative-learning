@@ -2112,10 +2112,48 @@
       ],
       "supports": []
     },
+        {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "TWMM Investigation 4 Variability in Numerical and Categorical Data",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "TWMM 4.1 Lines of Best Fit",
+          "subtitle": "",
+          "sections": [],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "TWMM 4.2Wood or Steel? Relationships in Categorical Data",
+          "subtitle": "",
+          "sections": [],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "TWMM 4.3 After-School Sports and Band Enrollments",
+          "subtitle": "Working Backwards: Setting up a Two-way Table",
+          "sections": []
+        },
+        {
+          "description": "Problem 4.4",
+          "ordinal": 3,
+          "title": "TWMM 4.4 Linear, Bivariate, and Categorical Data",
+          "subtitle": "",
+          "sections": []
+        }
+      ],
+      "supports": []
+    },
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "TWMM MR1 - MR3",
+      "title": "TWMM MR1 - MR4",
       "problems": [
         {
           "description": "Mathematical Reflections",
