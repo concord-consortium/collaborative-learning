@@ -124,7 +124,8 @@
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["publication"],
             "showStars": ["teacher"]
-          },          {
+          },
+          {
             "className": "section personal published",
             "title": "Extra Workspaces",
             "type": "published-personal-documents",

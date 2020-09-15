@@ -30,7 +30,7 @@ context('Test image functionalities', function(){
             cy.get(imageToolTile.imageChooseFileButton()).last().click();
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
-        it('will load an jpg from a URL', function(){
+        it.skip('will load an jpg from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/case_image.jpg';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
