@@ -53,7 +53,7 @@ context.skip("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData");
     });
 
-    context('Teacher Workspace', function () {
+    context.skip('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.addTile('table');

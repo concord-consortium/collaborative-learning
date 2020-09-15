@@ -364,11 +364,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handlePublishSupport = async (document: DocumentModelType) => {
-    const { db, ui } = this.stores;
+    const { db, problemPath, ui, user } = this.stores;
     const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, caption)
-      .then(() => ui.alert("Your support was published.", "Support Published"))
+      .then(() => {
+        const classes = user.classHashesForProblemPath(problemPath);
+        const classWord = classes.length === 1 ? "class" : "classes";
+        ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
+      })
       .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
   }
 

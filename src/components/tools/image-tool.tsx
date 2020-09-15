@@ -94,8 +94,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
-        const {width, height} = entry.contentRect;
-        this.setState({ imageEltWidth: width, imageEltHeight: height });
+        if (entry.target === this.imageElt) {
+          // debounce to prevent resize loops
+          debounce(() => {
+            const {width, height} = entry.contentRect;
+            this.setState({ imageEltWidth: Math.ceil(width), imageEltHeight: Math.ceil(height) });
+          }, 100);
+        }
       }
     });
     this.imageElt && this.resizeObserver.observe(this.imageElt);
@@ -178,13 +183,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private getDesiredHeight() {
-    const { imageEntry, imageEltWidth, imageEltHeight } = this.state;
-    const aspectRatio = imageEntry?.width && imageEntry?.height
-                          ? imageEntry.width / imageEntry.height
-                          : undefined;
-    return aspectRatio && imageEltWidth && imageEltHeight
-            ? Math.ceil(imageEltWidth / aspectRatio)
-            : imageEntry?.height;
+    const { imageEntry, imageEltWidth } = this.state;
+    if (!imageEntry?.width || !imageEntry?.height) return;
+    const naturalHeight = Math.ceil(imageEntry.height);
+    const aspectRatio = imageEntry.width / imageEntry.height;
+    return aspectRatio && imageEltWidth
+            ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight)
+            : naturalHeight;
   }
 
   private getContent() {

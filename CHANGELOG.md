@@ -1,5 +1,42 @@
 # Changelog
 
+## Version 1.2.2 - released August 28, 2020
+
+- More informative message upon publishing a teacher support
+- Improved image tile auto-sizing
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,710 bytes | 0.0% |
+| index.js | 4,921,173 bytes | 0.0% |
+
+## Version 1.2.1 - released August 25, 2020
+
+- Fix bug which affected class visibility of some teacher supports
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,710 bytes | 0.0% |
+| index.js | 4,921,038 bytes | 0.0% |
+
+## Version 1.2.0 - released August 24, 2020
+
+- Teacher supports visible across multiple classes
+- New 8th grade curriculum units
+- Improved image tile auto-sizing
+- Fix bug which could result in lost work
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,710 bytes | -3.0% |
+| index.js | 4,920,924 bytes | 18.8% |
+
 ## Version 1.1.2 - released March 12, 2020
 
 - MSA tables format numbers to two decimal places
@@ -576,4 +613,3 @@
 |---|---|---|
 | index.css | 7,041 bytes | n/a |
 | index.js | 703,783 bytes | n/a |
-

@@ -1,6 +1,7 @@
 import { getPortalOfferings, IPortalOffering, PortalOfferingParser } from "./portal-api";
 import nock from "nock";
 import { TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
+import { AppConfigModel } from "../models/stores/app-config-model";
 
 const userType = "teacher";
 const userID = 22;
@@ -38,6 +39,7 @@ describe("Portal Offerings", () => {
   describe("PortalOfferingParser", () => {
     const { getProblemOrdinal, getUnitCode } = PortalOfferingParser;
 
+    const appConfig = AppConfigModel.create();
     const samplePortalOffering = {
       id: 1190,
       teacher: "Dave Love",
@@ -56,8 +58,14 @@ describe("Portal Offerings", () => {
 
     describe("getUnitCode", () => {
       it("should return a unit code for problem", () => {
-        const unitCode = getUnitCode(samplePortalOffering.activity_url);
+        const unitCode = getUnitCode(samplePortalOffering.activity_url, appConfig);
         expect(unitCode).toEqual("foo");
+      });
+
+      it("should return a mapped unit code for legacy units", () => {
+        const barAppConfig = AppConfigModel.create({ unitCodeMap: { foo: "bar" }});
+        const unitCode = getUnitCode(samplePortalOffering.activity_url, barAppConfig);
+        expect(unitCode).toEqual("bar");
       });
     });
   });
@@ -82,8 +90,9 @@ describe("Portal Offerings", () => {
     });
 
     describe("getUnitCode", () => {
+      const appConfig = AppConfigModel.create();
       it(`should default to 'undefined'`, () => {
-        const unitCode = getUnitCode(samplePortalOffering.activity_url);
+        const unitCode = getUnitCode(samplePortalOffering.activity_url, appConfig);
         expect(unitCode).toBeUndefined();
       });
     });
