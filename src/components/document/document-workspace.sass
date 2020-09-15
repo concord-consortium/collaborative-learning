@@ -10,17 +10,21 @@
 
   .single-workspace
     position: absolute
-    top: $header-height + $half-nav-expanded-peek
-    left: $left-nav-contracted-width + $nav-expanded-peek + $workspace-toolbar-width
-    right: $right-nav-contracted-width + $nav-expanded-peek
-    bottom: $bottom-nav-contracted-height
+    top: $header-height
+    left: $nav-tabs-width
+    right: 0
+    bottom: $half-nav-expanded-peek
+    margin-top: 5px
+    transition: left 1s
+    &.half
+      left: 50%
 
   .left-workspace
     position: absolute
     top: $header-height + $half-nav-expanded-peek
     left: $left-nav-contracted-width + $nav-expanded-peek + $workspace-toolbar-width
     right: 50%
-    bottom: $bottom-nav-contracted-height
+    bottom: $half-nav-expanded-peek
 
     .workspace
       margin-right: $half-margin
@@ -30,7 +34,7 @@
     top: $header-height + $half-nav-expanded-peek
     left: 50%
     right: $right-nav-contracted-width + $nav-expanded-peek
-    bottom: $bottom-nav-contracted-height
+    bottom: $half-nav-expanded-peek
 
     .workspace
       margin-left: $half-margin
@@ -50,3 +54,14 @@
       justify-content: center
       align-items: center
       text-align: center
+
+.dialog
+  &.create-personal
+    .dialog-container
+      .dialog-title
+        background-color: $workspace-teal-light-3
+
+  &.create-learningLog
+    .dialog-container
+      .dialog-title
+        background-color: $learninglog-green-light-4

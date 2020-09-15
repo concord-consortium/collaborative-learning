@@ -26,7 +26,7 @@ describe("Four Up Component", () => {
       key: "test",
       createdAt: 1,
       content: {}
-    }),
+    });
     documents = DocumentsModel.create({});
     documents.add(document);
   });

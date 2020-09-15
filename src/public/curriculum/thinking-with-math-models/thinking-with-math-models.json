@@ -48,179 +48,11 @@
   },
   "investigations": [
     {
-      "description": "Investigation 0",
-      "ordinal": 0,
-      "title": "Introduction to CLUE",
-      "introduction": {
-        "tiles": [ ]
-      },
-      "problems": [
-        {
-          "description": "Problem 0.1",
-          "ordinal": 1,
-          "title": "0.1 Intro to CLUE",
-          "subtitle": "Working in the Collaborative Learning User Environment",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "When you launch a problem, there are up to four standard tabs corresponding to the curriculum:<ul><li>Introduction</li><li>Initial Challenge</li><li>What If ...?</li><li>Now What Do You Know?</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You will find text, graphs, images and other kinds of content in the tabs. These can be dragged into your workspace. Try to drag this text into your workspace now. You can drag any kind of content found in tabs on either side of the workspace. This will let you use useful parts from problems, supports from your teacher, and work you share with your fellow students."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/workspaceHelp.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Images are handy for recording work you do on paper. You can make an image either by choosing the image tool and choosing a file from your computer, or you can drag an image from your file list or desktop on to the browser window. Try this now."
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
-                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Click on <strong>tool buttons</strong> on the side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "To <strong>delete tiles</strong>, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "When you are ready to <strong>share work</strong> with your group, switch the Share slider, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."]
-                    }
-                  }
-                ]
-              },
-              "supports": []
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/graphdoc.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Note: Points are connected in the order they were made, which can lead, for example, to an unexpected hourglass shape as in the example above. If this is not the intended shape, simply drag the points to the desired shape."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/SS_LA_04_city_spoon_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now."
-                      ]
-                    }
-                  }
-                ],
-                "supports": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
-                      ]
-                    }
-                  }
-                ],
-                "supports": []
-              }
-            }
-          ],
-          "supports": []
-        }
-      ],
-      "supports": []
-    },
-    {
       "description": "Investigation 1",
       "ordinal": 1,
       "title": "TWMM Investigation 1 Exploring Data Patterns in Building Bridges",
       "introduction": {
-        "tiles": [ ]
+        "tiles": []
       },
       "problems": [
         {
@@ -249,14 +81,14 @@
                     }
                   },
                   {
-              		"content": {
-                		"type": "Text",
-                		"format": "markdown",
-                		"text": [
-                  			"*What variables determine the strength of a bridge?*"
-                		]
-              		}
-            	  }
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "*What variables determine the strength of a bridge?*"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -297,9 +129,9 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "**A Bridge-Thinkness Experiment**",
-                        "Materhials:",
-                        "- Two books of the same thinkness",
+                        "**A Bridge-Thickness Experiment**",
+                        "Materials:",
+                        "- Two books of the same thickness",
                         "- A small paper cup",
                         "- About 50 pennies",
                         "- Several 11-inch by 4¼-inch strips of paper",
@@ -371,11 +203,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Situation A. Modeling the Data**",
-                        "Does the relationship between the number of layers and the breaking weight appear to be linear or nonlinear?",
-                        "How do the graph and the table show this relationship?"
+                        "<h3>Situation A. Modeling the Data</h3>Does the relationship between the number of layers and the breaking weight appear to be linear or nonlinear?\n\nHow do the graph and the table show this relationship?"
                       ]
                     }
                   },
@@ -391,12 +221,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Situation B. Making Predictions**",
-                        "1. Suppose you could split layers of paper in half. What breaking weight would you predict for a bridge 2.5 layers thick? Explain.",
-                        "2. Predict the breaking weight for a bridge 6 layers thick. Explain your reasoning.",
-                        "3. Test your prediction of strength for the 6-layer bridge. Explain why results from such a test might not exactly match predictions."
+                        "<h3>Situation B. Making Predictions</h3><ol><li>Suppose you could split layers of paper in half. What breaking weight would you predict for a bridge 2.5 layers thick? Explain.</li><li>Predict the breaking weight for a bridge 6 layers thick. Explain your reasoning.</li><li>Test your prediction of strength for the 6-layer bridge. Explain why results from such a test might not exactly match predictions.</li></ol>"
                       ]
                     }
                   }
@@ -413,7 +240,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Describe the relationship between the bridge strength and the bridge thickness revealed by your experiment. What other variables might affect the strength of a bridge?"
+                        "Describe the relationship between the bridge strength and the bridge thickness revealed by your experiment.\n\nWhat other variables might affect the strength of a bridge?"
                       ]
                     }
                   }
@@ -475,9 +302,9 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "**A bridge-Length Experiment**",
+                        "**A Bridge-Length Experiment**",
                         "Materials:",
-                        "- Two books of the same thinkness",
+                        "- Two books of the same thickness",
                         "- A small paper cup",
                         "- About 50 pennies",
                         "- 4¼-inch paper strips with lengths 4, 6, 8, 9, and 11 inches"
@@ -518,7 +345,7 @@
                       "format": "markdown",
                       "text": [
                         "- Conduct the experiment.",
-                        "- Collect the data and represent the data in a table and graph",
+                        "- Collect the data and represent the data in a table and graph.",
                         "- What patterns do you observe in the data? Do they support your original conjecture? Explain."
                       ]
                     }
@@ -534,10 +361,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "###Situation A. Modeling the Data###",
-                        "Describe the relationship between bridge length and breaking weight. Is this relationship linear? Explain. How is the relationship shown by patterns in your table and graph?"
+                        "<h3>Situation A. Modeling the Data</h3>Describe the relationship between bridge length and breaking weight. Is this relationship linear? Explain. How is the relationship shown by patterns in your table and graph?"
                       ]
                     }
                   },
@@ -553,10 +379,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "###Situation B. Making Predictions###",
-                        "Use your data to predict the breaking weights for bridges of lengths 3, 5, 10, and 12 inches. Explain how you made your predictions."
+                        "<h3>Situation B. Making Predictions</h3>Use your data to predict the breaking weights for bridges of lengths 3, 5, 10, and 12 inches. Explain how you made your predictions."
                       ]
                     }
                   },
@@ -572,10 +397,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "###Situation C. Comparing Data Sets###",
-                        "Compare your data from this experiment to the data from the experiment on bridges with different numbers of layers. How is the relationship between the number of layers in a bridge and its breaking weight similar to the relationship between bridge length and breaking weight? How is it different?"
+                        "<h3>Situation C. Comparing Data Sets</h3>Compare your data from this experiment to the data from the experiment on bridges with different numbers of layers. How is the relationship between the number of layers in a bridge and its breaking weight similar to the relationship between bridge length and breaking weight? How is it different?"
                       ]
                     }
                   }
@@ -640,12 +464,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "- What equation could represent each line?",
-                        "- Would the equations for these lines be different?",
-                        "- Would the equations give the same predictions for the breaking weight for 3.5 layers?",
-                        "Before we can answer these questions, you will explore the skills needed to write equations for lines that represent linear relationships or linear functions. A linear relationship or function is one whose graph is a straight line.   We will return to these questions in Investigation 4."
+                        "*- What equation could represent each line?*",
+                        "*- Would the equations for these lines be different?*",
+                        "*- Would the equations give the same predictions for the breaking weight for 3.5 layers?*",
+                        " ",
+                        "Before we can answer these questions, you will explore the skills needed to write equations for lines that represent linear relationships or linear functions. A *linear relationship or function* is one whose graph is a straight line.   We will return to these questions in Investigation 4."
                       ]
                     }
                   }
@@ -657,12 +482,12 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                   {
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Suppose a company called Custom Steel Products (CSP for short) supplies materials to builders. One common structure that CSP makes is called a truss. You might see a truss holding up a bridge or the roof of a building. The following is a picture of a truss. It is made by fastening together steel rods 1 foot long."
+                        "Suppose a company called Custom Steel Products (CSP for short) supplies materials to builders. One common structure that CSP makes is called a <em>truss</em>. You might see a truss holding up a bridge or the roof of a building. The following is a picture of a truss. It is made by fastening together steel rods 1 foot long."
                       ]
                     }
                   },
@@ -677,7 +502,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "This truss has an overall length of 7 feet. The manager at CSP needs to know the number of rods in any length of truss a customer might order.",
+                        "This truss has an overall length of 7 feet. The manager at CSP needs to know the number of rods in _any length_ of truss a customer might order.",
                         "- Describe a pattern that the manager can use to predict the number of rods for any length of truss. Does the pattern represent a linear relationship? Explain.",
                         "- How does this pattern compare to the patterns found in Problems 1.1 and 1.2?",
                         "- Are you equally confident about the predictions you made for Problems 1.1 and 1.2 and this problem?"
@@ -710,15 +535,29 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "***Maria Uses a Table",
+                        "**Maria Uses a Table**",
                         "I worked out several cases for truss lengths. I recorded them in a table. I noticed that as the length increased by 1 unit, the number of rods increased by 4. That is the number of rods is increasing at a rate of change of 4 rods per one additional unit."
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_maria_table_350w.png"
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Length of Truss (ft)",
+                          "type": "number",
+                          "values": [ 2, 3, 4, 5, 6, 7, 8 ]
+                        },
+                        {
+                          "name": "Number of Rods",
+                          "type": "number",
+                          "values": [ 7, 11, "", "", "", 27, "" ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 380
                     }
                   },
                   {
@@ -726,7 +565,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "***Sungah Uses a Graph",
+                        "**Sungah Uses a Graph**",
                         "I also worked out several cases for truss lengths. But I made a graph of the data. The data points appear to lie on a straight line. The y-intercept is (0,0) but I was not sure what the rate of change between the two variables is."
                       ]
                     }
@@ -742,7 +581,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "***Walter Uses an Equation",
+                        "**Walter Uses an Equation**",
                         "I noticed that as the length of the truss increased by 1, the number of rods increased by 4. This means the relationship between the length of the truss L and the number of rods N is linear. So, the rate of change between the two variables is 4. The point (0,0) represents the y-intercept, the equation is",
                         "**N = 0 + 4L or N = 4L.**"
                       ]
@@ -753,7 +592,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "***Jenna Uses an Equation",
+                        "**Jenna Uses an Equation**",
                         "I figured out a pattern for the number of rods. For overall length 7, there are 7 triangles and 6 rods connecting these triangles, so I wrote ",
                         "**3 x 7 + 6 = 27**. The length L = 27.",
                         "The number of connecting rods 6 is one less than the length 7. I wrote the equation for the number of rods N is",
@@ -773,10 +612,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "***Situation B. Another Structure: Staircase Frames***",
-                        "Custom Steel Products also makes staircase frames like those shown here."
+                        "<h3>Situation B. Another Structure: Staircase Frames</h3>Custom Steel Products also makes staircase frames like those shown here."
                       ]
                     }
                   },
@@ -860,8 +698,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "**Did You Know?**",
-                        "*A **zip line** is a cable that starts at a higher point than it ends. Using the natural decline of the cable, a person or cargo can travel down the wire on a pulley system that minimizes friction to help the rider accelerate.  For example, for a 200′ **zip line** that is 7′ high in the middle (when loaded with a rider), **should** sag 5% or 10 feet. This means that the end attachments are 17′ high each. At this point, plan that the longer the zip line, the higher in the air you'll need to be to start.*",
+                        "*A **zip line** is a cable that starts at a higher point than it ends. Using the natural decline of the cable, a person or cargo can travel down the wire on a pulley system that minimizes friction to help the rider accelerate.  For example, for a 200′ **zip line** that is 7′ high in the middle (when loaded with a rider), **should** sag 5% or 10 feet. This means that the end attachments are 17′ high each. At this point, plan that the longer the **zip line**, the higher in the air you'll need to be to start.*",
                         "*You can travel internationally on ziplines. The Limited Zero Zipline crosses the Guadiana River from Spain to Portugal.*"
                       ]
                     }
@@ -927,14 +764,18 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "Markdown",
+                      "format": "html",
                       "text": [
-                        "***Situation A. Group Admission Fees***",
-                        "One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table.",
-                        "1. Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain",
-                        "2. How much money would a group expect to pay if the group size is 0? 21? 30?  ",
-                        "3. What equation relates admission fee A to the number n in the group? Use the equation to check your predictions for Part 2.",
-                        "**Group Admission Fees**"
+                        "<h3>Situation A. Group Admission Fees</h3>One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table. <ol><li>Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain.</li><li>How much money would a group expect to pay if the group size is 0? 21? 30? </li><li>What equation relates admission fee <em>A</em> to the number <em>n</em> in the group? Use the equation to check your predictions for Part 2.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Group Admission Fees</strong>"
                       ]
                     }
                   },
@@ -957,6 +798,39 @@
                     "layout": {
                       "height": 380
                     }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Matching Representations</h3>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Match each graph with an equation or set of criteria that is represent by the graph\n<strong>Equation 1</strong>\ny = 2x - 1\n\n<strong>Equation 2</strong>\ny = 2\n\n<strong>Equation 3</strong>\ny = 3 - x\n\n<strong>Criteria 4</strong>\ny-intercept = 0 and rate of change is 1\n\n"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_four_graphs_450w.png"
+                    }
                   }
                 ]
               },
@@ -972,7 +846,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Describe how you know if the relationship between two variables is a linear function? What strategies did you use to write equations for linear functions? "
+                        "Describe how you know if the relationship between two variables is a linear function. What strategies did you use to write equations for linear functions? "
                       ]
                     }
                   }
@@ -1047,8 +921,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Serena, Rashida and Omar’ Strategies.</strong>\nSome students in Summit Heights Middle School used different strategies to answer the question “which cost plan is the better deal?” Explain how each strategy would or would not work to decide which cost plan is the best",
-                        "<strong>Serena Uses Tables"
+                        "<h3>Situation A. Serena, Rashida and Omar’s Strategies</h3>Some students in Summit Heights Middle School used different strategies to answer the question “which cost plan is the better deal?” Explain how each strategy would or would not work to decide which cost plan is the best\n\n<strong>Serena Uses Tables</strong>"
                       ]
                     }
                   },
@@ -1078,7 +951,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Omar Uses Equations</strong>\nI wrote the equation, C<sub>manager</sub> = 0.15t + 2.50 for the cost that the owner charges. I wrote the equation C<sub>owner</sub> = 0.25t where t is the number of minutes. Then I set the two expressions for cost equal.\n0.25<em>t</em> = 0.15<em>t</em> + 2.50"
+                        "<strong>Omar Uses Equations</strong>\nI wrote the equation, <em>C<sub>manager</sub></em> = 0.15<em>t</em> + 2.50 for the cost that the manager charges. For the owner's suggestion, I wrote the equation <em>C<sub>owner</sub></em> = 0.25<em>t</em> where <em>t</em> is the number of minutes. Then I set the two expressions for cost equal.\n0.25<em>t</em> = 0.15<em>t</em> + 2.50"
                       ]
                     }
                   },
@@ -1096,8 +969,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
-                        "River Fun Boats (RFB) also rents canoes. The equation <em>c<sub>RFB</sub></em> = 4 + 0.10<em>t</em> gives the charge in dollars <em>c</em> for renting a canoe for <em>t</em> minutes."
+                        "<h3>Situation B. River Fun Boat Rides</h3>River Fun Boats (RFB) also rents canoes. The equation <em>c<sub>RFB</sub></em> = 4 + 0.10<em>t</em> gives the charge in dollars <em>c</em> for renting a canoe for <em>t</em> minutes."
                       ]
                     }
                   },
@@ -1127,7 +999,71 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>Situation B. River Fun Boat Rides</em></strong>",
+                        "<h3>Situation C. Solving Equations- Which Strategy?</h3>",
+                        "<strong>Serena Uses Tables</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "For the following equations students used different strategies to solve each equation for a given value of one of the variables.<ul><li><strong>Equation 1</strong> y = -x + 6 &nbsp;What is x if y = 4?</li><li><strong>Equation 2</strong> y = 5x - 3 &nbsp;What is y if x = 4?</li></ul>\n\nWhich of the following strategies go with each equation?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy1_300w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy2_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy3_300w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy4_250w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy5_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy6_250w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                        "type": "Text",
+                        "format": "markdown",
+                        "text": [
+                          "---"
+                        ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation D. Linear Functions</h3>",
                         "Do any of the three cost plans in this problem represent linear functions? Explain why or why not."
                       ]
                     }
@@ -1146,7 +1082,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How do graphs and tables and equations of functions such as <em>C</em> = 0.25<em>t</em> and <em>C</em> = 0.15<em>t</em> + 2.5 help you solve problems. Explain the advantages and disadvantages of each of each representation when trying to solve problems."
+                        "How do graphs and tables and equations of functions such as <em>C</em> = 0.25<em>t</em> and <em>C</em> = 0.15<em>t</em> + 2.5 help you solve problems? Explain the advantages and disadvantages of each of each representation when trying to solve problems."
                       ]
                     }
                   }
@@ -1172,20 +1108,26 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "In any problem that calls for a linear mode that is an equation, the goal is to find the values of *m* and *b* for the linear equation y = *m*x + *b* that fits the data pattern well. Recall from **Moving Straight Ahead** unit that for linear relationships as x increases by a fixed increment y changes by a constant amount, *m*, called the rate of change. The y-intercept is (0,*b*) or *b*. "
+                        "In any problem that calls for a linear mode that is an equation, the goal is to find the values of *m* and *b* for the linear equation y = *m*x + *b* that fits the data pattern well. Recall from *Moving Straight Ahead* unit that for linear relationships as x increases by a fixed increment y changes by a constant amount, *m*, called the rate of change. The y-intercept is (0,*b*) or *b*. "
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_graph_400w.png"
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_table_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_graph_450w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
                         "The change in x from one point to the another is also called the *horizontal change* or **run** change. The change in y from one point to another is called the *vertical change* or **rise** change.  The ratio of rise to run is called the **slope** of the line which is also the coefficient of *m* in the equation, y = *m*x + *b*."
                       ]
@@ -1202,7 +1144,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "This ratio, slope, describes the steepness of a line that represents the linear function. The equation y = *m*x + *b* is also called the **slope intercept** form of a linear equation. To measure the steepness of a linear equation graph, it helps to imagine a staircase that lies underneath the line. "
+                        "This ratio, slope, describes the steepness of a line that represents the linear function. The equation y = *m*x + *b* is also called the **slope intercept** form of a linear equation. To measure the steepness of a linear equation graph, it helps to imagine a staircase that lies underneath the line."
                       ]
                     }
                   },
@@ -1217,7 +1159,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>What is the slope of the line that represents the steepness of the staircase?</em></strong>"
+                        "<em>What is the slope of the line that represents the steepness of the staircase?</em>"
                       ]
                     }
                   }
@@ -1349,7 +1291,7 @@
                       "format": "markdown",
                       "text": [
                         "**Malcolm's Claim**",
-                        "The slope is the same as the constant rate of change m between the variables x and y."
+                        "The slope is the same as the constant rate of change *m* between the variables x and y."
                       ]
                     }
                   },
@@ -1359,7 +1301,16 @@
                       "format": "markdown",
                       "text": [
                         "**Kevin's Claim**",
-                        "The line with equation y = 2x passes through the points (0, 0) and (1, 2). The line with equation y = - 3x passes through the points (0, 0) and (1, - 3). In general, lines with equations of the form y = *m*x always pass through the points (0, 0) and (1, *m*). And *m* is the constant of proportionality.  "
+                        "The line with equation y = 2x passes through the points (0, 0) and (1, 2). The line with equation y = - 3x passes through the points (0, 0) and (1, - 3). In general, lines with equations of the form y = *m*x always pass through the points (0, 0) and (1, *m*). And *m* is the constant of proportionality."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
                       ]
                     }
                   },
@@ -1374,8 +1325,22 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_juan_table_401w.png"
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [ -1, 0, 1, 2, 3 ]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [ 3, 5, 7, 9, 11 ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   }
                 ]
@@ -1448,10 +1413,10 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "For each group or pairs of lines answer the following questions.",
-                        "- What features do the equations have in common?",
+                        "For each group of lines answer the following questions.",
+                        "- What features do the equations in each group have in common?",
                         "- Graph the equations on the same coordinate axes. What do you notice about the graphs? How might you have predicted this from the equations?",
-                        "- Describe another equation that has the same pattern."
+                        "- For each group describe another example that has the same pattern."
                       ]
                     }
                   },
@@ -1460,61 +1425,33 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "**Groups of Lines**",
-                        "**Group 1**  y = 3x  y = 5 + 3x  y = 10 + 3x y = 3x - 5",
-                        "**Group 2**  y = -2x y = -2x + 4 y = 8 - 2x  y = -4 - 2x"
+                        "**Group A**",
+                        "- *Example 1*  y = 3x  y = 5 + 3x  y = 10 + 3x  y = 3x - 5",
+                        "- *Example 2*  y = -2x  y = -2x + 4  y = 8 - 2x  y = -4 - 2x"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "Pairs of Lines 1",
-                        "<table>",
-                        "<tr>",
-                        "<th>Pair 1</th>",
-                        "<th>Pair 2</th>",
-                        "<th>Pair 3</th>",
-                        "</tr>",
-                        "<tr>",
-                        "<td>y = 2x</td>",
-                        "<td>y = 4x</td>",
-                        "<td>y = -3x + 5</td>",
-                        "</tr>",
-                        "<tr>",
-                        "<td>y = -0.5x</td>",
-                        "<td>y - -0.25x</td>",
-                        "<td>y = 1/3x - 1</td>",
-                        "</tr>",
-                        "</table>"
+                        "**Group B**",
+                        "- *Example 1*  y = 2x  y = -½x",
+                        "- *Example 2*  y = 4x  y = -0.25x",
+                        "- *Example 3*  y = -3x + 5  y = ⅓x - 1"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "Pairs of Lines 2",
-                        "<table>",
-                        "<tr>",
-                        "<th>Pair 1</th>",
-                        "<th>Pair 2</th>",
-                        "<th>Pair 3</th>",
-                        "</tr>",
-                        "<tr>",
-                        "<td>y = 2x + 1</td>",
-                        "<td>y = 5 - 2x</td>",
-                        "<td>y = 2(x - 1) - 1</td>",
-                        "</tr>",
-                        "<tr>",
-                        "<td>y = 2(x + 1) - 1</td>",
-                        "<td>y = 3 - 2(x - 1)</td>",
-                        "<td>y = 4x - 2x -2</td>",
-                        "</tr>",
-                        "</table>"
+                        "**Group C**",
+                        "- *Example 1*  y = 2x + 1  y = 2(x + 1) - 1",
+                        "- *Example 2*  y = 5 - 2x  y = 3 - 2(x - 1)",
+                        "- *Example 3*  y = 2(x - 1)  y = 4x - 2x - 2"
                       ]
                     }
                   }
@@ -1539,15 +1476,18 @@
                   {
                     "content": {
                       "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Boat Rentals Again</strong>\nSeveral competing canoe rentals use expressions to represent the rental cost <em>C</em>.",
-                        "<ul><li><em>C<sub>1</sub><em> = 2.5 + 0.25<em>t</em></li>",
-                        "<li><em>C<sub>2</sub><em> = 0.25(10 + <em>t</em>)</li>",
-                        "<li><em>C<sub>3</sub><em> = 0.25(10 + 10<em>t</em>)</li>",
-                        "<li><em>C<sub>4</sub><em> = 0.5(10 + 0.5<em>t</em>)</li></ul>",
-                        "1. Which plan(s) is the least expensive per minute?",
-                        "2. Describe the shape of each graph. What information about rental costs does the slope represent?"
+                        "<strong>Situation B. Boat Rentals Again</strong>\nSeveral competing canoe rentals use expressions to represent the rental cost <em>C</em>.<ul><li><em>C<sub>1</sub><em> = 2.5 + 0.25<em>t</em></li><li><em>C<sub>2</sub><em> = 0.25(10 + <em>t</em>)</li><li><em>C<sub>3</sub><em> = 0.25(10 + 10<em>t</em>)</li><li><em>C<sub>4</sub><em> = 0.5(10 + 0.5<em>t</em>)</li></ul> <ol><li>Which plan(s) is the least expensive per minute?</li><li>Describe the shape of each graph. What information about rental costs does the slope represent?</li></ul>"
                       ]
                     }
                   }
@@ -1578,10 +1518,644 @@
       "supports": []
     },
     {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "TWMM Investigation 3 Inverse Variation",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "TWMM 3.1 Rectangles with Fixed Area",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In Investigation 1, you explored the relationship of strength, number of layers, and length of a bridge. You found that the relationship between strength and number of layers was approximately linear. You also found that the relationship between strength and length was not linear. In this investigation, you will explore other nonlinear functions."
+                      ]
+                    }
+                  }
+                 ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In recent years, the populations of many small towns have declined as residents move to large cities for jobs. The town of Roseville has a plan to attract new residents."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Roseville offers free land to “homesteaders” who are willing to build houses. Each lot is rectangular and has an area of 24,000 square feet. The lengths and widths of the lots vary."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The town planners want a quick way to check lot sizes or possible rectangular shapes for the new homesteaders. They decide to experiment with a rectangle that has a fixed area of 24 square feet. Then look for patterns in the data to make predictions about the rectangles with an area of 24,000 square feet."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Look at all the rectangles that have whole number dimensions and an area of 24 square feet."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "- Create a table and graph for the length and width of rectangles that have an area of 24 square feet.",
+                        "- What patterns appear in tables and graphs of the data? Is it linear? Explain.",
+                        "- What equation represents the relationship between the length *l* and width *w* of rectangles with area 24 square feet? Is this a function? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Rectangles with Area of 32 square feet.</h3> <ol><li>Write an equation for the relationship between the width <em>w</em> and the length <em>l</em>.</li><li>Make a table and a graph of values for <em>w</em> and <em>l</em>.</li><li>Compare tables, graphs, and equations for the functions relating width and length of rectangles with area 24 square inches and area 32 square inches.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Rectangles with Area of 24,000 square feet.</h3> <ol><li>Write an equation for the relationship between <em>L</em> and <em>W</em> if the Area is 24000 square feet. Would the graph of this relationship be linear? Explain.</li>Use the results of your exploration of the relationship between <em>L</em> and <em>W</em> for fixed areas of 24 and 32 square feet to describe the shape of possible rectangular lots with an area of 24000 square feet.</li><li>Which lots should the builder use? What are the advantages and disadvantages of each shape?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation C. Niral’s Claim</h3><blockquote><em>The relationship between length and width for rectangles with a fixed area, like 24 square feet, is not linear. But the relationship between area and width for rectangles with a fixed length, like 15 inches, is linear. They are both functions.</em></blockquote><em>What evidence can you use to show his claims are or are not correct?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When the product of two variables is some fixed number, what is the pattern of change between the two variables? How is that pattern of change reflected in tables and graphs of the relationship? Is this pattern of change linear? Why or why not?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "TWMM 3.2 Distance, Speed, and Time",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "To understand a concept like linear functions it is important to look at nonlinear situations. The relationship between length and width for rectangles with a fixed area is not linear. As <em>l</em> increases, <em>w</em> decreases, but not at a constant rate. The graph is a curve showing how <em>l</em> and <em>w</em> relate to each other."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The relationship between <em>l</em> and <em>w</em> is an example of an important nonlinear relationship called an <strong>inverse variation</strong>. The word “inverse” suggests that as one variable increased in value, the other variable decreases in value. However, the meaning of inverse variation is more specific than that."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote>Two nonzero variables x and y are related by an inverse variation if<blockquote>y = <em>k</em>/x &nbsp;&nbsp; or &nbsp;&nbsp; xy = <em>k</em></blockquote>where <em>k</em> is a constant other than 0. The value of <em>k</em> is determined by the specific relationship.</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><em><li>How are the equations y = k/x and xy = k related?</li><li>For the same x-value, will the two equations give different y-values?</li></em></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Inverse variation occurs in many situations. For example, consider the table and graph below. They show the (bridge length, breaking weight) data collect by a group of students."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/thinking-with-math-models/images/TWMM_3.2_bridge_breaking_experiment_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Some students tried to find an equation that fits the inverse data and wrote 160 = <em>bl</em>, where <em>b</em> is the breaking weight and <em>l</em> is the length."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><em><li>Does this equation make sense? Why?</li><li>Is there an equation that fits the data better? Explain.</li></em></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "We will study more about inverse variation in high school. In this unit inverse variation shows us that not all relationships are linear. Some equations are linear models and some equations are nonlinear models."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "As we continue to explore linear and nonlinear situations, we might ask ourselves the following questions:",
+                        "<em><lu><li>How does the value of one variable change as the value of the other changes? Is it a linear function?</li><li>How is that pattern of change shown in a table of data and on a graph?</li><li>If it is a linear function, what equation shows how the two variables are related?</li></em>",
+                        "In the following problem we will investigate how the length of a trip depends on speed."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The Cordova family lives in Detroit, Michigan. They are planning a trip from Detroit to Mackinac Island, near the upper peninsula of Michigan. Mr. Cordova does some calculations to see how the travel time will change if the family drives at different average speeds. The island is 300 miles from Detroit."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Travel Times for Different Speeds</strong>"
+                      ]
+                    }
+                  },
+
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Average Speed (mi/h)",
+                          "type": "number",
+                          "values": [ 30, 40, 50, 60, 70 ]
+                        },
+                        {
+                          "name": "Travel Time (h)",
+                          "type": "number",
+                          "values": [ 10, 7.5, 6, 5, 4.3 ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 160
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul> <li>Describe the change in travel time as the average speed increases.</li> <li>If the distance is 300 miles, what equation relates travel time <em>t</em> to average speed <em>s</em>?</li> <li>How is the pattern relating travel time to average speed shown in a graph of (<em>s, t</em>) data?</li> <li>Is the relationship between travel time and average speed a function? A linear function? Explain why or why not.</li> </ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Driving 50 Miles per Hour to Mackinac Island</h3><ol><li>Make a table and a graph to show how the distance traveled changes as time passes from when the family leaves home to when they reach their destination.</li> <li>Write an equation relating distance traveled <em>d</em> to time <em>t</em>.</li><li>Is the relationship between distance and time a linear function? Explain why or why not.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Mr. Cordova’s Sister</h3><ol><li>Mr. Cordova’s sister also lives in Detroit and is driving to Mackinac Island which is 300 miles from Detroit. She plans on 5 hours to drive to the Island. How fast will she have to drive to make it in 5 hours? How fast will she have to drive if she wants to go to Grand Marais, Michigan, 400 miles, in 5 hours?</li> <li>Write an equation relating distance traveled <em>d</em> to speed <em>s</em>.</li> <li>Is the relationship between the variables <em>d</em> and <em>s</em> a linear function? Explain.</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What examples using distance, rate, and time show one variable related to another with a linear relationship? What examples using distance, rate, and time show one variable related to another with an inverse variation relationship?  Explain why."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "TWMM 3.3 Planning a Field Trip",
+          "subtitle": "Finding Individual Costs",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this problem you will use a new situation to continue to explore whether relationships are linear or nonlinear."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The students at Everett Middle School are planning a fundraising event at a local nature center. It costs $750 to rent the center facilities. They want a way to figure out what to charge per person to be sure to cover the rental cost of $750."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Investigate the relationship between cost per person and number of people who buy tickets.<ul><li>Describe a way to represent this relationship.</li> <li>Use this relationship to help you decide how much money they should charge per person. What did you charge? How many people have to buy tickets to make a profit?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation A. Strategies from Everett Middle School Students</h3>The following strategies were used to answer the question in the Initial Challenge. For each strategy, explain how it will or will not help answers the questions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Zane's Strategy</strong>\nOur group used a table to determine how much money we would have to charge just to cover our rental cost of $750 which is the break-even point."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of People",
+                          "type": "number",
+                          "values": [ 50, 100, 150, 200, 250, 300, 450 ]
+                        },
+                        {
+                          "name": "Cost per Person (dollars)",
+                          "type": "number",
+                          "values": []
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 250
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Molada's Strategy</strong>\nOur group also made a table, but then we looked at the pattern in the table and tried to write an equation that relates the cost per person <em>c</em> to the number of people <em>n</em> who buy tickets. But we could not find an equation, so we made a graph of the data and used it to make predictions."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Xander's Strategy</strong>\nWe could see there was not a constant rate of change in the Zane’s table. So, we made a graph like Molada’s. It looked a bit like our bridge length data, so we tried to find an inverse variation equation to fit."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "---"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Fixed Cost</h3>The students decide to charge $5 per person for the event. They want to know<ul><li>The amount of money <em>A</em> they collect if <em>n</em> people buy tickets.</li> <li>The amount of the profit <em>P</em> they will have after they pay for the rental cost.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "1. Write an equation that will help them predict the amount of money they collect if they charge $5 per person."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. Write an equation that will help them predict the profit if they charge $5 per person."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "3. Sketch a graph of each equation."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "4. Do the graphs indicate a linear relationship or an inverse variation? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "5. How would you use the graphs to show how many tickets must be sold in order to make a profit? How would you use the equations to decide how many tickets must be sold to make a profit?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The amount of money <em>A</em> collected is related to the cost per person <em>c</em> and the number of people <em>n</em>. When is the relationship linear? What are the variables?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When is the relationship an inverse variation? What are the variables?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do these relationships compare to the relationships in Problems 3.1 and 3.2?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ],
+      "supports": []
+    },
+        {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "TWMM Investigation 4 Variability in Numerical and Categorical Data",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "TWMM 4.1 Lines of Best Fit",
+          "subtitle": "",
+          "sections": [],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "TWMM 4.2Wood or Steel? Relationships in Categorical Data",
+          "subtitle": "",
+          "sections": [],
+          "supports": []
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "TWMM 4.3 After-School Sports and Band Enrollments",
+          "subtitle": "Working Backwards: Setting up a Two-way Table",
+          "sections": []
+        },
+        {
+          "description": "Problem 4.4",
+          "ordinal": 3,
+          "title": "TWMM 4.4 Linear, Bivariate, and Categorical Data",
+          "subtitle": "",
+          "sections": []
+        }
+      ],
+      "supports": []
+    },
+    {
       "description": "Mathematical Reflections",
       "ordinal": 5,
       "title": "TWMM MR1 - MR4",
-      "problems": [{
+      "problems": [
+        {
           "description": "Mathematical Reflections",
           "ordinal": 1,
           "title": "Thinking with Math Models Mathematical Reflections",
@@ -1596,13 +2170,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                        "<em>What are the characteristics of linear functions? How might you use what you know about linear functions to model a situation? What other kinds of models have you explored?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             },
             {
               "type": "MathReflection2",
@@ -1613,13 +2187,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                        "<em>What are the characteristics of linear functions? How might you use what you know about linear functions to model a situation? What other kinds of models have you explored?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             },
             {
               "type": "MathReflection3",
@@ -1630,19 +2204,18 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used models to represent scenarios. At the end of this Investigation, what do you know about mathematical modeling?"
+                        "<em>What are the characteristics of linear functions? How might you use what you know about linear functions to model a situation? What other kinds of models have you explored?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             }
           ]
         }
       ],
-      "supports": [
-      ]
+      "supports": []
     }
   ],
   "supports": [ ]

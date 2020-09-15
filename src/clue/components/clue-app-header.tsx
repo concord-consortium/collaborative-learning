@@ -4,15 +4,17 @@ import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
-import { ToggleGroup, Themes } from "@concord-consortium/react-components";
+import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { CustomSelect } from "./custom-select";
+
+// cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
+import styles from "./toggle-buttons.scss";
 
 import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
-const Colors = Themes.Default;
 
 interface IProps extends IBaseProps {
-  isGhostUser: boolean;
   panels: IPanelGroupSpec;
   current: string;
   onPanelChange: (panelId: EPanelId) => void;
@@ -25,30 +27,44 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
 
   public render() {
     const { showGroup } = this.props;
-    const {appConfig, appMode, appVersion, db, user, problem, groups} = this.stores;
+    const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, unit } = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
     const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
     if (user.isTeacher && appConfig.showClassSwitcher) {
       return this.renderTeacherHeader(userTitle);
     }
-
     return (
       <div className="app-header">
         <div className="left">
-          <div>
-            <div className="problem" data-test="problem-title">{problem.fullTitle}</div>
-            <div className="class" data-test="user-class">{user.className}</div>
+          <div className="unit">
+            <div className="title" data-test="unit-title">
+              {unit.title}
+            </div>
+            <div className="investigation" data-test="investigation">
+              {investigation.title}
+            </div>
           </div>
+          <div className="separator"/>
+          <CustomSelect
+            items={[{text: `${problem.title}: ${problem.subtitle}`}]}
+            isDisabled={true}
+          />
         </div>
-        <div className="middle">
+        <div className="middle student">
           {this.renderPanelButtons()}
         </div>
         <div className="right">
           <div className="version">Version {appVersion}</div>
           {myGroup ? this.renderGroup(myGroup) : null}
           <div className="user">
-            <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
+            <div className="user-contents">
+              <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
+              <div className="class" data-test="user-class">{user.className}</div>
+            </div>
+            <div className="profile-icon">
+              <div className="profile-icon-inner"/>
+            </div>
           </div>
         </div>
       </div>
@@ -60,15 +76,15 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
     return (
       <div className="app-header">
         <div className="left">
-          <div className="problem" data-test="investigation-title">
-            <div className="unit">
+          <div className="unit" data-test="investigation-title">
+            <div className="title">
               {unit.title}
             </div>
             <div className="investigation">
               {investigation.title}
             </div>
           </div>
-          <div className="spacer" />
+          <div className="separator"/>
           <div className="problem-dropdown" data-test="user-class">
             <ProblemMenuContainer />
           </div>
@@ -77,11 +93,13 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           {this.renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="class" data-test="user-class">
-            <ClassMenuContainer />
-          </div>
-          <div className="profile-icon">
-            <div className="profile-icon-inner"/>
+          <div className="user teacher">
+            <div className="class" data-test="user-class">
+              <ClassMenuContainer />
+            </div>
+            <div className="profile-icon teacher">
+              <div className="profile-icon-inner"/>
+            </div>
           </div>
         </div>
       </div>
@@ -99,19 +117,31 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
         const onClick = () => { onPanelChange?.(panelId); };
         const key = panelId;
         const selected = key === current;
-        const colors = panelId === EPanelId.workspace
+        const colors = panelId === EPanelId.workspace || panelId === EPanelId.dashboard
           ? {
             unselectedColor: {
-              color: Colors.Sky["sky-dark-5"],
-              background: Colors.Sky["sky-light-1"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceBackgroundColor
+                          : styles.toggleButtonDashboardBackgroundColor
             },
             hoverColor: {
-              color: Colors.Sky["sky-dark-5"],
-              background: Colors.Sky["sky-dark-1"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceHoverBackgroundColor
+                          : styles.toggleButtonDashboardHoverBackgroundColor
             },
             selectedColor: {
-              color: Colors.Sky["sky-light-2"],
-              background: Colors.Sky["sky-dark-5"]
+              color: panelId === EPanelId.workspace
+                     ? styles.toggleButtonWorkspaceColor
+                     : styles.toggleButtonDashboardColor,
+              background: panelId === EPanelId.workspace
+                          ? styles.toggleButtonWorkspaceSelectedBackgroundColor
+                          : styles.toggleButtonDashboardSelectedBackgroundColor,
             }
           }
           : undefined;
@@ -129,8 +159,9 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
       groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
     }
     return (
-      <div className="group">
-        <div onClick={this.handleResetGroup} className="name" data-test="group-name">{`Group ${group.id}`}</div>
+      <div onClick={this.handleResetGroup} className="group">
+        <div className="name" data-test="group-name">{`Group ${group.id}`}</div>
+        <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
             {this.renderGroupUser(groupUsers, 0, "nw")}
@@ -167,17 +198,11 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   }
 
   private handleResetGroup = () => {
-    const {isGhostUser} = this.props;
-    const {ui, db, groups} = this.stores;
+    const {ui, db} = this.stores;
     ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
-          if (isGhostUser) {
-            groups.ghostGroup();
-          }
-          else {
-            db.leaveGroup();
-          }
+          db.leaveGroup();
         }
       });
   }

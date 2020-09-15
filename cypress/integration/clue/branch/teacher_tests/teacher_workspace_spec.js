@@ -12,7 +12,7 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
     let tableToolTile = new TableToolTile;
     let drawToolTile = new DrawToolTile;
 
-    let teacherDoc = "Teacher Investigation Copy"
+    let teacherDoc = "Teacher Investigation Copy";
 
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("teacherQueryParams")}`;
@@ -22,57 +22,56 @@ before(function() {
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
-    dashboard.switchView("Workspace")
-    cy.wait(2000)
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')               
-})
+    dashboard.switchView("Workspace");
+    cy.wait(2000);
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+});
 
-describe('UI visibility', () => {
+describe.skip('UI visibility', () => {
     it('verify right nav elements', function() {
          //Supports will be labeled with <Investigation#>.<Prob#> <Section Name> Support <n>
-        rightNav.getRightNavTab("student-work").should('be.visible')
-        rightNav.getRightNavTab("my-work").should('be.visible')
-        rightNav.getRightNavTab("class-work").should('be.visible')
-        rightNav.getRightNavTab("learning-log").should('be.visible')
-        rightNav.getRightNavTab("supports").should('be.visible')
-        })    
-})
-describe('teacher document functionality',function(){
+        rightNav.getRightNavTab("student-work").should('be.visible');
+        rightNav.getRightNavTab("my-work").should('be.visible');
+        rightNav.getRightNavTab("class-work").should('be.visible');
+        rightNav.getRightNavTab("learning-log").should('be.visible');
+        rightNav.getRightNavTab("supports").should('be.visible');
+        });
+});
+describe.skip('teacher document functionality',function(){
      before(function(){
         clueCanvas.addTile('table');
         clueCanvas.addTile('drawing');
-        canvas.copyDocument(teacherDoc)
+        canvas.copyDocument(teacherDoc);
         rightNav.openRightNavTab("my-work");
-        rightNav.openSection('my-work','workspaces')
-        rightNav.openCanvasItem('my-work','workspaces',teacherDoc)
-        clueCanvas.addTile('table')
-    })
+        rightNav.openSection('my-work','workspaces');
+        rightNav.openCanvasItem('my-work','workspaces',teacherDoc);
+        clueCanvas.addTile('table');
+    });
     it('verify save and restore investigation',function(){
         rightNav.openRightNavTab("my-work");
         rightNav.openSection("my-work","investigations");
         rightNav.getCanvasItemTitle("my-work","investigations",this.investigationTitle).should('exist');
         rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
         cy.wait(2000);
-        tableToolTile.getTableTile().should('exist')
-        drawToolTile.getDrawTile().should('exist')
-    })
+        tableToolTile.getTableTile().should('exist');
+        drawToolTile.getDrawTile().should('exist');
+    });
     it('verify save and restore extra workspace',function(){
         rightNav.openRightNavTab("my-work");
         rightNav.openSection("my-work","workspaces");
         rightNav.getCanvasItemTitle("my-work","workspaces",teacherDoc).should('exist');
         rightNav.openCanvasItem("my-work","workspaces",teacherDoc);
         cy.wait(2000);
-        tableToolTile.getTableTile().should('exist')
-        drawToolTile.getDrawTile().should('exist')
-    })
-})
+        tableToolTile.getTableTile().should('exist');
+        drawToolTile.getDrawTile().should('exist');
+    });
+});
 after(function(){
-    rightNav.openRightNavTab("my-work");
-    rightNav.openSection('my-work','investigations');
-    rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
-    clueCanvas.deleteTile('table');
-    clueCanvas.deleteTile('draw');
-    cy.deleteWorkspaces(baseUrl,queryParams);
+    // rightNav.openRightNavTab("my-work");
+    // rightNav.openSection('my-work','investigations');
+    // rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
+    // clueCanvas.deleteTile('table');
+    // clueCanvas.deleteTile('draw');
+    // cy.deleteWorkspaces(baseUrl,queryParams);
     cy.clearQAData('all');
-})
-
+});

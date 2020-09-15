@@ -1,0 +1,35 @@
+@import ../vars
+
+.nav-tab-buttons
+  position: fixed
+  left: 0
+  top: 55px
+  display: flex
+  flex-direction: column
+  margin: 5px 0 0 0
+  padding: 0
+  transition: left 1s, box-shadow .25s
+  border-radius: 0 5px 5px 0
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.35)
+  &:hover
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.35)
+  &.hidden
+    left: -100px
+  .nav-tab
+    width: $nav-tabs-width
+    height: 36px
+    font-size: 13px
+    color: $charcoal-dark-2
+    border-style: solid
+    border-color: $charcoal-light-1
+    border-width: 1.5px 1.5px 0 1.5px
+    border-radius: 0
+    padding: 0 0 0 8px
+    display: flex
+    align-items: center
+    cursor: pointer
+  .nav-tab:first-child
+    border-radius: 0 5px 0 0
+  .nav-tab:last-child
+    border-width: 1.5px 1.5px 1.5px 1.5px
+    border-radius: 0 0 5px 0

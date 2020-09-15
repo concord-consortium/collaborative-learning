@@ -1,0 +1,95 @@
+@import "../vars";
+
+.document-file-menu {
+
+  &.custom-select {
+
+    margin-left: 5px;
+
+    .header {
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+      height: 26px;
+      color: $charcoal-dark-2;
+      background-color: $workspace-teal-light-4;
+
+      &:hover {
+        background-color: $workspace-teal-light-3;
+      }
+
+      &:active, &.show-list {
+        background-color: $workspace-teal-dark-1;
+
+        svg path {
+          fill: white;
+        }
+
+        .title {
+          color: white;
+        }
+      }
+
+      .title-icon {
+        margin-left: 2px;
+        width: 24px;
+        height: 24px;
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      font-size: 14px;
+
+      .title-container {
+        margin: 0 4px;
+
+        .title {
+          padding: 10px 0;
+          text-align: left;
+        }
+      }
+    }
+
+    .list {
+      width: 137px;
+      margin: 0;
+
+      .list-item {
+        height: 38px;
+        font-size: 14px;
+
+        &:active {
+          svg path {
+            fill: white;
+          }
+        }
+
+        &.disabled {
+          opacity: 35%;
+          color: $charcoal-dark-2;
+          background-color: white;
+          pointer-events: none;
+          cursor: auto;
+
+          svg path {
+            fill: $workspace-teal-dark-1;
+          }
+        }
+
+        .item-icon {
+          width: 24px;
+          height: 24px;
+          margin: 0 8px;
+
+          svg {
+            width: 24px;
+            height: 24px;
+          }
+        }
+      }
+    }
+  }
+}

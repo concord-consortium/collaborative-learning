@@ -1,12 +1,12 @@
-import Canvas from '../../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../../support/elements/clue/cCanvas'
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
-import RightNav from '../../../../support/elements/common/RightNav';
+import Canvas from '../../../../support/elements/common/Canvas';
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
+// import RightNav from '../../../../support/elements/common/RightNav';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-const rightNav = new RightNav;
+// const rightNav = new RightNav;
 
 
 before(function(){
@@ -24,9 +24,9 @@ context('Text tool tile functionalities', function(){
         clueCanvas.getInvestigationCanvasTitle()
             .then(($canvasTitle)=>{
                 title = $canvasTitle.text().trim();
-                cy.log('title is: '+title)
-            })
-    })
+                cy.log('title is: '+title);
+            });
+    });
     it('adds text tool and types Hello World', function(){
         clueCanvas.addTile('text');
         textToolTile.enterText('Hello World');
@@ -36,12 +36,13 @@ context('Text tool tile functionalities', function(){
         canvas.createNewExtraDocument('text tool test');
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
-        rightNav.openRightNavTab('my-work');
-        rightNav.openSection('my-work','investigations')
-        rightNav.openCanvasItem('my-work','investigations',title)
-        textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
-    })
+        // rightNav.openRightNavTab('my-work');
+        // rightNav.openSection('my-work','investigations');
+        // rightNav.openCanvasItem('my-work','investigations',title);
+        // textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
+    });
     it('clicks the same text field and allows user to edit text', function(){
+        clueCanvas.addTile('text');
         textToolTile.getTextTile().last().focus();
         textToolTile.enterText('Adding more text to see if it gets added. ');
         textToolTile.getTextEditor().last().should('contain','Adding more text to see if it gets added. ');
@@ -53,8 +54,8 @@ context('Text tool tile functionalities', function(){
     it('delete text tile',()=>{
         clueCanvas.deleteTile('text');
         textToolTile.getTextTile().should('not.exist');
-    })
-})
+    });
+});
 
 after(function(){
   cy.clearQAData('all');

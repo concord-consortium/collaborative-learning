@@ -3,7 +3,7 @@ import "firebase/auth";
 import "firebase/database";
 import "firebase/firestore";
 import "firebase/storage";
-import { getProblemPath, IStores } from "../models/stores/stores";
+import { IStores } from "../models/stores/stores";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
         DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
@@ -473,7 +473,7 @@ export class DB {
   }
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
-    const { user } = this.stores;
+    const { user, problemPath } = this.stores;
     const content = documentModel.content.publish();
     const fs = this.firestore;
     return fs.batch(batch => {
@@ -485,8 +485,8 @@ export class DB {
         type: "supportPublication",
         createdAt: fs.timestamp(),
         properties: { teacherSupport: "true", caption, ...documentModel.copyProperties() },
-        problem: getProblemPath(this.stores),
-        classes: user.classHashesForProblemPath(getProblemPath(this.stores)),
+        problem: problemPath,
+        classes: user.classHashesForProblemPath(problemPath),
         originDoc: documentModel.key,
         content,
         // LTI fields

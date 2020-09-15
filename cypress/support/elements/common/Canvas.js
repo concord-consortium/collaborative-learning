@@ -1,6 +1,6 @@
 import Dialog from "./Dialog";
 
-const dialog = new Dialog
+const dialog = new Dialog;
 
 class Canvas{
     canvas(){
@@ -8,7 +8,7 @@ class Canvas{
     }
 
     singleCanvas(){
-        return '[data-test=canvas]'
+        return '[data-test=canvas]';
     }
 
     getSingleCanvas(){
@@ -16,20 +16,41 @@ class Canvas{
     }
 
     getSingleCanvasDocumentContent(){
-        return cy.get('[data-test=canvas]:first .document-content')
+        return cy.get('[data-test=canvas]:first .document-content');
     }
 
     //Header elements
     personalDocTitleEl(){
-        return '[data-test=personal-doc-title]'
+        return '[data-test=personal-doc-title]';
     }
 
     getPersonalDocTitle(){
-        return cy.get(this.personalDocTitleEl())
+        return cy.get(this.personalDocTitleEl());
     }
 
-    getNewDocumentIcon(){
-        return cy.get('[data-test=new-icon]')
+    getFileMenu() {
+        return cy.get('[data-test=document-file-menu-header');
+    }
+
+    getOpenDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-open-workspace');
+            });
+    }
+
+    getCopyDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-copy-workspace');
+            });
+    }
+
+    getDeleteDocumentItem() {
+        return this.getFileMenu().click()
+            .then(() => {
+                return cy.get('[data-test=list-item-icon-delete-workspace');
+            });
     }
 
     getPublishIcon(){
@@ -41,25 +62,39 @@ class Canvas{
     }
 
     getEditTitleIcon(){
-        return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]')
-    }
-
-    getCopyIcon(){
-        return cy.get('[data-test=copy-icon]')
-    }
-
-    getDeleteIcon(){
-        return cy.get('[data-test=delete-icon] .delete')
+        return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
     }
 
     createNewExtraDocument(title){
-        this.getNewDocumentIcon().click()
+        const subTabSelector = '.primary-workspace .doc-tab.my-work.personal-documents';
+        this.getOpenDocumentItem().click()
+            .then(function() {
+                cy.get(subTabSelector).click()
+                    .then(function() {
+                        cy.get('.tab-panel-documents-section.personal-documents .new-document-button').click()
+                            .then(function() {
+                                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+                                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
+                                dialog.getDialogOKButton().click()
+                                    .then(function() {
+                                        this.getPersonalDocTitle().should("contain",title);
+                                    }.bind(this));
+                            }.bind(this));
+                    }.bind(this));
+            }.bind(this));
+    }
+
+    openDocumentWithTitle(subTab, title){
+        const subTabSelector = '.primary-workspace .doc-tab.my-work.' + subTab;
+        const panelSelector = '.primary-workspace .tab-panel-documents-section.' + subTab;
+        const titlesSelector = panelSelector + ' .list.my-work .list-item .footer';
+        this.getOpenDocumentItem().click()
             .then(()=>{
-                dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
-                dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click();
-            })
-        cy.wait(3000)    
+                cy.get(subTabSelector).click()
+                    .then(() => {
+                        cy.contains(titlesSelector, title).click();
+                    });
+            });
     }
 
     editTitlewithPencil(title){
@@ -68,7 +103,7 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
-            })
+            });
     }
 
     editTitle(title){
@@ -77,33 +112,32 @@ class Canvas{
                 dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
                 dialog.getDialogOKButton().click();
-            })
+            });
     }
 
     copyDocument(title){
-        this.getCopyIcon().click()
+        this.getCopyDocumentItem().click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Copy Problem Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
-            })
+                dialog.getDialogOKButton().click();
+            });
     }
 
     copyExtraDocument(title){
-        this.getCopyIcon().click()
+        this.getCopyDocumentItem().click()
             .then(function(){
                 dialog.getDialogTitle().should('exist').contains('Copy Extra Workspace');
                 dialog.getDialogTextInput().click().type('{selectall}{backspace}'+title);
-                dialog.getDialogOKButton().click(); 
-            })
+                dialog.getDialogOKButton().click();
+            });
     }
 
     deleteDocument(){
-        this.getDeleteIcon().click().then(()=>{
+        this.getDeleteDocumentItem().click().then(()=>{
             dialog.getDialogTitle().should('exist').contains('Delete ');
             dialog.getDialogOKButton().click();
-        })
-    cy.wait(3000)    
+        });
     }
 
     publishPersonalCanvas(){

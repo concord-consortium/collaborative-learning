@@ -1,10 +1,8 @@
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds, DocumentContentSnapshotType
         } from "./document-content";
 import { IDropRowInfo } from "../../models/document/document-content";
-import { IDragTileItem } from "../../models/tools/tool-tile";
+import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { defaultTextContent } from "../tools/text/text-content";
-import { getSnapshot } from "mobx-state-tree";
-import { cloneDeep } from "lodash";
 
 describe("DocumentContentModel", () => {
   let documentContent: DocumentContentModelType;
@@ -680,8 +678,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       const tileRow = documentContent.getRow(tileRowId)!;
       const tileRowIndex = documentContent.getRowIndex(tileRowId)!;
       const tileIndex = tileRow.tiles.findIndex(_tile => _tile.tileId === tileId);
-      const tileSnapshotWithoutId = cloneDeep(getSnapshot(tile));
-      delete tileSnapshotWithoutId.id;
+      const tileSnapshotWithoutId = cloneTileSnapshotWithoutId(tile);
       const item: IDragTileItem = {
         rowIndex: tileRowIndex,
         rowHeight: tileRow.height || 0,

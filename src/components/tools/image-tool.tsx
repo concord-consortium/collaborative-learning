@@ -10,7 +10,7 @@ import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { hasSelectionModifier } from "../../utilities/event-utils";
-const placeholderImage = require("../../assets/image_placeholder.png");
+import placeholderImage from "../../assets/image_placeholder.png";
 
 import "./image-tool.sass";
 

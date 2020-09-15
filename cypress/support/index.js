@@ -14,16 +14,16 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands'
 
-Cypress.config('defaultCommandTimeout', 10000)
+Cypress.config('defaultCommandTimeout', 10000);
 
 before(function(){
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-    const queryParams = `${Cypress.config("queryParams")}`;
+    // const baseUrl = `${Cypress.config("baseUrl")}`;
+    // const queryParams = `${Cypress.config("queryParams")}`;
 
     // cy.clearQAData('all');
     // cy.visit(baseUrl+queryParams);
@@ -33,7 +33,7 @@ before(function(){
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
     // failing the test
-    return false
+    return false;
 });
 
 // after(function(){

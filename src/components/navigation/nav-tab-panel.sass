@@ -1,0 +1,63 @@
+@import ../vars
+
+.nav-tab-panel
+  width: 50%
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
+  position: fixed
+  left: calc(0px - 100vw * .5)
+  top: $header-height
+  transition-duration: 1s
+  transition-property: left
+  margin-top: 4px
+  background-color: white
+  border-radius: 0 6px 0 0
+  &.shown
+    left: 0px
+
+  .top-row
+    display: flex
+    align-items: center
+    justify-content: flex-start
+
+  .close-button
+    flex-shrink: 0
+    width: 36px
+    height: $nav-tab-height
+    background-color: $charcoal-light-6
+    border-radius: 0 6px 0 0
+    border-style: solid
+    border-color: $charcoal-light-1
+    border-width: 1.5px 1.5px 1.5px 0
+    background-image: url("../../assets/icons/close/close.svg")
+    background-repeat: no-repeat
+    background-position: center
+    cursor: pointer
+    &:hover
+      background-color: $charcoal-light-4
+      background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
+    &:active
+      background-color: $charcoal-light-2
+      background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
+
+  .top-tab-list
+    display: flex
+    width: 100%
+    padding: 0
+    margin: 0
+    .top-tab
+      flex-grow: 1
+      height: $nav-tab-height
+      font-size: 13px
+      color: $charcoal-dark-2
+      border-style: solid
+      border-color: $charcoal-light-1
+      border-width: 1.5px 0 1.5px 1.5px
+      border-radius: 0
+      display: flex
+      align-items: center
+      justify-content: center
+      cursor: pointer
+    .top-tab:first-child
+      border-width: 1.5px 0 1.5px 0
+    .top-tab:last-child
+      border-width: 1.5px 1.5px 1.5px 1.5px

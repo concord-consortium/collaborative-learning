@@ -1,8 +1,7 @@
 import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
 import { getImageDimensions, storeCorsImage, storeFileImage, storeImage } from "../utilities/image-utils";
 import { DB } from "../lib/db";
-const placeholderImage = require("../assets/image_placeholder.png");
-const loadingSpinner = require("../assets/Spinner-1s-200px.svg");
+import placeholderImage from "../assets/image_placeholder.png";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -131,9 +130,8 @@ export const ImageMapModel = types
 
     return {
       afterCreate() {
-        // placeholder and spinner don't have contentUrl
+        // placeholder doesn't have contentUrl
         self.addImage(placeholderImage, { displayUrl: placeholderImage });
-        self.addImage(loadingSpinner, { displayUrl: loadingSpinner });
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);

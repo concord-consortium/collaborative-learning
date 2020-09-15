@@ -71,14 +71,17 @@ export class DBListeners extends BaseListener {
   public async start() {
     // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
     await this.latestGroupIdListener.start();
-    // parallelize starting the remaining listeners since there are no other interdependencies
+    // start group and document listeners
     await Promise.all([
       this.groupsListener.start(),
       this.problemDocumentsListener.start(),
       this.personalDocumentsListener.start(),
       this.learningLogsListener.start(),
       this.publicationListener.start(),
-      this.supportsListener.start(),
+      this.supportsListener.start()
+    ]);
+    // start listeners that depend on documents
+    await Promise.all([
       this.commentsListener.start(),
       this.starsListener.start()
     ]);

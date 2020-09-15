@@ -13,8 +13,8 @@ import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
-import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+import { gImageMap } from "../../../models/image-map";
+import placeholderImage from "../../../assets/image_placeholder.png";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -626,8 +626,6 @@ interface DrawingLayerViewState {
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObject|null;
   isLoading: boolean;
-  imageContentUrl?: string;
-  imageEntry?: ImageMapEntryType;
 }
 
 @observer
@@ -844,7 +842,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         this.setSelectedObjects(objectsToInteract);
         needToAddHoverToSelection = false;
       }
-      this.setState({objects: this.state.objects});
+      this.setState(state => ({ objects: state.objects }));
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -1001,22 +999,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           (imgObj as ImageObject).model.url = image.displayUrl || placeholderImage);
 
         // update react state
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageEntry: image
-        });
+        this.setState({ isLoading: false });
         // update mst content if conversion occurred
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
       })
       .catch(() => {
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageEntry: undefined
-        });
+        this.setState({ isLoading: false });
       });
   }
 
@@ -1138,7 +1128,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
     if (drawingObject?.model.id) {
       const objectId = drawingObject.model.id;
-      this.setState(state => ({objects: { ...state.objects, ...{ [objectId]: drawingObject } }}));
+      this.setState(state => ({ objects: { ...state.objects, ...{ [objectId]: drawingObject } }}));
     }
   }
 
@@ -1185,7 +1175,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           selectedObjects.splice(index, 1);
         }
         delete this.state.objects[id];
-        this.setState({objects: this.state.objects, selectedObjects, hoverObject: null});
+        this.setState(state => ({objects: state.objects, selectedObjects, hoverObject: null}));
       }
     }
   }

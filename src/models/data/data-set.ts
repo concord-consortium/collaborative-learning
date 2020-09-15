@@ -1,6 +1,5 @@
-import { applyAction, getEnv, Instance,
+import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { ISerializedActionCall } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
 // see https://medium.com/@martin_hotell/tree-shake-lodash-with-webpack-jest-and-typescript-2734fa13b5cd
 // for more efficient ways of importing lodash functions

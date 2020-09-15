@@ -1,31 +1,20 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { LeftNavComponent } from "../../components/navigation/left-nav";
-import { RightNavComponent } from "../../components/navigation/right-nav";
-import { DocumentComponent } from "../../components/document/document";
+import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentDragKey, DocumentModel, DocumentModelType, LearningLogDocument, OtherDocumentType,
+import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentType,
          PersonalDocument, ProblemDocument } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { getProblemPath } from "../../models/stores/stores";
-import { parseGhostSectionDocumentKey } from "../../models/stores/workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { NavTabPanel } from "../navigation/nav-tab-panel";
+import { NavTabButtons } from "../navigation/nav-tab-buttons";
 
 import "./document-workspace.sass";
 
-type WorkspaceSide = "primary" | "comparison";
-
 interface IProps extends IBaseProps {
-  isGhostUser: boolean;
 }
-
-// keep ghost documents out of MST
-interface GhostDocumentMap {
-  [key: string]: DocumentModelType;
-}
-const ghostProblemDocuments: GhostDocumentMap = {};
 
 @inject("stores")
 @observer
@@ -45,9 +34,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { rightNav: { tabSpecs } }, user } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } }, user } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
-    const isGhostUser = this.props.isGhostUser;
     const isTeacher = user.isTeacher;
     const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
@@ -62,15 +50,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments(isGhostUser)}
-        <LeftNavComponent
-          isGhostUser={isGhostUser}
+        {this.renderDocuments()}
+        <NavTabPanel
+          tabs={tabsToDisplay}
+          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        <RightNavComponent
+        <NavTabButtons
           tabs={tabsToDisplay}
-          isGhostUser={isGhostUser}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
@@ -110,7 +98,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
   }
 
-  private renderDocuments(isGhostUser: boolean) {
+  private renderDocuments() {
     const {appConfig, documents, ui, groups} = this.stores;
 
     const { problemWorkspace } = ui;
@@ -133,8 +121,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       ? <GroupVirtualDocumentComponent
           key={comparisonDocumentKey}
           document={groupVirtualDocument}
-          workspace={problemWorkspace}
-          side={hidePrimaryForCompare ? "primary" : "comparison"}
         />
       : comparisonDocument
         ?
@@ -149,7 +135,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             toolbar={toolbar}
             side="comparison"
             readOnly={true}
-            isGhostUser={isGhostUser}
           />
         : this.renderComparisonPlaceholder();
 
@@ -164,7 +149,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onPublishDocument={this.handlePublishDocument}
         toolbar={toolbar}
         side="primary"
-        isGhostUser={isGhostUser}
       />;
 
     // Show Pimary and comparison docs:
@@ -187,11 +171,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const hasRightNavTabs = this.stores.appConfig.rightNav.tabSpecs.length > 0;
-    const style = hasRightNavTabs ? undefined : { right: 0 };
+    const { ui } = this.stores;
+    const style = { right: 0 };
+    const positionedClassName = ui.navTabContentShown ? className + " half" : className;
+    const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div
-        className={className}
+        className={`${positionedClassName} ${roleClassName}`}
         style={style}
         onDragOver={this.handleDragOverSide}
         onDrop={this.handleDropSide(side)}
@@ -285,19 +271,25 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.stores.ui.restoreDefaultNavExpansion();
+    // placeholder
   }
 
-  private handleNewDocument = (document: DocumentModelType) => {
+  private handleNewDocument = (type: string) => {
     const { appConfig, user } = this.stores;
-    const docType = document.isLearningLog ? LearningLogDocument : PersonalDocument;
-    const defaultDocTitle = document.isLearningLog
+    const isLearningLog = type === LearningLogDocument;
+    const docType = isLearningLog ? LearningLogDocument : PersonalDocument;
+    const defaultDocTitle = isLearningLog
                             ? appConfig.defaultLearningLogTitle
                             : appConfig.defaultDocumentTitle;
     const docTypeString = appConfig.getDocumentLabel(docType, 1);
     const docTypeStringL = appConfig.getDocumentLabel(docType, 1, true);
     const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
-    this.stores.ui.prompt(`Name your new ${docTypeStringL}:`, `${nextTitle}`, `Create ${docTypeString}`)
+    this.stores.ui.prompt({
+        className: `create-${type}`,
+        title: `Create ${docTypeString}`,
+        text: `Name your new ${docTypeStringL}:`,
+        defaultValue: `${nextTitle}`,
+      })
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
         .catch(this.stores.ui.setError);
@@ -339,23 +331,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handleDeleteDocument = (document: DocumentModelType) => {
-    const { appConfig, documents, user } = this.stores;
-    const otherDocuments = documents.byTypeForUser(document.type, user.id);
-    const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
+    const { appConfig } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    if (countNotDeleted <= 1) {
-      this.stores.ui.alert(`Cannot delete the last ${docTypeStringL}.`, `Error: Delete ${docTypeString}`);
-    }
-    else {
-      this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
-      .then((confirmDelete: boolean) => {
-        if (confirmDelete) {
-          document.setProperty("isDeleted", "true");
-          this.handleDeleteOpenPrimaryDocument();
-        }
-      });
-    }
+    this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
+    .then((confirmDelete: boolean) => {
+      if (confirmDelete) {
+        document.setProperty("isDeleted", "true");
+        this.handleDeleteOpenPrimaryDocument();
+      }
+    });
   }
 
   private handleDeleteOpenPrimaryDocument = async () => {
@@ -379,12 +364,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handlePublishSupport = async (document: DocumentModelType) => {
-    const { db, ui, user } = this.stores;
+    const { db, problemPath, ui, user } = this.stores;
     const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, caption)
       .then(() => {
-        const classes = user.classHashesForProblemPath(getProblemPath(this.stores));
+        const classes = user.classHashesForProblemPath(problemPath);
         const classWord = classes.length === 1 ? "class" : "classes";
         ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
       })
@@ -409,20 +394,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
-      const ghostSectionId = parseGhostSectionDocumentKey(documentKey);
-      if (ghostSectionId) {
-        if (!ghostProblemDocuments[ghostSectionId]) {
-          // Ghosts don't store section documents in Firebase, so we create fake ones here for convenience
-          ghostProblemDocuments[ghostSectionId] = DocumentModel.create({
-            uid: "ghost",
-            type: ProblemDocument,
-            key: ghostSectionId,
-            createdAt: 1,
-            content: {},
-          });
-        }
-        return ghostProblemDocuments[ghostSectionId];
-      }
       return this.stores.documents.getDocument(documentKey);
     }
   }

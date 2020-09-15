@@ -22,12 +22,11 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   public render() {
     const { user, ui } = this.stores;
     const isTeacher = user && user.isTeacher;
-    const isGhostUser = this.stores.groups.ghostUserId === this.stores.user.id;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
                     label: "Workspace",
-                    content: <DocumentWorkspaceComponent isGhostUser={isGhostUser} />
+                    content: <DocumentWorkspaceComponent />
                   }];
     if (user && user.isTeacher) {
       panels.unshift({
@@ -45,7 +44,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
     return (
       <div className="clue-app-content">
-        <ClueAppHeaderComponent isGhostUser={isGhostUser} panels={panels}
+        <ClueAppHeaderComponent panels={panels}
                             current={teacherPanelKey} onPanelChange={this.handlePanelChange}
                             showGroup={true} />
         {currentPanelContent}
@@ -56,8 +55,6 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
   private handlePanelChange = (panelId: EPanelId) => {
     const { user, ui } = this.stores;
-    ui.toggleLeftNav(false);
-    ui.toggleRightNav(false);
     ui.setTeacherPanelKey(panelId);
 
     // log teacher dashboard panel changes

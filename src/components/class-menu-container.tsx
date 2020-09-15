@@ -3,8 +3,9 @@ import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
-import { DropDown, IDropdownItem } from "@concord-consortium/react-components";
+import { IDropdownItem } from "@concord-consortium/react-components";
 import { getProblemOrdinal } from "../models/stores/stores";
+import { CustomSelect } from "../clue/components/custom-select";
 
 interface IProps extends IBaseProps {}
 
@@ -14,13 +15,13 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
   public render() {
     const links = this.getPortalClasses();
     const { user } = this.stores;
-    return(<>
-      <DropDown
+    return(
+      <CustomSelect
         title="Class Menu"
-        prefix={user.name}
+        titlePrefix={user.name}
         items={links}
       />
-    </>);
+    );
   }
 
   private getCurrentProblemOrdinal() {
@@ -46,7 +47,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     const links: IDropdownItem[] = [];
 
     // If, by chance, there are no classes in the offerings, return a link
-    // with a name matching the current class name and no link. This is bit of
+    // with a name matching the current class name and no link. This bit of
     // code is primarily for when the application is running in demo mode.
     if (classNames.length === 0) {
       return [];

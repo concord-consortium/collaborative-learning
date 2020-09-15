@@ -23,7 +23,7 @@ export class ProgressWidgetItem extends React.Component<IProps, IState> {
           <div className="section-of">of</div>
           <div className="section-total">{item.total}</div>
         </div>
-    </div>
+      </div>
     );
   }
 

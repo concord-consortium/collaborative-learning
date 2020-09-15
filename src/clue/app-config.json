@@ -7,6 +7,7 @@
     "faw": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
     "hlit": "curriculum/how-likely-is-it/how-likely-is-it.json",
     "help": "curriculum/help/help.json",
+    "lfp": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json",
     "msa": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
     "sad": "curriculum/shapes-and-designs/shapes-and-designs.json",
     "sap": "curriculum/samples-and-populations/samples-and-populations.json",
@@ -48,13 +49,17 @@
     }
   },
   "showClassSwitcher": true,
-  "rightNav": {
+  "navTabs": {
     "lazyLoadTabContents": true,
     "tabSpecs": [
       {
+        "tab": "problems",
+        "label": "Problem",
+        "sections": []
+      },
+      {
         "tab": "student-work",
         "label": "Student Workspaces",
-        "hideGhostUser": true,
         "teacherOnly": true,
         "groupsDisplay": true,
         "sections": [
@@ -70,17 +75,7 @@
       {
         "tab": "my-work",
         "label": "My Work",
-        "hideGhostUser": true,
         "sections": [
-          {
-            "title": "Extra Workspaces",
-            "type": "personal-documents",
-            "dataTestHeader": "my-work-section-workspaces",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["personal"],
-            "properties": ["!isDeleted"],
-            "showStars": ["student", "teacher"]
-          },
           {
             "title": "Problem Workspaces",
             "type": "problem-documents",
@@ -90,12 +85,30 @@
             "showStars": ["student", "teacher"]
           },
           {
+            "title": "Extra Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": ["student", "teacher"],
+            "addDocument": true
+          },
+          {
             "title": "Starred",
             "type": "starred-problem-documents",
             "dataTestHeader": "my-work-section-starred",
             "documentTypes": ["personal", "problem"],
             "properties": ["starred", "!isDeleted"],
             "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Learning Log",
+            "type": "learning-logs",
+            "dataTestHeader": "learning-log-section",
+            "documentTypes": ["learningLog"],
+            "properties": ["!isDeleted"],
+            "addDocument": true
           }
         ]
       },
@@ -104,14 +117,6 @@
         "label": "Class Work",
         "sections": [
           {
-            "className": "section personal published",
-            "title": "Extra Workspaces",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section-personal",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"]
-          },
-          {
             "className": "section problem published",
             "title": "Problem Workspaces",
             "type": "published-problem-documents",
@@ -119,6 +124,14 @@
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["publication"],
             "showStars": ["teacher"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Extra Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"]
           },
           {
             "className": "section learning-log published",
@@ -136,20 +149,6 @@
             "documentTypes": ["publication"],
             "properties": ["starred"],
             "showStars": ["teacher"]
-          }
-        ]
-      },
-      {
-        "tab": "learning-log",
-        "label": "Learning Log",
-        "sections": [
-          {
-            "title": "Logs",
-            "type": "learning-logs",
-            "dataTestHeader": "learning-log-section",
-            "dataTestItem": "learning-log-list-items",
-            "documentTypes": ["learningLog"],
-            "properties": ["!isDeleted"]
           }
         ]
       },
@@ -182,7 +181,8 @@
     {
       "name": "select",
       "title": "Select",
-      "iconId": "icon-select-tool"
+      "iconId": "icon-select-tool",
+      "isDefault": true
     },
     {
       "name": "text",

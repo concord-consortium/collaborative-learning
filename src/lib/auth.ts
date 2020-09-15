@@ -8,8 +8,7 @@ import { IPortalClassOffering } from "../models/stores/user";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import { Logger, LogEventName } from "../lib/logger";
-
-const initials = require("initials");
+import initials from "initials";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -286,7 +285,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
               lastName: rawStudent.last_name,
               fullName,
               className: rawClassInfo.name,
-              initials: initials(fullName),
+              initials: initials(fullName) as string,
               classHash: rawClassInfo.class_hash,
               offeringId,
             };
@@ -303,7 +302,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
               lastName: rawTeacher.last_name,
               fullName,
               className: rawClassInfo.name,
-              initials: initials(fullName),
+              initials: initials(fullName) as string,
               classHash: rawClassInfo.class_hash,
               offeringId,
             };

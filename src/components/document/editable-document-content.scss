@@ -1,0 +1,33 @@
+@import "../vars";
+
+.editable-document-content {
+  position: absolute;
+  top: $workspace-titlebar-height;
+  left: 0;
+  width: 100%;
+  height: calc(100% - #{$workspace-titlebar-height});
+
+  .canvas-separator {
+    position: absolute;
+    top: 0;
+    left: $workspace-toolbar-width + $canvas-separator-offset;
+    width: $canvas-separator-width;
+    bottom: 0;
+    background-color: $workspace-teal-light-4;
+  }
+
+  .canvas-area {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: $document-border-width solid white;
+  }
+
+  &.show-toolbar {
+    .canvas-area {
+      left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+    }
+  }
+}

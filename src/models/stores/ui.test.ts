@@ -1,8 +1,6 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
-import { SectionModel } from "../curriculum/section";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
-import { ERightNavTab } from "../view/right-nav";
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -21,19 +19,13 @@ describe("ui model", () => {
   });
 
   it("has default values", () => {
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.rightNavExpanded).toBe(false);
-    expect(ui.leftNavExpanded).toBe(false);
     expect(ui.error).toBe(null);
-    expect(ui.activeSectionIndex).toBe(0);
-    expect(ui.activeRightNavTab).toBe(ERightNavTab.kMyWork);
     expect(ui.showDemoCreator).toBe(false);
     expect(ui.dialog).toBe(undefined);
   });
 
   it("uses override values", () => {
     ui = UIModel.create({
-      rightNavExpanded: true,
       showDemoCreator: true,
       error: "test",
       problemWorkspace: {
@@ -45,64 +37,8 @@ describe("ui model", () => {
         mode: "1-up"
       },
     });
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.rightNavExpanded).toBe(true);
-    expect(ui.leftNavExpanded).toBe(false);
     expect(ui.error).toBe("test");
     expect(ui.showDemoCreator).toBe(true);
-  });
-
-  it("allows the left nav to be toggled", () => {
-    ui.toggleLeftNav();
-    expect(ui.allDefaulted).toBe(false);
-    expect(ui.leftNavExpanded).toBe(true);
-    ui.toggleLeftNav();
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.leftNavExpanded).toBe(false);
-  });
-
-  it("allows the left nav to be explicitly set", () => {
-    ui.toggleLeftNav(false);
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.leftNavExpanded).toBe(false);
-    ui.toggleLeftNav(true);
-    expect(ui.allDefaulted).toBe(false);
-    expect(ui.leftNavExpanded).toBe(true);
-  });
-
-  it("allows the right nav to be toggled", () => {
-    ui.toggleRightNav();
-    expect(ui.allDefaulted).toBe(false);
-    expect(ui.rightNavExpanded).toBe(true);
-    ui.toggleRightNav();
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.rightNavExpanded).toBe(false);
-  });
-
-  it("allows the right nav to be explicitly set", () => {
-    ui.toggleRightNav(false);
-    expect(ui.allDefaulted).toBe(true);
-    expect(ui.rightNavExpanded).toBe(false);
-    ui.toggleRightNav(true);
-    expect(ui.allDefaulted).toBe(false);
-    expect(ui.rightNavExpanded).toBe(true);
-  });
-
-  it("only allows some components to be expanded at a time", () => {
-    ui.toggleLeftNav();
-    expect(ui.leftNavExpanded).toBe(true);
-    expect(ui.rightNavExpanded).toBe(false);
-
-    ui.toggleRightNav();
-    expect(ui.leftNavExpanded).toBe(false);
-    expect(ui.rightNavExpanded).toBe(true);
-  });
-
-  it("allows all components to be defaulted", () => {
-    ui.toggleLeftNav();
-    expect(ui.allDefaulted).toBe(false);
-    ui.restoreDefaultNavExpansion();
-    expect(ui.allDefaulted).toBe(true);
   });
 
   it("allows error to be set", () => {
@@ -111,22 +47,6 @@ describe("ui model", () => {
     expect(ui.error).toBe(error);
     ui.setError(null);
     expect(ui.error).toBe(null);
-  });
-
-  it("allows activeSection to be set", () => {
-    SectionModel.create({
-      type: "introduction"
-    });
-    ui.setActiveSectionIndex(1);
-    expect(ui.activeSectionIndex).toBe(1);
-    ui.setActiveSectionIndex(0);
-    expect(ui.activeSectionIndex).toBe(0);
-  });
-
-  it("allows activeRightNavTab to be set", () => {
-    const activeRightNavTab = "M";
-    ui.setActiveRightNavTab(activeRightNavTab);
-    expect(ui.activeRightNavTab).toBe(activeRightNavTab);
   });
 
   it("allows demo creator to be shown", () => {

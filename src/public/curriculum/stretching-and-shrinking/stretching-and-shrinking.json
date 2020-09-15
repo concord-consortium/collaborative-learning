@@ -326,8 +326,8 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "SAS 1.1 Solving a Mystery",
-          "subtitle": "An Introduction to Similarity",
+          "title": "SAS 1.1 Solving a Mystery with Proportional Reasoning",
+          "subtitle": "",
           "sections": [
             {
               "type": "introduction",
@@ -338,14 +338,17 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Investigation, you will make <strong>scale drawings</strong> of figures called <strong>similar figures</strong>. Your scale drawings will have the same shape as the original figure but may be larger or smaller. The drawings will help you explore how some properties of a shape change when the shape is enlarged or reduced."
+                        "The Mystery Club at P.I. Middle School meets monthly. Members watch videos, discuss novels, play “whodunit” games, and talk about real-life mysteries. One day, a member announces that the school is having a contest. A teacher in disguise will appear for a few minutes at school each day for a week. Any student can pay $1 for a guess at the identity of the mystery teacher. The student with the first correct guess wins a prize."
                       ]
                     }
-                  },
+                  }, 
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_1_1_05_scale_drawing_500w.png"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The Mystery Club decides to enter the contest together. Each member brings a camera to school in hopes of getting a picture of the mystery teacher."
+                      ]
                     }
                   }
                 ]
@@ -356,24 +359,6 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The Mystery Club at P.I. Middle School meets monthly. Members watch videos, discuss novels, play “whodunit” games, and talk about real-life mysteries. One day, a member announces that the school is having a contest. A teacher in disguise will appear for a few minutes at school each day for a week. Any student can pay $1 for a guess at the identity of the mystery teacher. The student with the first correct guess wins a prize."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The Mystery Club decides to enter the contest together. Each member brings a camera to school in hopes of getting a picture of the mystery teacher."
-                      ]
-                    }
-                  },
                   {
                     "content": {
                       "type": "Text",
@@ -413,8 +398,22 @@
                       "format": "markdown",
                       "text": [
                         "**Situation A. Daphne’s Reasoning**",
-                        "Daphne claims she used proportional reasoning to solve the problem. She wrote:",
-                        "> `Each PI magazine measures 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`",
+                        "Daphne claims she used ratio reasoning to solve the problem. She wrote:",
+                        "> `For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
                         "Complete Daphne’s reasoning to estimate the height of the teacher." 
                       ]
                     }
@@ -424,36 +423,8 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "---"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
                         "**Situation B. What’s Different?**",
-                        "How does the real-life teacher differ from the teacher in the photo?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "---"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "**Situation C.**",
-                        "Can you think of some other times you could use a photo to estimate the size of something?"
+                        "1. How does the real-life teacher differ from the teacher in the photo? \n2. Can you think of some other times you could use a photo to estimate the size of something?"
                       ]
                     }
                   }
@@ -484,8 +455,8 @@
         {
           "description": "SAS Problem 1.2",
           "ordinal": 2,
-          "title": "SAS 1.2 Stretching a Figure",
-          "subtitle": "Comparing Similar Figures",
+          "title": "SAS 1.2 Designing a Poster Using a Rubber Band Stretcher",
+          "subtitle": "",
           "sections": [
             {
               "type": "introduction",
@@ -496,9 +467,9 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "In Problem 1.1 A, Daphne used proportional reasoning to solve the mystery. She reasoned:",
-                        "> _Each PI magazine height measures 10 inches in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall._",
-                        "Daphne’s reasoning is similar to the reasoning you have done in the **Comparing Quantities** unit where you used ratios to describe and compare quantities. Recall that a ratio is a comparison of two quantities, such as two lengths.",
+                        "In Problem 1.1 A, Daphne used ratio relationships to solve the mystery. She reasoned:",
+                        "> _For every inch measured on the PI magazine, there are 10 inches of the PI magazine in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall._",
+                        "Daphne’s reasoning is similar to the reasoning you have done in the _Comparing Quantities_ unit where you used ratios to describe and compare quantities. Recall that a **ratio** is a comparison of two quantities which have a multiplicative relationshipn, such as two lengths.",
                         "* 1 PI magazine height to the height of the teacher (7 PI magazines)",
                         "**or**",
                         "* 1 PI magazine: 7 PI magazines",
@@ -582,6 +553,7 @@
                         "Ms. Marvel’s class made several comparison statements about the original figure and the image.",
                         "* Which of these statements are true? Explain your reasoning.",
                         "* Which of these statements represent ratios? Write these as ratio statements.",
+                        "* Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?",
                         " ",
                         "**Comparison 1.** The lengths of the sides of the image are twice the lengths of the original.",
                         "**Comparison 2.** The distance from a point on the original figure to P is equal to the distance from the image of the point to P.",
@@ -595,36 +567,8 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "---"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "### Situation B. Creating a New Figure",
-                        "Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons in Situation A are true for the original figure and its image?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "---"
-                      ]
-                    }
-                  },
-
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "### Situation C. Changing the Anchor Point",
+                        "### Situation B. Changing the Anchor Point and Number of Bands",
+                        "Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons in Situation A are true for the original figure and its image?",
                         "1. What if you could change the position of the anchor point? How does this affect the image?",
                         "1. What if you used three rubber bands and traced the figure using the knot closest to the anchor point? How does this affect the image?",
                         "1. Amy says the rubber bands are multipliers. They have a multiplying effect. Use the language of ratios to restate Amy’s idea mathematically."
@@ -662,8 +606,8 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "SAS 1.3 Scaling Up and Down",
-          "subtitle": "Corresponding Sides and Angles",
+          "title": "SAS 1.3 Scaling Up and Down with Percents",
+          "subtitle": "",
           "sections": [
             {
               "type": "introduction",
@@ -683,26 +627,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you study similar figures, you often compare their sides and angles. To compare the parts correctly, mathematicians use the terms corresponding sides and corresponding angles. In every pair of similar figures, each side of one figure has a corresponding side in the other figure. Also, each angle has a corresponding angle. Recall that there are two ways to identify angles."
+                        "When you study similar figures, you often compare their sides and angles. To compare the parts correctly, mathematicians use the terms corresponding sides and corresponding angles. In every pair of similar figures, each side of one figure has a corresponding side in the other figure. Also, each angle has a corresponding angle. \n\nRecall that there are two ways to identify angles. You can identify an angle with three letters. The angles in the small triangle have the following names:"
                       ]
                     }
                   },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You can identify an angle with three letters. The angles in the small triangle have the following names:"
-                      ]
-                    }
-                  },
-                  {
+                     {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -734,16 +663,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Notice that the letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of ∠BAC."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You can also name an angle by its vertex. It is important to use this method only when it is clear which angle you are referring to."
+                        "The letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of BAC. You can also name an angle by its vertex only when it is clear which angle you are referring to."
                       ]
                     }
                   },
@@ -772,6 +692,21 @@
                       "text": [
                         "∠ABC can also be called ∠ B"
                       ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The following example shows the corresponding sides and corresponding angles in the two triangles."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Image",
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
                     }
                   },
                   {
@@ -850,7 +785,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Comparing the Image to the Original</strong>\nCompare each copy to the original figure.<ol><li>Describe how the side lengths compare to the corresponding side lengths in the original figure.</li><li>Describe how the angle measures compare to the corresponding angle measures in the original figure.</li><li>Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure.</li><li>Describe how the area of the triangle in each copy compares to the area in the original figure.</li><li>Explain how the percent setting can be used to predict the relationships between each copy and the original figure.</li></ol>"
+                        "<strong>Situation A. Comparing the Image to the Original</strong>\nCompare each copier image to the original figure.<ol><li><strong>Comparison 1</strong>: Describe how the side lengths compare to the corresponding side lengths in the original figure.</li><li><strong>Comparison 2</strong>: Describe how the angle measures compare to the corresponding angle measures in the original figure.</li><li><strong>Comparison 3</strong>: Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure.</li><li><strong>Comparison 4</strong>: Describe how the area of the triangle in each copy compares to the area in the original figure.</li><li><strong>Comparison 5</strong>: Explain how the percent setting can be used to predict the relationships between each copy and the original figure.</li></ol>"
                       ]
                     }
                   },
@@ -885,7 +820,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "For similar figures, what attributes and <strong>measures</strong> stay the same? What characteristics and <strong>measures</strong> change? How does a <strong>multiplier</strong> play a role in these changes?"
+                        "For similar figures, what features (attributes) and measures stay the same? What features (attributes) and measures change? How does a multiplier play a role in these changes?"
                       ]
                     }
                   }
@@ -901,7 +836,7 @@
     {
       "description": "Investigation 2",
       "ordinal": 2,
-      "title": "SAS Investigation 2 Similar Figures",
+      "title": "SAS Investigation 2 The Mug Wump Family: Similar Figures",
       "introduction": {
       },
       "problems": [
@@ -927,7 +862,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, you need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. You can give it a rule for finding key points from the original figure. <em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
+                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. \n\nSometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.\n\n<em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
                           ]
                       }
                     }
@@ -945,15 +880,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
                         "Zack and Marta experiment with enlarging and reducing figures on a coordinate grid. First, Zack draws Mug Wump on graph paper. Then he labels the key points from A to X and lists the coordinates for each point. Marta writes the rules that will change Mug’s size. Marta tries several rules for transforming Mug into different sizes. She wonders which rules will make family members that are similar shapes."
                       ]
                     }
@@ -963,7 +889,16 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Draw Mug on a coordinate graph paper by referring to the “Mug Wump” columns in the table.<ul><li>For Parts 1-3 of the figure, plot the points in order. Connect them as you go along.</li><li>For Part 4, plot the two points, but do not connect them.</li></ul>Use the coordinate rules in the table to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper."
+                        "Draw Mug on a coordinate graph paper by referring to the “Mug Wump” columns in the table.<ul><li>For Parts 1-3 of the figure, plot the points in order. Connect them as you go along.</li><li>For Part 4, plot the two points, but do not connect them.</li></ul>Use the coordinate rules in the table to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper. "
+                      ]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Use the given rule to find the coordinates of the points. Record the coordinates in the columns Zug, Lug, Bug, and Glug.\nFor example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).</li><li>Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes.</li></ul>\n\nLook at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
                       ]
                     }
                   },
@@ -1085,7 +1020,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Marta’s Claim</h3>Marta says the rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug. Is this true? Why?"
+                        "<h3>Situation A. Student Claims</h3>Below are claims made by Marta’s class. Is each Claim true? Explain why.\n\n<strong>Marta’s Claim</strong> The rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug."
                       ]
                     }
                   },
@@ -1094,7 +1029,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Jacob’s Claim</h3>Jacob claims that he can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct? Explain why."
+                        "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
                       ]
                     }
                   },
@@ -1103,7 +1038,25 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. New Rules</h3>Make a rule that would create a figure similar to Lug."
+                        "<strong>Zack’s Claim</strong> For similar figures, the corresponding angle measures change the same way as the corresponding side lengths."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Billie’s Claim</stong> The rule (x, y) creates a figure that is exactly the same as the original."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. New Rules</h3><ol><li>1.  Make a rule that would create a figure similar to Lug. </li><li>Describe how the corresponding angle measures and side lengths change. </li></ol>"
                       ]
                     }
                   }
@@ -1232,7 +1185,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "• Look closely at each rule and predict what will happen to the hat with each rule.\n• Test each rule. How does your result compare with your prediction? "
+                        "• Look at each rule and predict what will happen to the hat with each rule.\n• Test each rule. How does your result compare with your prediction? "
                       ]
                     }
                   }
@@ -1256,7 +1209,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Writing New Hat Rules</strong>\nWhat if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if<ol><li>The side lengths are one third as long as Mug’s hat?</li><li>The side lengths are 1.5 times as long as Mug’s hat?</li><li>The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?</li><li>The image is in another quadrant?</li></ol>"
+                        "<strong>Situation A. Writing New Hat Rules</strong>\nWhat if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if:<ol><li>The side lengths are one third as long as Mug’s hat?</li><li>The side lengths are 1.5 times as long as Mug’s hat?</li><li>The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?</li><li>The image is in another quadrant of the graph?</li></ol>"
                       ]
                     }
                   },
@@ -1265,7 +1218,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Negative Numbers and Rules</strong>\nWhat if you multiply each coordinate by a negative number? What happens to the image?"
+                        "<strong>Situation B. Negative Numbers and Rules</strong>\nWhat if you multiply each coordinate by a negative number? What happens to the image? Is the image similar to the original figure?"
                       ]
                     }
                   },
@@ -1327,7 +1280,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the computer game the characters were members of the Wump family. You found a way to decide which characters were imposters using the coordinate rule."
+                        "In the computer game the characters were members of the Wump family. We found a way to decide which characters were imposters using the coordinate rule."
                       ]
                     }
                   },
@@ -1351,7 +1304,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:<ul><li>Corresponding angles are the same size</li><li>The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure.</li></ul>"
+                        "We have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:<ul><li>Corresponding angles are the same size</li><li>The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure.</li></ul>"
                       ]
                     }
                   },
@@ -1768,7 +1721,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In Situations A, B, and C Marta and Zack make claims. <h3>Situation A. Finding Scale Factors</h3>Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
+                        "<h3>Situation A. Finding Scale Factors</h3>Marta, Zack, and Jacob make claims. For each claim, decide if it is correct? Explain why. \n<strong>Marta and Zack's claims</strong> Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
                       ]
                     }
                   },
@@ -1777,7 +1730,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Predicting Perimeters in Similar Figures</h3>Marta claims that if she knows the perimeter of one shape, she can predict the perimeter of a similar shape. Do you agree? Explain why."
+                        "<strong>Zack's Claim</strong> To determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. For example, if the ratio of original side to corresponding side in two similar rectangles is 3:4, then the scale factor from the original to similar rectangle is 3/4."
                       ]
                     }
                   },
@@ -1786,7 +1739,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Determining Similarity</h3>Zack says that to determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. <ol><li>Is this correct? Explain.</li><li>Is Zack’s claim true for triangles? Explain.</li></ol>"
+                        "<strong>Jacob's Claim</strong> I also think that if two triangles are similar, you can use ratios to show that the scale factor is the same for corresponding sides. "
                       ]
                     }
                   },
@@ -1795,7 +1748,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation D. Using Ratios</strong>\nWhat if the ratio of original side: corresponding side in a similar figure is 3:4. What is the scale factor?"
+                        "<strong>Marta's Claim</strong> If you know the perimeter of one shape, you can predict the perimeter of a similar shape. "
                       ]
                     }
                   }
@@ -1817,6 +1770,12 @@
                       "text": [
                         "How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes?"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_chicago.png"
                     }
                   }
                 ]
@@ -1851,8 +1810,8 @@
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "SAS 3.1 Rep-Tile Quadrilaterals",
-          "subtitle": "Forming Rep-Tiles with Similar Quadrilaterals and Triangles",
+          "title": "SAS 3.1 Using Proportional Reasoning to Rep-tile",
+          "subtitle": "",
           "sections": [
              {
               "type": "introduction",
@@ -1863,7 +1822,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In <em>Shapes and Designs</em>, you learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
+                        "In <em>Shapes and Designs</em>, we learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
                       ]
                     }
                   },
@@ -1878,7 +1837,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Look closely at the pattern of squares. You can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+                        "Look closely at the pattern of squares. We can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
                       ]
                     }
                   },
@@ -1893,7 +1852,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
+                        "We can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
                       ]
                     }
                   },
@@ -1902,7 +1861,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "No matter how closely you look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+                        "No matter how closely we look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
                       ]
                     }
                   },
@@ -1911,7 +1870,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile."
+                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile. \n\nIn this problem we will investigate which rectangles and triangles are rep-tiles."
                       ]
                     }
                   }
@@ -1948,7 +1907,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "• Which shapes are rep-tiles? Make a sketch to show how the copies fit together."
+                        "• Which shapes are a rep-tile? Make a sketch to show how the copies fit together."
                       ]
                     }
                   },
@@ -1957,7 +1916,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "• For the shapes that rep-tile, what is the scale factor from the original figure to its image? Explain your reasoning."
+                        "For the shapes that rep-tile, what is the \n• Scale factor from the original figure to the image? Explain your reasoning."
                       ]
                     }
                   },
@@ -2242,7 +2201,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Making Rep-tiles </h3>Suppose you are given a rectangle or a triangle rep-tile and a scale factor of 5. How many copies of your rep-tile are needed to make the scale copy? Explain your reasoning."
+                        "<h3>Situation B. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). <ol><li>Explain why the smaller shapes are similar to the original.</li><li>How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures? </li></ol>"
                       ]
                     }
                   },
@@ -2251,26 +2210,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Scale Factors and Rep-tiles</h3>It takes nine copies of a certain rep-tile to make a similar figure. What is the scale factor between the original rep-tile and its image?"
+                        "<h3>Situation C. Claims About Rep-tiles</h3>Examine each claim. Is it correct? Explain why. \n<strong>Patricia’s Claim</strong> If it takes nine copies of a certain rectangle or triangle to make a similar figure, the scale factor is 9. \n<strong>Pete’s Claim</strong>  If you are given a certain rectangle or triangle and a scale factor of 5, then it will take 5 copies of the original to make a scale copy. \n<strong>Tomiko’s Claim</strong> All triangles are rep-tiles. \n<strong>Kazuko’s Claim</strong>  If you want to show two triangles with the same angle measures are similar, you can use a unit rep-tile. I used an equilateral triangle whose side lengths are one unit. To show that the following two triangles are similar."
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Situation D. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). Explain why the smaller shapes are similar to the original."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Situation E. Claims About Rep-tiles</h3>Tomoko claims that all triangles are rep-tiles. Is this true? Explain. Kazuko claims that if you want to show that two triangles with the same angle measures are similar, you can use a unit rep-tile. She used an equilateral triangle whose side lengths are one unit. Does her strategy work? Explain. "
-                      ]
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_similar.jpg"
                     }
                   }
                 ]
@@ -2379,8 +2326,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area?"
+                        "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area? "
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_350w.png"
                     }
                   }
                 ],
@@ -2405,7 +2358,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
+                        "The scale factor that compares one figure to another gives us information about how side lengths, perimeters and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that connects the original length to the image length.  It tells us how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, we will apply what we learned to draw scale drawings."
                       ]
                     }
                   }
@@ -2428,7 +2381,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.<ul><li>Rectangle P. The scale factor from Rectangle A to Rectangle P is 2.5.</li></li>Rectangle Q. The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li>Rectangle R. The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.\nDescribe the lengths, perimeters, and areas for each figure. <ul><li><strong>Rectangle P</strong> The scale factor from Rectangle A to Rectangle P is 2.5.</li><li><strong>Rectangle Q</strong> The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li><strong>Rectangle R</strong> The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
                       ]
                     }
                   },
@@ -2506,7 +2459,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li>Triangle X. The area of Triangle X is 16 times the area of Triangle B.</li><li> Triangle Y. The scale factor from Triangle B to Triangle X is 1/2. </li><li> Triangle Z. The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
+                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li><strong>Triangle X</strong> The area of the Triangle X is 16 times the area of Triangle B.</li><li><strong>Triangle Y</strong> The scale factor from Triangle B to Triangle X is 1/2. </li><li><strong>Triangle Z</strong> The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
                       ]
                     }
                   }
@@ -2590,7 +2543,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How can you use scale factors<ul><li>to draw similar figures?</li><li>to find missing information about angle measures? Areas? Perimeters?</li></ul>"
+                        "How can you use scale factors to draw similar figures(scale drawings)? \n\nHow can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter? "
                       ]
                     }
                   }
@@ -2616,7 +2569,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this problem you will use similar triangles to find the distance across a river."
+                        "In this problem we will use similar triangles to find the distance across a river."
                       ]
                     }
                   }
@@ -2675,7 +2628,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "1. Durrell claims that he can use rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
+                        "<h3>Situation A. Durrell's Claim</h3>Examine Durrell’s claim. Is he correct? Explain. \n<strong>Durrell's Claim</strong> I can use rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
                       ]
                     }
                   },
@@ -2684,7 +2637,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "2. Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
+                        "<h3>Situation B. Moving the Stakes</h3>Another group of students sketch a different diagram with similar triangles. They put their stakes in different places. Do they get the same measurement for the width of the river? Explain."
                       ]
                     }
                   },
@@ -2725,12 +2678,12 @@
     {
       "description": "Investigation 4",
       "ordinal": 4,
-      "title": "SAS Investigation 4 Similarity and Ratios",
+      "title": "SAS Investigation 4 Similar Figures and Ratios",
       "problems": [
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "SAS 4.1 Ratios Within Similar Parallelograms",
+          "title": "SAS 4.1 Equivalent Ratios within Similar Figures",
           "subtitle": "",
           "sections": [
             {
@@ -2742,7 +2695,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can enhance a report or story by adding photographs, drawings, or diagrams. If you place a graphic in an electronic document, you can enlarge, reduce, or move it. When you click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
+                        "We can enhance a report or story by adding photographs, drawings, or diagrams. If we place a graphic in an electronic document, we can enlarge, reduce, or move it. When we click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
                       ]
                     }
                   }, {
@@ -2755,7 +2708,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can change the size and shape of the image by dragging the handles."
+                        "We can change the size and shape of the image by dragging the handles."
                       ]
                     }
                   }, {
@@ -2790,7 +2743,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. You can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or you could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
+                        "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. We can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or we could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
                       ]
                     }
                   }, {
@@ -2804,7 +2757,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<em>What information does each fraction represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal.\n\nYou know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem you will explore ratios of adjacent side lengths within figures. For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+                        "<em>What information does each ratio written in fraction fraction form represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal."
                       ]
                     }
                   }
@@ -2861,7 +2814,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Using the Scale Factor</h3><ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                        "<h3>Situation A. Scale Factors and Ratios</h3>For each set in the Initial Challenge, <ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
                       ]
                     }
                   },
@@ -2870,7 +2823,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Isaiah, Noah, and Anna’s Claims</h3><ol><li>Isaiah claims that two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. Is he correct? Why?</li><li>Noah wonders if Isaiah’s conjecture is true for parallelograms. Is it true? Explain.</li><li>Anna thinks Isaiah’s conjecture is true for triangles if the corresponding angles are equal? Is that true? Explain.</li></ol>"
+                        "<h3>Situation B. Isaiah, Noah, and Anna’s Conjectures</h3>Examine each conjecture. Is it true? Explain. \n<strong>Isaiah's Conjectures</strong> Two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. \n<strong>Noah's Conjectures</strong> Isaiah’s conjecture is true for parallelograms. \n<strong>Anna's Conjectures</strong> Isaiah’s conjecture is true for triangles if the corresponding angles are equal. "
                       ]
                     }
                   }
@@ -2891,7 +2844,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What information does the ratio of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                        "What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
                       ]
                     }
                   }
@@ -2915,7 +2868,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
+                        "In the last problem we explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
                       ]
                     }
                   },
@@ -2945,7 +2898,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct.</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
+                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct?</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
                       ]
                     }
                   }, 
@@ -3036,7 +2989,7 @@
         }, {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "SAS 4.3 Using Shadows to Find Height",
+          "title": "SAS 4.3 Using Shadows to Find Heights",
           "subtitle": "",
           "sections": [
             {
@@ -3048,7 +3001,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths within each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths with each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
                       ]
                     }
                   }
@@ -3064,7 +3017,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can find the height of a school building by climbing a ladder and using a long tape measure. You can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
+                        "We can find the height of a school building by climbing a ladder and using a long tape measure. We can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
                       ]
                     }
                   }, {
@@ -3077,7 +3030,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Examine the diagram of the shadow method. \nWhy are the measures of the corresponding angles of the large triangle and the small triangle equal? \nHow can you use this method to find the height of the Statue of Liberty? What is the height?"
+                        "Examine the diagram of the shadow method. <ul><li>Why are the measures of the corresponding angles of the large triangle and the small triangle equal? </li><li>How can we use this method to find the height of the Statue of Liberty? What is the height?</li></ol>"
                       ]
                     }
                   }, {
@@ -3085,7 +3038,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the stick’s shadow</li><li>The length of the shadow cast by the building, tree, or other object</li></ul>"
+                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the shadow of the stick</li><li>The length of the shadow of the building’s (tree’s, or other object’s) shadow</li></ul>"
                       ]
                     }
                   }
@@ -3104,7 +3057,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet long. How tall is the tree?"
+                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet in length. How tall is the tree?"
                       ]
                     }
                   }, {
@@ -3134,7 +3087,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Creating Similar Figures</h3>Mario thought that the mirrors and shadows created similar figures. Is his claim correct? Explain. What other methods have you used in this unit to create similar figures?"
+                        "<h3>Situation C. Creating Similar Figures</h3>Mario claims that the mirrors and shadows created similar figures. Is his claim correct? Explain why. What other methods have you used in this unit to create similar figures?"
                       ]
                     }
                   }
@@ -3185,7 +3138,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3202,7 +3155,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3219,7 +3172,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 
@@ -3236,7 +3189,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit, you used proportional reasoning to investigate similar figures or scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                        "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
                   } 

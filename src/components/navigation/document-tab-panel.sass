@@ -1,0 +1,56 @@
+@import ../vars
+
+.document-tabs
+  border-color: $charcoal
+  border-width: 0 $tab-section-border-width $tab-section-border-width 0
+  border-style: solid
+  &.my-work
+    border-color: $workspace-teal
+  &.class-work
+    border-color: $classwork-purple
+  &.supports
+    border-color: $support-blue
+  .tab-panel
+    height: 100%
+  .tab-list
+    background-color: white
+    margin: 0
+    padding: 0
+    height: $nav-tab-height
+    display: flex
+    &.my-work
+      background-color: $workspace-teal-light-7
+    &.class-work
+      background-color: $classwork-purple-light-7
+    &.supports
+      background-color: $support-blue-light-7
+    .doc-tab
+      flex-grow: 1
+      height: $nav-tab-height
+      display: flex
+      justify-content: center
+      align-items: center
+      cursor: pointer
+      &.learning-logs
+        background-color: $learninglog-green-light-7
+      &:hover
+        background-color: $charcoal-light-9
+        &.my-work
+          background-color: $workspace-teal-light-5
+        &.class-work
+          background-color: $classwork-purple-light-5
+        &.supports
+          background-color: $support-blue-light-5
+        &.learning-logs
+          background-color: $learninglog-green-light-5
+      &:active, &.selected
+        background-color: $charcoal-light-8
+        font-weight: bold
+        &.my-work
+          background-color: $workspace-teal-light-3
+        &.class-work
+          background-color: $classwork-purple-light-3
+        &.supports
+          background-color: $support-blue-light-3
+        &.learning-logs
+          background-color: $learninglog-green-light-4

@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
-const placeholderImage = require("../../../assets/image_placeholder.png");
+import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 

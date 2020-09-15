@@ -1,6 +1,6 @@
 import Dialog from "../common/Dialog";
 
-const dialog = new Dialog
+const dialog = new Dialog;
 
 class ClueHeader{
 
@@ -8,7 +8,7 @@ class ClueHeader{
         return cy.get('[data-test=group-name]');
     }
     getGroupMembers(){
-        return cy.get('[data-test=group-members]')
+        return cy.get('[data-test=group-members]');
     }
     
     leaveGroup(){
