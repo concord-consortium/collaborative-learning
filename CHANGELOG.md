@@ -1,5 +1,26 @@
 # Changelog
 
+## Version 1.3.0 - released September 15, 2020
+
+### Features
+- Enhanced workspace navigation
+- Curriculum content can now be viewed side-by-side with user workspace
+- Reference/comparison workspace always to left of user workspace
+- New File menu on user workspace
+- Simplified teacher dashboard interface
+- New curriculum modules
+- Improved logging
+
+### Bugs Fixed
+- Teachers starring documents now works as expected
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 505,656 bytes | 0.6% |
+| index.js | 4,952,616 bytes | 0.6% |
+
 ## Version 1.2.2 - released August 28, 2020
 
 - More informative message upon publishing a teacher support
