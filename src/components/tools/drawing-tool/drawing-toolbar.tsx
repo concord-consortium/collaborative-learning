@@ -82,7 +82,7 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
                   ▶
                 </div>
               }
-          </div>
+            </div>
           }
           <div className={deleteButtonClass} title="Delete" onClick={this.handleDeleteButton}>
             <span className="drawing-tool-icon drawing-tool-icon-bin" />
@@ -96,10 +96,10 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
 
   private handleSettingsButton = () => {
     if (this.props.readOnly) return;
-    this.setState({
-      showSettings: !this.state.showSettings,
+    this.setState(state => ({
+      showSettings: !state.showSettings,
       showStampSelection: false
-    });
+    }));
   }
   private handleLineDrawingToolButton = () => {
     if (this.props.readOnly) return;
@@ -133,10 +133,10 @@ export class ToolbarView extends React.Component<ToolbarViewProps, ToolbarViewSt
   }
   private handleStampListButton = () => {
     if (this.props.readOnly) return;
-    this.setState({
+    this.setState(state => ({
       showSettings: false,
-      showStampSelection: !this.state.showStampSelection
-    });
+      showStampSelection: !state.showStampSelection
+    }));
   }
   private handleSelectStamp = (stampIndex: number) => () => {
     if (this.props.readOnly) return;

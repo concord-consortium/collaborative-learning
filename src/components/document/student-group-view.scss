@@ -1,0 +1,22 @@
+@import "../vars.sass";
+
+.student-group-view {
+  .canvas-area {
+    position: absolute;
+    top: $workspace-titlebar-height;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: $document-border-width solid white;
+  }
+}
+
+.nav-tab-panel {
+  .student-group-view {
+    top: $workspace-titlebar-height;
+    margin: 0;
+    padding-right: 3px;
+    border: 1.5px solid $workspace-teal;
+    border-radius: 0;
+  }
+}

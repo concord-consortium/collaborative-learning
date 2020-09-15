@@ -1,13 +1,13 @@
-import { types } from "mobx-state-tree";
+import { SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { ERightNavTab } from "../view/right-nav";
+import { ENavTab } from "../view/nav-tabs";
 import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
-export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
+export type ToggleElement = "leftNavExpanded";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
@@ -21,17 +21,19 @@ export const UIDialogModel = types
     type: UIDialogTypeEnum,
     text: types.string,
     title: types.maybe(types.string),
+    className: "",
     defaultValue: types.maybe(types.string),
     rows: types.maybe(types.number)
   });
+type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
+type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    leftNavExpanded: false,
-    rightNavExpanded: false,
+    navTabContentShown: false,
     error: types.maybeNull(types.string),
-    activeSectionIndex: 0,
-    activeRightNavTab: ERightNavTab.kMyWork,
+    activeNavTab: ENavTab.kMyWork,
+    activeGroupId: "",
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
@@ -42,52 +44,34 @@ export const UIModel = types
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
-    defaultRightNavExpanded: false
   }))
   .views((self) => ({
-    get allDefaulted() {
-      return (self.leftNavExpanded === self.defaultLeftNavExpanded) &&
-              (self.rightNavExpanded === self.defaultRightNavExpanded);
-    },
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     }
   }))
   .actions((self) => {
-    function restoreDefaultNavExpansion() {
-      self.leftNavExpanded = self.defaultLeftNavExpanded;
-      self.rightNavExpanded = self.defaultRightNavExpanded;
-    }
-
-    const toggleWithOverride = (toggle: ToggleElement, override?: boolean) => {
-      const expanded = typeof override !== "undefined" ? override : !self[toggle];
-
-      switch (toggle) {
-        case "leftNavExpanded":
-          self.leftNavExpanded = expanded;
-          self.rightNavExpanded = false;
-          break;
-        case "rightNavExpanded":
-          self.rightNavExpanded = expanded;
-          self.leftNavExpanded = false;
-          break;
-      }
-    };
-
-    const alert = (text: string, title?: string) => {
-      self.dialog = UIDialogModel.create({type: "alert", text, title});
+    const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "alert", text: textOrOpts, title }
+                                          : { type: "alert", ...textOrOpts });
       dialogResolver = undefined;
     };
 
-    const confirm = (text: string, title?: string) => {
-      self.dialog = UIDialogModel.create({type: "confirm", text, title});
+    const confirm = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "confirm", text: textOrOpts, title }
+                                          : { type: "confirm", ...textOrOpts });
       return new Promise<boolean>((resolve, reject) => {
         dialogResolver = resolve;
       });
     };
 
-    const prompt = (text: string, defaultValue = "", title?: string, rows?: number) => {
-      self.dialog = UIDialogModel.create({type: "prompt", text, defaultValue, title, rows});
+    const prompt = (textOrOpts: string | UIDialogModelSnapshotWithoutType,
+                    defaultValue = "", title?: string, rows?: number) => {
+      self.dialog = UIDialogModel.create(typeof textOrOpts === "string"
+                                          ? { type: "prompt", text: textOrOpts, defaultValue, title, rows }
+                                          : { type: "prompt", ...textOrOpts });
       return new Promise<string>((resolve, reject) => {
         dialogResolver = resolve;
       });
@@ -128,36 +112,32 @@ export const UIModel = types
     };
 
     return {
-      restoreDefaultNavExpansion,
       alert,
       prompt,
       confirm,
       resolveDialog,
 
-      afterCreate() {
-        self.defaultLeftNavExpanded = self.leftNavExpanded;
-        self.defaultRightNavExpanded = self.rightNavExpanded;
-      },
-      toggleLeftNav(override?: boolean) {
-        toggleWithOverride("leftNavExpanded", override);
-      },
-      toggleRightNav(override?: boolean) {
-        toggleWithOverride("rightNavExpanded", override);
+      toggleNavTabContent(show: boolean) {
+        self.navTabContentShown = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
       },
-      setActiveSectionIndex(activeSectionIndex: number) {
-        self.activeSectionIndex = activeSectionIndex;
+      setActiveNavTab(tab: string) {
+        self.activeNavTab = tab;
       },
-      setActiveRightNavTab(tab: string) {
-        self.activeRightNavTab = tab;
+      setActiveStudentGroup(groupId: string) {
+        self.activeNavTab = ENavTab.kStudentWork;
+        self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tileId, options);
+      },
+      removeTileIdFromSelection(tileId: string) {
+        self.selectedTileIds.remove(tileId);
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
@@ -167,7 +147,6 @@ export const UIModel = types
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);
-          restoreDefaultNavExpansion();
         }
         else if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {
@@ -177,7 +156,6 @@ export const UIModel = types
           else {
             alert("Please select a primary document first.", "Select Primary Document");
           }
-          return;
         }
       },
       setTeacherPanelKey(key: string) {

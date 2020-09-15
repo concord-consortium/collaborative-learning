@@ -17,7 +17,7 @@ import { getSetting } from "./settings";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
-export interface IStores {
+interface IBaseStores {
   appMode: AppMode;
   appVersion: string;
   appConfig: AppConfigModelType;
@@ -37,25 +37,27 @@ export interface IStores {
   selection: SelectionStoreModelType;
 }
 
+export interface IStores extends IBaseStores {
+  problemPath: string;
+}
+
 interface ICreateStores extends Partial<IStores> {
   demoName?: string;
 }
 
 export function createStores(params?: ICreateStores): IStores {
-  const user = params && params.user || UserModel.create({ id: "0" });
-  const appConfig = params && params.appConfig || AppConfigModel.create();
-  const demoName = params && params.demoName || appConfig.appName;
-  return {
-    appMode: params && params.appMode ? params.appMode : "dev",
-    appVersion: params && params.appVersion || "unknown",
+  const user = params?.user || UserModel.create({ id: "0" });
+  const appConfig = params?.appConfig || AppConfigModel.create();
+  const demoName = params?.demoName || appConfig.appName;
+  const stores: IBaseStores = {
+    appMode: params?.appMode || "dev",
+    appVersion: params?.appVersion || "unknown",
     appConfig,
     // for testing, we create a null problem or investigation if none is provided
-    investigation: params && params.investigation || InvestigationModel.create({
-      ordinal: 0, title: "Null Investigation"}),
-    problem: params && params.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
+    investigation: params?.investigation || InvestigationModel.create({ ordinal: 0, title: "Null Investigation" }),
+    problem: params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
     user,
-    ui: params && params.ui || UIModel.create({
-      rightNavExpanded: appConfig.rightNav.defaultExpanded,
+    ui: params?.ui || UIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
@@ -65,16 +67,20 @@ export function createStores(params?: ICreateStores): IStores {
         mode: "1-up"
       },
     }),
-    groups: params && params.groups || GroupsModel.create({}),
-    class: params && params.class || ClassModel.create({ name: "Null Class", classHash: "" }),
-    db: params && params.db || new DB(),
-    documents: params && params.documents || DocumentsModel.create({}),
-    unit: params && params.unit || UnitModel.create({title: "Null Unit"}),
-    demo: params && params.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
-    showDemoCreator: params && params.showDemoCreator || false,
-    supports: params && params.supports || SupportsModel.create({}),
+    groups: params?.groups || GroupsModel.create({}),
+    class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
+    db: params?.db || new DB(),
+    documents: params?.documents || DocumentsModel.create({}),
+    unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
+    demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
+    showDemoCreator: params?.showDemoCreator || false,
+    supports: params?.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create(),
     selection: SelectionStoreModel.create()
+  };
+  return {
+    ...stores,
+    problemPath: `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`
   };
 }
 
@@ -85,11 +91,6 @@ export function setAppMode(stores: IStores, appMode: AppMode) {
 export function getProblemOrdinal(stores: IStores) {
   const { investigation, problem } = stores;
   return `${investigation.ordinal}.${problem.ordinal}`;
-}
-
-export function getProblemPath(stores: IStores) {
-  const { unit, investigation, problem } = stores;
-  return `${unit.code}/${investigation.ordinal}/${problem.ordinal}`;
 }
 
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {

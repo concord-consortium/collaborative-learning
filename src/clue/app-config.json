@@ -48,13 +48,17 @@
     }
   },
   "showClassSwitcher": true,
-  "rightNav": {
+  "navTabs": {
     "lazyLoadTabContents": true,
     "tabSpecs": [
       {
+        "tab": "problems",
+        "label": "Problem",
+        "sections": []
+      },
+      {
         "tab": "student-work",
         "label": "Student Workspaces",
-        "hideGhostUser": true,
         "teacherOnly": true,
         "groupsDisplay": true,
         "sections": [
@@ -70,7 +74,6 @@
       {
         "tab": "my-work",
         "label": "My Work",
-        "hideGhostUser": true,
         "sections": [
           {
             "title": "Extra Workspaces",
@@ -79,7 +82,8 @@
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["personal"],
             "properties": ["!isDeleted"],
-            "showStars": ["student", "teacher"]
+            "showStars": ["student", "teacher"],
+            "addDocument": true
           },
           {
             "title": "Problem Workspaces",
@@ -96,6 +100,14 @@
             "documentTypes": ["personal", "problem"],
             "properties": ["starred", "!isDeleted"],
             "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Learning Log",
+            "type": "learning-logs",
+            "dataTestHeader": "learning-log-section",
+            "documentTypes": ["learningLog"],
+            "properties": ["!isDeleted"],
+            "addDocument": true
           }
         ]
       },
@@ -140,20 +152,6 @@
         ]
       },
       {
-        "tab": "learning-log",
-        "label": "Learning Log",
-        "sections": [
-          {
-            "title": "Logs",
-            "type": "learning-logs",
-            "dataTestHeader": "learning-log-section",
-            "dataTestItem": "learning-log-list-items",
-            "documentTypes": ["learningLog"],
-            "properties": ["!isDeleted"]
-          }
-        ]
-      },
-      {
         "tab": "supports",
         "label": "Supports",
         "sections": [
@@ -182,7 +180,8 @@
     {
       "name": "select",
       "title": "Select",
-      "iconId": "icon-select-tool"
+      "iconId": "icon-select-tool",
+      "isDefault": true
     },
     {
       "name": "text",

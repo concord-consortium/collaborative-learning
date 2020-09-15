@@ -5,7 +5,8 @@ import { Provider } from "mobx-react";
 import "mobx-react/batchingForReactDom";
 import React from "react";
 import ReactDOM from "react-dom";
-import { appConfigSpec, createStores } from "./app-config";
+import { appConfigSpec, appIcons, createStores } from "./app-config";
+import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { UserModel } from "./models/stores/user";
@@ -60,9 +61,11 @@ const initializeApp = async () => {
   });
 
   ReactDOM.render(
-    <Provider stores={stores}>
-      <AppComponent />
-    </Provider>,
+    <AppConfigContext.Provider value={{ appIcons }} >
+      <Provider stores={stores}>
+        <AppComponent />
+      </Provider>
+    </AppConfigContext.Provider>,
     document.getElementById("app")
   );
 };

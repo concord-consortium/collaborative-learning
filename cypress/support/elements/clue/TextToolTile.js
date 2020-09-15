@@ -1,9 +1,9 @@
 class TextToolTile {
-    getTextEditor(){
-        return cy.get('.canvas-area .text-tool-editor');
+    getTextEditor(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .text-tool-editor`);
     }
-    getTextTile(){
-        return cy.get('.canvas-area .text-tool');
+    getTextTile(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .text-tool`);
     }
     enterText(text){
         this.getTextTile().last().focus();

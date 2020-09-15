@@ -1,8 +1,4 @@
-import Header from '../../support/elements/Header';
-import RightNav from '../../support/elements/RightNav';
 import LeftNav from '../../support/elements/LeftNav';
-import Canvas from '../../support/elements/Canvas';
-import Workspace from '../../support/elements/Workspace';
 import TeacherDashboard from '../../support/elements/TeacherDashboard';
 
 let qaClass = 10,
@@ -14,21 +10,17 @@ let qaClass = 10,
 
 let teacher = 10;
 
-let header = new Header,
-    rightNav = new RightNav,
-    leftNav = new LeftNav,
-    canvas = new Canvas,
-    workspace = new Workspace,
+let leftNav = new LeftNav,
     teacherDashboard = new TeacherDashboard;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-   
+
 describe('setup', function(){
     it("will set up groups", function(){ //need to setup two groups to verify teacher can switch groups
         cy.setupGroup(studentArr10, qaGroup10); //This publishes canvases to Class Work
         cy.setupGroup(studentArr20, qaGroup20); //This publishes canvases to Class Work
     });
-});   
+});
 describe('Add teacher supports to specific sections', function(){
     it('will add a message to whole class for specific section and verify message appears in teacher dashboard', function(){
         let section1 = "Extra Workspace";
@@ -64,7 +56,7 @@ describe('Add teacher supports to specific sections', function(){
             leftNav.openToWorkspace(section1);
             cy.wait(3000);
             cy.get('[data-test="support-icon class"]').last().click();
-            cy.get('[data-test="supports-list"]').contains('whole class in '+section1)
+            cy.get('[data-test="supports-list"]').contains('whole class in '+section1);
         }
         //verify message does not appear in non-specified section
         leftNav.openToWorkspace('Introduction');
@@ -77,12 +69,12 @@ describe('Add teacher supports to specific sections', function(){
             leftNav.openToWorkspace(section1);
             cy.wait(3000);
             cy.get('[data-test="support-icon class"]').last().click();
-            cy.get('[data-test="supports-list"]').contains('whole class in '+section1)
+            cy.get('[data-test="supports-list"]').contains('whole class in '+section1);
         }
         //verify message does not appear in non-specified section
         leftNav.openToWorkspace('Introduction');
         cy.wait(1000);
-        cy.get('[data-test="support-icon class"]').should('not.exist'); 
+        cy.get('[data-test="support-icon class"]').should('not.exist');
     });
 
     it('verify message appears in the section for a group', function(){
@@ -94,23 +86,22 @@ describe('Add teacher supports to specific sections', function(){
             leftNav.openToWorkspace(section2);
             cy.wait(3000);
             cy.get('[data-test="support-icon group"]').last().click();
-            cy.get('[data-test="supports-list"]').contains('group'+qaGroup10+' in '+section2) 
+            cy.get('[data-test="supports-list"]').contains('group'+qaGroup10+' in '+section2);
         }
          //verify message does not appear in non-specified section
         leftNav.openToWorkspace('Introduction');
         cy.wait(1000);
-        cy.get('[data-test="support-icon group"]').should('not.exist'); 
+        cy.get('[data-test="support-icon group"]').should('not.exist');
 
         //verify message does not appear in non-specified group
-        cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[1]+'&problem='+problem)
+        cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr20[1]+'&problem='+problem);
         cy.wait(2000);
         leftNav.openToWorkspace(section2);
         cy.wait(3000);
-        cy.get('[data-test="support-icon group"]').should('not.exist'); 
+        cy.get('[data-test="support-icon group"]').should('not.exist');
     });
 
     it('will add a message to a student for a specific section and verify message appears in the section for a student', function(){
-        let i=0;
         let section3='What if...?';
         cy.visit(baseUrl+'?appMode=qa&fakeClass='+qaClass+'&fakeUser=student:'+studentArr10[0]+'&problem='+problem);
         cy.wait(2000);
@@ -118,7 +109,7 @@ describe('Add teacher supports to specific sections', function(){
         cy.wait(3000);
         cy.get('[data-test="support-icon user"]').last().click();
         cy.get('[data-test="supports-list"]').contains('S'+studentArr10[0]+' in '+section3) ;
-  
+
          //verify message does not appear in non-specified section
          leftNav.openToWorkspace('Introduction');
          cy.wait(1000);

@@ -1,6 +1,6 @@
 class TeacherWorkspace {
     getGroupNumberButton(){
-        return cy.get('.icon.group-number')
+        return cy.get('.icon.group-number');
     }
     // getClassSupportsSectionDropdown(){
     //     return cy.get('.tab-contents > .teacher-supports > .teacher-support > .section-dropdown')
@@ -70,4 +70,4 @@ class TeacherWorkspace {
     //     cy.get ('.teacher-student-tab > .selected-group .teacher-support > .icon-delete-tool').last().click();
     // }
 }
-export default TeacherWorkspace
+export default TeacherWorkspace;

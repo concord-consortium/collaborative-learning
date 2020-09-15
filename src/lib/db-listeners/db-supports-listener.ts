@@ -5,7 +5,6 @@ import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudie
 import { DBSupport } from "../db-types";
 import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
-import { getProblemPath } from "../../models/stores/stores";
 import { BaseListener } from "./base-listener";
 import { isAlive } from "mobx-state-tree";
 
@@ -24,7 +23,7 @@ export class DBSupportsListener extends BaseListener {
 
   // TODO: Create different listeners for support audiences
   public start() {
-    const { user } = this.db.stores;
+    const { user, problemPath } = this.db.stores;
     this.supportsRef = this.db.firebase.ref(
       this.db.firebase.getSupportsPath(user)
     );
@@ -33,7 +32,7 @@ export class DBSupportsListener extends BaseListener {
     this.supportsRef.on("child_added", this.onChildAdded = this.handleSupportsUpdate("child_added"));
 
     this.db.firestore.getMulticlassSupportsRef()
-        .where("problem", "==", getProblemPath(this.db.stores))
+        .where("problem", "==", problemPath)
         .where("classes", "array-contains", user.classHash)
         .onSnapshot(snapshot => this.handleMulticlassSupports(snapshot));
 

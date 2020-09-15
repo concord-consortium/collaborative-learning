@@ -9,7 +9,8 @@ $member-size: 18px
   left: 0
   right: 0
   height: $header-height
-  background-color: $color1
+  background-color: $workspace-teal-light-5
+  color: $charcoal-dark-2
   display: flex
   flex-direction: row
   flex-wrap: nowrap
@@ -22,25 +23,36 @@ $member-size: 18px
     display: flex
     align-items: center
     justify-content: flex-start
-    .problem
-      text-align: center
-      color: $sage-dark-5
-      .unit
+    .unit
+      max-width: 286px
+      flex-shrink: 0
+      .title
+        font-size: 13px
         font-weight: bold
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
       .investigation
+        font-size: 13px
         font-weight: normal
-    .spacer
-      border-right: 2px solid $sage-light-1
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
+    .separator
+      width: 1.5px
       height: 40px
-      margin: 5px
+      background-color: $charcoal-light-1
+      margin: 0 $margin
+      flex-shrink: 0
     .problem-dropdown
       height: 40px
-
   .middle
     display: flex
     align-items: center
     flex: 1
     justify-content: center
+    &.student
+      flex: 0
     button
       // note: need focus/accessibility solution
       outline: none
@@ -57,88 +69,159 @@ $member-size: 18px
     align-items: center
     justify-content: flex-end
     .version
-      padding-right: $padding
       font-size: 0.9em
 
     .group
+      height: 40px
+      min-width: 109px
+      max-width: 124px
+      box-sizing: border-box
       flex-grow: 0
-      padding: 0 $padding
+      padding: 0
+      margin: 0 $margin
       text-align: center
       display: flex
       flex-direction: row
+      justify-content: flex-end
       align-items: center
-
+      border-radius: 5px
+      border: solid 1.5px $charcoal-light-1
+      cursor: pointer
+      &:hover
+        background-color: $workspace-teal-light-3
+      &:active
+        background-color: $workspace-teal-dark-1
+        color: white
+        border-color: white
+      .group-center
+        position: relative
+        left: 22px
+        width: 8px
+        height: 8px
+        border-radius: 2.5px
+        background-color: white
       .name
-        font-weight: bold
-        cursor: pointer
-        background-color: $color1-3
-        padding: $half-padding $padding
+        font-weight: normal
+        font-size: 13px
+        margin: 0 2px 0 10px
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
 
       .members
         display: flex
         flex-direction: column
+        color: $charcoal-dark-2
         .row
           display: flex
           flex-direction: row
           .member
-            font-size: 10px
+            font-size: 9px
             line-height: $member-size
-            margin: 1px
             padding: 3px
             width: $member-size
             height: $member-size
             background-color: #2da343
-            color: white
             &.nw
-              background-color: blue
+              background-color: $id-blue
+              border-right: 1px solid white
+              border-bottom: 1px solid white
             &.ne
-              background-color: orange
-              border-top-right-radius: $border-radius
+              background-color: $id-orange
+              border-top-right-radius: 4px
+              border-left: 1px solid white
+              border-bottom: 1px solid white
             &.se
-              background-color: green
-              border-bottom-right-radius: $border-radius
+              background-color: $id-green
+              border-bottom-right-radius: 4px
+              border-left: 1px solid white
+              border-top: 1px solid white
             &.sw
-              background-color: purple
-              border-bottom-left-radius: $border-radius
+              background-color: $id-purple
+              border-right: 1px solid white
+              border-top: 1px solid white
             &.disconnected
-              background-color: #777
+              background-color: $charcoal-light-4
             &.teacher
               background-color: #EA6D2F !important
             &.empty
-              background-color: $color1-4
+              background-color: $workspace-teal-light-5
 
             .initials
               margin-top: -3px
 
-    .class
-      margin-left: 20px
-
     .profile-icon
-      background-color: $sage-dark-2
-      width: 40px
-      height: 40px
+      background-color: white
+      width: 36px
+      height: 36px
+      border-radius: 0 5px 5px 0
       display: flex
       justify-content: center
       align-items: center
       text-align: center
-      &:hover
-        background-color: $sage-dark-3
+      &.teacher
+        border: solid 1.5px $charcoal-light-1
+        height: 40px
+        width: 40px
       .profile-icon-inner
-        width: 30px
-        height: 30px
+        width: 24px
+        height: 24px
         mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg")
-        background-color: $sage-light-2
+        background-color: $problem-orange
 
     .user
+      height: 40px
+      padding: 0 1px 0 0
       flex-grow: 0
       display: flex
       align-items: center
-      margin-right: $double-margin
+      border-radius: 5px
+      border: solid 1.5px $charcoal-light-1
+      min-width: 144px
+      max-width: 191px
+      box-sizing: border-box
+      &.teacher
+        border-width: 0
+      .class > .custom-select > .header
+        min-width: 150px
 
-      .name
-        padding: $half-padding $padding
-        background-color: $color1-3
-        font-weight: bold
+      .user-contents
+        display: flex
+        flex-direction: column
+        align-items: flex-start
+        font-weight: normal
+        font-size: 13px
+        min-width: 108px
+        max-width: 155px
+        .name
+          width: 100%
+          padding: 0 10px 0 10px
+          text-align: left
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
+        .class
+          width: 100%
+          padding: 0 10px 0 10px
+          text-align: left
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
+
+      .student-profile-icon
+        background-color: white
+        width: 36px
+        height: 36px
+        border-radius: 0 5px 5px 0
+        display: flex
+        justify-content: center
+        align-items: center
+        text-align: center
+        .student-profile-icon-inner
+          width: 24px
+          height: 24px
+          mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg")
+          background-color: $problem-orange
 
   .problemMenu
     margin: 10px
@@ -151,3 +234,17 @@ $member-size: 18px
     .bp3-button
       background-color: $color1-4
       border-radius: 5px
+
+  .toggle-button
+    border-style: solid
+    border-color: $charcoal-light-1
+    border-width: 1.5px 0 1.5px 1.5px
+    height: 40px
+    padding: .75em
+    color: $charcoal-dark-2
+    cursor: pointer
+    &.selected
+      font-weight: bold
+      background-color: $workspace-teal-light-2
+    &:last-child
+      border-width: 1.5px

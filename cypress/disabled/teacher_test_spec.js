@@ -1,7 +1,5 @@
 import Header from '../support/xelements/Header';
 import RightNav from '../support/xelements/RightNav';
-import LeftNav from '../support/xelements/LeftNav';
-import Canvas from '../support/xelements/Canvas';
 import Workspace from '../support/xelements/Workspace';
 import TeacherDashboard from '../support/xelements/TeacherDashboard';
 
@@ -15,8 +13,6 @@ let teacher = 10;
 
 let header = new Header,
     rightNav = new RightNav,
-    leftNav = new LeftNav,
-    canvas = new Canvas,
     workspace = new Workspace,
     teacherDashboard = new TeacherDashboard;
 
@@ -32,7 +28,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             // cy.wait(3000)
         });
         it('will verify if class name is correct', function(){
-            header.getClassName().should('contain',''+'Class '+qaClass);
+            header.getClassName().should('contain','Class '+qaClass);
         });
         it('will verify teacher name is correct', function(){
             header.getUserName().should('contain','Teacher '+teacher);
@@ -50,7 +46,7 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             teacherDashboard.getGroupName().contains(qaGroup20).click();
             teacherDashboard.joinGroup();
             header.getGroupName().should('contain','Group '+qaGroup20);
-        })
+        });
     });
     // TODO: Class Work has changed with new feature changes.
     describe.skip('Check right nav for correctness', function(){
@@ -58,8 +54,6 @@ context('Teacher workspace',function(){ //does not have My Work tab and has Teac
             rightNav.getClassWorkTab().should('be.visible');
             rightNav.getClassLogTab().should('be.visible');
             rightNav.getMyWorkTab().should('not.be.visible');
-        })
+        });
     });
 });
-
-

@@ -3,13 +3,13 @@ class Header{
         return cy.get('.class[data-test=user-class]');
     }
     getUserName(){
-        return cy.get('[data-test=user-name]')
+        return cy.get('[data-test=user-name]');
     }
     getProblemTitle(){
-        return cy.get('[data-test=problem-title]')
+        return cy.get('[data-test=problem-title]');
     }
     getVersionNumber(){
-        return cy.get('.app-header .version')
+        return cy.get('.app-header .version');
     }
 }
 export default Header;

@@ -1,3 +1,4 @@
+/* eslint-env node */
 'use strict';
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -29,27 +30,51 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.(js|json|jsx|ts|tsx)$/,
+          test: /\.(js|json|jsx|tsx?)$/i,
           exclude: /node_modules/,
           enforce: 'pre',
           loader: 'eslint-loader',
         },
         {
-          test: /\.(t|j)sx?$/,
+          test: /\.[tj]sx?$/i,
           loader: 'ts-loader',
           exclude: /node_modules/
         },
         {
-          test: /\.(sa|sc|c)ss$/i,
+          test: /\.svg$/i,
+          oneOf: [
+            {
+              issuer: /\.[tj]sx?$/i,
+              loader: "@svgr/webpack"
+            },
+            {
+              // Do not apply SVGR import in CSS files.
+              issuer: /\.(sa|sc|le|c)ss$/i,
+              loader: 'url-loader',
+              options: {
+                limit: 8192,
+                name: 'assets/images/[name].[hash:6].[ext]',
+                esModule: false
+              }
+            }
+          ]
+        },
+        {
+          test: /\.(sa|sc|le|c)ss$/i,
           use: [
             devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                esModule: false
+              }
+            },
             'postcss-loader',
             'sass-loader'
           ]
         },
         {
-          test: /\.(woff|woff2|eot|ttf)$/,
+          test: /\.(woff|woff2|eot|ttf)$/i,
           loader: 'url-loader',
           options: {
             limit: 8192,
@@ -58,7 +83,7 @@ module.exports = (env, argv) => {
           }
         },
         {
-          test: /\.(png|svg)$/,
+          test: /\.png$/i,
           loader: 'url-loader',
           options: {
             limit: 8192,

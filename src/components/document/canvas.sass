@@ -1,3 +1,5 @@
+@import ../vars
+
 .canvas
   display: flex
   justify-content: center
@@ -30,16 +32,16 @@
       bottom: 0
 
     &.north.west
-      background-color: blue
+      background-color: $id-blue
 
     &.north.east
-      background-color: orange
+      background-color: $id-orange
 
     &.south.east
-      background-color: green
+      background-color: $id-green
 
     &.south.west
-      background-color: purple
+      background-color: $id-purple
 
   .icon:hover
     opacity: 1

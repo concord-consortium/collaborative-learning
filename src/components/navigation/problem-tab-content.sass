@@ -1,0 +1,24 @@
+@import ../vars
+
+.problem-tabs
+  border-color: $problem-orange-light-3
+  border-width: 0 $tab-section-border-width $tab-section-border-width 0
+  border-style: solid
+  .tab-list
+    background-color: $problem-orange-light-7
+    margin: 0
+    padding: 0
+    height: $nav-tab-height
+    display: flex
+    .prob-tab
+      flex-grow: 1
+      height: $nav-tab-height
+      display: flex
+      justify-content: center
+      align-items: center
+      cursor: pointer
+      &:hover
+        background-color: $problem-orange-light-5
+      &:active, &.selected
+        background-color: $problem-orange-light-3
+        font-weight: bold

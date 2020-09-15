@@ -1,22 +1,17 @@
 import { inject, observer } from "mobx-react";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 
-import { CanvasComponent } from "./canvas";
-import { DocumentContext, IDocumentContext } from "./document-context";
-import { FourUpComponent } from "../four-up";
+import { DocumentFileMenu } from "./document-file-menu";
+import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
-import { ToolbarComponent } from "../toolbar";
-import { IToolApi, IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
-import { DocumentModelType, ISetProperties, LearningLogDocument, LearningLogPublication,
-         ProblemDocument } from "../../models/document/document";
+import { ToolbarConfig } from "../toolbar";
+import { DocumentModelType, LearningLogDocument, LearningLogPublication } from "../../models/document/document";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
-import { ToolbarConfig } from "../../models/tools/tool-types";
 import { IconButton } from "../utilities/icon-button";
-import SingleStringDialog from "../utilities/single-string-dialog";
+import ToggleControl from "../utilities/toggle-control";
 import { Logger, LogEventName } from "../../lib/logger";
 
 import "./document.sass";
@@ -31,7 +26,7 @@ export type WorkspaceSide = "primary" | "comparison";
 interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
-  onNewDocument?: (document: DocumentModelType) => void;
+  onNewDocument?: (type: string) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onPublishSupport?: (document: DocumentModelType) => void;
@@ -39,13 +34,10 @@ interface IProps extends IBaseProps {
   toolbar?: ToolbarConfig;
   side: WorkspaceSide;
   readOnly?: boolean;
-  isGhostUser?: boolean;
 }
 
 interface IState {
-  documentContext?: IDocumentContext;
-  isCommentDialogOpen: boolean;
-  commentTileId: string;
+  showBrowser: boolean;
   stickyNotesVisible: boolean;
 }
 
@@ -53,7 +45,7 @@ type SVGClickHandler = (e: React.MouseEvent<SVGSVGElement>) => void;
 
 const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   return (
-    <svg key="download" className={`action icon icon-download`} onClick={onClick}>
+    <svg className={`action icon icon-download`} onClick={onClick}>
       <use xlinkHref={`#icon-publish`} />
     </svg>
   );
@@ -66,13 +58,6 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
   );
 };
 
-// const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
-//   return (
-//     <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
-//                 onClickButton={onClick} title="Published Workspace" />
-//   );
-// };
-
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="publish-support" key="support" className="action icon-support"
@@ -80,24 +65,10 @@ const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const NewButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="new" key="new" className="action icon-new"
-                onClickButton={onClick} title="Create New Workspace" />
-  );
-};
-
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
                 onClickButton={onClick} title="Rename Workspace" />
-  );
-};
-
-const CopyButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="copy" key="copy" className="action icon-copy"
-                onClickButton={onClick} title="Copy Workspace" />
   );
 };
 
@@ -119,21 +90,16 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
   );
 };
 
-const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: boolean }) => {
-    const enabledClass = enabled ? "enabled" : "disabled";
-    return (
-      <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
-                  enabled={enabled} innerClassName={enabledClass}
-                  onClickButton={enabled ? onClick : undefined} title="Delete Workspace" />
-    );
-};
-
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
   return (
-    <IconButton icon="share" key={`share-${visibility}`} className={`action icon-share`}
-                innerClassName={`visibility ${visibility}`} onClickButton={onClick}
-                title={`${isShared ? "Unshare from" : "Share to"} Group`} />
+    <>
+      {<div className="share-separator" />}
+      <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
+                      initialValue={isShared} onChange={onClick}
+                      title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
+      <div className="share-label">Share</div>
+    </>
   );
 };
 
@@ -164,45 +130,14 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
 @observer
 export class DocumentComponent extends BaseComponent<IProps, IState> {
 
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { document } = nextProps;
-    const documentContext: IDocumentContext = {
-            type: document.type,
-            key: document.key,
-            title: document.title,
-            originDoc: document.originDoc,
-            getProperty: (key: string) => document.properties.get(key),
-            setProperties: (properties: ISetProperties) => document.setProperties(properties)
-          };
-    return { documentContext };
-  }
-
-  private toolApiMap: IToolApiMap = {};
-  private toolApiInterface: IToolApiInterface;
   private stickyNoteIcon: HTMLDivElement | null;
   private documentContainer: HTMLDivElement | null;
+  private openHandlerDisposer: IReactionDisposer;
   private deleteHandler: { documentKey?: string, disposer?: IReactionDisposer } = {};
 
-  constructor(props: IProps) {
-    super(props);
-
-    this.toolApiInterface = {
-      register: (id: string, toolApi: IToolApi) => {
-        this.toolApiMap[id] = toolApi;
-      },
-      unregister: (id: string) => {
-        delete this.toolApiMap[id];
-      },
-      getToolApi: (id: string) => {
-        return this.toolApiMap[id];
-      }
-    };
-
-    this.state = {
-      isCommentDialogOpen: false,
-      commentTileId: "",
-      stickyNotesVisible: false
-    };
+  state = {
+    showBrowser: false,
+    stickyNotesVisible: false
   }
 
   public componentDidMount() {
@@ -210,25 +145,36 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate() {
+    this.openHandlerDisposer = reaction(
+      // data function: changes to primaryDocumentKey trigger the reaction
+      () => this.stores.ui.problemWorkspace.primaryDocumentKey,
+      // reaction function
+      () => this.setState({ showBrowser: false })
+    );
     this.configureDeleteHandler();
   }
 
   public componentWillUnmount() {
     this.deleteHandler.disposer?.();
+    this.openHandlerDisposer?.();
   }
 
   public render() {
-    const { document: { type } } = this.props;
+    const { workspace, document, toolbar, side, readOnly } = this.props;
     return (
-      <DocumentContext.Provider value={this.state.documentContext}>
-        {this.renderToolbar()}
-        <div key="document" className="document" ref={(el) => this.documentContainer = el}>
-          {this.renderTitleBar(type)}
-          {this.renderCanvas()}
-          {this.renderStatusBar(type)}
-          {this.renderStickyNotesPopup()}
-        </div>
-      </DocumentContext.Provider>
+      <div key="document" className="document" ref={(el) => this.documentContainer = el}>
+        {this.renderTitleBar(document.type)}
+        <MyWorkDocumentOrBrowser
+          showBrowser={this.state.showBrowser}
+          onSelectNewDocument={this.handleSelectNewDocument}
+          onSelectDocument={this.handleSelectDocument}
+          mode={workspace.mode}
+          isPrimary={side === "primary"}
+          document={document}
+          toolbar={toolbar}
+          readOnly={readOnly} />
+        {this.renderStickyNotesPopup()}
+      </div>
     );
   }
 
@@ -238,7 +184,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       // dispose any previous delete handler
       deleteHandler.disposer?.();
       // install delete handler for current document
-      deleteHandler.disposer = autorun(reaction => {
+      deleteHandler.disposer = autorun(() => {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
@@ -250,8 +196,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTitleBar(type: string) {
-    const { document, side, isGhostUser } = this.props;
-    const hideButtons = isGhostUser || (side === "comparison") || document.isPublished;
+    const { document, side } = this.props;
+    const hideButtons = (side === "comparison") || document.isPublished;
     if (document.isProblem) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
@@ -275,26 +221,26 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
-          <div className="actions">
-            <NewButton onClick={this.handleNewDocumentClick} />
-            <CopyButton onClick={this.handleCopyDocumentClick} />
+          <div className="actions left">
+            <DocumentFileMenu document={document}
+              onOpenDocument={this.handleOpenDocumentClick}
+              onCopyDocument={this.handleCopyDocumentClick}
+              isDeleteDisabled={true} />
+            {this.showPublishButton(document) &&
+              <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
         }
         <div className="title" data-test="document-title">
           {problemTitle} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
-          <div className="actions" data-test="document-titlebar-actions">
-            {[
-              downloadButton,
-              isTeacher &&
-                <PublishSupportButton key="problemPublish" onClick={this.handlePublishSupport} />,
-              this.showPublishButton(document) &&
-                <PublishButton key="publish" onClick={this.handlePublishDocument} />,
-              !isTeacher &&
-                <ShareButton key="share" isShared={isShared} onClick={this.handleToggleVisibility} />
-            ]}
+          <div className="actions right" data-test="document-titlebar-actions">
+            {downloadButton}
+            {isTeacher &&
+              <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
+            {!isTeacher &&
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
@@ -407,9 +353,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            <NewButton onClick={this.handleNewDocumentClick} />
-            <CopyButton onClick={this.handleCopyDocumentClick} />
-            <DeleteButton enabled={countNotDeleted > 1} onClick={this.handleDeleteDocumentClick} />
+            <DocumentFileMenu document={document}
+              onOpenDocument={this.handleOpenDocumentClick}
+              onCopyDocument={this.handleCopyDocumentClick}
+              isDeleteDisabled={countNotDeleted < 1}
+              onDeleteDocument={this.handleDeleteDocumentClick}/>
+            {!hideButtons && this.showPublishButton(document) &&
+              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -429,8 +379,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
-              {!hideButtons && this.showPublishButton(document) &&
-                <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
@@ -453,139 +401,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderToolbar() {
-    const {document, isGhostUser, readOnly} = this.props;
-    const isPublication = document.isPublished;
-    const showToolbar = this.isPrimary() && !isGhostUser && !readOnly && !isPublication;
-    if (!showToolbar || !this.props.toolbar) return;
-    return <ToolbarComponent key="toolbar" document={this.props.document}
-                              config={this.props.toolbar} toolApiMap={this.toolApiMap} />;
-  }
-
-  private renderCanvas() {
-    const { document, workspace, side, isGhostUser } = this.props;
-    const fourUp = (document.type === ProblemDocument) &&
-                    (isGhostUser || ((side === "primary") && (workspace.mode === "4-up")));
-    const canvas = fourUp ? this.render4UpCanvas() : this.render1UpCanvas(document.isPublished);
-    return (
-      <div className="canvas-area">{canvas}</div>
-    );
-  }
-
-  private render1UpCanvas(forceReadOnly?: boolean) {
-    const readOnly = forceReadOnly || this.props.readOnly;
-    return (
-      <CanvasComponent context="1-up" document={this.props.document} readOnly={readOnly}
-                        toolApiInterface={this.toolApiInterface} />
-    );
-  }
-
-  private render4UpCanvas() {
-    const {isGhostUser, document} = this.props;
-    const { groups } = this.stores;
-    const group = isGhostUser ? undefined : groups.groupForUser(document.uid);
-    const groupId = isGhostUser ? groups.ghostGroupId : group && group.id;
-    return (
-      <FourUpComponent userId={document.uid} groupId={groupId} isGhostUser={isGhostUser}
-                        toolApiInterface={this.toolApiInterface} />
-    );
-  }
-
-  private renderStatusBar(type: string) {
-    const { appConfig: { supportStackedTwoUpView }} = this.stores;
-    const isPrimary = this.isPrimary();
-    // Tile comments are disabled for now; uncomment the logic for showComment to re-enable them
-    // const showComment = !isPrimary && (document.type === ProblemPublication);
-    const showComment = false;
-    return (
-      <div className={`statusbar ${type}`}>
-        <div className="supports">
-          {null}
-        </div>
-        <div className="actions">
-          {!supportStackedTwoUpView && isPrimary && this.renderTwoUpButton()}
-          {showComment ? this.renderCommentButton() : null}
-        </div>
-        {this.renderCommentDialog()}
-      </div>
-    );
-  }
-
-  private renderCommentDialog = () => {
-    const { isCommentDialogOpen, commentTileId } = this.state;
-    if (isCommentDialogOpen) {
-      return (
-        <SingleStringDialog
-          parentId={commentTileId}
-          onAccept={this.handleSaveComment}
-          onClose={this.handleCloseCommentDialog}
-          title="Add Comment"
-          prompt="Enter a comment"
-          placeholder="Comment..."
-          maxLength={100}
-        />
-      );
-    }
-  }
-
-  private renderCommentButton() {
-    return (
-      <div className="tool comment" title="Comment"
-          onClick={this.handleComment}>
-        <svg className={`icon icon-geometry-comment`}>
-          <use xlinkHref={`#icon-geometry-comment`} />
-        </svg>
-      </div>
-    );
-  }
-
-  private handleComment = () => {
-    // TODO: how to handle comments when multiple tiles are selected?
-    //       currently it will select the first tile for commenting
-    const { ui: { selectedTileIds } } = this.stores;
-    if (selectedTileIds.length > 0) {
-      this.setState({
-        isCommentDialogOpen: true,
-        commentTileId: selectedTileIds[0]
-      });
-    }
-  }
-
-  private handleSaveComment = (comment: string, tileId?: string) => {
-    const { documents, user } = this.stores;
-    const document = tileId && documents.findDocumentOfTile(tileId);
-    if (!tileId || !document) return;
-    const toolApi = this.toolApiMap[tileId];
-    const selectionInfo = toolApi ? toolApi.getSelectionInfo() : undefined;
-    if (document) {
-      const newComment = TileCommentModel.create({
-        uid: user.id,
-        text: comment,
-        selectionInfo
-      });
-      let tileComments = document.comments.get(tileId);
-      if (!tileComments) {
-        tileComments = TileCommentsModel.create({ tileId });
-        document.setTileComments(tileId, tileComments);
-      }
-      tileComments.addComment(newComment);
-    }
-    this.handleCloseCommentDialog();
-  }
-
-  private handleCloseCommentDialog = () => {
-    this.setState({ isCommentDialogOpen: false });
-  }
-
-  private renderTwoUpButton() {
-    const {workspace} = this.props;
-    const mode = workspace.comparisonVisible ? "up2" : "up1";
-    const modeTitle = workspace.comparisonVisible ? "Return to Student View" : "Open Workspace Compare View";
-    return (
-      <ViewModeButton onClick={this.handleToggleTwoUp} icon={mode} title={modeTitle} />
-    );
-  }
-
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
   }
@@ -596,9 +411,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc);
   }
 
-  private handleToggleTwoUp = () => {
-    this.props.workspace.toggleComparisonVisible();
-  }
   private handleShowTwoUp = () => {
     this.props.workspace.toggleComparisonVisible({override: true});
   }
@@ -616,19 +428,29 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     clipboard.clear();
   }
 
-  private handleNewDocumentClick = () => {
-    const { document, onNewDocument } = this.props;
-    onNewDocument && onNewDocument(document);
+  private handleSelectNewDocument = (type: string) => {
+    const { onNewDocument } = this.props;
+    onNewDocument?.(type);
+  }
+
+  private handleOpenDocumentClick = () => {
+    this.setState({ showBrowser: true });
   }
 
   private handleCopyDocumentClick = () => {
     const { document, onCopyDocument } = this.props;
-    onCopyDocument && onCopyDocument(document);
+    onCopyDocument?.(document);
   }
 
   private handleDeleteDocumentClick = () => {
     const { document, onDeleteDocument } = this.props;
-    onDeleteDocument && onDeleteDocument(document);
+    onDeleteDocument?.(document);
+  }
+
+  private handleSelectDocument = (document: DocumentModelType) => {
+    const { appConfig, ui } = this.stores;
+    ui.rightNavDocumentSelected(appConfig, document);
+    this.setState({ showBrowser: false });
   }
 
   private handleDocumentRename = () => {

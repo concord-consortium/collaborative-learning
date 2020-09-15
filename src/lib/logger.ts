@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
+import { Optional } from "utility-types";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores/stores";
 import { InvestigationModelType } from "../models/curriculum/investigation";
@@ -8,6 +9,7 @@ import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
 import { ITableChange } from "../models/tools/table/table-content";
+import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 
 const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
@@ -22,7 +24,13 @@ interface LogMessage {
   appMode: string;
   investigation?: string;
   problem?: string;
+  problemPath: string;
+  navTabsOpen: boolean;
+  selectedNavTab: string;
   group?: string;
+  workspaceMode?: string;
+  teacherPanel?: string;
+  selectedGroupId?: string;
   time: number;
   event: string;
   method: string;
@@ -58,9 +66,8 @@ export enum LogEventName {
   CREATE_LEARNING_LOG,
 
   SHOW_WORK,
-  SHOW_LEFT_TAB,
-  SHOW_RIGHT_TAB,
-  SHOW_FILTER,
+  SHOW_TAB,
+  SHOW_TAB_SECTION,
 
   GRAPH_TOOL_CHANGE,
   DRAWING_TOOL_CHANGE,
@@ -89,7 +96,9 @@ export enum LogEventName {
   DASHBOARD_TOGGLE_TO_DASHBOARD
 }
 
-type ToolChangeEventType = JXGChange | DrawingToolChange | ITableChange;
+type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
+                                Partial<DrawingToolChange> |
+                                Optional<ITableChange, "action">;
 
 interface IDocumentInfo {
   type: string;
@@ -169,7 +178,7 @@ export class Logger {
   public static logToolChange(
     eventName: LogEventName,
     operation: string,
-    change: ToolChangeEventType,
+    change: LoggableToolChangeEvent,
     toolId: string,
     method?: LogEventMethod)
   {
@@ -208,7 +217,7 @@ export class Logger {
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
-    const {appConfig, user} = this.stores;
+    const {appConfig, user, problemPath, ui} = this.stores;
 
     const logMessage: LogMessage = {
       application: appConfig.appName,
@@ -219,6 +228,9 @@ export class Logger {
       appMode: this.stores.appMode,
       investigation: this.investigationTitle,
       problem: this.problemTitle,
+      problemPath,
+      navTabsOpen: ui.navTabContentShown,
+      selectedNavTab: ui.activeNavTab,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
       event,
       method,
@@ -231,6 +243,13 @@ export class Logger {
 
     if (user.isStudent) {
       logMessage.group = user.latestGroupId;
+      logMessage.workspaceMode = ui.problemWorkspace.mode;
+    }
+    if (user.isTeacher) {
+      logMessage.teacherPanel = ui.teacherPanelKey;
+      if (ui.activeNavTab === ENavTab.kStudentWork) {
+        logMessage.selectedGroupId = ui.activeGroupId;
+      }
     }
 
     return logMessage;
@@ -252,7 +271,7 @@ export class Logger {
 function sendToLoggingService(data: LogMessage) {
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sendng", JSON.stringify(data), "to", logManagerUrl);
+    console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
   }
   const request = new XMLHttpRequest();
   request.open("POST", logManagerUrl, true);

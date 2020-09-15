@@ -1,14 +1,8 @@
-import LeftNav from '../../../../support/elements/clue/LeftNav'
-import Canvas from '../../../../support/elements/common/Canvas'
-import ClueCanvas from '../../../../support/elements/clue/cCanvas'
-import TextToolTile from '../../../../support/elements/clue/TextToolTile'
-import ClueHeader from '../../../../support/elements/clue/cHeader';
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
-const leftNav = new LeftNav;
-const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-const clueHeader = new ClueHeader;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 
@@ -20,7 +14,7 @@ context('Test group functionalities', function(){
     context('test the views', function(){
         describe('set-up for 4-up view tests', function(){
             it('will set up groups', function(){
-                cy.setupGroup(studentArr, qaGroup)
+                cy.setupGroup(studentArr, qaGroup);
             });
             it.skip('will add content to each student canvas', function(){
                 let i=0;
@@ -52,7 +46,6 @@ context('Test group functionalities', function(){
                 cy.get('.canvas-area > .four-up > .horizontal.splitter').trigger('mousedown',{which:1}, {force:true}).trigger('mousemove',{pageX:243, pageY: 175}, {force:true}).trigger('mouseup',{force:true});
                 cy.get('.canvas-area > .canvas-container.north-west').should('have.css','height').and('less.than', 243);
                 cy.get('.canvas-area > .canvas-container.south-east').should('have.css','height').and('greater.than', 243);
-            
             });
             // TODO: Write this test
             it.skip('will move vertical splitter horizantally and verify canvas size change', function(){
@@ -84,7 +77,7 @@ context('Test group functionalities', function(){
             it.skip('will try to delete elements from other canvases in 4 up view', function(){
                 //TODO
                 cy.log('need to write this test');
-            })
+            });
 
             //TODO: have to figure out drag and drop
             it.skip('will copy text from one canvas to own canvas', function(){
@@ -93,18 +86,18 @@ context('Test group functionalities', function(){
             after(()=>{
                 clueCanvas.unshareCanvas();
                 clueCanvas.openOneUpViewFromFourUp(); //clean up
-            })
+            });
         });
 
         // TODO: Need to write tests
         describe('test sharing and unsharing canvases', function(){
             it('verify share icon toggles correctly',()=>{
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
+                clueCanvas.getShareButton().should('have.class', 'public');
                 clueCanvas.shareCanvas();
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'private');
+                clueCanvas.getShareButton().should('have.class', 'private');
                 clueCanvas.unshareCanvas();
-                clueCanvas.getShareButton().find('.button-icon').should('have.class', 'public')
-            })
+                clueCanvas.getShareButton().should('have.class', 'public');
+            });
             it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
                 cy.log('need to write this test');
             });
