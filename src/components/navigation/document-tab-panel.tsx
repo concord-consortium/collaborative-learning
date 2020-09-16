@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { NavTabSpec, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { ENavTabSectionType, NavTabSectionModelType, NavTabSpec  } from "../../models/view/nav-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
@@ -12,6 +12,8 @@ import "./document-tab-panel.sass";
 
 interface IProps extends IBaseProps {
   tabSpec: NavTabSpec;
+  selectedDocument?: string;
+  selectedSection?: ENavTabSectionType;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
   onTabClick?: (title: string, type: string) => void;
@@ -35,8 +37,19 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     };
   }
 
+  public componentDidMount() {
+    const { selectedSection, tabSpec } = this.props;
+    if (selectedSection) {
+      const selectedIndex = tabSpec.sections?.findIndex(spec => spec.type === selectedSection);
+      if (selectedIndex != null) {
+        this.setState({ tabIndex: selectedIndex });
+      }
+    }
+  }
+
   public render() {
-    const { documentView, tabSpec, onTabClick, onSelectNewDocument, onSelectDocument } = this.props;
+    const { documentView, tabSpec, selectedDocument,
+            onSelectNewDocument, onSelectDocument, onTabClick } = this.props;
     const { tabIndex } = this.state;
     const { user } = this.stores;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
@@ -81,6 +94,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                     section={section}
                     stores={this.stores}
                     scale={kNavItemScale}
+                    selectedDocument={selectedDocument}
                     onSelectNewDocument={onSelectNewDocument}
                     onSelectDocument={onSelectDocument}
                     onDocumentDragStart={this.handleDocumentDragStart}
