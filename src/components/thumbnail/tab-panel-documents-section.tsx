@@ -15,6 +15,7 @@ interface IProps {
   section: NavTabSectionModelType ;
   stores: IStores;
   scale: number;
+  selectedDocument?: string;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -45,7 +46,7 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   return `${namePrefix}${title}`;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
+export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
@@ -99,6 +100,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
         <div className={`list ${tab}`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
+
           {sectionDocs.map(document => {
 
             function handleDocumentClick() {
@@ -136,6 +138,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
                 canvasContext={tab}
                 document={document}
                 scale={scale}
+                isSelected={document.key === selectedDocument}
                 captionText={getDocumentCaption(stores, document)}
                 onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
                 onIsStarred={onIsStarred}

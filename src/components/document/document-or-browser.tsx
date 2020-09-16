@@ -1,9 +1,19 @@
 import React from "react";
 import { useAppConfigStore } from "../../hooks/use-stores";
-import { DocumentModelType } from "../../models/document/document";
-import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
+import { DocumentModelType, LearningLogDocument, PersonalDocument, ProblemDocument
+        } from "../../models/document/document";
+import { ENavTab, ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "../navigation/document-tab-panel";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
+
+function getSectionForDocument(document: DocumentModelType) {
+  const kDocTypeToSection: Record<string, ENavTabSectionType> = {
+    [ProblemDocument]: ENavTabSectionType.kProblemDocuments,
+    [PersonalDocument]: ENavTabSectionType.kPersonalDocuments,
+    [LearningLogDocument]: ENavTabSectionType.kLearningLogs
+  };
+  return kDocTypeToSection[document.type];
+}
 
 interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   showBrowser: boolean;
@@ -12,12 +22,14 @@ interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   onSelectDocument?: (document: DocumentModelType) => void;
 }
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
-  const { showBrowser, tabSpec, onSelectNewDocument, onSelectDocument, ...others } = props;
+  const { showBrowser, tabSpec, document, onSelectNewDocument, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec
           ? <DocumentTabPanel tabSpec={tabSpec}
+              selectedDocument={document.key}
+              selectedSection={getSectionForDocument(document)}
               onSelectNewDocument={onSelectNewDocument}
               onSelectDocument={onSelectDocument} />
-          : <EditableDocumentContent {...others} />;
+          : <EditableDocumentContent document={document} {...others} />;
 };
 
 function useTabSpec(tab: ENavTab) {
