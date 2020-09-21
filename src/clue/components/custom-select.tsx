@@ -69,18 +69,19 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   private renderHeader = () => {
     const { items, isDisabled, title, titlePrefix, titleIcon } = this.props;
     const selectedItem = items.find(i => i.text === this.state.selected);
+    const titleText = title || selectedItem?.text;
     const showListClass = this.state.showList ? "show-list" : "";
     const disabled = isDisabled || items.length === 0 ? "disabled" : "";
     return (
       <div className={`header ${showListClass} ${disabled}`}
         data-test={this.getDataTest("header")} onClick={this.handleHeaderClick}>
         {titleIcon && <div className="title-icon">{titleIcon}</div>}
-        { title
+        { titlePrefix
           ? <div className="title-container">
-              {titlePrefix && <div className="title-prefix">{titlePrefix}</div>}
-              <div className="title">{title}</div>
+              <div className="title-prefix">{titlePrefix}</div>
+              <div className="title">{titleText}</div>
             </div>
-          : <div className="item line-clamp">{selectedItem && selectedItem.text}</div>
+          : <div className="item line-clamp">{titleText}</div>
         }
         <div className={`arrow ${showListClass} ${disabled}`} />
       </div>
