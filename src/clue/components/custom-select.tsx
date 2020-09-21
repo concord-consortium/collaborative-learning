@@ -34,7 +34,8 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      selected: props.items.length > 0 ? props.items[0].text : "",
+      selected: props.items.find(item => item.selected)?.text ||
+                (props.items.length > 0 ? props.items[0].text : ""),
       showList: false
     };
   }
