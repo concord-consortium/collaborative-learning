@@ -17,7 +17,6 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     const { user } = this.stores;
     return(
       <CustomSelect
-        title="Class Menu"
         titlePrefix={user.name}
         items={links}
       />
@@ -58,8 +57,8 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     // current problem. If we find a match, we add that one to the link array.
     // If not, we use the first one in the list of offerings for that class.
     classNames.forEach( (className) => {
-      const classLinks = user.portalClassOfferings.filter(o => o.className === className);
-      const matchingLink = classLinks.find( l => l.problemOrdinal === currentProblemOrdinal);
+      const classProblems = user.portalClassOfferings.filter(o => o.className === className);
+      const matchingProblem = classProblems.find( l => l.problemOrdinal === currentProblemOrdinal);
       const handleClick = (name: string, url: string) => {
         const log = {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
@@ -69,17 +68,17 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         window.location.replace(url);
       };
 
-      if (matchingLink) {
+      if (matchingProblem) {
         links.push({
           text: className,
-          link: matchingLink.location,
+          link: matchingProblem.location,
           selected: className === user.className,
-          onClick: () => handleClick(className, matchingLink.location)
+          onClick: () => handleClick(className, matchingProblem.location)
         });
-      } else if (classLinks) {
+      } else if (classProblems) {
         links.push({
           text: className,
-          link: classLinks[0].location
+          link: classProblems[0].location
         });
       } else {
         console.warn(`Warning -- no problems assigned in this class ${className}`);
