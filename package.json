@@ -161,7 +161,7 @@
     "d3-format": "^2.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.2",
-    "firebase": "^7.20.0",
+    "firebase": "^7.21.0",
     "immutable": "^3.8.2",
     "initials": "^3.1.1",
     "jsonwebtoken": "^8.5.0",
