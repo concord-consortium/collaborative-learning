@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 1.3.1 - released September 21, 2020
+
+### Bugs Fixed
+- Document browser opens to section of current document initially
+- Current document is highlighted in document browser
+- Show full name when hovering over initials in four-up view
+- Fix issues with class/problem menus in teacher dashboard
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 505,932 bytes | 0.1% |
+| index.js | 4,950,977 bytes | 0.0% |
+
 ## Version 1.3.0 - released September 15, 2020
 
 ### Features
