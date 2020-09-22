@@ -187,9 +187,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const groupUser = this.userByContext[context];
       const isToggled = context === toggledContext;
       if (groupUser) {
+        const { name: fullName, initials } = groupUser.user;
         const className = `member${isToggled ? " member-centered" : ""}`;
-        const name = isToggled ? groupUser.user.name : groupUser.user.initials;
-        return <div className={className}>{name}</div>;
+        const name = isToggled ? fullName : initials;
+        return <div className={className} title={fullName}>{name}</div>;
       }
     };
 

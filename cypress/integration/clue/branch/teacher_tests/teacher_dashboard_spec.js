@@ -41,7 +41,8 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     dashboard.getProblemList().should('not.have.class','show');
                     // Check class list UI and visibility
                     dashboard.getClassList().should('not.have.class','show');
-                    dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className);
+                    dashboard.getClassDropdown().should('contain',clueData.teacherName);
+                    // dashboard.getClassDropdown().should('contain',tempClass.className);
                     dashboard.getClassDropdown().should('be.visible').click({ force: true });
                     // Check Dashboard and Workspace toggle default
                     dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');

@@ -1,8 +1,6 @@
 import "ts-polyfill";
 
 import { Provider } from "mobx-react";
-// https://github.com/mobxjs/mobx-react#observer-batching
-import "mobx-react/batchingForReactDom";
 import React from "react";
 import ReactDOM from "react-dom";
 import { appConfigSpec, appIcons, createStores } from "./app-config";

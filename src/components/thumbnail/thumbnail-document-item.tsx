@@ -9,6 +9,7 @@ interface IProps {
   document: DocumentModelType;
   scale: number;
   captionText: string;
+  isSelected?: boolean;
   onIsStarred: () => boolean;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -17,9 +18,11 @@ interface IProps {
 }
 
 export const ThumbnailDocumentItem = observer((props: IProps) => {
-  const { dataTestName, canvasContext, document, scale, captionText, onIsStarred,
+  const { dataTestName, canvasContext, document, scale, captionText, isSelected, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
+  const selectedClass = isSelected ? "selected" : "";
+
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);
     e.stopPropagation();
@@ -35,9 +38,10 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
+
   return (
     <div
-      className="list-item"
+      className={`list-item ${selectedClass}`}
       data-test={dataTestName}
       key={document.key}
       onClick={handleDocumentClick} >
