@@ -16,12 +16,14 @@ export function getParentWithTypeName(target: IAnyStateTreeNode, typeName: strin
   return undefined;
 }
 
+export function getDocumentContentFromNode(target: IAnyStateTreeNode): DocumentContentModelType | undefined {
+  return getParentWithTypeName(target, "DocumentContent") as DocumentContentModelType;
+}
+
 export function getContentIdFromNode(target: IAnyStateTreeNode) {
-  const documentContent = getParentWithTypeName(target, "DocumentContent") as DocumentContentModelType;
-  return documentContent?.contentId;
+  return getDocumentContentFromNode(target)?.contentId;
 }
 
 export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
-  const documentContent = getParentWithTypeName(target, "DocumentContent") as DocumentContentModelType;
-  return documentContent?.getTileContent(tileId);
+  return getDocumentContentFromNode(target)?.getTileContent(tileId);
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { observer, inject } from "mobx-react";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { cloneTileSnapshotWithoutId, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
@@ -19,7 +20,7 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
-import { getContentIdFromNode } from "../../utilities/mst-utils";
+import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import "../../utilities/dom-utils";
 
@@ -102,22 +103,37 @@ const kToolComponentMap: any = {
         [kTextToolID]: TextToolComponent
       };
 
-const DragTileButton = ({ ref }: { ref: (instance: HTMLDivElement | null) => void }) => {
+interface IDragTileButtonProps {
+  divRef: (instance: HTMLDivElement | null) => void;
+  hovered: boolean;
+  selected: boolean;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+}
+const DragTileButton = ({ divRef, hovered, selected, onClick }: IDragTileButtonProps) => {
+  const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
-    <div className="tool-tile-drag-handle-wrapper" ref={ref}>
-      <TileDragHandle className="tool-tile-drag-handle icon icon-select-tool" />
+    <div className={`tool-tile-drag-handle-wrapper`} ref={divRef} onClick={onClick}>
+      <TileDragHandle className={classes} />
     </div>
   );
 };
 
+interface IState {
+  hoverTile: boolean;
+}
+
 @inject("stores")
 @observer
-export class ToolTileComponent extends BaseComponent<IProps> {
+export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
+
+  state = {
+    hoverTile: false
+  };
 
   constructor(props: IProps) {
     super(props);
@@ -147,24 +163,34 @@ export class ToolTileComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { model, widthPct } = this.props;
+    const { model, readOnly, widthPct } = this.props;
+    const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const selectedClass = ui.isSelectedTile(model) ? " selected" : "";
     const ToolComponent = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
-    const placeholderClass = isPlaceholderTile ? " placeholder" : "";
-    const dragTileButton = !isPlaceholderTile && !appConfig.disableTileDrags &&
-                            <DragTileButton ref={elt => this.dragElement = elt} />;
+    const isTileSelected = ui.isSelectedTile(model);
+    const classes = classNames("tool-tile", {
+                      placeholder: isPlaceholderTile,
+                      readonly: readOnly,
+                      hovered: this.state.hoverTile,
+                      selected: isTileSelected });
+    const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
+    const dragTileButton = isDraggable &&
+                            <DragTileButton divRef={elt => this.dragElement = elt}
+                              hovered={hoverTile} selected={isTileSelected}
+                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
     const style: React.CSSProperties = {};
     if (widthPct) {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
     }
     return (
-      <div className={`tool-tile${selectedClass}${placeholderClass}`}
+      <div className={classes}
           ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
           tabIndex={-1}
+          onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
+          onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
           draggable={true}
@@ -285,6 +311,7 @@ export class ToolTileComponent extends BaseComponent<IProps> {
     // set the drag data
     const { model, docId, height, scale } = this.props;
     const ToolComponent = kToolComponentMap[model.content.type];
+    // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
       e.preventDefault();
       return;
@@ -298,11 +325,11 @@ export class ToolTileComponent extends BaseComponent<IProps> {
       sourceDocId: docId,
       items: []
     };
-    const { documents, ui: { selectedTileIds } } = this.stores;
+    const { ui: { selectedTileIds } } = this.stores;
 
     const getTileInfo = (tileId: string) => {
       // get tile from loaded document or from curriculum
-      const content = documents.findDocumentOfTile(tileId)?.content;
+      const content = getDocumentContentFromNode(model);
       const tile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
       if (tile) {
         const tileContentId = getContentIdFromNode(tile);

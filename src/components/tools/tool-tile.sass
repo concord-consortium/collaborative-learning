@@ -20,26 +20,30 @@
     opacity: 0
     transition: 0.3s
 
+    &.hovered
+      opacity: 0.5
+
     &:hover
       cursor: grab
+      opacity: 1
+
+    &.selected
       opacity: 1
 
     &:focus
       outline: none
 
-    .icon
-      width: 19px
-      height: 19px
-      margin-top: 5px
-      margin-left: -4px
-      left: 0px
+  &:focus
+    outline: none
 
-    .icon-select-tool
-      background-image: url("../../assets/icons/drag-tile/move.svg")
-      background-repeat: no-repeat
+  &.hovered
+    border: $half-border-width solid $color2-3
+
+    &.readonly
+      border: $half-border-width solid $charcoal-light-4
 
   &.selected
     border: $half-border-width solid $color2-4
 
-    .tool-tile-drag-handle
-      opacity: 1
+    &.readonly
+      border: $half-border-width solid $charcoal-light-2
