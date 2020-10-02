@@ -11,18 +11,11 @@
 
   .tool-tile-drag-handle
     position: absolute
-    right: 0px
-    box-sizing: content-box
-    width: 11px
-    height: 21px
-    border-radius: $half-border-radius
-    border-top-left-radius: 0
-    border-bottom-right-radius: 0
-    border-top-right-radius: 0
-    background-color: $color3-4
-    border: $half-border-width solid transparent
-    border-right: 0
-    border-top: 0
+    right: -2px
+    top: -2px
+    box-sizing: border-box
+    width: 24px
+    height: 24px
     z-index: 1
     opacity: 0
     transition: 0.3s
@@ -42,7 +35,7 @@
       left: 0px
 
     .icon-select-tool
-      background-image: url("../../assets/icons/drag-tile/drag-tile.svg")
+      background-image: url("../../assets/icons/drag-tile/move.svg")
       background-repeat: no-repeat
 
   &.selected
@@ -50,4 +43,3 @@
 
     .tool-tile-drag-handle
       opacity: 1
-

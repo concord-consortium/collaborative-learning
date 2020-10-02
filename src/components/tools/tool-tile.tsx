@@ -20,7 +20,7 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getContentIdFromNode } from "../../utilities/mst-utils";
-import { IconButton } from "../utilities/icon-button";
+import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -102,10 +102,11 @@ const kToolComponentMap: any = {
         [kTextToolID]: TextToolComponent
       };
 
-const DragTileButton = () => {
+const DragTileButton = ({ ref }: { ref: (instance: HTMLDivElement | null) => void }) => {
   return (
-    <IconButton icon="select-tool" key={`select-tool`} className={`tool-tile-drag-handle tool select`}
-                innerClassName={`icon icon-select-tool`} />
+    <div className="tool-tile-drag-handle-wrapper" ref={ref}>
+      <TileDragHandle className="tool-tile-drag-handle icon icon-select-tool" />
+    </div>
   );
 };
 
@@ -153,7 +154,7 @@ export class ToolTileComponent extends BaseComponent<IProps> {
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const placeholderClass = isPlaceholderTile ? " placeholder" : "";
     const dragTileButton = !isPlaceholderTile && !appConfig.disableTileDrags &&
-                            <div ref={elt => this.dragElement = elt}><DragTileButton /></div>;
+                            <DragTileButton ref={elt => this.dragElement = elt} />;
     const style: React.CSSProperties = {};
     if (widthPct) {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
