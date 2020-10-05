@@ -354,14 +354,12 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
-    const { model } = this.props;
-    if (e.target === this.wrapper.current) {
-      this.editor.current && this.editor.current.focus();
-      ui.setSelectedTile(model);
-      e.preventDefault();
-    }
-    else if (hasSelectionModifier(e)) {
-      ui.setSelectedTile(model, { append: true });
+    const { model, readOnly } = this.props;
+    const isExtendingSelection = hasSelectionModifier(e);
+    const isWrapperClick = e.target === this.wrapper.current;
+    if (readOnly || isWrapperClick || isExtendingSelection) {
+      isWrapperClick && this.editor.current?.focus();
+      ui.setSelectedTile(model, { append: isExtendingSelection });
       e.preventDefault();
     }
   }
