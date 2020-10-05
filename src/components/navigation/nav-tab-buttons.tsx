@@ -34,13 +34,15 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
     return (
       <div className={`nav-tab-buttons ${ui.navTabContentShown ? "hidden" : ""}`}>
         { tabs?.map((tabSpec, i) => {
-            const tabClass = `nav-tab tab-${tabSpec.tab}`;
-            return (
-              <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
-                {tabSpec.label}
-              </div>
-            );
-          })
+          const tabClass = `nav-tab tab-${tabSpec.tab}`;
+          const supportTab = tabSpec.tab === "supports";
+          return (
+            <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
+              {tabSpec.label}
+              { supportTab && <div className={`new-support-indicator`}></div> }
+            </div>
+          );
+        })
         }
       </div>
     );

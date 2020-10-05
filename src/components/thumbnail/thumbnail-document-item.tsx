@@ -9,6 +9,7 @@ interface IProps {
   document: DocumentModelType;
   scale: number;
   captionText: string;
+  isNewSupport: boolean;
   isSelected?: boolean;
   onIsStarred: () => boolean;
   onDocumentClick: (document: DocumentModelType) => void;
@@ -18,7 +19,7 @@ interface IProps {
 }
 
 export const ThumbnailDocumentItem = observer((props: IProps) => {
-  const { dataTestName, canvasContext, document, scale, captionText, isSelected, onIsStarred,
+  const { dataTestName, canvasContext, document, scale, captionText, isNewSupport, isSelected, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
   const selectedClass = isSelected ? "selected" : "";
@@ -58,6 +59,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
           />
         </div>
       </div>
+      {isNewSupport && <div className={`new-support-indicator`}></div>}
       { onDocumentStarClick &&
           <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
       }
