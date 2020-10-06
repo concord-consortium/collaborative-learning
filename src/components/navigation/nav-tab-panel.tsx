@@ -7,6 +7,7 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
+import { SupportBadge } from "./support-badge";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
@@ -47,10 +48,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   return (
                     <React.Fragment key={tabSpec.tab}>
                       <Tab className={tabClass}>{tabSpec.label}</Tab>
-                      {(tabSpec.tab === "supports"
-                        && user.isStudent
-                        && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp))
-                        && <div className={`support-badge`}></div>}
+                  {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
                     </React.Fragment>
                   );
                 })

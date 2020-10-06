@@ -3,6 +3,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { ENavTab, NavTabSpec } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
+import { SupportBadge } from "./support-badge";
 
 import "./nav-tab-buttons.sass";
 
@@ -38,10 +39,7 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
             return (
               <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
                 {tabSpec.label}
-                {(tabSpec.tab === "supports"
-                  && user.isStudent
-                  && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp))
-                  && <div className={`support-badge`}></div>}
+                { (tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
               </div>
             );
           })
