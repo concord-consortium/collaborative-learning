@@ -138,7 +138,6 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
                 canvasContext={tab}
                 document={document}
                 scale={scale}
-                isNewSupport={true}
                 isSelected={document.key === selectedDocument}
                 captionText={getDocumentCaption(stores, document)}
                 onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}

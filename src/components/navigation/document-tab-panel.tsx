@@ -65,7 +65,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         <TabList className={`tab-list ${navTabSpec?.tab}`}>
           {navTabSpec?.sections.map((section) => {
             const sectionTitle = this.getSectionTitle(section, this.stores);
-            const teacherSupportTab = sectionTitle === "Teacher Supports";
             return (
               <Tab
                 className={`doc-tab ${navTabSpec?.tab} ${section.type}`}
@@ -74,7 +73,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 data-test={section.dataTestHeader}
               >
                 {sectionTitle}
-                { teacherSupportTab && <div className={`new-support-indicator`}></div>}
               </Tab>
             );
           })}

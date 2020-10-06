@@ -30,16 +30,19 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs } = this.props;
-    const { ui } = this.stores;
+    const { ui, user, supports } = this.stores;
+
     return (
       <div className={`nav-tab-buttons ${ui.navTabContentShown ? "hidden" : ""}`}>
         { tabs?.map((tabSpec, i) => {
           const tabClass = `nav-tab tab-${tabSpec.tab}`;
-          const supportTab = tabSpec.tab === "supports";
+          const showNewSupportBadge = tabSpec.tab === "supports"
+                              && user.isStudent
+                              && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp);
           return (
             <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
               {tabSpec.label}
-              { supportTab && <div className={`new-support-indicator`}></div> }
+              { showNewSupportBadge && <div className={`support-badge`}></div> }
             </div>
           );
         })
@@ -49,7 +52,7 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
   }
 
   private handleTabButtonClick = (tab: ENavTab) => () => {
-    const { ui } = this.stores;
+    const { ui, user } = this.stores;
     const logParameters = {
       tab_name: tab.toString()
     };
@@ -59,6 +62,9 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
       logEvent();
     }
     ui.toggleNavTabContent(true);
+    if (tab === "supports") {
+      user.setLastSupportViewTimestamp(Date.now());
+    }
   }
 
 }

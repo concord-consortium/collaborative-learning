@@ -41,6 +41,7 @@
 
   .top-tab-list
     display: flex
+    align-items: center
     width: 100%
     padding: 0
     margin: 0
@@ -51,13 +52,18 @@
       color: $charcoal-dark-2
       border-style: solid
       border-color: $charcoal-light-2
-      border-width: 2px 0 0 2px
+      border-width: 2px 2px 0 0
       border-radius: 0
       display: flex
       align-items: center
       justify-content: center
       cursor: pointer
-    .top-tab:first-child
-      border-width: 2px 0 0 0
-    .top-tab:last-child
-      border-width: 2px 2px 0 2px
+    .support-badge
+      position: absolute
+      right: 34px
+      align-items: center
+      border: 2px solid $charcoal-light-2
+      border-radius: 50%
+      background-color: $decoration-yellow
+      height: 12px
+      width: 12px

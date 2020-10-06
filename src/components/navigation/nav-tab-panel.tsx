@@ -35,7 +35,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs } = this.props;
-    const { ui } = this.stores;
+    const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     return (
       <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
@@ -44,7 +44,15 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             <TabList className="top-tab-list">
               { tabs?.map((tabSpec, index) => {
                   const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
-                  return <Tab key={tabSpec.tab} className={tabClass}>{tabSpec.label}</Tab>;
+                  const showNewSupportBadge = (tabSpec.label === "Supports")
+                    && user.isStudent
+                    && (supports.hasNewTeacherSupports(user.lastSupportViewTimestamp));
+                  return (
+                    <React.Fragment key={tabSpec.tab}>
+                      <Tab className={tabClass}>{tabSpec.label}</Tab>
+                      { showNewSupportBadge && <div className="support-badge"></div>}
+                    </React.Fragment>
+                  );
                 })
               }
             </TabList>
@@ -95,7 +103,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private handleSelectTab = (tabIndex: number) => {
     const { tabs } = this.props;
-    const { ui } = this.stores;
+    const { ui, user } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
@@ -105,6 +113,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
+      }
+      if (tabSpec.tab === "supports") {
+        user.setLastSupportViewTimestamp(Date.now());
       }
     }
   }
