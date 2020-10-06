@@ -103,7 +103,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private handleSelectTab = (tabIndex: number) => {
     const { tabs } = this.props;
-    const { ui, user } = this.stores;
+    const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
@@ -113,9 +113,6 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
-      }
-      if (tabSpec.tab === "supports") {
-        user.setLastSupportViewTimestamp(Date.now());
       }
     }
   }

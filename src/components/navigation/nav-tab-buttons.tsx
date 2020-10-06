@@ -51,7 +51,7 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
   }
 
   private handleTabButtonClick = (tab: ENavTab) => () => {
-    const { ui, user } = this.stores;
+    const { ui } = this.stores;
     const logParameters = {
       tab_name: tab.toString()
     };
@@ -61,9 +61,6 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
       logEvent();
     }
     ui.toggleNavTabContent(true);
-    if (tab === "supports") {
-      user.setLastSupportViewTimestamp(Date.now());
-    }
   }
 
 }

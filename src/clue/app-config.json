@@ -157,14 +157,6 @@
         "label": "Supports",
         "sections": [
           {
-            "title": "Teacher Supports",
-            "type": "teacher-supports",
-            "dataTestHeader": "supports-section-teacher-supports",
-            "dataTestItem": "supports-list-items",
-            "documentTypes": ["supportPublication"],
-            "properties": ["teacherSupport", "!isDeleted"]
-          },
-          {
             "title": "Problem Supports",
             "type": "curricular-supports",
             "dataTestHeader": "supports-section-jit",
@@ -172,6 +164,14 @@
             "documentTypes": ["supportPublication"],
             "order": "original",
             "properties": ["curricularSupport"]
+          },
+          {
+            "title": "Teacher Supports",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
           }
         ]
       }
