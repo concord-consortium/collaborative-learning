@@ -31,21 +31,20 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
   public render() {
     const { tabs } = this.props;
     const { ui, user, supports } = this.stores;
-
     return (
       <div className={`nav-tab-buttons ${ui.navTabContentShown ? "hidden" : ""}`}>
         { tabs?.map((tabSpec, i) => {
-          const tabClass = `nav-tab tab-${tabSpec.tab}`;
-          const showNewSupportBadge = tabSpec.tab === "supports"
-                                      && user.isStudent
-                                      && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp);
-          return (
-            <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
-              {tabSpec.label}
-              { showNewSupportBadge && <div className={`support-badge`}></div> }
-            </div>
-          );
-        })
+            const tabClass = `nav-tab tab-${tabSpec.tab}`;
+            return (
+              <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
+                {tabSpec.label}
+                {(tabSpec.tab === "supports"
+                  && user.isStudent
+                  && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp))
+                  && <div className={`support-badge`}></div>}
+              </div>
+            );
+          })
         }
       </div>
     );

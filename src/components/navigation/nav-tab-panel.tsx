@@ -44,13 +44,13 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             <TabList className="top-tab-list">
               { tabs?.map((tabSpec, index) => {
                   const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
-                  const showNewSupportBadge = tabSpec.label === "Supports"
-                                              && user.isStudent
-                                              && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp);
                   return (
                     <React.Fragment key={tabSpec.tab}>
                       <Tab className={tabClass}>{tabSpec.label}</Tab>
-                      { showNewSupportBadge && <div className="support-badge"></div>}
+                      {(tabSpec.tab === "supports"
+                        && user.isStudent
+                        && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp))
+                        && <div className={`support-badge`}></div>}
                     </React.Fragment>
                   );
                 })
