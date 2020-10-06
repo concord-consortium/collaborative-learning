@@ -37,8 +37,8 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
         { tabs?.map((tabSpec, i) => {
           const tabClass = `nav-tab tab-${tabSpec.tab}`;
           const showNewSupportBadge = tabSpec.tab === "supports"
-                              && user.isStudent
-                              && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp);
+                                      && user.isStudent
+                                      && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp);
           return (
             <div key={tabSpec.tab} className={tabClass} onClick={this.handleTabButtonClick(tabSpec.tab)}>
               {tabSpec.label}
