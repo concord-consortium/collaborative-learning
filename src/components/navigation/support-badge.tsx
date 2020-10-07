@@ -1,15 +1,17 @@
 import React from "react";
 import { observer } from "mobx-react";
+import { UserModelType } from "../../models/stores/user";
+import { SupportsModelType } from "../../models/stores/supports";
 
 interface IProps {
-  user: any
-  supports: any
+  user: UserModelType;
+  supports: SupportsModelType;
 }
 
 export const SupportBadge = observer(({user, supports}: IProps) => {
-  if (user.isStudent && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp)) {
-    return ( <div className={`support-badge`} /> );
-  } else {
-    return null;
-  }
+  return (
+    (user.isStudent && supports.hasNewTeacherSupports(user.lastSupportViewTimestamp))
+      ? <div className="support-badge"/>
+      : null
+  );
 });

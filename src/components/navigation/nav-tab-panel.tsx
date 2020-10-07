@@ -48,7 +48,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   return (
                     <React.Fragment key={tabSpec.tab}>
                       <Tab className={tabClass}>{tabSpec.label}</Tab>
-                  {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
+                      {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
                     </React.Fragment>
                   );
                 })
