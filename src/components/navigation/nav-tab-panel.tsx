@@ -7,6 +7,7 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
+import { SupportBadge } from "./support-badge";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
@@ -35,7 +36,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs } = this.props;
-    const { ui } = this.stores;
+    const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     return (
       <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
@@ -44,7 +45,12 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             <TabList className="top-tab-list">
               { tabs?.map((tabSpec, index) => {
                   const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
-                  return <Tab key={tabSpec.tab} className={tabClass}>{tabSpec.label}</Tab>;
+                  return (
+                    <React.Fragment key={tabSpec.tab}>
+                      <Tab className={tabClass}>{tabSpec.label}</Tab>
+                      {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
+                    </React.Fragment>
+                  );
                 })
               }
             </TabList>
