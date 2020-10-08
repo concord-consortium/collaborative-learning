@@ -5,7 +5,7 @@ import { ProblemModelType } from "../../models/curriculum/problem";
 import { NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfigStore, useProblemStore } from "../../hooks/use-stores";
+import { useAppConfigStore, useProblemStore, useUiStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
@@ -19,6 +19,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType | undefined>(undefined);
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
+  const uiStore = useUiStore();
 
   const handleTabClick = (title: string, type: string) => {
     setReferenceDocument(undefined);
@@ -39,11 +40,15 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
       : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   };
 
-  const editButton = (type: string, sClass: string) => {
+  function handleEditClick (document: DocumentModelType) {
+    uiStore.problemWorkspace.setPrimaryDocument(document);
+  }
+
+  const editButton = (type: string, sClass: string, document: DocumentModelType ) => {
     return (
       (type === "my-work") || (type === "learningLog") ?
-        <div className={`edit-button ${sClass}`}>
-          <EditIcon className={`edit-icon ${sClass}`} />
+        <div className={`edit-button ${sClass}`} onClick={()=>handleEditClick(document)}>
+            <EditIcon className={`edit-icon ${sClass}`} />
           <div>Edit</div>
         </div>
       : null
@@ -57,7 +62,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         <div className={`document-title`}>
           {documentTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
-        {editButton(tabSpec.tab, sectionClass)}
+        {editButton(tabSpec.tab, sectionClass, referenceDocument)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
