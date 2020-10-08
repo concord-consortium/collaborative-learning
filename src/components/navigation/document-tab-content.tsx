@@ -48,7 +48,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     return (
       (type === "my-work") || (type === "learningLog") ?
         <div className={`edit-button ${sClass}`} onClick={()=>handleEditClick(document)}>
-            <EditIcon className={`edit-icon ${sClass}`} />
+          <EditIcon className={`edit-icon ${sClass}`} />
           <div>Edit</div>
         </div>
       : null
@@ -57,7 +57,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const documentView = referenceDocument &&
-    <div>
+    <React.Fragment>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
         <div className={`document-title`}>
           {documentTitle(referenceDocument, appConfigStore, problemStore)}
@@ -70,7 +70,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         document={referenceDocument}
         readOnly={true}
       />
-    </div>;
+    </React.Fragment>;
 
   return (
     <div className="document-tab-content">
