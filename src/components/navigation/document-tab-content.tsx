@@ -57,7 +57,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const documentView = referenceDocument &&
-    <React.Fragment>
+    <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
         <div className={`document-title`}>
           {documentTitle(referenceDocument, appConfigStore, problemStore)}
@@ -70,7 +70,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         document={referenceDocument}
         readOnly={true}
       />
-    </React.Fragment>;
+    </div>;
 
   return (
     <div className="document-tab-content">
