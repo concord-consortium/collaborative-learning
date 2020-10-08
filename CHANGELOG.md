@@ -1,5 +1,26 @@
 # Changelog
 
+## Version 1.4.0 - released October 7, 2020
+
+### Features/Improvements
+- New curriculum content
+- Show tile drag border and drag icon on hover
+- Tile drag border color reflects editability
+- Add new teacher supports indicator badge
+
+### Bugs Fixed
+- Fix File menu rendering issue
+- Fix text tile selection in curriculum content
+- Fix bug which prevented dragging multiple tiles from curriculum content
+- Fix table/geometry link icon appearance
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 503,854 bytes | -0.4% |
+| index.js | 4,887,087 bytes | -1.3% |
+
 ## Version 1.3.1 - released September 21, 2020
 
 ### Bugs Fixed

@@ -105,6 +105,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
 
             function handleDocumentClick() {
               onSelectDocument?.(document);
+              (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
             }
             function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
               onDocumentDragStart?.(e, document);

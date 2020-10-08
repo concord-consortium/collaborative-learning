@@ -4,6 +4,11 @@
   "title": "Thinking with Mathematical Models",
   "subtitle": "Linear Functions and Bivariate Data",
   "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
   "sections": {
     "introduction": {
       "initials": "IN",

@@ -66,7 +66,12 @@ module.exports = (env, argv) => {
             {
               loader: 'css-loader',
               options: {
-                esModule: false
+                esModule: false,
+                modules: {
+                  // required for :import from scss files
+                  // cf. https://github.com/webpack-contrib/css-loader#separating-interoperable-css-only-and-css-module-features
+                  compileType: 'icss'
+                }
               }
             },
             'postcss-loader',
