@@ -7,6 +7,7 @@ import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfigStore, useProblemStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
+import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
 import "./document-tab-content.sass";
 
@@ -38,11 +39,25 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
       : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   };
 
+  const editButton = (type: string, sClass: string) => {
+    return (
+      (type === "my-work") || (type === "learningLog") ?
+        <div className={`edit-button ${sClass}`}>
+          <EditIcon className={`edit-icon ${sClass}`} />
+          <div>Edit</div>
+        </div>
+      : null
+    );
+  };
+
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const documentView = referenceDocument &&
     <div>
-      <div className={`document-title ${tabSpec.tab} ${sectionClass}`}>
-        {documentTitle(referenceDocument, appConfigStore, problemStore)}
+      <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
+        <div className={`document-title`}>
+          {documentTitle(referenceDocument, appConfigStore, problemStore)}
+        </div>
+        {editButton(tabSpec.tab, sectionClass)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
