@@ -28,6 +28,6 @@ export function useProblemStore(): ProblemModelType {
   return useStores().problem;
 }
 
-export function useUiStore(): UIModelType {
+export function useUIStore(): UIModelType {
   return useStores().ui;
 }

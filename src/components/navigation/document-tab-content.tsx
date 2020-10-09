@@ -5,7 +5,7 @@ import { ProblemModelType } from "../../models/curriculum/problem";
 import { NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfigStore, useProblemStore, useUiStore } from "../../hooks/use-stores";
+import { useAppConfigStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
@@ -19,7 +19,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType | undefined>(undefined);
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
-  const uiStore = useUiStore();
+  const uiStore = useUIStore();
 
   const handleTabClick = (title: string, type: string) => {
     setReferenceDocument(undefined);
