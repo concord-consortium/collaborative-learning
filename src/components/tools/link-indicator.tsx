@@ -16,7 +16,9 @@ export const LinkIndicatorComponent: React.FC<IProps> = ({ id, index }: IProps) 
   const svgLinkIcon = linkColors &&
                         <SvgLinkedTileIcon
                           className={`button-icon link-indicator link-icon`}
-                          fillColor={linkColors.stroke} />;
+                          fillColor={linkColors.stroke}
+                          data-indicator-width={styles.linkIndicatorWidth}
+                          />;
   const initialOffset = parseInt(styles.linkIndicatorRightOffset, 10);
   const deltaOffset = parseInt(styles.linkIndicatorWidth, 10) + 2;
   const style: React.CSSProperties | undefined =
