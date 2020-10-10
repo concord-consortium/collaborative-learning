@@ -39,7 +39,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   };
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
-  const selectedSection = tabSpec.tab==="supports"? ENavTabSectionType.kTeacherSupports :undefined;
+  const selectedSection = tabSpec.tab==="supports" ? ENavTabSectionType.kTeacherSupports : undefined;
   const documentView = referenceDocument &&
     <div>
       <div className={`document-title ${tabSpec.tab} ${sectionClass}`}>
