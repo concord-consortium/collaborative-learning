@@ -1,5 +1,5 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { UnitModelType, UnitModel } from "../curriculum/unit";
+import { getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
@@ -17,7 +17,7 @@ import { getSetting } from "./settings";
 
 export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
 
-interface IBaseStores {
+export interface IBaseStores {
   appMode: AppMode;
   appVersion: string;
   appConfig: AppConfigModelType;
@@ -80,7 +80,7 @@ export function createStores(params?: ICreateStores): IStores {
   };
   return {
     ...stores,
-    problemPath: `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`
+    problemPath: getProblemPath(stores)
   };
 }
 
@@ -88,10 +88,30 @@ export function setAppMode(stores: IStores, appMode: AppMode) {
   stores.appMode = appMode;
 }
 
-export function getProblemOrdinal(stores: IStores) {
+export function getProblemOrdinal(stores: IBaseStores) {
   const { investigation, problem } = stores;
   return `${investigation.ordinal}.${problem.ordinal}`;
 }
+
+export function getProblemPath(stores: IBaseStores) {
+  return `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`;
+}
+
+export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
+  const unitJson = await getUnitJson(unitId, stores.appConfig);
+  const unit = UnitModel.create(unitJson);
+  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
+
+  if (unit) {
+    stores.unit = unit;
+    stores.documents.setUnit(stores.unit);
+    if (investigation && problem) {
+      stores.investigation = investigation;
+      stores.problem = problem;
+    }
+    stores.problemPath = getProblemPath(stores);
+  }
+};
 
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;
