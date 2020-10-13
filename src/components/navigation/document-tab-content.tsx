@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DocumentModelType, isProblemType } from "../../models/document/document";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { ProblemModelType } from "../../models/curriculum/problem";
-import { NavTabSpec } from "../../models/view/nav-tabs";
+import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfigStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
@@ -56,6 +56,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   };
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
+  const selectedSection = tabSpec.tab==="supports" ? ENavTabSectionType.kTeacherSupports : undefined;
   const documentView = referenceDocument &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
@@ -76,6 +77,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     <div className="document-tab-content">
       <DocumentTabPanel
         tabSpec={tabSpec}
+        selectedSection={selectedSection}
         onTabClick={handleTabClick}
         onSelectDocument={handleSelectDocument}
         documentView={documentView}
