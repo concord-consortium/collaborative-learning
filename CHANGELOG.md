@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.4.1 - released October 13, 2020
+
+### Features/Improvements
+- Edit button in document title bar
+- Supports tab defaults to Teacher Supports subtab
+
+### Bugs Fixed
+- Fix publishing teacher supports to multiple classes
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 505,055 bytes | 0.2% |
+| index.js | 4,888,343 bytes | 0.0% |
+
 ## Version 1.4.0 - released October 7, 2020
 
 ### Features/Improvements

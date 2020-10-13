@@ -8,8 +8,8 @@ import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponment } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
-import { IStores, setAppMode } from "../models/stores/stores";
-import { isDifferentUnitAndProblem, setUnitAndProblem } from "../models/curriculum/unit";
+import { IStores, setAppMode, setUnitAndProblem } from "../models/stores/stores";
+import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import "./app.sass";
 

@@ -5,6 +5,7 @@ import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
+import { UIModelType } from "../models/stores/ui";
 
 // https://mobx-react.js.org/recipes-migration
 export function useStores(): IStores {
@@ -25,4 +26,8 @@ export function useUserStore(): UserModelType {
 
 export function useProblemStore(): ProblemModelType {
   return useStores().problem;
+}
+
+export function useUIStore(): UIModelType {
+  return useStores().ui;
 }

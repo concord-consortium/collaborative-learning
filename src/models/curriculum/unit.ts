@@ -6,7 +6,7 @@ import { SupportModel } from "./support";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { SettingsMstType } from "../stores/settings";
-import { IStores } from "../stores/stores";
+import { IBaseStores } from "../stores/stores";
 
 export const UnitModel = types
   .model("Unit", {
@@ -55,7 +55,7 @@ export const UnitModel = types
 
 export type UnitModelType = typeof UnitModel.Type;
 
-function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
+export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
   const unitUrlParam = unitId && appConfig.units.get(unitId);
   if (!unitUrlParam){
     console.warn(`unitId "${unitId}" not found in appConfig.units`);
@@ -75,24 +75,9 @@ function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType )
           });
 }
 
-export function isDifferentUnitAndProblem(stores: IStores, unitId?: string | undefined, problemOrdinal?: string) {
+export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string | undefined, problemOrdinal?: string) {
   if (!unitId || !problemOrdinal) return false;
   const { unit, investigation, problem } = stores;
   const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
   return (unit.code !== unitId) || (combinedOrdinal !== problemOrdinal);
 }
-
-export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
-  const unitJson = await getUnitJson(unitId, stores.appConfig);
-  const unit = UnitModel.create(unitJson);
-  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
-
-  if (unit) {
-    stores.unit = unit;
-    stores.documents.setUnit(stores.unit);
-    if (investigation && problem) {
-      stores.investigation = investigation;
-      stores.problem = problem;
-    }
-  }
-};

@@ -58,6 +58,8 @@ context('Tests for graph and table integration', function(){
             connectTableToGraph();
             tableToolTile.getTableTile().scrollIntoView();
             graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('be.visible');
+            // verifies that values exported from .scss file were successfully imported
+            graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
             graphToolTile.getGraph().should('have.class','is-linked');
             tableToolTile.getTableTile().should('have.class','is-linked');
             tableToolTile.getTableTile().siblings(clueCanvas.linkIconEl()).should('be.visible');
