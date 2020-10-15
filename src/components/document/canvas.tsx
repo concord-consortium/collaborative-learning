@@ -57,9 +57,7 @@ export class CanvasComponent extends React.Component<IProps> {
 
     if (documentContent) {
       return (
-        <DocumentContentComponent content={documentContent} {...others}>
-          {/* {this.props.children} */}
-        </DocumentContentComponent>
+        <DocumentContentComponent content={documentContent} {...others} />
       );
     }
     else {

@@ -102,7 +102,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         ref={(elt) => this.domElement = elt}
       >
         {this.renderRows()}
-        {/* {this.props.children} */}
         {this.renderSpacer()}
       </div>
     );
