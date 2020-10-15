@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { isMac } from "../../utilities/browser";
@@ -11,27 +12,15 @@ interface IButtonDef {
 }
 
 interface IProps {
+  portalDomElement?: HTMLElement | null;
+  top?: number;
+  left?: number;
   selectedButtonNames: string[];
   clickHandler: (buttonName: string, editor: any, event: React.MouseEvent) => void;
   editor: any;
   visible: boolean;  // If true, render the tool bar.
   enabled: boolean;  // If true, let user events be processed.
 }
-
-// This component renders HTML for a vertical tool-bar used to style text in
-// a text-tool-editor. What follows is a pseudo-markup-outline for the various
-// HTML-tags & CSS-class names.
-//
-// <div text-style-bar>
-//   <div bar-header-icon>
-//     <svg header-icon />
-//   </div>
-//   <div button-with-tool-tip >  // This div is repeated for each button.
-//     <i button-icon fa fa-fw (on | off) [fa-bold, fa-italic, ..., fa-undo] />
-//     <span tool-tip-text />
-//   </div>
-//   ...
-// </div>
 
 @inject("stores")
 @observer
@@ -52,35 +41,25 @@ export class TextStyleBarComponent extends BaseComponent<IProps> {
     { iconName: "subscript",   toolTip: `Subscript (${this.prefix},)`},
     { iconName: "superscript", toolTip: `Superscript (${this.prefix}Shift-,)`},
     { iconName: "list-ol",     toolTip: `Numbered List`},
-    { iconName: "list-ul",     toolTip: `Bulleted List`},
-    { iconName: "undo",        toolTip: `Undo (${this.prefix}z)` }
+    { iconName: "list-ul",     toolTip: `Bulleted List`}
   ];
 
   public render() {
+    const { portalDomElement, top, left, enabled, visible } = this.props;
     const onMouseDownHandler = (event: React.MouseEvent) => {
       event.preventDefault();
     };
-    if (this.props.visible) {
-      const enabledClass = this.props.enabled ? "enabled" : "";
+    if (portalDomElement && top && (left != null) && visible) {
+      const enabledClass = enabled ? "enabled" : "";
+      const style = { top, left };
       return (
-        <div className={`text-style-bar ${enabledClass}`}
-             onMouseDown={onMouseDownHandler}>
-          {this.renderHeaderIcon()}
-          {this.buttonDefs.map(bDef => this.renderButton(bDef))}
-        </div>
+        ReactDOM.createPortal(
+          <div className={`text-style-bar ${enabledClass}`} style={style} onMouseDown={onMouseDownHandler}>
+            {this.buttonDefs.map(button => this.renderButton(button))}
+          </div>, portalDomElement)
       );
     }
     return (null);
-  }
-
-  private renderHeaderIcon() {
-    return (
-      <div className={"bar-header-icon"}>
-        <svg className="header-icon" viewBox="10 10 150 150">
-          <use xlinkHref="#icon-text-tool"/>
-        </svg>
-      </div>
-    );
   }
 
   private renderButton(buttonDef: IButtonDef) {

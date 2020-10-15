@@ -182,8 +182,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     ui.selectedTileIds.forEach(tileId => {
       const toolApi = this.props.toolApiMap[tileId];
       // if there is selected content inside the selected tile, delete it first
-      if (toolApi && toolApi.hasSelection()) {
-        toolApi.deleteSelection();
+      if (toolApi?.hasSelection?.()) {
+        toolApi.deleteSelection?.();
       }
       else {
         document.deleteTile(tileId);

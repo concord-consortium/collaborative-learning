@@ -8,10 +8,11 @@ import { isHotkey } from "is-hotkey";
 
 import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { getToolbarLocation } from "../utilities/tile-utils";
 import { TextStyleBarComponent } from "./text-style-bar";
+import { IToolTileProps } from "./tool-tile";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
 import "./text-tool.sass";
@@ -93,23 +94,20 @@ interface ISlateMapEntry {
   hotKey?: string;            // If missing, not a keyboard function.
 }
 
-interface IProps {
-  model: ToolTileModelType;
-  readOnly?: boolean;
-}
-
 interface IState {
   value?: Value;
   selectedButtons?: string[];
+  toolLeft?: number;
+  toolBottom?: number;
 }
 
 @inject("stores")
 @observer
-export default class TextToolComponent extends BaseComponent<IProps, IState> {
+export default class TextToolComponent extends BaseComponent<IToolTileProps, IState> {
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
-  private wrapper = React.createRef<HTMLDivElement>();
+  private textToolDiv: HTMLElement | null;
   private editor = React.createRef<Editor>();
 
   private slateMap: ISlateMapEntry[] = [
@@ -202,6 +200,18 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
         }
       }));
     }
+
+    this.props.onRegisterToolApi({
+      handleDocumentScroll: (x: number, y: number) => {
+        if (this.isEditableAndSelected()) {
+          this.forceUpdate();
+        }
+      },
+      handleTileResize: entry => {
+        const { left, bottom } = entry.contentRect;
+        this.setState({ toolLeft: left, toolBottom: bottom });
+      }
+    });
   }
 
   public componentWillUnmount() {
@@ -209,18 +219,28 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly } = this.props;
-    const { ui, unit: { placeholderText } } = this.stores;
+    const { documentContent, model, readOnly } = this.props;
+    const { value: editorValue, selectedButtons, toolLeft, toolBottom } = this.state;
+    const isFocused = editorValue?.selection.isFocused;
+    const { unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
     // to using 'text-tool-editor' for these purposes moving forward.
     const classes = `text-tool text-tool-editor ${editableClass}`;
 
-    const renderStyleBar = !readOnly;
-    const enableStyleBar = !readOnly && ui.isSelectedTile(model);
+    if (!editorValue) return null;
 
-    if (!this.state.value) { return null; }
+    const enableStyleBar = this.isEditableAndSelected();
+    const [toolbarLeft, toolbarTop] = getToolbarLocation({
+                                        documentContent,
+                                        toolTile: this.textToolDiv,
+                                        toolbarHeight: 29,
+                                        minToolContent: 22,
+                                        toolLeft,
+                                        toolBottom
+                                      });
+    const isStyleBarVisible = enableStyleBar && ((toolbarTop || 0) >= 0);
 
     const handleToolBarButtonClick = (
         buttonIconName: string,
@@ -246,15 +266,18 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
       // which is used for cypress tests and other purposes.
-      <div className="text-tool-wrapper"
-        ref={this.wrapper}
+      <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+        ref={elt => this.textToolDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextStyleBarComponent
-          selectedButtonNames={this.state.selectedButtons ? this.state.selectedButtons : []}
+          portalDomElement={isFocused ? documentContent : undefined}
+          top={toolbarTop}
+          left={toolbarLeft}
+          selectedButtonNames={selectedButtons || []}
           clickHandler={handleToolBarButtonClick}
           editor={this.editor}
           enabled={enableStyleBar}
-          visible={renderStyleBar}
+          visible={isStyleBarVisible}
         />
         <Editor
           key={model.id}
@@ -262,7 +285,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
           ref={this.editor}
           placeholder={placeholderText}
           readOnly={readOnly}
-          value={this.state.value}
+          value={editorValue}
           onChange={this.handleChange}
           renderMark={this.renderMark}
           renderBlock={this.renderBlock}
@@ -272,28 +295,19 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private isEditableAndSelected() {
+    const { model, readOnly } = this.props;
+    const { ui } = this.stores;
+    return !readOnly && ui.isSelectedTile(model);
+  }
+
   private handleChange = (change: SlateChange) => {
     const { readOnly, model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
 
-    // determine last focus state from list of operations
-    let isFocused: boolean | undefined;
-    change.operations.forEach(op => {
-      if (op && op.type === "set_selection") {
-        isFocused = op.properties.isFocused;
-      }
-    });
-
-    if (isFocused != null) {
-      // polarity is reversed from what one might expect
-      if (!isFocused) {
-        // only select - if we deselect, it breaks delete because Slate
-        // somehow detects the selection change before the click on the
-        // delete button is processed by the workspace. For now, we just
-        // disable focus change on deselection.
-        debouncedSelectTile(ui, model);
-      }
+    if (change.value.selection.isFocused) {
+      debouncedSelectTile(ui, model);
     }
 
     if (content.type === "Text" && !readOnly) {
@@ -356,7 +370,7 @@ export default class TextToolComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
-    const isWrapperClick = e.target === this.wrapper.current;
+    const isWrapperClick = e.target === this.textToolDiv;
     if (readOnly || isWrapperClick || isExtendingSelection) {
       isWrapperClick && this.editor.current?.focus();
       ui.setSelectedTile(model, { append: isExtendingSelection });

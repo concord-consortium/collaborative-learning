@@ -68,10 +68,6 @@ export default class TableToolComponent extends BaseComponent<IToolTileProps, IS
 
     const metadata = this.getContent().metadata;
     this.props.onRegisterToolApi({
-      hasSelection: () => false,
-      deleteSelection: () => { /* nop */ },
-      getSelectionInfo: () => "",
-      setSelectionHighlight: () => { /* nop */ },
       isLinked: () => {
         return metadata.isLinked;
       },

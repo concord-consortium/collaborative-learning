@@ -2,51 +2,36 @@
 
 .text-style-bar
   background-color: $color3-4
-  padding-top: 35px
   position: absolute
-  display: inline-block
+  display: flex
+  justify-content: space-around
+  align-items: center
   margin: 4px 2px 2px 2px
   float: left
-  top: -5px
+  top: 86px
   left: 0
-  width: 40px
-  min-height: 350px
-  height: 100%
+  width: 232px
+  height: 29px
 
-.bar-header-icon
-  position: absolute
-  top: -5px
-  left: 0
-  .header-icon
-    fill: white
-    width: 22px
-    height: 32px
-    background-color: $color3-6
-    border-bottom-right-radius: 5px
-    border: white solid 2px
-
-.button-with-tool-tip
-  position: relative
-  display: inline-block
-  background-color: $color3-4
-  color: black
-  font-size: 16px
-  margin: auto
-  padding-top: 3px
-  width: 30px
-  height: 28px
-  .on
-    color: #009CDC
-  .off
-    color: #909090
-  &:hover
-    background-color: $color3-5
-    .tool-tip-text
-      visibility: visible
-      opacity: 1
-      transition: opacity 0.5s
-      transition-delay: 0.8s
-      background-color: #f0f0f0
+  .button-with-tool-tip
+    background-color: $color3-4
+    color: black
+    font-size: 16px
+    padding-top: 3px
+    width: 30px
+    height: 28px
+    .on
+      color: #009CDC
+    .off
+      color: #909090
+    &:hover
+      background-color: $color3-5
+      .tool-tip-text
+        visibility: visible
+        opacity: 1
+        transition: opacity 0.5s
+        transition-delay: 0.8s
+        background-color: #f0f0f0
 
 .tool-tip-text
   position: absolute
