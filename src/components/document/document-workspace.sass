@@ -14,7 +14,8 @@
     left: $nav-tabs-width
     right: 0
     bottom: $half-nav-expanded-peek
-    margin-top: 5px
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
+    margin-top: $workspace-content-margin
     transition: left 1s
     &.half
       left: 50%

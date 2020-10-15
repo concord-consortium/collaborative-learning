@@ -1,17 +1,17 @@
 @import ../vars
 
+$document-margin: 2px
 .document-tabs
   border-color: $charcoal
   border-width: 0 $tab-section-border-width $tab-section-border-width 0
   border-style: solid
+
   &.my-work
     border-color: $workspace-teal
   &.class-work
     border-color: $classwork-purple
   &.supports
     border-color: $support-blue
-  .tab-panel
-    height: 100%
   .tab-list
     background-color: white
     margin: 0
@@ -55,3 +55,6 @@
           background-color: $support-blue-light-3
         &.learning-logs
           background-color: $learninglog-green-light-4
+  .documents-panel
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$nav-tab-height} * 2 + #{$tab-section-border-width} * 2))
+    margin-top: $document-margin

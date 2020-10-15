@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ENavTabSectionType, NavTabSectionModelType, NavTabSpec  } from "../../models/view/nav-tabs";
+import { ENavTabSectionType, NavTabSectionSpec, NavTabSectionModelType, NavTabSpec }
+  from "../../models/view/nav-tabs";
 import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
@@ -26,15 +27,32 @@ interface IState {
 
 const kNavItemScale = 0.11;
 
+export interface ISubTabSpec {
+  label: string;
+  sections: NavTabSectionSpec[];
+}
+
 @inject("stores")
 @observer
 export class DocumentTabPanel extends BaseComponent<IProps, IState> {
+
+  subTabs: ISubTabSpec[] = [];
 
   constructor(props: IProps) {
     super(props);
     this.state = {
       tabIndex: 0
     };
+
+    props.tabSpec.sections?.forEach(section => {
+      const found = this.subTabs.findIndex(tab => tab.label === section.title );
+      if (found >= 0) {
+        this.subTabs[found].sections.push(section);
+      }
+      else {
+        this.subTabs.push({ label: section.title, sections: [section] });
+      }
+    });
   }
 
   public componentDidMount() {
@@ -48,10 +66,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, selectedDocument,
-            onSelectNewDocument, onSelectDocument, onTabClick } = this.props;
-    const { tabIndex } = this.state;
-    const { user } = this.stores;
+    const { documentView, tabSpec, onTabClick } = this.props;    const { tabIndex } = this.state;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
@@ -63,47 +78,30 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         selectedTabClassName="selected"
       >
         <TabList className={`tab-list ${navTabSpec?.tab}`}>
-          {navTabSpec?.sections.map((section) => {
-            const sectionTitle = this.getSectionTitle(section, this.stores);
-            return (
-              <Tab
-                className={`doc-tab ${navTabSpec?.tab} ${section.type}`}
-                key={`section-${section.type}`}
-                onClick={() => onTabClick?.(sectionTitle, section.type)}
-                data-test={section.dataTestHeader}
-              >
-                {sectionTitle}
-              </Tab>
-            );
-          })}
+          {this.subTabs.map((subTab) => {
+            const sectionTitle = subTab.label;
+            const type = subTab.sections[0].type;
+              return (
+                <Tab className={`doc-tab ${navTabSpec?.tab} ${type}`}
+                     key={`section-${sectionTitle}`}
+                     onClick={() => onTabClick?.(sectionTitle, type)}>
+                  {sectionTitle}
+                </Tab>
+              );
+            })}
         </TabList>
-        {navTabSpec?.sections.map((section, index) => {
-          const _handleDocumentStarClick = section.showStarsForUser(user)
-                ? this.handleDocumentStarClick
-                : undefined;
-          const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                ? this.handleDocumentDeleteClick
-                : undefined;
-          return (
-            <TabPanel key={`section-${section.type}`}>
-              { documentView && (index === tabIndex)
-                ? documentView
-                : <TabPanelDocumentsSection
-                    key={section.type}
-                    tab={navTabSpec!.tab}
-                    section={section}
-                    stores={this.stores}
-                    scale={kNavItemScale}
-                    selectedDocument={selectedDocument}
-                    onSelectNewDocument={onSelectNewDocument}
-                    onSelectDocument={onSelectDocument}
-                    onDocumentDragStart={this.handleDocumentDragStart}
-                    onDocumentStarClick={_handleDocumentStarClick}
-                    onDocumentDeleteClick={_handleDocumentDeleteClick}
-                  /> }
-            </TabPanel>
-          );
-        })}
+        <div className="documents-panel">
+          { this.subTabs.map((subTab,index) => {
+              return (
+                <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${subTab.label}`}>
+                  { documentView && (index === tabIndex)
+                    ? documentView
+                    : this.renderSubsections(subTab)
+                  }
+                </TabPanel>
+              );
+          })}
+        </div>
       </Tabs>
     );
   }
@@ -144,4 +142,38 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     this.setState({ tabIndex });
   }
 
+  private renderSubsections( subTab: any) {
+    const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
+    const { user } = this.stores;
+    return (
+      <div>
+        { subTab.sections.map( (section: any, index: any) => {
+            const _handleDocumentStarClick = section.showStarsForUser(user)
+                  ? this.handleDocumentStarClick
+                  : undefined;
+            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+                  ? this.handleDocumentDeleteClick
+                  : undefined;
+            return (
+              <TabPanelDocumentsSection
+                key={section.type}
+                tab={subTab.label}
+                section={section}
+                index={index}
+                numOfSections={subTab.sections.length}
+                stores={this.stores}
+                scale={kNavItemScale}
+                selectedDocument={selectedDocument}
+                onSelectNewDocument={onSelectNewDocument}
+                onSelectDocument={onSelectDocument}
+                onDocumentDragStart={this.handleDocumentDragStart}
+                onDocumentStarClick={_handleDocumentStarClick}
+                onDocumentDeleteClick={_handleDocumentDeleteClick}
+              />
+            );
+          })
+        }
+      </div>
+    );
+  }
 }
