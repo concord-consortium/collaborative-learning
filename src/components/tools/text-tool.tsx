@@ -11,7 +11,7 @@ import { debouncedSelectTile } from "../../models/stores/ui";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getToolbarLocation } from "../utilities/tile-utils";
-import { TextStyleBarComponent } from "./text-style-bar";
+import { TextStyleBarComponent } from "./text-toolbar";
 import { IToolTileProps } from "./tool-tile";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 

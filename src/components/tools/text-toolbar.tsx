@@ -4,7 +4,7 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../base";
 import { isMac } from "../../utilities/browser";
 
-import "./text-style-bar.sass";
+import "./text-toolbar.sass";
 
 interface IButtonDef {
   iconName: string;  // Font-Awesome icon name for this button.
