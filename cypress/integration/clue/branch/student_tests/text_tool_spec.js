@@ -33,7 +33,7 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextTile().last().should('contain', 'Hello World');
     });
     it('verifies restore of text field content',()=>{
-        canvas.createNewExtraDocument('text tool test');
+        canvas.createNewExtraDocumentFromFileMenu('text tool test','my-work');
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
         // rightNav.openRightNavTab('my-work');

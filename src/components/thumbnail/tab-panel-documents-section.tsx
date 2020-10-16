@@ -57,6 +57,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
     const numPanels = numOfSections > 1 ? 2 : 1;
+    const tabName = tab.toLowerCase().replace(' ', '-');
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -98,10 +99,10 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     }
 
     return (
-      <div className={`tab-panel-documents-section ${tab} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}
+      <div className={`tab-panel-documents-section ${tabName} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
-        <div className={`list ${tab} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}>
+        <div className={`list ${tabName} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
@@ -139,7 +140,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             return (
               <ThumbnailDocumentItem
                 key={document.key}
-                dataTestName={`${tab}-list-items`}
+                dataTestName={`${tabName}-list-items`}
                 canvasContext={tab}
                 document={document}
                 scale={scale}

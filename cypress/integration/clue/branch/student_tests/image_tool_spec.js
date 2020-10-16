@@ -51,7 +51,7 @@ context('Test image functionalities', function(){
     });
     describe('upload image from user computer',()=>{
         before(()=>{ //create a new doc so that save and restore can e tested
-            canvas.createNewExtraDocument(userCanvas);
+            canvas.createNewExtraDocumentFromFileMenu(userCanvas, "workspaces");
             cy.wait(2000);
         });
         it('will upload png file from user computer', function(){

@@ -45,7 +45,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     };
 
     props.tabSpec.sections?.forEach(section => {
-      const found = this.subTabs.findIndex(tab => tab.label === section.title );
+      const found = this.subTabs.findIndex(tab => tab.label === section.title);
       if (found >= 0) {
         this.subTabs[found].sections.push(section);
       }
@@ -66,7 +66,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, onTabClick } = this.props;    const { tabIndex } = this.state;
+    const { documentView, tabSpec, onTabClick } = this.props; const { tabIndex } = this.state;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
@@ -79,34 +79,35 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
       >
         <TabList className={`tab-list ${navTabSpec?.tab}`}>
           {this.subTabs.map((subTab) => {
-            const sectionTitle = subTab.label;
+            const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             const type = subTab.sections[0].type;
-              return (
-                <Tab className={`doc-tab ${navTabSpec?.tab} ${type}`}
-                     key={`section-${sectionTitle}`}
-                     onClick={() => onTabClick?.(sectionTitle, type)}>
-                  {sectionTitle}
-                </Tab>
-              );
-            })}
+            return (
+              <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
+                    key={`section-${sectionTitle}`}
+                    onClick={() => onTabClick?.(subTab.label, type)}>
+                {subTab.label}
+              </Tab>
+            );
+          })}
         </TabList>
         <div className="documents-panel">
-          { this.subTabs.map((subTab,index) => {
-              return (
-                <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${subTab.label}`}>
-                  { documentView && (index === tabIndex)
-                    ? documentView
-                    : this.renderSubsections(subTab)
-                  }
-                </TabPanel>
-              );
+          {this.subTabs.map((subTab, index) => {
+            const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+            return (
+              <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
+                { documentView && (index === tabIndex)
+                  ? documentView
+                  : this.renderSubsections(subTab)
+                }
+              </TabPanel>
+            );
           })}
         </div>
       </Tabs>
     );
   }
 
-  private getSectionTitle = (section: NavTabSectionModelType , stores: IStores) => {
+  private getSectionTitle = (section: NavTabSectionModelType, stores: IStores) => {
     if (section.title === "%abbrevInvestigation%") {
       const { unit, investigation } = stores;
       const { abbrevTitle } = unit;
@@ -126,7 +127,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   private handleDocumentDeleteClick = (document: DocumentModelType) => {
-    const {ui} = this.stores;
+    const { ui } = this.stores;
     ui.confirm("Do you want to delete this?", "Confirm Delete")
       .then(ok => {
         if (ok) {
@@ -142,36 +143,36 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     this.setState({ tabIndex });
   }
 
-  private renderSubsections( subTab: any) {
+  private renderSubsections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
     return (
       <div>
-        { subTab.sections.map( (section: any, index: any) => {
-            const _handleDocumentStarClick = section.showStarsForUser(user)
-                  ? this.handleDocumentStarClick
-                  : undefined;
-            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                  ? this.handleDocumentDeleteClick
-                  : undefined;
-            return (
-              <TabPanelDocumentsSection
-                key={section.type}
-                tab={subTab.label}
-                section={section}
-                index={index}
-                numOfSections={subTab.sections.length}
-                stores={this.stores}
-                scale={kNavItemScale}
-                selectedDocument={selectedDocument}
-                onSelectNewDocument={onSelectNewDocument}
-                onSelectDocument={onSelectDocument}
-                onDocumentDragStart={this.handleDocumentDragStart}
-                onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
-              />
-            );
-          })
+        { subTab.sections.map((section: any, index: any) => {
+          const _handleDocumentStarClick = section.showStarsForUser(user)
+            ? this.handleDocumentStarClick
+            : undefined;
+          const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+            ? this.handleDocumentDeleteClick
+            : undefined;
+          return (
+            <TabPanelDocumentsSection
+              key={section.type}
+              tab={subTab.label}
+              section={section}
+              index={index}
+              numOfSections={subTab.sections.length}
+              stores={this.stores}
+              scale={kNavItemScale}
+              selectedDocument={selectedDocument}
+              onSelectNewDocument={onSelectNewDocument}
+              onSelectDocument={onSelectDocument}
+              onDocumentDragStart={this.handleDocumentDragStart}
+              onDocumentStarClick={_handleDocumentStarClick}
+              onDocumentDeleteClick={_handleDocumentDeleteClick}
+            />
+          );
+        })
         }
       </div>
     );

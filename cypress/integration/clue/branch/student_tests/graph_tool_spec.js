@@ -1,10 +1,12 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
+import RightNav from '../../../../support/elements/common/RightNav';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
+const rightNav = new RightNav;
 
 const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
@@ -28,7 +30,7 @@ context('Test graph tool functionalities', function(){
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will add points to a graph', function(){
-            canvas.createNewExtraDocument(ptsDoc);
+            canvas.createNewExtraDocumentFromFileMenu(ptsDoc, "my-work");
             clueCanvas.addTile('geometry');
             cy.get('.spacer').click();
             clueCanvas.deleteTile('text');
@@ -37,8 +39,8 @@ context('Test graph tool functionalities', function(){
             graphToolTile.addPointToGraph(10,5);
             graphToolTile.addPointToGraph(10,10);
         });
-        it('will add a polygon to a graph', function(){
-            canvas.createNewExtraDocument(polyDoc);
+        it.skip('will add a polygon to a graph', function(){
+            canvas.createNewExtraDocumentFromFileMenu(polyDoc, "my-work");
             clueCanvas.addTile('geometry');
             cy.get('.spacer').click();
             clueCanvas.deleteTile('text');
@@ -54,15 +56,15 @@ context('Test graph tool functionalities', function(){
 
     describe('restore points to canvas', function(){
         it('will verify restore of point at origin', function(){
-            canvas.openDocumentWithTitle('problem-documents', problemDoc);
+            rightNav.openDocumentWithTitle('my-work','workspace', problemDoc);
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will verify restore of multiple points', function(){
-            canvas.openDocumentWithTitle('personal-documents', ptsDoc);
+            rightNav.openDocumentWithTitle('my-work','workspace', ptsDoc);
             graphToolTile.getGraphPoint().should('have.length',3);
         });
-        it('will verify restore of polygon', function(){
-            canvas.openDocumentWithTitle('personal-documents', polyDoc);
+        it.skip('will verify restore of polygon', function(){
+            rightNav.openDocumentWithTitle('my-work','workspace', polyDoc);
             graphToolTile.getGraphPolygon().should('exist');
         });
     });
@@ -101,7 +103,7 @@ context('Test graph tool functionalities', function(){
             // it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
             //
             // });
-            it('will show and hide angles to a polygon', function(){
+            it.skip('will show and hide angles to a polygon', function(){
                 let numAngles=1;
                 canvas.openDocumentWithTitle('personal-documents', polyDoc);
                 graphToolTile.selectGraphPoint(4.2,2);
@@ -133,7 +135,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.selectGraphPoint(4.2,2);
 
             });
-            it('will drag a polygon to a new location', function(){
+            it.skip('will drag a polygon to a new location', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 18, y=5;
@@ -153,12 +155,12 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.getGraphPointCoordinates(1).should('contain', '('+newX2+', '+newY2+')');
                 graphToolTile.getGraphPointCoordinates(2).should('contain', '('+newX3+', '+newY3+')');
             });
-            it('verify rotate tool is visible when polygon is selected', function(){
+            it.skip('verify rotate tool is visible when polygon is selected', function(){
                 canvas.openDocumentWithTitle('personal-documents', polyDoc);
                 graphToolTile.getGraphPolygon().click({force:true});
                 graphToolTile.getRotateTool().should('be.visible');
             });
-            it('will rotate a polygon', function(){
+            it.skip('will rotate a polygon', function(){
                 //not sure how to verify the rotation
                 graphToolTile.getRotateTool()
                     .trigger('mousedown')
@@ -169,14 +171,14 @@ context('Test graph tool functionalities', function(){
                     .trigger('mouseup');
                 //TODO verify points are in new location
             });
-            it('will copy and paste a polygon', function(){
+            it.skip('will copy and paste a polygon', function(){
                 graphToolTile.getGraphPolygon();
                 graphToolTile.copyGraphElement();
                 graphToolTile.getGraphPolygon().should('have.length',2);
                 graphToolTile.getAngleAdornment().should('have.length',6);
                 graphToolTile.getGraphPoint().should('have.length',6);
             });
-            it('will restore changes to a graph', function(){
+            it.skip('will restore changes to a graph', function(){
                 canvas.openDocumentWithTitle('personal-documents', polyDoc);
                 graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
             });
