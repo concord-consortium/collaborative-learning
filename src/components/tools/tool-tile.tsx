@@ -88,9 +88,12 @@ interface IToolTileBaseProps {
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
-export interface IToolTileProps extends IToolTileBaseProps {
+export interface IRegisterToolApiProps {
   onRegisterToolApi: (toolApi: IToolApi) => void;
   onUnregisterToolApi: () => void;
+}
+
+export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
 }
 
 interface IProps extends IToolTileBaseProps {

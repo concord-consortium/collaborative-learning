@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { inject, observer } from "mobx-react";
-import { BaseComponent } from "../base";
+import { useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
+import { TextToolbarButton } from "./text-toolbar-button";
+import { IRegisterToolApiProps } from "./tool-tile";
 import { isMac } from "../../utilities/browser";
 
 import "./text-toolbar.sass";
@@ -11,77 +12,57 @@ interface IButtonDef {
   toolTip: string;   // Text for the button's tool-tip.
 }
 
-interface IProps {
-  portalDomElement?: HTMLElement | null;
-  top?: number;
-  left?: number;
-  selectedButtonNames: string[];
-  clickHandler: (buttonName: string, editor: any, event: React.MouseEvent) => void;
+interface IProps extends IRegisterToolApiProps {
+  documentContent?: HTMLElement | null;
+  toolTile?: HTMLElement | null;
+  selectedButtons: string[];
+  onButtonClick: (buttonName: string, editor: any, event: React.MouseEvent) => void;
   editor: any;
-  visible: boolean;  // If true, render the tool bar.
-  enabled: boolean;  // If true, let user events be processed.
+  enabled: boolean;
 }
 
-@inject("stores")
-@observer
-export class TextStyleBarComponent extends BaseComponent<IProps> {
+const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
-  private prefix = isMac() ? "Cmd-" : "Ctrl-";
+const buttonDefs: IButtonDef[] = [
+  { iconName: "bold",        toolTip: `Bold (${kShortcutPrefix}b)`},
+  { iconName: "italic",      toolTip: `Italic (${kShortcutPrefix}i)`},
+  { iconName: "underline",   toolTip: `Underline (${kShortcutPrefix}u)`},
+  { iconName: "subscript",   toolTip: `Subscript (${kShortcutPrefix},)`},
+  { iconName: "superscript", toolTip: `Superscript (${kShortcutPrefix}Shift-,)`},
+  { iconName: "list-ol",     toolTip: `Numbered List`},
+  { iconName: "list-ul",     toolTip: `Bulleted List`}
+];
 
-  // If there should be a need to use this component in more than one place,
-  // it should be relatively straightforward to abstract the set of buttons
-  // outside of the component and define the contents of the bar in the client
-  // code that instantiates the TextStyleBarComponent.
+const handleMouseDown = (event: React.MouseEvent) => {
+  event.preventDefault();
+};
 
-  private buttonDefs: IButtonDef[] = [
-    { iconName: "bold",        toolTip: `Bold (${this.prefix}b)`},
-    { iconName: "italic",      toolTip: `Italic (${this.prefix}i)`},
-    { iconName: "underline",   toolTip: `Underline (${this.prefix}u)`},
-    { iconName: "code",        toolTip: `Typewriter Font`},
-    { iconName: "subscript",   toolTip: `Subscript (${this.prefix},)`},
-    { iconName: "superscript", toolTip: `Superscript (${this.prefix}Shift-,)`},
-    { iconName: "list-ol",     toolTip: `Numbered List`},
-    { iconName: "list-ul",     toolTip: `Bulleted List`}
-  ];
-
-  public render() {
-    const { portalDomElement, top, left, enabled, visible } = this.props;
-    const onMouseDownHandler = (event: React.MouseEvent) => {
-      event.preventDefault();
-    };
-    if (portalDomElement && top && (left != null) && visible) {
-      const enabledClass = enabled ? "enabled" : "";
-      const style = { top, left };
-      return (
-        ReactDOM.createPortal(
-          <div className={`text-style-bar ${enabledClass}`} style={style} onMouseDown={onMouseDownHandler}>
-            {this.buttonDefs.map(button => this.renderButton(button))}
-          </div>, portalDomElement)
-      );
-    }
-    return (null);
-  }
-
-  private renderButton(buttonDef: IButtonDef) {
-    const showTip = this.props.enabled ? "enabled" : "";
-    const classes = (iconName: string) => {
-      const { selectedButtonNames: selected } = this.props;
-      const isSelected = selected.find( b => b === buttonDef.iconName );
-      const classList = [ "button-icon", "fa", "fa-fw" ].join(" ");
-      return (`${classList} fa-${iconName} ${isSelected ? "on" : "off" } ${showTip}`);
-    };
-    const clickHandler = (event: React.MouseEvent) => {
-      if (this.props.enabled) {
-        this.props.clickHandler(buttonDef.iconName, this.props.editor, event);
-      }
-    };
-    return (
-      <div className={`button-with-tool-tip ${showTip}`} key={buttonDef.iconName}>
-        <i className={classes(buttonDef.iconName)} onClick={clickHandler} />
-        <span className={`tool-tip-text ${showTip}`}>
-          {buttonDef.toolTip}
-        </span>
-      </div>
-    );
-  }
-}
+export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
+  const { documentContent, enabled, editor, selectedButtons, onButtonClick, ...others } = props;
+  const { isValid, left, top } = useFloatingToolbarLocation({
+                                  documentContent,
+                                  toolbarHeight: 29,
+                                  minToolContent: 22,
+                                  enabled,
+                                  ...others
+                                });
+  return documentContent && enabled && isValid
+    ? ReactDOM.createPortal(
+        <div className={`text-toolbar ${enabled ? "enabled" : ""}`}
+              style={{ left, top }} onMouseDown={handleMouseDown}>
+          {buttonDefs.map(button => {
+            const { iconName, toolTip } = button;
+            const isSelected = !!selectedButtons.find(b => b === iconName);
+            const handleClick = (event: React.MouseEvent) => {
+              if (enabled) {
+                onButtonClick(iconName, editor, event);
+              }
+            };
+            return (
+              <TextToolbarButton key={iconName} iconName={iconName} enabled={enabled}
+                tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />
+            );
+          })}
+        </div>, documentContent)
+    : null;
+};

@@ -10,9 +10,8 @@ import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
-import { getToolbarLocation } from "../utilities/tile-utils";
-import { TextStyleBarComponent } from "./text-toolbar";
-import { IToolTileProps } from "./tool-tile";
+import { TextToolbarComponent } from "./text-toolbar";
+import { IToolApi, IToolTileProps } from "./tool-tile";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
 import "./text-tool.sass";
@@ -97,8 +96,6 @@ interface ISlateMapEntry {
 interface IState {
   value?: Value;
   selectedButtons?: string[];
-  toolLeft?: number;
-  toolBottom?: number;
 }
 
 @inject("stores")
@@ -109,6 +106,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private prevText: any;
   private textToolDiv: HTMLElement | null;
   private editor = React.createRef<Editor>();
+  private toolbarToolApi: IToolApi | undefined;
 
   private slateMap: ISlateMapEntry[] = [
     // This table is needed to translate between Slate's block and mark types
@@ -203,13 +201,10 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
     this.props.onRegisterToolApi({
       handleDocumentScroll: (x: number, y: number) => {
-        if (this.isEditableAndSelected()) {
-          this.forceUpdate();
-        }
+        this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
-      handleTileResize: entry => {
-        const { left, bottom } = entry.contentRect;
-        this.setState({ toolLeft: left, toolBottom: bottom });
+      handleTileResize: (entry: ResizeObserverEntry) => {
+        this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
   }
@@ -220,8 +215,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
   public render() {
     const { documentContent, model, readOnly } = this.props;
-    const { value: editorValue, selectedButtons, toolLeft, toolBottom } = this.state;
-    const isFocused = editorValue?.selection.isFocused;
+    const { value: editorValue, selectedButtons } = this.state;
+    const isFocused = !!editorValue?.selection.isFocused;
     const { unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -230,17 +225,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     const classes = `text-tool text-tool-editor ${editableClass}`;
 
     if (!editorValue) return null;
-
-    const enableStyleBar = this.isEditableAndSelected();
-    const [toolbarLeft, toolbarTop] = getToolbarLocation({
-                                        documentContent,
-                                        toolTile: this.textToolDiv,
-                                        toolbarHeight: 29,
-                                        minToolContent: 22,
-                                        toolLeft,
-                                        toolBottom
-                                      });
-    const isStyleBarVisible = enableStyleBar && ((toolbarTop || 0) >= 0);
 
     const handleToolBarButtonClick = (
         buttonIconName: string,
@@ -269,15 +253,15 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
         ref={elt => this.textToolDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
-        <TextStyleBarComponent
-          portalDomElement={isFocused ? documentContent : undefined}
-          top={toolbarTop}
-          left={toolbarLeft}
-          selectedButtonNames={selectedButtons || []}
-          clickHandler={handleToolBarButtonClick}
+        <TextToolbarComponent
+          documentContent={documentContent}
+          toolTile={this.textToolDiv}
+          selectedButtons={selectedButtons || []}
+          onButtonClick={handleToolBarButtonClick}
           editor={this.editor}
-          enabled={enableStyleBar}
-          visible={isStyleBarVisible}
+          enabled={isFocused}
+          onRegisterToolApi={this.handleRegisterToolApi}
+          onUnregisterToolApi={this.handleUnregisterToolApi}
         />
         <Editor
           key={model.id}
@@ -295,25 +279,28 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     );
   }
 
-  private isEditableAndSelected() {
-    const { model, readOnly } = this.props;
-    const { ui } = this.stores;
-    return !readOnly && ui.isSelectedTile(model);
+  private handleRegisterToolApi = (toolApi: IToolApi) => {
+    this.toolbarToolApi = toolApi;
+  }
+
+  private handleUnregisterToolApi = () => {
+    this.toolbarToolApi = undefined;
   }
 
   private handleChange = (change: SlateChange) => {
+    const { value } = change;
     const { readOnly, model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
 
-    if (change.value.selection.isFocused) {
+    if (value.selection.isFocused) {
       debouncedSelectTile(ui, model);
     }
 
     if (content.type === "Text" && !readOnly) {
-      content.setSlate(change.value);
+      content.setSlate(value);
       this.setState({
-        value: change.value,
+        value,
         selectedButtons: this.getSelectedIcons(change).sort()
       });
     }
