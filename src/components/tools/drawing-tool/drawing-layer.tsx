@@ -621,7 +621,6 @@ interface DrawingLayerViewProps {
 interface DrawingLayerViewState {
   toolbarSettings?: ToolbarSettings;
   currentDrawingObject: DrawableObject|null;
-  objects: ObjectMap;
   selectedObjects: DrawingObject[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObject|null;
@@ -630,9 +629,9 @@ interface DrawingLayerViewState {
 
 @observer
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
-  public objects: ObjectMap;
   public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
+  private objects: ObjectMap;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
@@ -645,7 +644,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     this.state = {
       currentDrawingObject: null,
-      objects: {},
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
@@ -842,7 +840,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         this.setSelectedObjects(objectsToInteract);
         needToAddHoverToSelection = false;
       }
-      this.setState(state => ({ objects: state.objects }));
+      this.forceUpdate();
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -897,8 +895,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
   public renderObjects(_filter: (object: DrawingObject) => boolean) {
-    return Object.keys(this.state.objects).map((id) => {
-      const object = this.state.objects[id];
+    return Object.keys(this.objects).map((id) => {
+      const object = this.objects[id];
       if (!object || !_filter(object)) {
         return null;
       }
@@ -985,7 +983,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       .then(image => {
         if (!this._isMounted) return;
         // update all images with this originalUrl that have not been updated
-        const imageObjs = filter(this.state.objects,
+        const imageObjs = filter(this.objects,
           obj => {
             if (!!obj && obj.model.type === "image") {
               const _imgObj = obj as ImageObject;
@@ -1128,13 +1126,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
     if (drawingObject?.model.id) {
       const objectId = drawingObject.model.id;
-      this.setState(state => ({ objects: { ...state.objects, ...{ [objectId]: drawingObject } }}));
+      this.objects[objectId] = drawingObject;
+      this.forceUpdate();
     }
   }
 
   private moveDrawingObjects(moves: DrawingToolMove) {
     for (const move of moves) {
-      const drawingObject = this.state.objects[move.id];
+      const drawingObject = this.objects[move.id];
       if (drawingObject) {
         drawingObject.model.x = move.destination.x;
         drawingObject.model.y = move.destination.y;
@@ -1152,7 +1151,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private updateDrawingObjects(update: DrawingToolUpdate) {
     const {ids, update: {prop, newValue}} = update;
     for (const id of ids) {
-      const drawingObject = this.state.objects[id];
+      const drawingObject = this.objects[id];
       if (drawingObject && Object.prototype.hasOwnProperty.call(drawingObject.model, prop)) {
         if ((drawingObject instanceof ImageObject) && (prop === "url")) {
           const url = newValue as string;
@@ -1167,21 +1166,21 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   private deleteDrawingObjects(idsToDelete: string[]) {
     for (const id of idsToDelete) {
-      const drawingObject = this.state.objects[id];
+      const drawingObject = this.objects[id];
       if (drawingObject) {
         const {selectedObjects} = this.state;
         const index = selectedObjects.indexOf(drawingObject);
         if (index !== -1) {
           selectedObjects.splice(index, 1);
         }
-        delete this.state.objects[id];
-        this.setState(state => ({objects: state.objects, selectedObjects, hoverObject: null}));
+        delete this.objects[id];
+        this.setState({selectedObjects, hoverObject: null});
       }
     }
   }
 
   private forEachObject(callback: (object: DrawingObject, key?: string) => void) {
-    const {objects} = this.state;
+    const {objects} = this;
     Object.keys(objects).forEach((id) => {
       const object = objects[id];
       if (object) {
