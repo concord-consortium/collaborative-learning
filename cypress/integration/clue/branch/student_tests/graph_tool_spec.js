@@ -160,7 +160,6 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.getGraphPointCoordinates(2).should('contain', '('+newX3+', '+newY3+')');
             });
             it('verify rotate tool is visible when polygon is selected', function(){
-                // rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 graphToolTile.getGraphPolygon().click({force:true});
                 graphToolTile.getRotateTool().should('be.visible');
             });
@@ -184,7 +183,6 @@ context('Test graph tool functionalities', function(){
             });
             it('will restore changes to a graph', function(){
                 rightNav.openRightNavTab("my-work");                
-                rightNav.openDocumentWithTitle('my-work','workspaces', ptsDoc);
                 rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
             });

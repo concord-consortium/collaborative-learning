@@ -88,19 +88,21 @@ context('Test image functionalities', function(){
             rightNav.closeRightNavTabs();
         });
         it('verify restore of all images that were added by URL', function(){
+            // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded 
             // const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg','https://codap.concord.org/~eireland/model_image.gif'];
             // imageToolTile.getImageToolImage().each(($images, index, $list)=>{
                 // expect($list).to.have.length(3);
                 // expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
                 // expect($images).to.have.css('background-image').and.contains('url("data:image/png;base64');
             // });
-            imageToolTile.getImageToolImage().should('have.length', 3)
+            imageToolTile.getImageToolImage().should('have.length', 3);
         });
         it('verify restore of all  images that were added by upload', function(){
             rightNav.openRightNavTab('my-work');
             rightNav.openSection('my-work','workspaces');
             rightNav.openDocumentWithTitle('my-work','workspaces', userCanvas);
             cy.wait(3000);
+            // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded 
             // const imageFilePath=['image.png','case_image.jpg',/*'model_image.gif'*/];
 
             // imageToolTile.getImageToolImage().each(($images, index, $list)=>{

@@ -70,14 +70,12 @@ class Canvas {
   openDocumentWithTitle(subTab, title) {
     const subTabSelector = '.primary-workspace .doc-tab.my-work.' + subTab;
     const panelSelector = '.primary-workspace .tab-panel-documents-section.' + subTab;
-    const titlesSelector = panelSelector + ' .list.my-work .list-item .footer';
-    this.getOpenDocumentItem().click()
-      .then(() => {
-        cy.get(subTabSelector).click()
-          .then(() => {
-            cy.contains(titlesSelector, title).click();
-          });
-      });
+    const titlesSelector = panelSelector + ' .list-item .footer';
+
+    this.openFileMenu();
+    cy.get('[data-test=list-item-icon-open-workspace]').click();
+    cy.get(subTabSelector).click();
+    cy.get(titlesSelector).contains(title).click();
   }
 
   editTitlewithPencil(title) {

@@ -2,9 +2,8 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { ENavTabSectionType, NavTabSectionSpec, NavTabSectionModelType, NavTabSpec }
+import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec }
   from "../../models/view/nav-tabs";
-import { IStores } from "../../models/stores/stores";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
 import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
 import { LogEventName, Logger } from "../../lib/logger";
@@ -83,8 +82,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             const type = subTab.sections[0].type;
             return (
               <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                    key={`section-${sectionTitle}`}
-                    onClick={() => onTabClick?.(subTab.label, type)}>
+                   key={`section-${sectionTitle}`}
+                   onClick={() => onTabClick?.(subTab.label, type)}>
                 {subTab.label}
               </Tab>
             );
@@ -97,7 +96,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
               <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
                 { documentView && (index === tabIndex)
                   ? documentView
-                  : this.renderSubsections(subTab)
+                  : this.renderSubSections(subTab)
                 }
               </TabPanel>
             );
@@ -105,16 +104,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         </div>
       </Tabs>
     );
-  }
-
-  private getSectionTitle = (section: NavTabSectionModelType, stores: IStores) => {
-    if (section.title === "%abbrevInvestigation%") {
-      const { unit, investigation } = stores;
-      const { abbrevTitle } = unit;
-      const prefix = abbrevTitle ? `${abbrevTitle}: ` : "";
-      return `${prefix}Investigation ${investigation.ordinal}`;
-    }
-    return section.title;
   }
 
   private handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
@@ -143,7 +132,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     this.setState({ tabIndex });
   }
 
-  private renderSubsections(subTab: any) {
+  private renderSubSections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
     return (
