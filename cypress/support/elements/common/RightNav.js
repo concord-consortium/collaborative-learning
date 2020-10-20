@@ -41,7 +41,8 @@ class RightNav{
     }
 
     closeRightNavTabs(){
-        cy.get('.right-nav .tabs').click();
+        cy.get('.close-button').click();
+        cy.wait(1000);
     }
 
     getRightNavTab(tab){
@@ -84,6 +85,7 @@ class RightNav{
     }
 
     openDocumentWithTitle(tab, section, title){
+        this.openSection("my-work","workspaces");
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
         cy.get('.edit-button').click();
     }

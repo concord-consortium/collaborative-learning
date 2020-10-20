@@ -42,10 +42,7 @@ class Canvas {
   }
 
   getDeleteDocumentItem() {
-    return this.getFileMenu().click()
-      .then(() => {
-        return cy.get('[data-test=list-item-icon-delete-workspace');
-      });
+    return cy.get('[data-test=list-item-icon-delete-workspace');
   }
 
   getPublishIcon() {
@@ -110,10 +107,10 @@ class Canvas {
   }
 
   deleteDocument() {
-    this.getDeleteDocumentItem().click().then(() => {
-      dialog.getDialogTitle().should('exist').contains('Delete ');
-      dialog.getDialogOKButton().click();
-    });
+    this.openFileMenu();
+    this.getDeleteDocumentItem().click();
+    dialog.getDialogTitle().should('exist').contains('Delete ');
+    dialog.getDialogOKButton().click();
   }
 
   publishCanvas(type) {

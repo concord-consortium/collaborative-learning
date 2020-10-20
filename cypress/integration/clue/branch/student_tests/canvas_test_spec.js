@@ -53,7 +53,7 @@ context('Test Canvas', function () {
         clueCanvas.openOneUpViewFromFourUp();
       });
       it('verify personal workspace header UI', () => { //other header elements are tested in common
-        canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "workspaces");
+        canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
         canvas.getEditTitleIcon().should('be.visible');
         canvas.getPersonalPublishIcon().should('be.visible');
         clueCanvas.getShareButton().should('not.exist');
@@ -245,7 +245,7 @@ context('Test Canvas', function () {
 
     describe('save and restore of tool tiles', function () {
       describe('verify that tool tiles is saved from various locations', function () {
-        it('will restore from My Work/Extra Workspaces tab', function () {
+        it('will restore from My Work/Workspaces tab', function () {
           //Open personal workspace
           rightNav.openTopTab("my-work");
           rightNav.openDocumentWithTitle('my-work','workspaces', studentWorkspace);
@@ -256,7 +256,8 @@ context('Test Canvas', function () {
         });
         it('will restore from My Work/Investigation tab', function () {
           //Open Investigation
-          canvas.openDocumentWithTitle('problem-documents', this.title);
+          rightNav.openTopTab("my-work");
+          rightNav.openDocumentWithTitle('my-work','workspaces', this.title);
           clueCanvas.getInvestigationCanvasTitle().should('contain', this.title);
           textToolTile.getTextTile().should('be.visible').and('contain', this.title);
           graphToolTile.getGraphTile().should('exist');
@@ -273,12 +274,14 @@ context('Test Canvas', function () {
         });
         it('verify restore in 4 up view from Extra Workspace', function () {
           //Open Personal Workspace
-          canvas.openDocumentWithTitle('personal-documents', studentWorkspace);
+          rightNav.openTopTab("my-work");
+          rightNav.openDocumentWithTitle('my-work','workspaces', studentWorkspace);
           canvas.getPersonalDocTitle().should('contain', studentWorkspace);
         });
         it('verify restore in 4 up view from Investigation', function () {
           //Open Investigation should be in 4up view
-          canvas.openDocumentWithTitle('problem-documents', this.title);
+          rightNav.openTopTab("my-work");
+          rightNav.openDocumentWithTitle('my-work','workspaces', this.title);
           clueCanvas.getInvestigationCanvasTitle().should('contain', this.title);
           clueCanvas.getNorthWestCanvas().should('be.visible');
         });
@@ -422,45 +425,54 @@ context('Test Canvas', function () {
   });
 
   context('delete workspaces', function () {
-    before(() => {
-      // rightNav.openRightNavTab('my-work');
-      // rightNav.starCanvasItem('my-work','workspaces',studentWorkspace);
-    });
     it('verify delete of copy of investigation', function () {
-      canvas.openDocumentWithTitle('personal-documents', 'Investigation Copy');
+      rightNav.openTopTab("my-work");
+      rightNav.openDocumentWithTitle('my-work','workspaces', 'Investigation Copy');
       canvas.deleteDocument();
-      rightNav.shouldNotHaveDocumentWithTitle('my-work', 'personal-documents', 'Investigation Copy');
+      rightNav.openTopTab("my-work");
+      rightNav.openSection("my-work", "workspaces");
+      rightNav.getCanvasItemTitle("my-work","workspaces").contains('Investigation Copy').should('not.exist');
     });
     it('verify original investigation canvas still exist after copy delete', function () {
-      rightNav.shouldHaveDocumentWithTitle('my-work', 'problem-documents', 'Drawing Wumps');
+      rightNav.getCanvasItemTitle("my-work","workspaces").contains('Drawing Wumps').should('be.visible');
     });
     it('verify that original personal workspace is not deleted when copy is deleted', function () {
-      canvas.openDocumentWithTitle('personal-documents', renameTitle);
+      rightNav.openTopTab("my-work");
+      rightNav.openDocumentWithTitle('my-work', 'workspaces', renameTitlePencil);
       canvas.deleteDocument();
-      rightNav.shouldNotHaveDocumentWithTitle('my-work', 'personal-documents', renameTitle);
-      rightNav.shouldHaveDocumentWithTitle('my-work', 'personal-documents', studentWorkspace);
+      rightNav.openTopTab("my-work");
+      rightNav.openSection("my-work", "workspaces");
+      rightNav.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.exist');
+
     });
     it('verify delete of personal workspace', function () {
-      canvas.openDocumentWithTitle('personal-documents', studentWorkspace);
+      rightNav.openTopTab("my-work");
+      rightNav.openDocumentWithTitle('my-work', 'workspaces', studentWorkspace);
       canvas.deleteDocument();
-      rightNav.shouldNotHaveDocumentWithTitle('my-work', 'personal-documents', studentWorkspace);
+      rightNav.openTopTab("my-work");
+      rightNav.openSection("my-work", "workspaces");
+      rightNav.getCanvasItemTitle("my-work","workspaces").contains(studentWorkspace).should('not.exist');
     });
     it.skip('verify starred document is no longer in the Starred section after delete', function () {
       rightNav.openSection('my-work', 'starred');
       rightNav.getCanvasItemTitle('my-work', 'starred').should('not.exist');
     });
     it.skip('verify that published personal workspace', function () {
-      canvas.openDocumentWithTitle('personal-documents', publishTitle);
+      rightNav.openTopTab("my-work");
+      rightNav.openDocumentWithTitle('class-work', 'workspaces', publishTitle);
       canvas.deleteDocument();
       rightNav.shouldHaveDocumentWithTitle('class-work', 'published-personal-documents', publishTitle);
     });
-    it('verify delete of starred personal workspace', function () {
+    it.skip('verify delete of starred personal workspace', function () {
       //TODO: should also delete document from Starred section
     });
-    it('verify delete last document thumbnail', function () {
-      canvas.openDocumentWithTitle('personal-documents', renameTitlePencil);
+    it.skip('verify delete last document thumbnail', function () {//last document was deleted above
+      rightNav.openTopTab("my-work");
+      rightNav.openDocumentWithTitle('my-work', 'workspaces', renameTitlePencil);
       canvas.deleteDocument();
-      rightNav.shouldNotHaveDocumentWithTitle('my-work', 'personal-documents', renameTitlePencil);
+      rightNav.openTopTab("my-work");
+      rightNav.openSection("workspaces");
+      rightNav.getCanvasItemTitle("my-work","workspaces").should('have.length', 1);
     });
   });
 });

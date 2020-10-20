@@ -94,7 +94,7 @@ context('Tests for graph and table integration', function(){
           let title = "graph to table";
           before(()=>{
             canvas.canvas();
-            canvas.createNewExtraDocument(title);
+            canvas.createNewExtraDocumentFromFileMenu(title, 'my-work');
             canvas.getPersonalDocTitle().should('contain', title);
             addTableAndGraph();
             connectTableToGraph();
@@ -255,7 +255,7 @@ context('Tests for graph and table integration', function(){
         before(()=>{
             let title = 'table to graph';
             canvas.canvas();
-            canvas.createNewExtraDocument(title);
+            canvas.createNewExtraDocumentFromFileMenu(title, 'my-work');
             canvas.getPersonalDocTitle().should('contain', title);
             addTableAndGraph();
         });
