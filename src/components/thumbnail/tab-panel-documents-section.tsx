@@ -13,8 +13,8 @@ import "./tab-panel-documents-section.sass";
 interface IProps {
   tab: string;
   section: NavTabSectionModelType;
-  index: number
-  numOfSections: number
+  index: number;
+  numOfSections: number;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
@@ -99,10 +99,10 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     }
 
     return (
-      <div className={`tab-panel-documents-section ${tabName} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}
+      <div className={`tab-panel-documents-section ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
-        <div className={`list ${tabName} ${index === 0 && numPanels > 1 ? `top-panel`:``}`}>
+        <div className={`list ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 

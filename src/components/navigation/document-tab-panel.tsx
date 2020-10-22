@@ -43,6 +43,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
       tabIndex: 0
     };
 
+    // combine sections with matching titles into a single tab with sub-sections
     props.tabSpec.sections?.forEach(section => {
       const found = this.subTabs.findIndex(tab => tab.label === section.title);
       if (found >= 0) {
@@ -65,7 +66,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, onTabClick } = this.props; const { tabIndex } = this.state;
+    const { documentView, tabSpec, onTabClick } = this.props;
+    const { tabIndex } = this.state;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
