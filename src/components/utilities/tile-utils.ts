@@ -11,7 +11,7 @@ export function getToolbarLocation({
                   documentContent, toolTile, toolbarHeight, minToolContent, toolLeft, toolBottom
                 }: IGetToolbarLocationArgs) {
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-  let minToolbarTop = minToolContent || 22;
+  let minToolbarTop = minToolContent || 30;
   let maxToolbarTop = viewportHeight - toolbarHeight;
   let tileLeftOffset = 0;
   let tileTopOffset = 0;
