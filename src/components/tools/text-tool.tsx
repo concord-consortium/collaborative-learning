@@ -1,6 +1,6 @@
 import Immutable from "immutable";
 import React from "react";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import { Operation, Value, Range } from "slate";
 import { Editor, Plugin } from "slate-react";
@@ -198,6 +198,21 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         }
       }));
     }
+    // blur editor when tile is deselected
+    this.disposers.push(reaction(
+      () => {
+        const { model: { id } } = this.props;
+        const { ui: { selectedTileIds } } = this.stores;
+        return selectedTileIds.includes(id);
+      },
+      isTileSelected => {
+        const { value } = this.state;
+        const isFocused = !!value?.selection.isFocused;
+        if (isFocused && !isTileSelected) {
+          this.editor.current?.blur();
+        }
+      }
+    ));
 
     this.props.onRegisterToolApi({
       handleDocumentScroll: (x: number, y: number) => {
@@ -214,7 +229,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   }
 
   public render() {
-    const { documentContent, model, readOnly } = this.props;
+    const { documentContent, toolTile, model, readOnly } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
     const isFocused = !!editorValue?.selection.isFocused;
     const { unit: { placeholderText } } = this.stores;
@@ -255,7 +270,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextToolbarComponent
           documentContent={documentContent}
-          toolTile={this.textToolDiv}
+          toolTile={toolTile}
           selectedButtons={selectedButtons || []}
           onButtonClick={handleToolBarButtonClick}
           editor={this.editor}

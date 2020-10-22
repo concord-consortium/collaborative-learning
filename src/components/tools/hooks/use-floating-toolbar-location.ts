@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { getToolbarLocation } from "../../utilities/tile-utils";
+import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities/tile-utils";
 import { IRegisterToolApiProps } from "../tool-tile";
+import { useForceUpdate } from "./use-force-update";
 
-interface IFloatingToolbarArgs extends IRegisterToolApiProps {
-  documentContent?: HTMLElement | null;
-  toolTile?: HTMLElement | null;
-  toolbarHeight: number;
-  minToolContent?: number;
+interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocationBaseArgs {
   enabled: boolean;
 }
 
@@ -16,22 +13,18 @@ interface IFloatingToolbarArgs extends IRegisterToolApiProps {
  */
 export const useFloatingToolbarLocation = ({
         onRegisterToolApi, onUnregisterToolApi,
-        documentContent, toolTile,
-        toolbarHeight, minToolContent, enabled
+        documentContent, toolTile, enabled, ...others
       }: IFloatingToolbarArgs) => {
 
-  const [ , setScrollCount] = useState(0);
   const [tileOffset, setTileOffset] = useState<{ left: number, bottom: number }>({ left: 0, bottom: 0 });
+  const forceUpdate = useForceUpdate();
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
 
   useEffect(() => {
     onRegisterToolApi({
       handleDocumentScroll: () => {
-        if (enabledRef.current) {
-          // force redraw
-          setScrollCount(count => count + 1);
-        }
+        enabledRef.current && forceUpdate();
       },
       handleTileResize: (entry: ResizeObserverEntry) => {
         const { contentRect } = entry;
@@ -44,11 +37,10 @@ export const useFloatingToolbarLocation = ({
   const { left, top } = getToolbarLocation({
                           documentContent,
                           toolTile,
-                          toolbarHeight,
-                          minToolContent,
                           toolLeft: tileOffset.left,
-                          toolBottom: tileOffset.bottom
+                          toolBottom: tileOffset.bottom,
+                          ...others
                         });
   const isValid = (left != null) && (top != null) && (top >= 0);
-  return { isValid, left, top };
+  return isValid ? { left, top } : undefined;
 };

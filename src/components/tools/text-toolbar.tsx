@@ -39,17 +39,18 @@ const handleMouseDown = (event: React.MouseEvent) => {
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, enabled, editor, selectedButtons, onButtonClick, ...others } = props;
-  const { isValid, left, top } = useFloatingToolbarLocation({
-                                  documentContent,
-                                  toolbarHeight: 29,
-                                  minToolContent: 22,
-                                  enabled,
-                                  ...others
-                                });
-  return documentContent && enabled && isValid
+  const toolbarLocation = useFloatingToolbarLocation({
+                            documentContent,
+                            toolbarHeight: 29,
+                            minToolContent: 22,
+                            toolbarLeftOffset: -2,
+                            enabled,
+                            ...others
+                          });
+  return documentContent && enabled && toolbarLocation
     ? ReactDOM.createPortal(
         <div className={`text-toolbar ${enabled ? "enabled" : ""}`}
-              style={{ left, top }} onMouseDown={handleMouseDown}>
+              style={toolbarLocation} onMouseDown={handleMouseDown}>
           {buttonDefs.map(button => {
             const { iconName, toolTip } = button;
             const isSelected = !!selectedButtons.find(b => b === iconName);
