@@ -80,7 +80,7 @@
         "label": "My Work",
         "sections": [
           {
-            "title": "Problem Workspaces",
+            "title": "Workspaces",
             "type": "problem-documents",
             "dataTestHeader": "my-work-section-investigations",
             "dataTestItem": "my-work-list-items",
@@ -88,7 +88,7 @@
             "showStars": ["student", "teacher"]
           },
           {
-            "title": "Extra Workspaces",
+            "title": "Workspaces",
             "type": "personal-documents",
             "dataTestHeader": "my-work-section-workspaces",
             "dataTestItem": "my-work-list-items",

@@ -12,7 +12,9 @@ import "./tab-panel-documents-section.sass";
 
 interface IProps {
   tab: string;
-  section: NavTabSectionModelType ;
+  section: NavTabSectionModelType;
+  index: number;
+  numOfSections: number;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
@@ -46,7 +48,7 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   return `${namePrefix}${title}`;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale, selectedDocument,
+export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSections, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
@@ -54,6 +56,8 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
+    const numPanels = numOfSections > 1 ? 2 : 1;
+    const tabName = tab.toLowerCase().replace(' ', '-');
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -95,9 +99,10 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     return (
-      <div className={`tab-panel-documents-section ${section.type}`} key={`${tab}-${section.type}`}
-          data-test={`${section.dataTestHeader}-documents`}>
-        <div className={`list ${tab}`}>
+      <div className={`tab-panel-documents-section ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}
+            key={`${tab}-${section.type}`}
+            data-test={`${section.dataTestHeader}-documents`}>
+        <div className={`list ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
@@ -135,7 +140,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
             return (
               <ThumbnailDocumentItem
                 key={document.key}
-                dataTestName={`${tab}-list-items`}
+                dataTestName={`${tabName}-list-items`}
                 canvasContext={tab}
                 document={document}
                 scale={scale}

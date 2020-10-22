@@ -41,16 +41,16 @@ class RightNav{
     }
 
     closeRightNavTabs(){
-        cy.get('.right-nav .tabs').click();
+        cy.get('.close-button').click();
+        cy.wait(1000);
     }
 
     getRightNavTab(tab){
-        return cy.get('#rightNavTab-'+tab+'.tab');
+        return cy.get('.nav-tab.tab-'+tab);
     }
 
     openRightNavTab(tab){
         this.getRightNavTab(tab).click();
-        cy.wait(1000);
     }
     closeRightNavTab(tab){
         cy.get('#rightNavTab-'+tab+'.tab').click();
@@ -65,13 +65,11 @@ class RightNav{
         return cy.get('[data-test='+tab+'-section-'+section+'] .title');
     }
 
-    openSection(tab,section){
-        if (tab==='learning-log'){
-            cy.get('[data-test='+tab+'-section]').click();
-        } else {
-            cy.get('[data-test='+tab+'-section-'+section+']').click({ force: true });
-            cy.wait(1000);
-        }
+    openTopTab(tab) {
+      cy.get('.top-tab.tab-'+tab).click();
+    }
+    openSection(tab, section) {
+      cy.get('.doc-tab.'+tab+'.'+section).click();
     }
 
     closeSection(tab,section){
@@ -82,17 +80,14 @@ class RightNav{
         return cy.get('[data-test='+tab+'-section-'+section).siblings('.list-container').find('[data-test='+tab+'-list-items]');
     }
 
-    getCanvasItemTitle(tab,section){
-        if ((tab==='learning-log')||(section==='')){
-            return cy.get('[data-test='+tab+'-section]').siblings('.list-container').find('.footer .info div');
-        } else {
-            return cy.get('[data-test='+tab+'-section-'+section+']').siblings('.list-container').find('.footer .info div');
-
-        }
+    getCanvasItemTitle(tab, section){
+      return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    openCanvasItem(tab, section, title){
+    openDocumentWithTitle(tab, section, title){
+        this.openSection("my-work","workspaces");
         this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+        cy.get('.edit-button').click();
     }
 
     starCanvasItem(tab,section,title){

@@ -26,24 +26,25 @@ context('Test image functionalities', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/image.png';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().last().click().type(imageFileURL);
+            imageToolTile.getImageURLTextField().last().click().clear().type(imageFileURL);
             cy.get(imageToolTile.imageChooseFileButton()).last().click();
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
-        it.skip('will load an jpg from a URL', function(){
+        it('will load an jpg from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/case_image.jpg';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().last().click().type(imageFileURL);
+            imageToolTile.getImageURLTextField().last().click().clear().type(imageFileURL);
+            cy.wait(1000);
             cy.get(imageToolTile.imageChooseFileButton()).last().click();
             cy.wait(2000);
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
         });
-        it.skip('will load an gif from a URL', function(){
+        it('will load an gif from a URL', function(){
             const imageFileURL = 'https://codap.concord.org/~eireland/model_image.gif';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().click().type(imageFileURL);
+            imageToolTile.getImageURLTextField().click().clear().type(imageFileURL);
             cy.get(imageToolTile.imageChooseFileButton()).click();
             cy.wait(2000);
             imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
@@ -51,7 +52,7 @@ context('Test image functionalities', function(){
     });
     describe('upload image from user computer',()=>{
         before(()=>{ //create a new doc so that save and restore can e tested
-            canvas.createNewExtraDocument(userCanvas);
+            canvas.createNewExtraDocumentFromFileMenu(userCanvas, "my-work");
             cy.wait(2000);
         });
         it('will upload png file from user computer', function(){
@@ -70,7 +71,7 @@ context('Test image functionalities', function(){
             cy.wait(2000);
         });
 
-        it.skip('will upload gif file from user computer', function(){
+        it('will upload gif file from user computer', function(){
             const imageFilePath='model_image.gif';
             clueCanvas.addTile('image');
             imageToolTile.getImageToolControl().last().click();
@@ -78,33 +79,37 @@ context('Test image functionalities', function(){
             cy.wait(2000);
         });
     });
-    describe.skip('restore of images', function(){
+    describe('restore of images', function(){
         before(()=>{ //reopen the first canvas
             rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','investigations');
-            rightNav.openCanvasItem('my-work','investigations', '2.1 Drawing Wumps');
+            rightNav.openSection('my-work','workspaces');
+            rightNav.openDocumentWithTitle('my-work','workspaces', '2.1 Drawing Wumps');
             cy.wait(5000);
+            rightNav.closeRightNavTabs();
         });
         it('verify restore of all images that were added by URL', function(){
-            const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg','https://codap.concord.org/~eireland/model_image.gif'];
-            imageToolTile.getImageToolImage().each(($images, index, $list)=>{
-                expect($list).to.have.length(3);
-                expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
-            });
-        });
-        it('open the user created document from above',()=>{
-            rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','workspaces');
-            rightNav.openCanvasItem('my-work','workspaces', userCanvas);
-            cy.wait(5000);
+            // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded 
+            // const imageFileURL = ['https://codap.concord.org/~eireland/image.png', 'https://codap.concord.org/~eireland/case_image.jpg','https://codap.concord.org/~eireland/model_image.gif'];
+            // imageToolTile.getImageToolImage().each(($images, index, $list)=>{
+                // expect($list).to.have.length(3);
+                // expect($images).to.have.css('background-image').and.contains(imageFileURL[index]);
+                // expect($images).to.have.css('background-image').and.contains('url("data:image/png;base64');
+            // });
+            imageToolTile.getImageToolImage().should('have.length', 3);
         });
         it('verify restore of all  images that were added by upload', function(){
-            const imageFilePath=['image.png','case_image.jpg',/*'model_image.gif'*/];
+            rightNav.openRightNavTab('my-work');
+            rightNav.openSection('my-work','workspaces');
+            rightNav.openDocumentWithTitle('my-work','workspaces', userCanvas);
+            cy.wait(3000);
+            // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded 
+            // const imageFilePath=['image.png','case_image.jpg',/*'model_image.gif'*/];
 
-            imageToolTile.getImageToolImage().each(($images, index, $list)=>{
-                expect($list).to.have.length(imageFilePath.length);
-                expect($images).to.have.css('background-image').and.contains('url("data:image');
-            });
+            // imageToolTile.getImageToolImage().each(($images, index, $list)=>{
+            //     expect($list).to.have.length(imageFilePath.length);
+            //     expect($images).to.have.css('background-image').and.contains('url("data:image');
+            // });
+            imageToolTile.getImageToolImage().should('have.length', 3);
         });
     });
 });

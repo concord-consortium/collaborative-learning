@@ -166,7 +166,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
 
                 dashboard.switchView('Dashboard'); //switch back to continue tests
             });
-            it('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => {
+            it.skip('verify clicking a students canvas in 4 up view zooms into students canvas with student name', () => {
                 cy.get('@clueData').then((clueData) => {
                     let groupIndex = 0;
                     let studentIndex = 0;
@@ -182,7 +182,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
 
                 });
             });
-            it('verify message button opens message dialog to student',function(){
+            it.skip('verify message button opens message dialog to student',function(){
                 let group = 1,
                 studentName = "Student 1",
                 quadrant = ".north-west",

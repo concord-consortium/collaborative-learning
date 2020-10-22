@@ -106,6 +106,7 @@ describe('Test student join a group', function(){
     it('will verify new student can join group when one leaves it', function(){
         //have new student join the first group
         setup(student6);
+        cy.wait(500);
         cy.get('.groups > .group-list > .group').contains(group1).click();
         clueHeader.getGroupName().should('contain','Group '+group1);
         header.getUserName().should('contain','Student '+student6);
