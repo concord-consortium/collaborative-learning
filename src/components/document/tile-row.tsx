@@ -48,6 +48,7 @@ export function extractDragResizeDomHeight(dataTransfer: DataTransfer) {
 interface IProps {
   context: string;
   docId: string;
+  documentContent: HTMLElement | null;
   scale?: number;
   model: TileRowModelType;
   rowIndex: number;

@@ -94,6 +94,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const {viaTeacherDashboard} = this.props;
     return (
       <div className={`document-content${viaTeacherDashboard ? " document-content-smooth-scroll" : ""}`}
+        onScroll={this.handleScroll}
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}
         onDragLeave={this.handleDragLeave}
@@ -101,7 +102,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         ref={(elt) => this.domElement = elt}
       >
         {this.renderRows()}
-        {this.props.children}
         {this.renderSpacer()}
       </div>
     );
@@ -173,6 +173,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       }
       return row
               ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
+                                  documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
@@ -184,6 +185,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return !this.props.readOnly &&
             <div className="spacer" onClick={this.handleClick} />;
   }
+
+  private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
+    const xScroll = this.domElement?.scrollLeft || 0;
+    const yScroll = this.domElement?.scrollTop || 0;
+    this.props.toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
+  }, 50)
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;

@@ -1,5 +1,6 @@
 import React from "react";
 import classNames from "classnames";
+import ResizeObserver from "resize-observer-polyfill";
 import { observer, inject } from "mobx-react";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { cloneTileSnapshotWithoutId, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
@@ -27,24 +28,25 @@ import "../../utilities/dom-utils";
 import "./tool-tile.sass";
 
 export interface IToolApi {
-  hasSelection: () => boolean;
-  deleteSelection: () => void;
-  getSelectionInfo: () => string;
-  setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => void;
+  hasSelection?: () => boolean;
+  deleteSelection?: () => void;
+  getSelectionInfo?: () => string;
+  setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
   getLinkIndex?: (index?: number) => number;
   getLinkedTables?: () => string[] | undefined;
+  handleDocumentScroll?: (x: number, y: number) => void;
+  handleTileResize?: (entry: ResizeObserverEntry) => void;
 }
 
 export interface IToolApiInterface {
   register: (id: string, toolApi: IToolApi) => void;
   unregister: (id: string) => void;
   getToolApi: (id: string) => IToolApi;
+  forEach: (callback: (api: IToolApi) => void) => void;
 }
 
-export interface IToolApiMap {
-  [id: string]: IToolApi;
-}
+export type IToolApiMap = Record<string, IToolApi>;
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 
@@ -76,6 +78,7 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
 interface IToolTileBaseProps {
   context: string;
   docId: string;
+  documentContent: HTMLElement | null;
   scale?: number;
   widthPct?: number;
   height?: number;
@@ -85,9 +88,12 @@ interface IToolTileBaseProps {
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
-export interface IToolTileProps extends IToolTileBaseProps {
+export interface IRegisterToolApiProps {
   onRegisterToolApi: (toolApi: IToolApi) => void;
   onUnregisterToolApi: () => void;
+}
+
+export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
 }
 
 interface IProps extends IToolTileBaseProps {
@@ -128,6 +134,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
+  private resizeObserver: ResizeObserver;
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
 
@@ -152,14 +159,29 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    if (this.domElement) {
-      this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
+    this.domElement?.addEventListener("touchstart", this.handlePointerDown, true);
+    this.domElement?.addEventListener("mousedown", this.handlePointerDown, true);
+  }
+
+  public componentDidUpdate() {
+    const { model, toolApiInterface } = this.props;
+    if (this.domElement && !this.resizeObserver) {
+      this.resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          if (entry.target === this.domElement) {
+            toolApiInterface?.getToolApi(model.id)?.handleTileResize?.(entry);
+          }
+        }
+      });
+      this.resizeObserver.observe(this.domElement);
     }
   }
+
   public componentWillUnmount() {
-    if (this.domElement) {
-      this.domElement.removeEventListener("mousedown", this.handleMouseDown, true);
-    }
+    this.resizeObserver?.disconnect();
+
+    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, true);
+    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, true);
   }
 
   public render() {
@@ -259,7 +281,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     this.hotKeys.dispatch(e);
   }
 
-  private handleMouseDown = (e: MouseEvent) => {
+  private handlePointerDown = (e: MouseEvent | TouchEvent) => {
     const { model } = this.props;
     const { ui } = this.stores;
 
