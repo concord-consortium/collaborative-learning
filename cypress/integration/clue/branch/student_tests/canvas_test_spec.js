@@ -20,9 +20,9 @@ let tableToolTile = new TableToolTile;
 
 let studentWorkspace = 'My Student Test Workspace';
 let copyTitle = 'Personal Workspace Copy';
-let newDocTitleToPublish = 'New User Doc To Publish';
+// let newDocTitleToPublish = 'New User Doc To Publish';
 let publishTitle = 'publish 2up';
-let renameTitle = "Renamed Title title";
+// let renameTitle = "Renamed Title title";
 let renameTitlePencil = "Renamed Title pencil";
 
 
