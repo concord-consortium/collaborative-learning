@@ -4,9 +4,10 @@ import React from "react";
 import { configure, mount } from "enzyme";
 import { Provider } from "mobx-react";
 import { CanvasComponent } from "./canvas";
-import { DocumentContentModel } from "../../models/document/document-content";
 import { DocumentContentComponent } from "./document-content";
-import { DocumentModel, ProblemDocument } from "../../models/document/document";
+import { DocumentModel } from "../../models/document/document";
+import { DocumentContentModel } from "../../models/document/document-content";
+import { ProblemDocument } from "../../models/document/document-types";
 import { createStores } from "../../models/stores/stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 

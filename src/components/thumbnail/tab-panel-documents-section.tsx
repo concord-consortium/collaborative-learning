@@ -1,11 +1,14 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, PersonalDocument, SupportPublication
-      } from "../../models/document/document";
+import { DocumentModelType, getDocumentContext } from "../../models/document/document";
+import {
+  isProblemType, isPublishedType, isUnpublishedType, PersonalDocument, SupportPublication
+} from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
+import { DocumentContextReact } from "../document/document-context";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
@@ -137,20 +140,23 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             const _handleDocumentDeleteClick = section.showDeleteForUser(user)
                                               ? handleDocumentDeleteClick
                                               : undefined;
+            const documentContext = getDocumentContext(document);
             return (
-              <ThumbnailDocumentItem
-                key={document.key}
-                dataTestName={`${tabName}-list-items`}
-                canvasContext={tab}
-                document={document}
-                scale={scale}
-                isSelected={document.key === selectedDocument}
-                captionText={getDocumentCaption(stores, document)}
-                onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred}
-                onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
-              />
+              <DocumentContextReact.Provider key={document.key} value={documentContext}>
+                <ThumbnailDocumentItem
+                  key={document.key}
+                  dataTestName={`${tabName}-list-items`}
+                  canvasContext={tab}
+                  document={document}
+                  scale={scale}
+                  isSelected={document.key === selectedDocument}
+                  captionText={getDocumentCaption(stores, document)}
+                  onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+                  onIsStarred={onIsStarred}
+                  onDocumentStarClick={_handleDocumentStarClick}
+                  onDocumentDeleteClick={_handleDocumentDeleteClick}
+                />
+              </DocumentContextReact.Provider>
             );
           })}
         </div>

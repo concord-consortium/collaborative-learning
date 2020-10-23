@@ -1,8 +1,9 @@
 import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType, DocumentType, LearningLogDocument, LearningLogPublication,
-        OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication, ProblemDocument,
-        ProblemPublication
-      } from "../document/document";
+import { DocumentModel, DocumentModelType } from "../document/document";
+import {
+  DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication
+} from "../document/document-types";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";

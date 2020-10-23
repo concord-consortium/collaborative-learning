@@ -8,9 +8,11 @@ import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
-import { DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent
-        } from "../document/document-content";
-import { DocumentModel, SupportPublication, DocumentModelType } from "../document/document";
+import { DocumentModel, DocumentModelType } from "../document/document";
+import {
+  DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent
+} from "../document/document-content";
+import { SupportPublication } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";
 

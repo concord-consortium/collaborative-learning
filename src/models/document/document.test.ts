@@ -1,6 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
-import { DocumentModel, ProblemDocument, DocumentModelType } from "./document";
+import { DocumentModel, DocumentModelType } from "./document";
 import { DocumentContentModel } from "./document-content";
+import { ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
 

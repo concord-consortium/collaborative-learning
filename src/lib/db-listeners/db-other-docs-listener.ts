@@ -1,7 +1,8 @@
 import { DB } from "../db";
 import { DBOtherDocument, DBOtherPublication } from "../db-types";
-import { LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
-        } from "../../models/document/document";
+import {
+  LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
+} from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
 import { syncStars } from "./sync-stars";
 

@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { OtherDocumentType, PersonalDocument } from "../models/document/document";
+import { OtherDocumentType, PersonalDocument } from "../models/document/document-types";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";

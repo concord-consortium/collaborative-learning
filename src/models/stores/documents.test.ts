@@ -1,4 +1,5 @@
-import { DocumentModel, DocumentModelType, ProblemDocument, DocumentType} from "../document/document";
+import { DocumentModel, DocumentModelType } from "../document/document";
+import { ProblemDocument, DocumentType} from "../document/document-types";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { ClassModelType, ClassModel, ClassUserModel } from "./class";
 

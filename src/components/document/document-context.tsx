@@ -1,16 +1,7 @@
 import React from "react";
-import { ISetProperties } from "../../models/document/document";
+import { IDocumentContext } from "../../models/document/document-types";
 
-export interface IDocumentContext {
-  type: string;
-  key: string;
-  title?: string;
-  originDoc?: string;
-  getProperty: (key: string) => string | undefined;
-  setProperties: (properties: ISetProperties) => void;
-}
-
-export const DocumentContext = React.createContext<IDocumentContext | undefined>(undefined);
+export const DocumentContextReact = React.createContext<IDocumentContext | undefined>(undefined);
 
 /*
  * Example of use
