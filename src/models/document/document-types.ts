@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 
 export const DocumentDragKey = "org.concord.clue.document.key";
 
@@ -33,7 +33,7 @@ export const DocumentTypeEnum = types.enumeration("type",
                 ProblemDocument, PersonalDocument, LearningLogDocument,
                 ProblemPublication, PersonalPublication, LearningLogPublication,
                 SupportPublication]);
-export type DocumentType = typeof DocumentTypeEnum.Type;
+export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
 export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
@@ -42,7 +42,7 @@ export type PublicationType = typeof ProblemPublication | OtherPublicationType |
 export type ISetProperties = Record<string, string | undefined>;
 
 export interface IDocumentContext {
-  type: string;
+  type: DocumentType;
   key: string;
   title?: string;
   originDoc?: string;
