@@ -613,7 +613,7 @@ interface DrawingToolMap {
 
 interface DrawingLayerViewProps {
   model: ToolTileModelType;
-  readOnly: boolean;
+  readOnly?: boolean;
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;
 }

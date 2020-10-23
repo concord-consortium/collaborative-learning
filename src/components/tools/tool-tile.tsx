@@ -94,6 +94,7 @@ export interface IRegisterToolApiProps {
 }
 
 export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
+  toolTile: HTMLElement | null;
 }
 
 interface IProps extends IToolTileBaseProps {
@@ -230,7 +231,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { toolApiInterface, ...otherProps } = this.props;
     return ToolComponent != null
             ? <ToolComponent
-                key={tileId} {...otherProps}
+                key={tileId} toolTile={this.domElement} {...otherProps}
                 onRegisterToolApi={this.handleRegisterToolApi}
                 onUnregisterToolApi={this.handleUnregisterToolApi} />
             : null;
@@ -295,7 +296,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
 
     const ToolComponent = kToolComponentMap[model.content.type];
-    if (ToolComponent && ToolComponent.tileHandlesSelection) {
+    if (ToolComponent?.tileHandlesSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }
