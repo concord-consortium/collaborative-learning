@@ -5,7 +5,8 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec }
   from "../../models/view/nav-tabs";
 import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
-import { DocumentDragKey, DocumentModelType, SupportPublication } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
+import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
 
 import "./document-tab-panel.sass";

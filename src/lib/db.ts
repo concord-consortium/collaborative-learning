@@ -10,9 +10,11 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
         DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
         DBOtherDocument, DBOtherDocumentMap, IDocumentProperties, DBOtherPublication, DBSupport
         } from "./db-types";
-import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
-        PersonalPublication, ProblemPublication, LearningLogPublication, OtherPublicationType, OtherDocumentType,
-        SupportPublication } from "../models/document/document";
+import { DocumentModelType, DocumentModel } from "../models/document/document";
+import {
+  DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+} from "../models/document/document-types";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds

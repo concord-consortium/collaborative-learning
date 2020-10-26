@@ -1,4 +1,4 @@
-import { DocumentDragKey } from "../../models/document/document";
+import { DocumentDragKey } from "../../models/document/document-types";
 
 export interface ExternalImageDragDropOptions {
   isAcceptableImageDrag?: (e: React.DragEvent<HTMLDivElement>) => boolean;

@@ -1,14 +1,15 @@
 import React, { useContext } from "react";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
-import { DocumentContext } from "./document-context";
+import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useGroupsStore } from "../../hooks/use-stores";
 import { useToolApiInterface } from "../../hooks/use-tool-api-interface";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
 import { IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
-import { DocumentModelType, ProblemDocument } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
+import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
 
 import "./editable-document-content.scss";
@@ -86,13 +87,13 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   return (
-    <DocumentContext.Provider value={documentContext}>
+    <DocumentContextReact.Provider value={documentContext}>
       <div key="editable-document" className={`editable-document-content ${showToolbarClass}`} >
         {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} toolApiMap={toolApiMap} />}
         {isShowingToolbar && <div className="canvas-separator"/>}
         <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}
                         toolApiInterface={toolApiInterface} />
       </div>
-    </DocumentContext.Provider>
+    </DocumentContextReact.Provider>
   );
 };

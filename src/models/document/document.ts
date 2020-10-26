@@ -1,50 +1,15 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
+import {
+  DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
+  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+} from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
-
-export const DocumentDragKey = "org.concord.clue.document.key";
-
-export const SectionDocumentDEPRECATED = "section";
-export const ProblemDocument = "problem";
-export const PersonalDocument = "personal";
-export const LearningLogDocument = "learningLog";
-export const ProblemPublication = "publication";
-export const PersonalPublication = "personalPublication";
-export const LearningLogPublication = "learningLogPublication";
-export const SupportPublication = "supportPublication";
-
-export function isProblemType(type: string) {
-  return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
-}
-export function isPersonalType(type: string) {
-  return [PersonalDocument, PersonalPublication].indexOf(type) >= 0;
-}
-export function isLearningLogType(type: string) {
-  return [LearningLogDocument, LearningLogPublication].indexOf(type) >= 0;
-}
-export function isUnpublishedType(type: string) {
-  return [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument, LearningLogDocument]
-          .indexOf(type) >= 0;
-}
-export function isPublishedType(type: string) {
-  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0;
-}
-
-export const DocumentTypeEnum = types.enumeration("type",
-              [SectionDocumentDEPRECATED,
-                ProblemDocument, PersonalDocument, LearningLogDocument,
-                ProblemPublication, PersonalPublication, LearningLogPublication,
-                SupportPublication]);
-export type DocumentType = typeof DocumentTypeEnum.Type;
-export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
-export type PublishableType = typeof ProblemDocument | OtherDocumentType;
-export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
-export type PublicationType = typeof ProblemPublication | OtherPublicationType | typeof SupportPublication;
 
 export interface IDocumentAddTileOptions {
   addSidecarNotes?: boolean;
@@ -229,9 +194,14 @@ export const DocumentModel = types
     }
   }));
 
-export interface ISetProperties {
-  [key: string]: string | undefined;
-}
-
 export type DocumentModelType = Instance<typeof DocumentModel>;
 export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;
+
+export const getDocumentContext = (document: DocumentModelType): IDocumentContext => {
+  const { type, key, title, originDoc } = document;
+  return {
+    type, key, title, originDoc,
+    getProperty: (prop: string) => document.properties.get(prop),
+    setProperties: (properties: ISetProperties) => document.setProperties(properties)
+  };
+};

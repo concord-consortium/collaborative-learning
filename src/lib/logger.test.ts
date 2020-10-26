@@ -1,6 +1,7 @@
 import mock from "xhr-mock";
 import { Logger, LogEventName } from "./logger";
-import { ProblemDocument, DocumentModel, DocumentModelType } from "../models/document/document";
+import { DocumentModel, DocumentModelType } from "../models/document/document";
+import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";

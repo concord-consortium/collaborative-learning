@@ -5,7 +5,8 @@ import { configure, mount } from "enzyme";
 
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
-import { DocumentModel, ProblemDocument, DocumentModelType } from "../models/document/document";
+import { DocumentModel, DocumentModelType } from "../models/document/document";
+import { ProblemDocument } from "../models/document/document-types";
 import { createStores } from "../models/stores/stores";
 import { CanvasComponent } from "./document/canvas";
 import { UserModel } from "../models/stores/user";

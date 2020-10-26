@@ -8,9 +8,9 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { IDisposer } from "mobx-state-tree/dist/utils";
-import { DocumentModelType, LearningLogDocument, OtherDocumentType, PersonalDocument,
-        } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
+import { LearningLogDocument, OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
 import { DBDocument, DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";

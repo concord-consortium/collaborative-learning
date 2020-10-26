@@ -1,5 +1,6 @@
 import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "./workspace";
-import { DocumentModel, DocumentModelType, ProblemDocument } from "../document/document";
+import { DocumentModel, DocumentModelType } from "../document/document";
+import { ProblemDocument } from "../document/document-types";
 
 describe("workspaces model", () => {
   let workspace: WorkspaceModelType;

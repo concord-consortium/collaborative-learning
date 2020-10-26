@@ -3,7 +3,8 @@ import React from "react";
 
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
-import { DocumentModelType, DocumentDragKey, LearningLogPublication } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
+import { DocumentDragKey, LearningLogPublication } from "../../models/document/document-types";
 
 interface IProps extends IBaseProps {
   scale: number;
