@@ -1,12 +1,14 @@
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { autorun, IReactionDisposer } from "mobx";
+import { IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
 import { BaseComponent } from "../base";
+import { ImageComponent } from "./image-component";
 import { IToolTileProps } from "./tool-tile";
+import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
-import { gImageMap, ImageMapEntryType } from "../../models/image-map";
+import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -20,6 +22,7 @@ interface IState {
   isEditing?: boolean;
   isLoading?: boolean;
   imageContentUrl?: string;
+  documentContext?: IDocumentContext;
   imageEntry?: ImageMapEntryType;
   imageEltWidth?: number;
   imageEltHeight?: number;
@@ -40,29 +43,33 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private imageElt: HTMLDivElement | null;
   private inputElt: HTMLInputElement | null;
   private disposers: IReactionDisposer[];
-  private debouncedUpdateImage = debounce((url: string) => {
-            gImageMap.getImage(url)
-              .then(image => {
-                if (!this._isMounted) return;
-                // update react state
-                this.setState({
-                  isLoading: false,
-                  imageContentUrl: undefined,
-                  imageEntry: image
-                });
-                // update mst content if conversion occurred
-                if (image.contentUrl && (url !== image.contentUrl)) {
-                  this.getContent().updateImageUrl(url, image.contentUrl);
-                }
-              })
-              .catch(() => {
-                this.setState({
-                  isLoading: false,
-                  imageContentUrl: undefined,
-                  imageEntry: undefined
-                });
-              });
-          }, 100);
+  private debouncedUpdateImage = debounce(async (url: string) => {
+    const { documentContext } = this.state;
+    const imageContext: IImageContext | undefined = documentContext
+                                                      ? { type: documentContext?.type, key: documentContext?.key }
+                                                      : undefined;
+    gImageMap.getImage(url, imageContext)
+      .then(image => {
+        if (!this._isMounted) return;
+        // update react state
+        this.setState({
+          isLoading: false,
+          imageContentUrl: undefined,
+          imageEntry: image
+        });
+        // update mst content if conversion occurred
+        if (image.contentUrl && (url !== image.contentUrl)) {
+          this.getContent().updateImageUrl(url, image.contentUrl);
+        }
+      })
+      .catch(() => {
+        this.setState({
+          isLoading: false,
+          imageContentUrl: undefined,
+          imageEntry: undefined
+        });
+      });
+  }, 100);
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -75,22 +82,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    this.syncedChanges = 0;
     this.disposers = [];
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
     }
-
-    this.disposers.push(autorun(() => {
-      const content = this.getContent();
-      if (content.changeCount > this.syncedChanges) {
-        this.setState({
-          isLoading: true,
-          imageContentUrl: content.url
-        });
-        this.syncedChanges = content.changeCount;
-      }
-    }));
 
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
@@ -157,11 +152,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop} >
         {isLoading && <div className="loading-spinner" />}
-        <div
-          className="image-tool-image"
+        <ImageComponent
           ref={elt => this.imageElt = elt}
+          content={this.getContent()}
           style={imageDisplayStyle}
           onMouseDown={this.handleMouseDown}
+          onUrlChange={this.handleUrlChange}
         />
         <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
           <input
@@ -225,12 +221,20 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleUrlChange = (url: string, context?: IDocumentContext) => {
+    this.setState({
+      isLoading: true,
+      imageContentUrl: url,
+      documentContext: context
+    });
+  }
+
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
     if (this.state.isEditing && (e.target === e.currentTarget)) {
       this.setState({ isEditing: false });
     }
-}
+  }
 
   private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!this.state.isEditing) {
