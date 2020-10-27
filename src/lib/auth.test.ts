@@ -4,13 +4,12 @@ import { authenticate,
         PORTAL_JWT_URL_SUFFIX,
         FIREBASE_JWT_URL_SUFFIX,
         FIREBASE_JWT_QUERY,
-        PortalStudentJWT,
         RawUser,
         RawClassInfo,
         getAppMode,
-        PortalTeacherJWT,
         createFakeUser,
         getFirebaseJWTParams} from "./auth";
+import { PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS } from "../components/demo/demo-creator";
