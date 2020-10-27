@@ -7,3 +7,4 @@ serviceAccountKey.json
 .idea
 .vscode
 cypress/screenshots
+*debug.log
