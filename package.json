@@ -17,7 +17,8 @@
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/cypress/"
+      "/cypress/",
+      "/functions/"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",

@@ -46,7 +46,7 @@ export interface PortalFirebaseJWTStudentClaims extends PortalFirebaseJWTBaseCla
   offering_id: number;
 }
 
-export interface PortalFirebaseJWTTeacherClaims {
+export interface PortalFirebaseJWTTeacherClaims extends PortalFirebaseJWTBaseClaims {
   user_type: "teacher";
 }
 

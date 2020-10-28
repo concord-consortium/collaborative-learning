@@ -7,7 +7,9 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test": "ts-node node_modules/jest/bin/jest.js --forceExit",
+    "test:debug": "ts-node node_modules/jest/bin/jest.js --runInBand --detectOpenHandles"
   },
   "engines": {
     "node": "12"
@@ -18,11 +20,17 @@
     "firebase-functions": "^3.11.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "@types/rewire": "^2.5.28",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.22.0",
-    "firebase-functions-test": "^0.2.0",
+    "firebase-functions-test": "^0.2.3",
+    "jest": "^26.6.1",
+    "rewire": "^5.0.0",
+    "ts-jest": "^26.4.3",
+    "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   },
   "private": true

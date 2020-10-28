@@ -63,7 +63,11 @@ $ npm install     # install local dependencies
 $ npm run lint    # lint the functions code
 $ npm run build   # build the functions code (transpile TypeScript)
 ```
-Note that there seems to be an uneasy relationship between the `node_modules` folder in the `functions` directory and the one in the parent directory. I had to back down to ESLint 6.x in the `functions` directory to avoid ESLint plugin confusion and I also had to explicitly specify the path to typescript in the `build` function. There's probably a better configuration available, but in the meantime this seems to mostly work.
+Note that there seems to be an uneasy relationship between the `node_modules` folder in the
+`functions` directory and the one in the parent directory. I had to back down to ESLint 6.x in
+the `functions` directory to avoid ESLint plugin confusion and I also had to explicitly specify
+the path to typescript in the `build` function. There's probably a better configuration available,
+but in the meantime this seems to mostly work.
 
 Google recommends (requires?) that [firebase-tools](https://www.npmjs.com/package/firebase-tools) be installed globally:
 ```
@@ -83,6 +87,11 @@ To deploy the function(s) to production:
 ```
 $ npm run deploy
 ```
+
+To test the deployed function(s) from your local development environment, you will need to run
+your local dev server with https to avoid CORS errors. To do so,
+[create a certificate](https://www.matthewhoelter.com/2019/10/21/how-to-setup-https-on-your-local-development-environment-localhost-in-minutes.html)
+and [configure Webpack to use it](https://webpack.js.org/configuration/dev-server/#devserverhttps). These changes are specific to your installation, so be careful not to commit them to the GitHub repository.
 
 ## Deploying database rules
 

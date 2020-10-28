@@ -780,8 +780,7 @@ export class DB {
 
   public async getCloudImage(url: string, type?: string, key?: string) {
     const { appMode, demo: { name: demoName }, user } = this.stores;
-    const portal = user.portal;
-    const classHash = user.classHash;
+    const { portal, classHash } = user;
     const classPath = this.firebase.getFullClassPath(user);
     const getImageData = firebase.functions().httpsCallable("getImageData");
     const result = await getImageData({ url, appMode, demoName, portal, classHash, classPath, type, key });
