@@ -61,8 +61,11 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <IconButton icon="publish-support" key="support" className="action icon-support"
-                onClickButton={onClick} title="publish to supports" />
+    <>
+      <IconButton icon="publish-support" key="support" className="action icon-support"
+                  onClickButton={onClick} title="publish to supports" />
+      <div className="support-badge"/>
+    </>
   );
 };
 
