@@ -19,9 +19,11 @@ const UploadButton: React.FC<IUploadButtonProps> = ({ onFileInputChange }) => {
   // input instead of visibility: hidden or display: none, because assistive technology interprets
   // the latter two styles to mean the file input isn't interactive.
   const hideFileInputStyle = { opacity: 0 };
+  const kTooltipXOffset = -19;  // required for proper centering
+  const kTooltipYOffset = -32;  // required for proper placement
   return (
     <Tooltip title="Upload image" size="small"
-              position="bottom" distance={-32} offset={-19}
+              position="bottom" distance={kTooltipYOffset} offset={kTooltipXOffset}
               animation="fade" animateFill={false} >
       <div className="toolbar-button image-upload">
         <UploadButtonSvg />
