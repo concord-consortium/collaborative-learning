@@ -30,7 +30,7 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /popper.js$/,
+          test: /popper\.js$/,
           loader: require.resolve('string-replace-loader'),
           options: {
             multiple: [
@@ -102,7 +102,18 @@ module.exports = (env, argv) => {
           }
         },
         {
+          // store placeholder image as file not data URI
+          test: /image_placeholder\.png$/,
+          loader: 'file-loader',
+          options: {
+            name: 'assets/images/[name].[ext]',
+            esModule: false
+          }
+        },
+        {
           test: /\.png$/i,
+          // don't convert placeholder image to a data URI
+          exclude: /image_placeholder\.png$/,
           loader: 'url-loader',
           options: {
             limit: 8192,

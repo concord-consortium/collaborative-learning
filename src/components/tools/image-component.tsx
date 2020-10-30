@@ -17,12 +17,14 @@ export const ImageComponent =
     useImageContentUrl(content, onUrlChange);
 
     return (
-      <div
-        className="image-tool-image"
-        ref={forwardedRef}
-        style={style}
-        onMouseDown={onMouseDown}
-      />
+      <div className="image-frame">
+        <div
+          className="image-tool-image"
+          ref={forwardedRef}
+          style={style}
+          onMouseDown={onMouseDown}
+        />
+      </div>
     );
   });
 ImageComponent.displayName = "ImageComponent";

@@ -3,6 +3,7 @@ import { ImageModelType, ImageModel } from "../models/image";
 import { ImageContentSnapshotOutType } from "../models/tools/image/image-content";
 import { safeJsonParse } from "./js-utils";
 import placeholderImage from "../assets/image_placeholder.png";
+import orgPlaceholderImage from "../assets/image_placeholder_org.png";
 
 const ImageConstants = {
   maxWidth: 512,
@@ -22,6 +23,16 @@ export interface ISimpleImage {
 }
 
 const ccImageId = "ccimg://";
+
+// Due to Webpack's url-loader, historically the placeholder image has been
+// converted to a data URI at bundle time. Therefore, the placeholder "url"
+// was a data URI that contained the placeholder image data. When the
+// placeholder image was changed, this was changed so that now the placeholder
+// image is represented by a URL, but the original data URI placeholder image
+// is still present in documents.
+export function isPlaceholderImage(url?: string) {
+  return url && (url === placeholderImage) || (url === orgPlaceholderImage);
+}
 
 export function getUrlFromImageContent(content: ImageContentSnapshotOutType) {
   const changes = content.changes;

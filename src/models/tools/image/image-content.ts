@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { registerToolContentInfo } from "../tool-content-info";
+import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -54,7 +55,7 @@ export const ImageContentModel = types
   }))
   .views(self => ({
     get hasValidImage() {
-      return self.url !== placeholderImage;
+      return !isPlaceholderImage(self.url);
     }
   }))
   .actions(self => ({

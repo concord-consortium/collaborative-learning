@@ -13,8 +13,9 @@ import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { isPlaceholderImage } from "../../utilities/image-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
 import "./image-tool.sass";
@@ -31,7 +32,7 @@ interface IState {
   requestedHeight?: number;
 }
 
-const defaultImagePlaceholderSize = { width: 128, height: 128 };
+const defaultImagePlaceholderSize = { width: 100, height: 100 };
 
 @inject("stores")
 @observer
@@ -182,13 +183,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private getDesiredHeight() {
+    const kMarginsAndBorders = 26;
     const { imageEntry, imageEltWidth } = this.state;
     if (!imageEntry?.width || !imageEntry?.height) return;
     const naturalHeight = Math.ceil(imageEntry.height);
     const aspectRatio = imageEntry.width / imageEntry.height;
     return aspectRatio && imageEltWidth
-            ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight)
-            : naturalHeight;
+            ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight) + kMarginsAndBorders
+            : naturalHeight + kMarginsAndBorders;
   }
 
   private getContent() {
@@ -243,7 +245,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     if (isExternalUrl && (newUrl !== contentUrl)) {
       gImageMap.getImage(newUrl)
         .then(image => {
-          if (image.contentUrl && (image.displayUrl !== placeholderImage)) {
+          if (image.contentUrl && !isPlaceholderImage(image.displayUrl)) {
             this.getContent().setUrl(image.contentUrl);
             if (this.inputElt) {
               this.inputElt.value = image.contentUrl;
