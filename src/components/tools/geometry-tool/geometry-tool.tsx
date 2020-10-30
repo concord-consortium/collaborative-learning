@@ -2,7 +2,7 @@ import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../base";
-import { GeometryToolbarView } from "./geometry-toolbar";
+import { GeometryToolbar } from "./geometry-toolbar";
 import { GeometryContentComponent } from "./geometry-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
@@ -81,19 +81,14 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
                             !content.getOneSelectedComment(board);
 
     return (
-      <GeometryToolbarView
+      <GeometryToolbar
         key="geometry-toolbar-view"
-        model={this.props.model}
-        onAngleLabelClick={handlers.handleToggleVertexAngle}
-        isAngleLabelDisabled={disableVertexAngle}
-        isAngleLabelSelected={hasVertexAngle}
-        onDeleteClick={handlers.handleDelete}
-        isDeleteDisabled={disableDelete}
-        onDuplicateClick={handlers.handleDuplicate}
-        isDuplicateDisabled={disableDuplicate}
-        onMovableLineClick={handlers.handleCreateMovableLine}
-        onCommentClick={handlers.handleCreateComment}
-        isCommentDisabled={disableComment}
+        duplicate={{ disabled: disableDuplicate, onClick: handlers.handleDuplicate }}
+        angleLabel={{ disabled: disableVertexAngle, selected: hasVertexAngle,
+                      onClick: handlers.handleToggleVertexAngle }}
+        movableLine={{ onClick: handlers.handleCreateMovableLine }}
+        comment={{ disabled: disableComment, onClick: handlers.handleCreateComment }}
+        trash={{ disabled: disableDelete, onClick: handlers.handleDelete }}
       />
     );
   }

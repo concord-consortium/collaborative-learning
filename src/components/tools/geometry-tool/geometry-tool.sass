@@ -22,41 +22,15 @@ $toolbar-width: 44px
       justify-content: center
       align-items: center
 
-      .toolbar-header
-        display: flex
-        justify-content: left
-        align-items: center
-        height: 21px
-        width: 100%
-        margin-bottom: $quarter-margin
-        border-radius: 0 $half-border-radius 0 0
-
-        .graph-tile
-          box-sizing: content-box
-          width: 50%
-          border: solid 2px white
-          border-width: 0 2px 2px 0
-          border-radius: 0 0 6px 0
-          background-color: $color3
-
-        .settings-button
-          &:hover
-            background-color: $color3-6
-            cursor: pointer
-          &:active
-            background-color: $color3-7
-
-        .header-icon
-          width: 19px
-          height: 19px
-          fill: white
-
       .button
         box-sizing: content-box
         width: 36px
         height: 34px
         margin: 2px
         border: solid 1px $color3-4
+        display: flex
+        justify-content: center
+        align-items: center
         &:hover
           background-color: $color3-5
           cursor: pointer
@@ -71,29 +45,8 @@ $toolbar-width: 44px
           opacity: .25
           pointer-events: none
 
-        .toolbar-icon
-          fill: $font-3-color
-          width: 36px
-          height: 34px
-
-    .settings
-      z-index: 999
-      position: absolute
-      top: 0px
-      left: 48px
-      width: 100px
-      height: 100%
-      border-radius: 0 $border-radius 0 0
-      background-color: rgba(223, 223, 223, 0.5)
-
-      .settings-header
-        height: 19px
-        width: 100%
-        font-size: 12px
-        line-height: 19px
-        border-radius: 0 $border-radius 0 0
-        color: $color3-1
-        background-color: $color3
+        &.delete svg
+          width: 20px
 
   .geometry-wrapper
     position: absolute
