@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { IReactionDisposer } from "mobx";
@@ -133,8 +134,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const { isLoading, imageEntry } = this.state;
 
     // Include states for selected and editing separately to clean up UI a little
-    const editableClass = readOnly ? "read-only" : "editable";
-    const divClasses = `image-tool ${editableClass}`;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
@@ -145,7 +144,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
     }
     return (
-      <div className={divClasses}
+      <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
         onMouseDown={this.handleMouseDown}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop} >

@@ -3,7 +3,7 @@
 .image-toolbar {
   position: absolute;
   border: $toolbar-border;
-  border-radius: $toolbar-border-radius;
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
 
   .toolbar-button {
     position: relative;

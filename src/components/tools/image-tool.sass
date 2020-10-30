@@ -25,40 +25,6 @@
     background-size: contain
     background-repeat: no-repeat
 
-  .image-tool-controls
-    width: $double-margin
-    height: $double-margin
-    position: absolute
-    top: 0px
-    left: 0px
-    opacity: 0
-    border-radius: $border-radius
-    border-top-left-radius: 0
-    border-bottom-left-radius: 0
-    border-top-right-radius: 0
-    border: $border-width solid $border-color
-    border-top: 0
-    transition: 0.3s
-    z-index: 1
-
-    &.readonly
-      opacity: 0
-      display: none
-
-    &.selected
-      opacity: 1
-      background: rgba(255,255,255, 0.9)
-      background-image: url("../../assets/logo_image_tool.svg")
-      background-size: contain
-      background-repeat: no-repeat
-      background-position: center
-
-    &.editing
-      width: 90%
-      height: 100px
-      opacity: 1
-      background: rgba(255,255,255, 0.9)
-
   .image-url
     position: relative
     top: 10px
@@ -75,23 +41,3 @@
 
     &:focus
       width: 100%
-
-  .image-file
-    position: relative
-    top: 15px
-    left: 10px
-    visibility: hidden
-    width: 100%
-
-    &.editing
-      visibility: visible
-
-  .image-file-upload
-    position: relative
-    top: 20px
-    left: 10px
-    visibility: hidden
-    width: 100px
-
-    &.editing
-      visibility: visible
