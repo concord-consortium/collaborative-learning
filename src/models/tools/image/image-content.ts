@@ -49,7 +49,12 @@ export const ImageContentModel = types
       if (!self.changes.length) return;
       const lastChangeJson = self.changes[self.changes.length - 1];
       const lastChange = safeJsonParse(lastChangeJson);
-      return lastChange && lastChange.url;
+      return lastChange?.url;
+    }
+  }))
+  .views(self => ({
+    get hasValidImage() {
+      return self.url !== placeholderImage;
     }
   }))
   .actions(self => ({

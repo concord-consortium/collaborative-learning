@@ -5,6 +5,7 @@ import { IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
 import { BaseComponent } from "../base";
+import { EmptyImagePrompt } from "./image/empty-image-prompt";
 import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
 import { IToolApi, IToolTileProps } from "./tool-tile";
@@ -132,9 +133,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { documentContent, toolTile, readOnly } = this.props;
     const { isLoading, imageEntry } = this.state;
+    const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
     // Include states for selected and editing separately to clean up UI a little
-    const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
+    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
       backgroundImage: "url(" + imageToUseForDisplay + ")"
@@ -144,27 +146,30 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
     }
     return (
-      <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
-        onMouseDown={this.handleMouseDown}
-        onDragOver={this.handleDragOver}
-        onDrop={this.handleDrop} >
-        {isLoading && <div className="loading-spinner" />}
-        <ImageToolbar
-          onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
-          onUnregisterToolApi={() => this.toolbarToolApi = undefined}
-          documentContent={documentContent}
-          toolTile={toolTile}
-          onIsEnabled={this.handleIsEnabled}
-          onFileInputChange={this.handleFileInputChange}
-        />
-        <ImageComponent
-          ref={elt => this.imageElt = elt}
-          content={this.getContent()}
-          style={imageDisplayStyle}
+      <>
+        <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
           onMouseDown={this.handleMouseDown}
-          onUrlChange={this.handleUrlChange}
-        />
-      </div>
+          onDragOver={this.handleDragOver}
+          onDrop={this.handleDrop} >
+          {isLoading && <div className="loading-spinner" />}
+          <ImageToolbar
+            onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
+            onUnregisterToolApi={() => this.toolbarToolApi = undefined}
+            documentContent={documentContent}
+            toolTile={toolTile}
+            onIsEnabled={this.handleIsEnabled}
+            onFileInputChange={this.handleFileInputChange}
+          />
+          <ImageComponent
+            ref={elt => this.imageElt = elt}
+            content={this.getContent()}
+            style={imageDisplayStyle}
+            onMouseDown={this.handleMouseDown}
+            onUrlChange={this.handleUrlChange}
+          />
+        </div>
+        <EmptyImagePrompt show={showEmptyImagePrompt} />
+      </>
     );
   }
 

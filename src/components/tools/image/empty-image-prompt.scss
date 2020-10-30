@@ -1,0 +1,18 @@
+@import "../../vars.sass";
+
+.image-prompt-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+
+  .image-prompt {
+    font-style: italic;
+    color: $charcoal;
+  }
+}
