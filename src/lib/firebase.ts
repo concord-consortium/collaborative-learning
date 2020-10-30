@@ -90,6 +90,10 @@ export class Firebase {
     return `classes/${user.classHash}`;
   }
 
+  public getFullClassPath(user: UserModelType) {
+    return this.getFullPath(this.getClassPath(user));
+  }
+
   public getUserPath(user: UserModelType, userId?: string) {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
