@@ -4,8 +4,9 @@ import { IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
 import { BaseComponent } from "../base";
+import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
-import { IToolTileProps } from "./tool-tile";
+import { IToolApi, IToolTileProps } from "./tool-tile";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
@@ -19,7 +20,6 @@ import "./image-tool.sass";
 type IProps = IToolTileProps;
 
 interface IState {
-  isEditing?: boolean;
   isLoading?: boolean;
   imageContentUrl?: string;
   documentContext?: IDocumentContext;
@@ -37,8 +37,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = { isLoading: true };
 
-  private syncedChanges: number;
   private _isMounted = false;
+  private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
   private inputElt: HTMLInputElement | null;
@@ -99,6 +99,15 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       }
     });
     this.imageElt && this.resizeObserver.observe(this.imageElt);
+
+    this.props.onRegisterToolApi({
+      handleDocumentScroll: (x: number, y: number) => {
+        this.toolbarToolApi?.handleDocumentScroll?.(x, y);
+      },
+      handleTileResize: (entry: ResizeObserverEntry) => {
+        this.toolbarToolApi?.handleTileResize?.(entry);
+      }
+    });
   }
 
   public componentWillUnmount() {
@@ -120,23 +129,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, model } = this.props;
-    const { isEditing, isLoading, imageEntry } = this.state;
-    const { ui } = this.stores;
-
-    const contentUrl = this.getContent().url;
-    const isEditableUrl = gImageMap.isExternalUrl(contentUrl) && !gImageMap.isDataImageUrl(contentUrl);
-    const editableUrl = isEditableUrl ? contentUrl : undefined;
+    const { documentContent, toolTile, readOnly } = this.props;
+    const { isLoading, imageEntry } = this.state;
 
     // Include states for selected and editing separately to clean up UI a little
     const editableClass = readOnly ? "read-only" : "editable";
-    const selectedClass = ui.isSelectedTile(model) ? (isEditing && !readOnly ? "editing" : "selected") : "";
     const divClasses = `image-tool ${editableClass}`;
-    const inputClasses = `image-url ${selectedClass}`;
-    const fileInputClasses = `image-file ${selectedClass}`;
-    const imageToolControlContainerClasses = `image-tool-controls ${readOnly ? "readonly" : selectedClass}`;
-    // const imageWidth = imageEntry && imageEntry.width || defaultImagePlaceholderSize.width;
-    // const imageHeight = imageEntry && imageEntry.height || defaultImagePlaceholderSize.height;
     const imageToUseForDisplay = imageEntry && imageEntry.displayUrl || (isLoading ? "" : placeholderImage);
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
@@ -152,6 +150,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop} >
         {isLoading && <div className="loading-spinner" />}
+        <ImageToolbar
+          onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
+          onUnregisterToolApi={() => this.toolbarToolApi = undefined}
+          documentContent={documentContent}
+          toolTile={toolTile}
+          onIsEnabled={this.handleIsEnabled}
+          onFileInputChange={this.handleFileInputChange}
+        />
         <ImageComponent
           ref={elt => this.imageElt = elt}
           content={this.getContent()}
@@ -159,23 +165,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           onMouseDown={this.handleMouseDown}
           onUrlChange={this.handleUrlChange}
         />
-        <div className={imageToolControlContainerClasses} onMouseDown={this.handleContainerMouseDown}>
-          <input
-            className={inputClasses}
-            ref={elt => this.inputElt = elt}
-            defaultValue={editableUrl}
-            onBlur={this.handleBlur}
-            onKeyUp={this.handleKeyUp}
-          />
-          <input
-            className={fileInputClasses}
-            type="file"
-            accept="image/png, image/jpeg"
-            onChange={this.handleOnChange}
-          />
-        </div>
       </div>
     );
+  }
+
+  private handleIsEnabled = () => {
+    const { model: { id }, readOnly } = this.props;
+    const { ui } = this.stores;
+    return !readOnly &&
+            (ui?.selectedTileIds.length === 1) &&
+            (ui?.selectedTileIds.includes(id));
   }
 
   private getDesiredHeight() {
@@ -199,11 +198,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
-  private handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  private handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files as FileList;
     const currentFile = files[0];
     if (currentFile) {
-      this.setState({ isLoading: true, isEditing: false }, () => {
+      this.setState({ isLoading: true }, () => {
         gImageMap.addFileImage(currentFile)
           .then(image => {
             if (this._isMounted) {
@@ -231,36 +230,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
-    if (this.state.isEditing && (e.target === e.currentTarget)) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!this.state.isEditing) {
-      this.setState({ isEditing: true });
-    }
-    else if (e.target === e.currentTarget) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // If we detect an enter key, treat the same way we handle losing focus,
-    // i.e., attempt to change the URL for the image.
-    if (e.keyCode === 13) {
-      this.storeNewImageUrl(e.currentTarget.value);
-    }
-    else if (e.keyCode === 27) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  // User has input a new url into the input box, check the dimensions, upload to FB,
-  // then update state and finally model
-  private handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    this.setState({ isEditing: false });
-    this.storeNewImageUrl(e.currentTarget.value);
   }
 
   private storeNewImageUrl(newUrl: string) {
@@ -305,7 +274,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     this.imageDragDrop.drop(e)
       .then((dropUrl) => {
-        this.setState({ isEditing: false });
         this.storeNewImageUrl(dropUrl);
       })
       .catch((err) => {
