@@ -229,33 +229,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
-    if (this.state.isEditing && (e.target === e.currentTarget)) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  private handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!this.state.isEditing) {
-      this.setState({ isEditing: true });
-    }
-    else if (e.target === e.currentTarget) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  private handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // If we detect an enter key, treat the same way we handle losing focus,
-    // i.e., attempt to change the URL for the image.
-    if (e.keyCode === 13) {
-      this.storeNewImageUrl(e.currentTarget.value);
-    }
-    else if (e.keyCode === 27) {
-      this.setState({ isEditing: false });
-    }
-  }
-
-  private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
   }
 
   private storeNewImageUrl(newUrl: string) {
