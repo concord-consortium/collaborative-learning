@@ -1,6 +1,5 @@
 // https://weekly.elfitz.com/2018/10/17/using-rewire-with-typescript-jest/
 const rewire = require("rewire");
-// https://weekly.elfitz.com/2018/10/17/using-rewire-with-typescript-jest/
 // https://github.com/kulshekhar/ts-jest/issues/1029#issuecomment-610284927
 const index = rewire("../src/index.ts");
 

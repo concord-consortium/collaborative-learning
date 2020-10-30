@@ -4,13 +4,13 @@ import * as functions from "firebase-functions";
 import { PortalFirebaseJWTClaims } from "./portal-types";
 
 // set to true to enable additional logging
-const DEBUG=false;
+const DEBUG = false;
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
 const app = admin.initializeApp({
-  databaseURL: 'https://collaborative-learning-ec215.firebaseio.com/'
+  databaseURL: "https://collaborative-learning-ec215.firebaseio.com/"
 });
 const firebase = app.database();
 const firestore = app.firestore();
