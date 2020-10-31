@@ -7,7 +7,7 @@ import { DefaultToolbarSettings, computeStrokeDashArray,
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
   EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
-import { getUrlFromImageContent } from "../../../utilities/image-utils";
+import { getUrlFromImageContent, isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
@@ -988,7 +988,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
             if (!!obj && obj.model.type === "image") {
               const _imgObj = obj as ImageObject;
               return _imgObj.model.originalUrl === url &&
-              (!_imgObj.model.url || _imgObj.model.url === placeholderImage);
+              (!_imgObj.model.url || isPlaceholderImage(_imgObj.model.url));
             }
             return false;
           });

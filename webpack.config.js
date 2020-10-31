@@ -30,6 +30,20 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
+          test: /popper\.js$/,
+          loader: require.resolve('string-replace-loader'),
+          options: {
+            multiple: [
+              { // I couldn't get react-tippy's popperOptions to have the desired effect, so we
+                // just use the string-replace trick to change the popper.js library defaults.
+                search: /padding: 5,/g,
+                replace: "padding: 0, // [CC] override (string-replace-loader)",
+                strict: true  // fail build if replacement not performed
+              }
+            ]
+          }
+        },
+        {
           test: /\.(js|json|jsx|tsx?)$/i,
           exclude: /node_modules/,
           enforce: 'pre',
@@ -88,7 +102,18 @@ module.exports = (env, argv) => {
           }
         },
         {
+          // store placeholder image as file not data URI
+          test: /image_placeholder\.png$/,
+          loader: 'file-loader',
+          options: {
+            name: 'assets/images/[name].[ext]',
+            esModule: false
+          }
+        },
+        {
           test: /\.png$/i,
+          // don't convert placeholder image to a data URI
+          exclude: /image_placeholder\.png$/,
           loader: 'url-loader',
           options: {
             limit: 8192,

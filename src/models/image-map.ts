@@ -1,5 +1,7 @@
 import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
-import { getImageDimensions, storeCorsImage, storeFileImage, storeImage } from "../utilities/image-utils";
+import {
+  getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
+} from "../utilities/image-utils";
 import { SupportPublication } from "./document/document-types";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
@@ -57,7 +59,7 @@ export const ImageMapModel = types
       return /data:image\//.test(url);
     },
     isPlaceholder(url: string) {
-      return url === placeholderImage;
+      return isPlaceholderImage(url);
     },
     getCachedImage(url?: string) {
       return url ? self.images.get(url) : undefined;
@@ -206,7 +208,7 @@ export const externalUrlImagesHandler: IImageHandler = {
       if (db && userId) {
         storeImage(db, userId, url)
           .then(simpleImage => {
-            if (simpleImage.imageUrl === placeholderImage) {
+            if (isPlaceholderImage(simpleImage.imageUrl)) {
               // conversion errors are resolved to placeholder image
               // this generally occurs due to a CORS error, in which
               // case we just use the original url.
