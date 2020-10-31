@@ -1,25 +1,38 @@
 import { observer } from "mobx-react";
 import React from "react";
+import ReactDOM from "react-dom";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
 import { isPoint } from "../../../models/tools/geometry/jxg-point";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { IToolbarActionHandlers } from "./geometry-shared";
 import {
   AngleLabelButton, CommentButton, DeleteButton, DuplicateButton, MovableLineButton
 } from "./geometry-tool-buttons";
 
-interface IProps {
+import "./geometry-toolbar.sass";
+
+interface IProps extends IFloatingToolbarProps {
   board: JXG.Board;
   content: GeometryContentModelType;
   handlers: IToolbarActionHandlers;
 }
 
 export const GeometryToolbar: React.FC<IProps> = observer(({
-  board, content, handlers
+  documentContent, toolTile, board, content, handlers, onIsEnabled, ...others
 }) => {
   const {
     handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate, handleToggleVertexAngle
   } = handlers;
+  const enabled = onIsEnabled();
+  const location = useFloatingToolbarLocation({
+                    documentContent,
+                    toolTile,
+                    toolbarHeight: 38,
+                    toolbarTopOffset: 2,
+                    enabled,
+                    ...others
+                  });
   const selectedObjects = content.selectedObjects(board);
   const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
   const selectedPoint = selectedPoints && (selectedPoints.length === 1)
@@ -32,15 +45,17 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
   const disableComment = !content.getOneSelectedSegment(board) &&
                           !content.getCommentAnchor(board) &&
                           !content.getOneSelectedComment(board);
-  return (
-    <div className="geometry-toolbar" data-test="geometry-toolbar">
-      <div className="toolbar-buttons">
-        <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>
-        <AngleLabelButton disabled={disableVertexAngle} selected={hasVertexAngle} onClick={handleToggleVertexAngle}/>
-        <MovableLineButton onClick={handleCreateMovableLine}/>
-        <CommentButton disabled={disableComment} onClick={handleCreateComment}/>
-        <DeleteButton disabled={disableDelete} onClick={handleDelete}/>
-      </div>
-    </div>
-  );
+  return documentContent && enabled && location
+    ? ReactDOM.createPortal(
+        <div className="geometry-toolbar" data-test="geometry-toolbar" style={location}>
+          <div className="toolbar-buttons">
+            <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>
+            <AngleLabelButton disabled={disableVertexAngle} selected={hasVertexAngle}
+                              onClick={handleToggleVertexAngle}/>
+            <MovableLineButton onClick={handleCreateMovableLine}/>
+            <CommentButton disabled={disableComment} onClick={handleCreateComment}/>
+            <DeleteButton disabled={disableDelete} onClick={handleDelete}/>
+          </div>
+        </div>, documentContent)
+    : null;
 });

@@ -3,8 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
-import { useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
-import { IRegisterToolApiProps } from "../tool-tile";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
 import "react-tippy/dist/tippy.css";
 import "./image-toolbar.scss";
@@ -39,10 +38,7 @@ const UploadButton: React.FC<IUploadButtonProps> = ({ onFileInputChange }) => {
   );
 };
 
-interface IProps extends IRegisterToolApiProps {
-  documentContent?: HTMLElement | null;
-  toolTile?: HTMLElement | null;
-  onIsEnabled: () => boolean;
+interface IProps extends IFloatingToolbarProps {
   onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 export const ImageToolbar: React.FC<IProps> = observer(({

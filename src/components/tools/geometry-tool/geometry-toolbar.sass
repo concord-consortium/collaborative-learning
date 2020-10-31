@@ -1,0 +1,43 @@
+@import ../../vars
+
+.geometry-toolbar
+  position: absolute
+  height: $toolbar-button-height + 4px
+  border: $toolbar-border
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius
+  background-color: $color3-4
+
+  .toolbar-buttons
+    height: $toolbar-button-height
+    display: flex
+    flex-direction: row
+    justify-content: center
+    align-items: center
+
+    .button
+      box-sizing: content-box
+      width: $toolbar-button-width
+      height: $toolbar-button-height
+      margin: 2px
+      border: solid 1px $color3-4
+      display: flex
+      justify-content: center
+      align-items: center
+      &:hover
+        background-color: $color3-5
+        cursor: pointer
+      &:active
+        background-color: $color3-4
+        cursor: pointer
+      &.selected
+        background-color: $color3
+      &.selected.toolbar-icon
+        fill: $color3-1
+      &.disabled
+        opacity: .25
+        pointer-events: none
+
+      &.movable-line
+        height: 30px
+      &.delete svg
+        width: 20px

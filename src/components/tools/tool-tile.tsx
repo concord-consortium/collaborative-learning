@@ -89,8 +89,8 @@ interface IToolTileBaseProps {
 }
 
 export interface IRegisterToolApiProps {
-  onRegisterToolApi: (toolApi: IToolApi) => void;
-  onUnregisterToolApi: () => void;
+  onRegisterToolApi: (toolApi: IToolApi, facet?: string) => void;
+  onUnregisterToolApi: (facet?: string) => void;
 }
 
 export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
@@ -168,9 +168,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, toolApiInterface } = this.props;
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(entries => {
-        for (const entry of entries) {
-          if (entry.target === this.domElement) {
-            toolApiInterface?.getToolApi(model.id)?.handleTileResize?.(entry);
+        const handler = toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
+                        toolApiInterface?.getToolApi(model.id)?.handleTileResize;
+        if (handler) {
+          for (const entry of entries) {
+            if (entry.target === this.domElement) {
+              handler(entry);
+            }
           }
         }
       });
@@ -268,14 +272,16 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleRegisterToolApi = (toolApi: IToolApi) => {
-    this.props.toolApiInterface?.register(this.modelId, toolApi);
+  private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
+    const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
+    this.props.toolApiInterface?.register(id, toolApi);
     // trigger initial render of link indicators
     toolApi.isLinked?.() && this.forceUpdate();
   }
 
-  private handleUnregisterToolApi = () => {
-    this.props.toolApiInterface?.unregister(this.modelId);
+  private handleUnregisterToolApi = (facet?: string) => {
+    const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
+    this.props.toolApiInterface?.unregister(id);
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

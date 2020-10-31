@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef } from "react";
 import { useUIStore } from "../../../hooks/use-stores";
 import { IToolApi } from "../tool-tile";
 
-interface IUseToolbarToolApi {
+export interface IUseToolbarToolApi {
   id: string;
   readOnly?: boolean;
-  onRegisterToolApi: (toolApi: IToolApi) => void;
-  onUnregisterToolApi: () => void;
+  onRegisterToolApi: (toolApi: IToolApi, facet?: string) => void;
+  onUnregisterToolApi: (facet?: string) => void;
 }
 
 /*
@@ -24,8 +24,8 @@ export const useToolbarToolApi = (
       handleTileResize: (entry: ResizeObserverEntry) => {
         toolbarToolApi.current?.handleTileResize?.(entry);
       }
-    });
-    return () => onUnregisterToolApi();
+    }, "layout");
+    return () => onUnregisterToolApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ui = useUIStore();

@@ -7,11 +7,15 @@ import { useTileSelectionPointerEvents } from "./use-tile-selection-pointer-even
 import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
+import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./geometry-tool.sass";
 
-const GeometryToolComponent: React.FC<IGeometryProps> = ({ model, readOnly, ...others }) => {
+const GeometryToolComponent: React.FC<IGeometryProps> = ({
+  model, readOnly, ...others
+}) => {
+  const { documentContent, toolTile, onRegisterToolApi, onUnregisterToolApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
@@ -44,6 +48,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({ model, readOnly, ...o
     domElement
   );
 
+  const toolbarProps = useToolbarToolApi({ id: model.id, readOnly, onRegisterToolApi, onUnregisterToolApi });
+
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
@@ -57,7 +63,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({ model, readOnly, ...o
           onKeyDown={e => hotKeys.current.dispatch(e)} >
 
       {!readOnly && board && actionHandlers &&
-        <GeometryToolbar board={board} content={content} handlers={actionHandlers}/>}
+        <GeometryToolbar documentContent={documentContent} toolTile={toolTile}
+          board={board} content={content} handlers={actionHandlers} {...toolbarProps} />}
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers} onContentChange={forceUpdate}/>
     </div>

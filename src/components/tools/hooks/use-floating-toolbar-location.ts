@@ -3,6 +3,12 @@ import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities
 import { IRegisterToolApiProps } from "../tool-tile";
 import { useForceUpdate } from "./use-force-update";
 
+export interface IFloatingToolbarProps extends IRegisterToolApiProps {
+  documentContent?: HTMLElement | null;
+  toolTile?: HTMLElement | null;
+  onIsEnabled: () => boolean;
+}
+
 interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocationBaseArgs {
   enabled: boolean;
 }
@@ -30,8 +36,8 @@ export const useFloatingToolbarLocation = ({
         const { contentRect } = entry;
         setTileOffset({ left: contentRect.left, bottom: contentRect.bottom });
       }
-    });
-    return () => onUnregisterToolApi();
+    }, "layout");
+    return () => onUnregisterToolApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { left, top } = getToolbarLocation({
