@@ -44,11 +44,12 @@ import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
-export interface IProps extends IGeometryProps, SizeMeProps {
+export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
-  onUpdateToolbar: () => void;
+  onContentChange: () => void;
 }
+export type IProps = IGeometryContentProps & SizeMeProps;
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
 type Mutable<T> = {
@@ -1389,7 +1390,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const polygon = geometryContent.createPolygonFromFreePoints(board, linkedTableId) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
-              this.props.onUpdateToolbar();
+              this.props.onContentChange();
             }
           });
           this.lastPointDown = undefined;
