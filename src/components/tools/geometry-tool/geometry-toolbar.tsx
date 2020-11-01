@@ -57,7 +57,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                               onClick={handleToggleVertexAngle}/>
             <MovableLineButton onClick={handleCreateMovableLine}/>
             <CommentButton disabled={disableComment} onClick={handleCreateComment}/>
-            <ImageUploadButton onUploadImageFile={handleUploadImageFile}/>
+            <ImageUploadButton onUploadImageFile={handleUploadImageFile} tooltipOffset={{ y: 2 }}/>
             <DeleteButton disabled={disableDelete} onClick={handleDelete}/>
           </div>
         </div>, documentContent)
