@@ -9,6 +9,7 @@ import { IToolbarActionHandlers } from "./geometry-shared";
 import {
   AngleLabelButton, CommentButton, DeleteButton, DuplicateButton, MovableLineButton
 } from "./geometry-tool-buttons";
+import { ImageUploadButton } from "../image/image-toolbar";
 
 import "./geometry-toolbar.sass";
 
@@ -22,7 +23,8 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
   documentContent, toolTile, board, content, handlers, onIsEnabled, ...others
 }) => {
   const {
-    handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate, handleToggleVertexAngle
+    handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate,
+    handleToggleVertexAngle, handleUploadImageFile
   } = handlers;
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -47,13 +49,15 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                           !content.getOneSelectedComment(board);
   return documentContent && enabled && location
     ? ReactDOM.createPortal(
-        <div className="geometry-toolbar" data-test="geometry-toolbar" style={location}>
+        <div className="geometry-toolbar" data-test="geometry-toolbar" style={location}
+              onMouseDown={e => e.stopPropagation()}>
           <div className="toolbar-buttons">
             <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>
             <AngleLabelButton disabled={disableVertexAngle} selected={hasVertexAngle}
                               onClick={handleToggleVertexAngle}/>
             <MovableLineButton onClick={handleCreateMovableLine}/>
             <CommentButton disabled={disableComment} onClick={handleCreateComment}/>
+            <ImageUploadButton onUploadImageFile={handleUploadImageFile}/>
             <DeleteButton disabled={disableDelete} onClick={handleDelete}/>
           </div>
         </div>, documentContent)

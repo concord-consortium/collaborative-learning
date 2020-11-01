@@ -5,7 +5,7 @@
   height: $toolbar-button-height + 4px
   border: $toolbar-border
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius
-  background-color: $color3-4
+  background-color: $workspace-teal-light-9
 
   .toolbar-buttons
     height: $toolbar-button-height
@@ -19,25 +19,46 @@
       width: $toolbar-button-width
       height: $toolbar-button-height
       margin: 2px
-      border: solid 1px $color3-4
+      background-color: $workspace-teal-light-9
       display: flex
       justify-content: center
       align-items: center
-      &:hover
-        background-color: $color3-5
-        cursor: pointer
       &:active
-        background-color: $color3-4
+        background-color: $workspace-teal-light-4
         cursor: pointer
       &.selected
-        background-color: $color3
-      &.selected.toolbar-icon
-        fill: $color3-1
+        background-color: $workspace-teal-light-4
+      &:hover
+        background-color: $workspace-teal-light-6
+        cursor: pointer
       &.disabled
         opacity: .25
         pointer-events: none
 
-      &.movable-line
+      &.movable-line svg
         height: 30px
       &.delete svg
         width: 20px
+
+    // image upload button
+    .toolbar-button
+      position: relative
+      width: $toolbar-button-width
+      height: $toolbar-button-height
+      background-color: $workspace-teal-light-9
+
+      &:hover
+        background-color: $workspace-teal-light-6
+
+      &:active
+        background-color: $workspace-teal-light-4
+
+        svg path
+          fill: $workspace-teal-dark-1
+
+      input
+        position: absolute
+        left: 0
+        top: 0
+        width: $toolbar-button-width
+        height: $toolbar-button-height

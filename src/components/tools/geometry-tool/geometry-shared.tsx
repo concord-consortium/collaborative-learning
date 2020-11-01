@@ -7,6 +7,7 @@ export interface IToolbarActionHandlers {
   handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
   handleCreateComment: () => void;
+  handleUploadImageFile: (file: File) => void;
 }
 export interface IActionHandlers extends IToolbarActionHandlers {
   handleArrows: HotKeyHandler;

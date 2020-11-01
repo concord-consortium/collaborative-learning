@@ -8,21 +8,26 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 import "react-tippy/dist/tippy.css";
 import "./image-toolbar.scss";
 
-interface IUploadButtonProps {
-  onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+interface IImageUploadButtonProps {
+  tooltipOffset?: { x?: number, y?: number };
+  onUploadImageFile: (file: File) => void;
 }
-const UploadButton: React.FC<IUploadButtonProps> = ({ onFileInputChange }) => {
+export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOffset, onUploadImageFile }) => {
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
   // Next, we hide the <input> element — we do this because file inputs tend to be ugly, difficult
   // to style, and inconsistent in their design across browsers. Opacity is used to hide the file
   // input instead of visibility: hidden or display: none, because assistive technology interprets
   // the latter two styles to mean the file input isn't interactive.
   const hideFileInputStyle = { opacity: 0 };
-  const kTooltipXOffset = -19;  // required for proper centering
-  const kTooltipYOffset = -32;  // required for proper placement
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files;
+    if (files?.length) {
+      onUploadImageFile(files[0]);
+    }
+  };
   return (
     <Tooltip title="Upload image" size="small"
-              position="bottom" distance={kTooltipYOffset} offset={kTooltipXOffset}
+              position="bottom" distance={tooltipOffset?.y || 0} offset={tooltipOffset?.x || 0}
               animation="fade" animateFill={false} >
       <div className="toolbar-button image-upload">
         <UploadButtonSvg />
@@ -31,7 +36,7 @@ const UploadButton: React.FC<IUploadButtonProps> = ({ onFileInputChange }) => {
           style={hideFileInputStyle}
           accept="image/png, image/jpeg"
           title=""
-          onChange={onFileInputChange}
+          onChange={handleFileInputChange}
         />
       </div>
     </Tooltip>
@@ -39,10 +44,10 @@ const UploadButton: React.FC<IUploadButtonProps> = ({ onFileInputChange }) => {
 };
 
 interface IProps extends IFloatingToolbarProps {
-  onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUploadImageFile: (file: File) => void;
 }
 export const ImageToolbar: React.FC<IProps> = observer(({
-  documentContent, onIsEnabled, onFileInputChange, ...others
+  documentContent, onIsEnabled, onUploadImageFile, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -52,12 +57,14 @@ export const ImageToolbar: React.FC<IProps> = observer(({
                     enabled,
                     ...others
                   });
+  // required for proper placement and label centering
+  const tooltipOffset = { x: -19, y: -32 };
   return documentContent && enabled && location
     ? ReactDOM.createPortal(
         <div className={`image-toolbar ${enabled ? "enabled" : ""}`}
             style={location}
             onMouseDown={e => e.stopPropagation()}>
-          <UploadButton onFileInputChange={onFileInputChange} />
+          <ImageUploadButton tooltipOffset={tooltipOffset} onUploadImageFile={onUploadImageFile} />
         </div>, documentContent)
     : null;
 });
