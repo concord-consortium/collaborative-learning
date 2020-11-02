@@ -45,7 +45,7 @@ before(function(){
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 });
 
-context('Tests for graph and table integration', function(){
+context.skip('Tests for graph and table integration', function(){
     before(function(){
         addTableAndGraph();
         clueCanvas.deleteTile('text');
@@ -325,7 +325,7 @@ context.skip('Save and restore keeps the connection between table and graph', fu
         graphToolTile.getGraphPointLabel().contains('p1').should('exist');
     });
 });
-context('Delete connected table', function(){
+context.skip('Delete connected table', function(){
     it('will delete connected table', function(){
         clueCanvas.deleteTile('table');
         graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');

@@ -186,8 +186,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         toolApi.deleteSelection?.();
       }
       else {
-        document.deleteTile(tileId);
         ui.removeTileIdFromSelection(tileId);
+        document.deleteTile(tileId);
       }
     });
     this.setState(state => ({ activeTool: state.defaultTool }));
