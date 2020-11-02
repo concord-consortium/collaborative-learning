@@ -10,7 +10,7 @@ import "./image-toolbar.scss";
 
 interface IImageUploadButtonProps {
   tooltipOffset?: { x?: number, y?: number };
-  onUploadImageFile: (file: File) => void;
+  onUploadImageFile?: (file: File) => void;
 }
 export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOffset, onUploadImageFile }) => {
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
@@ -22,7 +22,7 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOf
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
     if (files?.length) {
-      onUploadImageFile(files[0]);
+      onUploadImageFile?.(files[0]);
     }
   };
   return (
@@ -59,9 +59,9 @@ export const ImageToolbar: React.FC<IProps> = observer(({
                   });
   // required for proper placement and label centering
   const tooltipOffset = { x: -19, y: -32 };
-  return documentContent && enabled && location
+  return documentContent
     ? ReactDOM.createPortal(
-        <div className={`image-toolbar ${enabled ? "enabled" : ""}`}
+        <div className={`image-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location}
             onMouseDown={e => e.stopPropagation()}>
           <ImageUploadButton tooltipOffset={tooltipOffset} onUploadImageFile={onUploadImageFile} />

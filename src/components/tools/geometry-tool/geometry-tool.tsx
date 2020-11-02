@@ -48,7 +48,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     domElement
   );
 
-  const toolbarProps = useToolbarToolApi({ id: model.id, readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const enabled = !readOnly && !!board && !!actionHandlers;
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled, onRegisterToolApi, onUnregisterToolApi });
 
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
@@ -62,9 +63,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
           onMouseUpCapture={handlePointerUp}
           onKeyDown={e => hotKeys.current.dispatch(e)} >
 
-      {!readOnly && board && actionHandlers &&
-        <GeometryToolbar documentContent={documentContent} toolTile={toolTile}
-          board={board} content={content} handlers={actionHandlers} {...toolbarProps} />}
+      {<GeometryToolbar documentContent={documentContent} toolTile={toolTile}
+        board={board} content={content} handlers={actionHandlers} {...toolbarProps} />}
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers} onContentChange={forceUpdate}/>
     </div>

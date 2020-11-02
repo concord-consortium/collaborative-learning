@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -14,9 +15,9 @@ import { ImageUploadButton } from "../image/image-toolbar";
 import "./geometry-toolbar.sass";
 
 interface IProps extends IFloatingToolbarProps {
-  board: JXG.Board;
+  board?: JXG.Board;
   content: GeometryContentModelType;
-  handlers: IToolbarActionHandlers;
+  handlers?: IToolbarActionHandlers;
 }
 
 export const GeometryToolbar: React.FC<IProps> = observer(({
@@ -25,7 +26,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
   const {
     handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate,
     handleToggleVertexAngle, handleUploadImageFile
-  } = handlers;
+  } = handlers || {};
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
@@ -35,21 +36,21 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                     enabled,
                     ...others
                   });
-  const selectedObjects = content.selectedObjects(board);
-  const selectedPoints = selectedObjects && selectedObjects.filter(isPoint);
-  const selectedPoint = selectedPoints && (selectedPoints.length === 1)
-                          ? selectedPoints[0] as JXG.Point : undefined;
+  const selectedObjects = board && content.selectedObjects(board);
+  const selectedPoints = selectedObjects?.filter(isPoint);
+  const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] as JXG.Point : undefined;
   const disableVertexAngle = !(selectedPoint && canSupportVertexAngle(selectedPoint));
   const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
-  const disableDelete = !content.getDeletableSelectedIds(board).length;
-  const disableDuplicate = (!content.getOneSelectedPoint(board) &&
-                            !content.getOneSelectedPolygon(board));
-  const disableComment = !content.getOneSelectedSegment(board) &&
-                          !content.getCommentAnchor(board) &&
-                          !content.getOneSelectedComment(board);
-  return documentContent && enabled && location
+  const disableDelete = board && !content.getDeletableSelectedIds(board).length;
+  const disableDuplicate = board && (!content.getOneSelectedPoint(board) &&
+                                    !content.getOneSelectedPolygon(board));
+  const disableComment = board && !content.getOneSelectedSegment(board) &&
+                                  !content.getCommentAnchor(board) &&
+                                  !content.getOneSelectedComment(board);
+  return documentContent
     ? ReactDOM.createPortal(
-        <div className="geometry-toolbar" data-test="geometry-toolbar" style={location}
+        <div className={classNames("geometry-toolbar", { disabled: !enabled || !location })}
+              data-test="geometry-toolbar" style={location}
               onMouseDown={e => e.stopPropagation()}>
           <div className="toolbar-buttons">
             <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>

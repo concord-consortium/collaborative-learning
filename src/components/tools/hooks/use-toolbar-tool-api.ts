@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
 import { IToolApi } from "../tool-tile";
 
 export interface IUseToolbarToolApi {
   id: string;
-  readOnly?: boolean;
+  enabled: boolean;
   onRegisterToolApi: (toolApi: IToolApi, facet?: string) => void;
   onUnregisterToolApi: (facet?: string) => void;
 }
@@ -13,7 +14,7 @@ export interface IUseToolbarToolApi {
  * Implements the tool's side of the floating toolbar API.
  */
 export const useToolbarToolApi = (
-  { id, readOnly, onRegisterToolApi, onUnregisterToolApi }: IUseToolbarToolApi) => {
+  { id, enabled, onRegisterToolApi, onUnregisterToolApi }: IUseToolbarToolApi) => {
   const toolbarToolApi = useRef<IToolApi | undefined>();
 
   useEffect(() => {
@@ -29,11 +30,12 @@ export const useToolbarToolApi = (
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ui = useUIStore();
+  const enabledRef = useCurrent(enabled);
   const handleIsEnabled = useRef(() => {
     // Implemented as callback so that the MST accesses occur from the toolbar's
     // render function rather than the parent tool's, so that only the former
     // will re-render and not the latter.
-    return !readOnly &&
+    return enabledRef.current &&
             (ui?.selectedTileIds.length === 1) &&
             (ui?.selectedTileIds.includes(id));
   });

@@ -19,7 +19,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toolbarProps = useToolbarToolApi({ id: model.id, readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
     <div className={classNames("drawing-tool", { "read-only": readOnly })}>

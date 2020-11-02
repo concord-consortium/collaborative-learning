@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useCurrent } from "../../../hooks/use-current";
 import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities/tile-utils";
 import { IRegisterToolApiProps } from "../tool-tile";
 import { useForceUpdate } from "./use-force-update";
@@ -24,8 +25,7 @@ export const useFloatingToolbarLocation = ({
 
   const [tileOffset, setTileOffset] = useState<{ left: number, bottom: number }>({ left: 0, bottom: 0 });
   const forceUpdate = useForceUpdate();
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
+  const enabledRef = useCurrent(enabled && !!documentContent && !!toolTile);
 
   useEffect(() => {
     onRegisterToolApi({

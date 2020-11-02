@@ -5,6 +5,10 @@
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
 
+  &.disabled {
+    display: none;
+  }
+
   .toolbar-button {
     position: relative;
     width: $toolbar-button-width;

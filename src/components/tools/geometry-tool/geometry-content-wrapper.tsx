@@ -15,9 +15,7 @@ export const GeometryContentWrapper: React.FC<IProps> = ({
         {({ size }: SizeMeProps) => {
           return (
             <div className="geometry-size-me">
-              <GeometryContentComponent
-                size={size}
-                {...others} />
+              <GeometryContentComponent size={size} {...others} />
             </div>
           );
         }}
