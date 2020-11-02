@@ -1,0 +1,69 @@
+@import ../../vars
+
+.geometry-toolbar
+  position: absolute
+  height: $toolbar-button-height + 4px
+  border: $toolbar-border
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius
+  background-color: $workspace-teal-light-9
+
+  &.disabled
+    display: none
+
+  .toolbar-buttons
+    height: $toolbar-button-height
+    display: flex
+    flex-direction: row
+    justify-content: center
+    align-items: center
+
+    .button
+      box-sizing: content-box
+      width: $toolbar-button-width
+      height: $toolbar-button-height
+      margin: 0 2px
+      background-color: $workspace-teal-light-9
+      display: flex
+      justify-content: center
+      align-items: center
+      &:active
+        background-color: $workspace-teal-light-4
+        cursor: pointer
+      &.selected
+        background-color: $workspace-teal-light-4
+      &:hover
+        background-color: $workspace-teal-light-6
+        cursor: pointer
+      &.disabled
+        opacity: .25
+        pointer-events: none
+
+      svg
+        height: 34px
+      &.movable-line svg
+        height: 30px
+      &.delete svg
+        width: 20px
+
+    // image upload button
+    .toolbar-button
+      position: relative
+      width: $toolbar-button-width
+      height: $toolbar-button-height
+      background-color: $workspace-teal-light-9
+
+      &:hover
+        background-color: $workspace-teal-light-6
+
+      &:active
+        background-color: $workspace-teal-light-4
+
+        svg path
+          fill: $workspace-teal-dark-1
+
+      input
+        position: absolute
+        left: 0
+        top: 0
+        width: $toolbar-button-width
+        height: $toolbar-button-height

@@ -21,7 +21,7 @@ before(function(){
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
 });
-context('Test graph tool functionalities', function(){
+context.skip('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
         it('will add a point to the origin', function(){
             clueCanvas.addTile('geometry');
@@ -106,7 +106,7 @@ context('Test graph tool functionalities', function(){
             // });
             it('will show and hide angles to a polygon', function(){
                 let numAngles=1;
-                rightNav.openRightNavTab("my-work");                
+                rightNav.openRightNavTab("my-work");
                 rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 rightNav.closeRightNavTabs();
                 graphToolTile.selectGraphPoint(4.2,2);
@@ -182,7 +182,7 @@ context('Test graph tool functionalities', function(){
                 graphToolTile.getGraphPoint().should('have.length',6);
             });
             it('will restore changes to a graph', function(){
-                rightNav.openRightNavTab("my-work");                
+                rightNav.openRightNavTab("my-work");
                 rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
             });

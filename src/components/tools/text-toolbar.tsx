@@ -47,9 +47,9 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             enabled,
                             ...others
                           });
-  return documentContent && enabled && toolbarLocation
+  return documentContent
     ? ReactDOM.createPortal(
-        <div className={`text-toolbar ${enabled ? "enabled" : ""}`}
+        <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
           {buttonDefs.map(button => {
             const { iconName, toolTip } = button;

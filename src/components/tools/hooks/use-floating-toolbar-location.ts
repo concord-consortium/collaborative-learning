@@ -1,7 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useCurrent } from "../../../hooks/use-current";
 import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities/tile-utils";
 import { IRegisterToolApiProps } from "../tool-tile";
 import { useForceUpdate } from "./use-force-update";
+
+export interface IFloatingToolbarProps extends IRegisterToolApiProps {
+  documentContent?: HTMLElement | null;
+  toolTile?: HTMLElement | null;
+  onIsEnabled: () => boolean;
+}
 
 interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocationBaseArgs {
   enabled: boolean;
@@ -18,8 +25,7 @@ export const useFloatingToolbarLocation = ({
 
   const [tileOffset, setTileOffset] = useState<{ left: number, bottom: number }>({ left: 0, bottom: 0 });
   const forceUpdate = useForceUpdate();
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
+  const enabledRef = useCurrent(enabled && !!documentContent && !!toolTile);
 
   useEffect(() => {
     onRegisterToolApi({
@@ -30,8 +36,8 @@ export const useFloatingToolbarLocation = ({
         const { contentRect } = entry;
         setTileOffset({ left: contentRect.left, bottom: contentRect.bottom });
       }
-    });
-    return () => onUnregisterToolApi();
+    }, "layout");
+    return () => onUnregisterToolApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { left, top } = getToolbarLocation({

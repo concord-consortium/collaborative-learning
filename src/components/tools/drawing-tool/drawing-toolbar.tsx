@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { DrawingSettingsView } from "./drawing-settings-view";
@@ -106,9 +107,9 @@ export const ToolbarView: React.FC<IProps> = (
     forceUpdate();
   };
 
-  return isEnabled && documentContent
+  return documentContent
     ? ReactDOM.createPortal(
-        <div className="drawing-tool-toolbar" style={toolbarLocation}>
+        <div className={classNames("drawing-tool-toolbar", { disabled: !isEnabled })} style={toolbarLocation}>
           <div className="drawing-tool-buttons">
             <ClassIconButton content={drawingContent} title="Settings"
                               iconClass="menu" onClick={handleSettingsButton} />

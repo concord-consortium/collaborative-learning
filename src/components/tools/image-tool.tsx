@@ -44,7 +44,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  private inputElt: HTMLInputElement | null;
   private disposers: IReactionDisposer[];
   private debouncedUpdateImage = debounce(async (url: string) => {
     const { documentContext } = this.state;
@@ -159,7 +158,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             documentContent={documentContent}
             toolTile={toolTile}
             onIsEnabled={this.handleIsEnabled}
-            onFileInputChange={this.handleFileInputChange}
+            onUploadImageFile={this.handleUploadImageFile}
           />
           <ImageComponent
             ref={elt => this.imageElt = elt}
@@ -204,26 +203,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.debouncedUpdateImage(url);
   }
 
-  private handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files as FileList;
-    const currentFile = files[0];
-    if (currentFile) {
-      this.setState({ isLoading: true }, () => {
-        gImageMap.addFileImage(currentFile)
-          .then(image => {
-            if (this._isMounted) {
-              const content = this.getContent();
-              this.setState({ isLoading: false, imageEntry: image });
-              if (image.contentUrl && (image.contentUrl !== content.url)) {
-                content.setUrl(image.contentUrl);
-              }
-              if (this.inputElt) {
-                this.inputElt.value = "";
-              }
+  private handleUploadImageFile = (file: File) => {
+    this.setState({ isLoading: true }, () => {
+      gImageMap.addFileImage(file)
+        .then(image => {
+          if (this._isMounted) {
+            const content = this.getContent();
+            this.setState({ isLoading: false, imageEntry: image });
+            if (image.contentUrl && (image.contentUrl !== content.url)) {
+              content.setUrl(image.contentUrl);
             }
-          });
-      });
-    }
+          }
+        });
+    });
   }
 
   private handleUrlChange = (url: string, context?: IDocumentContext) => {
@@ -247,9 +239,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         .then(image => {
           if (image.contentUrl && !isPlaceholderImage(image.displayUrl)) {
             this.getContent().setUrl(image.contentUrl);
-            if (this.inputElt) {
-              this.inputElt.value = image.contentUrl;
-            }
           }
         });
     }
