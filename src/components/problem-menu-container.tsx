@@ -56,9 +56,10 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
             offering.unitCode === unitCode
           );
         });
+        const fullTitle = invProb.subtitle ? `${invProb.title}: ${invProb.subtitle}` : invProb.title;
         const link: IDropdownItem = {
           selected: problem.title === invProb.title,
-          text: portalOffering ? invProb.title : `${invProb.title} (N/A)`,
+          text: portalOffering ? fullTitle : `${fullTitle} (N/A)`,
           link: portalOffering ? portalOffering.location : undefined,
           disabled: false
         };

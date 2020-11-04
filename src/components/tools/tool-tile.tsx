@@ -165,11 +165,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate() {
-    const { model, toolApiInterface } = this.props;
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(entries => {
-        const handler = toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
-                        toolApiInterface?.getToolApi(model.id)?.handleTileResize;
+        const handler = this.getToolResizeHandler();
         if (handler) {
           for (const entry of entries) {
             if (entry.target === this.domElement) {
@@ -220,6 +218,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
+          onDragEnd={this.handleToolDragEnd}
           draggable={true}
       >
         {this.renderLinkIndicators()}
@@ -270,6 +269,12 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                 />;
       }
     }
+  }
+
+  private getToolResizeHandler = () => {
+  const { model, toolApiInterface } = this.props;
+  return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
+            toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
@@ -354,7 +359,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       sourceDocId: docId,
       items: []
     };
-    const { ui: { selectedTileIds } } = this.stores;
+    const { ui } = this.stores;
+    const dragSrcContentId = getContentIdFromNode(model);
 
     const getTileInfo = (tileId: string) => {
       // get tile from loaded document or from curriculum
@@ -379,15 +385,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     };
 
-    // support dragging a tile without selecting it first
-    const dragSrcContentId = getContentIdFromNode(model);
-    const dragTileIds = selectedTileIds.slice();
-    if (dragTileIds.indexOf(model.id) < 0) {
-      dragTileIds.push(model.id);
-    }
+    // dragging a tile selects it first
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
-    dragTileIds.forEach(selectedTileId => {
+    ui.selectedTileIds.forEach(selectedTileId => {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
         const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
@@ -415,8 +417,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
     // and to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (dragTileIds.length === 1) {
-      const tileInfo = getTileInfo(dragTileIds[0]);
+    if (ui.selectedTileIds.length === 1) {
+      const tileInfo = getTileInfo(ui.selectedTileIds[0]);
       if (tileInfo) {
         const {tile, tileContent} = tileInfo;
         e.dataTransfer.setData(kDragTileId, tile.id);
@@ -439,4 +441,26 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
+  private handleToolDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    const handler = this.getToolResizeHandler();
+    if (this.domElement && handler) {
+      const bounds = this.domElement.getBoundingClientRect();
+      const kBorderSize = 4;
+      const entry: ResizeObserverEntry = {
+        target: this.domElement,
+        contentRect: {
+          x: 0,
+          y: 0,
+          width: bounds.width - kBorderSize,
+          height: bounds.height - kBorderSize,
+          top: 0,
+          right: bounds.width - kBorderSize,
+          bottom: bounds.height - kBorderSize,
+          left: 0
+        }
+      };
+      // calling the resize handler triggers a re-render
+      handler(entry);
+    }
+  }
 }

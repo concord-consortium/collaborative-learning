@@ -1,3 +1,5 @@
+@import ../../vars
+
 .drawing-tool
   display: flex
   border: 1px solid #BBB
@@ -7,6 +9,7 @@
   position: absolute
   height: 44px
   background-color: #eee
+  z-index: $toolbar-z-index
   &.disabled
     display: none
   .drawing-tool-buttons
