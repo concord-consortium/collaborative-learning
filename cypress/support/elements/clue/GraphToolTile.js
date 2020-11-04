@@ -1,22 +1,37 @@
-const graphUnit=18.33;
+const kGraphPixPerCoord = 18.33;
+// determined by inspection
+// const kGraphOriginFromCoordPix = { x: 20, y: 297 };
+const kGraphOriginCoordPix = { x: 20, y: 263 };
+
+function pointCoordsToPix(ptCoords, originPix) {
+    return { x: originPix.x + ptCoords.x * kGraphPixPerCoord,
+             y: originPix.y - ptCoords.y * kGraphPixPerCoord };
+}
+
+function pointPixToCoords(ptPix, originPix) {
+    const x = Math.round((ptPix.x - originPix.x) / kGraphPixPerCoord);
+    const y = Math.round((originPix.y - ptPix.y) / kGraphPixPerCoord);
+    return { x: x === 0 ? 0 : x, y: y === 0 ? 0 : y }; // convert -0 to 0
+}
 
 class GraphToolTile{
+    getOriginCoords() {
+        return cy.get('.geometry-content.editable svg line')
+            .then(lines => {
+                const x = parseFloat(lines.eq(1).attr('x1'));
+                const y = parseFloat(lines.eq(0).attr('y1'));
+                return { x, y };
+            });
+    }
     transformFromCoordinate(axis, num){
-        if (axis==='x'){
-            return (num+1.05)*graphUnit;
-        }
-        if (axis==='y'){
-            // return 320-((num+1.2)*graphUnit);
-            return 316-((num+1.05)*graphUnit);
-        }
+        console.log(`transformFromCoordinate[${axis}]`, "coord:", num, "pix:", kGraphOriginCoordPix[axis] + num * kGraphPixPerCoord);
+        return kGraphOriginCoordPix[axis] + num * kGraphPixPerCoord;
     }
     transformToCoordinate(axis, num){
-        if (axis==='x'){
-            return Math.round(((num-(graphUnit))/graphUnit));
-        }
-        if (axis==='y'){
-            return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))));
-        }
+        const coord = Math.round((num - kGraphOriginCoordPix[axis]) / kGraphPixPerCoord);
+        const result = coord === 0 ? 0 : coord; // convert -0 to 0
+        console.log(`transformToCoordinate[${axis}]`, "pix:", num, "coord:", result);
+        return result;
     }
     getGraphTile(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool`);
@@ -40,20 +55,57 @@ class GraphToolTile{
         }
     }
     getGraphPointCoordinates(index){ //This is the point coordinate text
-        let x=0,
-            y=0;
+        let origin;
+        cy.get('.geometry-content.editable svg line')
+            .then(lines => {
+                origin = { x: lines.eq(1).attr('x1'), y: lines.eq(0).attr('y1') };
+            });
 
         return (index > -1 ? this.getGraphPoint().eq(index) : this.getGraphPoint().last())
             .then(($point)=>{
-                x = $point.attr('cx');
-                y = $point.attr('cy');
-                return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
+                const ptPix = { x: parseFloat($point.attr('cx')),
+                                y: parseFloat($point.attr('cy')) };
+                const ptCoords = pointPixToCoords(ptPix, origin);
+                return `(${ptCoords.x}, ${ptCoords.y})`;
             });
     }
     getGraphPointLabel(){ //This is the letter label for a point
         return cy.get('.geometry-content.editable .JXGtext');
     }
     getGraphPoint(){
+        let origin;
+        cy.get('.geometry-content.editable svg line')
+            .then(lines => {
+                origin = { x: lines.eq(1).attr('x1'), y: lines.eq(0).attr('y1') };
+            });
+        cy.get('.geometry-content.editable ellipse[display="inline"]')
+            .each((pt, i) => {
+                const ptPix = { x: parseFloat(pt.attr('cx')), y: parseFloat(pt.attr('cy')) };
+                const ptCoords = pointPixToCoords(ptPix, origin);
+                console.log(`${i}: (${ptCoords.x}, ${ptCoords.y})`);
+            });
+        return cy.get('.geometry-content.editable ellipse[display="inline"]');
+    }
+    getGraphPointAt(x, y){
+        let origin;
+        cy.get('.geometry-content.editable svg line')
+            .then(lines => {
+                origin = { x: lines.eq(1).attr('x1'), y: lines.eq(0).attr('y1') };
+            });
+        cy.get('.geometry-content.editable ellipse[display="inline"]')
+            .then(pts => {
+                for (let i = pts.length - 1; i >= 0; --i) {
+                    const pt = Cypress.$(pts[i]);
+                    const ptPix = { x: parseFloat(pt.attr('cx')), y: parseFloat(pt.attr('cy')) };
+                    const ptCoords = pointPixToCoords(ptPix, origin);
+                    if ((ptCoords.x === x) && (ptCoords.y === y)) {
+                        // return the first matching point
+                        return pt;
+                    }
+                }
+                // no matching point
+                return Cypress.$();
+            });
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
     hoverGraphPoint(x,y){
@@ -80,10 +132,11 @@ class GraphToolTile{
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
     addPointToGraph(x,y){
-        let transX=this.transformFromCoordinate('x', x),
-            transY=this.transformFromCoordinate('y', y);
-
-        this.getGraph().last().click(transX,transY, {force:true});
+        this.getOriginCoords()
+            .then(origin => {
+                const ptClick = pointCoordsToPix({ x, y }, origin);
+                this.getGraph().last().click(ptClick.x, ptClick.y, {force:true});
+            });
     }
     getRotateTool(){
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');

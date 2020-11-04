@@ -25,8 +25,10 @@ context.skip('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){
         it('will add a point to the origin', function(){
             clueCanvas.addTile('geometry');
+            console.log("addPointToOrigin [pre]");
             graphToolTile.addPointToGraph(0,0);
-            graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
+            console.log("addPointToOrigin [post]");
+            graphToolTile.getGraphPointAt(0, 0).should('exist');
         });
         it('will add points to a graph', function(){
             canvas.createNewExtraDocumentFromFileMenu(ptsDoc, "my-work");
@@ -44,11 +46,10 @@ context.skip('Test graph tool functionalities', function(){
             cy.get('.spacer').click();
             clueCanvas.deleteTile('text');
             graphToolTile.getGraphTile().last().click();
-            graphToolTile.addPointToGraph(4.2,2);
+            graphToolTile.addPointToGraph(4,2);
             graphToolTile.addPointToGraph(10.4, 7.2);
             graphToolTile.addPointToGraph(13.2,2);
-            graphToolTile.addPointToGraph(13.2,2);
-            graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
+            graphToolTile.getGraphPointAt(4, 2).click({force:true}).click({force:true});
             graphToolTile.getGraphPolygon().should('exist');
         });
     });
