@@ -359,7 +359,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       sourceDocId: docId,
       items: []
     };
-    const { ui: { selectedTileIds } } = this.stores;
+    const { ui } = this.stores;
+    const dragSrcContentId = getContentIdFromNode(model);
 
     const getTileInfo = (tileId: string) => {
       // get tile from loaded document or from curriculum
@@ -384,15 +385,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     };
 
-    // support dragging a tile without selecting it first
-    const dragSrcContentId = getContentIdFromNode(model);
-    const dragTileIds = selectedTileIds.slice();
-    if (dragTileIds.indexOf(model.id) < 0) {
-      dragTileIds.push(model.id);
-    }
+    // dragging a tile selects it first
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
-    dragTileIds.forEach(selectedTileId => {
+    ui.selectedTileIds.forEach(selectedTileId => {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
         const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
@@ -420,8 +417,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
     // and to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (dragTileIds.length === 1) {
-      const tileInfo = getTileInfo(dragTileIds[0]);
+    if (ui.selectedTileIds.length === 1) {
+      const tileInfo = getTileInfo(ui.selectedTileIds[0]);
       if (tileInfo) {
         const {tile, tileContent} = tileInfo;
         e.dataTransfer.setData(kDragTileId, tile.id);
