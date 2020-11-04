@@ -165,11 +165,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate() {
-    const { model, toolApiInterface } = this.props;
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(entries => {
-        const handler = toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
-                        toolApiInterface?.getToolApi(model.id)?.handleTileResize;
+        const handler = this.getToolResizeHandler();
         if (handler) {
           for (const entry of entries) {
             if (entry.target === this.domElement) {
@@ -220,6 +218,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
+          onDragEnd={this.handleToolDragEnd}
           draggable={true}
       >
         {this.renderLinkIndicators()}
@@ -270,6 +269,12 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                 />;
       }
     }
+  }
+
+  private getToolResizeHandler = () => {
+  const { model, toolApiInterface } = this.props;
+  return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
+            toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
@@ -439,4 +444,26 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
+  private handleToolDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    const handler = this.getToolResizeHandler();
+    if (this.domElement && handler) {
+      const bounds = this.domElement.getBoundingClientRect();
+      const kBorderSize = 4;
+      const entry: ResizeObserverEntry = {
+        target: this.domElement,
+        contentRect: {
+          x: 0,
+          y: 0,
+          width: bounds.width - kBorderSize,
+          height: bounds.height - kBorderSize,
+          top: 0,
+          right: bounds.width - kBorderSize,
+          bottom: bounds.height - kBorderSize,
+          left: 0
+        }
+      };
+      // calling the resize handler triggers a re-render
+      handler(entry);
+    }
+  }
 }

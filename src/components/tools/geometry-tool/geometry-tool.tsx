@@ -63,8 +63,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
           onMouseUpCapture={handlePointerUp}
           onKeyDown={e => hotKeys.current.dispatch(e)} >
 
-      {<GeometryToolbar documentContent={documentContent} toolTile={toolTile}
-        board={board} content={content} handlers={actionHandlers} {...toolbarProps} />}
+      <GeometryToolbar documentContent={documentContent} toolTile={toolTile}
+        board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers} onContentChange={forceUpdate}/>
     </div>
