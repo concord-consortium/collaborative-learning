@@ -4,6 +4,7 @@
   position: absolute;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  z-index: $toolbar-z-index;
 
   &.disabled {
     display: none;
