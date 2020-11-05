@@ -218,7 +218,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
-          onDragEnd={this.handleToolDragEnd}
+          onDragEnd={this.triggerResizeHandler}
           draggable={true}
       >
         {this.renderLinkIndicators()}
@@ -272,16 +272,16 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   private getToolResizeHandler = () => {
-  const { model, toolApiInterface } = this.props;
-  return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
+    const { model, toolApiInterface } = this.props;
+    return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
             toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
     this.props.toolApiInterface?.register(id, toolApi);
-    // trigger initial render of link indicators
-    toolApi.isLinked?.() && this.forceUpdate();
+    // trigger initial render
+    this.forceUpdate();
   }
 
   private handleUnregisterToolApi = (facet?: string) => {
@@ -441,7 +441,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
-  private handleToolDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+  private triggerResizeHandler = () => {
     const handler = this.getToolResizeHandler();
     if (this.domElement && handler) {
       const bounds = this.domElement.getBoundingClientRect();

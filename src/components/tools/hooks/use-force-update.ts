@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export const useForceUpdate = () => {
   const [ , setChangeCount] = useState(0);
-  return () => setChangeCount(count => count + 1);
+  return useCallback(() => setChangeCount(count => count + 1), []);
 };

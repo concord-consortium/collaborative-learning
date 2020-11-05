@@ -23,9 +23,9 @@ export function getToolbarLocation({
 
   if (documentContent && toolTile) {
     const docBounds = documentContent.getBoundingClientRect();
-    const textBounds = toolTile.getBoundingClientRect();
-    const topOffset = textBounds.top - docBounds.top;
-    const leftOffset = textBounds.left - docBounds.left;
+    const tileBounds = toolTile.getBoundingClientRect();
+    const topOffset = tileBounds.top - docBounds.top;
+    const leftOffset = tileBounds.left - docBounds.left;
     if ((topOffset != null) && (leftOffset != null)) {
       tileTopOffset = topOffset;
       tileLeftOffset = leftOffset;
