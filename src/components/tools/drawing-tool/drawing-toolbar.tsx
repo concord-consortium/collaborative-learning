@@ -50,8 +50,13 @@ export const ToolbarView: React.FC<IProps> = (
                             ...others
                           });
 
-  const modalButtonClasses = (type: ToolbarModalButton) => {
-    return buttonClasses(drawingContent, type);
+  const modalButtonClasses = (type?: ToolbarModalButton) => {
+    return buttonClasses({ selected: type && (drawingContent.selectedButton === type) });
+  };
+
+  const modalButtonProps = (type: ToolbarModalButton) => {
+    const { selectedButton, toolbarSettings } = drawingContent;
+    return { modalButton: type, selected: selectedButton === type, settings: toolbarSettings };
   };
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
@@ -111,24 +116,23 @@ export const ToolbarView: React.FC<IProps> = (
     ? ReactDOM.createPortal(
         <div className={classNames("drawing-tool-toolbar", { disabled: !isEnabled })} style={toolbarLocation}>
           <div className="drawing-tool-buttons">
-            <ClassIconButton content={drawingContent} title="Settings"
-                              iconClass="menu" onClick={handleSettingsButton} />
-            <ClassIconButton content={drawingContent} modalButton="select" title="Select"
+            <ClassIconButton title="Settings" iconClass="menu" onClick={handleSettingsButton} />
+            <ClassIconButton {...modalButtonProps("select")} title="Select"
                               iconClass="mouse-pointer" onSetSelectedButton={handleSetSelectedButton} />
-            <ClassIconButton content={drawingContent} modalButton="line" title="Freehand Tool"
+            <ClassIconButton {...modalButtonProps("line")} title="Freehand Tool"
                               iconClass="pencil" style={{color: stroke}}
                               onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton content={drawingContent} modalButton="vector" title="Line Tool"
+            <SvgIconButton {...modalButtonProps("vector")} title="Line Tool"
                               onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton content={drawingContent} modalButton="rectangle" title="Rectangle Tool"
+            <SvgIconButton {...modalButtonProps("rectangle")} title="Rectangle Tool"
                               onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton content={drawingContent} modalButton="ellipse" title="Ellipse Tool"
+            <SvgIconButton {...modalButtonProps("ellipse")} title="Ellipse Tool"
                               onSetSelectedButton={handleSetSelectedButton} />
             {
               currentStamp &&
               <div
-                  className={"flyout-top-button " + modalButtonClasses("stamp")}
-                  style={{height: 30}} title="Coin Stamp"
+                className={"flyout-top-button " + modalButtonClasses("stamp")}
+                style={{height: 30}} title="Coin Stamp"
                 onClick={() => handleSetSelectedButton("stamp")}>
                 {
                   stamps.length > 1 &&
@@ -139,7 +143,7 @@ export const ToolbarView: React.FC<IProps> = (
                 <img src={currentStamp.url} />
               </div>
             }
-            <ClassIconButton content={drawingContent} modalButton={{ disabled: !drawingContent.hasSelectedObjects }}
+            <ClassIconButton disabled={!drawingContent.hasSelectedObjects}
                   title="Delete" iconClass="bin" onClick={handleDeleteButton} />
           </div>
           {showSettings

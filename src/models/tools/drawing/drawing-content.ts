@@ -134,10 +134,32 @@ export const DrawingContentModel = types
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
     stamps: types.array(StampModel),
+    // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
     metadata: undefined as any as DrawingToolMetadataModelType
+  }))
+  .views(self => ({
+    get isUserResizable() {
+      return true;
+    },
+    get selectedButton() {
+      return self.metadata.selectedButton;
+    },
+    get hasSelectedObjects() {
+      return self.metadata.selection.length > 0;
+    },
+    get currentStamp() {
+      const currentStampIndex = self.currentStampIndex || 0;
+      return currentStampIndex < self.stamps.length
+              ? self.stamps[currentStampIndex]
+              : null;
+    },
+    get toolbarSettings(): ToolbarSettings {
+      const { stroke, fill, strokeDashArray, strokeWidth } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth };
+    }
   }))
   .extend(self => {
 
@@ -189,25 +211,6 @@ export const DrawingContentModel = types
     }
 
     return {
-      views: {
-        get isUserResizable() {
-          return true;
-        },
-        get selectedButton() {
-          return self.metadata.selectedButton;
-        },
-        get hasSelectedObjects() {
-          return self.metadata.selection.length > 0;
-        },
-        get currentStamp() {
-          // is type.maybe to avoid need for migration
-          const currentStampIndex = self.currentStampIndex || 0;
-          if (currentStampIndex < self.stamps.length) {
-            return self.stamps[currentStampIndex];
-          }
-          return null;
-        }
-      },
       actions: {
         doPostCreate(metadata: DrawingToolMetadataModelType) {
           self.metadata = metadata;

@@ -1,21 +1,22 @@
 import classNames from "classnames";
 import React, { useCallback, useRef } from "react";
 import {
-  computeStrokeDashArray, DrawingContentModelType, ToolbarModalButton
+  computeStrokeDashArray, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 
-export const buttonClasses =
-        (content: DrawingContentModelType, modalButtonOrMap?: ToolbarModalButton | Record<string, any>) => {
-  const selected = typeof modalButtonOrMap === "string"
-                    ? { selected: modalButtonOrMap && (modalButtonOrMap === content.selectedButton) }
-                    : undefined;
-  const others = typeof modalButtonOrMap !== "string" ? modalButtonOrMap : undefined;
-  return classNames("drawing-tool-button", selected, others);
+interface IButtonClasses {
+  disabled?: boolean;
+  selected?: boolean;
+}
+export const buttonClasses = ({ disabled, selected }: IButtonClasses) => {
+  return classNames("drawing-tool-button", { disabled, selected });
 };
 
 interface IBaseIconButtonProps {
-  content: DrawingContentModelType;
-  modalButton?: ToolbarModalButton | Record<string, any>;
+  disabled?: boolean;
+  selected?: boolean;
+  modalButton?: ToolbarModalButton;
+  settings?: ToolbarSettings;
   title: string;
   onSetSelectedButton?: (modalButton: ToolbarModalButton) => void;
 }
@@ -25,20 +26,18 @@ interface IBaseIconButtonProps {
  */
 interface IClassIconButtonProps extends IBaseIconButtonProps {
   iconClass: string;
-  disabled?: boolean;
   style?: React.CSSProperties;
   onClick?: () => void;
-  onSetSelectedButton?: (modalButton: ToolbarModalButton) => void;
 }
 export const ClassIconButton: React.FC<IClassIconButtonProps> = ({
-        content, modalButton, title, iconClass, style, onClick, onSetSelectedButton }) => {
+        disabled, selected, modalButton, title, iconClass, style, onClick, onSetSelectedButton }) => {
   const buttonRef = useRef<HTMLElement | null>(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleClick = useCallback(onClick ||
                       (() => (typeof modalButton === "string") && onSetSelectedButton?.(modalButton)),
                       []);
   return (
-    <div className={buttonClasses(content, modalButton)} title={title}
+    <div className={buttonClasses({ disabled, selected })} title={title}
           ref={elt => buttonRef.current = elt} onClick={handleClick}>
       <span className={`drawing-tool-icon drawing-tool-icon-${iconClass}`} style={style} />
     </div>
@@ -50,12 +49,16 @@ export const ClassIconButton: React.FC<IClassIconButtonProps> = ({
  */
 interface ISvgIconButtonProps extends IBaseIconButtonProps {
   modalButton: ToolbarModalButton;
+  settings: ToolbarSettings;
 }
-export const SvgIconButton: React.FC<ISvgIconButtonProps> = ({ content, modalButton, title, onSetSelectedButton }) => {
+export const SvgIconButton: React.FC<ISvgIconButtonProps> = ({
+  selected, modalButton, settings, title, onSetSelectedButton
+}) => {
   const handleClick = () => onSetSelectedButton?.(modalButton);
   return (
-    <div className={buttonClasses(content, modalButton)} style={{height: 30}} title={title} onClick={handleClick}>
-      <DrawingSvgIcon content={content} button={modalButton} />
+    <div className={buttonClasses({ selected })}
+          style={{height: 30}} title={title} onClick={handleClick}>
+      <DrawingSvgIcon settings={settings} button={modalButton} />
     </div>
   );
 };
@@ -64,11 +67,11 @@ export const SvgIconButton: React.FC<ISvgIconButtonProps> = ({ content, modalBut
  * DrawingSvgIcon
  */
 interface IDrawingSvgIconProps {
-  content: DrawingContentModelType;
+  settings: ToolbarSettings;
   button: ToolbarModalButton;
 }
-export const DrawingSvgIcon: React.FC<IDrawingSvgIconProps> = ({ content, button }) => {
-  const {stroke, fill, strokeDashArray, strokeWidth} = content;
+export const DrawingSvgIcon: React.FC<IDrawingSvgIconProps> = ({ settings, button }) => {
+  const {stroke, fill, strokeDashArray, strokeWidth} = settings;
   let iconElement: JSX.Element|null = null;
   const iconSize = 30;
   const iconMargin = 5;
