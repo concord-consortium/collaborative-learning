@@ -1,23 +1,44 @@
 import classNames from "classnames";
 import React, { useCallback, useRef } from "react";
+import { Tooltip } from "react-tippy";
 import {
   computeStrokeDashArray, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
+import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
+import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
+import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
+import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
+import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
+import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
+import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
+import { luminanceColorString } from "../../../utilities/color-utils";
+
+const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  ellipse: EllipseToolIcon,
+  line: FreehandToolIcon,
+  rectangle: RectToolIcon,
+  select: SelectToolIcon,
+  vector: LineToolIcon
+};
 
 interface IButtonClasses {
+  modalButton?: ToolbarModalButton;
   disabled?: boolean;
   selected?: boolean;
+  others?: string;
 }
-export const buttonClasses = ({ disabled, selected }: IButtonClasses) => {
-  return classNames("drawing-tool-button", { disabled, selected });
+export const buttonClasses = ({ modalButton, disabled, selected, others }: IButtonClasses) => {
+  const modalButtonClass = modalButton ? `button-${modalButton}` : undefined;
+  return classNames("drawing-tool-button", modalButtonClass, { disabled, selected });
 };
 
 interface IBaseIconButtonProps {
   disabled?: boolean;
   selected?: boolean;
   modalButton?: ToolbarModalButton;
-  settings?: ToolbarSettings;
+  settings?: Partial<ToolbarSettings>;
   title: string;
+  onClick?: () => void;
   onSetSelectedButton?: (modalButton: ToolbarModalButton) => void;
 }
 
@@ -27,7 +48,6 @@ interface IBaseIconButtonProps {
 interface IClassIconButtonProps extends IBaseIconButtonProps {
   iconClass: string;
   style?: React.CSSProperties;
-  onClick?: () => void;
 }
 export const ClassIconButton: React.FC<IClassIconButtonProps> = ({
         disabled, selected, modalButton, title, iconClass, style, onClick, onSetSelectedButton }) => {
@@ -45,57 +65,69 @@ export const ClassIconButton: React.FC<IClassIconButtonProps> = ({
 };
 
 /*
- * SvgIconButton
+ * SvgToolbarButton
  */
-interface ISvgIconButtonProps extends IBaseIconButtonProps {
-  modalButton: ToolbarModalButton;
-  settings: ToolbarSettings;
+interface ISvgToolbarButtonProps {
+  SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
+  buttonClass: string;
+  selected?: boolean;
+  settings?: Partial<ToolbarSettings>;
+  title: string;
+  onClick: () => void;
 }
-export const SvgIconButton: React.FC<ISvgIconButtonProps> = ({
-  selected, modalButton, settings, title, onSetSelectedButton
+export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
+  SvgIcon, buttonClass, selected, settings, title, onClick
 }) => {
-  const handleClick = () => onSetSelectedButton?.(modalButton);
-  return (
-    <div className={buttonClasses({ selected })}
-          style={{height: 30}} title={title} onClick={handleClick}>
-      <DrawingSvgIcon settings={settings} button={modalButton} />
-    </div>
-  );
+  const { fill, stroke, strokeWidth, strokeDashArray } = settings || {};
+  const kTooltipYDistance = 0;
+  return SvgIcon
+    ? <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
+              animation="fade" animateFill={false}>
+        <div className={buttonClasses({ selected, others: buttonClass })} onClick={onClick}>
+          <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
+              strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
+        </div>
+      </Tooltip>
+    : null;
 };
 
 /*
- * DrawingSvgIcon
+ * SvgToolModeButton
  */
-interface IDrawingSvgIconProps {
-  settings: ToolbarSettings;
-  button: ToolbarModalButton;
+interface ISvgToolModeButtonProps {
+  modalButton: ToolbarModalButton;
+  selected?: boolean;
+  settings: Partial<ToolbarSettings>;
+  title: string;
+  onSetSelectedButton: (modalButton: ToolbarModalButton) => void;
 }
-export const DrawingSvgIcon: React.FC<IDrawingSvgIconProps> = ({ settings, button }) => {
-  const {stroke, fill, strokeDashArray, strokeWidth} = settings;
-  let iconElement: JSX.Element|null = null;
-  const iconSize = 30;
-  const iconMargin = 5;
-  const elementSize = iconSize - (2 * iconMargin);
-  const elementHalfSize = elementSize / 2;
+export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = ({
+  modalButton, onSetSelectedButton, ...others
+}) => {
+  const SvgIcon = modalButton && svgIcons[modalButton];
+  const handleClick = () => onSetSelectedButton?.(modalButton);
+  return SvgIcon
+    ? <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} {...others} />
+    : null;
+};
 
-  switch (button) {
-    case "rectangle":
-      iconElement = <rect width={elementSize} height={elementSize} />;
-      break;
-    case "ellipse":
-      iconElement = <ellipse cx={elementHalfSize} cy={elementHalfSize} rx={elementHalfSize} ry={elementHalfSize} />;
-      break;
-    case "vector":
-      iconElement = <line x1={0} y1={elementSize} x2={elementSize} y2={0} />;
-      break;
-  }
+interface IColorButtonProps {
+  settings: Partial<ToolbarSettings>;
+  onClick: () => void;
+}
+const kLightLuminanceThreshold = 0.85;
+const kLightLuminanceContrastStroke = "#949494";  // $charcoal-light-1
 
-  return (
-    <svg width={iconSize} height={iconSize}>
-      <g transform={`translate(${iconMargin},${iconMargin})`} fill={fill} stroke={stroke} strokeWidth={strokeWidth}
-          strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}>
-        {iconElement}
-      </g>
-    </svg>
-  );
+export const FillColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
+  const luminance = (settings.fill && luminanceColorString(settings.fill)) || 0;
+  const stroke = luminance >= kLightLuminanceThreshold ? kLightLuminanceContrastStroke : settings.fill;
+  return <SvgToolbarButton SvgIcon={ColorFillIcon} buttonClass="fill-color" title="Fill color"
+            settings={{ fill: settings.fill, stroke }} onClick={onClick} />;
+};
+
+export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
+  const luminance = (settings.stroke && luminanceColorString(settings.stroke)) || 0;
+  const stroke = luminance >= kLightLuminanceThreshold ? kLightLuminanceContrastStroke : settings.stroke;
+  return <SvgToolbarButton SvgIcon={ColorStrokeIcon} buttonClass="stroke-color" title="Line/border color"
+            settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
 };

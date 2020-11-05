@@ -59,7 +59,19 @@ module.exports = (env, argv) => {
           oneOf: [
             {
               issuer: /\.[tj]sx?$/i,
-              loader: "@svgr/webpack"
+              loader: "@svgr/webpack",
+              options: {
+                svgoConfig: {
+                  plugins: [
+                    // leave <line>s, <rect>s and <circle>s alone
+                    // https://github.com/svg/svgo/blob/master/plugins/convertShapeToPath.js
+                    { convertShapeToPath: false },
+                    // leave "stroke"s and "fill"s alone
+                    // https://github.com/svg/svgo/blob/master/plugins/removeUnknownsAndDefaults.js
+                    { removeUnknownsAndDefaults: { defaultAttrs: false } }
+                  ]
+                }
+              }
             },
             {
               // Do not apply SVGR import in CSS files.

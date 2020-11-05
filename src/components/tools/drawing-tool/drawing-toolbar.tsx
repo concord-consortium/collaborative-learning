@@ -3,13 +3,15 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { DrawingSettingsView } from "./drawing-settings-view";
 import { DrawingStampSelection } from "./drawing-stamp-selection";
-import { buttonClasses, ClassIconButton, SvgIconButton } from "./drawing-toolbar-buttons";
+import {
+  buttonClasses, ClassIconButton, FillColorButton, StrokeColorButton, SvgToolModeButton
+} from "./drawing-toolbar-buttons";
 import { useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../tool-tile";
 import {
-  Color, colors, DrawingContentModelType, ToolbarModalButton
+  Color, colors, DrawingContentModelType, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
@@ -36,7 +38,7 @@ interface IProps extends IRegisterToolApiProps {
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
-  const {stroke, stamps, currentStamp} = drawingContent;
+  const {stamps, currentStamp} = drawingContent;
   const [showSettings, setShowSettings] = useState(false);
   const [showStampSelection, setShowStampSelection] = useState(false);
   const isEnabled = onIsEnabled();
@@ -44,7 +46,7 @@ export const ToolbarView: React.FC<IProps> = (
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
                             toolbarHeight: 29,
-                            toolbarTopOffset: 4,
+                            toolbarTopOffset: 2,
                             minToolContent: 22,
                             enabled: isEnabled,
                             ...others
@@ -54,9 +56,9 @@ export const ToolbarView: React.FC<IProps> = (
     return buttonClasses({ selected: type && (drawingContent.selectedButton === type) });
   };
 
-  const modalButtonProps = (type: ToolbarModalButton) => {
+  const modalButtonProps = (type: ToolbarModalButton, settings?: Partial<ToolbarSettings>) => {
     const { selectedButton, toolbarSettings } = drawingContent;
-    return { modalButton: type, selected: selectedButton === type, settings: toolbarSettings };
+    return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
@@ -116,23 +118,21 @@ export const ToolbarView: React.FC<IProps> = (
     ? ReactDOM.createPortal(
         <div className={classNames("drawing-tool-toolbar", { disabled: !isEnabled })} style={toolbarLocation}>
           <div className="drawing-tool-buttons">
-            <ClassIconButton title="Settings" iconClass="menu" onClick={handleSettingsButton} />
-            <ClassIconButton {...modalButtonProps("select")} title="Select"
-                              iconClass="mouse-pointer" onSetSelectedButton={handleSetSelectedButton} />
-            <ClassIconButton {...modalButtonProps("line")} title="Freehand Tool"
-                              iconClass="pencil" style={{color: stroke}}
-                              onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton {...modalButtonProps("vector")} title="Line Tool"
-                              onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton {...modalButtonProps("rectangle")} title="Rectangle Tool"
-                              onSetSelectedButton={handleSetSelectedButton} />
-            <SvgIconButton {...modalButtonProps("ellipse")} title="Ellipse Tool"
-                              onSetSelectedButton={handleSetSelectedButton} />
+            <SvgToolModeButton {...modalButtonProps("select", {})}
+                                title="Select" onSetSelectedButton={handleSetSelectedButton} />
+            <SvgToolModeButton {...modalButtonProps("line", { fill: drawingContent.stroke })}
+                                title="Freehand" onSetSelectedButton={handleSetSelectedButton} />
+            <SvgToolModeButton {...modalButtonProps("vector")}
+                                title="Line" onSetSelectedButton={handleSetSelectedButton} />
+            <SvgToolModeButton {...modalButtonProps("rectangle")} title="Rectangle"
+                                onSetSelectedButton={handleSetSelectedButton} />
+            <SvgToolModeButton {...modalButtonProps("ellipse")} title="Ellipse"
+                                onSetSelectedButton={handleSetSelectedButton} />
             {
               currentStamp &&
               <div
                 className={"flyout-top-button " + modalButtonClasses("stamp")}
-                style={{height: 30}} title="Coin Stamp"
+                style={{height: 30}} title="Stamp"
                 onClick={() => handleSetSelectedButton("stamp")}>
                 {
                   stamps.length > 1 &&
@@ -143,6 +143,8 @@ export const ToolbarView: React.FC<IProps> = (
                 <img src={currentStamp.url} />
               </div>
             }
+            <StrokeColorButton settings={drawingContent.toolbarSettings} onClick={handleSettingsButton} />
+            <FillColorButton settings={drawingContent.toolbarSettings} onClick={handleSettingsButton} />
             <ClassIconButton disabled={!drawingContent.hasSelectedObjects}
                   title="Delete" iconClass="bin" onClick={handleDeleteButton} />
           </div>

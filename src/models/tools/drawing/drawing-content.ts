@@ -6,8 +6,7 @@ import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kDrawingToolID = "Drawing";
 
-export const kDrawingDefaultHeight = 320;
-export const TOOLBAR_WIDTH = 48;
+export const kDrawingDefaultHeight = 180;
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
 
@@ -48,7 +47,7 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   strokeWidth: 2
 };
 
-export const computeStrokeDashArray = (type: string, strokeWidth: string|number) => {
+export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
   const dotted = strokeWidth;
   const dashed = (strokeWidth as number) * 3;
   switch (type) {
