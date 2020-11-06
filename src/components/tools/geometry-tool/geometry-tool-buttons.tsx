@@ -7,7 +7,7 @@ import CopyPolygonSvg from "../../../clue/assets/icons/geometry/copy-polygon.svg
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 // generic icons
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
-import DeleteSvg from "../../../assets/icons/delete/delete.svg";
+import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 
 type SvgComponent = React.FC<React.SVGProps<SVGSVGElement>>;
 
