@@ -1,5 +1,27 @@
 # Changelog
 
+## Version 1.5.0 - released November 6, 2020
+
+### Features/Improvements
+- Combined Problem and Extra Workspaces under single Workspaces tab
+- Text, Drawing, Geometry, and Image tools have "floating" toolbars that show only when the tile is selected
+- Improved appearance of teacher's publish support icon
+- Teacher's problem menu shows problem subtitles
+- Teacher's class menu handles multiple assignments of the same problem
+
+### Bugs Fixed
+- Fixed drawing tool update bug
+- Fixed display of images in cross-class teacher supports
+- Dragging a tile selects the tile first
+- Student names/initials are now more legible
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 517,550 bytes | 2.5% |
+| index.js | 4,950,264 bytes | 1.3% |
+
 ## Version 1.4.1 - released October 13, 2020
 
 ### Features/Improvements
