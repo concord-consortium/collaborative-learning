@@ -99,14 +99,58 @@
         &:hover:not(.selected)
           background: #999
 
+  .color-swatches
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-evenly
+    align-items: center
+    padding: 2.5px
+
+    .color-swatch
+      position: relative
+      width: 30px
+      height: 30px
+
+      svg
+        position: absolute
+        left: 0
+        top: 0
+
+      .check-icon
+        left: 4px
+        top: 4px
+        fill: white
+      &.light
+        .check-icon
+          fill: $workspace-teal
+
+      &.light
+        .contrast-border
+          stroke: $charcoal-light-1
+
+      .highlight
+        &.select
+          stroke: $workspace-teal
+      &:hover
+        .highlight
+          stroke: $workspace-teal-light-2
+
+  .stroke-color-palette
+    position: absolute
+    left: 216px
+    width: 129px
+    height: 69px
+    background-color: $workspace-teal-light-9
+    border: $toolbar-border
+    border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius
+    z-index: $toolbar-z-index
+
 .drawing-tool.read-only .drawing-tool-toolbar
   .drawing-tool-button
     cursor: default
   .drawing-tool-buttons .flyout-top-button .flyout-toggle:hover
     background-color: unset
     color: unset
-
-
 
 @font-face
   font-family: 'icomoon'

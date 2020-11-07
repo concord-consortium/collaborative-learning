@@ -66,6 +66,9 @@ module.exports = (env, argv) => {
                     // leave <line>s, <rect>s and <circle>s alone
                     // https://github.com/svg/svgo/blob/master/plugins/convertShapeToPath.js
                     { convertShapeToPath: false },
+                    // leave "class"es and "id"s alone
+                    // https://github.com/svg/svgo/blob/master/plugins/prefixIds.js
+                    { prefixIds: false },
                     // leave "stroke"s and "fill"s alone
                     // https://github.com/svg/svgo/blob/master/plugins/removeUnknownsAndDefaults.js
                     { removeUnknownsAndDefaults: { defaultAttrs: false } }

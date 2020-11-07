@@ -6,6 +6,7 @@ import { DrawingStampSelection } from "./drawing-stamp-selection";
 import {
   buttonClasses, ClassIconButton, FillColorButton, StrokeColorButton, SvgToolModeButton
 } from "./drawing-toolbar-buttons";
+import { StrokeColorPalette } from "./stroke-color-palette";
 import { useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
@@ -39,6 +40,7 @@ export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const {stamps, currentStamp} = drawingContent;
+  const [showStrokeColorPalette, setShowStrokeColorPalette] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStampSelection, setShowStampSelection] = useState(false);
   const isEnabled = onIsEnabled();
@@ -64,6 +66,10 @@ export const ToolbarView: React.FC<IProps> = (
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
     forceUpdate();
+  };
+
+  const handleToggleShowStrokeColorPalette = (show?: boolean) => {
+    setShowStrokeColorPalette(state => show != null ? show : !state);
   };
 
   const handleSettingsButton = () => {
@@ -99,6 +105,10 @@ export const ToolbarView: React.FC<IProps> = (
 
   const handleStrokeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     isEnabled && drawingContent.setStroke(e.target.value);
+    forceUpdate();
+  };
+  const handleStrokeColorChange = (color: string) => {
+    isEnabled && drawingContent.setStroke(color);
     forceUpdate();
   };
   const handleFillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -143,11 +153,15 @@ export const ToolbarView: React.FC<IProps> = (
                 <img src={currentStamp.url} />
               </div>
             }
-            <StrokeColorButton settings={drawingContent.toolbarSettings} onClick={handleSettingsButton} />
+            <StrokeColorButton settings={drawingContent.toolbarSettings}
+                  onClick={() => handleToggleShowStrokeColorPalette()} />
             <FillColorButton settings={drawingContent.toolbarSettings} onClick={handleSettingsButton} />
             <ClassIconButton disabled={!drawingContent.hasSelectedObjects}
                   title="Delete" iconClass="bin" onClick={handleDeleteButton} />
           </div>
+          {showStrokeColorPalette
+            ? <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />
+            : null}
           {showSettings
             ? <DrawingSettingsView
                 drawingContent={drawingContent}

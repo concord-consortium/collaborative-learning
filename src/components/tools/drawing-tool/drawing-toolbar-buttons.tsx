@@ -11,7 +11,7 @@ import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
-import { luminanceColorString } from "../../../utilities/color-utils";
+import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
 
 const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   ellipse: EllipseToolIcon,
@@ -115,19 +115,16 @@ interface IColorButtonProps {
   settings: Partial<ToolbarSettings>;
   onClick: () => void;
 }
-const kLightLuminanceThreshold = 0.85;
 const kLightLuminanceContrastStroke = "#949494";  // $charcoal-light-1
 
 export const FillColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
-  const luminance = (settings.fill && luminanceColorString(settings.fill)) || 0;
-  const stroke = luminance >= kLightLuminanceThreshold ? kLightLuminanceContrastStroke : settings.fill;
+  const stroke = isLightColorRequiringContrastOffset(settings.fill) ? kLightLuminanceContrastStroke : settings.fill;
   return <SvgToolbarButton SvgIcon={ColorFillIcon} buttonClass="fill-color" title="Fill color"
             settings={{ fill: settings.fill, stroke }} onClick={onClick} />;
 };
 
 export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
-  const luminance = (settings.stroke && luminanceColorString(settings.stroke)) || 0;
-  const stroke = luminance >= kLightLuminanceThreshold ? kLightLuminanceContrastStroke : settings.stroke;
+  const stroke = isLightColorRequiringContrastOffset(settings.stroke) ? kLightLuminanceContrastStroke : settings.stroke;
   return <SvgToolbarButton SvgIcon={ColorStrokeIcon} buttonClass="stroke-color" title="Line/border color"
             settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
 };
