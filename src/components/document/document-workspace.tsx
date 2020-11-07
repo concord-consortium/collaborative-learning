@@ -4,9 +4,11 @@ import React from "react";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentDragKey, DocumentModelType, LearningLogDocument, OtherDocumentType,
-         PersonalDocument, ProblemDocument } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
+import {
+  DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+} from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";

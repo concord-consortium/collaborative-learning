@@ -1,0 +1,39 @@
+@import "../../vars.sass";
+
+.image-toolbar {
+  position: absolute;
+  border: $toolbar-border;
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  z-index: $toolbar-z-index;
+
+  &.disabled {
+    display: none;
+  }
+
+  .toolbar-button {
+    position: relative;
+    width: $toolbar-button-width;
+    height: $toolbar-button-height;
+    background-color: $workspace-teal-light-9;
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
+
+    &:active {
+      background-color: $workspace-teal-light-4;
+
+      svg path {
+        fill: $workspace-teal-dark-1;
+      }
+    }
+
+    input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: $toolbar-button-width;
+      height: $toolbar-button-height;
+    }
+  }
+}

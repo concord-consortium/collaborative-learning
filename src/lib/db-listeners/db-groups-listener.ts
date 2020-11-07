@@ -1,7 +1,7 @@
+import firebase from "firebase/app";
 import { DB, Monitor } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
-import firebase from "firebase/app";
-import { ProblemDocument } from "../../models/document/document";
+import { ProblemDocument } from "../../models/document/document-types";
 import { map } from "lodash";
 import { BaseListener } from "./base-listener";
 

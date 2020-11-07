@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/firestore";
+import "firebase/functions";
 import "firebase/storage";
 import { IStores } from "../models/stores/stores";
 import { observable } from "mobx";
@@ -10,9 +11,11 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
         DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
         DBOtherDocument, DBOtherDocumentMap, IDocumentProperties, DBOtherPublication, DBSupport
         } from "./db-types";
-import { DocumentModelType, DocumentModel, DocumentType, PersonalDocument, ProblemDocument, LearningLogDocument,
-        PersonalPublication, ProblemPublication, LearningLogPublication, OtherPublicationType, OtherDocumentType,
-        SupportPublication } from "../models/document/document";
+import { DocumentModelType, DocumentModel } from "../models/document/document";
+import {
+  DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+} from "../models/document/document-types";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
@@ -119,6 +122,8 @@ export class DB {
           appId: "1:112537088884:web:c51b1b8432fff36faff221"
         });
       }
+      // uncomment next line to direct requests to functions emulator
+      // firebase.functions().useFunctionsEmulator("http://localhost:5001");
 
       this.stores = options.stores;
 
@@ -473,7 +478,7 @@ export class DB {
   }
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
-    const { user, problemPath } = this.stores;
+    const { appMode, demo: { name: demoName }, user, problemPath } = this.stores;
     const content = documentModel.content.publish();
     const fs = this.firestore;
     return fs.batch(batch => {
@@ -481,6 +486,9 @@ export class DB {
       batch.set(rootRef, { updatedAt: fs.timestamp() });
       const docRef = fs.newDocumentRef(fs.getMulticlassSupportsPath());
       batch.set(docRef, {
+        appMode,
+        demoName,
+        classPath: this.firebase.getFullClassPath(user),
         uid: user.id,
         type: "supportPublication",
         createdAt: fs.timestamp(),
@@ -753,7 +761,8 @@ export class DB {
   public getImage(imageKey: string) {
     const { user } = this.stores;
     return new Promise<DBImage>((resolve, reject) => {
-      const imageRef = this.firebase.ref(this.firebase.getImagesPath(user) + "/" + imageKey);
+      const imagePath = this.firebase.getImagesPath(user) + "/" + imageKey;
+      const imageRef = this.firebase.ref(imagePath);
       return imageRef.once("value")
         .then((snapshot) => {
           resolve(snapshot.val());
@@ -767,6 +776,22 @@ export class DB {
             .then(image => fetch(image.imageData))
             .then(response => response.blob())
             .then(blob => URL.createObjectURL(blob));
+  }
+
+  public async getCloudImage(url: string, type?: string, key?: string) {
+    const { appMode, demo: { name: demoName }, user } = this.stores;
+    const { portal, classHash } = user;
+    const classPath = this.firebase.getFullClassPath(user);
+    const getImageData = firebase.functions().httpsCallable("getImageData");
+    const result = await getImageData({ url, appMode, demoName, portal, classHash, classPath, type, key });
+    return result?.data;
+  }
+
+  public getCloudImageBlob(url: string, type?: string, key?: string) {
+    return this.getCloudImage(url, type, key)
+            .then(image => image && fetch(image.imageData))
+            .then(response => response?.blob())
+            .then(blob => blob && URL.createObjectURL(blob));
   }
 
   public createTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {

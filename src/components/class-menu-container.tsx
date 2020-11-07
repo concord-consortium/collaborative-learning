@@ -5,6 +5,7 @@ import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import { getProblemOrdinal } from "../models/stores/stores";
+import { IPortalClassOffering } from "../models/stores/user";
 import { CustomSelect } from "../clue/components/custom-select";
 
 interface IProps extends IBaseProps {}
@@ -18,6 +19,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     return(
       <CustomSelect
         titlePrefix={user.name}
+        title={user.className}
         items={links}
       />
     );
@@ -58,7 +60,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     // If not, we use the first one in the list of offerings for that class.
     classNames.forEach( (className) => {
       const classProblems = user.portalClassOfferings.filter(o => o.className === className);
-      const matchingProblem = classProblems.find( l => l.problemOrdinal === currentProblemOrdinal);
+      const matchingProblems = classProblems.filter(l => l.problemOrdinal === currentProblemOrdinal);
       const handleClick = (name: string, url: string) => {
         const log = {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
@@ -68,18 +70,20 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         window.location.replace(url);
       };
 
-      if (matchingProblem) {
+      const addMenuItemForOffering = (offering: IPortalClassOffering) => {
+        const text = offering.activityTitle ? `${className}: ${offering.activityTitle}` : className;
         links.push({
-          text: className,
-          link: matchingProblem.location,
+          text,
+          link: offering.location,
           selected: className === user.className,
-          onClick: () => handleClick(className, matchingProblem.location)
+          onClick: () => handleClick(className, offering.location)
         });
-      } else if (classProblems) {
-        links.push({
-          text: className,
-          link: classProblems[0].location
-        });
+      };
+
+      if (matchingProblems.length) {
+        matchingProblems.forEach(p => addMenuItemForOffering(p));
+      } else if (classProblems.length) {
+        addMenuItemForOffering(classProblems[0]);
       } else {
         console.warn(`Warning -- no problems assigned in this class ${className}`);
       }

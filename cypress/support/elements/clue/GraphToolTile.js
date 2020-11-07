@@ -7,12 +7,12 @@ class GraphToolTile{
         }
         if (axis==='y'){
             // return 320-((num+1.2)*graphUnit);
-            return 316-((num+1.1)*graphUnit);
+            return 316-((num+1.05)*graphUnit);
         }
     }
     transformToCoordinate(axis, num){
         if (axis==='x'){
-            return Math.round(((num-graphUnit)/graphUnit));
+            return Math.round(((num-(graphUnit))/graphUnit));
         }
         if (axis==='y'){
             return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))));

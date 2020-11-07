@@ -1,5 +1,6 @@
 import React from "react";
 import classNames from "classnames";
+import ResizeObserver from "resize-observer-polyfill";
 import { observer, inject } from "mobx-react";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { cloneTileSnapshotWithoutId, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
@@ -27,24 +28,25 @@ import "../../utilities/dom-utils";
 import "./tool-tile.sass";
 
 export interface IToolApi {
-  hasSelection: () => boolean;
-  deleteSelection: () => void;
-  getSelectionInfo: () => string;
-  setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => void;
+  hasSelection?: () => boolean;
+  deleteSelection?: () => void;
+  getSelectionInfo?: () => string;
+  setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
   getLinkIndex?: (index?: number) => number;
   getLinkedTables?: () => string[] | undefined;
+  handleDocumentScroll?: (x: number, y: number) => void;
+  handleTileResize?: (entry: ResizeObserverEntry) => void;
 }
 
 export interface IToolApiInterface {
   register: (id: string, toolApi: IToolApi) => void;
   unregister: (id: string) => void;
   getToolApi: (id: string) => IToolApi;
+  forEach: (callback: (api: IToolApi) => void) => void;
 }
 
-export interface IToolApiMap {
-  [id: string]: IToolApi;
-}
+export type IToolApiMap = Record<string, IToolApi>;
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 
@@ -76,6 +78,7 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
 interface IToolTileBaseProps {
   context: string;
   docId: string;
+  documentContent: HTMLElement | null;
   scale?: number;
   widthPct?: number;
   height?: number;
@@ -85,9 +88,13 @@ interface IToolTileBaseProps {
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
-export interface IToolTileProps extends IToolTileBaseProps {
-  onRegisterToolApi: (toolApi: IToolApi) => void;
-  onUnregisterToolApi: () => void;
+export interface IRegisterToolApiProps {
+  onRegisterToolApi: (toolApi: IToolApi, facet?: string) => void;
+  onUnregisterToolApi: (facet?: string) => void;
+}
+
+export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
+  toolTile: HTMLElement | null;
 }
 
 interface IProps extends IToolTileBaseProps {
@@ -128,6 +135,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
+  private resizeObserver: ResizeObserver;
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
 
@@ -152,14 +160,31 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    if (this.domElement) {
-      this.domElement.addEventListener("mousedown", this.handleMouseDown, true);
+    this.domElement?.addEventListener("touchstart", this.handlePointerDown, true);
+    this.domElement?.addEventListener("mousedown", this.handlePointerDown, true);
+  }
+
+  public componentDidUpdate() {
+    if (this.domElement && !this.resizeObserver) {
+      this.resizeObserver = new ResizeObserver(entries => {
+        const handler = this.getToolResizeHandler();
+        if (handler) {
+          for (const entry of entries) {
+            if (entry.target === this.domElement) {
+              handler(entry);
+            }
+          }
+        }
+      });
+      this.resizeObserver.observe(this.domElement);
     }
   }
+
   public componentWillUnmount() {
-    if (this.domElement) {
-      this.domElement.removeEventListener("mousedown", this.handleMouseDown, true);
-    }
+    this.resizeObserver?.disconnect();
+
+    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, true);
+    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, true);
   }
 
   public render() {
@@ -193,6 +218,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
           onDragStart={this.handleToolDragStart}
+          onDragEnd={this.triggerResizeHandler}
           draggable={true}
       >
         {this.renderLinkIndicators()}
@@ -208,7 +234,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { toolApiInterface, ...otherProps } = this.props;
     return ToolComponent != null
             ? <ToolComponent
-                key={tileId} {...otherProps}
+                key={tileId} toolTile={this.domElement} {...otherProps}
                 onRegisterToolApi={this.handleRegisterToolApi}
                 onUnregisterToolApi={this.handleUnregisterToolApi} />
             : null;
@@ -245,21 +271,29 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleRegisterToolApi = (toolApi: IToolApi) => {
-    this.props.toolApiInterface?.register(this.modelId, toolApi);
-    // trigger initial render of link indicators
-    toolApi.isLinked?.() && this.forceUpdate();
+  private getToolResizeHandler = () => {
+    const { model, toolApiInterface } = this.props;
+    return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
+            toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
-  private handleUnregisterToolApi = () => {
-    this.props.toolApiInterface?.unregister(this.modelId);
+  private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
+    const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
+    this.props.toolApiInterface?.register(id, toolApi);
+    // trigger initial render
+    this.forceUpdate();
+  }
+
+  private handleUnregisterToolApi = (facet?: string) => {
+    const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
+    this.props.toolApiInterface?.unregister(id);
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
   }
 
-  private handleMouseDown = (e: MouseEvent) => {
+  private handlePointerDown = (e: MouseEvent | TouchEvent) => {
     const { model } = this.props;
     const { ui } = this.stores;
 
@@ -273,7 +307,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
 
     const ToolComponent = kToolComponentMap[model.content.type];
-    if (ToolComponent && ToolComponent.tileHandlesSelection) {
+    if (ToolComponent?.tileHandlesSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }
@@ -325,7 +359,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       sourceDocId: docId,
       items: []
     };
-    const { ui: { selectedTileIds } } = this.stores;
+    const { ui } = this.stores;
+    const dragSrcContentId = getContentIdFromNode(model);
 
     const getTileInfo = (tileId: string) => {
       // get tile from loaded document or from curriculum
@@ -350,15 +385,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     };
 
-    // support dragging a tile without selecting it first
-    const dragSrcContentId = getContentIdFromNode(model);
-    const dragTileIds = selectedTileIds.slice();
-    if (dragTileIds.indexOf(model.id) < 0) {
-      dragTileIds.push(model.id);
-    }
+    // dragging a tile selects it first
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
-    dragTileIds.forEach(selectedTileId => {
+    ui.selectedTileIds.forEach(selectedTileId => {
       const tileInfo = getTileInfo(selectedTileId);
       if (tileInfo) {
         const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
@@ -386,8 +417,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
     // and to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (dragTileIds.length === 1) {
-      const tileInfo = getTileInfo(dragTileIds[0]);
+    if (ui.selectedTileIds.length === 1) {
+      const tileInfo = getTileInfo(ui.selectedTileIds[0]);
       if (tileInfo) {
         const {tile, tileContent} = tileInfo;
         e.dataTransfer.setData(kDragTileId, tile.id);
@@ -410,4 +441,26 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
+  private triggerResizeHandler = () => {
+    const handler = this.getToolResizeHandler();
+    if (this.domElement && handler) {
+      const bounds = this.domElement.getBoundingClientRect();
+      const kBorderSize = 4;
+      const entry: ResizeObserverEntry = {
+        target: this.domElement,
+        contentRect: {
+          x: 0,
+          y: 0,
+          width: bounds.width - kBorderSize,
+          height: bounds.height - kBorderSize,
+          top: 0,
+          right: bounds.width - kBorderSize,
+          bottom: bounds.height - kBorderSize,
+          left: 0
+        }
+      };
+      // calling the resize handler triggers a re-render
+      handler(entry);
+    }
+  }
 }

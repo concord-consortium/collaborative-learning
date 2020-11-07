@@ -1,5 +1,6 @@
 import { types } from "mobx-state-tree";
-import { AuthenticatedUser, PortalFirebaseStudentJWT } from "../../lib/auth";
+import { AuthenticatedUser } from "../../lib/auth";
+import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
 import initials from "initials";
 
 export const UserTypeEnum = types.enumeration("type", ["student", "teacher"]);

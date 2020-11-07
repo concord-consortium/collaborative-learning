@@ -64,18 +64,14 @@ export class TileCommentsComponent extends BaseComponent<IProps> {
 
   private handleHover = (selectionInfo?: string) => () => {
     const { toolApiInterface, model } = this.props;
-    const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
-    if (toolApi && selectionInfo) {
-      toolApi.setSelectionHighlight(selectionInfo, true);
-    }
+    const toolApi = toolApiInterface?.getToolApi(model.tileId);
+    selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, true);
   }
 
   private handleLeave = (selectionInfo?: string) => () => {
     const { toolApiInterface, model } = this.props;
-    const toolApi = toolApiInterface && toolApiInterface.getToolApi(model.tileId);
-    if (toolApi && selectionInfo) {
-      toolApi.setSelectionHighlight(selectionInfo, false);
-    }
+    const toolApi = toolApiInterface?.getToolApi(model.tileId);
+    selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, false);
   }
 
   private handleDelete = (comment: TileCommentModelType) => () => {

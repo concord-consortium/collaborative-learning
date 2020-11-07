@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { DocumentModelType, isProblemType } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
+import { isProblemType } from "../../models/document/document-types";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";

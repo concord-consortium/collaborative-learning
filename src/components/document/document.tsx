@@ -7,7 +7,8 @@ import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { ToolbarConfig } from "../toolbar";
-import { DocumentModelType, LearningLogDocument, LearningLogPublication } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
+import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { IconButton } from "../utilities/icon-button";
@@ -60,8 +61,11 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <IconButton icon="publish-support" key="support" className="action icon-support"
-                onClickButton={onClick} title="publish to supports" />
+    <>
+      <IconButton icon="publish-support" key="support" className="action icon-support"
+                  onClickButton={onClick} title="publish to supports" />
+      <div className="support-badge"/>
+    </>
   );
 };
 

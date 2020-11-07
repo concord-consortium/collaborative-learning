@@ -1,5 +1,8 @@
 import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
-import { getImageDimensions, storeCorsImage, storeFileImage, storeImage } from "../utilities/image-utils";
+import {
+  getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
+} from "../utilities/image-utils";
+import { SupportPublication } from "./document/document-types";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
 
@@ -18,11 +21,15 @@ export const ImageMapEntry = types
 export type ImageMapEntryType = Instance<typeof ImageMapEntry>;
 export type ImageMapEntrySnapshot = SnapshotIn<typeof ImageMapEntry>;
 
+export interface IImageContext {
+  type?: string;
+  key?: string;
+}
 export interface IImageHandler {
   name: string;
   priority: number;
   match: (url: string) => boolean;
-  store: (url: string, db?: DB, userId?: string) => Promise<ImageMapEntrySnapshot>;
+  store: (url: string, db?: DB, userId?: string, context?: IImageContext) => Promise<ImageMapEntrySnapshot>;
 }
 
 export const ImageMapModel = types
@@ -52,7 +59,7 @@ export const ImageMapModel = types
       return /data:image\//.test(url);
     },
     isPlaceholder(url: string) {
-      return url === placeholderImage;
+      return isPlaceholderImage(url);
     },
     getCachedImage(url?: string) {
       return url ? self.images.get(url) : undefined;
@@ -158,7 +165,7 @@ export const ImageMapModel = types
         });
       },
 
-      getImage(url: string): Promise<ImageMapEntryType> {
+      getImage(url: string, context?: IImageContext): Promise<ImageMapEntryType> {
         return new Promise((resolve, reject) => {
           if (!url) {
             resolve(clone(self.images.get(placeholderImage)!));
@@ -170,7 +177,7 @@ export const ImageMapModel = types
 
           const handler = self.getHandler(url);
           if (handler) {
-            const promise = handler.store(url, _db, _userId);
+            const promise = handler.store(url, _db, _userId, context);
             resolve(self.addPromise(url, promise));
           }
           else {
@@ -201,7 +208,7 @@ export const externalUrlImagesHandler: IImageHandler = {
       if (db && userId) {
         storeImage(db, userId, url)
           .then(simpleImage => {
-            if (simpleImage.imageUrl === placeholderImage) {
+            if (isPlaceholderImage(simpleImage.imageUrl)) {
               // conversion errors are resolved to placeholder image
               // this generally occurs due to a CORS error, in which
               // case we just use the original url.
@@ -330,15 +337,20 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  store(url: string, db?: DB) {
+  store(url: string, db?: DB, userID?: string, context?: IImageContext) {
     return new Promise((resolve, reject) => {
       const { path, normalized } = parseFauxFirebaseRTDBUrl(url);
 
       if (db && path && normalized) {
-        db.getImageBlob(path)
-          .then(blobUrl => {
-            resolve({ contentUrl: normalized, displayUrl: blobUrl });
-          });
+        // In theory we could direct all firebase image requests to the cloud function,
+        // but only cross-class supports require the use of the cloud function.
+        const useCloudFn = context?.type === SupportPublication;
+        const blobPromise = useCloudFn
+                              ? db.getCloudImageBlob(path, context?.type, context?.key)
+                              : db.getImageBlob(path);
+        blobPromise.then(blobUrl => {
+          resolve(blobUrl ? { contentUrl: normalized, displayUrl: blobUrl } : {});
+        });
       }
       else {
         resolve({});

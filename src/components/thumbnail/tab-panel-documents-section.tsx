@@ -1,18 +1,23 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { DocumentModelType, isUnpublishedType, isPublishedType, isProblemType, PersonalDocument, SupportPublication
-      } from "../../models/document/document";
+import { DocumentModelType, getDocumentContext } from "../../models/document/document";
+import {
+  isProblemType, isPublishedType, isUnpublishedType, PersonalDocument, SupportPublication
+} from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
+import { DocumentContextReact } from "../document/document-context";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
 
 interface IProps {
   tab: string;
-  section: NavTabSectionModelType ;
+  section: NavTabSectionModelType;
+  index: number;
+  numOfSections: number;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
@@ -46,7 +51,7 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   return `${namePrefix}${title}`;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale, selectedDocument,
+export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSections, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
@@ -54,6 +59,8 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
+    const numPanels = numOfSections > 1 ? 2 : 1;
+    const tabName = tab.toLowerCase().replace(' ', '-');
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -95,9 +102,10 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
     }
 
     return (
-      <div className={`tab-panel-documents-section ${section.type}`} key={`${tab}-${section.type}`}
-          data-test={`${section.dataTestHeader}-documents`}>
-        <div className={`list ${tab}`}>
+      <div className={`tab-panel-documents-section ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}
+            key={`${tab}-${section.type}`}
+            data-test={`${section.dataTestHeader}-documents`}>
+        <div className={`list ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
@@ -132,20 +140,23 @@ export const TabPanelDocumentsSection = observer(({ tab, section, stores, scale,
             const _handleDocumentDeleteClick = section.showDeleteForUser(user)
                                               ? handleDocumentDeleteClick
                                               : undefined;
+            const documentContext = getDocumentContext(document);
             return (
-              <ThumbnailDocumentItem
-                key={document.key}
-                dataTestName={`${tab}-list-items`}
-                canvasContext={tab}
-                document={document}
-                scale={scale}
-                isSelected={document.key === selectedDocument}
-                captionText={getDocumentCaption(stores, document)}
-                onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                onIsStarred={onIsStarred}
-                onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
-              />
+              <DocumentContextReact.Provider key={document.key} value={documentContext}>
+                <ThumbnailDocumentItem
+                  key={document.key}
+                  dataTestName={`${tabName}-list-items`}
+                  canvasContext={tab}
+                  document={document}
+                  scale={scale}
+                  isSelected={document.key === selectedDocument}
+                  captionText={getDocumentCaption(stores, document)}
+                  onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+                  onIsStarred={onIsStarred}
+                  onDocumentStarClick={_handleDocumentStarClick}
+                  onDocumentDeleteClick={_handleDocumentDeleteClick}
+                />
+              </DocumentContextReact.Provider>
             );
           })}
         </div>

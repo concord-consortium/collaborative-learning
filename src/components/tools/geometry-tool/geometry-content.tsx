@@ -44,11 +44,12 @@ import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
 
-export interface IProps extends IGeometryProps, SizeMeProps {
+export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
-  onUpdateToolbar: () => void;
+  onContentChange: () => void;
 }
+export type IProps = IGeometryContentProps & SizeMeProps;
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
 type Mutable<T> = {
@@ -232,7 +233,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleRedo: this.handleRedo,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleCreateComment: this.handleCreateCommentOrLabel
+        handleCreateComment: this.handleCreateCommentOrLabel,
+        handleUploadImageFile: this.handleUploadBackgroundImage
       };
       onSetActionHandlers(handlers);
     }
@@ -998,39 +1000,48 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleImageTileDrop(e: React.DragEvent<HTMLDivElement>, parsedContent: any) {
     const { board } = this.state;
     if (parsedContent && board) {
-        const { model: { content } } = this.props;
-        const geometryContent = content as GeometryContentModelType;
         const droppedContent = parsedContent.content;
         const url = getUrlFromImageContent(droppedContent);
         if (url) {
           gImageMap.getImage(url)
-            .then(image => {
-              if (!this._isMounted || !image.contentUrl) return;
-              const width = image.width! / kGeometryDefaultPixelsPerUnit;
-              const height = image.height! / kGeometryDefaultPixelsPerUnit;
-              const imageIds = geometryContent
-                                .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
-                                .map((obj: JXG.GeometryElement) => obj.id);
-              const contentUrl = image.contentUrl || url;
-              this.applyChanges(() => {
-                if (imageIds.length) {
-                  // change URL if there's already an image present
-                  const imageId = imageIds[imageIds.length - 1];
-                  geometryContent.updateObjects(board, imageId, {
-                                                  url: contentUrl,
-                                                  size: [width, height]
-                                                });
-                }
-                else {
-                  geometryContent.addImage(board, contentUrl, [0, 0], [width, height]);
-                }
-              });
-              this.updateImageUrl(contentUrl);
-              if (this.props.size.height && image.height! > this.props.size.height) {
-                this.props.onRequestRowHeight(this.props.model.id, image.height!);
-              }
-            });
+            .then(image => this.setBackgroundImage(image));
         }
+    }
+  }
+
+  private handleUploadBackgroundImage = (file: File) => {
+    this.setState({ isLoading: true }, () => {
+      gImageMap.addFileImage(file)
+        .then(image => this.setBackgroundImage(image));
+    });
+  }
+
+  private setBackgroundImage(image: ImageMapEntryType) {
+    const { board } = this.state;
+    const contentUrl = image.contentUrl;
+    if (!board || !this._isMounted || !contentUrl) return;
+    const geometryContent = this.getContent();
+    const width = image.width! / kGeometryDefaultPixelsPerUnit;
+    const height = image.height! / kGeometryDefaultPixelsPerUnit;
+    const imageIds = geometryContent
+                      .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
+                      .map((obj: JXG.GeometryElement) => obj.id);
+    this.applyChanges(() => {
+      if (imageIds.length) {
+        // change URL if there's already an image present
+        const imageId = imageIds[imageIds.length - 1];
+        geometryContent.updateObjects(board, imageId, {
+                                        url: contentUrl,
+                                        size: [width, height]
+                                      });
+      }
+      else {
+        geometryContent.addImage(board, contentUrl, [0, 0], [width, height]);
+      }
+    });
+    this.updateImageUrl(contentUrl);
+    if (this.props.size.height && image.height! > this.props.size.height) {
+      this.props.onRequestRowHeight(this.props.model.id, image.height!);
     }
   }
 
@@ -1389,7 +1400,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const polygon = geometryContent.createPolygonFromFreePoints(board, linkedTableId) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
-              this.props.onUpdateToolbar();
+              this.props.onContentChange();
             }
           });
           this.lastPointDown = undefined;

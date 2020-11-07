@@ -1,163 +1,66 @@
-import React from "react";
-import { BaseComponent, IBaseProps } from "../../base";
-import { observer, inject } from "mobx-react";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import classNames from "classnames";
-import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { observer } from "mobx-react";
+import React from "react";
+import ReactDOM from "react-dom";
+import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
+import { isPoint } from "../../../models/tools/geometry/jxg-point";
+import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
+import { IToolbarActionHandlers } from "./geometry-shared";
+import {
+  AngleLabelButton, CommentButton, DeleteButton, DuplicateButton, MovableLineButton
+} from "./geometry-tool-buttons";
+import { ImageUploadButton } from "../image/image-toolbar";
 
-interface IProps extends IBaseProps {
-  model: ToolTileModelType;
-  onAngleLabelClick: () => void;
-  isAngleLabelDisabled: boolean;
-  isAngleLabelSelected: boolean;
-  onDeleteClick: () => void;
-  isDeleteDisabled: boolean;
-  onDuplicateClick: () => void;
-  isDuplicateDisabled: boolean;
-  onMovableLineClick: () => void;
-  onCommentClick: () => void;
-  isCommentDisabled: boolean;
-}
-interface IState {
-  showSettings: boolean;
-}
+import "./geometry-toolbar.sass";
 
-interface IRenderToolButtonParams {
-  onClick?: () => void;
-  selected: boolean;
-  disabled: boolean;
-  hidden: boolean;
+interface IProps extends IFloatingToolbarProps {
+  board?: JXG.Board;
+  content: GeometryContentModelType;
+  handlers?: IToolbarActionHandlers;
 }
 
-@inject("stores")
-@observer
-export class GeometryToolbarView extends BaseComponent<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      showSettings: false,
-    };
-  }
-  public render() {
-    return (
-      <div className="geometry-toolbar" data-test="geometry-toolbar" onMouseDown={this.handleMouseDown}>
-        <div className="toolbar-buttons">
-          {this.renderToolHeader(false)}
-          {this.renderToolButton("Select", "selection",
-                                  { onClick: undefined,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: true })}
-          {this.renderToolButton("Point", "point",
-                                  { onClick: undefined,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: true })}
-          {this.renderToolButton("Polygon", "polygon",
-                                  { onClick: undefined,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: true })}
-          {this.renderToolButton("Duplicate", "duplicate",
-                                  { onClick: this.props.onDuplicateClick,
-                                    selected: false,
-                                    disabled: this.props.isDuplicateDisabled,
-                                    hidden: false })}
-          {this.renderToolButton("Line Label", "line-label",
-                                  { onClick: undefined,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: true })}
-          {this.renderToolButton("Angle Label", "angle-label",
-                                  { onClick: this.props.onAngleLabelClick,
-                                    selected: this.props.isAngleLabelSelected,
-                                    disabled: this.props.isAngleLabelDisabled,
-                                    hidden: false })}
-          {this.renderToolButton("Movable Line", "movable-line",
-                                  { onClick: this.props.onMovableLineClick,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: false })}
-          {this.renderToolButton("Draw", "draw",
-                                  { onClick: undefined,
-                                    selected: false,
-                                    disabled: false,
-                                    hidden: true })}
-          {this.renderToolButton("Comment", "comment",
-                                  { onClick: this.props.onCommentClick,
-                                    selected: false,
-                                    disabled: this.props.isCommentDisabled,
-                                    hidden: false })}
-          {this.renderToolButton("Delete", "delete",
-                                  { onClick: this.props.onDeleteClick,
-                                    selected: false,
-                                    disabled: this.props.isDeleteDisabled,
-                                    hidden: false })}
-        </div>
-        { this.state.showSettings
-          ? <div className="settings">
-              <div className="settings-header">
-                Settings
-              </div>
-            </div>
-          : null
-        }
-      </div>
-    );
-  }
-
-  private renderToolHeader = (showSettings: boolean) => {
-    return (
-      <div className="toolbar-header">
-        <div className="graph-tile">
-          <svg className="header-icon">
-            <use xlinkHref="#icon-graph-tile"/>
-          </svg>
-        </div>
-        {showSettings
-          ? <div className="settings-button" title="Settings"
-                 onClick={this.handleSettingsButton}>
-              <svg className="icon">
-                <use xlinkHref="#icon-settings"/>
-              </svg>
-            </div>
-          : null
-        }
-      </div>
-    );
-  }
-
-  private renderToolButton = (toolName: string, toolClass: string, params: IRenderToolButtonParams) => {
-    const buttonClass = classNames("button",
-                                    toolClass,
-                                    { selected: params.selected },
-                                    { disabled: params.disabled },
-                                    { enabled: !params.disabled }
-                                  );
-    if (!params.hidden) {
-      return (
-        <div className={buttonClass}
-             title={toolName}
-             onClick={params.onClick}
-        >
-          <svg className="toolbar-icon">
-            <use xlinkHref={"#icon-geometry-" + toolClass}/>
-          </svg>
-        </div>
-      );
-    } else {
-      return (null);
-    }
-  }
-
-  private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { model } = this.props;
-    const { ui } = this.stores;
-    ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
-  }
-
-  private handleSettingsButton = () => {
-    this.setState(state => ({ showSettings: !state.showSettings }));
-  }
-
-}
+export const GeometryToolbar: React.FC<IProps> = observer(({
+  documentContent, toolTile, board, content, handlers, onIsEnabled, ...others
+}) => {
+  const {
+    handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate,
+    handleToggleVertexAngle, handleUploadImageFile
+  } = handlers || {};
+  const enabled = onIsEnabled();
+  const location = useFloatingToolbarLocation({
+                    documentContent,
+                    toolTile,
+                    toolbarHeight: 38,
+                    toolbarTopOffset: 2,
+                    enabled,
+                    ...others
+                  });
+  const selectedObjects = board && content.selectedObjects(board);
+  const selectedPoints = selectedObjects?.filter(isPoint);
+  const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] as JXG.Point : undefined;
+  const disableVertexAngle = !(selectedPoint && canSupportVertexAngle(selectedPoint));
+  const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
+  const disableDelete = board && !content.getDeletableSelectedIds(board).length;
+  const disableDuplicate = board && (!content.getOneSelectedPoint(board) &&
+                                    !content.getOneSelectedPolygon(board));
+  const disableComment = board && !content.getOneSelectedSegment(board) &&
+                                  !content.getCommentAnchor(board) &&
+                                  !content.getOneSelectedComment(board);
+  return documentContent
+    ? ReactDOM.createPortal(
+        <div className={classNames("geometry-toolbar", { disabled: !enabled || !location })}
+              data-test="geometry-toolbar" style={location}
+              onMouseDown={e => e.stopPropagation()}>
+          <div className="toolbar-buttons">
+            <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>
+            <AngleLabelButton disabled={disableVertexAngle} selected={hasVertexAngle}
+                              onClick={handleToggleVertexAngle}/>
+            <MovableLineButton onClick={handleCreateMovableLine}/>
+            <CommentButton disabled={disableComment} onClick={handleCreateComment}/>
+            <ImageUploadButton onUploadImageFile={handleUploadImageFile} tooltipOffset={{ y: 2 }}/>
+            <DeleteButton disabled={disableDelete} onClick={handleDelete}/>
+          </div>
+        </div>, documentContent)
+    : null;
+});

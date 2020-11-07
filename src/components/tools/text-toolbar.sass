@@ -1,0 +1,53 @@
+@import ../vars
+
+.text-toolbar
+  background-color: $color3-4
+  position: absolute
+  display: flex
+  justify-content: space-around
+  align-items: center
+  margin: 4px 2px 2px 2px
+  width: 232px
+  height: 29px
+  z-index: $toolbar-z-index
+
+  &.disabled
+    display: none
+
+  .button-with-tool-tip
+    position: relative
+    background-color: $color3-4
+    color: black
+    font-size: 16px
+    padding-top: 3px
+    width: 30px
+    height: 28px
+    .on
+      color: #009CDC
+    .off
+      color: #909090
+    &:hover
+      background-color: $color3-5
+      .tool-tip-text
+        visibility: visible
+        opacity: 1
+        transition: opacity 0.5s
+        transition-delay: 0.8s
+        background-color: #f0f0f0
+
+.tool-tip-text
+  position: absolute
+  visibility: hidden
+  opacity: 0
+  transition: opacity 0.1s
+  z-index: 10
+  color: black
+  white-space: nowrap
+  text-align: center
+  margin: 0
+  padding: 2px
+  border: solid 1px #dfdfdf
+  box-shadow: 4px 4px 2px lightgray
+  font-size: 8pt
+  top: 28px
+  left: 0px

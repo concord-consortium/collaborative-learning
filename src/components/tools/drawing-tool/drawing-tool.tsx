@@ -1,40 +1,35 @@
-import React from "react";
-import { BaseComponent } from "../../base";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import classNames from "classnames";
+import React, { useEffect } from "react";
+import { IToolTileProps } from "../tool-tile";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
-import { TOOLBAR_WIDTH, DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
+import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 
 import "./drawing-tool.sass";
 
-interface IProps {
-  model: ToolTileModelType;
-  readOnly: boolean;
-  scale?: number;
-  onSetCanAcceptDrop: (tileId?: string) => void;
-}
+type IProps = IToolTileProps;
 
-export default class DrawingToolComponent extends BaseComponent<IProps> {
+const DrawingToolComponent: React.FC<IProps> = (props) => {
+  const { documentContent, toolTile, model, readOnly, onRegisterToolApi, onUnregisterToolApi } = props;
 
-  public static tileHandlesSelection = true;
-
-  public componentDidMount() {
-    if (!this.props.readOnly) {
-      (this.props.model.content as DrawingContentModelType).reset();
+  useEffect(() => {
+    if (!readOnly) {
+      (model.content as DrawingContentModelType).reset();
     }
-  }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  public render() {
-    const { model, readOnly } = this.props;
-    const editableClass = readOnly ? " read-only" : "";
-    const className = `drawing-tool${editableClass}`;
-    return (
-      <div className={className}>
-        <ToolbarView model={model} readOnly={!!readOnly}/>
-        <div style={{left: TOOLBAR_WIDTH}} >
-          <DrawingLayerView {...this.props} />
-        </div>
-      </div>
-    );
-  }
-}
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+
+  return (
+    <div className={classNames("drawing-tool", { "read-only": readOnly })}>
+      <ToolbarView model={model}
+                  documentContent={documentContent}
+                  toolTile={toolTile}
+                  {...toolbarProps} />
+      <DrawingLayerView {...props} />
+    </div>
+  );
+};
+(DrawingToolComponent as any).tileHandlesSelection = true;
+export default DrawingToolComponent;

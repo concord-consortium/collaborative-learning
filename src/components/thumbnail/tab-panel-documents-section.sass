@@ -3,17 +3,25 @@
 $list-item-height: 660px
 $list-item-width: 880px
 $list-item-scale: 0.11
+$first-panel-height: 157px
+$section-padding: 6px
 
 .tab-panel-documents-section
-  height: 100%
+  display: flex
+  flex-direction: column
+  padding: $section-padding
+  &.top-panel
+    padding: 4px $section-padding 0 $section-padding
+
   .list
-    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$nav-tab-height} * 2 + #{$tab-section-border-width} * 2))
     display: flex
     flex-wrap: wrap
     align-content: flex-start
-    overflow: auto
-    overflow-x: hidden
-    padding: $padding
+    overflow-y: auto
+    &.top-panel
+      height: $first-panel-height
+      border-bottom: solid 1px $charcoal-light-1
+      overflow-y: hidden
 
     .list-item
       position: relative

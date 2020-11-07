@@ -5,7 +5,6 @@ import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
-import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "leftNavExpanded";
 
@@ -168,8 +167,7 @@ export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
 
 export function selectTile(ui: UIModelType, model: ToolTileModelType, isExtending?: boolean) {
-  const append = isExtending ?? isSelectionModifierKeyDown();
-  ui.setSelectedTile(model, { append });
+  ui.setSelectedTile(model, { append: !!isExtending });
 }
 
 // Sometimes we get multiple selection events for a single click.
