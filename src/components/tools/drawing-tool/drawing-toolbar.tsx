@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { DrawingSettingsView } from "./drawing-settings-view";
 import { DrawingStampSelection } from "./drawing-stamp-selection";
 import {
   buttonClasses, DeleteButton, FillColorButton, StrokeColorButton, SvgToolModeButton
@@ -13,7 +12,7 @@ import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../tool-tile";
 import {
-  Color, colors, DrawingContentModelType, ToolbarModalButton, ToolbarSettings
+  Color, DrawingContentModelType, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
@@ -31,6 +30,14 @@ export interface LineButtonData {
   lineColor: Color;
 }
 
+interface IPaletteState {
+  showStamps: boolean;
+  showStroke: boolean;
+  showFill: boolean;
+}
+type PaletteKey = keyof IPaletteState;
+const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
+
 interface IProps extends IRegisterToolApiProps {
   documentContent?: HTMLElement | null;
   toolTile?: HTMLElement | null;
@@ -41,10 +48,17 @@ export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const {stamps, currentStamp} = drawingContent;
-  const [showStrokeColorPalette, setShowStrokeColorPalette] = useState(false);
-  const [showFillColorPalette, setShowFillColorPalette] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showStampSelection, setShowStampSelection] = useState(false);
+  const [paletteState, _setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
+  const clearPaletteState = () => {
+    _setPaletteState(kClosedPalettesState);
+  };
+  const togglePaletteState = (palette: PaletteKey, show?: boolean) => {
+    _setPaletteState(state => {
+      const newState = { ...kClosedPalettesState };
+      newState[palette] = show != null ? show : !state[palette];
+      return newState;
+    });
+  };
   const isEnabled = onIsEnabled();
   const forceUpdate = useForceUpdate();
   const toolbarLocation = useFloatingToolbarLocation({
@@ -71,19 +85,16 @@ export const ToolbarView: React.FC<IProps> = (
   };
 
   const handleToggleShowStrokeColorPalette = (show?: boolean) => {
-    setShowStrokeColorPalette(state => show != null ? show : !state);
-    setShowFillColorPalette(false);
+    togglePaletteState("showStroke", show);
   };
 
   const handleToggleShowFillColorPalette = (show?: boolean) => {
-    setShowStrokeColorPalette(false);
-    setShowFillColorPalette(state => show != null ? show : !state);
+    togglePaletteState("showFill", show);
   };
 
   const handleStampListButton = () => {
     if (isEnabled) {
-      setShowSettings(false);
-      setShowStampSelection(state => !state);
+      togglePaletteState("showStamps");
     }
   };
 
@@ -91,8 +102,7 @@ export const ToolbarView: React.FC<IProps> = (
     if (isEnabled) {
       drawingContent.setSelectedStamp(stampIndex);
       drawingContent.setSelectedButton("stamp");
-      setShowSettings(false);
-      setShowStampSelection(false);
+      clearPaletteState();
     }
   };
 
@@ -106,29 +116,13 @@ export const ToolbarView: React.FC<IProps> = (
     drawingContent.deleteSelectedObjects();
   };
 
-  const handleStrokeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    isEnabled && drawingContent.setStroke(e.target.value);
-    forceUpdate();
-  };
   const handleStrokeColorChange = (color: string) => {
     isEnabled && drawingContent.setStroke(color);
-    setShowStrokeColorPalette(false);
-  };
-  const handleFillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    isEnabled && drawingContent.setFill(e.target.value);
-    forceUpdate();
+    clearPaletteState();
   };
   const handleFillColorChange = (color: string) => {
     isEnabled && drawingContent.setFill(color);
-    setShowFillColorPalette(false);
-  };
-  const handleStrokeDashArrayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    isEnabled && drawingContent.setStrokeDashArray(e.target.value);
-    forceUpdate();
-  };
-  const handleStrokeWidthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    isEnabled && drawingContent.setStrokeWidth(+e.target.value);
-    forceUpdate();
+    clearPaletteState();
   };
 
   return documentContent
@@ -166,22 +160,13 @@ export const ToolbarView: React.FC<IProps> = (
                   onClick={() => handleToggleShowFillColorPalette()} />
             <DeleteButton disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />
           </div>
-          {showStrokeColorPalette
+          {paletteState.showStroke
             ? <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />
             : null}
-          {showFillColorPalette
+          {paletteState.showFill
             ? <FillColorPalette selectedColor={drawingContent.fill} onSelectColor={handleFillColorChange} />
             : null}
-          {showSettings
-            ? <DrawingSettingsView
-                drawingContent={drawingContent}
-                colors={colors}
-                onStrokeChange={handleStrokeChange}
-                onFillChange={handleFillChange}
-                onStrokeDashArrayChange={handleStrokeDashArrayChange}
-                onStrokeWidthChange={handleStrokeWidthChange} />
-            : null}
-          {showStampSelection
+          {paletteState.showStamps
             ? <DrawingStampSelection
                 drawingContent={drawingContent}
                 onSelectStamp={handleSelectStamp} />
