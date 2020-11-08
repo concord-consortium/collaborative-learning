@@ -1,6 +1,18 @@
 # Changelog
 
-## Version 1.5.0 - released November 6, 2020
+## Version 1.5.1 - released November 8, 2020
+
+### Bugs Fixed
+- Fix text toolbar initial location bug
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 517,550 bytes | 0.0% |
+| index.js | 4,950,629 bytes | 0.0% |
+
+## Version 1.5.0 - released November 7, 2020
 
 ### Features/Improvements
 - Combined Problem and Extra Workspaces under single Workspaces tab
