@@ -61,14 +61,15 @@ export const ToolbarView: React.FC<IProps> = (
   };
   const isEnabled = onIsEnabled();
   const forceUpdate = useForceUpdate();
-  const toolbarLocation = useFloatingToolbarLocation({
-                            documentContent,
-                            toolbarHeight: 29,
-                            toolbarTopOffset: 2,
-                            minToolContent: 22,
-                            enabled: isEnabled,
-                            ...others
-                          });
+  const { flipPalettes, ...location } = useFloatingToolbarLocation({
+                                          documentContent,
+                                          toolbarHeight: 38,
+                                          paletteHeight: 69,
+                                          toolbarTopOffset: 2,
+                                          minToolContent: 22,
+                                          enabled: isEnabled,
+                                          ...others
+                                        }) || {};
 
   const modalButtonClasses = (type?: ToolbarModalButton) => {
     return buttonClasses({ selected: type && (drawingContent.selectedButton === type) });
@@ -125,9 +126,10 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
 
+  const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={classNames("drawing-tool-toolbar", { disabled: !isEnabled })} style={toolbarLocation}>
+        <div className={toolbarClasses} style={location}>
           <div className="drawing-tool-buttons">
             <SvgToolModeButton {...modalButtonProps("select", {})}
                                 title="Select" onSetSelectedButton={handleSetSelectedButton} />

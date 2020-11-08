@@ -12,6 +12,7 @@ export interface IFloatingToolbarProps extends IRegisterToolApiProps {
 
 interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocationBaseArgs {
   enabled: boolean;
+  paletteHeight?: number;
 }
 
 /*
@@ -20,7 +21,7 @@ interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocatio
  */
 export const useFloatingToolbarLocation = ({
         onRegisterToolApi, onUnregisterToolApi,
-        documentContent, toolTile, enabled, ...others
+        documentContent, toolTile, enabled, paletteHeight, ...others
       }: IFloatingToolbarArgs) => {
 
   const [tileOffset, setTileOffset] = useState<{ left: number, bottom: number }>({ left: 0, bottom: 0 });
@@ -40,13 +41,14 @@ export const useFloatingToolbarLocation = ({
     return () => onUnregisterToolApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { left, top } = getToolbarLocation({
+  const { left, top, spaceBelow } = getToolbarLocation({
                           documentContent,
                           toolTile,
                           toolLeft: tileOffset.left,
                           toolBottom: tileOffset.bottom,
                           ...others
                         });
+  const flipPalettes = paletteHeight && (spaceBelow != null) ? paletteHeight > spaceBelow : false;
   const isValid = (left != null) && (top != null) && (top >= 0);
-  return isValid ? { left, top } : undefined;
+  return isValid ? { left, top, flipPalettes } : undefined;
 };
