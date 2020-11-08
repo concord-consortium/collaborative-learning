@@ -1,11 +1,12 @@
 import classNames from "classnames";
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { Tooltip } from "react-tippy";
 import {
   computeStrokeDashArray, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
+import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
 import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
@@ -32,58 +33,27 @@ export const buttonClasses = ({ modalButton, disabled, selected, others }: IButt
   return classNames("drawing-tool-button", modalButtonClass, { disabled, selected });
 };
 
-interface IBaseIconButtonProps {
-  disabled?: boolean;
-  selected?: boolean;
-  modalButton?: ToolbarModalButton;
-  settings?: Partial<ToolbarSettings>;
-  title: string;
-  onClick?: () => void;
-  onSetSelectedButton?: (modalButton: ToolbarModalButton) => void;
-}
-
-/*
- * ClassIconButton
- */
-interface IClassIconButtonProps extends IBaseIconButtonProps {
-  iconClass: string;
-  style?: React.CSSProperties;
-}
-export const ClassIconButton: React.FC<IClassIconButtonProps> = ({
-        disabled, selected, modalButton, title, iconClass, style, onClick, onSetSelectedButton }) => {
-  const buttonRef = useRef<HTMLElement | null>(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleClick = useCallback(onClick ||
-                      (() => (typeof modalButton === "string") && onSetSelectedButton?.(modalButton)),
-                      []);
-  return (
-    <div className={buttonClasses({ disabled, selected })} title={title}
-          ref={elt => buttonRef.current = elt} onClick={handleClick}>
-      <span className={`drawing-tool-icon drawing-tool-icon-${iconClass}`} style={style} />
-    </div>
-  );
-};
-
 /*
  * SvgToolbarButton
  */
 interface ISvgToolbarButtonProps {
   SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
   buttonClass: string;
+  disabled?: boolean;
   selected?: boolean;
   settings?: Partial<ToolbarSettings>;
   title: string;
   onClick: () => void;
 }
 export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
-  SvgIcon, buttonClass, selected, settings, title, onClick
+  SvgIcon, buttonClass, disabled, selected, settings, title, onClick
 }) => {
   const { fill, stroke, strokeWidth, strokeDashArray } = settings || {};
   const kTooltipYDistance = 0;
   return SvgIcon
     ? <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
               animation="fade" animateFill={false}>
-        <div className={buttonClasses({ selected, others: buttonClass })} onClick={onClick}>
+        <div className={buttonClasses({ disabled, selected, others: buttonClass })} onClick={onClick}>
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
         </div>
@@ -127,4 +97,12 @@ export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onCli
   const stroke = isLightColorRequiringContrastOffset(settings.stroke) ? kLightLuminanceContrastStroke : settings.stroke;
   return <SvgToolbarButton SvgIcon={ColorStrokeIcon} buttonClass="stroke-color" title="Line/border color"
             settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
+};
+
+interface IDeleteToolButtonProps {
+  disabled?: boolean;
+  onClick: () => void;
+}
+export const DeleteButton: React.FC<IDeleteToolButtonProps> = (props) => {
+  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" {...props} />;
 };

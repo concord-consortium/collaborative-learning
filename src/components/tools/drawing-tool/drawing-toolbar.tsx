@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { DrawingSettingsView } from "./drawing-settings-view";
 import { DrawingStampSelection } from "./drawing-stamp-selection";
 import {
-  buttonClasses, ClassIconButton, FillColorButton, StrokeColorButton, SvgToolModeButton
+  buttonClasses, DeleteButton, FillColorButton, StrokeColorButton, SvgToolModeButton
 } from "./drawing-toolbar-buttons";
 import { FillColorPalette } from "./fill-color-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
@@ -164,8 +164,7 @@ export const ToolbarView: React.FC<IProps> = (
                   onClick={() => handleToggleShowStrokeColorPalette()} />
             <FillColorButton settings={drawingContent.toolbarSettings}
                   onClick={() => handleToggleShowFillColorPalette()} />
-            <ClassIconButton disabled={!drawingContent.hasSelectedObjects}
-                  title="Delete" iconClass="bin" onClick={handleDeleteButton} />
+            <DeleteButton disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />
           </div>
           {showStrokeColorPalette
             ? <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />
