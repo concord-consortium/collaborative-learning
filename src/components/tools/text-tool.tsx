@@ -106,6 +106,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private prevText: any;
   private textToolDiv: HTMLElement | null;
   private editor = React.createRef<Editor>();
+  private tileContentRect: Omit<DOMRectReadOnly, "toJSON">;
   private toolbarToolApi: IToolApi | undefined;
 
   private slateMap: ISlateMapEntry[] = [
@@ -219,6 +220,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
       handleTileResize: (entry: ResizeObserverEntry) => {
+        const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
+        this.tileContentRect = { x, y, width, height, top, left, bottom, right };
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
@@ -296,6 +299,11 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
   private handleRegisterToolApi = (toolApi: IToolApi) => {
     this.toolbarToolApi = toolApi;
+
+    // call resize handler immediately with current size
+    const { toolTile } = this.props;
+    toolTile && this.tileContentRect &&
+      this.toolbarToolApi?.handleTileResize?.({ target: toolTile, contentRect: this.tileContentRect });
   }
 
   private handleUnregisterToolApi = () => {
