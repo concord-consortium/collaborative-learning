@@ -696,16 +696,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this._isMounted = false;
   }
 
-  public componentDidUpdate(prevProps: DrawingLayerViewProps) {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-
-    const newSettings = this.toolbarSettings(drawingContent);
-    const prevSettings = this.state.toolbarSettings;
-    if (JSON.stringify(newSettings) !== JSON.stringify(prevSettings)) {
-      this.setCurrentToolSettings(newSettings);
-    }
-  }
-
   public syncCurrentTool(selectedButton: string) {
     const settings = this.toolbarSettings(this.getContent());
     switch (selectedButton) {
@@ -766,10 +756,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public setCurrentToolSettings(settings: ToolbarSettings) {
-    if (this.currentTool) {
-      this.currentTool.setSettings(settings);
-      this.setState({ toolbarSettings: settings });
-    }
+    this.currentTool?.setSettings(settings);
   }
 
   public getCurrentStamp() {

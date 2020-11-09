@@ -12,23 +12,9 @@ import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../tool-tile";
 import {
-  Color, DrawingContentModelType, ToolbarModalButton, ToolbarSettings
+  DrawingContentModelType, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-
-export interface TextButtonData {
-  color: string;
-}
-
-export interface PolygonButtonData {
-  type: string;
-  stroke?: string;
-  fill?: string;
-}
-
-export interface LineButtonData {
-  lineColor: Color;
-}
 
 interface IPaletteState {
   showStamps: boolean;

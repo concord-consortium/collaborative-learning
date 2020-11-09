@@ -10,29 +10,6 @@ export const kDrawingDefaultHeight = 180;
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
 
-export interface Color {
-  name: string;
-  hex: string;
-}
-
-export const colors: Color[] = [
-  {name: "Aqua",    hex: "#00FFFF"},
-  {name: "Black",   hex: "#000000"},
-  {name: "Blue",    hex: "#0000FF"},
-  {name: "Fuchsia", hex: "#FF00FF"},
-  {name: "Gray",    hex: "#808080"},
-  {name: "Green",   hex: "#008000"},
-  {name: "Lime",    hex: "#00FF00"},
-  {name: "Maroon",  hex: "#800000"},
-  {name: "Navy",    hex: "#000080"},
-  {name: "Olive",   hex: "#808000"},
-  {name: "Purple",  hex: "#800080"},
-  {name: "Red",     hex: "#FF0000"},
-  {name: "Silver",  hex: "#C0C0C0"},
-  {name: "Teal",    hex: "#008080"},
-  {name: "Yellow",  hex: "#FFFF00"}
-];
-
 export interface ToolbarSettings {
   stroke: string;
   fill: string;
