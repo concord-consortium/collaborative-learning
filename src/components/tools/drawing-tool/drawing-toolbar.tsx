@@ -1,12 +1,12 @@
 import classNames from "classnames";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { DrawingStampSelection } from "./drawing-stamp-selection";
 import {
-  buttonClasses, DeleteButton, FillColorButton, StrokeColorButton, SvgToolModeButton
+  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton
 } from "./drawing-toolbar-buttons";
-import { FillColorPalette } from "./fill-color-palette";
+import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
+import { FillColorPalette } from "./fill-color-palette";
 import { useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
@@ -34,12 +34,12 @@ export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const {stamps, currentStamp} = drawingContent;
-  const [paletteState, _setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
+  const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
   const clearPaletteState = () => {
-    _setPaletteState(kClosedPalettesState);
+    setPaletteState(kClosedPalettesState);
   };
   const togglePaletteState = (palette: PaletteKey, show?: boolean) => {
-    _setPaletteState(state => {
+    setPaletteState(state => {
       const newState = { ...kClosedPalettesState };
       newState[palette] = show != null ? show : !state[palette];
       return newState;
@@ -52,14 +52,9 @@ export const ToolbarView: React.FC<IProps> = (
                                           toolbarHeight: 38,
                                           paletteHeight: 69,
                                           toolbarTopOffset: 2,
-                                          minToolContent: 22,
                                           enabled: isEnabled,
                                           ...others
                                         }) || {};
-
-  const modalButtonClasses = (type?: ToolbarModalButton) => {
-    return buttonClasses({ selected: type && (drawingContent.selectedButton === type) });
-  };
 
   const modalButtonProps = (type: ToolbarModalButton, settings?: Partial<ToolbarSettings>) => {
     const { selectedButton, toolbarSettings } = drawingContent;
@@ -79,11 +74,17 @@ export const ToolbarView: React.FC<IProps> = (
     togglePaletteState("showFill", show);
   };
 
-  const handleStampListButton = () => {
-    if (isEnabled) {
-      togglePaletteState("showStamps");
-    }
-  };
+  const handleStampsButtonClick = useCallback(() => {
+    drawingContent.setSelectedButton("stamp");
+    togglePaletteState("showStamps", false);
+    forceUpdate();
+  }, [drawingContent, forceUpdate]);
+
+  const handleStampsButtonTouchHold = useCallback(() => {
+    drawingContent.setSelectedButton("stamp");
+    togglePaletteState("showStamps");
+    forceUpdate();
+  }, [drawingContent, forceUpdate]);
 
   const handleSelectStamp = (stampIndex: number) => {
     if (isEnabled) {
@@ -127,21 +128,9 @@ export const ToolbarView: React.FC<IProps> = (
                                 onSetSelectedButton={handleSetSelectedButton} />
             <SvgToolModeButton {...modalButtonProps("ellipse")} title="Ellipse"
                                 onSetSelectedButton={handleSetSelectedButton} />
-            {
-              currentStamp &&
-              <div
-                className={"flyout-top-button " + modalButtonClasses("stamp")}
-                style={{height: 30}} title="Stamp"
-                onClick={() => handleSetSelectedButton("stamp")}>
-                {
-                  stamps.length > 1 &&
-                  <div className="flyout-toggle" onClick={handleStampListButton}>
-                    ▶
-                  </div>
-                }
-                <img src={currentStamp.url} />
-              </div>
-            }
+            {currentStamp &&
+              <StampModeButton stamp={currentStamp} selected={drawingContent.isSelectedButton("stamp")} title="Stamps"
+                                onClick={handleStampsButtonClick} onTouchHold={handleStampsButtonTouchHold} />}
             <StrokeColorButton settings={drawingContent.toolbarSettings}
                   onClick={() => handleToggleShowStrokeColorPalette()} />
             <FillColorButton settings={drawingContent.toolbarSettings}
@@ -155,9 +144,10 @@ export const ToolbarView: React.FC<IProps> = (
             ? <FillColorPalette selectedColor={drawingContent.fill} onSelectColor={handleFillColorChange} />
             : null}
           {paletteState.showStamps
-            ? <DrawingStampSelection
-                drawingContent={drawingContent}
-                onSelectStamp={handleSelectStamp} />
+            ? <StampsPalette
+                stamps={stamps}
+                selectedStampIndex={drawingContent.currentStampIndex}
+                onSelectStampIndex={handleSelectStamp} />
             : null}
         </div>, documentContent)
   : null;

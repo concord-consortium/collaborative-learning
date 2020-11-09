@@ -21,7 +21,7 @@ interface IProps {
 export const FillColorPalette: React.FC<IProps> = ({ selectedColor, onSelectColor }) => {
   return (
     <div className="toolbar-palette fill-color">
-      <div className="color-swatches">
+      <div className="palette-buttons">
         {kColors.map(color =>
           <ColorSwatch key={color} color={color}
             isSelected={color === selectedColor}

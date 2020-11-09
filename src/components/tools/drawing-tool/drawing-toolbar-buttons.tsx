@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React from "react";
 import { Tooltip } from "react-tippy";
 import {
-  computeStrokeDashArray, ToolbarModalButton, ToolbarSettings
+  computeStrokeDashArray, StampModelType, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
@@ -12,6 +12,7 @@ import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
 
 const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
@@ -30,7 +31,7 @@ interface IButtonClasses {
 }
 export const buttonClasses = ({ modalButton, disabled, selected, others }: IButtonClasses) => {
   const modalButtonClass = modalButton ? `button-${modalButton}` : undefined;
-  return classNames("drawing-tool-button", modalButtonClass, { disabled, selected });
+  return classNames("drawing-tool-button", modalButtonClass, { disabled, selected }, others);
 };
 
 /*
@@ -53,7 +54,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   return SvgIcon
     ? <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
               animation="fade" animateFill={false}>
-        <div className={buttonClasses({ disabled, selected, others: buttonClass })} onClick={onClick}>
+        <div className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} onClick={onClick}>
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
         </div>
@@ -79,6 +80,39 @@ export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = ({
   return SvgIcon
     ? <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} {...others} />
     : null;
+};
+
+interface IStampModeButtonProps {
+  selected: boolean;
+  stamp: StampModelType;
+  title: string;
+  onClick: () => void;
+  onTouchHold: () => void;
+}
+export const StampModeButton: React.FC<IStampModeButtonProps> = ({
+  selected, stamp, title, onClick, onTouchHold
+}) => {
+  const { didTouchHold, ...handlers } = useTouchHold(onTouchHold, onClick);
+  const handleExpandCollapseClick = (e: React.MouseEvent) => {
+    if (!didTouchHold()) {
+      onTouchHold();
+      e.stopPropagation();
+    }
+  };
+  const kTooltipYDistance = 0;
+  return (
+    <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
+              animation="fade" animateFill={false}>
+      <div className={buttonClasses({ modalButton: "stamp", selected })} {...handlers}>
+        <img src={stamp.url} draggable="false" />
+        <div className="expand-collapse" onClick={handleExpandCollapseClick}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" width="7" height="7">
+            <polygon points="0,7 7,7 7,0"/>
+          </svg>
+        </div>
+      </div>
+    </Tooltip>
+  );
 };
 
 interface IColorButtonProps {

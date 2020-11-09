@@ -18,93 +18,79 @@
     display: flex
     font-size: 24px
     text-align: center
-    .flyout-top-button
-      position: relative
-      .flyout-toggle
-        position: absolute
-        top: 16px
-        left: 22px
-        font-size: 9px
-        padding: 5px
-        background-color: rgba(224, 224, 224, 0.1)
-      .flyout-toggle:hover
-        z-index: 1
-        background-color: #ccc
-        color: #000
     .drawing-tool-button
+      position: relative
       user-select: none
-      width: 36px
-      height: 34px
+      width: $toolbar-button-width
+      height: $toolbar-button-height
       cursor: pointer
-      &:active, &.selected
+      &.selected
         background-color: $workspace-teal-light-4
         &.button-select
           svg path
             fill: $workspace-teal-dark-1
       &:hover
         background-color: $workspace-teal-light-6
-      img
-        max-width: 24px
-        max-height: 24px
-        display: inline
-        padding-top: 4px
-      .drawing-tool-icon
-        font-size: 18px
+      &:active
+        background-color: $workspace-teal-light-4
+        &.button-select
+          svg path
+            fill: $workspace-teal-dark-1
+
+      &.button-stamp
+        display: flex
+        align-items: center
+        justify-content: center
+        img
+          max-width: 23px
+          max-height: 23px
+          z-index: 1
+        .expand-collapse
+          position: absolute
+          right: 0
+          bottom: 0
+          width: 10px
+          height: 10px
+          &:hover
+            background-color: $workspace-teal-light-4
+          svg
+            position: absolute
+            left: 1px
+            top: 1px
+            fill: $workspace-teal-dark-1
+
       &.disabled
         opacity: 25%
         cursor: default
     a
       text-decoration: none
       color: #000
-  .settings
-    position: absolute
-    top: -226px
-    width: 100px
-    left: 1px
-    background-color: #bbb
-    cursor: pointer
-    font-size: 14px
-    border-right: 1px solid #aaa
-    opacity: 0.75
-    .title
-      padding: 5px
-      background-color: #999
-      color: #fff
-      font-size: 12px
-      .drawing-tool-icon
-        font-size: 12px
-        margin: 0 2px 0 10px
-    .form-group
-      margin: 10px
-    label
-      display: block
-      font-weight: bold
-      margin-bottom: 3px
-      font-size: 12px
-    select
-      background-color: #fff
-      width: 80px
 
-    &.stamps
-      width: 60px
-      left: 216px
-      top: -256px
-      img
-        display: block
-        width: 40px
-        margin: 3px 10px
-        padding: 5px
-        &.selected
-          background: #666
-        &:hover:not(.selected)
-          background: #999
-
-  .color-swatches
+  .palette-buttons
     display: flex
     flex-wrap: wrap
     justify-content: space-evenly
     align-items: center
     padding: 2.5px
+
+    .stamp-button
+      position: relative
+      width: 30px
+      height: 30px
+
+      img
+        position: absolute
+        left: 3px
+        top: 3px
+        max-width: 24px
+        max-height: 24px
+
+      &.select
+        stroke: $workspace-teal
+      &:hover
+        stroke: $workspace-teal-light-2
+      &:active
+        stroke: $workspace-teal
 
     .color-swatch
       position: relative
@@ -137,14 +123,23 @@
       &:hover
         .highlight
           stroke: $workspace-teal-light-2
+      &:active
+        .highlight
+          stroke: $workspace-teal
 
   .toolbar-palette
     position: absolute
-    height: 69px
+    height: 70px
     background-color: $workspace-teal-light-9
     border: $toolbar-border
     border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius
     z-index: $toolbar-z-index
+
+    &.stamps
+      left: 180px
+      width: 190px
+      &.one-row
+        height: 40px
 
     &.stroke-color
       left: 216px
@@ -156,12 +151,11 @@
 
   &.flip
     .toolbar-palette
-      top: -69px
+      top: -70px
       border-radius: $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius 0
+      &.one-row
+        top: -40px
 
 .drawing-tool.read-only .drawing-tool-toolbar
   .drawing-tool-button
     cursor: default
-  .drawing-tool-buttons .flyout-top-button .flyout-toggle:hover
-    background-color: unset
-    color: unset

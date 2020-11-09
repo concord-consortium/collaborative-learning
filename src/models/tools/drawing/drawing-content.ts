@@ -120,6 +120,9 @@ export const DrawingContentModel = types
     get isUserResizable() {
       return true;
     },
+    isSelectedButton(button: ToolbarModalButton) {
+      return button === self.metadata.selectedButton;
+    },
     get selectedButton() {
       return self.metadata.selectedButton;
     },

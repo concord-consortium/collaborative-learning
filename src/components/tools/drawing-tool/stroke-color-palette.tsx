@@ -19,7 +19,7 @@ interface IProps {
 export const StrokeColorPalette: React.FC<IProps> = ({ selectedColor, onSelectColor }) => {
   return (
     <div className="toolbar-palette stroke-color">
-      <div className="color-swatches">
+      <div className="palette-buttons">
         {kColors.map(color =>
           <ColorSwatch key={color} color={color}
             isSelected={color === selectedColor}
