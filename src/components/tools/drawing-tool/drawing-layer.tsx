@@ -676,8 +676,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.disposers = [];
 
     this.disposers.push(reaction(
-        () => this.getContent().metadata.selectedButton,
-        selectedButton => this.syncCurrentTool(selectedButton)
+      () => this.getContent().metadata.selectedButton,
+      selectedButton => this.syncCurrentTool(selectedButton)
+    ));
+
+    this.disposers.push(reaction(
+      () => this.getContent().toolbarSettings,
+      settings => this.setCurrentToolSettings(settings)
     ));
 
     this.disposers.push(autorun(() => {
