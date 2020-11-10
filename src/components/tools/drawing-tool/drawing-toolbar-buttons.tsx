@@ -12,6 +12,7 @@ import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
 
@@ -50,10 +51,9 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   SvgIcon, buttonClass, disabled, selected, settings, title, onClick
 }) => {
   const { fill, stroke, strokeWidth, strokeDashArray } = settings || {};
-  const kTooltipYDistance = 0;
+  const tooltipOptions = useTooltipOptions();
   return SvgIcon
-    ? <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    ? <Tooltip title={title} {...tooltipOptions}>
         <div className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} onClick={onClick}>
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
@@ -99,10 +99,9 @@ export const StampModeButton: React.FC<IStampModeButtonProps> = ({
       e.stopPropagation();
     }
   };
-  const kTooltipYDistance = 0;
+  const tooltipOptions = useTooltipOptions();
   return (
-    <Tooltip title={title} position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title={title} {...tooltipOptions}>
       <div className={buttonClasses({ modalButton: "stamp", selected })} {...handlers}>
         <img src={stamp.url} draggable="false" />
         <div className="expand-collapse" onClick={handleExpandCollapseClick}>

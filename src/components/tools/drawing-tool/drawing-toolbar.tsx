@@ -50,7 +50,7 @@ export const ToolbarView: React.FC<IProps> = (
   const { flipPalettes, ...location } = useFloatingToolbarLocation({
                                           documentContent,
                                           toolbarHeight: 38,
-                                          paletteHeight: 69,
+                                          paletteHeight: 70,
                                           toolbarTopOffset: 2,
                                           enabled: isEnabled,
                                           ...others
