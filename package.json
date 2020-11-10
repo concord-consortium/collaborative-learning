@@ -155,9 +155,6 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@ag-grid-community/client-side-row-model": "^22.1.1",
-    "@ag-grid-community/core": "^22.1.1",
-    "@ag-grid-community/react": "^22.1.2",
     "@blueprintjs/core": "^3.31.0",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.1.14",
