@@ -85,7 +85,11 @@ export const DrawingToolMetadataModel = types
   })
   .actions(self => ({
     setSelectedButton(button: ToolbarModalButton) {
-      self.selectedButton = button;
+      if (self.selectedButton !== button) {
+        self.selectedButton = button;
+        // clear selection on tool mode change
+        self.selection.clear();
+      }
     },
     setSelection(selection: string[]) {
       self.selection.replace(selection);

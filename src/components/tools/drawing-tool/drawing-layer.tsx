@@ -681,6 +681,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ));
 
     this.disposers.push(reaction(
+      () => this.getContent().metadata.selection.toJS(),
+      selectedIds => {
+        const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObject[];
+        this.setState({ selectedObjects });
+      }
+    ));
+
+    this.disposers.push(reaction(
       () => this.getContent().toolbarSettings,
       settings => this.setCurrentToolSettings(settings)
     ));

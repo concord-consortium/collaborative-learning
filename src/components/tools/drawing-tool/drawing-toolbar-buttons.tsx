@@ -85,12 +85,13 @@ export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = ({
 interface IStampModeButtonProps {
   selected: boolean;
   stamp: StampModelType;
+  stampCount: number;
   title: string;
   onClick: () => void;
   onTouchHold: () => void;
 }
 export const StampModeButton: React.FC<IStampModeButtonProps> = ({
-  selected, stamp, title, onClick, onTouchHold
+  selected, stamp, stampCount, title, onClick, onTouchHold
 }) => {
   const { didTouchHold, ...handlers } = useTouchHold(onTouchHold, onClick);
   const handleExpandCollapseClick = (e: React.MouseEvent) => {
@@ -104,11 +105,12 @@ export const StampModeButton: React.FC<IStampModeButtonProps> = ({
     <Tooltip title={title} {...tooltipOptions}>
       <div className={buttonClasses({ modalButton: "stamp", selected })} {...handlers}>
         <img src={stamp.url} draggable="false" />
-        <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" width="7" height="7">
-            <polygon points="0,7 7,7 7,0"/>
-          </svg>
-        </div>
+        {stampCount > 1 &&
+          <div className="expand-collapse" onClick={handleExpandCollapseClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" width="7" height="7">
+              <polygon points="0,7 7,7 7,0"/>
+            </svg>
+          </div>}
       </div>
     </Tooltip>
   );
