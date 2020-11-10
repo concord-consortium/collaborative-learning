@@ -140,18 +140,14 @@ export const ToolbarView: React.FC<IProps> = (
                   onClick={() => handleToggleShowFillColorPalette()} />
             <DeleteButton disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />
           </div>
-          {paletteState.showStroke
-            ? <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />
-            : null}
-          {paletteState.showFill
-            ? <FillColorPalette selectedColor={drawingContent.fill} onSelectColor={handleFillColorChange} />
-            : null}
-          {paletteState.showStamps
-            ? <StampsPalette
-                stamps={stamps}
-                selectedStampIndex={currentStampIndex}
-                onSelectStampIndex={handleSelectStamp} />
-            : null}
+          {paletteState.showStroke &&
+            <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
+          {paletteState.showFill &&
+            <FillColorPalette selectedColor={drawingContent.fill} onSelectColor={handleFillColorChange} />}
+          {paletteState.showStamps &&
+            <StampsPalette stamps={stamps}
+              selectedStampIndex={currentStampIndex}
+              onSelectStampIndex={handleSelectStamp} />}
         </div>, documentContent)
   : null;
 };

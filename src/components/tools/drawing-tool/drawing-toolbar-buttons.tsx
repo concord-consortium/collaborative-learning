@@ -4,6 +4,7 @@ import { Tooltip } from "react-tippy";
 import {
   computeStrokeDashArray, StampModelType, ToolbarModalButton, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-content";
+import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
@@ -107,9 +108,7 @@ export const StampModeButton: React.FC<IStampModeButtonProps> = ({
         <img src={stamp.url} draggable="false" />
         {stampCount > 1 &&
           <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" width="7" height="7">
-              <polygon points="0,7 7,7 7,0"/>
-            </svg>
+            <SmallCornerTriangle />
           </div>}
       </div>
     </Tooltip>
