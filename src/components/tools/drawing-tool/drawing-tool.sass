@@ -11,7 +11,6 @@
   border: $toolbar-border
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius
   background-color: $workspace-teal-light-9
-  // overflow: hidden   // breaks subpalettes
   z-index: $toolbar-z-index
   &.disabled
     display: none
@@ -38,6 +37,8 @@
           svg path
             fill: $workspace-teal-dark-1
 
+      &.button-select
+        border-bottom-left-radius: 3px
       &.button-stamp
         display: flex
         align-items: center
@@ -59,6 +60,8 @@
             left: 1px
             top: 1px
             fill: $workspace-teal-dark-1
+      &.button-delete
+        border-bottom-right-radius: 3px
 
       &.disabled
         opacity: 25%
